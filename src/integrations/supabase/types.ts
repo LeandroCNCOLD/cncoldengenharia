@@ -432,36 +432,45 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          equipment_id: string | null
           extracted_fields: Json
           file_id: string
           id: string
           parser: string
-          product_id: string
+          product_id: string | null
           raw_preview: string | null
+          raw_text: string | null
+          structured_data: Json
           success: boolean
           warnings: Json
         }
         Insert: {
           created_at?: string
           created_by?: string | null
+          equipment_id?: string | null
           extracted_fields?: Json
           file_id: string
           id?: string
           parser: string
-          product_id: string
+          product_id?: string | null
           raw_preview?: string | null
+          raw_text?: string | null
+          structured_data?: Json
           success?: boolean
           warnings?: Json
         }
         Update: {
           created_at?: string
           created_by?: string | null
+          equipment_id?: string | null
           extracted_fields?: Json
           file_id?: string
           id?: string
           parser?: string
-          product_id?: string
+          product_id?: string | null
           raw_preview?: string | null
+          raw_text?: string | null
+          structured_data?: Json
           success?: boolean
           warnings?: Json
         }
