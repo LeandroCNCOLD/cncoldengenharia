@@ -1,7 +1,7 @@
 /**
  * Parser Unilab — Evaporador.
  * Lê PDF / XLS / XLSX e extrai os campos técnicos de um aletado evaporador.
- * Referência: datasheet CN 1200 LT.
+ * Produz confidence_score e missing_fields.
  */
 import { extractTextFromFile, extractFields, type FieldPattern } from "./unilabExtractor";
 
@@ -10,7 +10,7 @@ export interface UnilabEvaporatorFields {
   sensibleCapacityW?: number;
   latentCapacityW?: number;
   airflowM3h?: number;
-  airMassFlowKgs?: number;
+  airMassFlowKgh?: number;
   frontalVelocityMs?: number;
   airTempInC?: number;
   airTempOutC?: number;
@@ -30,6 +30,8 @@ export interface UnilabEvaporatorFields {
   finPitchMm?: number;
   tubeOdMm?: number;
   tubeIdMm?: number;
+  finMaterial?: string;
+  tubeMaterial?: string;
   refrigerant?: string;
 }
 
@@ -46,7 +48,7 @@ const PATTERNS: FieldPattern[] = [
   { key: "sensibleCapacityW", patterns: [/capacidade\s+sensivel/, /sensible\s+capacity/] },
   { key: "latentCapacityW", patterns: [/capacidade\s+latente/, /latent\s+capacity/] },
   { key: "airflowM3h", patterns: [/vazao\s+de\s+ar/, /vazao\s+ar/, /airflow/, /caudal\s+de\s+ar/] },
-  { key: "airMassFlowKgs", patterns: [/vazao\s+massica\s+de\s+ar/, /air\s+mass\s+flow/] },
+  { key: "airMassFlowKgh", patterns: [/vazao\s+massica\s+de\s+ar/, /air\s+mass\s+flow/] },
   { key: "frontalVelocityMs", patterns: [/velocidade\s+frontal/, /frontal\s+velocity/] },
   {
     key: "airTempInC",
@@ -79,6 +81,22 @@ const PATTERNS: FieldPattern[] = [
   { key: "tubeOdMm", patterns: [/diametro\s+externo\s+(?:do\s+)?tubo/, /tube\s+od/, /od\s+tubo/] },
   { key: "tubeIdMm", patterns: [/diametro\s+interno\s+(?:do\s+)?tubo/, /tube\s+id/, /id\s+tubo/] },
   {
+    key: "finMaterial",
+    patterns: [/material\s+(?:das?\s+)?aletas/, /fin\s+material/],
+    parse: (s) => {
+      const m = s.match(/(aluminio|aluminium|cobre|copper|inox|stainless)/i);
+      return m ? m[1] : null;
+    },
+  },
+  {
+    key: "tubeMaterial",
+    patterns: [/material\s+(?:dos?\s+)?tubos/, /tube\s+material/],
+    parse: (s) => {
+      const m = s.match(/(cobre|copper|aluminio|aluminium|inox|stainless)/i);
+      return m ? m[1] : null;
+    },
+  },
+  {
     key: "refrigerant",
     patterns: [/fluido\s+refrigerante/, /refrigerante\s*[:=]/, /refrigerant\s*[:=]/],
     parse: (s) => {
@@ -88,9 +106,22 @@ const PATTERNS: FieldPattern[] = [
   },
 ];
 
+const REQUIRED_FIELDS: (keyof UnilabEvaporatorFields)[] = [
+  "totalCapacityW",
+  "evapTempC",
+  "airTempInC",
+  "airflowM3h",
+  "refrigerant",
+  "rows",
+  "tubesPerRow",
+  "circuits",
+];
+
 export interface ParseEvaporatorResult {
   fields: UnilabEvaporatorFields;
   warnings: string[];
+  missingFields: string[];
+  confidenceScore: number; // 0..1
   rawPreview: string;
 }
 
@@ -99,11 +130,14 @@ export async function parseUnilabEvaporator(file: File): Promise<ParseEvaporator
   const fields = extractFields(text, PATTERNS) as UnilabEvaporatorFields;
   const warnings: string[] = [];
 
-  if (!fields.totalCapacityW) warnings.push("Capacidade total não identificada.");
-  if (!fields.evapTempC) warnings.push("Temperatura de evaporação não identificada.");
-  if (!fields.airTempInC) warnings.push("Temperatura do ar na entrada não identificada.");
-  if (!fields.airflowM3h) warnings.push("Vazão de ar não identificada.");
-  if (!fields.refrigerant) warnings.push("Fluido refrigerante não identificado.");
+  // missing_fields = keys do parser não preenchidas
+  const allKeys = PATTERNS.map((p) => p.key);
+  const missingFields = allKeys.filter((k) => fields[k as keyof UnilabEvaporatorFields] == null);
+  const confidenceScore = (allKeys.length - missingFields.length) / allKeys.length;
 
-  return { fields, warnings, rawPreview: text.slice(0, 4000) };
+  for (const k of REQUIRED_FIELDS) {
+    if (fields[k] == null) warnings.push(`Campo obrigatório ausente: ${k}`);
+  }
+
+  return { fields, warnings, missingFields, confidenceScore, rawPreview: text.slice(0, 4000) };
 }

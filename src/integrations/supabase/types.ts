@@ -320,76 +320,112 @@ export type Database = {
       }
       evaporator_coil_models: {
         Row: {
+          air_pressure_drop_pa: number | null
           circuits: number | null
           component_item_id: string
+          confidence_score: number | null
           created_at: string
           exponent_n: number
+          face_velocity_ms: number | null
+          fin_material: string | null
           fin_pitch_mm: number | null
           id: string
           internal_volume_l: number | null
           length_mm: number | null
+          manual_overrides: Json
+          missing_fields: Json
+          nominal_air_mass_flow_kgh: number | null
           nominal_air_temp_in_c: number | null
           nominal_air_temp_out_c: number | null
           nominal_airflow_m3h: number | null
           nominal_capacity_w: number | null
+          nominal_delta_t_k: number | null
           nominal_evap_temp_c: number | null
           nominal_latent_w: number | null
           nominal_sensible_w: number | null
           raw_fields: Json
           refrigerant: string | null
+          refrigerant_pressure_drop_kpa: number | null
           rows: number | null
+          subcooling_k: number | null
+          superheat_k: number | null
           surface_area_m2: number | null
           tube_id_mm: number | null
+          tube_material: string | null
           tube_od_mm: number | null
           tubes_per_row: number | null
           updated_at: string
         }
         Insert: {
+          air_pressure_drop_pa?: number | null
           circuits?: number | null
           component_item_id: string
+          confidence_score?: number | null
           created_at?: string
           exponent_n?: number
+          face_velocity_ms?: number | null
+          fin_material?: string | null
           fin_pitch_mm?: number | null
           id?: string
           internal_volume_l?: number | null
           length_mm?: number | null
+          manual_overrides?: Json
+          missing_fields?: Json
+          nominal_air_mass_flow_kgh?: number | null
           nominal_air_temp_in_c?: number | null
           nominal_air_temp_out_c?: number | null
           nominal_airflow_m3h?: number | null
           nominal_capacity_w?: number | null
+          nominal_delta_t_k?: number | null
           nominal_evap_temp_c?: number | null
           nominal_latent_w?: number | null
           nominal_sensible_w?: number | null
           raw_fields?: Json
           refrigerant?: string | null
+          refrigerant_pressure_drop_kpa?: number | null
           rows?: number | null
+          subcooling_k?: number | null
+          superheat_k?: number | null
           surface_area_m2?: number | null
           tube_id_mm?: number | null
+          tube_material?: string | null
           tube_od_mm?: number | null
           tubes_per_row?: number | null
           updated_at?: string
         }
         Update: {
+          air_pressure_drop_pa?: number | null
           circuits?: number | null
           component_item_id?: string
+          confidence_score?: number | null
           created_at?: string
           exponent_n?: number
+          face_velocity_ms?: number | null
+          fin_material?: string | null
           fin_pitch_mm?: number | null
           id?: string
           internal_volume_l?: number | null
           length_mm?: number | null
+          manual_overrides?: Json
+          missing_fields?: Json
+          nominal_air_mass_flow_kgh?: number | null
           nominal_air_temp_in_c?: number | null
           nominal_air_temp_out_c?: number | null
           nominal_airflow_m3h?: number | null
           nominal_capacity_w?: number | null
+          nominal_delta_t_k?: number | null
           nominal_evap_temp_c?: number | null
           nominal_latent_w?: number | null
           nominal_sensible_w?: number | null
           raw_fields?: Json
           refrigerant?: string | null
+          refrigerant_pressure_drop_kpa?: number | null
           rows?: number | null
+          subcooling_k?: number | null
+          superheat_k?: number | null
           surface_area_m2?: number | null
           tube_id_mm?: number | null
+          tube_material?: string | null
           tube_od_mm?: number | null
           tubes_per_row?: number | null
           updated_at?: string
@@ -535,6 +571,7 @@ export type Database = {
         | "simulated"
         | "validated"
         | "approved"
+        | "needs_review"
       equipment_application:
         | "resfriamento"
         | "congelamento"
@@ -722,6 +759,7 @@ export const Constants = {
         "simulated",
         "validated",
         "approved",
+        "needs_review",
       ],
       equipment_application: [
         "resfriamento",
