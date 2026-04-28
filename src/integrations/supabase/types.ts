@@ -14,16 +14,226 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      component_data: {
+        Row: {
+          component_id: string
+          field_sources: Json
+          fields: Json
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          component_id: string
+          field_sources?: Json
+          fields?: Json
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          component_id?: string
+          field_sources?: Json
+          fields?: Json
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "component_data_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: true
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      component_files: {
+        Row: {
+          component_id: string
+          error_message: string | null
+          file_kind: Database["public"]["Enums"]["file_kind"]
+          file_name: string
+          id: string
+          processed_at: string | null
+          processing_status: Database["public"]["Enums"]["file_processing_status"]
+          size_bytes: number | null
+          storage_path: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          component_id: string
+          error_message?: string | null
+          file_kind: Database["public"]["Enums"]["file_kind"]
+          file_name: string
+          id?: string
+          processed_at?: string | null
+          processing_status?: Database["public"]["Enums"]["file_processing_status"]
+          size_bytes?: number | null
+          storage_path: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          component_id?: string
+          error_message?: string | null
+          file_kind?: Database["public"]["Enums"]["file_kind"]
+          file_name?: string
+          id?: string
+          processed_at?: string | null
+          processing_status?: Database["public"]["Enums"]["file_processing_status"]
+          size_bytes?: number | null
+          storage_path?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "component_files_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      component_history: {
+        Row: {
+          action: string
+          component_id: string
+          created_at: string
+          id: string
+          payload: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          component_id: string
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          component_id?: string
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "component_history_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      components: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          fluid: string | null
+          id: string
+          manufacturer: string | null
+          name: string
+          status: Database["public"]["Enums"]["component_status"]
+          type: Database["public"]["Enums"]["component_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          fluid?: string | null
+          id?: string
+          manufacturer?: string | null
+          name: string
+          status?: Database["public"]["Enums"]["component_status"]
+          type: Database["public"]["Enums"]["component_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          fluid?: string | null
+          id?: string
+          manufacturer?: string | null
+          name?: string
+          status?: Database["public"]["Enums"]["component_status"]
+          type?: Database["public"]["Enums"]["component_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "engenheiro"
+      component_status: "incompleto" | "validando" | "pronto" | "invalido"
+      component_type: "compressor" | "evaporador" | "condensador"
+      file_kind: "csv" | "pdf" | "xls"
+      file_processing_status: "pendente" | "processando" | "processado" | "erro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +360,12 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "engenheiro"],
+      component_status: ["incompleto", "validando", "pronto", "invalido"],
+      component_type: ["compressor", "evaporador", "condensador"],
+      file_kind: ["csv", "pdf", "xls"],
+      file_processing_status: ["pendente", "processando", "processado", "erro"],
+    },
   },
 } as const
