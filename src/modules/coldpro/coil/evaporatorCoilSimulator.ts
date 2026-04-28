@@ -18,22 +18,29 @@ export interface EvaporatorNominalPoint {
 export interface EvaporatorSimulationInputs {
   airTempInC: number;
   evapTempC: number;
-  airflowM3h?: number; // default = nominal
-  rhInPct?: number; // só usado para split sens/lat heurístico
+  airflowM3h?: number;
+  rhInPct?: number;
   frostFactor?: number; // default 0.90
   foulingFactor?: number; // default 1.00
 }
 
 export interface EvaporatorSimulationResult {
   totalCapacityW: number;
+  totalCapacityKcalh: number;
   sensibleCapacityW: number | null;
   latentCapacityW: number | null;
   dtRealK: number;
   dtNominalK: number;
   airflowUsedM3h: number;
+  airflowFactor: number;
+  frostFactor: number;
+  foulingFactor: number;
   correctionFactor: number;
+  comparisonToNominalPercent: number; // Q/Qnom * 100
   warnings: string[];
 }
+
+const W_TO_KCALH = 0.859845;
 
 export function simulateEvaporator(
   nominal: EvaporatorNominalPoint,
@@ -48,17 +55,31 @@ export function simulateEvaporator(
   const dtNom = nominal.airTempInC - nominal.evapTempC;
   const dtReal = inputs.airTempInC - inputs.evapTempC;
 
+  // Alertas técnicos completos (item 6 do prompt)
   if (dtNom <= 0) warnings.push("DT nominal inválido (≤ 0).");
-  if (dtReal <= 0) warnings.push("DT real ≤ 0 — capacidade tende a zero.");
-  if (nominal.airflowM3h <= 0) warnings.push("Vazão nominal de ar inválida.");
+  if (dtReal <= 0) warnings.push("ERRO: DT real ≤ 0 — capacidade tende a zero.");
+  else if (dtReal < 4) warnings.push(`DT muito baixo (${dtReal.toFixed(1)} K).`);
+  else if (dtReal > 15) warnings.push(`DT alto para evaporador (${dtReal.toFixed(1)} K).`);
+
+  const airflowFactor = nominal.airflowM3h > 0 ? airflow / nominal.airflowM3h : 1;
+  if (airflowFactor < 0.7) warnings.push(`Vazão de ar abaixo da nominal (${(airflowFactor * 100).toFixed(0)}%).`);
+  else if (airflowFactor > 1.3) warnings.push(`Vazão de ar acima da nominal (${(airflowFactor * 100).toFixed(0)}%).`);
+
+  if (frost < 0.8) warnings.push(`Perda significativa por gelo (fator ${frost.toFixed(2)}).`);
 
   const dtRatio = dtNom > 0 ? dtReal / dtNom : 0;
-  const airflowFactor = nominal.airflowM3h > 0 ? airflow / nominal.airflowM3h : 1;
   const correction = Math.max(dtRatio, 0) ** n * airflowFactor * frost * fouling;
-
   const totalCapacityW = Math.max(nominal.capacityW * correction, 0);
+  const comparisonToNominalPercent = nominal.capacityW > 0
+    ? (totalCapacityW / nominal.capacityW) * 100
+    : 0;
 
-  // Split sens/lat: mantém proporção nominal se disponível; caso contrário 100% sensível
+  if (comparisonToNominalPercent < 70)
+    warnings.push(`Capacidade simulada abaixo de 70% da nominal (${comparisonToNominalPercent.toFixed(0)}%).`);
+  else if (comparisonToNominalPercent > 140)
+    warnings.push(`Capacidade simulada acima de 140% da nominal (${comparisonToNominalPercent.toFixed(0)}%).`);
+
+  // Split sens/lat
   let sensible: number | null = null;
   let latent: number | null = null;
   if (nominal.sensibleW && nominal.capacityW > 0) {
@@ -70,18 +91,19 @@ export function simulateEvaporator(
     latent = 0;
   }
 
-  if (Math.abs(airflowFactor - 1) > 0.4)
-    warnings.push("Vazão de ar fora de ±40% do nominal — modelo perde acurácia.");
-  if (frost < 0.7) warnings.push("Fator de gelo muito baixo — verifique degelo.");
-
   return {
     totalCapacityW,
+    totalCapacityKcalh: totalCapacityW * W_TO_KCALH,
     sensibleCapacityW: sensible,
     latentCapacityW: latent,
     dtRealK: dtReal,
     dtNominalK: dtNom,
     airflowUsedM3h: airflow,
+    airflowFactor,
+    frostFactor: frost,
+    foulingFactor: fouling,
     correctionFactor: correction,
+    comparisonToNominalPercent,
     warnings,
   };
 }
