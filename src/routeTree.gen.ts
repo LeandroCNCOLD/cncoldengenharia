@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppColdproEquipamentosIndexRouteImport } from './routes/_app/coldpro/equipamentos/index'
+import { Route as AppColdproEquipamentosIdRouteImport } from './routes/_app/coldpro/equipamentos/$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -46,12 +47,19 @@ const AppColdproEquipamentosIndexRoute =
     path: '/coldpro/equipamentos/',
     getParentRoute: () => AppRoute,
   } as any)
+const AppColdproEquipamentosIdRoute =
+  AppColdproEquipamentosIdRouteImport.update({
+    id: '/coldpro/equipamentos/$id',
+    path: '/coldpro/equipamentos/$id',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AppAdminRoute
   '/dashboard': typeof AppDashboardRoute
+  '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRoute
   '/coldpro/equipamentos/': typeof AppColdproEquipamentosIndexRoute
 }
 export interface FileRoutesByTo {
@@ -59,6 +67,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/admin': typeof AppAdminRoute
   '/dashboard': typeof AppDashboardRoute
+  '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRoute
   '/coldpro/equipamentos': typeof AppColdproEquipamentosIndexRoute
 }
 export interface FileRoutesById {
@@ -68,13 +77,26 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_app/admin': typeof AppAdminRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRoute
   '/_app/coldpro/equipamentos/': typeof AppColdproEquipamentosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/admin' | '/dashboard' | '/coldpro/equipamentos/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/admin'
+    | '/dashboard'
+    | '/coldpro/equipamentos/$id'
+    | '/coldpro/equipamentos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/admin' | '/dashboard' | '/coldpro/equipamentos'
+  to:
+    | '/'
+    | '/auth'
+    | '/admin'
+    | '/dashboard'
+    | '/coldpro/equipamentos/$id'
+    | '/coldpro/equipamentos'
   id:
     | '__root__'
     | '/'
@@ -82,6 +104,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_app/admin'
     | '/_app/dashboard'
+    | '/_app/coldpro/equipamentos/$id'
     | '/_app/coldpro/equipamentos/'
   fileRoutesById: FileRoutesById
 }
@@ -135,18 +158,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproEquipamentosIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/coldpro/equipamentos/$id': {
+      id: '/_app/coldpro/equipamentos/$id'
+      path: '/coldpro/equipamentos/$id'
+      fullPath: '/coldpro/equipamentos/$id'
+      preLoaderRoute: typeof AppColdproEquipamentosIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppColdproEquipamentosIdRoute: typeof AppColdproEquipamentosIdRoute
   AppColdproEquipamentosIndexRoute: typeof AppColdproEquipamentosIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppColdproEquipamentosIdRoute: AppColdproEquipamentosIdRoute,
   AppColdproEquipamentosIndexRoute: AppColdproEquipamentosIndexRoute,
 }
 
