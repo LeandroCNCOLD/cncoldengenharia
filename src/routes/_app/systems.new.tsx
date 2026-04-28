@@ -88,7 +88,7 @@ function NewSystemPage() {
       <PageHeader
         title="Novo sistema"
         description="Combine componentes prontos para criar um sistema simulável."
-        action={
+        actions={
           <Link to="/systems">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" /> Voltar

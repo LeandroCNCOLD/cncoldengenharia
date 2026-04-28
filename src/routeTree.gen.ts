@@ -13,12 +13,14 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppUploadsRouteImport } from './routes/_app/uploads'
+import { Route as AppSystemsRouteImport } from './routes/_app/systems'
 import { Route as AppSimulationRouteImport } from './routes/_app/simulation'
 import { Route as AppReportsRouteImport } from './routes/_app/reports'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppComponentsRouteImport } from './routes/_app/components'
 import { Route as AppCatalogRouteImport } from './routes/_app/catalog'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
+import { Route as AppSystemsNewRouteImport } from './routes/_app/systems.new'
 import { Route as AppComponentsNewRouteImport } from './routes/_app/components.new'
 import { Route as AppComponentsIdRouteImport } from './routes/_app/components.$id'
 
@@ -39,6 +41,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppUploadsRoute = AppUploadsRouteImport.update({
   id: '/uploads',
   path: '/uploads',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSystemsRoute = AppSystemsRouteImport.update({
+  id: '/systems',
+  path: '/systems',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSimulationRoute = AppSimulationRouteImport.update({
@@ -71,6 +78,11 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSystemsNewRoute = AppSystemsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AppSystemsRoute,
+} as any)
 const AppComponentsNewRoute = AppComponentsNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -91,9 +103,11 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/reports': typeof AppReportsRoute
   '/simulation': typeof AppSimulationRoute
+  '/systems': typeof AppSystemsRouteWithChildren
   '/uploads': typeof AppUploadsRoute
   '/components/$id': typeof AppComponentsIdRoute
   '/components/new': typeof AppComponentsNewRoute
+  '/systems/new': typeof AppSystemsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -104,9 +118,11 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/reports': typeof AppReportsRoute
   '/simulation': typeof AppSimulationRoute
+  '/systems': typeof AppSystemsRouteWithChildren
   '/uploads': typeof AppUploadsRoute
   '/components/$id': typeof AppComponentsIdRoute
   '/components/new': typeof AppComponentsNewRoute
+  '/systems/new': typeof AppSystemsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -119,9 +135,11 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/simulation': typeof AppSimulationRoute
+  '/_app/systems': typeof AppSystemsRouteWithChildren
   '/_app/uploads': typeof AppUploadsRoute
   '/_app/components/$id': typeof AppComponentsIdRoute
   '/_app/components/new': typeof AppComponentsNewRoute
+  '/_app/systems/new': typeof AppSystemsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -134,9 +152,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/reports'
     | '/simulation'
+    | '/systems'
     | '/uploads'
     | '/components/$id'
     | '/components/new'
+    | '/systems/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -147,9 +167,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/reports'
     | '/simulation'
+    | '/systems'
     | '/uploads'
     | '/components/$id'
     | '/components/new'
+    | '/systems/new'
   id:
     | '__root__'
     | '/'
@@ -161,9 +183,11 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/reports'
     | '/_app/simulation'
+    | '/_app/systems'
     | '/_app/uploads'
     | '/_app/components/$id'
     | '/_app/components/new'
+    | '/_app/systems/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -200,6 +224,13 @@ declare module '@tanstack/react-router' {
       path: '/uploads'
       fullPath: '/uploads'
       preLoaderRoute: typeof AppUploadsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/systems': {
+      id: '/_app/systems'
+      path: '/systems'
+      fullPath: '/systems'
+      preLoaderRoute: typeof AppSystemsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/simulation': {
@@ -244,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/systems/new': {
+      id: '/_app/systems/new'
+      path: '/new'
+      fullPath: '/systems/new'
+      preLoaderRoute: typeof AppSystemsNewRouteImport
+      parentRoute: typeof AppSystemsRoute
+    }
     '/_app/components/new': {
       id: '/_app/components/new'
       path: '/new'
@@ -275,6 +313,18 @@ const AppComponentsRouteWithChildren = AppComponentsRoute._addFileChildren(
   AppComponentsRouteChildren,
 )
 
+interface AppSystemsRouteChildren {
+  AppSystemsNewRoute: typeof AppSystemsNewRoute
+}
+
+const AppSystemsRouteChildren: AppSystemsRouteChildren = {
+  AppSystemsNewRoute: AppSystemsNewRoute,
+}
+
+const AppSystemsRouteWithChildren = AppSystemsRoute._addFileChildren(
+  AppSystemsRouteChildren,
+)
+
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
   AppCatalogRoute: typeof AppCatalogRoute
@@ -282,6 +332,7 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppReportsRoute: typeof AppReportsRoute
   AppSimulationRoute: typeof AppSimulationRoute
+  AppSystemsRoute: typeof AppSystemsRouteWithChildren
   AppUploadsRoute: typeof AppUploadsRoute
 }
 
@@ -292,6 +343,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppReportsRoute: AppReportsRoute,
   AppSimulationRoute: AppSimulationRoute,
+  AppSystemsRoute: AppSystemsRouteWithChildren,
   AppUploadsRoute: AppUploadsRoute,
 }
 

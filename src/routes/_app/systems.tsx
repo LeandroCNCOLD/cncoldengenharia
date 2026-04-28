@@ -31,7 +31,7 @@ function SystemsPage() {
       <PageHeader
         title="Sistemas"
         description="Combinações de compressor, evaporador e condensador prontas para simular."
-        action={
+        actions={
           <Link to="/systems/new">
             <Button size="sm">
               <Plus className="mr-2 h-4 w-4" /> Novo sistema
