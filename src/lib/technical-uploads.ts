@@ -227,12 +227,8 @@ export async function processTechnicalFile(fileVersionId: string, userId: string
 
   const finalStatus: TechnicalFileStatus =
     parsed.errors.length && parsed.confidence < 0.3
-      ? "failed"
-      : parsed.confidence >= 0.8
-        ? "parsed"
-        : parsed.confidence >= 0.5
-          ? ("parsed" as TechnicalFileStatus) // mapeia "needs_review" para parsed visível; status semântico fica em payload
-          : "uploaded";
+      ? "rejected"
+      : "uploaded";
 
   // Status técnico semântico que aparece no payload
   const semanticStatus =
