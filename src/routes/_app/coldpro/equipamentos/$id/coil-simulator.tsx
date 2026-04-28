@@ -390,10 +390,9 @@ function CoilSimulatorPage() {
           </AlertDescription>
         </Alert>
       )}
-        />
-      </div>
 
       <div className="max-w-md">
+
         <Label>Descrição da simulação</Label>
         <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Ex.: Verify base R404A -8°C" />
       </div>
