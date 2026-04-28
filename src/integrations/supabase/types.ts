@@ -14,6 +14,171 @@ export type Database = {
   }
   public: {
     Tables: {
+      coil_calibrations: {
+        Row: {
+          air_dp_correction_factor: number
+          capacity_correction_factor: number
+          coil_type: string
+          component_item_id: string
+          created_at: string
+          created_by: string | null
+          deviation_after: Json
+          deviation_before: Json
+          engine: string
+          id: string
+          inputs_snapshot: Json
+          meets_targets: boolean
+          notes: string | null
+          outputs_snapshot: Json
+          ref_dp_correction_factor: number
+          reference_source: string | null
+          ua_correction_factor: number
+        }
+        Insert: {
+          air_dp_correction_factor?: number
+          capacity_correction_factor?: number
+          coil_type: string
+          component_item_id: string
+          created_at?: string
+          created_by?: string | null
+          deviation_after?: Json
+          deviation_before?: Json
+          engine?: string
+          id?: string
+          inputs_snapshot?: Json
+          meets_targets?: boolean
+          notes?: string | null
+          outputs_snapshot?: Json
+          ref_dp_correction_factor?: number
+          reference_source?: string | null
+          ua_correction_factor?: number
+        }
+        Update: {
+          air_dp_correction_factor?: number
+          capacity_correction_factor?: number
+          coil_type?: string
+          component_item_id?: string
+          created_at?: string
+          created_by?: string | null
+          deviation_after?: Json
+          deviation_before?: Json
+          engine?: string
+          id?: string
+          inputs_snapshot?: Json
+          meets_targets?: boolean
+          notes?: string | null
+          outputs_snapshot?: Json
+          ref_dp_correction_factor?: number
+          reference_source?: string | null
+          ua_correction_factor?: number
+        }
+        Relationships: []
+      }
+      coil_fluids: {
+        Row: {
+          created_at: string
+          critical_pressure_bar: number | null
+          critical_temp_c: number | null
+          family: string | null
+          fluid_type: string
+          gwp: number | null
+          id: string
+          latent_heat_kj_kg: number | null
+          liquid_conductivity_w_mk: number | null
+          liquid_cp_kj_kgk: number | null
+          liquid_density_kg_m3: number | null
+          liquid_viscosity_upa_s: number | null
+          molar_mass_g_mol: number | null
+          name: string
+          notes: string | null
+          reference_temp_c: number | null
+          updated_at: string
+          vapour_cp_kj_kgk: number | null
+          vapour_density_kg_m3: number | null
+          vapour_viscosity_upa_s: number | null
+        }
+        Insert: {
+          created_at?: string
+          critical_pressure_bar?: number | null
+          critical_temp_c?: number | null
+          family?: string | null
+          fluid_type: string
+          gwp?: number | null
+          id?: string
+          latent_heat_kj_kg?: number | null
+          liquid_conductivity_w_mk?: number | null
+          liquid_cp_kj_kgk?: number | null
+          liquid_density_kg_m3?: number | null
+          liquid_viscosity_upa_s?: number | null
+          molar_mass_g_mol?: number | null
+          name: string
+          notes?: string | null
+          reference_temp_c?: number | null
+          updated_at?: string
+          vapour_cp_kj_kgk?: number | null
+          vapour_density_kg_m3?: number | null
+          vapour_viscosity_upa_s?: number | null
+        }
+        Update: {
+          created_at?: string
+          critical_pressure_bar?: number | null
+          critical_temp_c?: number | null
+          family?: string | null
+          fluid_type?: string
+          gwp?: number | null
+          id?: string
+          latent_heat_kj_kg?: number | null
+          liquid_conductivity_w_mk?: number | null
+          liquid_cp_kj_kgk?: number | null
+          liquid_density_kg_m3?: number | null
+          liquid_viscosity_upa_s?: number | null
+          molar_mass_g_mol?: number | null
+          name?: string
+          notes?: string | null
+          reference_temp_c?: number | null
+          updated_at?: string
+          vapour_cp_kj_kgk?: number | null
+          vapour_density_kg_m3?: number | null
+          vapour_viscosity_upa_s?: number | null
+        }
+        Relationships: []
+      }
+      coil_materials: {
+        Row: {
+          category: string
+          created_at: string
+          density_kg_m3: number | null
+          id: string
+          name: string
+          notes: string | null
+          roughness_mm: number | null
+          thermal_conductivity_w_mk: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          density_kg_m3?: number | null
+          id?: string
+          name: string
+          notes?: string | null
+          roughness_mm?: number | null
+          thermal_conductivity_w_mk: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          density_kg_m3?: number | null
+          id?: string
+          name?: string
+          notes?: string | null
+          roughness_mm?: number | null
+          thermal_conductivity_w_mk?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coil_simulations: {
         Row: {
           coil_type: string | null
