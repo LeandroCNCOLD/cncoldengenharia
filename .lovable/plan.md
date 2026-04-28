@@ -1,83 +1,239 @@
-## Contexto
 
-A base atual já tem:
-- Catálogo de componentes (compressor, evaporador, condensador) com normalização, conflitos e prontidão.
-- Página `/simulation` que lista componentes Prontos × Bloqueados, mas **sem motor de cálculo**.
-- Schema com `coeficientes` (AHRI 540) e `faixa_operacional` no compressor; capacidade nominal e temperaturas de referência em evaporador/condensador.
+# Coil Simulator — Fundação Técnica (Iteração 1)
 
-O prompt v4.0 cobre 4 grandes funcionalidades + arquitetura ampla. Em vez de tentar tudo de uma vez (alto risco), proponho uma **Fase 1 enxuta**: motor de equilíbrio + sistemas + simulação básica funcionando ponta a ponta, deixando linhas de sucção, custos, dinâmica e comparação para fases seguintes (já estruturadas, mas não implementadas).
+## Princípio
+Em vez de saltar para correlações avançadas, criamos uma **fundação calibrável e auditável**: bancos técnicos, geometria derivada, motor físico simples (`Q = U·A·LMTD`) e comparação lado a lado contra Unilab e contra o motor empírico atual. Nada do que existe hoje é removido.
 
-## Escopo desta etapa (Fase 1 — Motor de Equilíbrio + Sistemas)
+Toggle de motor:
+```
+engine: "empirical" | "physical_simple" | "physical_advanced"
+```
+Apenas **`empirical`** (já existe) e **`physical_simple`** (novo) entram em operação. `physical_advanced` fica reservado nos tipos para fases futuras (Wang, Cavallini, Kandlikar, etc.).
 
-### 1. Banco de dados
-Nova migração com 3 tabelas (RLS habilitado, política `authenticated`):
+---
 
-- **`systems`** — combinação nomeada de 1 compressor + 1 evaporador + 1 condensador
-  - `id, name, description, compressor_id, evaporator_id, condenser_id, created_by, created_at, updated_at`
-  - FK referenciando `components(id)` com `ON DELETE RESTRICT`
-  - Trigger valida que cada FK aponta para um componente do tipo correto
-- **`simulations`** — uma execução de cálculo
-  - `id, system_id, t_evap_target, t_air_evap, t_air_cond,`
-  - `t_cond_eq, q_evap, q_comp, w_comp, q_cond, cop, balance_error,`
-  - `util_comp, util_evap, util_cond, bottleneck,`
-  - `recommendations jsonb, raw jsonb, created_by, created_at`
-- Sem tabelas para sucção/custos/dinâmica/comparação ainda — entram nas fases seguintes.
+## 1. Bancos técnicos (novas tabelas)
 
-Índices: `systems(created_by)`, `simulations(system_id, created_at desc)`.
+### `coil_materials`
+- `id`, `key` (cobre, aluminio, aco_carbono, inox, microfin, aleta_lisa, aleta_corrugada, aleta_louvered)
+- `name`, `kind` ("tube" | "fin")
+- `thermal_conductivity_w_mk` (numeric)
+- `density_kg_m3`, `specific_heat_j_kgk`, `roughness_mm`
+- `default_thickness_mm`, `surface_correction_factor`
+- `notes`, `created_at`, `updated_at`
 
-### 2. Motor de cálculo (TypeScript puro, client-side)
+### `coil_fluids`
+- `id`, `key` (R404A, R507, R134a, R448A, R449A, R410A, R32, R290, R744, R717, AGUA, EG30, PG30)
+- `name`, `family` ("hfc" | "hfo" | "natural" | "secondary")
+- `saturation_table` (jsonb): array `{T_c, Psat_kpa, h_l_kjkg, h_v_kjkg, rho_l, rho_v, mu_l, mu_v, k_l, k_v, cp_l, cp_v}`
+- `gwp`, `notes`
 
-`src/lib/engine/` (sem Python, sem servidor extra — roda no browser via TanStack Query):
+### `coil_geometries`
+- `id`, `name`, `description`
+- Todos os campos geométricos de `CoilGeometry` (tubos, fileiras, passos, materiais por FK opcional para `coil_materials`).
+- `is_template` (boolean) — geometrias-template reutilizáveis.
+- `created_by`, `created_at`, `updated_at`
 
-- **`ahri540.ts`** — avalia polinômio AHRI 540 de 10 coeficientes para capacidade e potência do compressor em função de `(T_evap, T_cond)`. Aceita `coeficientes` no formato `{ capacity: number[10], power: number[10] }` armazenado no `component_data.fields`.
-- **`heat-exchanger.ts`** — modelo simplificado linear para evaporador/condensador:
-  - `Q_evap = UA_evap × (T_air_evap − T_evap)` derivado da capacidade nominal e ΔT de referência.
-  - `Q_cond = UA_cond × (T_cond − T_air_cond)` análogo.
-- **`equilibrium.ts`** — busca `T_cond` no intervalo (T_air_cond+1 … 70 °C) que minimize `|Q_cond − (Q_evap + W_comp)|` (passo 0,1 °C, depois refino bisection). Retorna ponto de equilíbrio + utilizações + gargalo.
-- **`recommendations.ts`** — gera lista de sugestões com base em utilizações (>90% / <50%) e erro de balanço.
+RLS:
+- SELECT: `authenticated` (todos leem).
+- INSERT/UPDATE/DELETE: apenas `has_role(auth.uid(), 'admin')` para `coil_materials` e `coil_fluids`. `coil_geometries` é livre para `authenticated` criarem suas próprias.
 
-Validações de entrada: `T_air_evap > T_evap_target`, `T_air_cond < 60`, componentes prontos (`status='pronto'`).
+Seed inicial via migration:
+- Materiais: cobre (k=401), alumínio (k=237), aço carbono (k=50), inox 304 (k=16).
+- Fluidos: R-404A, R-134a, R-448A, R-449A, R-744, R-717, água, EG30 — tabela de saturação simplificada (≈10 pontos por fluido).
 
-### 3. Interface (novas rotas TanStack)
+Módulos de leitura cacheada:
+- `src/modules/coldpro/data/materials.ts`
+- `src/modules/coldpro/data/fluids.ts` (com helper `interpFluidProps(fluidKey, T_c)`)
+- `src/modules/coldpro/data/geometries.ts`
 
-- **`/systems`** (`src/routes/_app/systems.tsx`) — lista de sistemas montados, botão "Novo sistema".
-- **`/systems/new`** — formulário: nome + 3 selects (filtrados por tipo e `status='pronto'`).
-- **`/systems/$id`** — detalhe do sistema, lista de simulações anteriores, botão "Nova simulação".
-- **`/systems/$id/simulate`** — formulário com 3 sliders/inputs (`T_evap_target`, `T_air_evap`, `T_air_cond`) e resultado:
-  - Cards de destaque: T_cond, COP, Q_evap, W_comp.
-  - Tabela de utilizações e gargalo.
-  - Lista de recomendações com prioridade.
-  - Botão "Salvar simulação" → grava em `simulations`.
-- **`/simulation`** (existente) — passa a mostrar Sistemas Prontos como atalho para simular, mantendo a lista de Componentes Prontos × Bloqueados como abaixo.
+---
 
-Sidebar ganha item **"Sistemas"** entre "Catálogo Técnico" e "Simulação".
+## 2. Geometria derivada
 
-### 4. Fora desta etapa (próximos prompts)
+Novo módulo `src/modules/coldpro/coil/geometryDerived.ts` com função pura:
+```
+deriveGeometry(g: CoilGeometry) => {
+  totalTubes,             // tubesPerRow * rows - skippedTubes
+  totalTubeLengthM,       // totalTubes * coilLengthMm/1000
+  faceAreaM2,             // (tubesPerRow * tubeSpacingMm) * coilLengthMm / 1e6
+  externalAreaM2,         // π * tubeOd * L_total * (1 + finRatio)
+  internalAreaM2,         // π * tubeId * L_total
+  internalVolumeL,        // π/4 * tubeId² * L_total * 1000
+  finRatio,               // razão área aleta/tubo (estimada de finPitch e geometria)
+  source: { [field]: "calculated" | "imported" | "estimated" }
+}
+```
+Usado em todos os formulários (mostra valores derivados read-only com badge de origem) e dentro do motor físico.
 
-Mantidos no roadmap mas **não implementados agora**, para evitar plano gigante e decisões prematuras:
+---
 
-- Linhas de sucção (precisa tabela de tubos comerciais e fluido configurável — só R-404A não é suficiente).
-- Análise de custos / payback / VPL (precisa inputs de tarifa, horas, investimento por componente — confirmar fonte).
-- Simulação dinâmica (perfil senoidal de T_ar — confirmar se 24 h ou 7 dias é o padrão).
-- Comparação de sistemas (depende de pesos configuráveis pelo usuário).
-- Exportação PDF, gráficos Chart.js, modo escuro extra.
+## 3. Calibração Unilab — `coil_calibrations`
 
-Cada um desses vira um prompt focado depois que o motor base estiver validado.
+Tabela:
+- `id`, `component_item_id` (FK lógica para `component_items`)
+- `engine_target` ("physical_simple" | "physical_advanced")
+- `capacity_correction_factor` numeric default 1.0
+- `air_pressure_drop_factor` numeric default 1.0
+- `refrigerant_pressure_drop_factor` numeric default 1.0
+- `heat_transfer_correction_factor` numeric default 1.0
+- `nominal_point` (jsonb) — ponto do datasheet usado: `{Tair_in, RH_in, Tref, airflow, Q_unilab, dPair_unilab, dPref_unilab, U_unilab, A_unilab}`
+- `deviation_before` (jsonb) — `{capacityPct, dPairPct, dPrefPct}` antes da calibração
+- `deviation_after` (jsonb) — `{capacityPct, dPairPct, dPrefPct}` depois
+- `meets_targets` (boolean) — true quando os 3 desvios estão dentro das metas
+- `created_by`, `created_at`, `updated_at`
 
-## Detalhes técnicos
+RLS: `authenticated` SELECT/INSERT/UPDATE.
 
-- **Sem Python, sem FastAPI, sem novo backend.** O motor é TypeScript puro chamado direto na página de simulação; persistência via Supabase como já é feito.
-- **Coeficientes AHRI 540**: o schema já reserva `coeficientes` como JSON. Vou padronizar como `{ capacity: number[10], power: number[10] }` e documentar isso no `FieldEditor` via placeholder/help text.
-- **Faixa operacional**: `{ t_evap_min, t_evap_max, t_cond_min, t_cond_max }`. O motor rejeita pontos fora.
-- **RLS**: `systems` e `simulations` seguem o mesmo padrão das tabelas existentes (`authenticated` pode CRUD; `created_by = auth.uid()` no INSERT).
-- **Tipos gerados**: após a migração, `src/integrations/supabase/types.ts` é regenerado automaticamente.
+Função `calibrateAgainstUnilab(componentItemId)`:
+1. Lê o ponto nominal do `evaporator_coil_models` / `condenser_coil_models`.
+2. Roda `physical_simple` no mesmo ponto.
+3. Calcula desvios em Q, ΔP_ar, ΔP_ref.
+4. Resolve fatores: `capacityCorrectionFactor = Q_unilab / Q_calc`, idem para ΔPs, `heatTransferCorrectionFactor` ajusta U se vier do Unilab.
+5. Re-roda com calibração, salva `deviation_after`.
+6. Marca `meets_targets` segundo as metas (ver §6).
 
-## Entregáveis
+UI: na aba do componente, botão **"Calibrar contra Unilab"** mostra a tabela antes/depois e o status das metas.
 
-1. Migração SQL (`systems`, `simulations`, RLS, trigger de validação de tipo).
-2. Motor `src/lib/engine/` (4 arquivos).
-3. 4 novas rotas (`/systems`, `/systems/new`, `/systems/$id`, `/systems/$id/simulate`).
-4. Atualização da sidebar e da página `/simulation` (atalho para sistemas).
-5. Atualização do `.lovable/plan.md` registrando a Fase 1 do motor.
+---
 
-Após sua aprovação, executo tudo em sequência. Os módulos seguintes (sucção, custos, dinâmica, comparação) serão propostos um a um nos próximos prompts.
+## 4. Motor `physical_simple`
+
+Novo arquivo `src/modules/coldpro/coil/physicalSimpleSimulator.ts`. Lógica:
+
+```
+1. Resolve A (área de troca):
+   - Se Unilab forneceu surface_area_m2 → A = imported
+   - Senão → A = derived.externalAreaM2 (estimated)
+
+2. Resolve U (coeficiente global):
+   - Se Unilab forneceu global_coeff_w e A → U = global_coeff_w / A (imported)
+   - Senão → U estimado por faixa típica:
+       evap DX ar: U ≈ 25–45 W/m²K (default 35)
+       cond ar:    U ≈ 25–40 W/m²K (default 30)
+     ajustado por airflowFactor^0.6 (estimated)
+
+3. Calcula LMTD:
+   - Evap fase única: ΔT_ml = ((Tar_in − Tref) − (Tar_out − Tref)) / ln(...)
+     Quando Tar_out não fornecido, estima por balanço com airflow + cp_ar do banco.
+   - Evap com mudança de fase: usa ΔH_ml / cp_ar (preparação para Fase 3 psicrometria).
+   - Cond: análogo com Tref constante.
+
+4. Q = U · A · LMTD · capacityCorrectionFactor · heatTransferCorrectionFactor
+
+5. ΔP_ar e ΔP_ref:
+   - Se Unilab forneceu → usa o valor importado * fator de calibração.
+   - Senão → estimativa atual (já existente) * fator.
+
+6. Saída inclui:
+   { engine, U, A, LMTD, capacityW, sources: {U, A, dPair, dPref} }
+```
+
+Tipos atualizados:
+```ts
+type CoilEngine = "empirical" | "physical_simple" | "physical_advanced";
+type FieldOrigin = "imported" | "calculated" | "calibrated" | "estimated" | "manual";
+
+interface CoilSimulatorResult {
+  // ... existentes
+  engine: CoilEngine;
+  U?: number;
+  areaM2?: number;
+  lmtdK?: number;
+  fieldSources?: Record<string, FieldOrigin>;
+}
+```
+
+`physicalAdvancedSimulator.ts` é criado **vazio** (stub) só para reservar o ponto de extensão.
+
+---
+
+## 5. Comparativo na tela Coil Simulator
+
+Nova aba **"Comparativo"** ao lado de Resultados:
+
+```
++----------------------+-----------+-----------+----------------+
+|                      |  Unilab   | Empírico  | Physical Simple|
++----------------------+-----------+-----------+----------------+
+| Capacidade (kW)      |   12.40   |   11.82   |     12.05      |
+| Desvio %             |     —     |   −4.7%   |     −2.8%      |
+| ΔP ar (Pa)           |   85      |   72      |     91         |
+| Desvio %             |     —     |  −15.3%   |    +7.1%       |
+| ΔP refrig. (kPa)     |   18      |   18*     |     21         |
+| Desvio %             |     —     |    0%*    |    +16.7%      |
+| U (W/m²K)            |   32.1    |     —     |     30.4       |
+| Área (m²)            |   8.7     |     —     |     8.7        |
++----------------------+-----------+-----------+----------------+
+* empírico copia ΔP do datasheet — não é cálculo independente
+```
+
+Linha "Status metas" indica em verde/vermelho se as 3 metas (§6) foram atendidas.
+
+Toggle no header: **Motor: [ Empírico | Físico Simples | Comparar ambos ]** — modo "Comparar" calcula os dois e exibe a tabela.
+
+---
+
+## 6. Metas de aderência (após calibração)
+
+Validadas no painel de calibração e na aba Comparativo:
+- Capacidade: erro ≤ **5%**
+- ΔP ar: erro ≤ **10%**
+- ΔP refrigerante: erro ≤ **15%**
+
+`meets_targets = true` apenas quando os três passam.
+
+---
+
+## 7. Rastreabilidade (origem de campo)
+
+Toda saída do motor e toda linha do componente carrega `field_sources: Record<string, FieldOrigin>` com:
+- `imported` — veio do PDF Unilab
+- `calculated` — derivado por fórmula no front (ex.: área frontal)
+- `calibrated` — corrigido pelo `coil_calibrations`
+- `estimated` — chute por faixa típica (default)
+- `manual` — usuário sobrescreveu
+
+UI: cada campo numérico nos resultados mostra um pequeno **badge colorido** com a origem (já existe componente parecido em `unilab-import-form.tsx` — vamos reaproveitar).
+
+---
+
+## Entregáveis desta iteração
+
+**Migration**
+- `coil_materials`, `coil_fluids`, `coil_geometries`, `coil_calibrations` + RLS + seed.
+
+**Módulos**
+- `src/modules/coldpro/data/materials.ts`
+- `src/modules/coldpro/data/fluids.ts`
+- `src/modules/coldpro/data/geometries.ts`
+- `src/modules/coldpro/coil/geometryDerived.ts`
+- `src/modules/coldpro/coil/physicalSimpleSimulator.ts`
+- `src/modules/coldpro/coil/physicalAdvancedSimulator.ts` (stub)
+- `src/modules/coldpro/coil/calibration.ts` (`calibrateAgainstUnilab`, `applyCalibration`)
+- Atualização de `coilSimulatorTypes.ts`: `CoilEngine`, `FieldOrigin`, novos campos no resultado.
+
+**UI**
+- Toggle de motor no Coil Simulator (Empírico / Físico Simples / Comparar).
+- Nova aba **Comparativo** com tabela Unilab × Empírico × Physical Simple + status das metas.
+- Badges de origem nos resultados.
+- Botão **"Calibrar contra Unilab"** nas abas Evaporador e Condensador, abrindo dialog com a tabela antes/depois e salvando em `coil_calibrations`.
+- (Opcional desta iteração) Aba admin **"Bancos"** com leitura de materiais/fluidos. CRUD completo pode ficar para uma próxima passada — para esta iteração basta seed + leitura.
+
+**O que NÃO entra agora**
+- Correlações avançadas (Wang, Cavallini, Kandlikar, Schmidt, Friedel) — ficam em `physical_advanced` (stub).
+- Psicrometria ASHRAE completa — usamos cp_ar do banco e balanço simples.
+- Modo Design — só depois do Verify físico calibrado bater as metas em pelo menos 3 datasheets reais.
+- CRUD admin completo dos bancos.
+
+---
+
+## Detalhes técnicos (referência)
+
+- Tudo TypeScript puro, Worker-safe, sem dependências nativas.
+- `evaporator_coil_models.global_coeff_w` e `surface_area_m2` já existem — viram fonte primária de U e A.
+- Calibração não modifica os modelos importados; vive em tabela separada e é aplicada **na hora do cálculo**.
+- Histórico (`coil_simulations`) ganha `engine` e `calibration_id` para auditar qual motor/calibração gerou cada resultado.
+- O motor empírico continua sendo o default até que exista calibração validada para o componente; quando houver, o default passa a ser `physical_simple` calibrado.
+
+Confirma que posso seguir com esta iteração inteira (migration + módulos + UI comparativa + calibração) ou prefere quebrar em duas entregas (primeiro bancos+geometria derivada, depois motor+calibração+comparativo)?
