@@ -298,8 +298,28 @@ function CoilSimulatorPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      if (!result || !lastInput) throw new Error("Calcule antes de salvar.");
+      await saveCoilSimulatorRun({
+        equipmentProjectId: id,
+        componentItemId: prefillComponentId,
+        input: lastInput,
+        result,
+        userId: user?.id,
+      });
+    },
+    onSuccess: () => {
+      toast.success("Simulação salva no histórico.");
+      qc.invalidateQueries({ queryKey: ["coil-sims", id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
-  return (
+  const errors = useMemo(() => result?.warnings.filter((w) => w.startsWith("ERRO")) ?? [], [result]);
+  const warns = useMemo(() => result?.warnings.filter((w) => !w.startsWith("ERRO")) ?? [], [result]);
+
+
     <div className="space-y-6">
       <div>
         <Button asChild variant="ghost" size="sm" className="mb-2 -ml-2">
