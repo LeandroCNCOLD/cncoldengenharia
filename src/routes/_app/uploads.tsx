@@ -97,6 +97,10 @@ function UploadsPage() {
     group: FileGroup;
     category: TechnicalCategory;
   } | null>(null);
+  const [extractionView, setExtractionView] = useState<{
+    fileId: string;
+    extraction: { parser: string; warnings: unknown; raw_preview: string | null; extracted_fields: Record<string, unknown>; success: boolean };
+  } | null>(null);
 
   const products = useQuery({
     queryKey: ["technical-products"],
