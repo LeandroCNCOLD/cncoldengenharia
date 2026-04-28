@@ -312,34 +312,39 @@ export async function processBatch(batchId: string, userId: string) {
       );
 
       const semanticStatus =
-        parsed.confidence >= 0.8
-          ? "parsed"
-          : parsed.confidence >= 0.5
-            ? "needs_review"
-            : "failed";
+        parsed.status === "parsed" && parsed.confidence < 0.8 ? "needs_review" : parsed.status;
       const techType = (refined as any).technicalDocumentType ?? null;
       const fileType = (refined as any).fileType ?? null;
 
-      await (supabase as any).from("technical_file_extractions").insert({
+      const structuredData =
+        typeof parsed.structuredData === "object" && parsed.structuredData
+          ? JSON.parse(JSON.stringify(parsed.structuredData))
+          : null;
+      const { error: extractionError } = await (supabase as any).from("technical_file_extractions").insert({
         file_id: file.id,
         product_id: file.product_id ?? null,
+        equipment_id: file.equipment_id ?? null,
         parser: parsed.parserUsed,
         extracted_fields: {
           classification: refined,
           semanticStatus,
           parserVersion: parsed.parserVersion,
           confidence: parsed.confidence,
+          status: parsed.status,
           fields: parsed.extractedFields,
-          structuredPreview:
-            typeof parsed.structuredData === "object" && parsed.structuredData
-              ? JSON.parse(JSON.stringify(parsed.structuredData).slice(0, 5000))
-              : null,
+          errors: parsed.errors,
+          structuredPreview: structuredData
+            ? JSON.parse(JSON.stringify(structuredData).slice(0, 5000))
+            : null,
         },
         warnings: parsed.warnings,
         raw_preview: parsed.rawText.slice(0, 4000) || null,
+        raw_text: parsed.rawText || null,
+        structured_data: structuredData ?? {},
         success: parsed.errors.length === 0,
         created_by: userId,
       });
+      if (extractionError) throw new Error(extractionError.message);
 
       const dbStatus =
         semanticStatus === "parsed"
