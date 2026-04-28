@@ -171,8 +171,17 @@ function UploadsPage() {
     if (!user) return;
     try {
       await processTechnicalFile(id, user.id);
-      toast.success("Arquivo processado (mock).");
+      toast.success("Arquivo processado.");
       qc.invalidateQueries({ queryKey: ["technical-files"] });
+      // Busca extração mais recente para exibir
+      const { data: ext } = await supabase
+        .from("technical_file_extractions")
+        .select("*")
+        .eq("file_id", id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (ext) setExtractionView({ fileId: id, extraction: ext });
     } catch (e) {
       toast.error("Falha ao processar", { description: (e as Error).message });
     }
