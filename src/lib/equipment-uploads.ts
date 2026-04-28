@@ -430,8 +430,8 @@ export async function buildPreCatalog(equipmentId: string): Promise<PreCatalog> 
 
   // Agrupa campos por categoria com fontes para detectar conflito
   const byTech: Record<string, Map<string, FieldSource[]>> = {
-    evaporador: new Map(),
-    condensador: new Map(),
+    evaporator: new Map(),
+    condenser: new Map(),
     compressor: new Map(),
   };
 
@@ -442,7 +442,7 @@ export async function buildPreCatalog(equipmentId: string): Promise<PreCatalog> 
     const f: any = fileById.get(ex.file_id);
     if (!f) continue;
     const ef = (ex.extracted_fields ?? {}) as any;
-    const tech: string = ef?.classification?.technicalType ?? "outro";
+    const tech: string = ef?.classification?.technicalDocumentType ?? "generic";
     const fields = (ef?.fields ?? {}) as Record<string, any>;
     if (typeof ef?.confidence === "number") {
       confSum += ef.confidence;
