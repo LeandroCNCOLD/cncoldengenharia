@@ -564,35 +564,35 @@ function CoilSimulatorPage() {
                     <tbody className="divide-y">
                       <CompareRow
                         label="Capacidade (kW)"
-                        ref={prefillNominal ? prefillNominal.capacityW / 1000 : null}
+                        nominal={prefillNominal ? prefillNominal.capacityW / 1000 : null}
                         emp={empiricalResult.capacityW / 1000}
                         phy={physicalResult.capacityW / 1000}
                         digits={2}
                       />
                       <CompareRow
                         label="DT real (K)"
-                        ref={prefillNominal ? prefillNominal.airTempInC - prefillNominal.refTempC : null}
+                        nominal={prefillNominal ? prefillNominal.airTempInC - prefillNominal.refTempC : null}
                         emp={empiricalResult.dtRealK}
                         phy={physicalResult.dtRealK}
                         digits={2}
                       />
                       <CompareRow
                         label="ΔP ar (Pa)"
-                        ref={NUM(a.airPressureDropPa) ?? null}
+                        nominal={NUM(a.airPressureDropPa) ?? null}
                         emp={empiricalResult.airPressureDropPa}
                         phy={physicalResult.airPressureDropPa}
                         digits={0}
                       />
                       <CompareRow
                         label="ΔP refrigerante (kPa)"
-                        ref={NUM(r.refrigerantPressureDropKpa) ?? null}
+                        nominal={NUM(r.refrigerantPressureDropKpa) ?? null}
                         emp={empiricalResult.refPressureDropKpa}
                         phy={physicalResult.refPressureDropKpa}
                         digits={2}
                       />
                       <CompareRow
                         label="Vel. frontal (m/s)"
-                        ref={NUM(a.faceVelocityMs) ?? null}
+                        nominal={NUM(a.faceVelocityMs) ?? null}
                         emp={empiricalResult.faceVelocityMs}
                         phy={physicalResult.faceVelocityMs}
                         digits={2}
