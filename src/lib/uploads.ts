@@ -112,12 +112,12 @@ export async function uploadComponentFile(params: {
     })
     .eq("id", fileId);
 
-  await supabase.from("component_history").insert({
+  await supabase.from("component_history").insert([{
     component_id: componentId,
     user_id: userId,
     action: "file_uploaded",
-    payload: { file_name: file.name, kind, status: finalStatus },
-  });
+    payload: { file_name: file.name, kind, status: finalStatus } as never,
+  }]);
 
   await recomputeComponentStatus(componentId);
 }
@@ -241,12 +241,12 @@ export async function setFieldManual(params: {
   // Resolve qualquer conflito desse campo (escolha manual prevalece)
   await resolveConflictKey(componentId, key);
 
-  await supabase.from("component_history").insert({
+  await supabase.from("component_history").insert([{
     component_id: componentId,
     user_id: userId,
     action: "field_edited",
     payload: { key, value } as never,
-  });
+  }]);
 
   await recomputeComponentStatus(componentId);
 }
@@ -286,12 +286,12 @@ export async function resolveConflict(params: {
 
   await resolveConflictKey(componentId, key);
 
-  await supabase.from("component_history").insert({
+  await supabase.from("component_history").insert([{
     component_id: componentId,
     user_id: userId,
     action: "conflict_resolved",
     payload: { key, chosen: chosenSource } as never,
-  });
+  }]);
 
   await recomputeComponentStatus(componentId);
 }
@@ -368,12 +368,12 @@ export async function removeComponentFile(params: {
     await supabase.from("components").update({ conflicts: cleaned as unknown as never }).eq("id", componentId);
   }
 
-  await supabase.from("component_history").insert({
+  await supabase.from("component_history").insert([{
     component_id: componentId,
     user_id: userId,
     action: "file_removed",
-    payload: { file_name: fileName },
-  });
+    payload: { file_name: fileName } as never,
+  }]);
 
   await recomputeComponentStatus(componentId);
 }

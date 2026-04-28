@@ -99,7 +99,7 @@ function ComponentDetailPage() {
   const sources = (cdata?.field_sources ?? {}) as Record<string, string>;
   const expectedKinds = EXPECTED_FILE_KINDS[type];
   const status = component.status as ComponentStatus;
-  const conflicts = ((component.conflicts ?? []) as unknown as FieldConflict[]) ?? [];
+  const conflicts = (component.conflicts ?? []) as unknown as FieldConflict[];
 
   const fieldDefs = COMPONENT_FIELDS[type];
   const readiness = computeReadiness(type, fields, conflicts);
