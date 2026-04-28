@@ -72,7 +72,15 @@ export function EvaporatorTab({ equipmentProjectId }: Props) {
           </CardContent>
         </Card>
       ) : (
-        items.map((c) => <EvaporatorCard key={c.id} componentId={c.id} status={c.status} />)
+        items.map((c) => (
+          <EvaporatorCard
+            key={c.id}
+            componentId={c.id}
+            equipmentProjectId={equipmentProjectId}
+            code={c.code}
+            status={c.status}
+          />
+        ))
       )}
     </div>
   );
@@ -80,9 +88,13 @@ export function EvaporatorTab({ equipmentProjectId }: Props) {
 
 function EvaporatorCard({
   componentId,
+  equipmentProjectId,
+  code,
   status,
 }: {
   componentId: string;
+  equipmentProjectId: string;
+  code: string | null;
   status: keyof typeof COMPONENT_STATUS_LABELS;
 }) {
   const qc = useQueryClient();
@@ -216,8 +228,8 @@ function EvaporatorCard({
                 `coilsim:prefill:${equipmentProjectId}`,
                 JSON.stringify({
                   coilType: "evaporator",
-                  componentItemId: item.id,
-                  label: `Evap ${item.code ?? item.id.slice(0, 6)}`,
+                  componentItemId: componentId,
+                  label: `Evap ${code ?? componentId.slice(0, 6)}`,
                   nominal: {
                     capacityW: Number(model.nominal_capacity_w),
                     airTempInC: Number(model.nominal_air_temp_in_c ?? 0),
