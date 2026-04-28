@@ -171,8 +171,15 @@ function UploadsPage() {
   async function handleApprove(batchId: string) {
     if (!userId) return;
     try {
-      await approveBatch(batchId, userId);
-      toast.success("Lote aprovado para o catálogo.");
+      const res = await approveBatch(batchId, userId);
+      const n = res?.promoted?.length ?? 0;
+      if (n > 0) {
+        toast.success(
+          `Lote aprovado. ${n} componente(s) promovido(s) e disponível(eis) em Sistemas → Novo sistema.`,
+        );
+      } else {
+        toast.success("Lote aprovado para o catálogo.");
+      }
       if (selectedId) await refreshBatches(selectedId);
     } catch (e: any) {
       toast.error(e.message);
