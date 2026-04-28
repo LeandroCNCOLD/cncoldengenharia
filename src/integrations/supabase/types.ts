@@ -332,6 +332,272 @@ export type Database = {
           },
         ]
       }
+      technical_catalog_snapshots: {
+        Row: {
+          approved_at: string
+          approved_by: string | null
+          file_group: Database["public"]["Enums"]["technical_file_group"]
+          file_id: string | null
+          id: string
+          payload: Json
+          product_id: string
+          technical_category: Database["public"]["Enums"]["technical_file_category"]
+          version_label: string
+        }
+        Insert: {
+          approved_at?: string
+          approved_by?: string | null
+          file_group: Database["public"]["Enums"]["technical_file_group"]
+          file_id?: string | null
+          id?: string
+          payload?: Json
+          product_id: string
+          technical_category: Database["public"]["Enums"]["technical_file_category"]
+          version_label: string
+        }
+        Update: {
+          approved_at?: string
+          approved_by?: string | null
+          file_group?: Database["public"]["Enums"]["technical_file_group"]
+          file_id?: string | null
+          id?: string
+          payload?: Json
+          product_id?: string
+          technical_category?: Database["public"]["Enums"]["technical_file_category"]
+          version_label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technical_catalog_snapshots_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "technical_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_catalog_snapshots_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "technical_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technical_file_extractions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          extracted_fields: Json
+          file_id: string
+          id: string
+          parser: string
+          product_id: string
+          raw_preview: string | null
+          success: boolean
+          warnings: Json
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          extracted_fields?: Json
+          file_id: string
+          id?: string
+          parser: string
+          product_id: string
+          raw_preview?: string | null
+          success?: boolean
+          warnings?: Json
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          extracted_fields?: Json
+          file_id?: string
+          id?: string
+          parser?: string
+          product_id?: string
+          raw_preview?: string | null
+          success?: boolean
+          warnings?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technical_file_extractions_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "technical_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_file_extractions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "technical_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technical_file_versions: {
+        Row: {
+          action: string
+          created_at: string
+          file_id: string
+          id: string
+          payload: Json | null
+          product_id: string
+          user_id: string | null
+          version_label: string
+          version_number: number
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          file_id: string
+          id?: string
+          payload?: Json | null
+          product_id: string
+          user_id?: string | null
+          version_label: string
+          version_number: number
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          file_id?: string
+          id?: string
+          payload?: Json | null
+          product_id?: string
+          user_id?: string | null
+          version_label?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technical_file_versions_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "technical_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_file_versions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "technical_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technical_files: {
+        Row: {
+          description: string | null
+          file_extension: string
+          file_group: Database["public"]["Enums"]["technical_file_group"]
+          file_hash: string | null
+          file_size: number | null
+          id: string
+          is_current_version: boolean
+          mime_type: string | null
+          notes: string | null
+          original_filename: string
+          product_id: string
+          status: Database["public"]["Enums"]["technical_file_status"]
+          storage_path: string
+          technical_category: Database["public"]["Enums"]["technical_file_category"]
+          updated_at: string
+          uploaded_at: string
+          uploaded_by: string | null
+          version_label: string
+          version_number: number
+        }
+        Insert: {
+          description?: string | null
+          file_extension: string
+          file_group: Database["public"]["Enums"]["technical_file_group"]
+          file_hash?: string | null
+          file_size?: number | null
+          id?: string
+          is_current_version?: boolean
+          mime_type?: string | null
+          notes?: string | null
+          original_filename: string
+          product_id: string
+          status?: Database["public"]["Enums"]["technical_file_status"]
+          storage_path: string
+          technical_category: Database["public"]["Enums"]["technical_file_category"]
+          updated_at?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+          version_label: string
+          version_number: number
+        }
+        Update: {
+          description?: string | null
+          file_extension?: string
+          file_group?: Database["public"]["Enums"]["technical_file_group"]
+          file_hash?: string | null
+          file_size?: number | null
+          id?: string
+          is_current_version?: boolean
+          mime_type?: string | null
+          notes?: string | null
+          original_filename?: string
+          product_id?: string
+          status?: Database["public"]["Enums"]["technical_file_status"]
+          storage_path?: string
+          technical_category?: Database["public"]["Enums"]["technical_file_category"]
+          updated_at?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+          version_label?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technical_files_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "technical_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technical_products: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          family: string | null
+          id: string
+          manufacturer: string | null
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          family?: string | null
+          id?: string
+          manufacturer?: string | null
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          family?: string | null
+          id?: string
+          manufacturer?: string | null
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -372,6 +638,33 @@ export type Database = {
       component_type: "compressor" | "evaporador" | "condensador"
       file_kind: "csv" | "pdf" | "xls"
       file_processing_status: "pendente" | "processando" | "processado" | "erro"
+      technical_file_category:
+        | "ficha_tecnica"
+        | "laudo_teste"
+        | "planilha_calculo"
+        | "curva_compressor"
+        | "catalogo_fornecedor"
+        | "desenho_tecnico"
+        | "imagem"
+        | "outro"
+      technical_file_group:
+        | "evaporador"
+        | "condensador"
+        | "compressor"
+        | "laudos"
+        | "planilhas"
+        | "curvas"
+        | "imagens"
+        | "documentos"
+        | "outros"
+      technical_file_status:
+        | "uploaded"
+        | "processing"
+        | "parsed"
+        | "validated"
+        | "approved"
+        | "rejected"
+        | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -504,6 +797,36 @@ export const Constants = {
       component_type: ["compressor", "evaporador", "condensador"],
       file_kind: ["csv", "pdf", "xls"],
       file_processing_status: ["pendente", "processando", "processado", "erro"],
+      technical_file_category: [
+        "ficha_tecnica",
+        "laudo_teste",
+        "planilha_calculo",
+        "curva_compressor",
+        "catalogo_fornecedor",
+        "desenho_tecnico",
+        "imagem",
+        "outro",
+      ],
+      technical_file_group: [
+        "evaporador",
+        "condensador",
+        "compressor",
+        "laudos",
+        "planilhas",
+        "curvas",
+        "imagens",
+        "documentos",
+        "outros",
+      ],
+      technical_file_status: [
+        "uploaded",
+        "processing",
+        "parsed",
+        "validated",
+        "approved",
+        "rejected",
+        "archived",
+      ],
     },
   },
 } as const
