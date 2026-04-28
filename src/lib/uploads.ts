@@ -144,7 +144,7 @@ async function mergeExtractedFields(
     .select("conflicts")
     .eq("id", componentId)
     .single();
-  const conflicts: FieldConflict[] = (comp?.conflicts as FieldConflict[]) ?? [];
+  const conflicts: FieldConflict[] = (comp?.conflicts as unknown as FieldConflict[]) ?? [];
   const conflictMap = new Map(conflicts.map((c) => [c.key, c]));
 
   const fileSourceKey = `file:${fileId}`;
@@ -302,7 +302,7 @@ async function resolveConflictKey(componentId: string, key: string): Promise<voi
     .select("conflicts")
     .eq("id", componentId)
     .single();
-  const conflicts: FieldConflict[] = (comp?.conflicts as FieldConflict[]) ?? [];
+  const conflicts: FieldConflict[] = (comp?.conflicts as unknown as FieldConflict[]) ?? [];
   const next = conflicts.filter((c) => c.key !== key);
   await supabase.from("components").update({ conflicts: next }).eq("id", componentId);
 }
@@ -361,7 +361,7 @@ export async function removeComponentFile(params: {
     .eq("id", componentId)
     .single();
   if (comp?.conflicts) {
-    const conflicts: FieldConflict[] = comp.conflicts as FieldConflict[];
+    const conflicts: FieldConflict[] = comp.conflicts as unknown as FieldConflict[];
     const cleaned = conflicts
       .map((c) => ({ ...c, values: c.values.filter((v) => v.source !== fileSrc) }))
       .filter((c) => c.values.length >= 2);
@@ -396,7 +396,7 @@ export async function recomputeComponentStatus(componentId: string): Promise<voi
   if (!comp) return;
   const type = comp.type as ComponentType;
   const fields = (cdata?.fields ?? {}) as Record<string, unknown>;
-  const conflicts = (comp.conflicts ?? []) as FieldConflict[];
+  const conflicts = (comp.conflicts ?? []) as unknown as FieldConflict[];
 
   let next = computeComponentStatus(
     type,
