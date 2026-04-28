@@ -186,18 +186,18 @@ async function mergeExtractedFields(
   await supabase
     .from("component_data")
     .upsert(
-      {
+      [{
         component_id: componentId,
         fields,
         field_sources: sources,
         updated_by: userId,
-      },
+      }],
       { onConflict: "component_id" },
     );
 
   await supabase
     .from("components")
-    .update({ conflicts: Array.from(conflictMap.values()) })
+    .update({ conflicts: Array.from(conflictMap.values()) as unknown as never })
     .eq("id", componentId);
 }
 
@@ -229,12 +229,12 @@ export async function setFieldManual(params: {
   await supabase
     .from("component_data")
     .upsert(
-      {
+      [{
         component_id: componentId,
         fields,
         field_sources: sources,
         updated_by: userId,
-      },
+      }],
       { onConflict: "component_id" },
     );
 
@@ -275,12 +275,12 @@ export async function resolveConflict(params: {
   await supabase
     .from("component_data")
     .upsert(
-      {
+      [{
         component_id: componentId,
         fields,
         field_sources: sources,
         updated_by: userId,
-      },
+      }],
       { onConflict: "component_id" },
     );
 
@@ -304,7 +304,7 @@ async function resolveConflictKey(componentId: string, key: string): Promise<voi
     .single();
   const conflicts: FieldConflict[] = (comp?.conflicts as unknown as FieldConflict[]) ?? [];
   const next = conflicts.filter((c) => c.key !== key);
-  await supabase.from("components").update({ conflicts: next }).eq("id", componentId);
+  await supabase.from("components").update({ conflicts: next as unknown as never }).eq("id", componentId);
 }
 
 /** Remove arquivo do storage, da tabela e limpa origens vinculadas. */
@@ -348,7 +348,7 @@ export async function removeComponentFile(params: {
       await supabase
         .from("component_data")
         .upsert(
-          { component_id: componentId, fields, field_sources: sources, updated_by: userId },
+          [{ component_id: componentId, fields, field_sources: sources, updated_by: userId }],
           { onConflict: "component_id" },
         );
     }
@@ -365,7 +365,7 @@ export async function removeComponentFile(params: {
     const cleaned = conflicts
       .map((c) => ({ ...c, values: c.values.filter((v) => v.source !== fileSrc) }))
       .filter((c) => c.values.length >= 2);
-    await supabase.from("components").update({ conflicts: cleaned }).eq("id", componentId);
+    await supabase.from("components").update({ conflicts: cleaned as unknown as never }).eq("id", componentId);
   }
 
   await supabase.from("component_history").insert({
