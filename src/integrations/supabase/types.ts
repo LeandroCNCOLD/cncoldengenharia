@@ -163,14 +163,36 @@ export type Database = {
       }
       condenser_coil_models: {
         Row: {
+          air_density_in_kg_m3: number | null
+          air_mass_flow_kgh: number | null
+          air_pressure_drop_pa: number | null
+          altitude_m: number | null
+          atm_pressure_bar: number | null
           circuits: number | null
           component_item_id: string
+          confidence_score: number | null
           created_at: string
+          delta_t_log_k: number | null
+          description: string | null
+          desuperheat_k: number | null
+          enthalpy_in_kjkg: number | null
+          enthalpy_out_kjkg: number | null
           exponent_n: number
+          face_velocity_ms: number | null
+          field_sources: Json
+          fin_material: string | null
           fin_pitch_mm: number | null
+          fin_thickness_mm: number | null
+          frontal_area_m2: number | null
+          global_coeff_w: number | null
           id: string
           internal_volume_l: number | null
           length_mm: number | null
+          liquid_velocity_ms: number | null
+          manifold_pressure_drop_kpa: number | null
+          manual_overrides: Json
+          mass_velocity_kg_m2s: number | null
+          missing_fields: Json
           nominal_air_temp_in_c: number | null
           nominal_air_temp_out_c: number | null
           nominal_airflow_m3h: number | null
@@ -178,22 +200,57 @@ export type Database = {
           nominal_cond_temp_c: number | null
           raw_fields: Json
           refrigerant: string | null
+          refrigerant_mass_flow_kgh: number | null
+          refrigerant_pressure_drop_kpa: number | null
+          rh_in_pct: number | null
+          rh_out_pct: number | null
           rows: number | null
+          sensible_ratio: number | null
+          spec_hum_in_g_kg: number | null
+          spec_hum_out_g_kg: number | null
+          subcooling_k: number | null
           surface_area_m2: number | null
+          total_ref_pressure_drop_kpa: number | null
           tube_id_mm: number | null
+          tube_material: string | null
           tube_od_mm: number | null
+          tube_shape: string | null
           tubes_per_row: number | null
           updated_at: string
+          validation_report: Json
+          vapour_velocity_ms: number | null
         }
         Insert: {
+          air_density_in_kg_m3?: number | null
+          air_mass_flow_kgh?: number | null
+          air_pressure_drop_pa?: number | null
+          altitude_m?: number | null
+          atm_pressure_bar?: number | null
           circuits?: number | null
           component_item_id: string
+          confidence_score?: number | null
           created_at?: string
+          delta_t_log_k?: number | null
+          description?: string | null
+          desuperheat_k?: number | null
+          enthalpy_in_kjkg?: number | null
+          enthalpy_out_kjkg?: number | null
           exponent_n?: number
+          face_velocity_ms?: number | null
+          field_sources?: Json
+          fin_material?: string | null
           fin_pitch_mm?: number | null
+          fin_thickness_mm?: number | null
+          frontal_area_m2?: number | null
+          global_coeff_w?: number | null
           id?: string
           internal_volume_l?: number | null
           length_mm?: number | null
+          liquid_velocity_ms?: number | null
+          manifold_pressure_drop_kpa?: number | null
+          manual_overrides?: Json
+          mass_velocity_kg_m2s?: number | null
+          missing_fields?: Json
           nominal_air_temp_in_c?: number | null
           nominal_air_temp_out_c?: number | null
           nominal_airflow_m3h?: number | null
@@ -201,22 +258,57 @@ export type Database = {
           nominal_cond_temp_c?: number | null
           raw_fields?: Json
           refrigerant?: string | null
+          refrigerant_mass_flow_kgh?: number | null
+          refrigerant_pressure_drop_kpa?: number | null
+          rh_in_pct?: number | null
+          rh_out_pct?: number | null
           rows?: number | null
+          sensible_ratio?: number | null
+          spec_hum_in_g_kg?: number | null
+          spec_hum_out_g_kg?: number | null
+          subcooling_k?: number | null
           surface_area_m2?: number | null
+          total_ref_pressure_drop_kpa?: number | null
           tube_id_mm?: number | null
+          tube_material?: string | null
           tube_od_mm?: number | null
+          tube_shape?: string | null
           tubes_per_row?: number | null
           updated_at?: string
+          validation_report?: Json
+          vapour_velocity_ms?: number | null
         }
         Update: {
+          air_density_in_kg_m3?: number | null
+          air_mass_flow_kgh?: number | null
+          air_pressure_drop_pa?: number | null
+          altitude_m?: number | null
+          atm_pressure_bar?: number | null
           circuits?: number | null
           component_item_id?: string
+          confidence_score?: number | null
           created_at?: string
+          delta_t_log_k?: number | null
+          description?: string | null
+          desuperheat_k?: number | null
+          enthalpy_in_kjkg?: number | null
+          enthalpy_out_kjkg?: number | null
           exponent_n?: number
+          face_velocity_ms?: number | null
+          field_sources?: Json
+          fin_material?: string | null
           fin_pitch_mm?: number | null
+          fin_thickness_mm?: number | null
+          frontal_area_m2?: number | null
+          global_coeff_w?: number | null
           id?: string
           internal_volume_l?: number | null
           length_mm?: number | null
+          liquid_velocity_ms?: number | null
+          manifold_pressure_drop_kpa?: number | null
+          manual_overrides?: Json
+          mass_velocity_kg_m2s?: number | null
+          missing_fields?: Json
           nominal_air_temp_in_c?: number | null
           nominal_air_temp_out_c?: number | null
           nominal_airflow_m3h?: number | null
@@ -224,12 +316,25 @@ export type Database = {
           nominal_cond_temp_c?: number | null
           raw_fields?: Json
           refrigerant?: string | null
+          refrigerant_mass_flow_kgh?: number | null
+          refrigerant_pressure_drop_kpa?: number | null
+          rh_in_pct?: number | null
+          rh_out_pct?: number | null
           rows?: number | null
+          sensible_ratio?: number | null
+          spec_hum_in_g_kg?: number | null
+          spec_hum_out_g_kg?: number | null
+          subcooling_k?: number | null
           surface_area_m2?: number | null
+          total_ref_pressure_drop_kpa?: number | null
           tube_id_mm?: number | null
+          tube_material?: string | null
           tube_od_mm?: number | null
+          tube_shape?: string | null
           tubes_per_row?: number | null
           updated_at?: string
+          validation_report?: Json
+          vapour_velocity_ms?: number | null
         }
         Relationships: [
           {
@@ -332,19 +437,33 @@ export type Database = {
       }
       evaporator_coil_models: {
         Row: {
+          air_density_in_kg_m3: number | null
           air_pressure_drop_pa: number | null
+          altitude_m: number | null
+          atm_pressure_bar: number | null
           circuits: number | null
           component_item_id: string
           confidence_score: number | null
           created_at: string
+          delta_h_log_kjkg: number | null
+          description: string | null
+          enthalpy_in_kjkg: number | null
+          enthalpy_out_kjkg: number | null
           exponent_n: number
           face_velocity_ms: number | null
+          field_sources: Json
           fin_material: string | null
           fin_pitch_mm: number | null
+          fin_thickness_mm: number | null
+          frontal_area_m2: number | null
+          global_coeff_w: number | null
           id: string
           internal_volume_l: number | null
           length_mm: number | null
+          liquid_velocity_ms: number | null
+          manifold_pressure_drop_kpa: number | null
           manual_overrides: Json
+          mass_velocity_kg_m2s: number | null
           missing_fields: Json
           nominal_air_mass_flow_kgh: number | null
           nominal_air_temp_in_c: number | null
@@ -357,31 +476,56 @@ export type Database = {
           nominal_sensible_w: number | null
           raw_fields: Json
           refrigerant: string | null
+          refrigerant_mass_flow_kgh: number | null
           refrigerant_pressure_drop_kpa: number | null
+          rh_in_pct: number | null
+          rh_out_pct: number | null
           rows: number | null
+          sensible_ratio: number | null
+          spec_hum_in_g_kg: number | null
+          spec_hum_out_g_kg: number | null
           subcooling_k: number | null
           superheat_k: number | null
           surface_area_m2: number | null
+          total_ref_pressure_drop_kpa: number | null
           tube_id_mm: number | null
           tube_material: string | null
           tube_od_mm: number | null
+          tube_shape: string | null
           tubes_per_row: number | null
           updated_at: string
+          validation_report: Json
+          vapour_velocity_ms: number | null
+          water_production_kgh: number | null
         }
         Insert: {
+          air_density_in_kg_m3?: number | null
           air_pressure_drop_pa?: number | null
+          altitude_m?: number | null
+          atm_pressure_bar?: number | null
           circuits?: number | null
           component_item_id: string
           confidence_score?: number | null
           created_at?: string
+          delta_h_log_kjkg?: number | null
+          description?: string | null
+          enthalpy_in_kjkg?: number | null
+          enthalpy_out_kjkg?: number | null
           exponent_n?: number
           face_velocity_ms?: number | null
+          field_sources?: Json
           fin_material?: string | null
           fin_pitch_mm?: number | null
+          fin_thickness_mm?: number | null
+          frontal_area_m2?: number | null
+          global_coeff_w?: number | null
           id?: string
           internal_volume_l?: number | null
           length_mm?: number | null
+          liquid_velocity_ms?: number | null
+          manifold_pressure_drop_kpa?: number | null
           manual_overrides?: Json
+          mass_velocity_kg_m2s?: number | null
           missing_fields?: Json
           nominal_air_mass_flow_kgh?: number | null
           nominal_air_temp_in_c?: number | null
@@ -394,31 +538,56 @@ export type Database = {
           nominal_sensible_w?: number | null
           raw_fields?: Json
           refrigerant?: string | null
+          refrigerant_mass_flow_kgh?: number | null
           refrigerant_pressure_drop_kpa?: number | null
+          rh_in_pct?: number | null
+          rh_out_pct?: number | null
           rows?: number | null
+          sensible_ratio?: number | null
+          spec_hum_in_g_kg?: number | null
+          spec_hum_out_g_kg?: number | null
           subcooling_k?: number | null
           superheat_k?: number | null
           surface_area_m2?: number | null
+          total_ref_pressure_drop_kpa?: number | null
           tube_id_mm?: number | null
           tube_material?: string | null
           tube_od_mm?: number | null
+          tube_shape?: string | null
           tubes_per_row?: number | null
           updated_at?: string
+          validation_report?: Json
+          vapour_velocity_ms?: number | null
+          water_production_kgh?: number | null
         }
         Update: {
+          air_density_in_kg_m3?: number | null
           air_pressure_drop_pa?: number | null
+          altitude_m?: number | null
+          atm_pressure_bar?: number | null
           circuits?: number | null
           component_item_id?: string
           confidence_score?: number | null
           created_at?: string
+          delta_h_log_kjkg?: number | null
+          description?: string | null
+          enthalpy_in_kjkg?: number | null
+          enthalpy_out_kjkg?: number | null
           exponent_n?: number
           face_velocity_ms?: number | null
+          field_sources?: Json
           fin_material?: string | null
           fin_pitch_mm?: number | null
+          fin_thickness_mm?: number | null
+          frontal_area_m2?: number | null
+          global_coeff_w?: number | null
           id?: string
           internal_volume_l?: number | null
           length_mm?: number | null
+          liquid_velocity_ms?: number | null
+          manifold_pressure_drop_kpa?: number | null
           manual_overrides?: Json
+          mass_velocity_kg_m2s?: number | null
           missing_fields?: Json
           nominal_air_mass_flow_kgh?: number | null
           nominal_air_temp_in_c?: number | null
@@ -431,16 +600,27 @@ export type Database = {
           nominal_sensible_w?: number | null
           raw_fields?: Json
           refrigerant?: string | null
+          refrigerant_mass_flow_kgh?: number | null
           refrigerant_pressure_drop_kpa?: number | null
+          rh_in_pct?: number | null
+          rh_out_pct?: number | null
           rows?: number | null
+          sensible_ratio?: number | null
+          spec_hum_in_g_kg?: number | null
+          spec_hum_out_g_kg?: number | null
           subcooling_k?: number | null
           superheat_k?: number | null
           surface_area_m2?: number | null
+          total_ref_pressure_drop_kpa?: number | null
           tube_id_mm?: number | null
           tube_material?: string | null
           tube_od_mm?: number | null
+          tube_shape?: string | null
           tubes_per_row?: number | null
           updated_at?: string
+          validation_report?: Json
+          vapour_velocity_ms?: number | null
+          water_production_kgh?: number | null
         }
         Relationships: [
           {

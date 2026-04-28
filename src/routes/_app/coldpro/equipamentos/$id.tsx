@@ -14,6 +14,7 @@ import {
   EQUIPMENT_PROJECT_STATUS_LABELS,
 } from "@/lib/coldpro/labels";
 import { EvaporatorTab } from "@/components/coldpro/evaporator-tab";
+import { CondenserTab } from "@/components/coldpro/condenser-tab";
 import { PlaceholderTab } from "@/components/coldpro/placeholder-tab";
 
 export const Route = createFileRoute("/_app/coldpro/equipamentos/$id")({
@@ -103,10 +104,7 @@ function EquipmentDetailPage() {
         </TabsContent>
 
         <TabsContent value="condenser" className="mt-6">
-          <PlaceholderTab
-            title="Condensador"
-            description="Em breve: cadastro, importação Unilab e simulação do condensador."
-          />
+          <CondenserTab equipmentProjectId={project.id} />
         </TabsContent>
 
         <TabsContent value="compressor" className="mt-6">
