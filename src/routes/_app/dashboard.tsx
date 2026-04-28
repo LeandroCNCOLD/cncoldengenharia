@@ -37,7 +37,9 @@ function DashboardPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("component_files")
-        .select("id, file_name, file_kind, processing_status, uploaded_at, component_id")
+        .select(
+          "id, file_name, file_kind, processing_status, uploaded_at, component_id, components(name)",
+        )
         .order("uploaded_at", { ascending: false })
         .limit(5);
       if (error) throw error;
@@ -126,7 +128,7 @@ function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Componentes recentes</CardTitle>
+            <CardTitle className="text-base">Atualizados recentemente</CardTitle>
           </CardHeader>
           <CardContent>
             {!components?.length ? (
@@ -171,17 +173,28 @@ function DashboardPage() {
             </p>
           ) : (
             <ul className="divide-y divide-border">
-              {recentFiles.map((f) => (
-                <li key={f.id} className="flex items-center justify-between py-2 text-sm">
-                  <span className="truncate">
-                    <span className="font-mono text-xs uppercase text-muted-foreground">
-                      {f.file_kind}
-                    </span>{" "}
-                    {f.file_name}
-                  </span>
-                  <span className="text-xs text-muted-foreground">{f.processing_status}</span>
-                </li>
-              ))}
+              {recentFiles.map((f) => {
+                const comp = f.components as { name: string } | null;
+                return (
+                  <li key={f.id} className="py-2 text-sm">
+                    <Link
+                      to="/components/$id"
+                      params={{ id: f.component_id }}
+                      className="flex items-center justify-between gap-3 rounded-md px-2 py-1 hover:bg-accent/40"
+                    >
+                      <span className="flex min-w-0 items-center gap-2 truncate">
+                        <span className="font-mono text-xs uppercase text-muted-foreground">
+                          {f.file_kind}
+                        </span>
+                        <span className="truncate">{f.file_name}</span>
+                      </span>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {comp?.name ?? f.processing_status}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </CardContent>

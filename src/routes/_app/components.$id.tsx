@@ -1,12 +1,27 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, FileText } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, FileText, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { FileUploader } from "@/components/file-uploader";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { removeComponentFile } from "@/lib/uploads";
 import {
   COMPONENT_FIELDS,
   COMPONENT_TYPE_LABELS,
@@ -15,7 +30,6 @@ import {
   STATUS_LABELS,
   type ComponentStatus,
   type ComponentType,
-  type FileKind,
 } from "@/lib/component-schema";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +39,8 @@ export const Route = createFileRoute("/_app/components/$id")({
 
 function ComponentDetailPage() {
   const { id } = Route.useParams();
+  const { user } = useAuth();
+  const qc = useQueryClient();
 
   const { data: component } = useQuery({
     queryKey: ["component", id],
@@ -79,6 +95,37 @@ function ComponentDetailPage() {
     (f) => f.required && fields[f.key] !== undefined && fields[f.key] !== "",
   ).length;
   const totalRequired = fieldDefs.filter((f) => f.required).length;
+
+  function refreshAll() {
+    qc.invalidateQueries({ queryKey: ["component", id] });
+    qc.invalidateQueries({ queryKey: ["component-files", id] });
+    qc.invalidateQueries({ queryKey: ["component-data", id] });
+    qc.invalidateQueries({ queryKey: ["components-list"] });
+    qc.invalidateQueries({ queryKey: ["dashboard-files"] });
+  }
+
+  async function handleRemove(f: {
+    id: string;
+    storage_path: string;
+    file_name: string;
+  }) {
+    if (!user) return;
+    try {
+      await removeComponentFile({
+        fileId: f.id,
+        storagePath: f.storage_path,
+        componentId: id,
+        userId: user.id,
+        fileName: f.file_name,
+      });
+      toast.success("Arquivo removido");
+      refreshAll();
+    } catch (e) {
+      toast.error("Falha ao remover", {
+        description: e instanceof Error ? e.message : undefined,
+      });
+    }
+  }
 
   return (
     <div>
@@ -175,11 +222,17 @@ function ComponentDetailPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="files" className="mt-4">
+        <TabsContent value="files" className="mt-4 space-y-4">
+          <FileUploader
+            componentId={id}
+            componentType={type}
+            onUploaded={refreshAll}
+          />
+
           <Card>
             <CardContent className="p-6">
               {!files?.length ? (
-                <div className="py-12 text-center">
+                <div className="py-8 text-center">
                   <FileText className="mx-auto h-10 w-10 text-muted-foreground" />
                   <p className="mt-2 text-sm text-muted-foreground">
                     Nenhum arquivo enviado.
@@ -188,27 +241,60 @@ function ComponentDetailPage() {
                     Tipos esperados:{" "}
                     {expectedKinds.map((k) => k.toUpperCase()).join(", ")}
                   </p>
-                  <p className="mt-4 text-xs text-muted-foreground">
-                    Upload e parsing serão implementados na próxima iteração desta
-                    fundação. A estrutura de dados já está pronta para receber.
-                  </p>
                 </div>
               ) : (
                 <ul className="divide-y divide-border">
                   {files.map((f) => (
                     <li
                       key={f.id}
-                      className="flex items-center justify-between py-3 text-sm"
+                      className="flex items-center justify-between gap-3 py-3 text-sm"
                     >
-                      <span className="truncate">
-                        <span className="font-mono text-xs uppercase text-muted-foreground">
+                      <div className="flex min-w-0 flex-1 items-center gap-3">
+                        <span className="rounded bg-muted px-2 py-0.5 font-mono text-[10px] uppercase text-muted-foreground">
                           {f.file_kind}
-                        </span>{" "}
-                        {f.file_name}
+                        </span>
+                        <span className="truncate font-medium">{f.file_name}</span>
+                      </div>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {new Date(f.uploaded_at).toLocaleDateString("pt-BR")}
                       </span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="shrink-0 text-xs text-muted-foreground">
                         {f.processing_status}
                       </span>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Remover arquivo?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Esta ação remove "{f.file_name}" do armazenamento e do
+                              componente. O status pode ser recalculado.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() =>
+                                handleRemove({
+                                  id: f.id,
+                                  storage_path: f.storage_path,
+                                  file_name: f.file_name,
+                                })
+                              }
+                            >
+                              Remover
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </li>
                   ))}
                 </ul>
@@ -266,8 +352,8 @@ function ComponentDetailPage() {
                 })}
               </div>
               <p className="mt-4 text-xs text-muted-foreground">
-                Edição manual e extração automática serão habilitadas na próxima
-                iteração — a estrutura já está pronta no banco.
+                A extração automática a partir de CSV/PDF/XLS e a edição manual dos
+                campos serão habilitadas no próximo módulo de normalização.
               </p>
             </CardContent>
           </Card>

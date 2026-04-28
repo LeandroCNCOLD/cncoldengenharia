@@ -1,11 +1,27 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Plus, Search } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import {
   COMPONENT_TYPE_LABELS,
@@ -21,6 +37,10 @@ export const Route = createFileRoute("/_app/components")({
 });
 
 function ComponentsPage() {
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
   const { data, isLoading } = useQuery({
     queryKey: ["components-list"],
     queryFn: async () => {
@@ -32,6 +52,22 @@ function ComponentsPage() {
       return data;
     },
   });
+
+  const filtered = useMemo(() => {
+    if (!data) return [];
+    const q = search.trim().toLowerCase();
+    return data.filter((c) => {
+      if (typeFilter !== "all" && c.type !== typeFilter) return false;
+      if (statusFilter !== "all" && c.status !== statusFilter) return false;
+      if (q) {
+        const hay = `${c.name} ${c.manufacturer ?? ""} ${c.fluid ?? ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [data, search, typeFilter, statusFilter]);
+
+  const hasFilters = search || typeFilter !== "all" || statusFilter !== "all";
 
   return (
     <div>
@@ -47,6 +83,46 @@ function ComponentsPage() {
         }
       />
 
+      <Card className="mb-4">
+        <CardContent className="grid gap-3 p-4 md:grid-cols-[1fr_180px_180px]">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por nome, fabricante ou fluido…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os tipos</SelectItem>
+              {(Object.keys(COMPONENT_TYPE_LABELS) as ComponentType[]).map((t) => (
+                <SelectItem key={t} value={t}>
+                  {COMPONENT_TYPE_LABELS[t]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os status</SelectItem>
+              {(Object.keys(STATUS_LABELS) as ComponentStatus[]).map((s) => (
+                <SelectItem key={s} value={s}>
+                  {STATUS_LABELS[s]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardContent className="p-0">
           {isLoading ? (
@@ -58,6 +134,12 @@ function ComponentsPage() {
                 <Link to="/components/new">Criar primeiro componente</Link>
               </Button>
             </div>
+          ) : !filtered.length ? (
+            <p className="py-12 text-center text-sm text-muted-foreground">
+              {hasFilters
+                ? "Nenhum componente corresponde aos filtros."
+                : "Nenhum componente."}
+            </p>
           ) : (
             <Table>
               <TableHeader>
@@ -67,10 +149,11 @@ function ComponentsPage() {
                   <TableHead>Fabricante</TableHead>
                   <TableHead>Fluido</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Atualizado em</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.map((c) => (
+                {filtered.map((c) => (
                   <TableRow key={c.id}>
                     <TableCell>
                       <Link
@@ -95,6 +178,9 @@ function ComponentsPage() {
                       >
                         {STATUS_LABELS[c.status as ComponentStatus]}
                       </span>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {new Date(c.updated_at).toLocaleDateString("pt-BR")}
                     </TableCell>
                   </TableRow>
                 ))}
