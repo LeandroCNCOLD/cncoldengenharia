@@ -185,7 +185,7 @@ function UploadsPage() {
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (ext) setExtractionView({ fileId: id, extraction: ext });
+      if (ext) setExtractionView({ fileId: id, extraction: ext as never });
     } catch (e) {
       toast.error("Falha ao processar", { description: (e as Error).message });
     }
