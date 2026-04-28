@@ -19,8 +19,8 @@ export async function extractTextFromFile(file: File): Promise<UnilabRawText> {
 async function extractPdfText(file: File): Promise<string> {
   const pdfjs = await import("pdfjs-dist");
   // worker via CDN (compatível com Vite/SSR)
-  // @ts-expect-error workerSrc é configurável em runtime
-  pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+  (pdfjs.GlobalWorkerOptions as { workerSrc: string }).workerSrc =
+    `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
   const buf = await file.arrayBuffer();
   const doc = await pdfjs.getDocument({ data: buf }).promise;
   const lines: string[] = [];
