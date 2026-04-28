@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calculator } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -48,9 +48,16 @@ function EquipmentDetailPage() {
             </span>
           }
           actions={
-            <Badge variant="secondary">
-              {EQUIPMENT_PROJECT_STATUS_LABELS[project.status]}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Button asChild variant="outline" size="sm">
+                <Link to="/coldpro/equipamentos/$id/coil-simulator" params={{ id: project.id }}>
+                  <Calculator className="mr-1 h-4 w-4" /> Coil Simulator
+                </Link>
+              </Button>
+              <Badge variant="secondary">
+                {EQUIPMENT_PROJECT_STATUS_LABELS[project.status]}
+              </Badge>
+            </div>
           }
         />
       </div>
