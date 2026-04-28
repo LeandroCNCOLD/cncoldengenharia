@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Upload, Loader2, Play, FileText, Plus, Trash2, CheckCircle2, History } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Upload, Loader2, Play, FileText, Plus, Trash2, CheckCircle2, History, Calculator } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -193,7 +194,7 @@ function EvaporatorCard({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between gap-2">
         <CardTitle className="text-base">
           Evaporador
           <Badge className={`ml-2 ${COMPONENT_STATUS_COLORS[status]}`} variant="secondary">
@@ -205,6 +206,46 @@ function EvaporatorCard({
             </Badge>
           )}
         </CardTitle>
+        <Button
+          asChild
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            if (model?.nominal_capacity_w) {
+              localStorage.setItem(
+                `coilsim:prefill:${equipmentProjectId}`,
+                JSON.stringify({
+                  coilType: "evaporator",
+                  componentItemId: item.id,
+                  label: `Evap ${item.code ?? item.id.slice(0, 6)}`,
+                  nominal: {
+                    capacityW: Number(model.nominal_capacity_w),
+                    airTempInC: Number(model.nominal_air_temp_in_c ?? 0),
+                    refTempC: Number(model.nominal_evap_temp_c ?? 0),
+                    airflowM3h: Number(model.nominal_airflow_m3h ?? 0),
+                  },
+                  refrigerant: model.refrigerant ?? undefined,
+                  geometry: {
+                    rows: model.rows,
+                    tubesPerRow: model.tubes_per_row,
+                    circuits: model.circuits,
+                    coilLengthMm: model.length_mm,
+                    finPitchMm: model.fin_pitch_mm,
+                    tubeOdMm: model.tube_od_mm,
+                    tubeIdMm: model.tube_id_mm,
+                  },
+                }),
+              );
+            }
+          }}
+        >
+          <Link
+            to="/coldpro/equipamentos/$id/coil-simulator"
+            params={{ id: equipmentProjectId }}
+          >
+            <Calculator className="mr-1 h-4 w-4" /> Coil Simulator
+          </Link>
+        </Button>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="rounded-md border bg-muted/30 p-4">
