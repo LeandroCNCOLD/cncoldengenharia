@@ -286,7 +286,7 @@ export async function processTechnicalFile(fileVersionId: string, userId: string
     version_number: 0,
     version_label: "—",
     action: "processed",
-    payload: { parser },
+    payload: { parser: parsed.parserUsed, confidence: parsed.confidence, semanticStatus },
     user_id: userId,
   });
 }
