@@ -21,8 +21,10 @@ import { Route as AppComponentsRouteImport } from './routes/_app/components'
 import { Route as AppCatalogRouteImport } from './routes/_app/catalog'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppSystemsNewRouteImport } from './routes/_app/systems.new'
+import { Route as AppSystemsIdRouteImport } from './routes/_app/systems.$id'
 import { Route as AppComponentsNewRouteImport } from './routes/_app/components.new'
 import { Route as AppComponentsIdRouteImport } from './routes/_app/components.$id'
+import { Route as AppSystemsIdSimulateRouteImport } from './routes/_app/systems.$id.simulate'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -83,6 +85,11 @@ const AppSystemsNewRoute = AppSystemsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AppSystemsRoute,
 } as any)
+const AppSystemsIdRoute = AppSystemsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppSystemsRoute,
+} as any)
 const AppComponentsNewRoute = AppComponentsNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -92,6 +99,11 @@ const AppComponentsIdRoute = AppComponentsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => AppComponentsRoute,
+} as any)
+const AppSystemsIdSimulateRoute = AppSystemsIdSimulateRouteImport.update({
+  id: '/simulate',
+  path: '/simulate',
+  getParentRoute: () => AppSystemsIdRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -107,7 +119,9 @@ export interface FileRoutesByFullPath {
   '/uploads': typeof AppUploadsRoute
   '/components/$id': typeof AppComponentsIdRoute
   '/components/new': typeof AppComponentsNewRoute
+  '/systems/$id': typeof AppSystemsIdRouteWithChildren
   '/systems/new': typeof AppSystemsNewRoute
+  '/systems/$id/simulate': typeof AppSystemsIdSimulateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -122,7 +136,9 @@ export interface FileRoutesByTo {
   '/uploads': typeof AppUploadsRoute
   '/components/$id': typeof AppComponentsIdRoute
   '/components/new': typeof AppComponentsNewRoute
+  '/systems/$id': typeof AppSystemsIdRouteWithChildren
   '/systems/new': typeof AppSystemsNewRoute
+  '/systems/$id/simulate': typeof AppSystemsIdSimulateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -139,7 +155,9 @@ export interface FileRoutesById {
   '/_app/uploads': typeof AppUploadsRoute
   '/_app/components/$id': typeof AppComponentsIdRoute
   '/_app/components/new': typeof AppComponentsNewRoute
+  '/_app/systems/$id': typeof AppSystemsIdRouteWithChildren
   '/_app/systems/new': typeof AppSystemsNewRoute
+  '/_app/systems/$id/simulate': typeof AppSystemsIdSimulateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -156,7 +174,9 @@ export interface FileRouteTypes {
     | '/uploads'
     | '/components/$id'
     | '/components/new'
+    | '/systems/$id'
     | '/systems/new'
+    | '/systems/$id/simulate'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -171,7 +191,9 @@ export interface FileRouteTypes {
     | '/uploads'
     | '/components/$id'
     | '/components/new'
+    | '/systems/$id'
     | '/systems/new'
+    | '/systems/$id/simulate'
   id:
     | '__root__'
     | '/'
@@ -187,7 +209,9 @@ export interface FileRouteTypes {
     | '/_app/uploads'
     | '/_app/components/$id'
     | '/_app/components/new'
+    | '/_app/systems/$id'
     | '/_app/systems/new'
+    | '/_app/systems/$id/simulate'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -282,6 +306,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSystemsNewRouteImport
       parentRoute: typeof AppSystemsRoute
     }
+    '/_app/systems/$id': {
+      id: '/_app/systems/$id'
+      path: '/$id'
+      fullPath: '/systems/$id'
+      preLoaderRoute: typeof AppSystemsIdRouteImport
+      parentRoute: typeof AppSystemsRoute
+    }
     '/_app/components/new': {
       id: '/_app/components/new'
       path: '/new'
@@ -295,6 +326,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/components/$id'
       preLoaderRoute: typeof AppComponentsIdRouteImport
       parentRoute: typeof AppComponentsRoute
+    }
+    '/_app/systems/$id/simulate': {
+      id: '/_app/systems/$id/simulate'
+      path: '/simulate'
+      fullPath: '/systems/$id/simulate'
+      preLoaderRoute: typeof AppSystemsIdSimulateRouteImport
+      parentRoute: typeof AppSystemsIdRoute
     }
   }
 }
@@ -313,11 +351,25 @@ const AppComponentsRouteWithChildren = AppComponentsRoute._addFileChildren(
   AppComponentsRouteChildren,
 )
 
+interface AppSystemsIdRouteChildren {
+  AppSystemsIdSimulateRoute: typeof AppSystemsIdSimulateRoute
+}
+
+const AppSystemsIdRouteChildren: AppSystemsIdRouteChildren = {
+  AppSystemsIdSimulateRoute: AppSystemsIdSimulateRoute,
+}
+
+const AppSystemsIdRouteWithChildren = AppSystemsIdRoute._addFileChildren(
+  AppSystemsIdRouteChildren,
+)
+
 interface AppSystemsRouteChildren {
+  AppSystemsIdRoute: typeof AppSystemsIdRouteWithChildren
   AppSystemsNewRoute: typeof AppSystemsNewRoute
 }
 
 const AppSystemsRouteChildren: AppSystemsRouteChildren = {
+  AppSystemsIdRoute: AppSystemsIdRouteWithChildren,
   AppSystemsNewRoute: AppSystemsNewRoute,
 }
 

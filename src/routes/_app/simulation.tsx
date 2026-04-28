@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { CheckCircle2, AlertCircle, FlaskConical } from "lucide-react";
+import { CheckCircle2, AlertCircle, FlaskConical, Network, ArrowRight } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
