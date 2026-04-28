@@ -221,6 +221,7 @@ function CoilSimulatorPage() {
       liquidVelocityMs: NUM(r.liquidVelocityMs),
       refrigerantPressureDropKpa: NUM(r.refrigerantPressureDropKpa),
     },
+    nominal: prefillNominal ?? undefined,
   });
 
   const handleCalculate = () => {
@@ -239,6 +240,7 @@ function CoilSimulatorPage() {
       if (!result || !lastInput) throw new Error("Calcule antes de salvar.");
       await saveCoilSimulatorRun({
         equipmentProjectId: id,
+        componentItemId: prefillComponentId,
         input: lastInput,
         result,
         userId: user?.id,
