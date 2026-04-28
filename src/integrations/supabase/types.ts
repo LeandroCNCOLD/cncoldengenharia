@@ -136,6 +136,7 @@ export type Database = {
       }
       components: {
         Row: {
+          conflicts: Json
           created_at: string
           created_by: string | null
           fluid: string | null
@@ -147,6 +148,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          conflicts?: Json
           created_at?: string
           created_by?: string | null
           fluid?: string | null
@@ -158,6 +160,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          conflicts?: Json
           created_at?: string
           created_by?: string | null
           fluid?: string | null
