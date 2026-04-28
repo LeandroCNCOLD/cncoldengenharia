@@ -170,8 +170,12 @@ export async function uploadTechnicalFile(input: UploadTechnicalFileInput) {
   return { id: inserted.id, versionLabel, storagePath };
 }
 
-/** MOCK: simula extração técnica e marca arquivo como parsed. */
+/** Processa um arquivo técnico: classifica, roteia parser e salva extração. */
 export async function processTechnicalFile(fileVersionId: string, userId: string) {
+  const { classifyFile, routeParser, logIngestion } = await import(
+    "@/modules/coldpro/ingestion"
+  );
+
   await supabase
     .from("technical_files")
     .update({ status: "processing" as TechnicalFileStatus })
@@ -179,44 +183,98 @@ export async function processTechnicalFile(fileVersionId: string, userId: string
 
   const { data: file } = await supabase
     .from("technical_files")
-    .select("id, product_id, file_group, technical_category, original_filename")
+    .select(
+      "id, product_id, file_group, technical_category, original_filename, file_extension, mime_type, file_size, storage_path",
+    )
     .eq("id", fileVersionId)
     .single();
   if (!file) throw new TechnicalUploadError("Arquivo não encontrado.");
 
-  // Roteador para parsers reais (a serem conectados depois).
-  const parser =
-    file.file_group === "evaporador"
-      ? "evaporatorParser"
-      : file.file_group === "condensador"
-        ? "condenserParser"
-        : file.file_group === "compressor"
-          ? "compressorParser"
-          : "genericDocumentParser";
+  const t0 = performance.now();
 
-  // Mock de extração
-  const extracted = {
-    parser,
-    placeholder: true,
-    sourceFile: file.original_filename,
-    note: "Extração mock — conectar parser real em ColdPro v2.",
-  };
+  // Baixa o binário do storage
+  const dl = await supabase.storage.from(BUCKET).download(file.storage_path);
+  if (dl.error || !dl.data) {
+    await supabase
+      .from("technical_files")
+      .update({ status: "failed" as TechnicalFileStatus })
+      .eq("id", file.id);
+    throw new TechnicalUploadError(`Falha ao baixar arquivo: ${dl.error?.message ?? ""}`);
+  }
+  const buffer = await dl.data.arrayBuffer();
+
+  // Classificação por nome
+  const initial = classifyFile({
+    filename: file.original_filename,
+    mimeType: file.mime_type,
+    extension: file.file_extension,
+    sizeBytes: file.file_size,
+  });
+
+  // Roteia parser (já combina base + técnico)
+  const parsed = await routeParser(initial, buffer);
+
+  // Reclassifica usando o rawText para refinar tipo técnico, se necessário
+  const refined = classifyFile(
+    {
+      filename: file.original_filename,
+      mimeType: file.mime_type,
+      extension: file.file_extension,
+      sizeBytes: file.file_size,
+    },
+    parsed.rawText,
+  );
+
+  const finalStatus: TechnicalFileStatus =
+    parsed.errors.length && parsed.confidence < 0.3
+      ? "rejected"
+      : "uploaded";
+
+  // Status técnico semântico que aparece no payload
+  const semanticStatus =
+    parsed.confidence >= 0.8
+      ? "parsed"
+      : parsed.confidence >= 0.5
+        ? "needs_review"
+        : "failed";
 
   await supabase.from("technical_file_extractions").insert({
     file_id: file.id,
     product_id: file.product_id,
-    parser,
-    extracted_fields: extracted,
-    warnings: [],
-    raw_preview: null,
-    success: true,
+    parser: parsed.parserUsed,
+    extracted_fields: {
+      classification: refined,
+      semanticStatus,
+      parserVersion: parsed.parserVersion,
+      confidence: parsed.confidence,
+      fields: parsed.extractedFields,
+      structuredPreview:
+        typeof parsed.structuredData === "object" && parsed.structuredData
+          ? JSON.parse(JSON.stringify(parsed.structuredData).slice(0, 5000))
+          : null,
+    },
+    warnings: parsed.warnings,
+    raw_preview: parsed.rawText.slice(0, 4000) || null,
+    success: parsed.errors.length === 0,
     created_by: userId,
   });
 
-  await supabase
-    .from("technical_files")
-    .update({ status: "parsed" as TechnicalFileStatus })
-    .eq("id", file.id);
+  // Mapeia o status para o enum permitido
+  const dbStatus: TechnicalFileStatus =
+    semanticStatus === "parsed" ? "parsed" : semanticStatus === "needs_review" ? "processing" : finalStatus;
+
+  await supabase.from("technical_files").update({ status: dbStatus }).eq("id", file.id);
+
+  const durationMs = Math.round(performance.now() - t0);
+  logIngestion("processed", {
+    fileId: file.id,
+    filename: file.original_filename,
+    parser: parsed.parserUsed,
+    durationMs,
+    fieldsFound: Object.keys(parsed.extractedFields).length,
+    warnings: parsed.warnings,
+    errors: parsed.errors,
+  });
 
   await supabase.from("technical_file_versions").insert({
     file_id: file.id,
@@ -224,7 +282,7 @@ export async function processTechnicalFile(fileVersionId: string, userId: string
     version_number: 0,
     version_label: "—",
     action: "processed",
-    payload: { parser },
+    payload: { parser: parsed.parserUsed, confidence: parsed.confidence, semanticStatus },
     user_id: userId,
   });
 }
