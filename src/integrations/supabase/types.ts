@@ -16,29 +16,41 @@ export type Database = {
     Tables: {
       coil_simulations: {
         Row: {
-          component_item_id: string
+          coil_type: string | null
+          component_item_id: string | null
           created_at: string
           created_by: string | null
+          equipment_project_id: string | null
           id: string
           inputs: Json
+          label: string | null
+          mode: string
           outputs: Json
           warnings: Json
         }
         Insert: {
-          component_item_id: string
+          coil_type?: string | null
+          component_item_id?: string | null
           created_at?: string
           created_by?: string | null
+          equipment_project_id?: string | null
           id?: string
           inputs?: Json
+          label?: string | null
+          mode?: string
           outputs?: Json
           warnings?: Json
         }
         Update: {
-          component_item_id?: string
+          coil_type?: string | null
+          component_item_id?: string | null
           created_at?: string
           created_by?: string | null
+          equipment_project_id?: string | null
           id?: string
           inputs?: Json
+          label?: string | null
+          mode?: string
           outputs?: Json
           warnings?: Json
         }

@@ -16,6 +16,7 @@ import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppColdproEquipamentosIndexRouteImport } from './routes/_app/coldpro/equipamentos/index'
 import { Route as AppColdproEquipamentosIdRouteImport } from './routes/_app/coldpro/equipamentos/$id'
+import { Route as AppColdproEquipamentosIdCoilSimulatorRouteImport } from './routes/_app/coldpro/equipamentos/$id/coil-simulator'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -53,22 +54,30 @@ const AppColdproEquipamentosIdRoute =
     path: '/coldpro/equipamentos/$id',
     getParentRoute: () => AppRoute,
   } as any)
+const AppColdproEquipamentosIdCoilSimulatorRoute =
+  AppColdproEquipamentosIdCoilSimulatorRouteImport.update({
+    id: '/coil-simulator',
+    path: '/coil-simulator',
+    getParentRoute: () => AppColdproEquipamentosIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AppAdminRoute
   '/dashboard': typeof AppDashboardRoute
-  '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRoute
+  '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRouteWithChildren
   '/coldpro/equipamentos/': typeof AppColdproEquipamentosIndexRoute
+  '/coldpro/equipamentos/$id/coil-simulator': typeof AppColdproEquipamentosIdCoilSimulatorRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AppAdminRoute
   '/dashboard': typeof AppDashboardRoute
-  '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRoute
+  '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRouteWithChildren
   '/coldpro/equipamentos': typeof AppColdproEquipamentosIndexRoute
+  '/coldpro/equipamentos/$id/coil-simulator': typeof AppColdproEquipamentosIdCoilSimulatorRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,8 +86,9 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_app/admin': typeof AppAdminRoute
   '/_app/dashboard': typeof AppDashboardRoute
-  '/_app/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRoute
+  '/_app/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRouteWithChildren
   '/_app/coldpro/equipamentos/': typeof AppColdproEquipamentosIndexRoute
+  '/_app/coldpro/equipamentos/$id/coil-simulator': typeof AppColdproEquipamentosIdCoilSimulatorRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/coldpro/equipamentos/$id'
     | '/coldpro/equipamentos/'
+    | '/coldpro/equipamentos/$id/coil-simulator'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -97,6 +108,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/coldpro/equipamentos/$id'
     | '/coldpro/equipamentos'
+    | '/coldpro/equipamentos/$id/coil-simulator'
   id:
     | '__root__'
     | '/'
@@ -106,6 +118,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/coldpro/equipamentos/$id'
     | '/_app/coldpro/equipamentos/'
+    | '/_app/coldpro/equipamentos/$id/coil-simulator'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -165,20 +178,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproEquipamentosIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/coldpro/equipamentos/$id/coil-simulator': {
+      id: '/_app/coldpro/equipamentos/$id/coil-simulator'
+      path: '/coil-simulator'
+      fullPath: '/coldpro/equipamentos/$id/coil-simulator'
+      preLoaderRoute: typeof AppColdproEquipamentosIdCoilSimulatorRouteImport
+      parentRoute: typeof AppColdproEquipamentosIdRoute
+    }
   }
 }
+
+interface AppColdproEquipamentosIdRouteChildren {
+  AppColdproEquipamentosIdCoilSimulatorRoute: typeof AppColdproEquipamentosIdCoilSimulatorRoute
+}
+
+const AppColdproEquipamentosIdRouteChildren: AppColdproEquipamentosIdRouteChildren =
+  {
+    AppColdproEquipamentosIdCoilSimulatorRoute:
+      AppColdproEquipamentosIdCoilSimulatorRoute,
+  }
+
+const AppColdproEquipamentosIdRouteWithChildren =
+  AppColdproEquipamentosIdRoute._addFileChildren(
+    AppColdproEquipamentosIdRouteChildren,
+  )
 
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
   AppDashboardRoute: typeof AppDashboardRoute
-  AppColdproEquipamentosIdRoute: typeof AppColdproEquipamentosIdRoute
+  AppColdproEquipamentosIdRoute: typeof AppColdproEquipamentosIdRouteWithChildren
   AppColdproEquipamentosIndexRoute: typeof AppColdproEquipamentosIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRoute,
   AppDashboardRoute: AppDashboardRoute,
-  AppColdproEquipamentosIdRoute: AppColdproEquipamentosIdRoute,
+  AppColdproEquipamentosIdRoute: AppColdproEquipamentosIdRouteWithChildren,
   AppColdproEquipamentosIndexRoute: AppColdproEquipamentosIndexRoute,
 }
 
