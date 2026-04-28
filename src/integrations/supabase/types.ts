@@ -14,76 +14,70 @@ export type Database = {
   }
   public: {
     Tables: {
-      component_data: {
+      coil_simulations: {
         Row: {
-          component_id: string
-          field_sources: Json
-          fields: Json
+          component_item_id: string
+          created_at: string
+          created_by: string | null
           id: string
-          updated_at: string
-          updated_by: string | null
+          inputs: Json
+          outputs: Json
+          warnings: Json
         }
         Insert: {
-          component_id: string
-          field_sources?: Json
-          fields?: Json
+          component_item_id: string
+          created_at?: string
+          created_by?: string | null
           id?: string
-          updated_at?: string
-          updated_by?: string | null
+          inputs?: Json
+          outputs?: Json
+          warnings?: Json
         }
         Update: {
-          component_id?: string
-          field_sources?: Json
-          fields?: Json
+          component_item_id?: string
+          created_at?: string
+          created_by?: string | null
           id?: string
-          updated_at?: string
-          updated_by?: string | null
+          inputs?: Json
+          outputs?: Json
+          warnings?: Json
         }
         Relationships: [
           {
-            foreignKeyName: "component_data_component_id_fkey"
-            columns: ["component_id"]
-            isOneToOne: true
-            referencedRelation: "components"
+            foreignKeyName: "coil_simulations_component_item_id_fkey"
+            columns: ["component_item_id"]
+            isOneToOne: false
+            referencedRelation: "component_items"
             referencedColumns: ["id"]
           },
         ]
       }
       component_files: {
         Row: {
-          component_id: string
-          error_message: string | null
-          file_kind: Database["public"]["Enums"]["file_kind"]
+          component_item_id: string
           file_name: string
           id: string
-          processed_at: string | null
-          processing_status: Database["public"]["Enums"]["file_processing_status"]
+          mime_type: string | null
           size_bytes: number | null
           storage_path: string
           uploaded_at: string
           uploaded_by: string | null
         }
         Insert: {
-          component_id: string
-          error_message?: string | null
-          file_kind: Database["public"]["Enums"]["file_kind"]
+          component_item_id: string
           file_name: string
           id?: string
-          processed_at?: string | null
-          processing_status?: Database["public"]["Enums"]["file_processing_status"]
+          mime_type?: string | null
           size_bytes?: number | null
           storage_path: string
           uploaded_at?: string
           uploaded_by?: string | null
         }
         Update: {
-          component_id?: string
-          error_message?: string | null
-          file_kind?: Database["public"]["Enums"]["file_kind"]
+          component_item_id?: string
           file_name?: string
           id?: string
-          processed_at?: string | null
-          processing_status?: Database["public"]["Enums"]["file_processing_status"]
+          mime_type?: string | null
           size_bytes?: number | null
           storage_path?: string
           uploaded_at?: string
@@ -91,87 +85,324 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "component_files_component_id_fkey"
-            columns: ["component_id"]
+            foreignKeyName: "component_files_component_item_id_fkey"
+            columns: ["component_item_id"]
             isOneToOne: false
-            referencedRelation: "components"
+            referencedRelation: "component_items"
             referencedColumns: ["id"]
           },
         ]
       }
-      component_history: {
+      component_items: {
         Row: {
-          action: string
-          component_id: string
+          code: string | null
           created_at: string
+          created_by: string | null
+          description: string | null
+          equipment_project_id: string
           id: string
-          payload: Json | null
-          user_id: string | null
+          kind: Database["public"]["Enums"]["component_kind"]
+          manufacturer: string | null
+          model: string | null
+          raw_fields: Json
+          status: Database["public"]["Enums"]["component_status"]
+          updated_at: string
+          validated_fields: Json
         }
         Insert: {
-          action: string
-          component_id: string
+          code?: string | null
           created_at?: string
+          created_by?: string | null
+          description?: string | null
+          equipment_project_id: string
           id?: string
-          payload?: Json | null
-          user_id?: string | null
+          kind: Database["public"]["Enums"]["component_kind"]
+          manufacturer?: string | null
+          model?: string | null
+          raw_fields?: Json
+          status?: Database["public"]["Enums"]["component_status"]
+          updated_at?: string
+          validated_fields?: Json
         }
         Update: {
-          action?: string
-          component_id?: string
+          code?: string | null
           created_at?: string
+          created_by?: string | null
+          description?: string | null
+          equipment_project_id?: string
           id?: string
-          payload?: Json | null
-          user_id?: string | null
+          kind?: Database["public"]["Enums"]["component_kind"]
+          manufacturer?: string | null
+          model?: string | null
+          raw_fields?: Json
+          status?: Database["public"]["Enums"]["component_status"]
+          updated_at?: string
+          validated_fields?: Json
         }
         Relationships: [
           {
-            foreignKeyName: "component_history_component_id_fkey"
-            columns: ["component_id"]
+            foreignKeyName: "component_items_equipment_project_id_fkey"
+            columns: ["equipment_project_id"]
             isOneToOne: false
-            referencedRelation: "components"
+            referencedRelation: "equipment_projects"
             referencedColumns: ["id"]
           },
         ]
       }
-      components: {
+      condenser_coil_models: {
         Row: {
-          conflicts: Json
+          circuits: number | null
+          component_item_id: string
           created_at: string
-          created_by: string | null
-          fluid: string | null
+          exponent_n: number
+          fin_pitch_mm: number | null
           id: string
-          manufacturer: string | null
-          name: string
-          status: Database["public"]["Enums"]["component_status"]
-          type: Database["public"]["Enums"]["component_type"]
+          internal_volume_l: number | null
+          length_mm: number | null
+          nominal_air_temp_in_c: number | null
+          nominal_air_temp_out_c: number | null
+          nominal_airflow_m3h: number | null
+          nominal_capacity_w: number | null
+          nominal_cond_temp_c: number | null
+          raw_fields: Json
+          refrigerant: string | null
+          rows: number | null
+          surface_area_m2: number | null
+          tube_id_mm: number | null
+          tube_od_mm: number | null
+          tubes_per_row: number | null
           updated_at: string
         }
         Insert: {
-          conflicts?: Json
+          circuits?: number | null
+          component_item_id: string
           created_at?: string
-          created_by?: string | null
-          fluid?: string | null
+          exponent_n?: number
+          fin_pitch_mm?: number | null
           id?: string
-          manufacturer?: string | null
-          name: string
-          status?: Database["public"]["Enums"]["component_status"]
-          type: Database["public"]["Enums"]["component_type"]
+          internal_volume_l?: number | null
+          length_mm?: number | null
+          nominal_air_temp_in_c?: number | null
+          nominal_air_temp_out_c?: number | null
+          nominal_airflow_m3h?: number | null
+          nominal_capacity_w?: number | null
+          nominal_cond_temp_c?: number | null
+          raw_fields?: Json
+          refrigerant?: string | null
+          rows?: number | null
+          surface_area_m2?: number | null
+          tube_id_mm?: number | null
+          tube_od_mm?: number | null
+          tubes_per_row?: number | null
           updated_at?: string
         }
         Update: {
-          conflicts?: Json
+          circuits?: number | null
+          component_item_id?: string
+          created_at?: string
+          exponent_n?: number
+          fin_pitch_mm?: number | null
+          id?: string
+          internal_volume_l?: number | null
+          length_mm?: number | null
+          nominal_air_temp_in_c?: number | null
+          nominal_air_temp_out_c?: number | null
+          nominal_airflow_m3h?: number | null
+          nominal_capacity_w?: number | null
+          nominal_cond_temp_c?: number | null
+          raw_fields?: Json
+          refrigerant?: string | null
+          rows?: number | null
+          surface_area_m2?: number | null
+          tube_id_mm?: number | null
+          tube_od_mm?: number | null
+          tubes_per_row?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "condenser_coil_models_component_item_id_fkey"
+            columns: ["component_item_id"]
+            isOneToOne: true
+            referencedRelation: "component_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equipment_projects: {
+        Row: {
+          application: Database["public"]["Enums"]["equipment_application"]
+          code: string
+          commercial_name: string
+          created_at: string
+          created_by: string | null
+          equipment_kind: Database["public"]["Enums"]["equipment_kind"]
+          family: string | null
+          id: string
+          notes: string | null
+          refrigerant: string | null
+          status: Database["public"]["Enums"]["equipment_project_status"]
+          target_capacity: number | null
+          target_temperature: number | null
+          updated_at: string
+        }
+        Insert: {
+          application?: Database["public"]["Enums"]["equipment_application"]
+          code: string
+          commercial_name: string
           created_at?: string
           created_by?: string | null
-          fluid?: string | null
+          equipment_kind?: Database["public"]["Enums"]["equipment_kind"]
+          family?: string | null
           id?: string
-          manufacturer?: string | null
-          name?: string
-          status?: Database["public"]["Enums"]["component_status"]
-          type?: Database["public"]["Enums"]["component_type"]
+          notes?: string | null
+          refrigerant?: string | null
+          status?: Database["public"]["Enums"]["equipment_project_status"]
+          target_capacity?: number | null
+          target_temperature?: number | null
+          updated_at?: string
+        }
+        Update: {
+          application?: Database["public"]["Enums"]["equipment_application"]
+          code?: string
+          commercial_name?: string
+          created_at?: string
+          created_by?: string | null
+          equipment_kind?: Database["public"]["Enums"]["equipment_kind"]
+          family?: string | null
+          id?: string
+          notes?: string | null
+          refrigerant?: string | null
+          status?: Database["public"]["Enums"]["equipment_project_status"]
+          target_capacity?: number | null
+          target_temperature?: number | null
           updated_at?: string
         }
         Relationships: []
+      }
+      equipment_simulations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          equipment_project_id: string
+          id: string
+          inputs: Json
+          outputs: Json
+          warnings: Json
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          equipment_project_id: string
+          id?: string
+          inputs?: Json
+          outputs?: Json
+          warnings?: Json
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          equipment_project_id?: string
+          id?: string
+          inputs?: Json
+          outputs?: Json
+          warnings?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_simulations_equipment_project_id_fkey"
+            columns: ["equipment_project_id"]
+            isOneToOne: false
+            referencedRelation: "equipment_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evaporator_coil_models: {
+        Row: {
+          circuits: number | null
+          component_item_id: string
+          created_at: string
+          exponent_n: number
+          fin_pitch_mm: number | null
+          id: string
+          internal_volume_l: number | null
+          length_mm: number | null
+          nominal_air_temp_in_c: number | null
+          nominal_air_temp_out_c: number | null
+          nominal_airflow_m3h: number | null
+          nominal_capacity_w: number | null
+          nominal_evap_temp_c: number | null
+          nominal_latent_w: number | null
+          nominal_sensible_w: number | null
+          raw_fields: Json
+          refrigerant: string | null
+          rows: number | null
+          surface_area_m2: number | null
+          tube_id_mm: number | null
+          tube_od_mm: number | null
+          tubes_per_row: number | null
+          updated_at: string
+        }
+        Insert: {
+          circuits?: number | null
+          component_item_id: string
+          created_at?: string
+          exponent_n?: number
+          fin_pitch_mm?: number | null
+          id?: string
+          internal_volume_l?: number | null
+          length_mm?: number | null
+          nominal_air_temp_in_c?: number | null
+          nominal_air_temp_out_c?: number | null
+          nominal_airflow_m3h?: number | null
+          nominal_capacity_w?: number | null
+          nominal_evap_temp_c?: number | null
+          nominal_latent_w?: number | null
+          nominal_sensible_w?: number | null
+          raw_fields?: Json
+          refrigerant?: string | null
+          rows?: number | null
+          surface_area_m2?: number | null
+          tube_id_mm?: number | null
+          tube_od_mm?: number | null
+          tubes_per_row?: number | null
+          updated_at?: string
+        }
+        Update: {
+          circuits?: number | null
+          component_item_id?: string
+          created_at?: string
+          exponent_n?: number
+          fin_pitch_mm?: number | null
+          id?: string
+          internal_volume_l?: number | null
+          length_mm?: number | null
+          nominal_air_temp_in_c?: number | null
+          nominal_air_temp_out_c?: number | null
+          nominal_airflow_m3h?: number | null
+          nominal_capacity_w?: number | null
+          nominal_evap_temp_c?: number | null
+          nominal_latent_w?: number | null
+          nominal_sensible_w?: number | null
+          raw_fields?: Json
+          refrigerant?: string | null
+          rows?: number | null
+          surface_area_m2?: number | null
+          tube_id_mm?: number | null
+          tube_od_mm?: number | null
+          tubes_per_row?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaporator_coil_models_component_item_id_fkey"
+            columns: ["component_item_id"]
+            isOneToOne: true
+            referencedRelation: "component_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -197,537 +428,56 @@ export type Database = {
         }
         Relationships: []
       }
-      simulations: {
+      unilab_extractions: {
         Row: {
-          balance_error: number | null
-          bottleneck: string | null
-          cop: number | null
+          component_file_id: string | null
+          component_item_id: string
           created_at: string
           created_by: string | null
-          id: string
-          q_comp: number | null
-          q_cond: number | null
-          q_evap: number | null
-          raw: Json
-          recommendations: Json
-          system_id: string
-          t_air_cond: number
-          t_air_evap: number
-          t_cond_eq: number | null
-          t_evap_target: number
-          util_comp: number | null
-          util_cond: number | null
-          util_evap: number | null
-          w_comp: number | null
-        }
-        Insert: {
-          balance_error?: number | null
-          bottleneck?: string | null
-          cop?: number | null
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          q_comp?: number | null
-          q_cond?: number | null
-          q_evap?: number | null
-          raw?: Json
-          recommendations?: Json
-          system_id: string
-          t_air_cond: number
-          t_air_evap: number
-          t_cond_eq?: number | null
-          t_evap_target: number
-          util_comp?: number | null
-          util_cond?: number | null
-          util_evap?: number | null
-          w_comp?: number | null
-        }
-        Update: {
-          balance_error?: number | null
-          bottleneck?: string | null
-          cop?: number | null
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          q_comp?: number | null
-          q_cond?: number | null
-          q_evap?: number | null
-          raw?: Json
-          recommendations?: Json
-          system_id?: string
-          t_air_cond?: number
-          t_air_evap?: number
-          t_cond_eq?: number | null
-          t_evap_target?: number
-          util_comp?: number | null
-          util_cond?: number | null
-          util_evap?: number | null
-          w_comp?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "simulations_system_id_fkey"
-            columns: ["system_id"]
-            isOneToOne: false
-            referencedRelation: "systems"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      systems: {
-        Row: {
-          compressor_id: string
-          condenser_id: string
-          created_at: string
-          created_by: string | null
-          description: string | null
-          evaporator_id: string
-          id: string
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          compressor_id: string
-          condenser_id: string
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          evaporator_id: string
-          id?: string
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          compressor_id?: string
-          condenser_id?: string
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          evaporator_id?: string
-          id?: string
-          name?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "systems_compressor_id_fkey"
-            columns: ["compressor_id"]
-            isOneToOne: false
-            referencedRelation: "components"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "systems_condenser_id_fkey"
-            columns: ["condenser_id"]
-            isOneToOne: false
-            referencedRelation: "components"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "systems_evaporator_id_fkey"
-            columns: ["evaporator_id"]
-            isOneToOne: false
-            referencedRelation: "components"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technical_catalog_snapshots: {
-        Row: {
-          approved_at: string
-          approved_by: string | null
-          file_group: Database["public"]["Enums"]["technical_file_group"]
-          file_id: string | null
-          id: string
-          payload: Json
-          product_id: string
-          technical_category: Database["public"]["Enums"]["technical_file_category"]
-          version_label: string
-        }
-        Insert: {
-          approved_at?: string
-          approved_by?: string | null
-          file_group: Database["public"]["Enums"]["technical_file_group"]
-          file_id?: string | null
-          id?: string
-          payload?: Json
-          product_id: string
-          technical_category: Database["public"]["Enums"]["technical_file_category"]
-          version_label: string
-        }
-        Update: {
-          approved_at?: string
-          approved_by?: string | null
-          file_group?: Database["public"]["Enums"]["technical_file_group"]
-          file_id?: string | null
-          id?: string
-          payload?: Json
-          product_id?: string
-          technical_category?: Database["public"]["Enums"]["technical_file_category"]
-          version_label?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technical_catalog_snapshots_file_id_fkey"
-            columns: ["file_id"]
-            isOneToOne: false
-            referencedRelation: "technical_files"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technical_catalog_snapshots_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "technical_products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technical_equipments: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          default_refrigerant: string | null
-          description: string | null
-          equipment_kind: Database["public"]["Enums"]["equipment_kind"]
-          family: string | null
-          id: string
-          internal_code: string | null
-          name: string
-          slug: string
-          status: Database["public"]["Enums"]["equipment_status"]
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          default_refrigerant?: string | null
-          description?: string | null
-          equipment_kind?: Database["public"]["Enums"]["equipment_kind"]
-          family?: string | null
-          id?: string
-          internal_code?: string | null
-          name: string
-          slug: string
-          status?: Database["public"]["Enums"]["equipment_status"]
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          default_refrigerant?: string | null
-          description?: string | null
-          equipment_kind?: Database["public"]["Enums"]["equipment_kind"]
-          family?: string | null
-          id?: string
-          internal_code?: string | null
-          name?: string
-          slug?: string
-          status?: Database["public"]["Enums"]["equipment_status"]
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      technical_file_extractions: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          equipment_id: string | null
           extracted_fields: Json
-          file_id: string
           id: string
           parser: string
-          product_id: string | null
           raw_preview: string | null
-          raw_text: string | null
-          structured_data: Json
           success: boolean
           warnings: Json
         }
         Insert: {
+          component_file_id?: string | null
+          component_item_id: string
           created_at?: string
           created_by?: string | null
-          equipment_id?: string | null
           extracted_fields?: Json
-          file_id: string
           id?: string
           parser: string
-          product_id?: string | null
           raw_preview?: string | null
-          raw_text?: string | null
-          structured_data?: Json
           success?: boolean
           warnings?: Json
         }
         Update: {
+          component_file_id?: string | null
+          component_item_id?: string
           created_at?: string
           created_by?: string | null
-          equipment_id?: string | null
           extracted_fields?: Json
-          file_id?: string
           id?: string
           parser?: string
-          product_id?: string | null
           raw_preview?: string | null
-          raw_text?: string | null
-          structured_data?: Json
           success?: boolean
           warnings?: Json
         }
         Relationships: [
           {
-            foreignKeyName: "technical_file_extractions_file_id_fkey"
-            columns: ["file_id"]
+            foreignKeyName: "unilab_extractions_component_file_id_fkey"
+            columns: ["component_file_id"]
             isOneToOne: false
-            referencedRelation: "technical_files"
+            referencedRelation: "component_files"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "technical_file_extractions_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: "unilab_extractions_component_item_id_fkey"
+            columns: ["component_item_id"]
             isOneToOne: false
-            referencedRelation: "technical_products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technical_file_versions: {
-        Row: {
-          action: string
-          created_at: string
-          file_id: string
-          id: string
-          payload: Json | null
-          product_id: string
-          user_id: string | null
-          version_label: string
-          version_number: number
-        }
-        Insert: {
-          action: string
-          created_at?: string
-          file_id: string
-          id?: string
-          payload?: Json | null
-          product_id: string
-          user_id?: string | null
-          version_label: string
-          version_number: number
-        }
-        Update: {
-          action?: string
-          created_at?: string
-          file_id?: string
-          id?: string
-          payload?: Json | null
-          product_id?: string
-          user_id?: string | null
-          version_label?: string
-          version_number?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technical_file_versions_file_id_fkey"
-            columns: ["file_id"]
-            isOneToOne: false
-            referencedRelation: "technical_files"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technical_file_versions_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "technical_products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technical_files: {
-        Row: {
-          description: string | null
-          detected_file_type: string | null
-          detected_technical_type: string | null
-          equipment_id: string | null
-          file_extension: string
-          file_group: Database["public"]["Enums"]["technical_file_group"] | null
-          file_hash: string | null
-          file_size: number | null
-          id: string
-          is_current_version: boolean
-          mime_type: string | null
-          notes: string | null
-          original_filename: string
-          product_id: string | null
-          status: Database["public"]["Enums"]["technical_file_status"]
-          storage_path: string
-          technical_category:
-            | Database["public"]["Enums"]["technical_file_category"]
-            | null
-          updated_at: string
-          upload_batch_id: string | null
-          uploaded_at: string
-          uploaded_by: string | null
-          version_label: string
-          version_number: number
-        }
-        Insert: {
-          description?: string | null
-          detected_file_type?: string | null
-          detected_technical_type?: string | null
-          equipment_id?: string | null
-          file_extension: string
-          file_group?:
-            | Database["public"]["Enums"]["technical_file_group"]
-            | null
-          file_hash?: string | null
-          file_size?: number | null
-          id?: string
-          is_current_version?: boolean
-          mime_type?: string | null
-          notes?: string | null
-          original_filename: string
-          product_id?: string | null
-          status?: Database["public"]["Enums"]["technical_file_status"]
-          storage_path: string
-          technical_category?:
-            | Database["public"]["Enums"]["technical_file_category"]
-            | null
-          updated_at?: string
-          upload_batch_id?: string | null
-          uploaded_at?: string
-          uploaded_by?: string | null
-          version_label: string
-          version_number: number
-        }
-        Update: {
-          description?: string | null
-          detected_file_type?: string | null
-          detected_technical_type?: string | null
-          equipment_id?: string | null
-          file_extension?: string
-          file_group?:
-            | Database["public"]["Enums"]["technical_file_group"]
-            | null
-          file_hash?: string | null
-          file_size?: number | null
-          id?: string
-          is_current_version?: boolean
-          mime_type?: string | null
-          notes?: string | null
-          original_filename?: string
-          product_id?: string | null
-          status?: Database["public"]["Enums"]["technical_file_status"]
-          storage_path?: string
-          technical_category?:
-            | Database["public"]["Enums"]["technical_file_category"]
-            | null
-          updated_at?: string
-          upload_batch_id?: string | null
-          uploaded_at?: string
-          uploaded_by?: string | null
-          version_label?: string
-          version_number?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technical_files_equipment_id_fkey"
-            columns: ["equipment_id"]
-            isOneToOne: false
-            referencedRelation: "technical_equipments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technical_files_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "technical_products"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "technical_files_upload_batch_id_fkey"
-            columns: ["upload_batch_id"]
-            isOneToOne: false
-            referencedRelation: "technical_upload_batches"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technical_products: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          description: string | null
-          family: string | null
-          id: string
-          manufacturer: string | null
-          name: string
-          slug: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          family?: string | null
-          id?: string
-          manufacturer?: string | null
-          name: string
-          slug: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          family?: string | null
-          id?: string
-          manufacturer?: string | null
-          name?: string
-          slug?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      technical_upload_batches: {
-        Row: {
-          batch_label: string
-          batch_number: number
-          equipment_id: string
-          id: string
-          notes: string | null
-          status: Database["public"]["Enums"]["upload_batch_status"]
-          updated_at: string
-          uploaded_at: string
-          uploaded_by: string | null
-        }
-        Insert: {
-          batch_label: string
-          batch_number: number
-          equipment_id: string
-          id?: string
-          notes?: string | null
-          status?: Database["public"]["Enums"]["upload_batch_status"]
-          updated_at?: string
-          uploaded_at?: string
-          uploaded_by?: string | null
-        }
-        Update: {
-          batch_label?: string
-          batch_number?: number
-          equipment_id?: string
-          id?: string
-          notes?: string | null
-          status?: Database["public"]["Enums"]["upload_batch_status"]
-          updated_at?: string
-          uploaded_at?: string
-          uploaded_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technical_upload_batches_equipment_id_fkey"
-            columns: ["equipment_id"]
-            isOneToOne: false
-            referencedRelation: "technical_equipments"
+            referencedRelation: "component_items"
             referencedColumns: ["id"]
           },
         ]
@@ -768,19 +518,45 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "engenheiro"
-      component_status: "incompleto" | "validando" | "pronto" | "invalido"
-      component_type: "compressor" | "evaporador" | "condensador"
-      equipment_kind:
-        | "unidade_condensadora"
+      component_kind:
         | "evaporador"
         | "condensador"
         | "compressor"
-        | "rack"
-        | "sistema_completo"
+        | "ventilador"
+        | "valvula_expansao"
+        | "separador_liquido"
+        | "acumulador"
+        | "painel_eletrico"
+        | "controlador"
         | "outro"
-      equipment_status: "active" | "draft" | "archived"
-      file_kind: "csv" | "pdf" | "xls"
-      file_processing_status: "pendente" | "processando" | "processado" | "erro"
+      component_status:
+        | "draft"
+        | "imported"
+        | "simulated"
+        | "validated"
+        | "approved"
+      equipment_application:
+        | "resfriamento"
+        | "congelamento"
+        | "conservacao"
+        | "processo_industrial"
+        | "climatizacao_industrial"
+        | "outro"
+      equipment_kind:
+        | "plugin"
+        | "split"
+        | "rack"
+        | "chiller"
+        | "tunel_congelamento"
+        | "camara_fria"
+        | "unidade_condensadora"
+        | "unidade_evaporadora"
+        | "outro"
+      equipment_project_status:
+        | "draft"
+        | "in_progress"
+        | "validated"
+        | "archived"
       technical_file_category:
         | "ficha_tecnica"
         | "laudo_teste"
@@ -800,22 +576,6 @@ export type Database = {
         | "imagens"
         | "documentos"
         | "outros"
-      technical_file_status:
-        | "uploaded"
-        | "processing"
-        | "parsed"
-        | "validated"
-        | "approved"
-        | "rejected"
-        | "archived"
-      upload_batch_status:
-        | "uploaded"
-        | "processing"
-        | "parsed"
-        | "needs_review"
-        | "approved"
-        | "rejected"
-        | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -944,20 +704,50 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "engenheiro"],
-      component_status: ["incompleto", "validando", "pronto", "invalido"],
-      component_type: ["compressor", "evaporador", "condensador"],
-      equipment_kind: [
-        "unidade_condensadora",
+      component_kind: [
         "evaporador",
         "condensador",
         "compressor",
-        "rack",
-        "sistema_completo",
+        "ventilador",
+        "valvula_expansao",
+        "separador_liquido",
+        "acumulador",
+        "painel_eletrico",
+        "controlador",
         "outro",
       ],
-      equipment_status: ["active", "draft", "archived"],
-      file_kind: ["csv", "pdf", "xls"],
-      file_processing_status: ["pendente", "processando", "processado", "erro"],
+      component_status: [
+        "draft",
+        "imported",
+        "simulated",
+        "validated",
+        "approved",
+      ],
+      equipment_application: [
+        "resfriamento",
+        "congelamento",
+        "conservacao",
+        "processo_industrial",
+        "climatizacao_industrial",
+        "outro",
+      ],
+      equipment_kind: [
+        "plugin",
+        "split",
+        "rack",
+        "chiller",
+        "tunel_congelamento",
+        "camara_fria",
+        "unidade_condensadora",
+        "unidade_evaporadora",
+        "outro",
+      ],
+      equipment_project_status: [
+        "draft",
+        "in_progress",
+        "validated",
+        "archived",
+      ],
       technical_file_category: [
         "ficha_tecnica",
         "laudo_teste",
@@ -978,24 +768,6 @@ export const Constants = {
         "imagens",
         "documentos",
         "outros",
-      ],
-      technical_file_status: [
-        "uploaded",
-        "processing",
-        "parsed",
-        "validated",
-        "approved",
-        "rejected",
-        "archived",
-      ],
-      upload_batch_status: [
-        "uploaded",
-        "processing",
-        "parsed",
-        "needs_review",
-        "approved",
-        "rejected",
-        "archived",
       ],
     },
   },
