@@ -276,7 +276,7 @@ export async function processTechnicalFile(fileVersionId: string, userId: string
     errors: parsed.errors,
   });
 
-  await supabase.from("technical_file_versions").insert({
+  await (supabase as any).from("technical_file_versions").insert({
     file_id: file.id,
     product_id: file.product_id,
     version_number: 0,
