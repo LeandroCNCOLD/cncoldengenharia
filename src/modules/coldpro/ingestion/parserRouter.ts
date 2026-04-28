@@ -41,9 +41,9 @@ function runTechnicalParser(
   switch (type) {
     case "evaporator":
     case "heat_exchanger":
-      return evaporatorTechnicalParser(rawText);
+      return evaporatorTechnicalParser(rawText, structured);
     case "condenser":
-      return condenserTechnicalParser(rawText);
+      return condenserTechnicalParser(rawText, structured);
     case "compressor":
     case "curve":
       return compressorTechnicalParser(rawText, structured);

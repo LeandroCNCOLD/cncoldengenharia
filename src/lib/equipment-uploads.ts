@@ -312,34 +312,39 @@ export async function processBatch(batchId: string, userId: string) {
       );
 
       const semanticStatus =
-        parsed.confidence >= 0.8
-          ? "parsed"
-          : parsed.confidence >= 0.5
-            ? "needs_review"
-            : "failed";
+        parsed.status === "parsed" && parsed.confidence < 0.8 ? "needs_review" : parsed.status;
       const techType = (refined as any).technicalDocumentType ?? null;
       const fileType = (refined as any).fileType ?? null;
 
-      await (supabase as any).from("technical_file_extractions").insert({
+      const structuredData =
+        typeof parsed.structuredData === "object" && parsed.structuredData
+          ? JSON.parse(JSON.stringify(parsed.structuredData))
+          : null;
+      const { error: extractionError } = await (supabase as any).from("technical_file_extractions").insert({
         file_id: file.id,
         product_id: file.product_id ?? null,
+        equipment_id: file.equipment_id ?? null,
         parser: parsed.parserUsed,
         extracted_fields: {
           classification: refined,
           semanticStatus,
           parserVersion: parsed.parserVersion,
           confidence: parsed.confidence,
+          status: parsed.status,
           fields: parsed.extractedFields,
-          structuredPreview:
-            typeof parsed.structuredData === "object" && parsed.structuredData
-              ? JSON.parse(JSON.stringify(parsed.structuredData).slice(0, 5000))
-              : null,
+          errors: parsed.errors,
+          structuredPreview: structuredData
+            ? JSON.parse(JSON.stringify(structuredData).slice(0, 5000))
+            : null,
         },
         warnings: parsed.warnings,
         raw_preview: parsed.rawText.slice(0, 4000) || null,
+        raw_text: parsed.rawText || null,
+        structured_data: structuredData ?? {},
         success: parsed.errors.length === 0,
         created_by: userId,
       });
+      if (extractionError) throw new Error(extractionError.message);
 
       const dbStatus =
         semanticStatus === "parsed"
@@ -421,12 +426,17 @@ export async function buildPreCatalog(equipmentId: string): Promise<PreCatalog> 
     };
   }
 
-  const { data: extractions } = await (supabase as any)
+  const { data: extractionRows } = await (supabase as any)
     .from("technical_file_extractions")
-    .select("file_id, extracted_fields")
-    .in("file_id", fileIds);
+    .select("file_id, extracted_fields, created_at")
+    .in("file_id", fileIds)
+    .order("created_at", { ascending: false });
 
   const fileById = new Map(files.map((f: any) => [f.id, f]));
+  const latestByFile = new Map<string, any>();
+  for (const ex of extractionRows ?? []) {
+    if (!latestByFile.has(ex.file_id)) latestByFile.set(ex.file_id, ex);
+  }
 
   // Agrupa campos por categoria com fontes para detectar conflito
   const byTech: Record<"evaporator" | "condenser" | "compressor", Map<string, FieldSource[]>> = {
@@ -448,7 +458,7 @@ export async function buildPreCatalog(equipmentId: string): Promise<PreCatalog> 
   let confSum = 0;
   let confCount = 0;
 
-  for (const ex of extractions ?? []) {
+  for (const ex of latestByFile.values()) {
     const f: any = fileById.get(ex.file_id);
     if (!f) continue;
     const ef = (ex.extracted_fields ?? {}) as any;

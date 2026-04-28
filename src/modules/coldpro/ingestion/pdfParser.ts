@@ -12,10 +12,10 @@ export async function pdfParser(file: ArrayBuffer): Promise<ParserResult> {
       GlobalWorkerOptions: { workerSrc: string };
       getDocument: (opts: unknown) => { promise: Promise<unknown> };
     };
-    pdfjs.GlobalWorkerOptions.workerSrc = "";
     const doc = (await pdfjs.getDocument({
       data: new Uint8Array(file),
       useSystemFonts: true,
+      disableWorker: true,
     }).promise) as {
       numPages: number;
       getPage: (n: number) => Promise<{
