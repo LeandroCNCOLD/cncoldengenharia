@@ -197,6 +197,141 @@ export type Database = {
         }
         Relationships: []
       }
+      simulations: {
+        Row: {
+          balance_error: number | null
+          bottleneck: string | null
+          cop: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          q_comp: number | null
+          q_cond: number | null
+          q_evap: number | null
+          raw: Json
+          recommendations: Json
+          system_id: string
+          t_air_cond: number
+          t_air_evap: number
+          t_cond_eq: number | null
+          t_evap_target: number
+          util_comp: number | null
+          util_cond: number | null
+          util_evap: number | null
+          w_comp: number | null
+        }
+        Insert: {
+          balance_error?: number | null
+          bottleneck?: string | null
+          cop?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          q_comp?: number | null
+          q_cond?: number | null
+          q_evap?: number | null
+          raw?: Json
+          recommendations?: Json
+          system_id: string
+          t_air_cond: number
+          t_air_evap: number
+          t_cond_eq?: number | null
+          t_evap_target: number
+          util_comp?: number | null
+          util_cond?: number | null
+          util_evap?: number | null
+          w_comp?: number | null
+        }
+        Update: {
+          balance_error?: number | null
+          bottleneck?: string | null
+          cop?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          q_comp?: number | null
+          q_cond?: number | null
+          q_evap?: number | null
+          raw?: Json
+          recommendations?: Json
+          system_id?: string
+          t_air_cond?: number
+          t_air_evap?: number
+          t_cond_eq?: number | null
+          t_evap_target?: number
+          util_comp?: number | null
+          util_cond?: number | null
+          util_evap?: number | null
+          w_comp?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulations_system_id_fkey"
+            columns: ["system_id"]
+            isOneToOne: false
+            referencedRelation: "systems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      systems: {
+        Row: {
+          compressor_id: string
+          condenser_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          evaporator_id: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          compressor_id: string
+          condenser_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          evaporator_id: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          compressor_id?: string
+          condenser_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          evaporator_id?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "systems_compressor_id_fkey"
+            columns: ["compressor_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "systems_condenser_id_fkey"
+            columns: ["condenser_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "systems_evaporator_id_fkey"
+            columns: ["evaporator_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string

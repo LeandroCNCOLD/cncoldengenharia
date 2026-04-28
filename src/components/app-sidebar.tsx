@@ -4,6 +4,7 @@ import {
   Boxes,
   Upload,
   BookOpen,
+  Network,
   FlaskConical,
   FileBarChart,
   Settings,
@@ -29,7 +30,8 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Componentes", to: "/components", icon: Boxes },
   { label: "Uploads", to: "/uploads", icon: Upload },
   { label: "Catálogo Técnico", to: "/catalog", icon: BookOpen },
-  { label: "Simulação", to: "/simulation", icon: FlaskConical, badge: "Em breve" },
+  { label: "Sistemas", to: "/systems", icon: Network },
+  { label: "Simulação", to: "/simulation", icon: FlaskConical },
   { label: "Relatórios", to: "/reports", icon: FileBarChart, badge: "Em breve" },
   { label: "Administração", to: "/admin", icon: Settings, adminOnly: true },
 ];
