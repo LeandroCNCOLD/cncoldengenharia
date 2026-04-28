@@ -1,103 +1,83 @@
+## Contexto
 
-# Consolidação da Fundação — CN Cold Engineering
+A base atual já tem:
+- Catálogo de componentes (compressor, evaporador, condensador) com normalização, conflitos e prontidão.
+- Página `/simulation` que lista componentes Prontos × Bloqueados, mas **sem motor de cálculo**.
+- Schema com `coeficientes` (AHRI 540) e `faixa_operacional` no compressor; capacidade nominal e temperaturas de referência em evaporador/condensador.
 
-A base atual já cobre a maior parte do briefing (navegação, schema, RBAC, status, dashboard, placeholders). Esta etapa **não recria nada** — apenas preenche as lacunas funcionais detectadas na revisão para deixar o sistema-base completo antes dos motores.
+O prompt v4.0 cobre 4 grandes funcionalidades + arquitetura ampla. Em vez de tentar tudo de uma vez (alto risco), proponho uma **Fase 1 enxuta**: motor de equilíbrio + sistemas + simulação básica funcionando ponta a ponta, deixando linhas de sucção, custos, dinâmica e comparação para fases seguintes (já estruturadas, mas não implementadas).
 
-## Diagnóstico do que já está pronto
+## Escopo desta etapa (Fase 1 — Motor de Equilíbrio + Sistemas)
 
-| Área | Estado atual |
-|---|---|
-| Navegação (Sidebar) | OK — Dashboard, Componentes, Uploads, Catálogo, Simulação, Relatórios, Administração |
-| Simulação / Relatórios | OK — placeholders já isolados |
-| Tabelas (`components`, `component_files`, `component_data`, `component_history`) | OK — todos os campos exigidos presentes |
-| Tipos suportados (compressor, evaporador, condensador) | OK |
-| Status (`incompleto`, `validando`, `pronto`, `inválido`) | OK — visível em listagem, detalhe, dashboard e catálogo |
-| Bucket privado `component-files` | OK |
-| Administração (papéis admin/engenheiro) | OK |
-| Dashboard (KPIs, distribuição, recentes) | OK |
+### 1. Banco de dados
+Nova migração com 3 tabelas (RLS habilitado, política `authenticated`):
 
-## Lacunas a corrigir nesta etapa
+- **`systems`** — combinação nomeada de 1 compressor + 1 evaporador + 1 condensador
+  - `id, name, description, compressor_id, evaporator_id, condenser_id, created_by, created_at, updated_at`
+  - FK referenciando `components(id)` com `ON DELETE RESTRICT`
+  - Trigger valida que cada FK aponta para um componente do tipo correto
+- **`simulations`** — uma execução de cálculo
+  - `id, system_id, t_evap_target, t_air_evap, t_air_cond,`
+  - `t_cond_eq, q_evap, q_comp, w_comp, q_cond, cop, balance_error,`
+  - `util_comp, util_evap, util_cond, bottleneck,`
+  - `recommendations jsonb, raw jsonb, created_by, created_at`
+- Sem tabelas para sucção/custos/dinâmica/comparação ainda — entram nas fases seguintes.
 
-1. **Uploads não funcionais** — a página `/uploads` só lista; não há formulário de envio nem o detalhe do componente permite anexar arquivos.
-2. **Sem validação de compatibilidade** entre tipo de arquivo e tipo de componente (regra: compressor → CSV; evaporador/condensador → PDF ou XLS).
-3. **Sem remoção de arquivos** (briefing exige).
-4. **Catálogo sem filtros** (tipo, status) nem **busca textual**.
-5. **Listagem de Componentes sem filtros** por tipo/status.
-6. **Recálculo de status** não dispara após upload/remoção (o status fica congelado em `incompleto`).
-7. Pequenos polimentos: dashboard cita "Uploads recentes" sem link para o componente; detalhe do componente menciona que "upload será implementado na próxima iteração" — texto a substituir.
+Índices: `systems(created_by)`, `simulations(system_id, created_at desc)`.
 
-## Mudanças planejadas
+### 2. Motor de cálculo (TypeScript puro, client-side)
 
-### 1. Helper central de upload (`src/lib/uploads.ts`)
-- `ALLOWED_KINDS_BY_TYPE`: mapa `compressor → ["csv"]`, `evaporador/condensador → ["pdf","xls"]`.
-- `detectFileKind(fileName)`: deduz `csv | pdf | xls` pela extensão (`.csv`, `.pdf`, `.xls/.xlsx`).
-- `uploadComponentFile({ componentId, componentType, file, userId })`:
-  - valida extensão contra `ALLOWED_KINDS_BY_TYPE`;
-  - faz `supabase.storage.from("component-files").upload(path, file)` em caminho `<componentId>/<timestamp>-<nome>`;
-  - insere em `component_files` com `processing_status = "pendente"`;
-  - registra `component_history` (`action: "file_uploaded"`);
-  - chama `recomputeComponentStatus(componentId)`.
-- `removeComponentFile(fileId)`:
-  - apaga objeto do bucket;
-  - apaga linha em `component_files`;
-  - registra histórico (`file_removed`);
-  - recalcula status.
-- `recomputeComponentStatus(componentId)`: lê arquivos + `component_data.fields`, aplica `computeComponentStatus` (já existe em `src/lib/component-schema.ts`) e dá `update` em `components.status`.
+`src/lib/engine/` (sem Python, sem servidor extra — roda no browser via TanStack Query):
 
-### 2. Página Uploads (`src/routes/_app/uploads.tsx`)
-- Adicionar bloco superior **"Enviar arquivo"**:
-  - `Select` de componente (carrega lista) → quando escolhido, mostra os tipos de arquivo aceitos para aquele componente;
-  - `Input type=file` com `accept` dinâmico;
-  - botão "Enviar" usa o helper acima; toast de sucesso/erro.
-- Tabela existente ganha coluna **"Ações"** com botão excluir (confirmação via `AlertDialog`).
-- Mensagem vazia atualizada (sem "será habilitado").
+- **`ahri540.ts`** — avalia polinômio AHRI 540 de 10 coeficientes para capacidade e potência do compressor em função de `(T_evap, T_cond)`. Aceita `coeficientes` no formato `{ capacity: number[10], power: number[10] }` armazenado no `component_data.fields`.
+- **`heat-exchanger.ts`** — modelo simplificado linear para evaporador/condensador:
+  - `Q_evap = UA_evap × (T_air_evap − T_evap)` derivado da capacidade nominal e ΔT de referência.
+  - `Q_cond = UA_cond × (T_cond − T_air_cond)` análogo.
+- **`equilibrium.ts`** — busca `T_cond` no intervalo (T_air_cond+1 … 70 °C) que minimize `|Q_cond − (Q_evap + W_comp)|` (passo 0,1 °C, depois refino bisection). Retorna ponto de equilíbrio + utilizações + gargalo.
+- **`recommendations.ts`** — gera lista de sugestões com base em utilizações (>90% / <50%) e erro de balanço.
 
-### 3. Detalhe do componente (`src/routes/_app/components.$id.tsx`)
-- Aba **Arquivos** ganha:
-  - bloco de upload no topo (mesmo helper, já com `componentId`/`componentType` fixos);
-  - cada item da lista: nome, tipo, data, status e botão remover;
-  - aviso de tipos aceitos quando vazio (já existe — manter, retirar texto "próxima iteração").
-- Após upload/remoção: invalidar queries `component-files`, `component`, `component-data`.
+Validações de entrada: `T_air_evap > T_evap_target`, `T_air_cond < 60`, componentes prontos (`status='pronto'`).
 
-### 4. Catálogo (`src/routes/_app/catalog.tsx`)
-- Barra de filtros acima do grid:
-  - `Input` de busca (debounce simples; filtra por `name`, `manufacturer`, `fluid`);
-  - `Select` "Tipo" (Todos / Compressor / Evaporador / Condensador);
-  - `Select` "Status" (Todos / Incompleto / Validando / Pronto / Inválido).
-- Filtragem feita client-side sobre o resultado da query.
-- Estado vazio diferenciado quando filtros ativos.
+### 3. Interface (novas rotas TanStack)
 
-### 5. Listagem de Componentes (`src/routes/_app/components.tsx`)
-- Mesmos filtros (tipo, status, busca) aplicados sobre a tabela.
-- Adicionar coluna "Atualizado em".
+- **`/systems`** (`src/routes/_app/systems.tsx`) — lista de sistemas montados, botão "Novo sistema".
+- **`/systems/new`** — formulário: nome + 3 selects (filtrados por tipo e `status='pronto'`).
+- **`/systems/$id`** — detalhe do sistema, lista de simulações anteriores, botão "Nova simulação".
+- **`/systems/$id/simulate`** — formulário com 3 sliders/inputs (`T_evap_target`, `T_air_evap`, `T_air_cond`) e resultado:
+  - Cards de destaque: T_cond, COP, Q_evap, W_comp.
+  - Tabela de utilizações e gargalo.
+  - Lista de recomendações com prioridade.
+  - Botão "Salvar simulação" → grava em `simulations`.
+- **`/simulation`** (existente) — passa a mostrar Sistemas Prontos como atalho para simular, mantendo a lista de Componentes Prontos × Bloqueados como abaixo.
 
-### 6. Dashboard (`src/routes/_app/dashboard.tsx`)
-- "Uploads recentes" passa a linkar para `/components/$id` do arquivo.
-- Atalho "Criar componente" já existe — manter.
-- Acrescentar pequeno bloco "Componentes atualizados recentemente" ao lado de "Distribuição por tipo" (já está lá como "Componentes recentes" — apenas renomear o título para casar com o briefing).
+Sidebar ganha item **"Sistemas"** entre "Catálogo Técnico" e "Simulação".
 
-### 7. Componente reutilizável `FileUploader`
-- `src/components/file-uploader.tsx`: encapsula select de componente (opcional) + input de arquivo + botão. Reusado em `/uploads` e na aba Arquivos do componente.
+### 4. Fora desta etapa (próximos prompts)
 
-## Diagrama de fluxo do upload
+Mantidos no roadmap mas **não implementados agora**, para evitar plano gigante e decisões prematuras:
 
-```text
-[ usuário ] -> escolhe componente + arquivo
-            -> detectFileKind()
-            -> valida contra ALLOWED_KINDS_BY_TYPE[type]
-              | inválido -> toast.error, aborta
-              | válido   -> storage.upload() -> insert component_files
-                         -> insert component_history
-                         -> recomputeComponentStatus()
-                         -> invalidate queries
-```
+- Linhas de sucção (precisa tabela de tubos comerciais e fluido configurável — só R-404A não é suficiente).
+- Análise de custos / payback / VPL (precisa inputs de tarifa, horas, investimento por componente — confirmar fonte).
+- Simulação dinâmica (perfil senoidal de T_ar — confirmar se 24 h ou 7 dias é o padrão).
+- Comparação de sistemas (depende de pesos configuráveis pelo usuário).
+- Exportação PDF, gráficos Chart.js, modo escuro extra.
 
-## Itens explicitamente fora do escopo desta etapa
+Cada um desses vira um prompt focado depois que o motor base estiver validado.
 
-- Parsers reais de CSV / PDF / XLS (extração automática) — `processing_status` continua iniciando em `pendente`.
-- Cálculo térmico, solver, comparação, simulação dinâmica, relatórios PDF, custos.
-- Edição manual dos campos extraídos (já existe a estrutura JSON; a UI de edição vem na próxima fase de normalização).
+## Detalhes técnicos
 
-## Resultado esperado
+- **Sem Python, sem FastAPI, sem novo backend.** O motor é TypeScript puro chamado direto na página de simulação; persistência via Supabase como já é feito.
+- **Coeficientes AHRI 540**: o schema já reserva `coeficientes` como JSON. Vou padronizar como `{ capacity: number[10], power: number[10] }` e documentar isso no `FieldEditor` via placeholder/help text.
+- **Faixa operacional**: `{ t_evap_min, t_evap_max, t_cond_min, t_cond_max }`. O motor rejeita pontos fora.
+- **RLS**: `systems` e `simulations` seguem o mesmo padrão das tabelas existentes (`authenticated` pode CRUD; `created_by = auth.uid()` no INSERT).
+- **Tipos gerados**: após a migração, `src/integrations/supabase/types.ts` é regenerado automaticamente.
 
-Plataforma-base 100% funcional para o ciclo: **criar componente → enviar arquivos → ver status atualizar → consultar pelo catálogo com filtros → administrar usuários** — pronta para receber os módulos de parsing e os motores térmicos sem refatoração estrutural.
+## Entregáveis
+
+1. Migração SQL (`systems`, `simulations`, RLS, trigger de validação de tipo).
+2. Motor `src/lib/engine/` (4 arquivos).
+3. 4 novas rotas (`/systems`, `/systems/new`, `/systems/$id`, `/systems/$id/simulate`).
+4. Atualização da sidebar e da página `/simulation` (atalho para sistemas).
+5. Atualização do `.lovable/plan.md` registrando a Fase 1 do motor.
+
+Após sua aprovação, executo tudo em sequência. Os módulos seguintes (sucção, custos, dinâmica, comparação) serão propostos um a um nos próximos prompts.
