@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useMemo, useEffect } from "react";
-import { ArrowLeft, Calculator, Save, AlertTriangle, History } from "lucide-react";
+import { ArrowLeft, Calculator, Save, AlertTriangle, History, Sparkles, GitCompare } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/page-header";
@@ -28,6 +28,11 @@ import {
 } from "@/lib/coldpro/coil-simulations";
 import { simulateDxEvaporator } from "@/modules/coldpro/coil/dxEvaporatorSimulator";
 import { simulateDxCondenser } from "@/modules/coldpro/coil/dxCondenserSimulator";
+import { simulatePhysicalSimple } from "@/modules/coldpro/coil/physicalSimpleEngine";
+import { calibrateAgainstReference } from "@/modules/coldpro/coil/coilCalibration";
+import { getLatestCalibration, saveCoilCalibration } from "@/lib/coldpro/coil-calibrations";
+import { NEUTRAL_CALIBRATION, type CalibrationFactors, type CoilEngine } from "@/modules/coldpro/coil/coilEngineTypes";
+import { OriginBadge } from "@/components/coldpro/origin-badge";
 import type {
   CoilSimulatorInput,
   CoilSimulatorResult,
