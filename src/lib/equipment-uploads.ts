@@ -542,7 +542,7 @@ export async function approveBatch(batchId: string, userId: string) {
 
   // Snapshot do catálogo
   await (supabase as any).from("technical_catalog_snapshots").insert({
-    product_id: batch.equipment_id, // reutilizamos o campo como referência
+    product_id: batch.equipment_id,
     file_id: null,
     file_group: "outros",
     technical_category: "outro",
@@ -550,6 +550,108 @@ export async function approveBatch(batchId: string, userId: string) {
     payload: pre,
     approved_by: userId,
   });
+
+  // Promoção automática: cria/atualiza componentes prontos a partir do snapshot.
+  const promoted = await promoteSnapshotToComponents(pre, userId);
+  return { promoted };
+}
+
+async function promoteSnapshotToComponents(
+  pre: Awaited<ReturnType<typeof buildPreCatalog>>,
+  userId: string,
+) {
+  const buckets: Array<{ type: "compressor" | "evaporador" | "condensador"; data: Record<string, any> }> = [
+    { type: "compressor", data: pre.compressorData },
+    { type: "evaporador", data: pre.evaporatorData },
+    { type: "condensador", data: pre.condenserData },
+  ];
+
+  const promoted: Array<{ id: string; type: string; name: string }> = [];
+
+  for (const { type, data } of buckets) {
+    if (!data || Object.keys(data).length === 0) continue;
+
+    const name = `${pre.equipmentName} — ${type}`;
+    const manufacturer = data.fabricante ?? data.manufacturer ?? null;
+    const fluid = data.fluido ?? data.refrigerante ?? null;
+
+    // Idempotente: procura pelo mesmo nome + tipo
+    const { data: existing } = await (supabase as any)
+      .from("components")
+      .select("id")
+      .eq("name", name)
+      .eq("type", type)
+      .maybeSingle();
+
+    let componentId: string;
+    if (existing?.id) {
+      componentId = existing.id;
+      await (supabase as any)
+        .from("components")
+        .update({
+          status: "pronto",
+          manufacturer,
+          fluid,
+          conflicts: [],
+        })
+        .eq("id", componentId);
+    } else {
+      const { data: created, error: insErr } = await (supabase as any)
+        .from("components")
+        .insert({
+          name,
+          type,
+          manufacturer,
+          fluid,
+          status: "pronto",
+          created_by: userId,
+        })
+        .select("id")
+        .single();
+      if (insErr || !created) continue;
+      componentId = created.id;
+    }
+
+    // Snapshot completo dos campos extraídos
+    const fieldSources: Record<string, "arquivo"> = {};
+    for (const k of Object.keys(data)) fieldSources[k] = "arquivo";
+
+    const { data: existingData } = await (supabase as any)
+      .from("component_data")
+      .select("id")
+      .eq("component_id", componentId)
+      .maybeSingle();
+
+    if (existingData?.id) {
+      await (supabase as any)
+        .from("component_data")
+        .update({
+          fields: data,
+          field_sources: fieldSources,
+          updated_by: userId,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", existingData.id);
+    } else {
+      await (supabase as any).from("component_data").insert({
+        component_id: componentId,
+        fields: data,
+        field_sources: fieldSources,
+        updated_by: userId,
+      });
+    }
+
+    await (supabase as any).from("component_history").insert({
+      component_id: componentId,
+      user_id: userId,
+      action: "promoted_from_technical_batch",
+      payload: { equipmentId: pre.equipmentId, equipmentName: pre.equipmentName },
+    });
+
+    promoted.push({ id: componentId, type, name });
+  }
+
+  return promoted;
 }
 
 export async function rejectBatch(batchId: string) {
