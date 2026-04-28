@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ArrowLeft, Calculator, Save, AlertTriangle, History } from "lucide-react";
 import { toast } from "sonner";
 
@@ -113,6 +113,60 @@ function CoilSimulatorPage() {
     liquidVelocityMs: "",
     refrigerantPressureDropKpa: "",
   });
+
+  const [prefillNominal, setPrefillNominal] = useState<{
+    capacityW: number; airTempInC: number; refTempC: number; airflowM3h: number;
+  } | null>(null);
+  const [prefillComponentId, setPrefillComponentId] = useState<string | null>(null);
+
+  // Carrega prefill vindo do botão dentro da aba Evaporador/Condensador
+  useEffect(() => {
+    const key = `coilsim:prefill:${id}`;
+    const raw = localStorage.getItem(key);
+    if (!raw) return;
+    localStorage.removeItem(key);
+    try {
+      const p = JSON.parse(raw) as {
+        coilType?: CoilType;
+        label?: string;
+        componentItemId?: string;
+        refrigerant?: string;
+        nominal?: { capacityW: number; airTempInC: number; refTempC: number; airflowM3h: number };
+        geometry?: Record<string, number | null | undefined>;
+      };
+      if (p.coilType) setCoilType(p.coilType);
+      if (p.label) setLabel(p.label);
+      if (p.componentItemId) setPrefillComponentId(p.componentItemId);
+      if (p.nominal) {
+        setPrefillNominal(p.nominal);
+        setA((s) => ({
+          ...s,
+          airTempInC: s.airTempInC || String(p.nominal!.airTempInC ?? ""),
+          airflowM3h: s.airflowM3h || String(p.nominal!.airflowM3h ?? ""),
+        }));
+        setR((s) => ({
+          ...s,
+          refTempC: s.refTempC || String(p.nominal!.refTempC ?? ""),
+          refrigerant: p.refrigerant ?? s.refrigerant,
+        }));
+      }
+      const gx = p.geometry ?? {};
+      setG((s) => ({
+        ...s,
+        rows: gx.rows != null ? String(gx.rows) : s.rows,
+        tubesPerRow: gx.tubesPerRow != null ? String(gx.tubesPerRow) : s.tubesPerRow,
+        circuits: gx.circuits != null ? String(gx.circuits) : s.circuits,
+        coilLengthMm: gx.coilLengthMm != null ? String(gx.coilLengthMm) : s.coilLengthMm,
+        finPitchMm: gx.finPitchMm != null ? String(gx.finPitchMm) : s.finPitchMm,
+        tubeOdMm: gx.tubeOdMm != null ? String(gx.tubeOdMm) : s.tubeOdMm,
+        tubeIdMm: gx.tubeIdMm != null ? String(gx.tubeIdMm) : s.tubeIdMm,
+      }));
+      toast.info("Dados do componente pré-carregados.");
+    } catch {
+      // noop
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const [result, setResult] = useState<CoilSimulatorResult | null>(null);
   const [lastInput, setLastInput] = useState<CoilSimulatorInput | null>(null);
