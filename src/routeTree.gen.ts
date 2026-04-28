@@ -12,19 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppUploadsRouteImport } from './routes/_app/uploads'
-import { Route as AppSystemsRouteImport } from './routes/_app/systems'
-import { Route as AppSimulationRouteImport } from './routes/_app/simulation'
-import { Route as AppReportsRouteImport } from './routes/_app/reports'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
-import { Route as AppComponentsRouteImport } from './routes/_app/components'
-import { Route as AppCatalogRouteImport } from './routes/_app/catalog'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
-import { Route as AppSystemsNewRouteImport } from './routes/_app/systems.new'
-import { Route as AppSystemsIdRouteImport } from './routes/_app/systems.$id'
-import { Route as AppComponentsNewRouteImport } from './routes/_app/components.new'
-import { Route as AppComponentsIdRouteImport } from './routes/_app/components.$id'
-import { Route as AppSystemsIdSimulateRouteImport } from './routes/_app/systems.$id.simulate'
+import { Route as AppColdproEquipamentosIndexRouteImport } from './routes/_app/coldpro/equipamentos/index'
+import { Route as AppColdproEquipamentosIdRouteImport } from './routes/_app/coldpro/equipamentos/$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -40,39 +31,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppUploadsRoute = AppUploadsRouteImport.update({
-  id: '/uploads',
-  path: '/uploads',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppSystemsRoute = AppSystemsRouteImport.update({
-  id: '/systems',
-  path: '/systems',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppSimulationRoute = AppSimulationRouteImport.update({
-  id: '/simulation',
-  path: '/simulation',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppReportsRoute = AppReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppComponentsRoute = AppComponentsRouteImport.update({
-  id: '/components',
-  path: '/components',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppCatalogRoute = AppCatalogRouteImport.update({
-  id: '/catalog',
-  path: '/catalog',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAdminRoute = AppAdminRouteImport.update({
@@ -80,65 +41,34 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
-const AppSystemsNewRoute = AppSystemsNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => AppSystemsRoute,
-} as any)
-const AppSystemsIdRoute = AppSystemsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AppSystemsRoute,
-} as any)
-const AppComponentsNewRoute = AppComponentsNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => AppComponentsRoute,
-} as any)
-const AppComponentsIdRoute = AppComponentsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AppComponentsRoute,
-} as any)
-const AppSystemsIdSimulateRoute = AppSystemsIdSimulateRouteImport.update({
-  id: '/simulate',
-  path: '/simulate',
-  getParentRoute: () => AppSystemsIdRoute,
-} as any)
+const AppColdproEquipamentosIndexRoute =
+  AppColdproEquipamentosIndexRouteImport.update({
+    id: '/coldpro/equipamentos/',
+    path: '/coldpro/equipamentos/',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppColdproEquipamentosIdRoute =
+  AppColdproEquipamentosIdRouteImport.update({
+    id: '/coldpro/equipamentos/$id',
+    path: '/coldpro/equipamentos/$id',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AppAdminRoute
-  '/catalog': typeof AppCatalogRoute
-  '/components': typeof AppComponentsRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
-  '/reports': typeof AppReportsRoute
-  '/simulation': typeof AppSimulationRoute
-  '/systems': typeof AppSystemsRouteWithChildren
-  '/uploads': typeof AppUploadsRoute
-  '/components/$id': typeof AppComponentsIdRoute
-  '/components/new': typeof AppComponentsNewRoute
-  '/systems/$id': typeof AppSystemsIdRouteWithChildren
-  '/systems/new': typeof AppSystemsNewRoute
-  '/systems/$id/simulate': typeof AppSystemsIdSimulateRoute
+  '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRoute
+  '/coldpro/equipamentos/': typeof AppColdproEquipamentosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AppAdminRoute
-  '/catalog': typeof AppCatalogRoute
-  '/components': typeof AppComponentsRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
-  '/reports': typeof AppReportsRoute
-  '/simulation': typeof AppSimulationRoute
-  '/systems': typeof AppSystemsRouteWithChildren
-  '/uploads': typeof AppUploadsRoute
-  '/components/$id': typeof AppComponentsIdRoute
-  '/components/new': typeof AppComponentsNewRoute
-  '/systems/$id': typeof AppSystemsIdRouteWithChildren
-  '/systems/new': typeof AppSystemsNewRoute
-  '/systems/$id/simulate': typeof AppSystemsIdSimulateRoute
+  '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRoute
+  '/coldpro/equipamentos': typeof AppColdproEquipamentosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -146,18 +76,9 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
   '/_app/admin': typeof AppAdminRoute
-  '/_app/catalog': typeof AppCatalogRoute
-  '/_app/components': typeof AppComponentsRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
-  '/_app/reports': typeof AppReportsRoute
-  '/_app/simulation': typeof AppSimulationRoute
-  '/_app/systems': typeof AppSystemsRouteWithChildren
-  '/_app/uploads': typeof AppUploadsRoute
-  '/_app/components/$id': typeof AppComponentsIdRoute
-  '/_app/components/new': typeof AppComponentsNewRoute
-  '/_app/systems/$id': typeof AppSystemsIdRouteWithChildren
-  '/_app/systems/new': typeof AppSystemsNewRoute
-  '/_app/systems/$id/simulate': typeof AppSystemsIdSimulateRoute
+  '/_app/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRoute
+  '/_app/coldpro/equipamentos/': typeof AppColdproEquipamentosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -165,53 +86,26 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/admin'
-    | '/catalog'
-    | '/components'
     | '/dashboard'
-    | '/reports'
-    | '/simulation'
-    | '/systems'
-    | '/uploads'
-    | '/components/$id'
-    | '/components/new'
-    | '/systems/$id'
-    | '/systems/new'
-    | '/systems/$id/simulate'
+    | '/coldpro/equipamentos/$id'
+    | '/coldpro/equipamentos/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/admin'
-    | '/catalog'
-    | '/components'
     | '/dashboard'
-    | '/reports'
-    | '/simulation'
-    | '/systems'
-    | '/uploads'
-    | '/components/$id'
-    | '/components/new'
-    | '/systems/$id'
-    | '/systems/new'
-    | '/systems/$id/simulate'
+    | '/coldpro/equipamentos/$id'
+    | '/coldpro/equipamentos'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/auth'
     | '/_app/admin'
-    | '/_app/catalog'
-    | '/_app/components'
     | '/_app/dashboard'
-    | '/_app/reports'
-    | '/_app/simulation'
-    | '/_app/systems'
-    | '/_app/uploads'
-    | '/_app/components/$id'
-    | '/_app/components/new'
-    | '/_app/systems/$id'
-    | '/_app/systems/new'
-    | '/_app/systems/$id/simulate'
+    | '/_app/coldpro/equipamentos/$id'
+    | '/_app/coldpro/equipamentos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -243,53 +137,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/uploads': {
-      id: '/_app/uploads'
-      path: '/uploads'
-      fullPath: '/uploads'
-      preLoaderRoute: typeof AppUploadsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/systems': {
-      id: '/_app/systems'
-      path: '/systems'
-      fullPath: '/systems'
-      preLoaderRoute: typeof AppSystemsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/simulation': {
-      id: '/_app/simulation'
-      path: '/simulation'
-      fullPath: '/simulation'
-      preLoaderRoute: typeof AppSimulationRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/reports': {
-      id: '/_app/reports'
-      path: '/reports'
-      fullPath: '/reports'
-      preLoaderRoute: typeof AppReportsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/components': {
-      id: '/_app/components'
-      path: '/components'
-      fullPath: '/components'
-      preLoaderRoute: typeof AppComponentsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/catalog': {
-      id: '/_app/catalog'
-      path: '/catalog'
-      fullPath: '/catalog'
-      preLoaderRoute: typeof AppCatalogRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/admin': {
@@ -299,104 +151,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/systems/new': {
-      id: '/_app/systems/new'
-      path: '/new'
-      fullPath: '/systems/new'
-      preLoaderRoute: typeof AppSystemsNewRouteImport
-      parentRoute: typeof AppSystemsRoute
+    '/_app/coldpro/equipamentos/': {
+      id: '/_app/coldpro/equipamentos/'
+      path: '/coldpro/equipamentos'
+      fullPath: '/coldpro/equipamentos/'
+      preLoaderRoute: typeof AppColdproEquipamentosIndexRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/_app/systems/$id': {
-      id: '/_app/systems/$id'
-      path: '/$id'
-      fullPath: '/systems/$id'
-      preLoaderRoute: typeof AppSystemsIdRouteImport
-      parentRoute: typeof AppSystemsRoute
-    }
-    '/_app/components/new': {
-      id: '/_app/components/new'
-      path: '/new'
-      fullPath: '/components/new'
-      preLoaderRoute: typeof AppComponentsNewRouteImport
-      parentRoute: typeof AppComponentsRoute
-    }
-    '/_app/components/$id': {
-      id: '/_app/components/$id'
-      path: '/$id'
-      fullPath: '/components/$id'
-      preLoaderRoute: typeof AppComponentsIdRouteImport
-      parentRoute: typeof AppComponentsRoute
-    }
-    '/_app/systems/$id/simulate': {
-      id: '/_app/systems/$id/simulate'
-      path: '/simulate'
-      fullPath: '/systems/$id/simulate'
-      preLoaderRoute: typeof AppSystemsIdSimulateRouteImport
-      parentRoute: typeof AppSystemsIdRoute
+    '/_app/coldpro/equipamentos/$id': {
+      id: '/_app/coldpro/equipamentos/$id'
+      path: '/coldpro/equipamentos/$id'
+      fullPath: '/coldpro/equipamentos/$id'
+      preLoaderRoute: typeof AppColdproEquipamentosIdRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
 
-interface AppComponentsRouteChildren {
-  AppComponentsIdRoute: typeof AppComponentsIdRoute
-  AppComponentsNewRoute: typeof AppComponentsNewRoute
-}
-
-const AppComponentsRouteChildren: AppComponentsRouteChildren = {
-  AppComponentsIdRoute: AppComponentsIdRoute,
-  AppComponentsNewRoute: AppComponentsNewRoute,
-}
-
-const AppComponentsRouteWithChildren = AppComponentsRoute._addFileChildren(
-  AppComponentsRouteChildren,
-)
-
-interface AppSystemsIdRouteChildren {
-  AppSystemsIdSimulateRoute: typeof AppSystemsIdSimulateRoute
-}
-
-const AppSystemsIdRouteChildren: AppSystemsIdRouteChildren = {
-  AppSystemsIdSimulateRoute: AppSystemsIdSimulateRoute,
-}
-
-const AppSystemsIdRouteWithChildren = AppSystemsIdRoute._addFileChildren(
-  AppSystemsIdRouteChildren,
-)
-
-interface AppSystemsRouteChildren {
-  AppSystemsIdRoute: typeof AppSystemsIdRouteWithChildren
-  AppSystemsNewRoute: typeof AppSystemsNewRoute
-}
-
-const AppSystemsRouteChildren: AppSystemsRouteChildren = {
-  AppSystemsIdRoute: AppSystemsIdRouteWithChildren,
-  AppSystemsNewRoute: AppSystemsNewRoute,
-}
-
-const AppSystemsRouteWithChildren = AppSystemsRoute._addFileChildren(
-  AppSystemsRouteChildren,
-)
-
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
-  AppCatalogRoute: typeof AppCatalogRoute
-  AppComponentsRoute: typeof AppComponentsRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
-  AppReportsRoute: typeof AppReportsRoute
-  AppSimulationRoute: typeof AppSimulationRoute
-  AppSystemsRoute: typeof AppSystemsRouteWithChildren
-  AppUploadsRoute: typeof AppUploadsRoute
+  AppColdproEquipamentosIdRoute: typeof AppColdproEquipamentosIdRoute
+  AppColdproEquipamentosIndexRoute: typeof AppColdproEquipamentosIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRoute,
-  AppCatalogRoute: AppCatalogRoute,
-  AppComponentsRoute: AppComponentsRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
-  AppReportsRoute: AppReportsRoute,
-  AppSimulationRoute: AppSimulationRoute,
-  AppSystemsRoute: AppSystemsRouteWithChildren,
-  AppUploadsRoute: AppUploadsRoute,
+  AppColdproEquipamentosIdRoute: AppColdproEquipamentosIdRoute,
+  AppColdproEquipamentosIndexRoute: AppColdproEquipamentosIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
