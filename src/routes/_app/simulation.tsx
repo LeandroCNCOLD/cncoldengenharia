@@ -6,12 +6,10 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  COMPONENT_FIELDS,
   COMPONENT_TYPE_LABELS,
   type ComponentType,
 } from "@/lib/component-schema";
 import { computeReadiness, type FieldConflict } from "@/lib/component-readiness";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/simulation")({
   component: SimulationPage,
@@ -33,13 +31,21 @@ function SimulationPage() {
       );
       return (comps ?? []).map((c) => {
         const conflicts = (c.conflicts ?? []) as unknown as FieldConflict[];
-        const r = computeReadiness(
-          c.type as ComponentType,
-          dataMap.get(c.id) ?? {},
-          conflicts,
-        );
+        const r = computeReadiness(c.type as ComponentType, dataMap.get(c.id) ?? {}, conflicts);
         return { ...c, readiness: r };
       });
+    },
+  });
+
+  const { data: systems } = useQuery({
+    queryKey: ["systems-shortcut"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("systems")
+        .select("id, name")
+        .order("created_at", { ascending: false })
+        .limit(6);
+      return data ?? [];
     },
   });
 
@@ -50,18 +56,51 @@ function SimulationPage() {
     <div>
       <PageHeader
         title="Simulação"
-        description="Componentes disponíveis para uso nos motores térmicos."
+        description="Sistemas prontos para simular e estado dos componentes."
       />
+
+      <section className="mb-8">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
+            <Network className="h-4 w-4" /> Sistemas ({systems?.length ?? 0})
+          </h2>
+          <Link to="/systems" className="text-xs text-primary hover:underline">Ver todos</Link>
+        </div>
+        {(systems?.length ?? 0) === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="py-6 text-center text-sm text-muted-foreground">
+              Nenhum sistema montado.{" "}
+              <Link to="/systems/new" className="text-primary hover:underline">Criar primeiro</Link>.
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+            {systems!.map((s) => (
+              <Link key={s.id} to="/systems/$id/simulate" params={{ id: s.id }}>
+                <Card className="transition-colors hover:border-primary/50">
+                  <CardContent className="flex items-center justify-between p-4">
+                    <div>
+                      <p className="font-medium">{s.name}</p>
+                      <p className="text-xs text-muted-foreground">Simular agora</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <section>
           <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-success">
-            <CheckCircle2 className="h-4 w-4" /> Prontos ({ready.length})
+            <CheckCircle2 className="h-4 w-4" /> Componentes prontos ({ready.length})
           </h2>
           {ready.length === 0 ? (
             <Card>
               <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                Nenhum componente pronto ainda. Complete os dados para liberar.
+                Nenhum componente pronto ainda.
               </CardContent>
             </Card>
           ) : (
@@ -87,7 +126,7 @@ function SimulationPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-warning-foreground">
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
             <AlertCircle className="h-4 w-4 text-warning" /> Bloqueados ({blocked.length})
           </h2>
           {blocked.length === 0 ? (
@@ -100,7 +139,7 @@ function SimulationPage() {
             <div className="space-y-2">
               {blocked.map((c) => (
                 <Link key={c.id} to="/components/$id" params={{ id: c.id }}>
-                  <Card className={cn("transition-colors hover:border-primary/50")}>
+                  <Card className="transition-colors hover:border-primary/50">
                     <CardContent className="space-y-1 p-4">
                       <div className="flex items-center justify-between">
                         <p className="font-medium">{c.name}</p>
@@ -126,9 +165,8 @@ function SimulationPage() {
         <CardContent className="flex items-start gap-3 p-4 text-sm text-muted-foreground">
           <FlaskConical className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
-            Os motores térmicos (compressor, evaporador, condensador), o solver de
-            equilíbrio e a simulação dinâmica serão habilitados nas próximas etapas.
-            Esta tela já reflete a base de componentes prontos.
+            O motor de equilíbrio AHRI 540 já está ativo. Linhas de sucção, custos,
+            simulação dinâmica e comparação serão liberados nas próximas etapas.
           </p>
         </CardContent>
       </Card>
