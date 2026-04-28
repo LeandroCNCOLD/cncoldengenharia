@@ -403,6 +403,7 @@ function CoilSimulatorPage() {
           <TabsTrigger value="air">Lado do Ar</TabsTrigger>
           <TabsTrigger value="ref">Lado Refrigerante</TabsTrigger>
           <TabsTrigger value="results">Resultados</TabsTrigger>
+          <TabsTrigger value="compare"><GitCompare className="mr-1 h-3 w-3" />Comparativo</TabsTrigger>
           <TabsTrigger value="alerts">
             Alertas {result && result.warnings.length > 0 && (
               <Badge variant="secondary" className="ml-2">{result.warnings.length}</Badge>
