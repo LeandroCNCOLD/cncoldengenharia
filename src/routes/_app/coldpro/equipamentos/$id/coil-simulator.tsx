@@ -173,8 +173,28 @@ function CoilSimulatorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  const [engine, setEngine] = useState<CoilEngine>("empirical");
   const [result, setResult] = useState<CoilSimulatorResult | null>(null);
+  const [physicalResult, setPhysicalResult] = useState<CoilSimulatorResult | null>(null);
+  const [empiricalResult, setEmpiricalResult] = useState<CoilSimulatorResult | null>(null);
   const [lastInput, setLastInput] = useState<CoilSimulatorInput | null>(null);
+
+  // Última calibração para o componente prefilled
+  const { data: latestCal } = useQuery({
+    queryKey: ["coil-cal-latest", prefillComponentId],
+    queryFn: () => (prefillComponentId ? getLatestCalibration(prefillComponentId) : Promise.resolve(null)),
+    enabled: !!prefillComponentId,
+  });
+
+  const calibration: CalibrationFactors = useMemo(() => {
+    if (!latestCal) return NEUTRAL_CALIBRATION;
+    return {
+      capacityCorrectionFactor: Number(latestCal.capacity_correction_factor) || 1,
+      airDpCorrectionFactor: Number(latestCal.air_dp_correction_factor) || 1,
+      refDpCorrectionFactor: Number(latestCal.ref_dp_correction_factor) || 1,
+      uaCorrectionFactor: Number(latestCal.ua_correction_factor) || 1,
+    };
+  }, [latestCal]);
 
   const buildInput = (): CoilSimulatorInput => ({
     mode: "verify",
@@ -231,35 +251,53 @@ function CoilSimulatorPage() {
 
   const handleCalculate = () => {
     const input = buildInput();
-    const out =
+    const emp =
       coilType === "evaporator" ? simulateDxEvaporator(input) : simulateDxCondenser(input);
-    setResult(out);
+    const phy = simulatePhysicalSimple(input, { calibration });
+    setEmpiricalResult(emp);
+    setPhysicalResult(phy);
+    const chosen = engine === "physical_simple" ? phy : emp;
+    setResult(chosen);
     setLastInput(input);
-    const errs = out.warnings.filter((w) => w.startsWith("ERRO"));
+    const errs = chosen.warnings.filter((w) => w.startsWith("ERRO"));
     if (errs.length) toast.error(errs[0]);
-    else toast.success(`Q = ${(out.capacityW / 1000).toFixed(2)} kW`);
+    else toast.success(`Q (${engine === "physical_simple" ? "físico" : "empírico"}) = ${(chosen.capacityW / 1000).toFixed(2)} kW`);
   };
 
-  const saveMutation = useMutation({
+  const calibrateMutation = useMutation({
     mutationFn: async () => {
-      if (!result || !lastInput) throw new Error("Calcule antes de salvar.");
-      await saveCoilSimulatorRun({
-        equipmentProjectId: id,
+      if (!prefillComponentId) throw new Error("Importe um componente antes de calibrar.");
+      if (!prefillNominal) throw new Error("Sem ponto nominal Unilab para calibrar.");
+      const input = buildInput();
+      const outcome = calibrateAgainstReference(input, {
+        capacityW: prefillNominal.capacityW,
+        airPressureDropPa: NUM(a.airPressureDropPa) ?? null,
+        refPressureDropKpa: NUM(r.refrigerantPressureDropKpa) ?? null,
+      });
+      const calibrated = simulatePhysicalSimple(input, { calibration: outcome.factors });
+      await saveCoilCalibration({
         componentItemId: prefillComponentId,
-        input: lastInput,
-        result,
+        coilType,
+        outcome,
+        referenceSource: "Unilab nominal",
+        inputSnapshot: input,
+        outputSnapshot: calibrated,
         userId: user?.id,
       });
+      return outcome;
     },
-    onSuccess: () => {
-      toast.success("Simulação salva no histórico.");
-      qc.invalidateQueries({ queryKey: ["coil-sims", id] });
+    onSuccess: (outcome) => {
+      qc.invalidateQueries({ queryKey: ["coil-cal-latest", prefillComponentId] });
+      const dev = outcome.deviationAfter.capacityPct;
+      toast.success(
+        outcome.meetsTargets
+          ? `Calibrado: erro de capacidade ${dev?.toFixed(2)}% (meta ≤5%).`
+          : `Calibração salva. Erro residual ${dev?.toFixed(2)}% — revisar.`,
+      );
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const errors = useMemo(() => result?.warnings.filter((w) => w.startsWith("ERRO")) ?? [], [result]);
-  const warns = useMemo(() => result?.warnings.filter((w) => !w.startsWith("ERRO")) ?? [], [result]);
 
   return (
     <div className="space-y-6">
