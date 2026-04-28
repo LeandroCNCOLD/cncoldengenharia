@@ -319,8 +319,9 @@ function CoilSimulatorPage() {
   const errors = useMemo(() => result?.warnings.filter((w) => w.startsWith("ERRO")) ?? [], [result]);
   const warns = useMemo(() => result?.warnings.filter((w) => !w.startsWith("ERRO")) ?? [], [result]);
 
-
+  return (
     <div className="space-y-6">
+
       <div>
         <Button asChild variant="ghost" size="sm" className="mb-2 -ml-2">
           <Link to="/coldpro/equipamentos/$id" params={{ id }}>
