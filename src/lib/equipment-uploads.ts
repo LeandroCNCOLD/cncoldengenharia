@@ -426,12 +426,17 @@ export async function buildPreCatalog(equipmentId: string): Promise<PreCatalog> 
     };
   }
 
-  const { data: extractions } = await (supabase as any)
+  const { data: extractionRows } = await (supabase as any)
     .from("technical_file_extractions")
-    .select("file_id, extracted_fields")
-    .in("file_id", fileIds);
+    .select("file_id, extracted_fields, created_at")
+    .in("file_id", fileIds)
+    .order("created_at", { ascending: false });
 
   const fileById = new Map(files.map((f: any) => [f.id, f]));
+  const latestByFile = new Map<string, any>();
+  for (const ex of extractionRows ?? []) {
+    if (!latestByFile.has(ex.file_id)) latestByFile.set(ex.file_id, ex);
+  }
 
   // Agrupa campos por categoria com fontes para detectar conflito
   const byTech: Record<"evaporator" | "condenser" | "compressor", Map<string, FieldSource[]>> = {
@@ -453,7 +458,7 @@ export async function buildPreCatalog(equipmentId: string): Promise<PreCatalog> 
   let confSum = 0;
   let confCount = 0;
 
-  for (const ex of extractions ?? []) {
+  for (const ex of latestByFile.values()) {
     const f: any = fileById.get(ex.file_id);
     if (!f) continue;
     const ef = (ex.extracted_fields ?? {}) as any;
