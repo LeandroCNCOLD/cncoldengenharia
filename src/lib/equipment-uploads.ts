@@ -429,10 +429,20 @@ export async function buildPreCatalog(equipmentId: string): Promise<PreCatalog> 
   const fileById = new Map(files.map((f: any) => [f.id, f]));
 
   // Agrupa campos por categoria com fontes para detectar conflito
-  const byTech: Record<string, Map<string, FieldSource[]>> = {
+  const byTech: Record<"evaporator" | "condenser" | "compressor", Map<string, FieldSource[]>> = {
     evaporator: new Map(),
     condenser: new Map(),
     compressor: new Map(),
+  };
+
+  // Aceita rótulos PT/EN do classificador
+  const TECH_ALIASES: Record<string, keyof typeof byTech> = {
+    evaporator: "evaporator",
+    evaporador: "evaporator",
+    condenser: "condenser",
+    condensador: "condenser",
+    compressor: "compressor",
+    compressor_polynomial: "compressor",
   };
 
   let confSum = 0;
@@ -442,14 +452,17 @@ export async function buildPreCatalog(equipmentId: string): Promise<PreCatalog> 
     const f: any = fileById.get(ex.file_id);
     if (!f) continue;
     const ef = (ex.extracted_fields ?? {}) as any;
-    const tech: string = ef?.classification?.technicalDocumentType ?? "generic";
+    const techRaw: string = String(
+      ef?.classification?.technicalDocumentType ?? f?.detected_technical_type ?? "generic",
+    ).toLowerCase();
+    const techKey = TECH_ALIASES[techRaw];
     const fields = (ef?.fields ?? {}) as Record<string, any>;
     if (typeof ef?.confidence === "number") {
       confSum += ef.confidence;
       confCount++;
     }
-    const target = byTech[tech as keyof typeof byTech];
-    if (!target) continue;
+    if (!techKey) continue;
+    const target = byTech[techKey];
     for (const [k, v] of Object.entries(fields)) {
       if (v == null || v === "") continue;
       if (!target.has(k)) target.set(k, []);
@@ -458,8 +471,9 @@ export async function buildPreCatalog(equipmentId: string): Promise<PreCatalog> 
   }
 
   const conflicts: PreCatalog["conflicts"] = [];
-  const flatten = (m: Map<string, FieldSource[]>) => {
+  const flatten = (m: Map<string, FieldSource[]> | undefined) => {
     const out: Record<string, any> = {};
+    if (!m) return out;
     for (const [field, sources] of m.entries()) {
       const distinct = Array.from(new Set(sources.map((s) => JSON.stringify(s.value))));
       if (distinct.length > 1) {
@@ -470,8 +484,8 @@ export async function buildPreCatalog(equipmentId: string): Promise<PreCatalog> 
     return out;
   };
 
-  const evaporatorData = flatten(byTech.evaporador);
-  const condenserData = flatten(byTech.condensador);
+  const evaporatorData = flatten(byTech.evaporator);
+  const condenserData = flatten(byTech.condenser);
   const compressorData = flatten(byTech.compressor);
 
   const merged = { ...evaporatorData, ...condenserData, ...compressorData };
