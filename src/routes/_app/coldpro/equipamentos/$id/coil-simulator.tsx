@@ -703,13 +703,13 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
 
 function CompareRow({
   label,
-  ref,
+  nominal,
   emp,
   phy,
   digits = 2,
 }: {
   label: string;
-  ref: number | null | undefined;
+  nominal: number | null | undefined;
   emp: number | null | undefined;
   phy: number | null | undefined;
   digits?: number;
@@ -717,14 +717,14 @@ function CompareRow({
   const fmt = (v: number | null | undefined) =>
     v == null || !Number.isFinite(v) ? "—" : v.toFixed(digits);
   const dev = (v: number | null | undefined) => {
-    if (v == null || ref == null || ref === 0) return "—";
-    const d = ((v - ref) / ref) * 100;
+    if (v == null || nominal == null || nominal === 0) return "—";
+    const d = ((v - nominal) / nominal) * 100;
     const sign = d > 0 ? "+" : "";
     return `${sign}${d.toFixed(1)}%`;
   };
   const tone = (v: number | null | undefined) => {
-    if (v == null || ref == null || ref === 0) return "text-muted-foreground";
-    const d = Math.abs((v - ref) / ref) * 100;
+    if (v == null || nominal == null || nominal === 0) return "text-muted-foreground";
+    const d = Math.abs((v - nominal) / nominal) * 100;
     if (d <= 5) return "text-emerald-600 font-medium";
     if (d <= 15) return "text-amber-600";
     return "text-destructive";
@@ -732,7 +732,7 @@ function CompareRow({
   return (
     <tr>
       <td className="py-2 pr-4 font-medium">{label}</td>
-      <td className="py-2 pr-4 font-mono">{fmt(ref)}</td>
+      <td className="py-2 pr-4 font-mono">{fmt(nominal)}</td>
       <td className="py-2 pr-4 font-mono">{fmt(emp)}</td>
       <td className="py-2 pr-4 font-mono">{fmt(phy)}</td>
       <td className={`py-2 pr-4 font-mono ${tone(emp)}`}>{dev(emp)}</td>
@@ -740,3 +740,4 @@ function CompareRow({
     </tr>
   );
 }
+
