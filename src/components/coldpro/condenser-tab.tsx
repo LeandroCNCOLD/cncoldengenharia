@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   createComponent,
-  getEvaporatorCoilModel,
+  getCondenserCoilModel,
   listComponentsByKind,
-  upsertEvaporatorCoilModel,
+  upsertCondenserCoilModel,
 } from "@/lib/coldpro/component-items";
 import { useAuth } from "@/lib/auth";
 import { UnilabImportForm } from "@/components/coldpro/unilab-import-form";
@@ -16,13 +16,13 @@ interface Props {
   equipmentProjectId: string;
 }
 
-export function EvaporatorTab({ equipmentProjectId }: Props) {
+export function CondenserTab({ equipmentProjectId }: Props) {
   const qc = useQueryClient();
   const { user } = useAuth();
 
   const { data: items = [] } = useQuery({
-    queryKey: ["components", equipmentProjectId, "evaporador"],
-    queryFn: () => listComponentsByKind(equipmentProjectId, "evaporador"),
+    queryKey: ["components", equipmentProjectId, "condensador"],
+    queryFn: () => listComponentsByKind(equipmentProjectId, "condensador"),
   });
 
   const create = useMutation({
@@ -30,27 +30,27 @@ export function EvaporatorTab({ equipmentProjectId }: Props) {
       if (!user) throw new Error("Não autenticado");
       return createComponent({
         equipment_project_id: equipmentProjectId,
-        kind: "evaporador",
+        kind: "condensador",
         created_by: user.id,
       });
     },
     onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ["components", equipmentProjectId, "evaporador"] }),
+      qc.invalidateQueries({ queryKey: ["components", equipmentProjectId, "condensador"] }),
   });
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Evaporadores</h2>
+        <h2 className="text-lg font-semibold">Condensadores</h2>
         <Button onClick={() => create.mutate()} disabled={create.isPending}>
-          <Plus className="mr-2 h-4 w-4" /> Adicionar evaporador
+          <Plus className="mr-2 h-4 w-4" /> Adicionar condensador
         </Button>
       </div>
 
       {items.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            Nenhum evaporador cadastrado.
+            Nenhum condensador cadastrado.
           </CardContent>
         </Card>
       ) : (
@@ -60,11 +60,11 @@ export function EvaporatorTab({ equipmentProjectId }: Props) {
             componentId={c.id}
             componentCode={c.code}
             componentStatus={c.status}
-            expectedKind="evaporator"
-            queryKey={["evap-model", c.id]}
-            fetchRow={async () => (await getEvaporatorCoilModel(c.id)) as Record<string, unknown> | null}
+            expectedKind="condenser"
+            queryKey={["cond-model", c.id]}
+            fetchRow={async () => (await getCondenserCoilModel(c.id)) as Record<string, unknown> | null}
             upsertRow={async (patch) => {
-              const r = await upsertEvaporatorCoilModel(patch as never);
+              const r = await upsertCondenserCoilModel(patch as never);
               return r as unknown as Record<string, unknown>;
             }}
           />
