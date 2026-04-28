@@ -512,6 +512,72 @@ function UploadsPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!extractionView} onOpenChange={(o) => !o && setExtractionView(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Resultado da extração</DialogTitle>
+          </DialogHeader>
+          {extractionView && (
+            <div className="max-h-[60vh] space-y-3 overflow-y-auto text-sm">
+              {(() => {
+                const ef = extractionView.extraction.extracted_fields as {
+                  classification?: { technicalDocumentType?: string; confidence?: number; reasons?: string[] };
+                  semanticStatus?: string;
+                  confidence?: number;
+                  fields?: Record<string, { value: unknown; unit?: string }>;
+                };
+                const fields = ef.fields ?? {};
+                const warns = (extractionView.extraction.warnings as string[]) ?? [];
+                return (
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div><span className="text-muted-foreground">Status técnico:</span> <Badge>{ef.semanticStatus ?? "—"}</Badge></div>
+                      <div><span className="text-muted-foreground">Tipo detectado:</span> {ef.classification?.technicalDocumentType ?? "—"}</div>
+                      <div><span className="text-muted-foreground">Confiança:</span> {((ef.confidence ?? 0) * 100).toFixed(0)}%</div>
+                      <div><span className="text-muted-foreground">Parser:</span> <span className="font-mono text-xs">{extractionView.extraction.parser}</span></div>
+                    </div>
+                    {Object.keys(fields).length > 0 && (
+                      <div>
+                        <p className="mb-1 font-medium">Campos extraídos</p>
+                        <div className="rounded border bg-muted/30 p-2 font-mono text-xs">
+                          {Object.entries(fields).map(([k, v]) => (
+                            <div key={k}>{k}: {String(v.value)} {v.unit ?? ""}</div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {warns.length > 0 && (
+                      <div>
+                        <p className="mb-1 font-medium text-amber-600">Avisos</p>
+                        <ul className="list-inside list-disc text-xs text-muted-foreground">
+                          {warns.map((w, i) => <li key={i}>{w}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                    <div className="flex justify-end gap-2 pt-2">
+                      <Button variant="outline" size="sm" onClick={async () => {
+                        if (!user) return;
+                        await setTechnicalFileStatus(extractionView.fileId, "processing", user.id);
+                        toast.success("Enviado para revisão.");
+                        qc.invalidateQueries({ queryKey: ["technical-files"] });
+                        setExtractionView(null);
+                      }}>Enviar para revisão</Button>
+                      <Button size="sm" onClick={async () => {
+                        if (!user) return;
+                        await approveTechnicalFile(extractionView.fileId, user.id);
+                        toast.success("Aprovado para o catálogo.");
+                        qc.invalidateQueries({ queryKey: ["technical-files"] });
+                        setExtractionView(null);
+                      }}>Aprovar para catálogo</Button>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
