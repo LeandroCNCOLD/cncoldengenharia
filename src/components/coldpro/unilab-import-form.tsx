@@ -26,7 +26,7 @@ import {
   type ValidationReport,
 } from "@/lib/coldpro/unilab-import";
 import { COMPONENT_STATUS_COLORS, COMPONENT_STATUS_LABELS } from "@/lib/coldpro/labels";
-import type { Database } from "@/integrations/supabase/types";
+// (Database type imported on demand by callers)
 
 type ExpectedKind = "evaporator" | "condenser";
 
@@ -598,5 +598,3 @@ function SourceBadge({ source }: { source?: FieldSource }) {
   );
 }
 
-// Re-export type used in Database typings (for callers)
-export type { Database };
