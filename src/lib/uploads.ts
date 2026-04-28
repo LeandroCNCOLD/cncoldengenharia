@@ -188,8 +188,8 @@ async function mergeExtractedFields(
     .upsert(
       [{
         component_id: componentId,
-        fields,
-        field_sources: sources,
+        fields: fields as never,
+        field_sources: sources as never,
         updated_by: userId,
       }],
       { onConflict: "component_id" },
@@ -231,8 +231,8 @@ export async function setFieldManual(params: {
     .upsert(
       [{
         component_id: componentId,
-        fields,
-        field_sources: sources,
+        fields: fields as never,
+        field_sources: sources as never,
         updated_by: userId,
       }],
       { onConflict: "component_id" },
@@ -245,7 +245,7 @@ export async function setFieldManual(params: {
     component_id: componentId,
     user_id: userId,
     action: "field_edited",
-    payload: { key, value },
+    payload: { key, value } as never,
   });
 
   await recomputeComponentStatus(componentId);
@@ -277,8 +277,8 @@ export async function resolveConflict(params: {
     .upsert(
       [{
         component_id: componentId,
-        fields,
-        field_sources: sources,
+        fields: fields as never,
+        field_sources: sources as never,
         updated_by: userId,
       }],
       { onConflict: "component_id" },
@@ -290,7 +290,7 @@ export async function resolveConflict(params: {
     component_id: componentId,
     user_id: userId,
     action: "conflict_resolved",
-    payload: { key, chosen: chosenSource },
+    payload: { key, chosen: chosenSource } as never,
   });
 
   await recomputeComponentStatus(componentId);
@@ -348,7 +348,7 @@ export async function removeComponentFile(params: {
       await supabase
         .from("component_data")
         .upsert(
-          [{ component_id: componentId, fields, field_sources: sources, updated_by: userId }],
+          [{ component_id: componentId, fields: fields as never, field_sources: sources as never, updated_by: userId }],
           { onConflict: "component_id" },
         );
     }
