@@ -322,7 +322,7 @@ export async function approveTechnicalFile(fileId: string, userId: string) {
     .limit(1)
     .maybeSingle();
 
-  await supabase.from("technical_catalog_snapshots").insert({
+  await (supabase as any).from("technical_catalog_snapshots").insert({
     product_id: file.product_id,
     file_id: file.id,
     file_group: file.file_group,
