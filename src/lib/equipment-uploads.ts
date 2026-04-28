@@ -317,6 +317,8 @@ export async function processBatch(batchId: string, userId: string) {
           : parsed.confidence >= 0.5
             ? "needs_review"
             : "failed";
+      const techType = (refined as any).technicalDocumentType ?? null;
+      const fileType = (refined as any).fileType ?? null;
 
       await (supabase as any).from("technical_file_extractions").insert({
         file_id: file.id,
