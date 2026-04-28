@@ -44,7 +44,13 @@ export async function csvParser(file: ArrayBuffer | string): Promise<ParserResul
   let rows: (string | number)[][] = [];
   let rawText = "";
   try {
-    rawText = typeof file === "string" ? file : new TextDecoder("utf-8").decode(file);
+    if (typeof file === "string") {
+      rawText = file;
+    } else {
+      // Tenta UTF-8; se aparecer caractere de substituição (�), refaz como latin-1.
+      const utf8 = new TextDecoder("utf-8", { fatal: false }).decode(file);
+      rawText = utf8.includes("\uFFFD") ? new TextDecoder("latin1").decode(file) : utf8;
+    }
     const lines = rawText.split(/\r?\n/).filter((l) => l.length > 0);
     if (!lines.length) warnings.push("CSV vazio.");
     const sep = detectSeparator(lines[0] ?? "");
