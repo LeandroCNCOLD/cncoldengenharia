@@ -352,8 +352,8 @@ export async function processBatch(batchId: string, userId: string) {
         .from("technical_files")
         .update({
           status: dbStatus,
-          detected_file_type: refined.fileType ?? null,
-          detected_technical_type: refined.technicalType ?? null,
+          detected_file_type: fileType,
+          detected_technical_type: techType,
         })
         .eq("id", file.id);
 
