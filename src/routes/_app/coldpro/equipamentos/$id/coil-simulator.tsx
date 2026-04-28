@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useMemo, useEffect } from "react";
-import { ArrowLeft, Calculator, Save, AlertTriangle, History } from "lucide-react";
+import { ArrowLeft, Calculator, Save, AlertTriangle, History, Sparkles, GitCompare } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/page-header";
@@ -28,6 +28,11 @@ import {
 } from "@/lib/coldpro/coil-simulations";
 import { simulateDxEvaporator } from "@/modules/coldpro/coil/dxEvaporatorSimulator";
 import { simulateDxCondenser } from "@/modules/coldpro/coil/dxCondenserSimulator";
+import { simulatePhysicalSimple } from "@/modules/coldpro/coil/physicalSimpleEngine";
+import { calibrateAgainstReference } from "@/modules/coldpro/coil/coilCalibration";
+import { getLatestCalibration, saveCoilCalibration } from "@/lib/coldpro/coil-calibrations";
+import { NEUTRAL_CALIBRATION, type CalibrationFactors, type CoilEngine } from "@/modules/coldpro/coil/coilEngineTypes";
+import { OriginBadge } from "@/components/coldpro/origin-badge";
 import type {
   CoilSimulatorInput,
   CoilSimulatorResult,
@@ -168,8 +173,28 @@ function CoilSimulatorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  const [engine, setEngine] = useState<CoilEngine>("empirical");
   const [result, setResult] = useState<CoilSimulatorResult | null>(null);
+  const [physicalResult, setPhysicalResult] = useState<CoilSimulatorResult | null>(null);
+  const [empiricalResult, setEmpiricalResult] = useState<CoilSimulatorResult | null>(null);
   const [lastInput, setLastInput] = useState<CoilSimulatorInput | null>(null);
+
+  // Última calibração para o componente prefilled
+  const { data: latestCal } = useQuery({
+    queryKey: ["coil-cal-latest", prefillComponentId],
+    queryFn: () => (prefillComponentId ? getLatestCalibration(prefillComponentId) : Promise.resolve(null)),
+    enabled: !!prefillComponentId,
+  });
+
+  const calibration: CalibrationFactors = useMemo(() => {
+    if (!latestCal) return NEUTRAL_CALIBRATION;
+    return {
+      capacityCorrectionFactor: Number(latestCal.capacity_correction_factor) || 1,
+      airDpCorrectionFactor: Number(latestCal.air_dp_correction_factor) || 1,
+      refDpCorrectionFactor: Number(latestCal.ref_dp_correction_factor) || 1,
+      uaCorrectionFactor: Number(latestCal.ua_correction_factor) || 1,
+    };
+  }, [latestCal]);
 
   const buildInput = (): CoilSimulatorInput => ({
     mode: "verify",
@@ -226,14 +251,52 @@ function CoilSimulatorPage() {
 
   const handleCalculate = () => {
     const input = buildInput();
-    const out =
+    const emp =
       coilType === "evaporator" ? simulateDxEvaporator(input) : simulateDxCondenser(input);
-    setResult(out);
+    const phy = simulatePhysicalSimple(input, { calibration });
+    setEmpiricalResult(emp);
+    setPhysicalResult(phy);
+    const chosen = engine === "physical_simple" ? phy : emp;
+    setResult(chosen);
     setLastInput(input);
-    const errs = out.warnings.filter((w) => w.startsWith("ERRO"));
+    const errs = chosen.warnings.filter((w) => w.startsWith("ERRO"));
     if (errs.length) toast.error(errs[0]);
-    else toast.success(`Q = ${(out.capacityW / 1000).toFixed(2)} kW`);
+    else toast.success(`Q (${engine === "physical_simple" ? "físico" : "empírico"}) = ${(chosen.capacityW / 1000).toFixed(2)} kW`);
   };
+
+  const calibrateMutation = useMutation({
+    mutationFn: async () => {
+      if (!prefillComponentId) throw new Error("Importe um componente antes de calibrar.");
+      if (!prefillNominal) throw new Error("Sem ponto nominal Unilab para calibrar.");
+      const input = buildInput();
+      const outcome = calibrateAgainstReference(input, {
+        capacityW: prefillNominal.capacityW,
+        airPressureDropPa: NUM(a.airPressureDropPa) ?? null,
+        refPressureDropKpa: NUM(r.refrigerantPressureDropKpa) ?? null,
+      });
+      const calibrated = simulatePhysicalSimple(input, { calibration: outcome.factors });
+      await saveCoilCalibration({
+        componentItemId: prefillComponentId,
+        coilType,
+        outcome,
+        referenceSource: "Unilab nominal",
+        inputSnapshot: input,
+        outputSnapshot: calibrated,
+        userId: user?.id,
+      });
+      return outcome;
+    },
+    onSuccess: (outcome) => {
+      qc.invalidateQueries({ queryKey: ["coil-cal-latest", prefillComponentId] });
+      const dev = outcome.deviationAfter.capacityPct;
+      toast.success(
+        outcome.meetsTargets
+          ? `Calibrado: erro de capacidade ${dev?.toFixed(2)}% (meta ≤5%).`
+          : `Calibração salva. Erro residual ${dev?.toFixed(2)}% — revisar.`,
+      );
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -258,6 +321,7 @@ function CoilSimulatorPage() {
 
   return (
     <div className="space-y-6">
+
       <div>
         <Button asChild variant="ghost" size="sm" className="mb-2 -ml-2">
           <Link to="/coldpro/equipamentos/$id" params={{ id }}>
@@ -272,18 +336,31 @@ function CoilSimulatorPage() {
             </span>
           }
           actions={
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Select value={coilType} onValueChange={(v) => setCoilType(v as CoilType)}>
-                <SelectTrigger className="w-44">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="evaporator">Evaporador (DX)</SelectItem>
                   <SelectItem value="condenser">Condensador</SelectItem>
                 </SelectContent>
               </Select>
+              <Select value={engine} onValueChange={(v) => setEngine(v as CoilEngine)}>
+                <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="empirical">Motor: Empírico</SelectItem>
+                  <SelectItem value="physical_simple">Motor: Físico simples</SelectItem>
+                </SelectContent>
+              </Select>
               <Button onClick={handleCalculate}>
-                <Calculator className="mr-1 h-4 w-4" /> Calcular como Verify
+                <Calculator className="mr-1 h-4 w-4" /> Calcular
+              </Button>
+              <Button
+                variant="secondary"
+                disabled={!prefillNominal || !prefillComponentId || calibrateMutation.isPending}
+                onClick={() => calibrateMutation.mutate()}
+                title={!prefillNominal ? "Importe um componente Unilab para habilitar" : "Calibrar motor físico contra ponto nominal"}
+              >
+                <Sparkles className="mr-1 h-4 w-4" /> Calibrar c/ Unilab
               </Button>
               <Button
                 variant="outline"
@@ -297,7 +374,25 @@ function CoilSimulatorPage() {
         />
       </div>
 
+      {latestCal && (
+        <Alert>
+          <Sparkles className="h-4 w-4" />
+          <AlertTitle className="flex items-center gap-2">
+            Calibração ativa
+            <Badge variant={latestCal.meets_targets ? "default" : "secondary"}>
+              {latestCal.meets_targets ? "Dentro das metas" : "Fora das metas"}
+            </Badge>
+          </AlertTitle>
+          <AlertDescription className="text-xs">
+            Fatores aplicados ao motor físico — capacidade ×{Number(latestCal.capacity_correction_factor).toFixed(3)},
+            ΔP ar ×{Number(latestCal.air_dp_correction_factor).toFixed(3)},
+            ΔP ref ×{Number(latestCal.ref_dp_correction_factor).toFixed(3)}.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="max-w-md">
+
         <Label>Descrição da simulação</Label>
         <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Ex.: Verify base R404A -8°C" />
       </div>
@@ -308,6 +403,7 @@ function CoilSimulatorPage() {
           <TabsTrigger value="air">Lado do Ar</TabsTrigger>
           <TabsTrigger value="ref">Lado Refrigerante</TabsTrigger>
           <TabsTrigger value="results">Resultados</TabsTrigger>
+          <TabsTrigger value="compare"><GitCompare className="mr-1 h-3 w-3" />Comparativo</TabsTrigger>
           <TabsTrigger value="alerts">
             Alertas {result && result.warnings.length > 0 && (
               <Badge variant="secondary" className="ml-2">{result.warnings.length}</Badge>
@@ -441,6 +537,82 @@ function CoilSimulatorPage() {
           )}
         </TabsContent>
 
+        {/* Comparativo Unilab × Empírico × Físico */}
+        <TabsContent value="compare" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <GitCompare className="h-4 w-4" /> Comparativo de motores
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              {!empiricalResult || !physicalResult ? (
+                <p className="text-sm text-muted-foreground">Clique em <strong>Calcular</strong> para gerar a comparação.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="border-b">
+                      <tr className="text-left">
+                        <th className="py-2 pr-4">Métrica</th>
+                        <th className="py-2 pr-4">Unilab (nominal)</th>
+                        <th className="py-2 pr-4">Empírico</th>
+                        <th className="py-2 pr-4">Físico simples {latestCal && <Badge variant="outline" className="ml-1">calibrado</Badge>}</th>
+                        <th className="py-2 pr-4">Δ Empírico</th>
+                        <th className="py-2 pr-4">Δ Físico</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      <CompareRow
+                        label="Capacidade (kW)"
+                        ref={prefillNominal ? prefillNominal.capacityW / 1000 : null}
+                        emp={empiricalResult.capacityW / 1000}
+                        phy={physicalResult.capacityW / 1000}
+                        digits={2}
+                      />
+                      <CompareRow
+                        label="DT real (K)"
+                        ref={prefillNominal ? prefillNominal.airTempInC - prefillNominal.refTempC : null}
+                        emp={empiricalResult.dtRealK}
+                        phy={physicalResult.dtRealK}
+                        digits={2}
+                      />
+                      <CompareRow
+                        label="ΔP ar (Pa)"
+                        ref={NUM(a.airPressureDropPa) ?? null}
+                        emp={empiricalResult.airPressureDropPa}
+                        phy={physicalResult.airPressureDropPa}
+                        digits={0}
+                      />
+                      <CompareRow
+                        label="ΔP refrigerante (kPa)"
+                        ref={NUM(r.refrigerantPressureDropKpa) ?? null}
+                        emp={empiricalResult.refPressureDropKpa}
+                        phy={physicalResult.refPressureDropKpa}
+                        digits={2}
+                      />
+                      <CompareRow
+                        label="Vel. frontal (m/s)"
+                        ref={NUM(a.faceVelocityMs) ?? null}
+                        emp={empiricalResult.faceVelocityMs}
+                        phy={physicalResult.faceVelocityMs}
+                        digits={2}
+                      />
+                    </tbody>
+                  </table>
+                  <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
+                    <span className="text-muted-foreground">Origem dos campos:</span>
+                    <OriginBadge origin="imported" />
+                    <OriginBadge origin="calculated" />
+                    <OriginBadge origin="calibrated" />
+                    <OriginBadge origin="estimated" />
+                    <OriginBadge origin="manual" />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* Alertas */}
         <TabsContent value="alerts" className="mt-4 space-y-3">
           {!result && <p className="text-sm text-muted-foreground">Sem cálculo ainda.</p>}
@@ -526,5 +698,45 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
       <p className="mt-1 text-lg font-semibold">{value}</p>
       {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
     </div>
+  );
+}
+
+function CompareRow({
+  label,
+  ref,
+  emp,
+  phy,
+  digits = 2,
+}: {
+  label: string;
+  ref: number | null | undefined;
+  emp: number | null | undefined;
+  phy: number | null | undefined;
+  digits?: number;
+}) {
+  const fmt = (v: number | null | undefined) =>
+    v == null || !Number.isFinite(v) ? "—" : v.toFixed(digits);
+  const dev = (v: number | null | undefined) => {
+    if (v == null || ref == null || ref === 0) return "—";
+    const d = ((v - ref) / ref) * 100;
+    const sign = d > 0 ? "+" : "";
+    return `${sign}${d.toFixed(1)}%`;
+  };
+  const tone = (v: number | null | undefined) => {
+    if (v == null || ref == null || ref === 0) return "text-muted-foreground";
+    const d = Math.abs((v - ref) / ref) * 100;
+    if (d <= 5) return "text-emerald-600 font-medium";
+    if (d <= 15) return "text-amber-600";
+    return "text-destructive";
+  };
+  return (
+    <tr>
+      <td className="py-2 pr-4 font-medium">{label}</td>
+      <td className="py-2 pr-4 font-mono">{fmt(ref)}</td>
+      <td className="py-2 pr-4 font-mono">{fmt(emp)}</td>
+      <td className="py-2 pr-4 font-mono">{fmt(phy)}</td>
+      <td className={`py-2 pr-4 font-mono ${tone(emp)}`}>{dev(emp)}</td>
+      <td className={`py-2 pr-4 font-mono ${tone(phy)}`}>{dev(phy)}</td>
+    </tr>
   );
 }
