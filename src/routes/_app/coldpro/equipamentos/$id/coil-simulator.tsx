@@ -336,18 +336,31 @@ function CoilSimulatorPage() {
             </span>
           }
           actions={
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Select value={coilType} onValueChange={(v) => setCoilType(v as CoilType)}>
-                <SelectTrigger className="w-44">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="evaporator">Evaporador (DX)</SelectItem>
                   <SelectItem value="condenser">Condensador</SelectItem>
                 </SelectContent>
               </Select>
+              <Select value={engine} onValueChange={(v) => setEngine(v as CoilEngine)}>
+                <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="empirical">Motor: Empírico</SelectItem>
+                  <SelectItem value="physical_simple">Motor: Físico simples</SelectItem>
+                </SelectContent>
+              </Select>
               <Button onClick={handleCalculate}>
-                <Calculator className="mr-1 h-4 w-4" /> Calcular como Verify
+                <Calculator className="mr-1 h-4 w-4" /> Calcular
+              </Button>
+              <Button
+                variant="secondary"
+                disabled={!prefillNominal || !prefillComponentId || calibrateMutation.isPending}
+                onClick={() => calibrateMutation.mutate()}
+                title={!prefillNominal ? "Importe um componente Unilab para habilitar" : "Calibrar motor físico contra ponto nominal"}
+              >
+                <Sparkles className="mr-1 h-4 w-4" /> Calibrar c/ Unilab
               </Button>
               <Button
                 variant="outline"
@@ -358,6 +371,25 @@ function CoilSimulatorPage() {
               </Button>
             </div>
           }
+        />
+      </div>
+
+      {latestCal && (
+        <Alert>
+          <Sparkles className="h-4 w-4" />
+          <AlertTitle className="flex items-center gap-2">
+            Calibração ativa
+            <Badge variant={latestCal.meets_targets ? "default" : "secondary"}>
+              {latestCal.meets_targets ? "Dentro das metas" : "Fora das metas"}
+            </Badge>
+          </AlertTitle>
+          <AlertDescription className="text-xs">
+            Fatores aplicados ao motor físico — capacidade ×{Number(latestCal.capacity_correction_factor).toFixed(3)},
+            ΔP ar ×{Number(latestCal.air_dp_correction_factor).toFixed(3)},
+            ΔP ref ×{Number(latestCal.ref_dp_correction_factor).toFixed(3)}.
+          </AlertDescription>
+        </Alert>
+      )}
         />
       </div>
 
