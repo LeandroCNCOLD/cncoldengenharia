@@ -238,7 +238,7 @@ export async function processTechnicalFile(fileVersionId: string, userId: string
         ? "needs_review"
         : "failed";
 
-  await supabase.from("technical_file_extractions").insert({
+  await (supabase as any).from("technical_file_extractions").insert({
     file_id: file.id,
     product_id: file.product_id,
     parser: parsed.parserUsed,
@@ -276,7 +276,7 @@ export async function processTechnicalFile(fileVersionId: string, userId: string
     errors: parsed.errors,
   });
 
-  await supabase.from("technical_file_versions").insert({
+  await (supabase as any).from("technical_file_versions").insert({
     file_id: file.id,
     product_id: file.product_id,
     version_number: 0,
@@ -322,7 +322,7 @@ export async function approveTechnicalFile(fileId: string, userId: string) {
     .limit(1)
     .maybeSingle();
 
-  await supabase.from("technical_catalog_snapshots").insert({
+  await (supabase as any).from("technical_catalog_snapshots").insert({
     product_id: file.product_id,
     file_id: file.id,
     file_group: file.file_group,

@@ -1,34 +1,31 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import {
-  CheckCircle2,
-  Cog,
-  Download,
-  Eye,
-  GitCompare,
-  History,
-  Loader2,
-  Plus,
-  Upload,
-  XCircle,
-} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-import { PageHeader } from "@/components/page-header";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  ACCEPTED_EXTENSIONS,
+  BATCH_STATUS_LABELS,
+  EQUIPMENT_KINDS,
+  type EquipmentKind,
+  type UploadBatchStatus,
+  approveBatch,
+  buildPreCatalog,
+  createEquipment,
+  getSignedUrl,
+  listBatches,
+  listEquipments,
+  listFilesByBatch,
+  processBatch,
+  rejectBatch,
+  uploadEquipmentBatch,
+} from "@/lib/equipment-uploads";
+
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -37,631 +34,559 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
-import {
-  FILE_GROUPS,
-  FILE_STATUS_LABELS,
-  TECHNICAL_CATEGORIES,
-  TechnicalUploadError,
-  approveTechnicalFile,
-  getTechnicalFileSignedUrl,
-  processTechnicalFile,
-  setTechnicalFileStatus,
-  slugify,
-  uploadTechnicalFile,
-  type FileGroup,
-  type TechnicalCategory,
-  type TechnicalFileStatus,
-} from "@/lib/technical-uploads";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Loader2, Plus, RefreshCw, Upload, FileText, Folder } from "lucide-react";
 
 export const Route = createFileRoute("/_app/uploads")({
   component: UploadsPage,
 });
 
-const STATUS_VARIANT: Record<
-  TechnicalFileStatus,
-  "default" | "secondary" | "destructive" | "outline"
-> = {
-  uploaded: "secondary",
-  processing: "outline",
-  parsed: "default",
-  validated: "default",
-  approved: "default",
-  rejected: "destructive",
-  archived: "outline",
-};
+function statusVariant(s: UploadBatchStatus) {
+  switch (s) {
+    case "approved":
+      return "default" as const;
+    case "rejected":
+      return "destructive" as const;
+    case "needs_review":
+      return "outline" as const;
+    default:
+      return "secondary" as const;
+  }
+}
 
 function UploadsPage() {
-  const { user } = useAuth();
-  const qc = useQueryClient();
+  const [equipments, setEquipments] = useState<any[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [batches, setBatches] = useState<any[]>([]);
+  const [filesByBatch, setFilesByBatch] = useState<Record<string, any[]>>({});
+  const [loading, setLoading] = useState(false);
 
-  const [productId, setProductId] = useState<string>("");
-  const [fileGroup, setFileGroup] = useState<FileGroup | "">("");
-  const [category, setCategory] = useState<TechnicalCategory | "">("");
-  const [description, setDescription] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
   const [notes, setNotes] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [openProduct, setOpenProduct] = useState(false);
-  const [versionsForFile, setVersionsForFile] = useState<{
-    productId: string;
-    group: FileGroup;
-    category: TechnicalCategory;
-  } | null>(null);
-  const [extractionView, setExtractionView] = useState<{
-    fileId: string;
-    extraction: { parser: string; warnings: unknown; raw_preview: string | null; extracted_fields: Record<string, unknown>; success: boolean };
-  } | null>(null);
-
-  const products = useQuery({
-    queryKey: ["technical-products"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("technical_products")
-        .select("id, name, slug, manufacturer")
-        .order("name");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const files = useQuery({
-    queryKey: ["technical-files"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("technical_files")
-        .select(
-          "id, product_id, file_group, technical_category, original_filename, version_label, status, uploaded_at, uploaded_by, storage_path, is_current_version, technical_products(name, slug)",
-        )
-        .order("uploaded_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const versions = useQuery({
-    queryKey: ["technical-file-history", versionsForFile],
-    enabled: !!versionsForFile,
-    queryFn: async () => {
-      if (!versionsForFile) return [];
-      const { data, error } = await supabase
-        .from("technical_files")
-        .select("id, version_label, version_number, status, uploaded_at, original_filename")
-        .eq("product_id", versionsForFile.productId)
-        .eq("file_group", versionsForFile.group)
-        .eq("technical_category", versionsForFile.category)
-        .order("version_number", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const upload = useMutation({
-    mutationFn: async () => {
-      if (!user || !file || !productId || !fileGroup || !category) {
-        throw new TechnicalUploadError("Preencha todos os campos obrigatórios.");
-      }
-      return uploadTechnicalFile({
-        productId,
-        fileGroup: fileGroup as FileGroup,
-        technicalCategory: category as TechnicalCategory,
-        description: description.trim() || undefined,
-        notes: notes.trim() || undefined,
-        file,
-        userId: user.id,
-      });
-    },
-    onSuccess: (res) => {
-      toast.success(`Arquivo enviado (${res.versionLabel}).`);
-      setFile(null);
-      setDescription("");
-      setNotes("");
-      qc.invalidateQueries({ queryKey: ["technical-files"] });
-    },
-    onError: (e) => toast.error("Falha no envio", { description: (e as Error).message }),
-    onSettled: () => setBusy(false),
-  });
-
-  async function handleProcess(id: string) {
-    if (!user) return;
-    try {
-      await processTechnicalFile(id, user.id);
-      toast.success("Arquivo processado.");
-      qc.invalidateQueries({ queryKey: ["technical-files"] });
-      // Busca extração mais recente para exibir
-      const { data: ext } = await supabase
-        .from("technical_file_extractions")
-        .select("*")
-        .eq("file_id", id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (ext) setExtractionView({ fileId: id, extraction: ext as never });
-    } catch (e) {
-      toast.error("Falha ao processar", { description: (e as Error).message });
-    }
-  }
-
-  async function handleApprove(id: string) {
-    if (!user) return;
-    try {
-      await approveTechnicalFile(id, user.id);
-      toast.success("Aprovado para o catálogo técnico.");
-      qc.invalidateQueries({ queryKey: ["technical-files"] });
-    } catch (e) {
-      toast.error("Falha ao aprovar", { description: (e as Error).message });
-    }
-  }
-
-  async function handleReject(id: string) {
-    if (!user) return;
-    await setTechnicalFileStatus(id, "rejected", user.id);
-    toast.success("Arquivo rejeitado.");
-    qc.invalidateQueries({ queryKey: ["technical-files"] });
-  }
-
-  async function handleView(path: string) {
-    try {
-      const url = await getTechnicalFileSignedUrl(path);
-      window.open(url, "_blank", "noopener,noreferrer");
-    } catch (e) {
-      toast.error((e as Error).message);
-    }
-  }
-
-  const canSubmit = useMemo(
-    () => !!user && !!productId && !!fileGroup && !!category && !!file,
-    [user, productId, fileGroup, category, file],
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number; name: string } | null>(
+    null,
   );
 
-  return (
-    <div>
-      <PageHeader
-        title="Upload Técnico"
-        description="Central técnica de documentos por produto, grupo, categoria e versão."
-      />
+  const [preCatalog, setPreCatalog] = useState<any | null>(null);
+  const [processingBatchId, setProcessingBatchId] = useState<string | null>(null);
 
-      <Card className="mb-6">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base">Enviar arquivo técnico</CardTitle>
-          <NewProductDialog
-            open={openProduct}
-            onOpenChange={setOpenProduct}
-            onCreated={(id) => {
-              setProductId(id);
-              qc.invalidateQueries({ queryKey: ["technical-products"] });
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+  }, []);
+
+  async function refreshEquipments() {
+    setLoading(true);
+    try {
+      const list = await listEquipments();
+      setEquipments(list);
+      if (!selectedId && list.length) setSelectedId(list[0].id);
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function refreshBatches(equipmentId: string) {
+    const list = await listBatches(equipmentId);
+    setBatches(list);
+    const filesMap: Record<string, any[]> = {};
+    for (const b of list) {
+      filesMap[b.id] = await listFilesByBatch(b.id);
+    }
+    setFilesByBatch(filesMap);
+  }
+
+  useEffect(() => {
+    refreshEquipments();
+  }, []);
+
+  useEffect(() => {
+    if (selectedId) {
+      refreshBatches(selectedId);
+      buildPreCatalog(selectedId).then(setPreCatalog).catch(() => setPreCatalog(null));
+    }
+  }, [selectedId]);
+
+  const selectedEquipment = useMemo(
+    () => equipments.find((e) => e.id === selectedId) ?? null,
+    [equipments, selectedId],
+  );
+
+  async function handleUpload() {
+    if (!selectedId || !userId) return;
+    if (!files.length) {
+      toast.error("Selecione pelo menos um arquivo.");
+      return;
+    }
+    setUploading(true);
+    setProgress({ done: 0, total: files.length, name: "" });
+    try {
+      const r = await uploadEquipmentBatch({
+        equipmentId: selectedId,
+        files,
+        notes,
+        userId,
+        onProgress: (done, total, name) => setProgress({ done, total, name }),
+      });
+      toast.success(`Lote ${r.batch.batch_label} criado (${r.files.length} arquivo(s)).`);
+      setFiles([]);
+      setNotes("");
+      await refreshBatches(selectedId);
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setUploading(false);
+      setProgress(null);
+    }
+  }
+
+  async function handleProcess(batchId: string) {
+    if (!userId) return;
+    setProcessingBatchId(batchId);
+    try {
+      const res = await processBatch(batchId, userId);
+      toast.success(`Pasta processada: ${res.status}`);
+      if (selectedId) {
+        await refreshBatches(selectedId);
+        setPreCatalog(await buildPreCatalog(selectedId));
+      }
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setProcessingBatchId(null);
+    }
+  }
+
+  async function handleApprove(batchId: string) {
+    if (!userId) return;
+    try {
+      await approveBatch(batchId, userId);
+      toast.success("Lote aprovado para o catálogo.");
+      if (selectedId) await refreshBatches(selectedId);
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  }
+
+  async function handleReject(batchId: string) {
+    try {
+      await rejectBatch(batchId);
+      toast.success("Lote rejeitado.");
+      if (selectedId) await refreshBatches(selectedId);
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  }
+
+  async function openFile(path: string) {
+    try {
+      const url = await getSignedUrl(path);
+      window.open(url, "_blank");
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  }
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Upload Técnico</h1>
+          <p className="text-muted-foreground">
+            Pastas técnicas por equipamento. Cada upload múltiplo gera um lote/versão.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={refreshEquipments} disabled={loading}>
+            <RefreshCw className="h-4 w-4 mr-2" /> Atualizar
+          </Button>
+          <NewEquipmentDialog
+            userId={userId}
+            onCreated={async (id) => {
+              await refreshEquipments();
+              setSelectedId(id);
             }}
           />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="space-y-2">
-              <Label>Produto técnico *</Label>
-              <Select value={productId} onValueChange={setProductId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um produto" />
-                </SelectTrigger>
-                <SelectContent>
-                  {products.data?.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name}
-                      {p.manufacturer ? ` · ${p.manufacturer}` : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Grupo *</Label>
-              <Select value={fileGroup} onValueChange={(v) => setFileGroup(v as FileGroup)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o grupo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {FILE_GROUPS.map((g) => (
-                    <SelectItem key={g.value} value={g.value}>
-                      {g.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Categoria técnica *</Label>
-              <Select value={category} onValueChange={(v) => setCategory(v as TechnicalCategory)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TECHNICAL_CATEGORIES.map((c) => (
-                    <SelectItem key={c.value} value={c.value}>
-                      {c.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+        </div>
+      </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Descrição</Label>
-              <Input
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Ex.: ficha técnica oficial CN 1200 LT"
-                maxLength={200}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Observação da versão</Label>
-              <Input
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Ex.: revisão de outubro 2026"
-                maxLength={200}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Arquivo *</Label>
-            <Input
-              type="file"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              disabled={busy}
-            />
-          </div>
-
-          <Button
-            onClick={() => {
-              setBusy(true);
-              upload.mutate();
-            }}
-            disabled={!canSubmit || busy}
-          >
-            {busy ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Enviando…
-              </>
-            ) : (
-              <>
-                <Upload className="mr-2 h-4 w-4" /> Enviar nova versão
-              </>
+      <div className="grid grid-cols-12 gap-6">
+        {/* Lista de pastas */}
+        <Card className="col-span-12 md:col-span-4">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Folder className="h-4 w-4" /> Pastas de Equipamento
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1 max-h-[600px] overflow-auto">
+            {equipments.length === 0 && (
+              <p className="text-sm text-muted-foreground">Nenhuma pasta criada ainda.</p>
             )}
-          </Button>
-        </CardContent>
-      </Card>
+            {equipments.map((eq) => (
+              <button
+                key={eq.id}
+                onClick={() => setSelectedId(eq.id)}
+                className={`w-full text-left p-2 rounded-md hover:bg-muted transition ${
+                  selectedId === eq.id ? "bg-muted" : ""
+                }`}
+              >
+                <div className="font-medium text-sm">{eq.name}</div>
+                <div className="text-xs text-muted-foreground">
+                  {eq.internal_code ?? eq.slug} · {eq.equipment_kind}
+                </div>
+              </button>
+            ))}
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Arquivos técnicos</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {files.isLoading ? (
-            <p className="py-12 text-center text-sm text-muted-foreground">Carregando…</p>
-          ) : !files.data?.length ? (
-            <p className="py-12 text-center text-sm text-muted-foreground">
-              Nenhum arquivo enviado ainda.
-            </p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Produto</TableHead>
-                  <TableHead>Grupo</TableHead>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead>Versão</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Enviado em</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {files.data.map((f) => {
-                  const product = f.technical_products as { name: string; slug: string } | null;
-                  const groupLabel =
-                    FILE_GROUPS.find((g) => g.value === f.file_group)?.label ?? f.file_group;
-                  const categoryLabel =
-                    TECHNICAL_CATEGORIES.find((c) => c.value === f.technical_category)?.label ??
-                    f.technical_category;
-                  return (
-                    <TableRow key={f.id}>
-                      <TableCell className="font-medium">{product?.name ?? "—"}</TableCell>
-                      <TableCell>{groupLabel}</TableCell>
-                      <TableCell>{categoryLabel}</TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {f.version_label}
-                        {f.is_current_version && (
-                          <Badge variant="outline" className="ml-2">
-                            atual
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={STATUS_VARIANT[f.status as TechnicalFileStatus]}>
-                          {FILE_STATUS_LABELS[f.status as TechnicalFileStatus]}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {new Date(f.uploaded_at).toLocaleString("pt-BR")}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex flex-wrap justify-end gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleView(f.storage_path)}
-                            title="Visualizar"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleView(f.storage_path)}
-                            title="Baixar"
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleProcess(f.id)}
-                            title="Processar"
-                          >
-                            <Cog className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() =>
-                              setVersionsForFile({
-                                productId: f.product_id,
-                                group: f.file_group as FileGroup,
-                                category: f.technical_category as TechnicalCategory,
-                              })
-                            }
-                            title="Comparar versões"
-                          >
-                            <GitCompare className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleApprove(f.id)}
-                            title="Aprovar para catálogo"
-                            className="text-emerald-600 hover:text-emerald-700"
-                          >
-                            <CheckCircle2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleReject(f.id)}
-                            title="Rejeitar"
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <XCircle className="h-4 w-4" />
-                          </Button>
+        {/* Detalhes da pasta */}
+        <div className="col-span-12 md:col-span-8 space-y-6">
+          {selectedEquipment ? (
+            <>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">{selectedEquipment.name}</CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedEquipment.slug} · {selectedEquipment.equipment_kind}
+                    {selectedEquipment.default_refrigerant
+                      ? ` · ${selectedEquipment.default_refrigerant}`
+                      : ""}
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-2">
+                    <Label>Adicionar arquivos (PDF/XLS/CSV/DOCX/TXT/PNG/JPG)</Label>
+                    <Input
+                      type="file"
+                      multiple
+                      accept={ACCEPTED_EXTENSIONS.map((e) => "." + e).join(",")}
+                      onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
+                    />
+                    {files.length > 0 && (
+                      <div className="text-xs text-muted-foreground">
+                        {files.length} arquivo(s) selecionado(s)
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Observação do lote</Label>
+                    <Textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Ex.: ficha + curva do compressor revisão maio/2026"
+                    />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Button onClick={handleUpload} disabled={uploading || !files.length}>
+                      {uploading ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4 mr-2" />
+                      )}
+                      Enviar lote
+                    </Button>
+                    {progress && (
+                      <div className="text-xs text-muted-foreground">
+                        {progress.done}/{progress.total} – {progress.name}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Lotes */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Lotes técnicos</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {batches.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      Nenhum lote enviado ainda.
+                    </p>
+                  )}
+                  {batches.map((b) => {
+                    const bf = filesByBatch[b.id] ?? [];
+                    return (
+                      <div key={b.id} className="border rounded-md p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-sm font-medium">
+                              {b.batch_label}{" "}
+                              <Badge variant={statusVariant(b.status)} className="ml-2">
+                                {BATCH_STATUS_LABELS[b.status as UploadBatchStatus]}
+                              </Badge>
+                            </div>
+                            {b.notes && (
+                              <div className="text-xs text-muted-foreground">{b.notes}</div>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleProcess(b.id)}
+                              disabled={processingBatchId === b.id}
+                            >
+                              {processingBatchId === b.id ? (
+                                <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+                              ) : null}
+                              Processar pasta técnica
+                            </Button>
+                            <Button size="sm" onClick={() => handleApprove(b.id)}>
+                              Aprovar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleReject(b.id)}
+                            >
+                              Rejeitar
+                            </Button>
+                          </div>
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      <Dialog
-        open={!!versionsForFile}
-        onOpenChange={(open) => !open && setVersionsForFile(null)}
-      >
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <History className="h-4 w-4" /> Histórico de versões
-            </DialogTitle>
-          </DialogHeader>
-          <div className="max-h-[60vh] overflow-y-auto">
-            {versions.isLoading ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">Carregando…</p>
-            ) : !versions.data?.length ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">
-                Nenhuma versão encontrada.
-              </p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Versão</TableHead>
-                    <TableHead>Arquivo</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Data</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {versions.data.map((v) => (
-                    <TableRow key={v.id}>
-                      <TableCell className="font-mono text-xs">{v.version_label}</TableCell>
-                      <TableCell>{v.original_filename}</TableCell>
-                      <TableCell>
-                        <Badge variant={STATUS_VARIANT[v.status as TechnicalFileStatus]}>
-                          {FILE_STATUS_LABELS[v.status as TechnicalFileStatus]}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {new Date(v.uploaded_at).toLocaleString("pt-BR")}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!extractionView} onOpenChange={(o) => !o && setExtractionView(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Resultado da extração</DialogTitle>
-          </DialogHeader>
-          {extractionView && (
-            <div className="max-h-[60vh] space-y-3 overflow-y-auto text-sm">
-              {(() => {
-                const ef = extractionView.extraction.extracted_fields as {
-                  classification?: { technicalDocumentType?: string; confidence?: number; reasons?: string[] };
-                  semanticStatus?: string;
-                  confidence?: number;
-                  fields?: Record<string, { value: unknown; unit?: string }>;
-                };
-                const fields = ef.fields ?? {};
-                const warns = (extractionView.extraction.warnings as string[]) ?? [];
-                return (
-                  <>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div><span className="text-muted-foreground">Status técnico:</span> <Badge>{ef.semanticStatus ?? "—"}</Badge></div>
-                      <div><span className="text-muted-foreground">Tipo detectado:</span> {ef.classification?.technicalDocumentType ?? "—"}</div>
-                      <div><span className="text-muted-foreground">Confiança:</span> {((ef.confidence ?? 0) * 100).toFixed(0)}%</div>
-                      <div><span className="text-muted-foreground">Parser:</span> <span className="font-mono text-xs">{extractionView.extraction.parser}</span></div>
-                    </div>
-                    {Object.keys(fields).length > 0 && (
-                      <div>
-                        <p className="mb-1 font-medium">Campos extraídos</p>
-                        <div className="rounded border bg-muted/30 p-2 font-mono text-xs">
-                          {Object.entries(fields).map(([k, v]) => (
-                            <div key={k}>{k}: {String(v.value)} {v.unit ?? ""}</div>
+                        <div className="space-y-1">
+                          {bf.map((f: any) => (
+                            <div
+                              key={f.id}
+                              className="flex items-center justify-between text-xs p-1.5 rounded hover:bg-muted"
+                            >
+                              <button
+                                className="flex items-center gap-2 truncate"
+                                onClick={() => openFile(f.storage_path)}
+                              >
+                                <FileText className="h-3.5 w-3.5" />
+                                <span className="truncate">{f.original_filename}</span>
+                              </button>
+                              <div className="flex gap-2 items-center">
+                                {f.detected_technical_type && (
+                                  <Badge variant="outline">{f.detected_technical_type}</Badge>
+                                )}
+                                <Badge variant="secondary">{f.status}</Badge>
+                              </div>
+                            </div>
                           ))}
                         </div>
                       </div>
-                    )}
-                    {warns.length > 0 && (
-                      <div>
-                        <p className="mb-1 font-medium text-amber-600">Avisos</p>
-                        <ul className="list-inside list-disc text-xs text-muted-foreground">
-                          {warns.map((w, i) => <li key={i}>{w}</li>)}
-                        </ul>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+
+              {/* Pré-catálogo */}
+              {preCatalog && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Pré-catálogo do equipamento</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4 text-sm">
+                    <div className="grid grid-cols-3 gap-4">
+                      <PreSection title="Evaporador" data={preCatalog.evaporatorData} />
+                      <PreSection title="Condensador" data={preCatalog.condenserData} />
+                      <PreSection title="Compressor" data={preCatalog.compressorData} />
+                    </div>
+                    <div>
+                      <div className="font-medium">
+                        Confiança: {(preCatalog.confidenceScore * 100).toFixed(0)}%
+                      </div>
+                      {preCatalog.missingFields.length > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          Faltando: {preCatalog.missingFields.join(", ")}
+                        </div>
+                      )}
+                    </div>
+                    {preCatalog.conflicts.length > 0 && (
+                      <div className="border border-destructive/40 rounded p-2 space-y-1">
+                        <div className="text-destructive font-medium">
+                          Conflitos detectados ({preCatalog.conflicts.length})
+                        </div>
+                        {preCatalog.conflicts.map((c: any, i: number) => (
+                          <div key={i} className="text-xs">
+                            <span className="font-medium">{c.field}:</span>{" "}
+                            {c.sources
+                              .map((s: any) => `${s.filename}=${JSON.stringify(s.value)}`)
+                              .join(" ↔ ")}
+                          </div>
+                        ))}
                       </div>
                     )}
-                    <div className="flex justify-end gap-2 pt-2">
-                      <Button variant="outline" size="sm" onClick={async () => {
-                        if (!user) return;
-                        await setTechnicalFileStatus(extractionView.fileId, "processing", user.id);
-                        toast.success("Enviado para revisão.");
-                        qc.invalidateQueries({ queryKey: ["technical-files"] });
-                        setExtractionView(null);
-                      }}>Enviar para revisão</Button>
-                      <Button size="sm" onClick={async () => {
-                        if (!user) return;
-                        await approveTechnicalFile(extractionView.fileId, user.id);
-                        toast.success("Aprovado para o catálogo.");
-                        qc.invalidateQueries({ queryKey: ["technical-files"] });
-                        setExtractionView(null);
-                      }}>Aprovar para catálogo</Button>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          ) : (
+            <Card>
+              <CardContent className="py-10 text-center text-muted-foreground">
+                Selecione ou crie uma pasta de equipamento à esquerda.
+              </CardContent>
+            </Card>
           )}
-        </DialogContent>
-      </Dialog>
+        </div>
+      </div>
     </div>
   );
 }
 
-function NewProductDialog(props: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
+function PreSection({ title, data }: { title: string; data: Record<string, any> }) {
+  const entries = Object.entries(data);
+  return (
+    <div className="border rounded p-2">
+      <div className="font-medium mb-1">{title}</div>
+      {entries.length === 0 ? (
+        <div className="text-xs text-muted-foreground">— sem dados —</div>
+      ) : (
+        <ul className="text-xs space-y-0.5">
+          {entries.map(([k, v]) => (
+            <li key={k}>
+              <span className="text-muted-foreground">{k}:</span>{" "}
+              {typeof v === "object" ? JSON.stringify(v) : String(v)}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function NewEquipmentDialog({
+  userId,
+  onCreated,
+}: {
+  userId: string | null;
   onCreated: (id: string) => void;
 }) {
-  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [manufacturer, setManufacturer] = useState("");
+  const [internalCode, setInternalCode] = useState("");
+  const [family, setFamily] = useState("");
+  const [kind, setKind] = useState<EquipmentKind>("unidade_condensadora");
+  const [refrigerant, setRefrigerant] = useState("");
   const [description, setDescription] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   async function submit() {
-    if (!user || !name.trim()) return;
-    setBusy(true);
+    if (!userId) {
+      toast.error("Faça login.");
+      return;
+    }
+    if (!name.trim()) {
+      toast.error("Nome é obrigatório.");
+      return;
+    }
+    setSaving(true);
     try {
-      const slug = slugify(name);
-      const { data, error } = await supabase
-        .from("technical_products")
-        .insert({
-          name: name.trim(),
-          slug,
-          manufacturer: manufacturer.trim() || null,
-          description: description.trim() || null,
-          created_by: user.id,
-        })
-        .select("id")
-        .single();
-      if (error || !data) throw error ?? new Error("Falha ao criar produto.");
-      toast.success("Produto técnico criado.");
-      props.onCreated(data.id);
-      props.onOpenChange(false);
+      const created = await createEquipment({
+        name: name.trim(),
+        internalCode: internalCode.trim() || undefined,
+        family: family.trim() || undefined,
+        equipmentKind: kind,
+        defaultRefrigerant: refrigerant.trim() || undefined,
+        description: description.trim() || undefined,
+        userId,
+      });
+      toast.success("Pasta criada.");
+      setOpen(false);
       setName("");
-      setManufacturer("");
+      setInternalCode("");
+      setFamily("");
+      setRefrigerant("");
       setDescription("");
-    } catch (e) {
-      toast.error("Falha ao criar produto", { description: (e as Error).message });
+      onCreated(created.id);
+    } catch (e: any) {
+      toast.error(e.message);
     } finally {
-      setBusy(false);
+      setSaving(false);
     }
   }
 
   return (
-    <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Plus className="mr-2 h-4 w-4" /> Novo produto técnico
+        <Button size="sm">
+          <Plus className="h-4 w-4 mr-2" /> Nova pasta
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Cadastrar produto técnico</DialogTitle>
+          <DialogTitle>Nova pasta de equipamento</DialogTitle>
+          <DialogDescription>
+            Cada pasta agrupa todos os arquivos técnicos de um equipamento.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <div className="space-y-2">
-            <Label>Nome *</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={120} />
+          <div className="space-y-1">
+            <Label>Nome do equipamento *</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="CN2000LT" />
           </div>
-          <div className="space-y-2">
-            <Label>Fabricante</Label>
-            <Input
-              value={manufacturer}
-              onChange={(e) => setManufacturer(e.target.value)}
-              maxLength={120}
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Código interno</Label>
+              <Input
+                value={internalCode}
+                onChange={(e) => setInternalCode(e.target.value)}
+                placeholder="cn-2000-lt"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Família</Label>
+              <Input
+                value={family}
+                onChange={(e) => setFamily(e.target.value)}
+                placeholder="Linha LT"
+              />
+            </div>
           </div>
-          <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Tipo</Label>
+              <Select value={kind} onValueChange={(v) => setKind(v as EquipmentKind)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {EQUIPMENT_KINDS.map((k) => (
+                    <SelectItem key={k.value} value={k.value}>
+                      {k.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label>Fluido refrigerante padrão</Label>
+              <Input
+                value={refrigerant}
+                onChange={(e) => setRefrigerant(e.target.value)}
+                placeholder="R-404A"
+              />
+            </div>
+          </div>
+          <div className="space-y-1">
             <Label>Descrição</Label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              maxLength={500}
+              rows={3}
             />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => props.onOpenChange(false)}>
+          <Button variant="outline" onClick={() => setOpen(false)}>
             Cancelar
           </Button>
-          <Button onClick={submit} disabled={!name.trim() || busy}>
-            {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          <Button onClick={submit} disabled={saving}>
+            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
             Criar
           </Button>
         </DialogFooter>
