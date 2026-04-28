@@ -537,6 +537,82 @@ function CoilSimulatorPage() {
           )}
         </TabsContent>
 
+        {/* Comparativo Unilab × Empírico × Físico */}
+        <TabsContent value="compare" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <GitCompare className="h-4 w-4" /> Comparativo de motores
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              {!empiricalResult || !physicalResult ? (
+                <p className="text-sm text-muted-foreground">Clique em <strong>Calcular</strong> para gerar a comparação.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="border-b">
+                      <tr className="text-left">
+                        <th className="py-2 pr-4">Métrica</th>
+                        <th className="py-2 pr-4">Unilab (nominal)</th>
+                        <th className="py-2 pr-4">Empírico</th>
+                        <th className="py-2 pr-4">Físico simples {latestCal && <Badge variant="outline" className="ml-1">calibrado</Badge>}</th>
+                        <th className="py-2 pr-4">Δ Empírico</th>
+                        <th className="py-2 pr-4">Δ Físico</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      <CompareRow
+                        label="Capacidade (kW)"
+                        ref={prefillNominal ? prefillNominal.capacityW / 1000 : null}
+                        emp={empiricalResult.capacityW / 1000}
+                        phy={physicalResult.capacityW / 1000}
+                        digits={2}
+                      />
+                      <CompareRow
+                        label="DT real (K)"
+                        ref={prefillNominal ? prefillNominal.airTempInC - prefillNominal.refTempC : null}
+                        emp={empiricalResult.dtRealK}
+                        phy={physicalResult.dtRealK}
+                        digits={2}
+                      />
+                      <CompareRow
+                        label="ΔP ar (Pa)"
+                        ref={NUM(a.airPressureDropPa) ?? null}
+                        emp={empiricalResult.airPressureDropPa}
+                        phy={physicalResult.airPressureDropPa}
+                        digits={0}
+                      />
+                      <CompareRow
+                        label="ΔP refrigerante (kPa)"
+                        ref={NUM(r.refrigerantPressureDropKpa) ?? null}
+                        emp={empiricalResult.refPressureDropKpa}
+                        phy={physicalResult.refPressureDropKpa}
+                        digits={2}
+                      />
+                      <CompareRow
+                        label="Vel. frontal (m/s)"
+                        ref={NUM(a.faceVelocityMs) ?? null}
+                        emp={empiricalResult.faceVelocityMs}
+                        phy={physicalResult.faceVelocityMs}
+                        digits={2}
+                      />
+                    </tbody>
+                  </table>
+                  <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
+                    <span className="text-muted-foreground">Origem dos campos:</span>
+                    <OriginBadge origin="imported" />
+                    <OriginBadge origin="calculated" />
+                    <OriginBadge origin="calibrated" />
+                    <OriginBadge origin="estimated" />
+                    <OriginBadge origin="manual" />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* Alertas */}
         <TabsContent value="alerts" className="mt-4 space-y-3">
           {!result && <p className="text-sm text-muted-foreground">Sem cálculo ainda.</p>}
