@@ -383,6 +383,51 @@ export type Database = {
           },
         ]
       }
+      technical_equipments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          default_refrigerant: string | null
+          description: string | null
+          equipment_kind: Database["public"]["Enums"]["equipment_kind"]
+          family: string | null
+          id: string
+          internal_code: string | null
+          name: string
+          slug: string
+          status: Database["public"]["Enums"]["equipment_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          default_refrigerant?: string | null
+          description?: string | null
+          equipment_kind?: Database["public"]["Enums"]["equipment_kind"]
+          family?: string | null
+          id?: string
+          internal_code?: string | null
+          name: string
+          slug: string
+          status?: Database["public"]["Enums"]["equipment_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          default_refrigerant?: string | null
+          description?: string | null
+          equipment_kind?: Database["public"]["Enums"]["equipment_kind"]
+          family?: string | null
+          id?: string
+          internal_code?: string | null
+          name?: string
+          slug?: string
+          status?: Database["public"]["Enums"]["equipment_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       technical_file_extractions: {
         Row: {
           created_at: string
@@ -491,8 +536,11 @@ export type Database = {
       technical_files: {
         Row: {
           description: string | null
+          detected_file_type: string | null
+          detected_technical_type: string | null
+          equipment_id: string | null
           file_extension: string
-          file_group: Database["public"]["Enums"]["technical_file_group"]
+          file_group: Database["public"]["Enums"]["technical_file_group"] | null
           file_hash: string | null
           file_size: number | null
           id: string
@@ -500,11 +548,14 @@ export type Database = {
           mime_type: string | null
           notes: string | null
           original_filename: string
-          product_id: string
+          product_id: string | null
           status: Database["public"]["Enums"]["technical_file_status"]
           storage_path: string
-          technical_category: Database["public"]["Enums"]["technical_file_category"]
+          technical_category:
+            | Database["public"]["Enums"]["technical_file_category"]
+            | null
           updated_at: string
+          upload_batch_id: string | null
           uploaded_at: string
           uploaded_by: string | null
           version_label: string
@@ -512,8 +563,13 @@ export type Database = {
         }
         Insert: {
           description?: string | null
+          detected_file_type?: string | null
+          detected_technical_type?: string | null
+          equipment_id?: string | null
           file_extension: string
-          file_group: Database["public"]["Enums"]["technical_file_group"]
+          file_group?:
+            | Database["public"]["Enums"]["technical_file_group"]
+            | null
           file_hash?: string | null
           file_size?: number | null
           id?: string
@@ -521,11 +577,14 @@ export type Database = {
           mime_type?: string | null
           notes?: string | null
           original_filename: string
-          product_id: string
+          product_id?: string | null
           status?: Database["public"]["Enums"]["technical_file_status"]
           storage_path: string
-          technical_category: Database["public"]["Enums"]["technical_file_category"]
+          technical_category?:
+            | Database["public"]["Enums"]["technical_file_category"]
+            | null
           updated_at?: string
+          upload_batch_id?: string | null
           uploaded_at?: string
           uploaded_by?: string | null
           version_label: string
@@ -533,8 +592,13 @@ export type Database = {
         }
         Update: {
           description?: string | null
+          detected_file_type?: string | null
+          detected_technical_type?: string | null
+          equipment_id?: string | null
           file_extension?: string
-          file_group?: Database["public"]["Enums"]["technical_file_group"]
+          file_group?:
+            | Database["public"]["Enums"]["technical_file_group"]
+            | null
           file_hash?: string | null
           file_size?: number | null
           id?: string
@@ -542,11 +606,14 @@ export type Database = {
           mime_type?: string | null
           notes?: string | null
           original_filename?: string
-          product_id?: string
+          product_id?: string | null
           status?: Database["public"]["Enums"]["technical_file_status"]
           storage_path?: string
-          technical_category?: Database["public"]["Enums"]["technical_file_category"]
+          technical_category?:
+            | Database["public"]["Enums"]["technical_file_category"]
+            | null
           updated_at?: string
+          upload_batch_id?: string | null
           uploaded_at?: string
           uploaded_by?: string | null
           version_label?: string
@@ -554,10 +621,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "technical_files_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "technical_equipments"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "technical_files_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "technical_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_files_upload_batch_id_fkey"
+            columns: ["upload_batch_id"]
+            isOneToOne: false
+            referencedRelation: "technical_upload_batches"
             referencedColumns: ["id"]
           },
         ]
@@ -598,6 +679,50 @@ export type Database = {
         }
         Relationships: []
       }
+      technical_upload_batches: {
+        Row: {
+          batch_label: string
+          batch_number: number
+          equipment_id: string
+          id: string
+          notes: string | null
+          status: Database["public"]["Enums"]["upload_batch_status"]
+          updated_at: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          batch_label: string
+          batch_number: number
+          equipment_id: string
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["upload_batch_status"]
+          updated_at?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          batch_label?: string
+          batch_number?: number
+          equipment_id?: string
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["upload_batch_status"]
+          updated_at?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technical_upload_batches_equipment_id_fkey"
+            columns: ["equipment_id"]
+            isOneToOne: false
+            referencedRelation: "technical_equipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -636,6 +761,15 @@ export type Database = {
       app_role: "admin" | "engenheiro"
       component_status: "incompleto" | "validando" | "pronto" | "invalido"
       component_type: "compressor" | "evaporador" | "condensador"
+      equipment_kind:
+        | "unidade_condensadora"
+        | "evaporador"
+        | "condensador"
+        | "compressor"
+        | "rack"
+        | "sistema_completo"
+        | "outro"
+      equipment_status: "active" | "draft" | "archived"
       file_kind: "csv" | "pdf" | "xls"
       file_processing_status: "pendente" | "processando" | "processado" | "erro"
       technical_file_category:
@@ -662,6 +796,14 @@ export type Database = {
         | "processing"
         | "parsed"
         | "validated"
+        | "approved"
+        | "rejected"
+        | "archived"
+      upload_batch_status:
+        | "uploaded"
+        | "processing"
+        | "parsed"
+        | "needs_review"
         | "approved"
         | "rejected"
         | "archived"
@@ -795,6 +937,16 @@ export const Constants = {
       app_role: ["admin", "engenheiro"],
       component_status: ["incompleto", "validando", "pronto", "invalido"],
       component_type: ["compressor", "evaporador", "condensador"],
+      equipment_kind: [
+        "unidade_condensadora",
+        "evaporador",
+        "condensador",
+        "compressor",
+        "rack",
+        "sistema_completo",
+        "outro",
+      ],
+      equipment_status: ["active", "draft", "archived"],
       file_kind: ["csv", "pdf", "xls"],
       file_processing_status: ["pendente", "processando", "processado", "erro"],
       technical_file_category: [
@@ -823,6 +975,15 @@ export const Constants = {
         "processing",
         "parsed",
         "validated",
+        "approved",
+        "rejected",
+        "archived",
+      ],
+      upload_batch_status: [
+        "uploaded",
+        "processing",
+        "parsed",
+        "needs_review",
         "approved",
         "rejected",
         "archived",
