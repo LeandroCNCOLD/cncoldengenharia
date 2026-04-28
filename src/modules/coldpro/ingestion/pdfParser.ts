@@ -8,20 +8,25 @@ export async function pdfParser(file: ArrayBuffer): Promise<ParserResult> {
   let rawText = "";
   try {
     // Import dinâmico para evitar carregar no SSR.
-    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    // Desativa worker (executa sync no main thread).
-    // @ts-expect-error - GlobalWorkerOptions existe em runtime.
+    const pdfjs = (await import("pdfjs-dist/legacy/build/pdf.mjs")) as {
+      GlobalWorkerOptions: { workerSrc: string };
+      getDocument: (opts: unknown) => { promise: Promise<unknown> };
+    };
     pdfjs.GlobalWorkerOptions.workerSrc = "";
-    const doc = await pdfjs.getDocument({
+    const doc = (await pdfjs.getDocument({
       data: new Uint8Array(file),
-      disableWorker: true,
       useSystemFonts: true,
-    }).promise;
+    }).promise) as {
+      numPages: number;
+      getPage: (n: number) => Promise<{
+        getTextContent: () => Promise<{ items: { str?: string }[] }>;
+      }>;
+    };
     const parts: string[] = [];
     for (let p = 1; p <= doc.numPages; p++) {
       const page = await doc.getPage(p);
       const content = await page.getTextContent();
-      const text = content.items.map((it: { str?: string }) => it.str ?? "").join(" ");
+      const text = content.items.map((it) => it.str ?? "").join(" ");
       parts.push(text);
     }
     rawText = parts.join("\n").replace(/\s+\n/g, "\n").replace(/[ \t]{2,}/g, " ").trim();
