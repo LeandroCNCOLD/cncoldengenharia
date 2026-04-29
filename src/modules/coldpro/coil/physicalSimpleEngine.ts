@@ -16,6 +16,20 @@ import { deriveCoilGeometry, type GeometryDerived } from "./geometryDerived";
 import type { CalibrationFactors } from "./coilEngineTypes";
 import { NEUTRAL_CALIBRATION, normalizeCalibrationFactors } from "./coilEngineTypes";
 import { computeUnilabFactors } from "./unilabFactorApplication";
+import { calcHeatExchangeArea } from "./heatExchangeArea";
+import { selectAirHTC, type AirHtcCorrelation } from "./airSideCorrelations";
+
+/** Calibração só pode ajustar ±20% — além disso, o erro é estrutural. */
+const CALIBRATION_FINE_TUNE_LIMIT = 0.20;
+
+function clampFineTune(factor: number): { value: number; clamped: boolean } {
+  const lo = 1 - CALIBRATION_FINE_TUNE_LIMIT;
+  const hi = 1 + CALIBRATION_FINE_TUNE_LIMIT;
+  if (!Number.isFinite(factor) || factor <= 0) return { value: 1, clamped: true };
+  if (factor < lo) return { value: lo, clamped: true };
+  if (factor > hi) return { value: hi, clamped: true };
+  return { value: factor, clamped: false };
+}
 import {
   generateModelSignature,
   checkCalibrationValidity,
