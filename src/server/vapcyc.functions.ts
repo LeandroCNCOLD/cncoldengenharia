@@ -42,7 +42,7 @@ export const runVapcycSystemSimulation = createServerFn({ method: 'POST' })
   .inputValidator((d) => systemInput.parse(d))
   .handler(async ({ data, context }) => {
     const result = await simulateSystemVapcyc(context.supabase, data);
-    return JSON.parse(JSON.stringify(result)) as Record<string, unknown>;
+    return JSON.parse(JSON.stringify(result)) as { [k: string]: {} };
   });
 
 const searchInput = z.object({
