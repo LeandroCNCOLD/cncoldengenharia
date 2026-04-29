@@ -205,6 +205,8 @@ async function migrateRefrigerants(userId: string | null, budget: number): Promi
       model: r.code ?? r.name ?? null,
       code: r.code ?? null,
       status: "approved",
+      source: "UNILAB",
+      context: "reference",
       normalized_json: r as Record<string, unknown>,
       source_raw_id: r.id,
       source_batch_id: null,
