@@ -246,6 +246,54 @@ function classifyPoint(opts: {
   return { status, warnings: w };
 }
 
+function runHybridSim(
+  input: CoilSimulatorInput,
+  cal: CalibrationFactors,
+  hybridCalibration?: CoilCalibration | null,
+): { result: CoilSimulatorResult; signature: string; calibrationCompatible: boolean } {
+  const calcInput = buildHybridCalcInput(input);
+  // Anexa calibração híbrida (se houver) — engine valida assinatura internamente.
+  if (hybridCalibration) calcInput.calibration = hybridCalibration;
+
+  const r = simulateHybridCoil(calcInput);
+  // Aplica também os fatores legados (CalibrationFactors) como pós-multiplicador
+  // para manter compat com o pipeline atual quando não há calibração híbrida.
+  const capPost = hybridCalibration ? 1 : (cal.capacityCorrectionFactor ?? 1);
+  const airDpPost = hybridCalibration ? 1 : (cal.airDpCorrectionFactor ?? 1);
+  const refDpPost = hybridCalibration ? 1 : (cal.refDpCorrectionFactor ?? 1);
+
+  const capacityW = Math.max(0, r.capacityW * capPost);
+  const airDp = r.airPressureDropPa != null ? r.airPressureDropPa * airDpPost : null;
+  const refDp = r.refrigerantPressureDropKpa != null ? r.refrigerantPressureDropKpa * refDpPost : null;
+
+  // face velocity derivada da geometria efetiva
+  const faceVel =
+    r.frontalAreaM2 > 0 && (input.air.airflowM3h ?? 0) > 0
+      ? (input.air.airflowM3h ?? 0) / 3600 / r.frontalAreaM2
+      : null;
+
+  // Adapta para CoilSimulatorResult-like (apenas campos usados a jusante).
+  const adapted = {
+    coilType: input.coilType,
+    capacityW,
+    capacityKcalh: capacityW * 0.859845,
+    sensibleW: capacityW,
+    latentW: 0,
+    airPressureDropPa: airDp,
+    refPressureDropKpa: refDp,
+    faceVelocityMs: faceVel,
+    airOutletTempC: null,
+    warnings: r.warnings ?? [],
+    breakdown: { uWm2k: r.uWm2K, hAir: r.hAirWm2K, hRef: r.hRefWm2K, area: r.effectiveAreaM2 },
+  } as unknown as CoilSimulatorResult;
+
+  return {
+    result: adapted,
+    signature: r.modelSignature ?? "",
+    calibrationCompatible: Boolean(r.calibrationCompatible),
+  };
+}
+
 function runSim(
   input: CoilSimulatorInput,
   engine: PerformanceEngine,
@@ -253,7 +301,11 @@ function runSim(
   unilabGeometryFactor?: UnilabGeometryFactor | null,
   nominalFaceVelocityMs?: number,
   debug?: { componentItemId?: string; calibrationId?: string | null; nominalCapacityW?: number | null; calibrationSignature?: string | null },
+  hybridCalibration?: CoilCalibration | null,
 ): CoilSimulatorResult {
+  if (engine === "hybrid") {
+    return runHybridSim(input, cal, hybridCalibration).result;
+  }
   if (engine === "physical_simple") {
     return simulatePhysicalSimple(input, {
       calibration: cal,
