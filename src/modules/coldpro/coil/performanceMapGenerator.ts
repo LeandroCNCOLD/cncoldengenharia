@@ -635,6 +635,9 @@ export function generateCoilPerformanceMap(
     baselineCalibrationConfidence: calConf,
     points,
     summary,
+    modelSignature,
+    blocked: false,
+    blockReason: null,
   };
 }
 
