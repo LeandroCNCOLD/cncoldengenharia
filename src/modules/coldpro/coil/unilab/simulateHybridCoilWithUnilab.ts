@@ -22,7 +22,7 @@ export interface SimulateWithUnilabInput {
 
 export const simulateHybridCoilWithUnilab = createServerFn({ method: 'POST' })
   .inputValidator((data: unknown) => data as SimulateWithUnilabInput)
-  .handler(async ({ data }): Promise<CoilCalculationResult> => {
+  .handler<Promise<CoilCalculationResult>>(async ({ data }) => {
     const { geometryCode, geometryOverride, base } = data;
     const warnings: string[] = [];
 
