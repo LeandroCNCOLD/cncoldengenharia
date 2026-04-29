@@ -167,6 +167,7 @@ export function PerformanceMapPanel({
         calibration: calFactors,
         calibrationConfidence: calConf,
         ranges,
+        unilabGeometryFactor: unilabFactor,
         componentItemId,
         calibrationId: calRow?.id ?? null,
       });
