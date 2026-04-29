@@ -99,6 +99,21 @@ export interface HybridDebugInfo {
   isEstimated: boolean;
   factorsApplied: Record<string, number | undefined> | null;
   warnings: string[];
+  /** Geometria calculada do aletado. */
+  geometry?: {
+    frontalAreaM2: number;
+    totalExternalAreaM2: number;
+    internalTubeAreaM2: number;
+    internalVolumeL: number;
+    finEfficiency: number;
+    finCount: number;
+    totalTubeCount: number;
+    totalTubeLengthM: number;
+    qSpecificWm2: number;
+    areaSource: 'calculated_geometry' | 'imported_unilab';
+    areaDeviationPct?: number;
+    volumeDeviationPct?: number;
+  };
 }
 
 export interface CoilSimulatorResult {

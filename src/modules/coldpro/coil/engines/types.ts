@@ -16,10 +16,20 @@ export interface GeometryInput {
   finThicknessMm: number;
   coilLengthMm: number;
   coilHeightMm: number;
+  /** Profundidade do coil (na direção do escoamento). Default = rows × rowPitchMm. */
+  coilDepthMm?: number;
   rows: number;
   tubesPerRow: number;
   circuits: number;
+  /** Tubos suprimidos (entradas/saídas/manifolds). Default 0. */
+  skippedTubes?: number;
   tubeMaterialConductivityWmK?: number;
+  /** Condutividade do material da aleta (W/mK). Default 205 (Al). */
+  finMaterialConductivityWmK?: number;
+  /** Área de troca de catálogo Unilab (m²) — usada como fallback se geometria divergir. */
+  unilabExchangeAreaM2?: number;
+  /** Volume interno de catálogo Unilab (L) — referência para comparação. */
+  unilabInternalVolumeL?: number;
 }
 
 export interface UnilabFactors {
@@ -88,5 +98,20 @@ export interface CoilCalculationResult {
   isEstimated: boolean;
   modelSignature: string;
   warnings: string[];
+  /** Resultado completo do cálculo geométrico (área frontal, externa, volume etc.). */
+  geometryResult?: {
+    frontalAreaM2: number;
+    totalExternalAreaM2: number;
+    internalTubeAreaM2: number;
+    internalVolumeL: number;
+    finEfficiency: number;
+    finCount: number;
+    totalTubeCount: number;
+    totalTubeLengthM: number;
+    qSpecificWm2: number;
+    areaSource: 'calculated_geometry' | 'imported_unilab';
+    areaDeviationPct?: number;
+    volumeDeviationPct?: number;
+  };
   debug: Record<string, any>;
 }

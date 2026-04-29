@@ -40,9 +40,11 @@ function buildGeometry(input: CoilSimulatorInput): GeometryInput {
     finThicknessMm: g.finThicknessMm ?? 0.13,
     coilLengthMm: g.coilLengthMm ?? 1000,
     coilHeightMm: tubesPerRow * (g.tubeSpacingMm ?? 25),
+    coilDepthMm: rows * (g.rowSpacingMm ?? 22),
     rows,
     tubesPerRow,
     circuits: g.circuits ?? 1,
+    skippedTubes: g.skippedTubes ?? 0,
   };
 }
 
@@ -89,6 +91,7 @@ export function runHybridDebug(input: CoilSimulatorInput): HybridDebugInfo | und
       isEstimated: r.isEstimated,
       factorsApplied: d.factorsApplied,
       warnings: r.warnings,
+      geometry: r.geometryResult,
     };
   } catch {
     return undefined;

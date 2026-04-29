@@ -747,6 +747,58 @@ function CoilSimulatorPage() {
                     </div>
                   </div>
 
+                  {result.debug.geometry && (
+                    <div>
+                      <div className="text-xs uppercase text-muted-foreground mb-2 flex items-center gap-2">
+                        Geometria do aletado
+                        <Badge variant={result.debug.geometry.areaSource === "calculated_geometry" ? "default" : "secondary"}>
+                          {result.debug.geometry.areaSource === "calculated_geometry" ? "calculada" : "Unilab"}
+                        </Badge>
+                      </div>
+                      <div className="grid gap-2 font-mono text-xs md:grid-cols-3">
+                        <div className="rounded-md border p-2">
+                          Área frontal: <span className="font-semibold">{result.debug.geometry.frontalAreaM2.toFixed(3)} m²</span>
+                        </div>
+                        <div className="rounded-md border p-2">
+                          Área externa total: <span className="font-semibold">{result.debug.geometry.totalExternalAreaM2.toFixed(2)} m²</span>
+                          {result.debug.geometry.areaDeviationPct != null && (
+                            <span className="ml-1 text-muted-foreground">
+                              ({result.debug.geometry.areaDeviationPct >= 0 ? "+" : ""}
+                              {result.debug.geometry.areaDeviationPct.toFixed(1)}% vs Unilab)
+                            </span>
+                          )}
+                        </div>
+                        <div className="rounded-md border p-2">
+                          Área interna tubos: <span className="font-semibold">{result.debug.geometry.internalTubeAreaM2.toFixed(2)} m²</span>
+                        </div>
+                        <div className="rounded-md border p-2">
+                          Volume interno: <span className="font-semibold">{result.debug.geometry.internalVolumeL.toFixed(2)} L</span>
+                          {result.debug.geometry.volumeDeviationPct != null && (
+                            <span className="ml-1 text-muted-foreground">
+                              ({result.debug.geometry.volumeDeviationPct >= 0 ? "+" : ""}
+                              {result.debug.geometry.volumeDeviationPct.toFixed(1)}% vs Unilab)
+                            </span>
+                          )}
+                        </div>
+                        <div className="rounded-md border p-2">
+                          Eficiência aleta: <span className="font-semibold">{(result.debug.geometry.finEfficiency * 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="rounded-md border p-2">
+                          Nº de aletas: <span className="font-semibold">{result.debug.geometry.finCount}</span>
+                        </div>
+                        <div className="rounded-md border p-2">
+                          Nº de tubos: <span className="font-semibold">{result.debug.geometry.totalTubeCount}</span>
+                        </div>
+                        <div className="rounded-md border p-2">
+                          Comprimento total tubo: <span className="font-semibold">{result.debug.geometry.totalTubeLengthM.toFixed(1)} m</span>
+                        </div>
+                        <div className="rounded-md border p-2">
+                          q específico: <span className="font-semibold">{result.debug.geometry.qSpecificWm2.toFixed(0)} W/m²</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {result.debug.factorsApplied && (
                     <div>
                       <div className="text-xs uppercase text-muted-foreground mb-2">Fatores Unilab aplicados</div>

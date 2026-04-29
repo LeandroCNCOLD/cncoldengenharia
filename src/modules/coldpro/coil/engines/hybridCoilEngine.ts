@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { CoilCalculationInput, CoilCalculationResult, CoilCalibration } from './types';
 import { calculateAirSide } from './airSideEngine';
-import { calculateEffectiveAreaM2 } from './geometryEngine';
+import { calculateCoilGeometry } from './geometryEngine';
 import { calculateRefrigerantSide } from './refrigerantSideEngine';
 import { calculateAirPressureDrop, calculateRefrigerantPressureDrop } from './pressureDropEngine';
 
@@ -51,13 +51,28 @@ function compatibleCalibration(
 export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculationResult {
   const warnings: string[] = [];
 
-  const frontalAreaM2 = (input.geometry.coilLengthMm / 1000) * (input.geometry.coilHeightMm / 1000);
+  // 1ª passada da geometria sem hAir (eficiência inicial estimada).
+  const geom0 = calculateCoilGeometry(input.geometry, {
+    unilabExchangeAreaM2: input.geometry.unilabExchangeAreaM2,
+    unilabInternalVolumeL: input.geometry.unilabInternalVolumeL,
+  });
+  for (const e of geom0.errors) warnings.push(`[geom] ${e}`);
+
+  const frontalAreaM2 = geom0.frontalAreaM2;
   if (!frontalAreaM2 || frontalAreaM2 <= 0) {
     warnings.push('Geometria insuficiente para calcular área frontal.');
   }
 
   const air = calculateAirSide(input, frontalAreaM2);
-  const area = calculateEffectiveAreaM2(input.geometry, air.hAirWm2K);
+
+  // 2ª passada: agora com hAir real, recalcula eficiência de aleta + áreas.
+  const geom = calculateCoilGeometry(input.geometry, {
+    hAirWm2K: air.hAirWm2K,
+    unilabExchangeAreaM2: input.geometry.unilabExchangeAreaM2,
+    unilabInternalVolumeL: input.geometry.unilabInternalVolumeL,
+  });
+  for (const w of geom.warnings) warnings.push(`[geom] ${w}`);
+
   const ref = calculateRefrigerantSide(input);
 
   const rWall = wallResistance(input);
@@ -77,9 +92,11 @@ export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculation
   const dtml = calcLMTD(dt1, dt2);
 
   // REGRA CRÍTICA: Q = U × A_total × DTML — nunca U × DTML.
-  const qBase = uBase * area.effectiveAreaM2 * dtml * securityFactor;
+  const areaForHeatTransfer = geom.effectiveAreaForHeatTransferM2;
+  const qBase = uBase * areaForHeatTransfer * dtml * securityFactor;
+  const qSpecificWm2 = areaForHeatTransfer > 0 ? qBase / areaForHeatTransfer : 0;
 
-  const signature = generateModelSignature(input, air.correlationAir, area.effectiveAreaM2);
+  const signature = generateModelSignature(input, air.correlationAir, areaForHeatTransfer);
   const calibration = compatibleCalibration(input.calibration, signature);
   if (input.calibration && !calibration) {
     warnings.push('Calibração incompatível com assinatura atual — recalibre o componente.');
@@ -133,8 +150,8 @@ export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculation
     uWm2K: uBase,
     hAirWm2K: air.hAirWm2K,
     hRefWm2K: ref.hRefWm2K,
-    effectiveAreaM2: area.effectiveAreaM2,
-    frontalAreaM2: area.frontalAreaM2,
+    effectiveAreaM2: areaForHeatTransfer,
+    frontalAreaM2: geom.frontalAreaM2,
     airPressureDropPa: airDp,
     refrigerantPressureDropKpa: refDp,
     dtmlK: dtml,
@@ -144,6 +161,20 @@ export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculation
     isEstimated,
     modelSignature: signature,
     warnings,
+    geometryResult: {
+      frontalAreaM2: geom.frontalAreaM2,
+      totalExternalAreaM2: geom.totalExternalAreaM2,
+      internalTubeAreaM2: geom.internalTubeAreaM2,
+      internalVolumeL: geom.internalVolumeL,
+      finEfficiency: geom.finEfficiency,
+      finCount: geom.finCount,
+      totalTubeCount: geom.totalTubeCount,
+      totalTubeLengthM: geom.totalTubeLengthM,
+      qSpecificWm2,
+      areaSource: geom.areaSource,
+      areaDeviationPct: geom.areaDeviationPct,
+      volumeDeviationPct: geom.volumeDeviationPct,
+    },
     debug: {
       geometryCode: input.geometry.code,
       finType: input.geometry.finType,
@@ -162,7 +193,9 @@ export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculation
       isEstimated,
       air,
       ref,
-      area,
+      geometry: geom,
+      areaSource: geom.areaSource,
+      qSpecificWm2,
       rWall,
       rTotal,
       qBase,
