@@ -9,6 +9,7 @@ import type {
 } from "./coilSimulatorTypes";
 import type { CalibrationFactors } from "./coilEngineTypes";
 import { normalizeCalibrationFactors } from "./coilEngineTypes";
+import { runHybridDebug } from "./hybridDebugAdapter";
 
 export interface DxSimulatorOptions {
   calibration?: CalibrationFactors;
@@ -110,5 +111,6 @@ export function simulateDxCondenser(
     condensateLh: null,
     warnings,
     rejection: { used: nominal, estimated },
+    debug: runHybridDebug(input),
   };
 }

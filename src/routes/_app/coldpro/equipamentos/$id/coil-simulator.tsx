@@ -444,6 +444,7 @@ function CoilSimulatorPage() {
               <Badge variant="secondary" className="ml-2">{result.warnings.length}</Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="debug">Debug técnico</TabsTrigger>
           <TabsTrigger value="history">Histórico</TabsTrigger>
         </TabsList>
 
@@ -668,6 +669,114 @@ function CoilSimulatorPage() {
               <AlertDescription>{w}</AlertDescription>
             </Alert>
           ))}
+        </TabsContent>
+
+        {/* Debug técnico — Hybrid engine */}
+        <TabsContent value="debug" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Motor híbrido (correlações + Unilab)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 p-6 text-sm">
+              {!result?.debug && (
+                <p className="text-muted-foreground">
+                  Calcule uma simulação para ver os detalhes do motor híbrido.
+                </p>
+              )}
+              {result?.debug && (
+                <>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-1">
+                      <div className="text-xs uppercase text-muted-foreground">Origem dos dados</div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={result.debug.source === "unilab" ? "default" : "secondary"}>
+                          {result.debug.source}
+                        </Badge>
+                        {result.debug.isEstimated && (
+                          <Badge variant="outline">estimated</Badge>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Geometria: {result.debug.geometryCode || "—"} ·{" "}
+                        Aleta: {result.debug.finType || "—"} ·{" "}
+                        Tubo: {result.debug.tubeType || "—"}
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-xs uppercase text-muted-foreground">Confiança</div>
+                      <div className="font-mono">
+                        {(result.debug.confidenceScore * 100).toFixed(0)}%
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        ar: {(result.debug.airCorrelationConfidence * 100).toFixed(0)}% ·{" "}
+                        ref: {(result.debug.refCorrelationConfidence * 100).toFixed(0)}%
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div className="rounded-md border p-3">
+                      <div className="text-xs uppercase text-muted-foreground">Lado ar</div>
+                      <div className="mt-1 font-medium">{result.debug.airCorrelationName}</div>
+                      <div className="mt-2 grid grid-cols-2 gap-2 font-mono text-xs">
+                        <div>h base: {result.debug.hAirBaseWm2K?.toFixed(1)}</div>
+                        <div>h final: {result.debug.hAirFinalWm2K?.toFixed(1)}</div>
+                      </div>
+                    </div>
+                    <div className="rounded-md border p-3">
+                      <div className="text-xs uppercase text-muted-foreground">Lado refrigerante</div>
+                      <div className="mt-1 font-medium">{result.debug.refCorrelationName}</div>
+                      <div className="mt-2 grid grid-cols-2 gap-2 font-mono text-xs">
+                        <div>h base: {result.debug.hRefBaseWm2K?.toFixed(1)}</div>
+                        <div>h final: {result.debug.hRefFinalWm2K?.toFixed(1)}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-3 font-mono text-xs">
+                    <div className="rounded-md border p-3">
+                      U global: <span className="font-semibold">{result.debug.uWm2K?.toFixed(1)} W/m²K</span>
+                    </div>
+                    <div className="rounded-md border p-3">
+                      Área efetiva: <span className="font-semibold">{result.debug.effectiveAreaM2?.toFixed(2)} m²</span>
+                    </div>
+                    <div className="rounded-md border p-3">
+                      Q U·A·LMTD: <span className="font-semibold">
+                        {((result.debug.uWm2K * result.debug.effectiveAreaM2 * (result.dtRealK ?? 0)) / 1000).toFixed(2)} kW
+                      </span>
+                    </div>
+                  </div>
+
+                  {result.debug.factorsApplied && (
+                    <div>
+                      <div className="text-xs uppercase text-muted-foreground mb-2">Fatores Unilab aplicados</div>
+                      <div className="grid gap-1 font-mono text-xs md:grid-cols-2">
+                        {Object.entries(result.debug.factorsApplied)
+                          .filter(([, v]) => v != null)
+                          .map(([k, v]) => (
+                            <div key={k} className="flex justify-between rounded border px-2 py-1">
+                              <span className="text-muted-foreground">{k}</span>
+                              <span>{Number(v).toFixed(3)}</span>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {result.debug.warnings.length > 0 && (
+                    <div>
+                      <div className="text-xs uppercase text-muted-foreground mb-2">Warnings do motor</div>
+                      <ul className="list-disc pl-5 space-y-1 text-xs">
+                        {result.debug.warnings.map((w, i) => (
+                          <li key={i}>{w}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Histórico */}

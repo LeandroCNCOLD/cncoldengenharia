@@ -79,6 +79,28 @@ export interface CoilSimulatorInput {
   altitudeFactor?: number;       // cond, default 1.00
 }
 
+/** Snapshot técnico do motor híbrido (correlações + fatores Unilab). */
+export interface HybridDebugInfo {
+  source: "unilab" | "partial" | "fallback";
+  geometryCode?: string;
+  finType?: string;
+  tubeType?: string;
+  airCorrelationName: string;
+  refCorrelationName: string;
+  hAirBaseWm2K: number;
+  hAirFinalWm2K: number;
+  hRefBaseWm2K: number;
+  hRefFinalWm2K: number;
+  uWm2K: number;
+  effectiveAreaM2: number;
+  airCorrelationConfidence: number;
+  refCorrelationConfidence: number;
+  confidenceScore: number;
+  isEstimated: boolean;
+  factorsApplied: Record<string, number | undefined> | null;
+  warnings: string[];
+}
+
 export interface CoilSimulatorResult {
   coilType: CoilType;
   capacityW: number;
@@ -96,4 +118,6 @@ export interface CoilSimulatorResult {
   condensateLh: number | null;
   warnings: string[];
   rejection?: { used: NominalReference; estimated: boolean };
+  /** Telemetria do motor híbrido para o painel de Debug Técnico. */
+  debug?: HybridDebugInfo;
 }
