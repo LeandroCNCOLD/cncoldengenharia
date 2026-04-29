@@ -241,7 +241,7 @@ export function simulatePhysicalSimple(
   // === Ordem de cálculo (CRÍTICA — não inverter): ===
   // 1) base físico (qWraw)
   // 2) fatores empíricos Unilab (heatTransfer × surface × security)
-  // 3) calibração fina do componente (capacityCorrectionFactor)
+  // 3) calibração fina do componente (clamp ±20%)
   const qWraw = uaWk * lmtdK;
 
   const unilabFactors = computeUnilabFactors(opts.unilabGeometryFactor ?? null, {
@@ -252,8 +252,32 @@ export function simulatePhysicalSimple(
     nominalFaceVelocityMs: opts.nominalFaceVelocityMs,
   });
 
-  const qBase = qWraw * unilabFactors.effectiveCapacityFactor * cal.uaCorrectionFactor;
-  const qFinal = qBase * cal.capacityCorrectionFactor;
+  const qBase = qWraw * unilabFactors.effectiveCapacityFactor;
+
+  // Calibração: SOMENTE ajuste fino ±20%. Acima disso, é erro estrutural
+  // (área, correlação, fator Unilab) e a calibração é clampada + warning.
+  const fineUa = clampFineTune(cal.uaCorrectionFactor);
+  const fineCap = clampFineTune(cal.capacityCorrectionFactor);
+  if (fineUa.clamped || fineCap.clamped) {
+    warnings.push(
+      "Calibração excede ±20% — limitada a faixa de ajuste fino. Verifique área de troca e correlação de h_air.",
+    );
+  }
+  const qFinal = qBase * fineUa.value * fineCap.value;
+
+  // Validação estrutural: se a calibração precisa de >30% para fechar,
+  // o modelo físico está inconsistente.
+  const needFactor =
+    opts.nominalCapacityW && qBase > 0 ? opts.nominalCapacityW / qBase : 1;
+  if (
+    opts.nominalCapacityW &&
+    qBase > 0 &&
+    (needFactor > 1.3 || needFactor < 0.7)
+  ) {
+    warnings.push(
+      `Modelo físico inconsistente. Verifique área e correlação. (fator necessário ≈ ${needFactor.toFixed(2)})`,
+    );
+  }
 
   if (opts.logCalibration) {
     // Log obrigatório de rastreabilidade da calibração ativa/validade.
