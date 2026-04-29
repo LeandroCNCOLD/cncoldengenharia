@@ -23,7 +23,7 @@ function DatabaseIndexPage() {
       />
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {UNILAB_DB_TABLES.map((t) => (
-          <Link key={t.mode} to={`/admin/database/${t.mode}`}>
+          <Link key={t.mode} to="/admin/database/$mode" params={{ mode: t.mode }}>
             <Card className="transition-colors hover:bg-accent/40">
               <CardContent className="flex items-center gap-3 p-4">
                 <Database className="h-5 w-5 text-muted-foreground" />

@@ -72,7 +72,7 @@ function TechBankPage() {
           <StatBlock title="Geometrias Unilab" table="unilab_geometries" />
           <Card>
             <CardContent className="p-5 text-sm text-muted-foreground">
-              Use a tela <Link to="/admin/database/cooling" className="underline">Banco de Dados → modo</Link> para inspecionar
+              Use a tela <Link to="/admin/database/$mode" params={{ mode: 'cooling' }} className="underline">Banco de Dados → modo</Link> para inspecionar
               registros por modo (cooling, heating etc.).
             </CardContent>
           </Card>
