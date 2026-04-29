@@ -293,6 +293,8 @@ async function migrateCoilGeometry(userId: string | null, budget: number): Promi
         model: f.geometry_code ?? f.sigla ?? null,
         code: f.sigla ?? null,
         status: "approved",
+        source: "UNILAB",
+        context: "reference",
         normalized_json: f as Record<string, unknown>,
         source_raw_id: f.id,
         source_batch_id: null,
