@@ -26,6 +26,7 @@ import {
   rejectMapped,
   rejectMappedBulk,
 } from "@/lib/coldpro/technical-library";
+import { ProcessUnmappedButton } from "@/components/coldpro/process-unmapped-button";
 import type {
   TechnicalMappedRecord,
   TechnicalRawRecord,
@@ -193,6 +194,7 @@ function TechnicalReviewPage() {
                 <ChevronLeft className="mr-1 h-4 w-4" /> Banco Técnico
               </Link>
             </Button>
+            <ProcessUnmappedButton onDone={refresh} />
             <Button variant="outline" size="sm" onClick={refresh} disabled={busy}>
               <RefreshCcw className="mr-1 h-4 w-4" /> Atualizar
             </Button>

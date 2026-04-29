@@ -48,6 +48,7 @@ import {
   TECHNICAL_SOURCES,
 } from "@/modules/coldpro/library/types";
 import { migrateExistingDataToUniversalLibrary } from "@/server/technicalLibraryMigration.functions";
+import { ProcessUnmappedButton } from "@/components/coldpro/process-unmapped-button";
 
 export const Route = createFileRoute("/_app/coldpro/admin/banco-tecnico")({
   component: TechBankPage,
@@ -508,6 +509,7 @@ function TechBankPage() {
         description="Biblioteca técnica oficial consumida pelo motor. Mostra apenas registros aprovados ou validados."
         actions={
           <div className="flex gap-2">
+            <ProcessUnmappedButton />
             <InitializeLibraryButton />
             <Button asChild variant="outline" size="sm">
               <Link to="/admin/unilab-import">Importar Unilab</Link>
