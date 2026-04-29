@@ -223,15 +223,23 @@ export function simulatePhysicalSimple(
   const qFinal = qBase * cal.capacityCorrectionFactor;
 
   if (opts.logCalibration) {
-    // Log obrigatório de rastreabilidade da calibração ativa.
+    // Log obrigatório de rastreabilidade da calibração ativa/validade.
     // eslint-disable-next-line no-console
     console.log({
-      componentItemId: opts.componentItemId,
+      componentId: opts.componentItemId,
+      engineName: ENGINE_NAME,
+      engineVersion: ENGINE_VERSION,
+      correlationSetVersion: CORRELATION_SET_VERSION,
+      modelSignatureCurrent: currentModelSignature,
+      modelSignatureCalibration: opts.calibrationSignature ?? null,
+      calibrationApplied,
+      calibrationStaleReason,
       calibrationId: opts.calibrationId,
       capacityCorrectionFactor: cal.capacityCorrectionFactor,
-      qBase,
-      qFinal,
-      nominalCapacityW: opts.nominalCapacityW,
+      airSideCorrectionFactor,
+      capacityBase: qBase,
+      capacityFinal: qFinal,
+      capacityDatasheet: opts.nominalCapacityW ?? null,
     });
   }
 
