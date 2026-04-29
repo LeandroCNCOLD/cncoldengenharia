@@ -31,6 +31,10 @@ export interface PhysicalSimpleOptions {
   nominalFaceVelocityMs?: number;
   /** Indicador de coil molhado (latente significativo) para escolher fator de ar correto. */
   isWetCoil?: boolean;
+  componentItemId?: string;
+  calibrationId?: string | null;
+  nominalCapacityW?: number | null;
+  logCalibration?: boolean;
 }
 
 interface MaterialProps { kTube: number; kFin: number }
@@ -170,6 +174,19 @@ export function simulatePhysicalSimple(
 
   const qBase = qWraw * unilabFactors.effectiveCapacityFactor * cal.uaCorrectionFactor;
   const qFinal = qBase * cal.capacityCorrectionFactor;
+
+  if (opts.logCalibration) {
+    // Log obrigatório de rastreabilidade da calibração ativa.
+    // eslint-disable-next-line no-console
+    console.log({
+      componentItemId: opts.componentItemId,
+      calibrationId: opts.calibrationId,
+      capacityCorrectionFactor: cal.capacityCorrectionFactor,
+      qBase,
+      qFinal,
+      nominalCapacityW: opts.nominalCapacityW,
+    });
+  }
 
   // Perdas de carga: base × Unilab × calibração
   const airDpBase = faceVelocityMs && input.geometry.rows
