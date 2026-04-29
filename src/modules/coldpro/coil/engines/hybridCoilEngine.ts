@@ -120,10 +120,34 @@ export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculation
   const qBase = uBase * areaForHeatTransfer * dtml * securityFactor;
   const qSpecificWm2 = areaForHeatTransfer > 0 ? qBase / areaForHeatTransfer : 0;
 
-  const signature = generateModelSignature(input, air.correlationAir, areaForHeatTransfer);
-  const calibration = compatibleCalibration(input.calibration, signature);
-  if (input.calibration && !calibration) {
-    warnings.push('Calibração incompatível com assinatura atual — recalibre o componente.');
+  const signature = generateModelSignature(input, {
+    airCorrelationName: air.correlationAir,
+    refrigerantCorrelationName: (ref as any).correlationRef,
+    effectiveAreaM2: areaForHeatTransfer,
+    areaSource: geom.areaSource,
+    hAirBase: (air as any).hAirBaseWm2K,
+    hRefBase: (ref as any).hRefBaseWm2K,
+    uBase,
+  });
+
+  // ---- Verificação de compatibilidade da calibração ------------------------
+  const calibrationWarnings: string[] = [];
+  let calibration: CoilCalibration | null = null;
+  let calibrationCompatible = false;
+  if (input.calibration) {
+    calibrationCompatible = isCalibrationCompatible(input.calibration, signature);
+    if (calibrationCompatible) {
+      calibration = input.calibration;
+      const v = validateCalibrationFactors(calibration);
+      if (!v.withinFineRange) {
+        calibrationWarnings.push(...v.warnings);
+        warnings.push(...v.warnings);
+      }
+    } else {
+      const msg = 'Calibração incompatível com a versão atual do modelo. Recalibre o componente.';
+      calibrationWarnings.push(msg);
+      warnings.push(msg);
+    }
   }
 
   const capFactor = calibration?.capacityCorrectionFactor ?? 1;
@@ -152,18 +176,13 @@ export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculation
     warnings.push('Correlação estimada aplicada. Resultado requer validação.');
   }
 
-  // Confidence agregado (média ponderada das correlações; reduzido se <0.7).
+  // Confidence agregado das correlações + boost se calibração compatível.
   const airConf = Number((air as any).airCorrelationConfidence ?? 0.7);
   const refConf = Number((ref as any).refCorrelationConfidence ?? 0.7);
   let confidenceScore = (airConf + refConf) / 2;
   if (airConf < 0.7 || refConf < 0.7) confidenceScore *= 0.85;
-
-  // Calibração só pode ser ajuste fino. >1.3 ou <0.7 → revisão estrutural.
-  if (capFactor < 0.7 || capFactor > 1.3) {
-    warnings.push(
-      `Fator de calibração ${capFactor.toFixed(2)} fora da faixa de ajuste fino (0.7–1.3). ` +
-        'Revisar área, correlação ou fatores Unilab — calibração não corrige erro estrutural.',
-    );
+  if (calibration) {
+    confidenceScore = Math.max(confidenceScore, calibration.confidenceScore ?? 0.85);
   }
 
   return {
