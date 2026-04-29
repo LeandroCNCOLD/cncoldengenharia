@@ -26,10 +26,12 @@ import {
   listEquipmentCoilSimulations,
   saveCoilSimulatorRun,
 } from "@/lib/coldpro/coil-simulations";
-import { simulateDxEvaporator } from "@/modules/coldpro/coil/dxEvaporatorSimulator";
-import { simulateDxCondenser } from "@/modules/coldpro/coil/dxCondenserSimulator";
-import { simulatePhysicalSimple } from "@/modules/coldpro/coil/physicalSimpleEngine";
-import { calibrateAgainstReference } from "@/modules/coldpro/coil/coilCalibration";
+import {
+  simulateDxEvaporator,
+  simulateDxCondenser,
+  simulatePhysicalSimple,
+  calibrateAgainstReference,
+} from "@/modules/coldpro/adapters/thermalcalcAdapter";
 import { factorsFromRow, getLatestCalibration, saveCoilCalibration } from "@/lib/coldpro/coil-calibrations";
 import { NEUTRAL_CALIBRATION, type CalibrationFactors, type CoilEngine } from "@/modules/coldpro/coil/coilEngineTypes";
 import { OriginBadge } from "@/components/coldpro/origin-badge";

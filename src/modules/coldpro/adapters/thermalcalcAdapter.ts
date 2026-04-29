@@ -17,6 +17,74 @@ import type {
 } from "@/modules/thermalcalc/types/coilSimulatorTypes";
 import { deriveCoilGeometry, type GeometryDerived } from "@/modules/thermalcalc/engines/coil/geometryDerived";
 import { simulatePhysicalSimple } from "@/modules/thermalcalc/engines/coil/physicalSimpleEngine";
+import { simulateDxEvaporator } from "@/modules/thermalcalc/engines/coil/dxEvaporatorSimulator";
+import { simulateDxCondenser } from "@/modules/thermalcalc/engines/coil/dxCondenserSimulator";
+import {
+  simulateHybridCoil as _simulateHybridCoil,
+  generateModelSignature,
+  ENGINE_NAME,
+  ENGINE_VERSION,
+} from "@/modules/thermalcalc/engines/coil/internals/hybridCoilEngine";
+import {
+  calibrateAgainstReference as _calibrateAgainstReference,
+} from "@/modules/thermalcalc/engines/coil/coilCalibration";
+import type {
+  CoilCalculationInput,
+  CoilCalculationResult,
+} from "@/modules/thermalcalc/engines/coil/internals/types";
+
+// ============================================================
+// 0) Entrypoint canônico — motor híbrido completo
+// ============================================================
+//
+// Esta é a função preferida para qualquer tela/serviço que precise dos
+// novos campos: hAir, hRef, U, área efetiva, eficiência de aleta, DTML,
+// Q = U × Aeff × DTML, ΔP ar, ΔP refrigerante, warnings técnicos, source.
+//
+// O ColdPro NÃO deve recalcular nada — basta ler do retorno.
+
+export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculationResult {
+  return _simulateHybridCoil(input);
+}
+
+export {
+  generateModelSignature,
+  ENGINE_NAME,
+  ENGINE_VERSION,
+  simulateDxEvaporator,
+  simulateDxCondenser,
+  simulatePhysicalSimple,
+};
+
+export const calibrateAgainstReference = _calibrateAgainstReference;
+
+// Helpers de leitura (não recalculam — só extraem do resultado).
+export const Readers = {
+  airSide: (r: CoilCalculationResult) => ({
+    hAirWm2K: r.hAirWm2K,
+    correlation: r.correlationAir,
+    pressureDropPa: r.airPressureDropPa,
+  }),
+  refrigerantSide: (r: CoilCalculationResult) => ({
+    hRefWm2K: r.hRefWm2K,
+    pressureDropKpa: r.refrigerantPressureDropKpa,
+  }),
+  heatTransfer: (r: CoilCalculationResult) => ({
+    uWm2K: r.uWm2K,
+    effectiveAreaM2: r.effectiveAreaM2,
+    dtmlK: r.dtmlK,
+    capacityW: r.capacityW,
+    capacityKcalh: r.capacityKcalh,
+  }),
+  effectiveArea: (r: CoilCalculationResult) => ({
+    effectiveAreaM2: r.effectiveAreaM2,
+    finEfficiency: r.geometryResult?.finEfficiency,
+    areaSource: r.geometryResult?.areaSource,
+    areaDeviationPct: r.geometryResult?.areaDeviationPct,
+  }),
+} as const;
+
+export type { CoilCalculationInput, CoilCalculationResult };
 
 // ============================================================
 // 1) Simulação de coil (entrypoint canônico)
