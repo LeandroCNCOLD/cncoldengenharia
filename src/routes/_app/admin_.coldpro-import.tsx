@@ -28,6 +28,7 @@ interface UploadedRef {
 
 function ColdproImportPage() {
   const { isAdmin, loading, user } = useAuth();
+  const runImport = useServerFn(importColdproPackage);
 
   const [zipFile, setZipFile] = useState<File | null>(null);
   const [indexFile, setIndexFile] = useState<File | null>(null);
@@ -35,8 +36,15 @@ function ColdproImportPage() {
   const [version, setVersion] = useState("");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [uploaded, setUploaded] = useState<UploadedRef[]>([]);
   const [batchId, setBatchId] = useState<string | null>(null);
+  const [importResult, setImportResult] = useState<null | {
+    filesIngested: number;
+    rowsIngested: number;
+    filesSkipped: number;
+    errors: string[];
+  }>(null);
 
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/dashboard" />;
