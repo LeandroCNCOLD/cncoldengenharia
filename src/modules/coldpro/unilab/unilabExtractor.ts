@@ -73,17 +73,28 @@ export function parseNumber(s: string): number | null {
   // Remove separadores de milhar e troca vírgula decimal por ponto
   // Heurística: se há vírgula seguida por 1-3 dígitos no fim, é decimal
   let cleaned = s.replace(/\u00a0/g, " ").trim();
-  const m = cleaned.match(/-?\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?|-?\d+(?:[.,]\d+)?/);
+  // Captura número completo: dígitos com possíveis separadores de milhar (.,) e decimal opcional.
+  // IMPORTANTE: usar \d+ na base e ancorar o fim em borda não-dígito para evitar truncar
+  // ex.: "13312" não deve virar "133" por causa de quantificador 1-3 dígitos.
+  const m = cleaned.match(/-?\d+(?:[.,]\d+)*/);
   if (!m) return null;
   let raw = m[0];
   const lastComma = raw.lastIndexOf(",");
   const lastDot = raw.lastIndexOf(".");
-  if (lastComma > lastDot) {
-    // vírgula é decimal
-    raw = raw.replace(/\./g, "").replace(",", ".");
-  } else {
-    // ponto decimal (ou ausente); remove vírgulas de milhar
-    raw = raw.replace(/,/g, "");
+  if (lastComma >= 0 && lastDot >= 0) {
+    // ambos presentes: o último é decimal
+    if (lastComma > lastDot) raw = raw.replace(/\./g, "").replace(",", ".");
+    else raw = raw.replace(/,/g, "");
+  } else if (lastComma >= 0) {
+    // só vírgula: se for único e seguido de exatamente 3 dígitos, é milhar; senão decimal
+    const parts = raw.split(",");
+    if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) raw = raw.replace(/,/g, "");
+    else raw = raw.replace(",", ".");
+  } else if (lastDot >= 0) {
+    // só ponto: idem heurística
+    const parts = raw.split(".");
+    if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) raw = raw.replace(/\./g, "");
+    // senão mantém como decimal
   }
   const n = Number(raw);
   return Number.isFinite(n) ? n : null;
