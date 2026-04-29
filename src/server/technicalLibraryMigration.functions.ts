@@ -169,6 +169,8 @@ async function migrateFans(userId: string | null, budget: number): Promise<Sourc
           model: r.model ?? null,
           code: r.model ?? null,
           status,
+          source: inferSource(r.manufacturer, "UNKNOWN"),
+          context: "reference",
           normalized_json: r as Record<string, unknown>,
           source_raw_id: r.id,
           source_batch_id: null,
