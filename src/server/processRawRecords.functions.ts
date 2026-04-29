@@ -235,6 +235,24 @@ function dispatchMapper(raw: RawRow): MapperOutput | null {
 
 /* ---------- main ---------- */
 
+// Retry helper: tolera blips transitórios do Supabase/Cloudflare (521/522/timeouts).
+async function withRetry<T>(label: string, fn: () => PromiseLike<T>, attempts = 4): Promise<T> {
+  let lastErr: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      lastErr = e;
+      const msg = e instanceof Error ? e.message : String(e);
+      if (/permission denied|violates|duplicate key|invalid input syntax/i.test(msg)) throw e;
+      const delay = 500 * Math.pow(2, i);
+      console.warn(`[processRaw] ${label} attempt ${i + 1} failed: ${msg.slice(0, 200)} — retrying in ${delay}ms`);
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
+}
+
 export const processUnmappedRawRecords = createServerFn({ method: "POST" })
   .inputValidator((data) => InputSchema.parse(data ?? {}))
   .handler(async ({ data }) => {
@@ -262,7 +280,7 @@ export const processUnmappedRawRecords = createServerFn({ method: "POST" })
         .limit(pageSize);
       if (data.batchId) q = q.eq("batch_id", data.batchId);
 
-      const { data: rows, error } = await q;
+      const { data: rows, error } = await withRetry("fetch raw", () => q);
       if (error) throw new Error(`fetch raw: ${error.message}`);
       if (!rows || rows.length === 0) break;
       summary.pages++;
@@ -274,10 +292,12 @@ export const processUnmappedRawRecords = createServerFn({ method: "POST" })
       const CHUNK = 100;
       for (let i = 0; i < ids.length; i += CHUNK) {
         const slice = ids.slice(i, i + CHUNK);
-        const { data: existing, error: exErr } = await supabaseAdmin
-          .from("technical_mapped_records")
-          .select("raw_record_id")
-          .in("raw_record_id", slice);
+        const { data: existing, error: exErr } = await withRetry("fetch existing", () =>
+          supabaseAdmin
+            .from("technical_mapped_records")
+            .select("raw_record_id")
+            .in("raw_record_id", slice),
+        );
         if (exErr) throw new Error(`fetch existing: ${exErr.message}`);
         for (const r of existing ?? []) {
           if (r.raw_record_id) alreadyMapped.add(r.raw_record_id as string);
