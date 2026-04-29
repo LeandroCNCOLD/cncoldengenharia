@@ -17,7 +17,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
   { label: "Equipamentos", to: "/coldpro/equipamentos", icon: Boxes },
   { label: "Administração", to: "/admin", icon: Settings, adminOnly: true },
-  { label: "Importar Unilab", to: "/admin_/unilab-import", icon: Database, adminOnly: true },
+  { label: "Importar Unilab", to: "/admin/unilab-import", icon: Database, adminOnly: true },
 ];
 
 export function AppSidebar() {
