@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, Database, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,6 +17,7 @@ import {
   countUnmappedRaw,
 } from "@/lib/coldpro/technical-library";
 import type { TechnicalEntityType } from "@/modules/coldpro/library/types";
+import { migrateExistingDataToUniversalLibrary } from "@/server/technicalLibraryMigration.functions";
 
 export const Route = createFileRoute("/_app/coldpro/admin/banco-tecnico")({
   component: TechBankPage,
@@ -134,6 +137,43 @@ function PendingReviewBanner() {
   );
 }
 
+function InitializeLibraryButton() {
+  const qc = useQueryClient();
+  const [running, setRunning] = useState(false);
+  const handle = async () => {
+    setRunning(true);
+    try {
+      const res = await migrateExistingDataToUniversalLibrary();
+      const s = res.summary ?? {};
+      const parts = Object.entries(s)
+        .filter(([, v]) => (v as number) > 0)
+        .map(([k, v]) => `${k}: ${v}`);
+      toast.success(
+        parts.length
+          ? `Biblioteca inicializada — ${parts.join(", ")}`
+          : "Nenhum registro novo para migrar (já estava sincronizado).",
+      );
+      await qc.invalidateQueries({ queryKey: ["tech-universal-count"] });
+    } catch (err) {
+      toast.error(
+        `Falha ao inicializar: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    } finally {
+      setRunning(false);
+    }
+  };
+  return (
+    <Button size="sm" onClick={handle} disabled={running}>
+      {running ? (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      ) : (
+        <Database className="mr-2 h-4 w-4" />
+      )}
+      Inicializar Biblioteca Técnica
+    </Button>
+  );
+}
+
 function TechBankPage() {
   return (
     <div className="space-y-6">
@@ -142,6 +182,7 @@ function TechBankPage() {
         description="Biblioteca técnica oficial consumida pelo motor. Mostra apenas registros aprovados ou validados."
         actions={
           <div className="flex gap-2">
+            <InitializeLibraryButton />
             <Button asChild variant="outline" size="sm">
               <Link to="/admin/unilab-import">Importar Unilab</Link>
             </Button>
