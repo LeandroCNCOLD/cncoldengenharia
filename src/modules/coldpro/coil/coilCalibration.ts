@@ -102,6 +102,9 @@ export function calibrateAgainstReference(
     uaCorrectionFactor: 1,
     airDpCorrectionFactor: clampFactor(rawAir),
     refDpCorrectionFactor: clampFactor(rawRef),
+    airPressureDropFactor: clampFactor(rawAir),
+    refrigerantPressureDropFactor: clampFactor(rawRef),
+    heatTransferFactor: 1,
   };
   const heatTransferFactor = factors.capacityCorrectionFactor;
 
