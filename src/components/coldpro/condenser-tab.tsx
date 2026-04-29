@@ -82,7 +82,7 @@ export function CondenserTab({ equipmentProjectId }: Props) {
   );
 }
 
-function CondenserCalibrationSlot({ componentId }: { componentId: string }) {
+function CondenserCalibrationSlot({ componentId, equipmentProjectId }: { componentId: string; equipmentProjectId: string }) {
   const { data: row } = useQuery({
     queryKey: ["cond-model", componentId],
     queryFn: async () => (await getCondenserCoilModel(componentId)) as Record<string, unknown> | null,
@@ -90,11 +90,19 @@ function CondenserCalibrationSlot({ componentId }: { componentId: string }) {
   const datasheet = buildDatasheetFromCoilRow(row, "condenser");
   const input = buildInputFromCoilRow(row, "condenser");
   return (
-    <CalibrationPanel
-      componentItemId={componentId}
-      coilType="condenser"
-      datasheet={datasheet}
-      simulationInput={input}
-    />
+    <>
+      <CalibrationPanel
+        componentItemId={componentId}
+        coilType="condenser"
+        datasheet={datasheet}
+        simulationInput={input}
+      />
+      <PerformanceMapPanel
+        componentItemId={componentId}
+        equipmentProjectId={equipmentProjectId}
+        coilType="condenser"
+        simulationInput={input}
+      />
+    </>
   );
 }
