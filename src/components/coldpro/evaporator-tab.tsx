@@ -11,6 +11,11 @@ import {
 } from "@/lib/coldpro/component-items";
 import { useAuth } from "@/lib/auth";
 import { UnilabImportForm } from "@/components/coldpro/unilab-import-form";
+import { CalibrationPanel } from "@/components/coldpro/calibration-panel";
+import {
+  buildDatasheetFromCoilRow,
+  buildInputFromCoilRow,
+} from "@/lib/coldpro/coil-row-mapper";
 
 interface Props {
   equipmentProjectId: string;
@@ -55,21 +60,40 @@ export function EvaporatorTab({ equipmentProjectId }: Props) {
         </Card>
       ) : (
         items.map((c) => (
-          <UnilabImportForm
-            key={c.id}
-            componentId={c.id}
-            componentCode={c.code}
-            componentStatus={c.status}
-            expectedKind="evaporator"
-            queryKey={["evap-model", c.id]}
-            fetchRow={async () => (await getEvaporatorCoilModel(c.id)) as Record<string, unknown> | null}
-            upsertRow={async (patch) => {
-              const r = await upsertEvaporatorCoilModel(patch as never);
-              return r as unknown as Record<string, unknown>;
-            }}
-          />
+          <div key={c.id} className="space-y-3">
+            <UnilabImportForm
+              componentId={c.id}
+              componentCode={c.code}
+              componentStatus={c.status}
+              expectedKind="evaporator"
+              queryKey={["evap-model", c.id]}
+              fetchRow={async () => (await getEvaporatorCoilModel(c.id)) as Record<string, unknown> | null}
+              upsertRow={async (patch) => {
+                const r = await upsertEvaporatorCoilModel(patch as never);
+                return r as unknown as Record<string, unknown>;
+              }}
+            />
+            <EvaporatorCalibrationSlot componentId={c.id} />
+          </div>
         ))
       )}
     </div>
+  );
+}
+
+function EvaporatorCalibrationSlot({ componentId }: { componentId: string }) {
+  const { data: row } = useQuery({
+    queryKey: ["evap-model", componentId],
+    queryFn: async () => (await getEvaporatorCoilModel(componentId)) as Record<string, unknown> | null,
+  });
+  const datasheet = buildDatasheetFromCoilRow(row, "evaporator");
+  const input = buildInputFromCoilRow(row, "evaporator");
+  return (
+    <CalibrationPanel
+      componentItemId={componentId}
+      coilType="evaporator"
+      datasheet={datasheet}
+      simulationInput={input}
+    />
   );
 }

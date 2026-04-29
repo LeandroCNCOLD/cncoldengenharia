@@ -17,9 +17,11 @@ export type Database = {
       coil_calibrations: {
         Row: {
           air_dp_correction_factor: number
+          calibration_name: string | null
           capacity_correction_factor: number
           coil_type: string
           component_item_id: string
+          confidence_score: number
           created_at: string
           created_by: string | null
           deviation_after: Json
@@ -32,13 +34,16 @@ export type Database = {
           outputs_snapshot: Json
           ref_dp_correction_factor: number
           reference_source: string | null
+          status: string
           ua_correction_factor: number
         }
         Insert: {
           air_dp_correction_factor?: number
+          calibration_name?: string | null
           capacity_correction_factor?: number
           coil_type: string
           component_item_id: string
+          confidence_score?: number
           created_at?: string
           created_by?: string | null
           deviation_after?: Json
@@ -51,13 +56,16 @@ export type Database = {
           outputs_snapshot?: Json
           ref_dp_correction_factor?: number
           reference_source?: string | null
+          status?: string
           ua_correction_factor?: number
         }
         Update: {
           air_dp_correction_factor?: number
+          calibration_name?: string | null
           capacity_correction_factor?: number
           coil_type?: string
           component_item_id?: string
+          confidence_score?: number
           created_at?: string
           created_by?: string | null
           deviation_after?: Json
@@ -70,6 +78,7 @@ export type Database = {
           outputs_snapshot?: Json
           ref_dp_correction_factor?: number
           reference_source?: string | null
+          status?: string
           ua_correction_factor?: number
         }
         Relationships: []

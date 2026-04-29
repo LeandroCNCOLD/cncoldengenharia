@@ -7,6 +7,12 @@ import type {
   CoilSimulatorResult,
   NominalReference,
 } from "./coilSimulatorTypes";
+import type { CalibrationFactors } from "./coilEngineTypes";
+import { NEUTRAL_CALIBRATION } from "./coilEngineTypes";
+
+export interface DxSimulatorOptions {
+  calibration?: CalibrationFactors;
+}
 
 const W_TO_KCALH = 0.859845;
 
@@ -26,7 +32,11 @@ function estimateFaceArea(input: CoilSimulatorInput): number | null {
   return ((tubesPerRow * tubeSpacingMm) / 1000) * (coilLengthMm / 1000);
 }
 
-export function simulateDxCondenser(input: CoilSimulatorInput): CoilSimulatorResult {
+export function simulateDxCondenser(
+  input: CoilSimulatorInput,
+  options: DxSimulatorOptions = {},
+): CoilSimulatorResult {
+  const cal = options.calibration ?? NEUTRAL_CALIBRATION;
   const warnings: string[] = [];
   const air = input.air;
   const ref = input.refrigerant;
@@ -75,11 +85,19 @@ export function simulateDxCondenser(input: CoilSimulatorInput): CoilSimulatorRes
       ? 6 * input.geometry.rows * faceVelocity ** 1.7
       : null;
 
+  // Aplicação da calibração (pós-processamento empírico)
+  const capCal = capacityW * cal.capacityCorrectionFactor;
+  const airDpCal = airDp != null ? airDp * cal.airDpCorrectionFactor : null;
+  const refDpCal =
+    ref.refrigerantPressureDropKpa != null
+      ? ref.refrigerantPressureDropKpa * cal.refDpCorrectionFactor
+      : null;
+
   return {
     coilType: "condenser",
-    capacityW,
-    capacityKcalh: capacityW * W_TO_KCALH,
-    sensibleW: capacityW,
+    capacityW: capCal,
+    capacityKcalh: capCal * W_TO_KCALH,
+    sensibleW: capCal,
     latentW: 0,
     dtRealK: dtReal,
     dtNominalK: dtNom,
@@ -87,8 +105,8 @@ export function simulateDxCondenser(input: CoilSimulatorInput): CoilSimulatorRes
     faceVelocityMs: faceVelocity,
     airflowFactor,
     dtFactor,
-    airPressureDropPa: airDp,
-    refPressureDropKpa: ref.refrigerantPressureDropKpa ?? null,
+    airPressureDropPa: airDpCal,
+    refPressureDropKpa: refDpCal,
     condensateLh: null,
     warnings,
     rejection: { used: nominal, estimated },

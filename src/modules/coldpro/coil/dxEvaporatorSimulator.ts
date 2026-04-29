@@ -7,6 +7,12 @@ import type {
   CoilSimulatorResult,
   NominalReference,
 } from "./coilSimulatorTypes";
+import type { CalibrationFactors } from "./coilEngineTypes";
+import { NEUTRAL_CALIBRATION } from "./coilEngineTypes";
+
+export interface DxSimulatorOptions {
+  calibration?: CalibrationFactors;
+}
 
 const W_TO_KCALH = 0.859845;
 
@@ -31,7 +37,11 @@ function estimateFaceArea(input: CoilSimulatorInput): number | null {
   return heightM * lengthM;
 }
 
-export function simulateDxEvaporator(input: CoilSimulatorInput): CoilSimulatorResult {
+export function simulateDxEvaporator(
+  input: CoilSimulatorInput,
+  options: DxSimulatorOptions = {},
+): CoilSimulatorResult {
+  const cal = options.calibration ?? NEUTRAL_CALIBRATION;
   const warnings: string[] = [];
   const air = input.air;
   const ref = input.refrigerant;
@@ -95,21 +105,33 @@ export function simulateDxEvaporator(input: CoilSimulatorInput): CoilSimulatorRe
       ? 8 * input.geometry.rows * faceVelocity ** 1.7
       : null;
 
+  // Aplicação da calibração (pós-processamento empírico)
+  const capCal = capacityW * cal.capacityCorrectionFactor;
+  const sensibleCal = sensible != null ? sensible * cal.capacityCorrectionFactor : null;
+  const latentCal = latent != null ? latent * cal.capacityCorrectionFactor : null;
+  const condensateCal =
+    condensateLh != null ? condensateLh * cal.capacityCorrectionFactor : null;
+  const airDpCal = airDp != null ? airDp * cal.airDpCorrectionFactor : null;
+  const refDpCal =
+    ref.refrigerantPressureDropKpa != null
+      ? ref.refrigerantPressureDropKpa * cal.refDpCorrectionFactor
+      : null;
+
   return {
     coilType: "evaporator",
-    capacityW,
-    capacityKcalh: capacityW * W_TO_KCALH,
-    sensibleW: sensible,
-    latentW: latent,
+    capacityW: capCal,
+    capacityKcalh: capCal * W_TO_KCALH,
+    sensibleW: sensibleCal,
+    latentW: latentCal,
     dtRealK: dtReal,
     dtNominalK: dtNom,
     faceAreaM2: faceArea,
     faceVelocityMs: faceVelocity,
     airflowFactor,
     dtFactor,
-    airPressureDropPa: airDp,
-    refPressureDropKpa: ref.refrigerantPressureDropKpa ?? null,
-    condensateLh,
+    airPressureDropPa: airDpCal,
+    refPressureDropKpa: refDpCal,
+    condensateLh: condensateCal,
     warnings,
     rejection: { used: nominal, estimated },
   };

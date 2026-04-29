@@ -70,6 +70,12 @@ export interface PhysicalSimpleBreakdown {
   airMassFlowKgs: number | null;
   airDpRawPa: number | null;
   refDpRawKpa: number | null;
+  // Rastreabilidade dos fatores aplicados
+  heatTransferFactor: number;
+  capacityCorrectionFactor: number;
+  airDpCorrectionFactor: number;
+  refDpCorrectionFactor: number;
+  uaCorrectionFactor: number;
 }
 
 export interface PhysicalSimpleResult extends CoilSimulatorResult {
@@ -193,6 +199,12 @@ export function simulatePhysicalSimple(
       airMassFlowKgs,
       airDpRawPa,
       refDpRawKpa,
+      // Rastreabilidade: alias semântico de capacityCorrectionFactor
+      heatTransferFactor: cal.capacityCorrectionFactor,
+      capacityCorrectionFactor: cal.capacityCorrectionFactor,
+      airDpCorrectionFactor: cal.airDpCorrectionFactor,
+      refDpCorrectionFactor: cal.refDpCorrectionFactor,
+      uaCorrectionFactor: cal.uaCorrectionFactor,
     },
   };
 }

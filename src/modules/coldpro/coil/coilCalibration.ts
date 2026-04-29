@@ -1,17 +1,20 @@
 /**
  * Calibra o motor físico simples contra um ponto nominal Unilab.
  *
- * Estratégia: calcula desvio percentual no ponto nominal (com fatores neutros),
- * aplica fator inverso para zerar o erro de capacidade, e fatores
- * proporcionais para ΔP. Reporta desvio antes/depois e se atingiu metas.
+ * Estratégia: rodar baseline com fatores neutros, calcular fatores
+ * inversos para zerar o erro de capacidade e proporcionais para ΔP,
+ * clampar entre 0.3 e 3.0, validar contra metas.
  */
 
-import type { CoilSimulatorInput } from "./coilSimulatorTypes";
+import type { CoilSimulatorInput, CoilSimulatorResult } from "./coilSimulatorTypes";
 import { simulatePhysicalSimple } from "./physicalSimpleEngine";
 import {
   NEUTRAL_CALIBRATION,
   CALIBRATION_TARGETS,
+  clampFactor,
+  confidenceScoreFor,
   type CalibrationFactors,
+  type CalibrationStatus,
 } from "./coilEngineTypes";
 
 export interface CalibrationReference {
@@ -28,10 +31,15 @@ export interface CalibrationDeviation {
 
 export interface CalibrationOutcome {
   factors: CalibrationFactors;
+  heatTransferFactor: number;
   deviationBefore: CalibrationDeviation;
   deviationAfter: CalibrationDeviation;
   meetsTargets: boolean;
+  status: CalibrationStatus;
+  confidenceScore: number;
   notes: string[];
+  baselineResult: CoilSimulatorResult;
+  calibratedResult: CoilSimulatorResult;
 }
 
 function pctDeviation(actual: number | null | undefined, ref: number | null | undefined): number | null {
@@ -39,63 +47,111 @@ function pctDeviation(actual: number | null | undefined, ref: number | null | un
   return ((actual - ref) / ref) * 100;
 }
 
+/** API canônica: calibração ponto-a-ponto contra datasheet Unilab. */
+export interface DatasheetPoint {
+  capacityW: number;
+  airInletTempC?: number;
+  airOutletTempC?: number;
+  evaporationTempC?: number;
+  condensationTempC?: number;
+  airflowM3h?: number;
+  airPressureDropPa?: number | null;
+  refrigerantPressureDropKpa?: number | null;
+  refrigerant?: string;
+  coilType: "evaporator" | "condenser";
+}
+
+export function calibrateCoilFromDatasheet(params: {
+  input: CoilSimulatorInput;
+  datasheet: DatasheetPoint;
+}): CalibrationOutcome {
+  const { input, datasheet } = params;
+  const reference: CalibrationReference = {
+    capacityW: datasheet.capacityW,
+    airPressureDropPa: datasheet.airPressureDropPa ?? null,
+    refPressureDropKpa: datasheet.refrigerantPressureDropKpa ?? null,
+  };
+  return calibrateAgainstReference(input, reference);
+}
+
 export function calibrateAgainstReference(
   input: CoilSimulatorInput,
   reference: CalibrationReference,
 ): CalibrationOutcome {
   const notes: string[] = [];
-  const baseline = simulatePhysicalSimple(input, { calibration: NEUTRAL_CALIBRATION });
+  const baselineResult = simulatePhysicalSimple(input, { calibration: NEUTRAL_CALIBRATION });
 
   const deviationBefore: CalibrationDeviation = {
-    capacityPct: pctDeviation(baseline.capacityW, reference.capacityW),
-    airDpPct: pctDeviation(baseline.airPressureDropPa, reference.airPressureDropPa ?? null),
-    refDpPct: pctDeviation(baseline.refPressureDropKpa, reference.refPressureDropKpa ?? null),
+    capacityPct: pctDeviation(baselineResult.capacityW, reference.capacityW),
+    airDpPct: pctDeviation(baselineResult.airPressureDropPa, reference.airPressureDropPa ?? null),
+    refDpPct: pctDeviation(baselineResult.refPressureDropKpa, reference.refPressureDropKpa ?? null),
   };
 
-  // Fator de capacidade: ref / actual
-  const capacityFactor =
-    baseline.capacityW > 0 ? reference.capacityW / baseline.capacityW : 1;
-
-  const airDpFactor =
-    baseline.airPressureDropPa && reference.airPressureDropPa
-      ? reference.airPressureDropPa / baseline.airPressureDropPa
+  const rawCap = baselineResult.capacityW > 0 ? reference.capacityW / baselineResult.capacityW : 1;
+  const rawAir =
+    reference.airPressureDropPa && baselineResult.airPressureDropPa
+      ? reference.airPressureDropPa / baselineResult.airPressureDropPa
       : 1;
-
-  const refDpFactor =
-    baseline.refPressureDropKpa && reference.refPressureDropKpa
-      ? reference.refPressureDropKpa / baseline.refPressureDropKpa
+  const rawRef =
+    reference.refPressureDropKpa && baselineResult.refPressureDropKpa
+      ? reference.refPressureDropKpa / baselineResult.refPressureDropKpa
       : 1;
 
   const factors: CalibrationFactors = {
-    capacityCorrectionFactor: clamp(capacityFactor, 0.3, 3),
-    uaCorrectionFactor: 1, // mantemos UA neutro; correção entra na capacidade
-    airDpCorrectionFactor: clamp(airDpFactor, 0.3, 3),
-    refDpCorrectionFactor: clamp(refDpFactor, 0.3, 3),
+    capacityCorrectionFactor: clampFactor(rawCap),
+    uaCorrectionFactor: 1,
+    airDpCorrectionFactor: clampFactor(rawAir),
+    refDpCorrectionFactor: clampFactor(rawRef),
   };
+  const heatTransferFactor = factors.capacityCorrectionFactor;
 
-  if (capacityFactor !== factors.capacityCorrectionFactor) {
-    notes.push(`Fator de capacidade clampado para ${factors.capacityCorrectionFactor.toFixed(2)} (sugerido ${capacityFactor.toFixed(2)}).`);
+  if (Math.abs(rawCap - factors.capacityCorrectionFactor) > 1e-6) {
+    notes.push(
+      `Fator de capacidade clampado para ${factors.capacityCorrectionFactor.toFixed(2)} (sugerido ${rawCap.toFixed(2)}).`,
+    );
+  }
+  if (reference.airPressureDropPa && Math.abs(rawAir - factors.airDpCorrectionFactor) > 1e-6) {
+    notes.push(`Fator ΔP ar clampado para ${factors.airDpCorrectionFactor.toFixed(2)}.`);
+  }
+  if (reference.refPressureDropKpa && Math.abs(rawRef - factors.refDpCorrectionFactor) > 1e-6) {
+    notes.push(`Fator ΔP refrigerante clampado para ${factors.refDpCorrectionFactor.toFixed(2)}.`);
   }
 
-  const calibrated = simulatePhysicalSimple(input, { calibration: factors });
+  const calibratedResult = simulatePhysicalSimple(input, { calibration: factors });
   const deviationAfter: CalibrationDeviation = {
-    capacityPct: pctDeviation(calibrated.capacityW, reference.capacityW),
-    airDpPct: pctDeviation(calibrated.airPressureDropPa, reference.airPressureDropPa ?? null),
-    refDpPct: pctDeviation(calibrated.refPressureDropKpa, reference.refPressureDropKpa ?? null),
+    capacityPct: pctDeviation(calibratedResult.capacityW, reference.capacityW),
+    airDpPct: pctDeviation(calibratedResult.airPressureDropPa, reference.airPressureDropPa ?? null),
+    refDpPct: pctDeviation(calibratedResult.refPressureDropKpa, reference.refPressureDropKpa ?? null),
   };
 
-  const meetsTargets =
-    Math.abs(deviationAfter.capacityPct ?? 999) <= CALIBRATION_TARGETS.capacityPct &&
-    (deviationAfter.airDpPct == null || Math.abs(deviationAfter.airDpPct) <= CALIBRATION_TARGETS.airDpPct) &&
-    (deviationAfter.refDpPct == null || Math.abs(deviationAfter.refDpPct) <= CALIBRATION_TARGETS.refDpPct);
+  const capOk = Math.abs(deviationAfter.capacityPct ?? 999) <= CALIBRATION_TARGETS.capacityPct;
+  const airOk =
+    reference.airPressureDropPa == null ||
+    deviationAfter.airDpPct == null ||
+    Math.abs(deviationAfter.airDpPct) <= CALIBRATION_TARGETS.airDpPct;
+  const refOk =
+    reference.refPressureDropKpa == null ||
+    deviationAfter.refDpPct == null ||
+    Math.abs(deviationAfter.refDpPct) <= CALIBRATION_TARGETS.refDpPct;
+
+  const meetsTargets = capOk && airOk && refOk;
+  const status: CalibrationStatus = meetsTargets ? "calibrated" : "needs_review";
+  const confidenceScore = confidenceScoreFor(status, 1);
 
   if (!meetsTargets) {
     notes.push("Calibração não atingiu todas as metas — revisar geometria ou refinar correlações.");
   }
 
-  return { factors, deviationBefore, deviationAfter, meetsTargets, notes };
-}
-
-function clamp(v: number, lo: number, hi: number): number {
-  return Math.min(hi, Math.max(lo, v));
+  return {
+    factors,
+    heatTransferFactor,
+    deviationBefore,
+    deviationAfter,
+    meetsTargets,
+    status,
+    confidenceScore,
+    notes,
+    baselineResult,
+    calibratedResult,
+  };
 }
