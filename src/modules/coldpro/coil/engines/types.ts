@@ -88,5 +88,5 @@ export interface CoilCalculationResult {
   isEstimated: boolean;
   modelSignature: string;
   warnings: string[];
-  debug: Record<string, unknown>;
+  debug: Record<string, any>;
 }
