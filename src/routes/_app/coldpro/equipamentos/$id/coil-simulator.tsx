@@ -278,20 +278,21 @@ function CoilSimulatorPage() {
         airPressureDropPa: NUM(a.airPressureDropPa) ?? null,
         refPressureDropKpa: NUM(r.refrigerantPressureDropKpa) ?? null,
       });
-      const calibrated = simulatePhysicalSimple(input, { calibration: outcome.factors });
       await saveCoilCalibration({
         componentItemId: prefillComponentId,
         coilType,
         outcome,
         referenceSource: "Unilab nominal",
         inputSnapshot: input,
-        outputSnapshot: calibrated,
+        outputSnapshot: outcome.calibratedResult,
         userId: user?.id,
       });
       return outcome;
     },
     onSuccess: (outcome) => {
       qc.invalidateQueries({ queryKey: ["coil-cal-latest", prefillComponentId] });
+      qc.invalidateQueries({ queryKey: ["coil-cal-active", prefillComponentId] });
+      qc.invalidateQueries({ queryKey: ["coil-cal-history", prefillComponentId] });
       const dev = outcome.deviationAfter.capacityPct;
       toast.success(
         outcome.meetsTargets
