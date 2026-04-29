@@ -276,8 +276,10 @@ export const importColdproPackage = createServerFn({ method: "POST" })
             filesIngested: summary.filesIngested,
             rowsIngested: summary.rowsIngested,
             filesSkipped: summary.filesSkipped,
-          },
-          errors_json: summary.errors,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          errors_json: summary.errors as any,
         })
         .eq("id", data.batchId);
 
