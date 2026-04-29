@@ -291,12 +291,14 @@ export const importColdproPackage = createServerFn({ method: "POST" })
         .update({
           status: "failed",
           finished_at: new Date().toISOString(),
-          errors_json: [...summary.errors, msg],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          errors_json: [...summary.errors, msg] as any,
           summary_json: {
             filesIngested: summary.filesIngested,
             rowsIngested: summary.rowsIngested,
             filesSkipped: summary.filesSkipped,
-          },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any,
         })
         .eq("id", data.batchId);
       throw new Error(msg);
