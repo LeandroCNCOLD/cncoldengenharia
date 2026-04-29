@@ -444,6 +444,7 @@ function CoilSimulatorPage() {
               <Badge variant="secondary" className="ml-2">{result.warnings.length}</Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="debug">Debug técnico</TabsTrigger>
           <TabsTrigger value="history">Histórico</TabsTrigger>
         </TabsList>
 
