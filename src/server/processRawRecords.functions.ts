@@ -354,8 +354,8 @@ export const processUnmappedRawRecords = createServerFn({ method: "POST" })
       const groupMapped = updates.filter((u) => u.status === "mapped").map((u) => u.id);
       const groupUnmapped = updates.filter((u) => u.status === "unmapped");
 
-      for (let i = 0; i < groupMapped.length; i += 500) {
-        const slice = groupMapped.slice(i, i + 500);
+      for (let i = 0; i < groupMapped.length; i += 100) {
+        const slice = groupMapped.slice(i, i + 100);
         const { error: upErr } = await supabaseAdmin
           .from("technical_raw_records")
           .update({ status: "mapped", notes: null })
