@@ -216,6 +216,21 @@ function TechnicalReviewPage() {
         </Card>
       )}
 
+      <div className="flex flex-wrap items-center gap-3 rounded-md border bg-muted/40 px-4 py-2 text-sm">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <Checkbox
+            checked={asCnStandard}
+            onCheckedChange={(v) => setAsCnStandard(v === true)}
+          />
+          <span>
+            Aprovar como <strong>padrão CN</strong>
+            <span className="ml-1 text-xs text-muted-foreground">
+              (motor usa direto; senão entra como referência de catálogo)
+            </span>
+          </span>
+        </label>
+      </div>
+
       {checkedIds.size > 0 && (
         <div className="flex flex-wrap items-center gap-3 rounded-md border bg-accent/40 px-4 py-2 text-sm">
           <span className="font-medium">{checkedIds.size} selecionado(s)</span>
@@ -229,7 +244,7 @@ function TechnicalReviewPage() {
             ) : (
               <CheckCircle2 className="mr-1 h-4 w-4" />
             )}
-            Aprovar selecionados
+            {asCnStandard ? "Aprovar como padrão CN" : "Aprovar selecionados"}
           </Button>
           <Button
             size="sm"
