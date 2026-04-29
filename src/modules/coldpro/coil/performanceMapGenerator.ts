@@ -535,7 +535,7 @@ export function generateCoilPerformanceMap(
         let result: CoilSimulatorResult;
         let simWarnings: string[] = [];
         try {
-          result = runSim(stepInput, engine, cal, unilabFactor, nominalFaceVelocityMs);
+          result = runSim(stepInput, engine, cal, unilabFactor, nominalFaceVelocityMs, undefined, hybridCal);
           simWarnings = result.warnings ?? [];
         } catch (e) {
           const msg = e instanceof Error ? e.message : "Falha na simulação";
