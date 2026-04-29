@@ -251,8 +251,12 @@ function CoilSimulatorPage() {
 
   const handleCalculate = () => {
     const input = buildInput();
+    // Empírico: aplica calibração como pós-processamento (via options).
     const emp =
-      coilType === "evaporator" ? simulateDxEvaporator(input) : simulateDxCondenser(input);
+      coilType === "evaporator"
+        ? simulateDxEvaporator(input, { calibration })
+        : simulateDxCondenser(input, { calibration });
+    // Físico: aplica calibração internamente. NUNCA aplicar de novo por cima.
     const phy = simulatePhysicalSimple(input, { calibration });
     setEmpiricalResult(emp);
     setPhysicalResult(phy);
