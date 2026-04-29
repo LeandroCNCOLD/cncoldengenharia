@@ -142,7 +142,7 @@ export function PerformanceMapPanel({
   });
 
   const calRow = calibration as
-    | { id: string; confidence_score?: number; status?: string }
+    | { id: string; confidence_score?: number; status?: string; model_signature?: string | null }
     | null;
   const hasCalibration = !!calRow;
 
@@ -171,6 +171,7 @@ export function PerformanceMapPanel({
         unilabGeometryFactor: unilabFactor,
         componentItemId,
         calibrationId: calRow?.id ?? null,
+        calibrationSignature: calRow?.model_signature ?? null,
       });
       setResult(r);
       if (!r.nominalValidation.reproducesNominal) {
