@@ -13,8 +13,8 @@ export * as CoilCorrelations from "../coil/correlations";
 
 // Helpers de coil específicos (sem conflitos)
 export { simulateHybridCoilWithUnilab } from "../coil/unilab/simulateHybridCoilWithUnilab";
-export { performanceMapGenerator } from "../coil/performanceMapGenerator";
-export { performanceMapNominalGuard } from "../coil/performanceMapNominalGuard";
+export * as PerformanceMap from "../coil/performanceMapGenerator";
+export * as PerformanceMapGuard from "../coil/performanceMapNominalGuard";
 
 // Simuladores DX
 export * as DxEvaporator from "../coil/dxEvaporatorSimulator";
