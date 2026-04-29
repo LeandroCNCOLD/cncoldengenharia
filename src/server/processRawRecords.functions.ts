@@ -267,14 +267,22 @@ export const processUnmappedRawRecords = createServerFn({ method: "POST" })
       if (!rows || rows.length === 0) break;
       summary.pages++;
 
-      // Idempotência: descobre quais raw_record_ids já têm mapped
+      // Idempotência: descobre quais raw_record_ids já têm mapped (em chunks
+      // para não estourar o tamanho da URL no PostgREST).
       const ids = rows.map((r) => r.id);
-      const { data: existing, error: exErr } = await supabaseAdmin
-        .from("technical_mapped_records")
-        .select("raw_record_id")
-        .in("raw_record_id", ids);
-      if (exErr) throw new Error(`fetch existing: ${exErr.message}`);
-      const alreadyMapped = new Set((existing ?? []).map((r) => r.raw_record_id as string));
+      const alreadyMapped = new Set<string>();
+      const CHUNK = 100;
+      for (let i = 0; i < ids.length; i += CHUNK) {
+        const slice = ids.slice(i, i + CHUNK);
+        const { data: existing, error: exErr } = await supabaseAdmin
+          .from("technical_mapped_records")
+          .select("raw_record_id")
+          .in("raw_record_id", slice);
+        if (exErr) throw new Error(`fetch existing: ${exErr.message}`);
+        for (const r of existing ?? []) {
+          if (r.raw_record_id) alreadyMapped.add(r.raw_record_id as string);
+        }
+      }
 
       const toInsertMapped: Array<Record<string, unknown>> = [];
       const updates: { id: string; status: "mapped" | "unmapped"; notes: string | null }[] = [];
