@@ -468,6 +468,32 @@ export function generateCoilPerformanceMap(
 
   const points: PerformancePoint[] = [];
 
+  // Retorno antecipado: mapa bloqueado pelo guard rail nominal.
+  if (blocked) {
+    const summaryEmpty: PerformanceMapSummary = {
+      totalPoints: 0,
+      validCount: 0,
+      warningCount: 0,
+      invalidCount: 0,
+      avgConfidence: 0,
+      capacityMinW: 0,
+      capacityMaxW: 0,
+    };
+    return {
+      coilType: params.coilType,
+      engine,
+      ranges,
+      isEstimated,
+      baselineCalibrationConfidence: calConf,
+      points: [],
+      summary: summaryEmpty,
+      nominalValidation,
+      modelSignature,
+      blocked: true,
+      blockReason,
+    };
+  }
+
   for (const refT of refAxis) {
     for (const airT of airAxis) {
       for (const ff of flowAxis) {
