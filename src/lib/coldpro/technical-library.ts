@@ -134,13 +134,18 @@ export async function getRawRecord(id: string): Promise<TechnicalRawRecord | nul
 export async function approveMapped(
   mapped: TechnicalMappedRecord,
   reviewerUserId: string | null,
+  opts: { source?: TechnicalSource; context?: TechnicalContext } = {},
 ): Promise<{ ok: boolean; error?: string; componentId?: string }> {
+  const source = opts.source ?? inferSourceFromManufacturer(mapped.manufacturer);
+  const context: TechnicalContext = opts.context ?? "reference";
   const insert = {
     entity_type: mapped.entity_type,
     manufacturer: mapped.manufacturer,
     model: mapped.model,
     code: mapped.code,
     status: "approved" as const,
+    source,
+    context,
     source_batch_id: mapped.batch_id,
     source_raw_id: mapped.raw_record_id,
     source_mapped_id: mapped.id,
@@ -173,13 +178,14 @@ export async function approveMapped(
 export async function approveMappedBulk(
   mappedList: TechnicalMappedRecord[],
   reviewerUserId: string | null,
+  opts: { source?: TechnicalSource; context?: TechnicalContext } = {},
 ): Promise<{ ok: number; failed: number; errors: string[] }> {
   let ok = 0;
   let failed = 0;
   const errors: string[] = [];
   // Sequencial (volume modesto + evita exceder rate limits do PostgREST).
   for (const m of mappedList) {
-    const res = await approveMapped(m, reviewerUserId);
+    const res = await approveMapped(m, reviewerUserId, opts);
     if (res.ok) ok += 1;
     else {
       failed += 1;
