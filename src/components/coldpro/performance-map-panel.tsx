@@ -686,10 +686,14 @@ export function PerformanceMapPanel({
           </div>
         )}
 
-        {result && summary && !approvable && result.nominalValidation.reproducesNominal && (
+        {result && summary && !approvable && blockReasonText && (
           <p className="text-xs text-amber-600">
-            Mais de 30% dos pontos estão inválidos — este mapa não pode ser
-            aprovado. Ajuste as faixas e gere novamente.
+            Aprovação bloqueada: {blockReasonText}
+          </p>
+        )}
+        {result?.modelSignature && (
+          <p className="text-[10px] text-muted-foreground font-mono">
+            modelSignature: {result.modelSignature}
           </p>
         )}
       </CardContent>
