@@ -21,6 +21,10 @@ function mapFinType(v?: string): FinType {
   return "unknown";
 }
 
+export function buildHybridGeometry(input: CoilSimulatorInput): GeometryInput {
+  return buildGeometry(input);
+}
+
 function buildGeometry(input: CoilSimulatorInput): GeometryInput {
   const g = input.geometry;
   const tubesPerRow = g.tubesPerRow ?? 12;
@@ -48,27 +52,30 @@ function buildGeometry(input: CoilSimulatorInput): GeometryInput {
   };
 }
 
+export function buildHybridCalcInput(input: CoilSimulatorInput): CoilCalculationInput {
+  const mode: CoilMode =
+    input.coilType === "condenser" ? "condensation" : "direct_expansion";
+  const geometry = buildGeometry(input);
+  return {
+    mode,
+    geometry,
+    airInletTempC: input.air.airTempInC ?? 0,
+    airOutletTempC: input.air.airTempOutC,
+    refTempC: input.refrigerant.refTempC ?? 0,
+    airflowM3h: input.air.airflowM3h ?? 0,
+    relativeHumidityPct: input.air.rhInPct,
+    wet: (input.air.rhInPct ?? 0) >= 70 && input.coilType === "evaporator",
+    refrigerant: input.refrigerant.refrigerant,
+    refrigerantMassFlowKgH:
+      input.refrigerant.massFlowKgs != null
+        ? input.refrigerant.massFlowKgs * 3600
+        : undefined,
+  };
+}
+
 export function runHybridDebug(input: CoilSimulatorInput): HybridDebugInfo | undefined {
   try {
-    const mode: CoilMode =
-      input.coilType === "condenser" ? "condensation" : "direct_expansion";
-    const geometry = buildGeometry(input);
-
-    const calcInput: CoilCalculationInput = {
-      mode,
-      geometry,
-      airInletTempC: input.air.airTempInC ?? 0,
-      airOutletTempC: input.air.airTempOutC,
-      refTempC: input.refrigerant.refTempC ?? 0,
-      airflowM3h: input.air.airflowM3h ?? 0,
-      relativeHumidityPct: input.air.rhInPct,
-      wet: (input.air.rhInPct ?? 0) >= 70 && input.coilType === "evaporator",
-      refrigerant: input.refrigerant.refrigerant,
-      refrigerantMassFlowKgH:
-        input.refrigerant.massFlowKgs != null
-          ? input.refrigerant.massFlowKgs * 3600
-          : undefined,
-    };
+    const calcInput = buildHybridCalcInput(input);
 
     const r = simulateHybridCoil(calcInput);
     const d = r.debug as Record<string, any>;

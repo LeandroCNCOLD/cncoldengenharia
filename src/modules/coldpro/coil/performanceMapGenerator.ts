@@ -24,9 +24,12 @@ import {
 import { simulatePhysicalSimple } from "./physicalSimpleEngine";
 import { simulateDxEvaporator } from "./dxEvaporatorSimulator";
 import { simulateDxCondenser } from "./dxCondenserSimulator";
+import { simulateHybridCoil } from "./engines/hybridCoilEngine";
+import type { CoilCalibration } from "./engines/types";
+import { buildHybridCalcInput } from "./hybridDebugAdapter";
 import type { UnilabGeometryFactor } from "../unilabData/types";
 
-export type PerformanceEngine = "physical_simple" | "empirical";
+export type PerformanceEngine = "physical_simple" | "empirical" | "hybrid";
 export type PointStatus = "valid" | "warning" | "invalid";
 
 export interface RangeSpec {
@@ -113,6 +116,12 @@ export interface PerformanceMapResult {
   points: PerformancePoint[];
   summary: PerformanceMapSummary;
   nominalValidation: NominalValidation;
+  /** Assinatura do motor híbrido no ponto nominal (vincula mapa ao modelo). */
+  modelSignature?: string | null;
+  /** true quando o mapa foi bloqueado pelo guard rail nominal. */
+  blocked?: boolean;
+  /** Mensagem do bloqueio (quando blocked=true). */
+  blockReason?: string | null;
 }
 
 export interface GeneratePerformanceMapParams {
@@ -131,6 +140,10 @@ export interface GeneratePerformanceMapParams {
   calibrationId?: string | null;
   /** Assinatura do modelo associada à calibração persistida. */
   calibrationSignature?: string | null;
+  /** Calibração híbrida persistida (com modelSignature). Necessário para engine='hybrid' aplicar. */
+  hybridCalibration?: CoilCalibration | null;
+  /** Se true (default), bloqueia o mapa quando o ponto nominal não reproduz datasheet. */
+  blockOnNominalMismatch?: boolean;
 }
 
 // --- helpers ---------------------------------------------------------------
@@ -233,6 +246,54 @@ function classifyPoint(opts: {
   return { status, warnings: w };
 }
 
+function runHybridSim(
+  input: CoilSimulatorInput,
+  cal: CalibrationFactors,
+  hybridCalibration?: CoilCalibration | null,
+): { result: CoilSimulatorResult; signature: string; calibrationCompatible: boolean } {
+  const calcInput = buildHybridCalcInput(input);
+  // Anexa calibração híbrida (se houver) — engine valida assinatura internamente.
+  if (hybridCalibration) calcInput.calibration = hybridCalibration;
+
+  const r = simulateHybridCoil(calcInput);
+  // Aplica também os fatores legados (CalibrationFactors) como pós-multiplicador
+  // para manter compat com o pipeline atual quando não há calibração híbrida.
+  const capPost = hybridCalibration ? 1 : (cal.capacityCorrectionFactor ?? 1);
+  const airDpPost = hybridCalibration ? 1 : (cal.airDpCorrectionFactor ?? 1);
+  const refDpPost = hybridCalibration ? 1 : (cal.refDpCorrectionFactor ?? 1);
+
+  const capacityW = Math.max(0, r.capacityW * capPost);
+  const airDp = r.airPressureDropPa != null ? r.airPressureDropPa * airDpPost : null;
+  const refDp = r.refrigerantPressureDropKpa != null ? r.refrigerantPressureDropKpa * refDpPost : null;
+
+  // face velocity derivada da geometria efetiva
+  const faceVel =
+    r.frontalAreaM2 > 0 && (input.air.airflowM3h ?? 0) > 0
+      ? (input.air.airflowM3h ?? 0) / 3600 / r.frontalAreaM2
+      : null;
+
+  // Adapta para CoilSimulatorResult-like (apenas campos usados a jusante).
+  const adapted = {
+    coilType: input.coilType,
+    capacityW,
+    capacityKcalh: capacityW * 0.859845,
+    sensibleW: capacityW,
+    latentW: 0,
+    airPressureDropPa: airDp,
+    refPressureDropKpa: refDp,
+    faceVelocityMs: faceVel,
+    airOutletTempC: null,
+    warnings: r.warnings ?? [],
+    breakdown: { uWm2k: r.uWm2K, hAir: r.hAirWm2K, hRef: r.hRefWm2K, area: r.effectiveAreaM2 },
+  } as unknown as CoilSimulatorResult;
+
+  return {
+    result: adapted,
+    signature: r.modelSignature ?? "",
+    calibrationCompatible: Boolean(r.calibrationCompatible),
+  };
+}
+
 function runSim(
   input: CoilSimulatorInput,
   engine: PerformanceEngine,
@@ -240,7 +301,11 @@ function runSim(
   unilabGeometryFactor?: UnilabGeometryFactor | null,
   nominalFaceVelocityMs?: number,
   debug?: { componentItemId?: string; calibrationId?: string | null; nominalCapacityW?: number | null; calibrationSignature?: string | null },
+  hybridCalibration?: CoilCalibration | null,
 ): CoilSimulatorResult {
+  if (engine === "hybrid") {
+    return runHybridSim(input, cal, hybridCalibration).result;
+  }
   if (engine === "physical_simple") {
     return simulatePhysicalSimple(input, {
       calibration: cal,
@@ -265,12 +330,14 @@ function runSim(
 export function generateCoilPerformanceMap(
   params: GeneratePerformanceMapParams,
 ): PerformanceMapResult {
-  const engine: PerformanceEngine = params.engine ?? "physical_simple";
+  const engine: PerformanceEngine = params.engine ?? "hybrid";
   const ranges = pickRanges(params.coilType, params.ranges);
   // Mapa pode ser gerado SEM calibração — calibração é apenas ajuste fino.
   const cal = normalizeCalibrationFactors(params.calibration ?? NEUTRAL_CALIBRATION);
-  const isEstimated = !params.calibration;
+  const isEstimated = !params.calibration && !params.hybridCalibration;
   const calConf = isEstimated ? 0.6 : (params.calibrationConfidence ?? 0.85);
+  const hybridCal = params.hybridCalibration ?? null;
+  const blockOnMismatch = params.blockOnNominalMismatch ?? true;
 
   // baseline para calcular distance
   const baseInput = params.input;
@@ -309,6 +376,7 @@ export function generateCoilPerformanceMap(
 
   let nominalSimCapW = 0;
   let nominalRawCapW = 0;
+  let modelSignature: string | null = null;
   try {
     const nominalInput: CoilSimulatorInput = {
       ...baseInput,
@@ -319,13 +387,21 @@ export function generateCoilPerformanceMap(
       },
       refrigerant: { ...baseInput.refrigerant, refTempC: nominal.refTempC },
     };
-    nominalRawCapW = runSim(nominalInput, engine, NEUTRAL_CALIBRATION, unilabFactor, nominalFaceVelocityMs).capacityW;
-    nominalSimCapW = runSim(nominalInput, engine, cal, unilabFactor, nominalFaceVelocityMs, {
-      componentItemId: params.componentItemId,
-      calibrationId: params.calibrationId,
-      nominalCapacityW: datasheetCapW,
-      calibrationSignature: params.calibrationSignature ?? null,
-    }).capacityW;
+    if (engine === "hybrid") {
+      const rRaw = runHybridSim(nominalInput, NEUTRAL_CALIBRATION, null);
+      const rCal = runHybridSim(nominalInput, cal, hybridCal);
+      nominalRawCapW = rRaw.result.capacityW;
+      nominalSimCapW = rCal.result.capacityW;
+      modelSignature = rCal.signature || rRaw.signature || null;
+    } else {
+      nominalRawCapW = runSim(nominalInput, engine, NEUTRAL_CALIBRATION, unilabFactor, nominalFaceVelocityMs).capacityW;
+      nominalSimCapW = runSim(nominalInput, engine, cal, unilabFactor, nominalFaceVelocityMs, {
+        componentItemId: params.componentItemId,
+        calibrationId: params.calibrationId,
+        nominalCapacityW: datasheetCapW,
+        calibrationSignature: params.calibrationSignature ?? null,
+      }).capacityW;
+    }
   } catch {
     /* validation reports 0 */
   }
@@ -359,9 +435,16 @@ export function generateCoilPerformanceMap(
           : `Mapa não reproduz o ponto nominal Unilab. Verifique aplicação da calibração. Erro: ${((relErr ?? 0) * 100).toFixed(2)}% (sim ${nominalSimCapW.toFixed(0)} W vs datasheet ${datasheetCapW.toFixed(0)} W).`,
   };
 
-  // O mapa NÃO é mais bloqueado quando o nominal não bate exatamente.
-  // O modelo é fisicamente consistente; calibração é só ajuste fino ±20%.
-  // A validação nominal vira um aviso (warning), não um erro crítico.
+  // Guard rail: bloqueia o mapa se o nominal não reproduz o datasheet.
+  // (Aplicado apenas quando há datasheet de referência E bloqueio habilitado.)
+  const blocked =
+    blockOnMismatch &&
+    datasheetCapW != null &&
+    !reproducesNominal &&
+    (params.calibration != null || hybridCal != null);
+  const blockReason = blocked
+    ? `Mapa bloqueado: ponto nominal não reproduz o datasheet (sim ${nominalSimCapW.toFixed(0)} W vs ${datasheetCapW?.toFixed(0)} W, erro ${((relErr ?? 0) * 100).toFixed(2)}%). Recalibre ou revise o modelo.`
+    : null;
 
   // eslint-disable-next-line no-console
   console.debug("[performanceMap] nominal validation", {
@@ -384,6 +467,32 @@ export function generateCoilPerformanceMap(
   const flowAxis = buildAxis(ranges.airflowFactor);
 
   const points: PerformancePoint[] = [];
+
+  // Retorno antecipado: mapa bloqueado pelo guard rail nominal.
+  if (blocked) {
+    const summaryEmpty: PerformanceMapSummary = {
+      totalPoints: 0,
+      validCount: 0,
+      warningCount: 0,
+      invalidCount: 0,
+      avgConfidence: 0,
+      capacityMinW: 0,
+      capacityMaxW: 0,
+    };
+    return {
+      coilType: params.coilType,
+      engine,
+      ranges,
+      isEstimated,
+      baselineCalibrationConfidence: calConf,
+      points: [],
+      summary: summaryEmpty,
+      nominalValidation,
+      modelSignature,
+      blocked: true,
+      blockReason,
+    };
+  }
 
   for (const refT of refAxis) {
     for (const airT of airAxis) {
@@ -426,7 +535,7 @@ export function generateCoilPerformanceMap(
         let result: CoilSimulatorResult;
         let simWarnings: string[] = [];
         try {
-          result = runSim(stepInput, engine, cal, unilabFactor, nominalFaceVelocityMs);
+          result = runSim(stepInput, engine, cal, unilabFactor, nominalFaceVelocityMs, undefined, hybridCal);
           simWarnings = result.warnings ?? [];
         } catch (e) {
           const msg = e instanceof Error ? e.message : "Falha na simulação";
@@ -526,6 +635,9 @@ export function generateCoilPerformanceMap(
     baselineCalibrationConfidence: calConf,
     points,
     summary,
+    modelSignature,
+    blocked: false,
+    blockReason: null,
   };
 }
 
