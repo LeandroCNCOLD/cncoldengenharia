@@ -32,7 +32,11 @@ function estimateFaceArea(input: CoilSimulatorInput): number | null {
   return ((tubesPerRow * tubeSpacingMm) / 1000) * (coilLengthMm / 1000);
 }
 
-export function simulateDxCondenser(input: CoilSimulatorInput): CoilSimulatorResult {
+export function simulateDxCondenser(
+  input: CoilSimulatorInput,
+  options: DxSimulatorOptions = {},
+): CoilSimulatorResult {
+  const cal = options.calibration ?? NEUTRAL_CALIBRATION;
   const warnings: string[] = [];
   const air = input.air;
   const ref = input.refrigerant;
