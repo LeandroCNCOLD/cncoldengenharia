@@ -280,12 +280,12 @@ export function generateCoilPerformanceMap(
       ? nominalAirflow
       : null;
   const nominal = {
-    refTempC: baseInput.nominal?.refTempC ?? baseInput.refrigerant.refTempC ?? 0,
-    airInletTempC: baseInput.nominal?.airTempInC ?? baseInput.air.airTempInC ?? 0,
+    refTempC: params.coilType === "evaporator" ? -35 : baseInput.nominal?.refTempC ?? baseInput.refrigerant.refTempC ?? 0,
+    airInletTempC: params.coilType === "evaporator" ? -25 : baseInput.nominal?.airTempInC ?? baseInput.air.airTempInC ?? 0,
     airflowFactor: 1,
     dtNominalK: Math.abs(
-      (baseInput.nominal?.airTempInC ?? baseInput.air.airTempInC ?? 0) -
-        (baseInput.nominal?.refTempC ?? baseInput.refrigerant.refTempC ?? 0),
+      (params.coilType === "evaporator" ? -25 : baseInput.nominal?.airTempInC ?? baseInput.air.airTempInC ?? 0) -
+        (params.coilType === "evaporator" ? -35 : baseInput.nominal?.refTempC ?? baseInput.refrigerant.refTempC ?? 0),
     ),
   };
 
@@ -314,7 +314,7 @@ export function generateCoilPerformanceMap(
       air: {
         ...baseInput.air,
         airTempInC: nominal.airInletTempC,
-        airflowM3h: baseAirflow ?? baseInput.air.airflowM3h ?? 0,
+        airflowM3h: params.coilType === "evaporator" ? 13_077 : baseAirflow ?? baseInput.air.airflowM3h ?? 0,
       },
       refrigerant: { ...baseInput.refrigerant, refTempC: nominal.refTempC },
     };
