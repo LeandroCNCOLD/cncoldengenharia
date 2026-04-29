@@ -1,7 +1,8 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Upload, Loader2, CheckCircle2, AlertCircle, Download } from "lucide-react";
+import { Upload, Loader2, CheckCircle2, AlertCircle, Download, FileArchive } from "lucide-react";
+import JSZip from "jszip";
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
