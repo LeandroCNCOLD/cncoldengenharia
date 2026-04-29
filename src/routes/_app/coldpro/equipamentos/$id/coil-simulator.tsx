@@ -252,7 +252,13 @@ function CoilSimulatorPage() {
         ? simulateDxEvaporator(input, { calibration })
         : simulateDxCondenser(input, { calibration });
     // Físico: aplica calibração internamente. NUNCA aplicar de novo por cima.
-    const phy = simulatePhysicalSimple(input, { calibration });
+    const phy = simulatePhysicalSimple(input, {
+      calibration,
+      componentItemId: prefillComponentId ?? undefined,
+      calibrationId: (latestCal as { id?: string } | null)?.id ?? null,
+      nominalCapacityW: prefillNominal?.capacityW ?? null,
+      logCalibration: true,
+    });
     setEmpiricalResult(emp);
     setPhysicalResult(phy);
     const chosen = engine === "physical_simple" ? phy : emp;
