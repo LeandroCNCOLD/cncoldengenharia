@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, Boxes, Settings, LogOut, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, Boxes, Settings, LogOut, Database, type LucideIcon } from "lucide-react";
 
 import { CnLogo } from "@/components/cn-logo";
 import { useAuth } from "@/lib/auth";
@@ -17,6 +17,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
   { label: "Equipamentos", to: "/coldpro/equipamentos", icon: Boxes },
   { label: "Administração", to: "/admin", icon: Settings, adminOnly: true },
+  { label: "Importar Unilab", to: "/admin/unilab-import", icon: Database, adminOnly: true },
 ];
 
 export function AppSidebar() {
