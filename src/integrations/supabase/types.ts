@@ -110,6 +110,51 @@ export type Database = {
         }
         Relationships: []
       }
+      coil_correlations: {
+        Row: {
+          application: string | null
+          created_at: string
+          fluid_side: string | null
+          geometry_type: string | null
+          group_name: string | null
+          id: string
+          name: string
+          phase: string | null
+          raw_json: Json
+          updated_at: string
+          validity_range_json: Json
+          wet_mode: string | null
+        }
+        Insert: {
+          application?: string | null
+          created_at?: string
+          fluid_side?: string | null
+          geometry_type?: string | null
+          group_name?: string | null
+          id?: string
+          name: string
+          phase?: string | null
+          raw_json?: Json
+          updated_at?: string
+          validity_range_json?: Json
+          wet_mode?: string | null
+        }
+        Update: {
+          application?: string | null
+          created_at?: string
+          fluid_side?: string | null
+          geometry_type?: string | null
+          group_name?: string | null
+          id?: string
+          name?: string
+          phase?: string | null
+          raw_json?: Json
+          updated_at?: string
+          validity_range_json?: Json
+          wet_mode?: string | null
+        }
+        Relationships: []
+      }
       coil_factor_application_logs: {
         Row: {
           base_result_json: Json
@@ -609,6 +654,98 @@ export type Database = {
           },
         ]
       }
+      compressor_models: {
+        Row: {
+          compressor_type: string | null
+          created_at: string
+          displacement: number | null
+          frequency: string | null
+          id: string
+          manufacturer: string | null
+          model: string
+          raw_json: Json
+          refrigerant: string | null
+          updated_at: string
+          voltage: string | null
+        }
+        Insert: {
+          compressor_type?: string | null
+          created_at?: string
+          displacement?: number | null
+          frequency?: string | null
+          id?: string
+          manufacturer?: string | null
+          model: string
+          raw_json?: Json
+          refrigerant?: string | null
+          updated_at?: string
+          voltage?: string | null
+        }
+        Update: {
+          compressor_type?: string | null
+          created_at?: string
+          displacement?: number | null
+          frequency?: string | null
+          id?: string
+          manufacturer?: string | null
+          model?: string
+          raw_json?: Json
+          refrigerant?: string | null
+          updated_at?: string
+          voltage?: string | null
+        }
+        Relationships: []
+      }
+      compressor_polynomials: {
+        Row: {
+          coefficients_json: Json
+          compressor_id: string | null
+          created_at: string
+          curve_type: string
+          id: string
+          raw_json: Json
+          temp_cond_max_c: number | null
+          temp_cond_min_c: number | null
+          temp_evap_max_c: number | null
+          temp_evap_min_c: number | null
+          unit_system: string | null
+        }
+        Insert: {
+          coefficients_json?: Json
+          compressor_id?: string | null
+          created_at?: string
+          curve_type: string
+          id?: string
+          raw_json?: Json
+          temp_cond_max_c?: number | null
+          temp_cond_min_c?: number | null
+          temp_evap_max_c?: number | null
+          temp_evap_min_c?: number | null
+          unit_system?: string | null
+        }
+        Update: {
+          coefficients_json?: Json
+          compressor_id?: string | null
+          created_at?: string
+          curve_type?: string
+          id?: string
+          raw_json?: Json
+          temp_cond_max_c?: number | null
+          temp_cond_min_c?: number | null
+          temp_evap_max_c?: number | null
+          temp_evap_min_c?: number | null
+          unit_system?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compressor_polynomials_compressor_id_fkey"
+            columns: ["compressor_id"]
+            isOneToOne: false
+            referencedRelation: "compressor_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       condenser_coil_models: {
         Row: {
           air_density_in_kg_m3: number | null
@@ -1080,6 +1217,86 @@ export type Database = {
           },
         ]
       }
+      fan_curves: {
+        Row: {
+          coefficients_json: Json
+          created_at: string
+          curve_type: string
+          fan_id: string | null
+          id: string
+          raw_json: Json
+          table_data_json: Json
+        }
+        Insert: {
+          coefficients_json?: Json
+          created_at?: string
+          curve_type: string
+          fan_id?: string | null
+          id?: string
+          raw_json?: Json
+          table_data_json?: Json
+        }
+        Update: {
+          coefficients_json?: Json
+          created_at?: string
+          curve_type?: string
+          fan_id?: string | null
+          id?: string
+          raw_json?: Json
+          table_data_json?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fan_curves_fan_id_fkey"
+            columns: ["fan_id"]
+            isOneToOne: false
+            referencedRelation: "fan_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fan_models: {
+        Row: {
+          created_at: string
+          diameter_mm: number | null
+          fan_type: string | null
+          id: string
+          manufacturer: string | null
+          model: string
+          nominal_airflow_m3h: number | null
+          nominal_power_w: number | null
+          nominal_pressure_pa: number | null
+          raw_json: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          diameter_mm?: number | null
+          fan_type?: string | null
+          id?: string
+          manufacturer?: string | null
+          model: string
+          nominal_airflow_m3h?: number | null
+          nominal_power_w?: number | null
+          nominal_pressure_pa?: number | null
+          raw_json?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          diameter_mm?: number | null
+          fan_type?: string | null
+          id?: string
+          manufacturer?: string | null
+          model?: string
+          nominal_airflow_m3h?: number | null
+          nominal_power_w?: number | null
+          nominal_pressure_pa?: number | null
+          raw_json?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -1100,6 +1317,119 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      refrigerant_polynomials: {
+        Row: {
+          c0: number | null
+          c1: number | null
+          c2: number | null
+          c3: number | null
+          c4: number | null
+          c5: number | null
+          c6: number | null
+          created_at: string
+          id: string
+          phase: string | null
+          property_id: string | null
+          property_name: string
+          raw_json: Json
+          refrigerant_code: string | null
+          refrigerant_id: string | null
+          temp_max_c: number | null
+          temp_min_c: number | null
+          unit: string | null
+        }
+        Insert: {
+          c0?: number | null
+          c1?: number | null
+          c2?: number | null
+          c3?: number | null
+          c4?: number | null
+          c5?: number | null
+          c6?: number | null
+          created_at?: string
+          id?: string
+          phase?: string | null
+          property_id?: string | null
+          property_name: string
+          raw_json?: Json
+          refrigerant_code?: string | null
+          refrigerant_id?: string | null
+          temp_max_c?: number | null
+          temp_min_c?: number | null
+          unit?: string | null
+        }
+        Update: {
+          c0?: number | null
+          c1?: number | null
+          c2?: number | null
+          c3?: number | null
+          c4?: number | null
+          c5?: number | null
+          c6?: number | null
+          created_at?: string
+          id?: string
+          phase?: string | null
+          property_id?: string | null
+          property_name?: string
+          raw_json?: Json
+          refrigerant_code?: string | null
+          refrigerant_id?: string | null
+          temp_max_c?: number | null
+          temp_min_c?: number | null
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refrigerant_polynomials_refrigerant_id_fkey"
+            columns: ["refrigerant_id"]
+            isOneToOne: false
+            referencedRelation: "refrigerants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      refrigerants: {
+        Row: {
+          code: string
+          created_at: string
+          family: string | null
+          gwp: number | null
+          id: string
+          name: string | null
+          odp: number | null
+          raw_json: Json
+          safety_class: string | null
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          family?: string | null
+          gwp?: number | null
+          id?: string
+          name?: string | null
+          odp?: number | null
+          raw_json?: Json
+          safety_class?: string | null
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          family?: string | null
+          gwp?: number | null
+          id?: string
+          name?: string | null
+          odp?: number | null
+          raw_json?: Json
+          safety_class?: string | null
+          type?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1158,6 +1488,160 @@ export type Database = {
           },
         ]
       }
+      unilab_geometries: {
+        Row: {
+          circuits: number | null
+          created_at: string
+          description: string | null
+          fin_pitch_mm: number | null
+          fin_thickness_mm: number | null
+          fin_type: string | null
+          geometry_code: string
+          id: string
+          import_batch_id: string | null
+          mode: string
+          raw_json: Json
+          row_pitch_mm: number | null
+          rows: number | null
+          source_table: string | null
+          tube_inner_diameter_mm: number | null
+          tube_outer_diameter_mm: number | null
+          tube_pitch_mm: number | null
+          tube_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          circuits?: number | null
+          created_at?: string
+          description?: string | null
+          fin_pitch_mm?: number | null
+          fin_thickness_mm?: number | null
+          fin_type?: string | null
+          geometry_code: string
+          id?: string
+          import_batch_id?: string | null
+          mode: string
+          raw_json?: Json
+          row_pitch_mm?: number | null
+          rows?: number | null
+          source_table?: string | null
+          tube_inner_diameter_mm?: number | null
+          tube_outer_diameter_mm?: number | null
+          tube_pitch_mm?: number | null
+          tube_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          circuits?: number | null
+          created_at?: string
+          description?: string | null
+          fin_pitch_mm?: number | null
+          fin_thickness_mm?: number | null
+          fin_type?: string | null
+          geometry_code?: string
+          id?: string
+          import_batch_id?: string | null
+          mode?: string
+          raw_json?: Json
+          row_pitch_mm?: number | null
+          rows?: number | null
+          source_table?: string | null
+          tube_inner_diameter_mm?: number | null
+          tube_outer_diameter_mm?: number | null
+          tube_pitch_mm?: number | null
+          tube_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unilab_geometries_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "unilab_import_batches_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      unilab_geometries_factors: {
+        Row: {
+          created_at: string
+          factor_a0: number | null
+          factor_a1: number | null
+          factor_a2: number | null
+          factor_fatc: number | null
+          fat_coef_lattub: number | null
+          fat_cor_al: number | null
+          fat_corr_fat_attr: number | null
+          fat_rid_aum_sup: number | null
+          fattore_attr_aria: number | null
+          fattore_attr_aria_latente: number | null
+          geometry_code: string
+          id: string
+          import_batch_id: string | null
+          mode: string
+          raw_json: Json
+          security_factor: number | null
+          slope_fat_coef_lattub: number | null
+          slope_fat_cor_al: number | null
+          slope_fattore_attr_aria: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          factor_a0?: number | null
+          factor_a1?: number | null
+          factor_a2?: number | null
+          factor_fatc?: number | null
+          fat_coef_lattub?: number | null
+          fat_cor_al?: number | null
+          fat_corr_fat_attr?: number | null
+          fat_rid_aum_sup?: number | null
+          fattore_attr_aria?: number | null
+          fattore_attr_aria_latente?: number | null
+          geometry_code: string
+          id?: string
+          import_batch_id?: string | null
+          mode: string
+          raw_json?: Json
+          security_factor?: number | null
+          slope_fat_coef_lattub?: number | null
+          slope_fat_cor_al?: number | null
+          slope_fattore_attr_aria?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          factor_a0?: number | null
+          factor_a1?: number | null
+          factor_a2?: number | null
+          factor_fatc?: number | null
+          fat_coef_lattub?: number | null
+          fat_cor_al?: number | null
+          fat_corr_fat_attr?: number | null
+          fat_rid_aum_sup?: number | null
+          fattore_attr_aria?: number | null
+          fattore_attr_aria_latente?: number | null
+          geometry_code?: string
+          id?: string
+          import_batch_id?: string | null
+          mode?: string
+          raw_json?: Json
+          security_factor?: number | null
+          slope_fat_coef_lattub?: number | null
+          slope_fat_cor_al?: number | null
+          slope_fattore_attr_aria?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unilab_geometries_factors_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "unilab_import_batches_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       unilab_import_batches: {
         Row: {
           id: string
@@ -1187,6 +1671,92 @@ export type Database = {
           source_version?: string | null
         }
         Relationships: []
+      }
+      unilab_import_batches_v2: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          errors_json: Json
+          finished_at: string | null
+          id: string
+          notes: string | null
+          source_file: string
+          source_version: string | null
+          started_at: string
+          status: string
+          summary_json: Json
+          total_rows: number
+          total_tables: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          errors_json?: Json
+          finished_at?: string | null
+          id?: string
+          notes?: string | null
+          source_file: string
+          source_version?: string | null
+          started_at?: string
+          status?: string
+          summary_json?: Json
+          total_rows?: number
+          total_tables?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          errors_json?: Json
+          finished_at?: string | null
+          id?: string
+          notes?: string | null
+          source_file?: string
+          source_version?: string | null
+          started_at?: string
+          status?: string
+          summary_json?: Json
+          total_rows?: number
+          total_tables?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      unilab_raw_tables: {
+        Row: {
+          created_at: string
+          id: string
+          import_batch_id: string
+          raw_json: Json
+          row_index: number
+          source_table: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          import_batch_id: string
+          raw_json?: Json
+          row_index: number
+          source_table: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          import_batch_id?: string
+          raw_json?: Json
+          row_index?: number
+          source_table?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unilab_raw_tables_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "unilab_import_batches_v2"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
