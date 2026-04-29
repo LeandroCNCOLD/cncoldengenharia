@@ -14,8 +14,15 @@
 import type { CoilSimulatorInput, CoilSimulatorResult } from "./coilSimulatorTypes";
 import { deriveCoilGeometry, type GeometryDerived } from "./geometryDerived";
 import type { CalibrationFactors } from "./coilEngineTypes";
-import { normalizeCalibrationFactors } from "./coilEngineTypes";
+import { NEUTRAL_CALIBRATION, normalizeCalibrationFactors } from "./coilEngineTypes";
 import { computeUnilabFactors } from "./unilabFactorApplication";
+import {
+  generateModelSignature,
+  checkCalibrationValidity,
+  ENGINE_NAME,
+  ENGINE_VERSION,
+  CORRELATION_SET_VERSION,
+} from "./calibrationSignature";
 import type {
   AppliedUnilabFactors,
   UnilabGeometryFactor,
@@ -35,6 +42,14 @@ export interface PhysicalSimpleOptions {
   calibrationId?: string | null;
   nominalCapacityW?: number | null;
   logCalibration?: boolean;
+  /** Fator opcional aplicado ao h_air (lado do ar) — controlado e rastreável. Default 1. */
+  airSideCorrectionFactor?: number;
+  /**
+   * Assinatura do modelo associada à calibração `opts.calibration`.
+   * Se diferente da assinatura atual gerada para os inputs, a calibração
+   * NÃO será aplicada e um warning será adicionado.
+   */
+  calibrationSignature?: string | null;
 }
 
 interface MaterialProps { kTube: number; kFin: number }
@@ -108,7 +123,7 @@ export function simulatePhysicalSimple(
   input: CoilSimulatorInput,
   opts: PhysicalSimpleOptions = {},
 ): PhysicalSimpleResult {
-  const cal = normalizeCalibrationFactors(opts.calibration);
+  const requestedCal = normalizeCalibrationFactors(opts.calibration);
   const warnings: string[] = [];
   const derived = deriveCoilGeometry(input.geometry);
 
@@ -127,13 +142,14 @@ export function simulatePhysicalSimple(
   const airMassFlowKgs = airflowM3s * rho;
 
   // Coeficientes
-  // [TESTE TEMPORÁRIO] Multiplicador 2.5x em h_air para validar hipótese de subestimação
-  // do coeficiente de transferência do lado do ar. Remover após validação.
-  const H_AIR_TEST_MULTIPLIER = 2.5;
+  // Lado do ar: correlação base + fator opcional rastreável (substitui o
+  // hack temporário h_air * 2.5; default = 1).
+  const airSideCorrectionFactor =
+    Number.isFinite(opts.airSideCorrectionFactor) && (opts.airSideCorrectionFactor ?? 0) > 0
+      ? (opts.airSideCorrectionFactor as number)
+      : 1;
   const hArBase = airSideHtc(faceVelocityMs);
-  const hAr = hArBase * H_AIR_TEST_MULTIPLIER;
-  // eslint-disable-next-line no-console
-  console.log("[h_air TEST] base=", hArBase.toFixed(2), "W/m²K × ", H_AIR_TEST_MULTIPLIER, "→ usado=", hAr.toFixed(2), "W/m²K (faceVel=", faceVelocityMs?.toFixed(3), "m/s)");
+  const hAr = hArBase * airSideCorrectionFactor;
   const hRef = refSideHtc(input.coilType, input.refrigerant.refrigerant);
   const { kTube } = materialProps(input.geometry.tubeMaterial, input.geometry.finMaterial);
 
