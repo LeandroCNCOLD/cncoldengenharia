@@ -477,10 +477,15 @@ export function generateCoilPerformanceMap(
   };
 }
 
-/** Regra de aprovação: ≤30% de pontos invalid. */
-export function canApproveMap(summary: PerformanceMapSummary): boolean {
+/** Regra de aprovação: ≤30% de pontos invalid E reproduz ponto nominal (±5%). */
+export function canApproveMap(
+  summary: PerformanceMapSummary,
+  nominalValidation?: NominalValidation,
+): boolean {
   if (summary.totalPoints === 0) return false;
-  return summary.invalidCount / summary.totalPoints <= 0.3;
+  if (summary.invalidCount / summary.totalPoints > 0.3) return false;
+  if (nominalValidation && !nominalValidation.reproducesNominal) return false;
+  return true;
 }
 
 /** Exporta o mapa para CSV. */
