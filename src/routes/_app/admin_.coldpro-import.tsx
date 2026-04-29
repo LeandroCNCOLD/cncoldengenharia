@@ -68,16 +68,17 @@ function ColdproImportPage() {
         refs[0]?.fileName ??
         "coldpro-import";
 
+      const insertRow = {
+        source_file: sourceFile,
+        source_version: version || null,
+        status: "uploaded",
+        notes: notes || null,
+        created_by: user?.id ?? null,
+        summary_json: { uploads: refs } as unknown as Record<string, unknown>,
+      };
       const { data: batch, error: batchErr } = await supabase
         .from("unilab_import_batches_v2")
-        .insert({
-          source_file: sourceFile,
-          source_version: version || null,
-          status: "uploaded",
-          notes: notes || null,
-          created_by: user?.id ?? null,
-          summary_json: { uploads: refs },
-        })
+        .insert(insertRow)
         .select("id")
         .single();
       if (batchErr) throw new Error(batchErr.message);
