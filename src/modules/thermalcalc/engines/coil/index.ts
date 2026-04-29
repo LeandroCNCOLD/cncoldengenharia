@@ -43,8 +43,8 @@ export type {
 export { simulatePhysicalSimple } from './physicalSimpleEngine';
 export { simulateDxEvaporator } from './dxEvaporatorSimulator';
 export { simulateDxCondenser } from './dxCondenserSimulator';
-export { simulateEvaporatorCoil } from './evaporatorCoilSimulator';
-export { simulateCondenserCoil } from './condenserCoilSimulator';
+export { simulateEvaporator } from './evaporatorCoilSimulator';
+export { simulateCondenser } from './condenserCoilSimulator';
 export { calibrateAgainstReference } from './coilCalibration';
 export type { CalibrationOutcome as CoilCalibrationOutcome, DatasheetPoint } from './coilCalibration';
 export { deriveCoilGeometry } from './geometryDerived';
