@@ -129,6 +129,8 @@ export interface GeneratePerformanceMapParams {
   /** Identificadores opcionais (debug log). */
   componentItemId?: string;
   calibrationId?: string | null;
+  /** Assinatura do modelo associada à calibração persistida. */
+  calibrationSignature?: string | null;
 }
 
 // --- helpers ---------------------------------------------------------------
@@ -237,7 +239,7 @@ function runSim(
   cal: CalibrationFactors,
   unilabGeometryFactor?: UnilabGeometryFactor | null,
   nominalFaceVelocityMs?: number,
-  debug?: { componentItemId?: string; calibrationId?: string | null; nominalCapacityW?: number | null },
+  debug?: { componentItemId?: string; calibrationId?: string | null; nominalCapacityW?: number | null; calibrationSignature?: string | null },
 ): CoilSimulatorResult {
   if (engine === "physical_simple") {
     return simulatePhysicalSimple(input, {
@@ -248,6 +250,7 @@ function runSim(
       calibrationId: debug?.calibrationId,
       nominalCapacityW: debug?.nominalCapacityW,
       logCalibration: !!debug,
+      calibrationSignature: debug?.calibrationSignature ?? null,
     });
   }
   // empirical: aplica calibração via post (passa direto no options)
