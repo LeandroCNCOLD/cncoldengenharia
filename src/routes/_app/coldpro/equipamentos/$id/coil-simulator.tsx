@@ -33,6 +33,7 @@ import { calibrateAgainstReference } from "@/modules/coldpro/coil/coilCalibratio
 import { factorsFromRow, getLatestCalibration, saveCoilCalibration } from "@/lib/coldpro/coil-calibrations";
 import { NEUTRAL_CALIBRATION, type CalibrationFactors, type CoilEngine } from "@/modules/coldpro/coil/coilEngineTypes";
 import { OriginBadge } from "@/components/coldpro/origin-badge";
+import { SystemSimulatorPanel } from "@/components/coldpro/system-simulator-panel";
 import type {
   CoilSimulatorInput,
   CoilSimulatorResult,
@@ -445,8 +446,15 @@ function CoilSimulatorPage() {
             )}
           </TabsTrigger>
           <TabsTrigger value="debug">Debug técnico</TabsTrigger>
+          <TabsTrigger value="system">Sistema</TabsTrigger>
           <TabsTrigger value="history">Histórico</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="system" className="mt-4">
+          <SystemSimulatorPanel
+            defaultEvaporatorCode={g.description || "EVAP_DEFAULT"}
+          />
+        </TabsContent>
 
         {/* Geometria */}
         <TabsContent value="geometry" className="mt-4">
