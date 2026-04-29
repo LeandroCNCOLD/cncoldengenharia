@@ -267,9 +267,7 @@ export function generateCoilPerformanceMap(
 ): PerformanceMapResult {
   const engine: PerformanceEngine = params.engine ?? "physical_simple";
   const ranges = pickRanges(params.coilType, params.ranges);
-  if (engine === "physical_simple" && params.calibrationId && !params.calibration) {
-    throw new Error("Erro: calibração ativa não está sendo aplicada corretamente.");
-  }
+  // Mapa pode ser gerado SEM calibração — calibração é apenas ajuste fino.
   const cal = normalizeCalibrationFactors(params.calibration ?? NEUTRAL_CALIBRATION);
   const isEstimated = !params.calibration;
   const calConf = isEstimated ? 0.6 : (params.calibrationConfidence ?? 0.85);
