@@ -42,9 +42,9 @@ export function simulateCoil(
   if (strategy === 'dxEvaporator') return Coil.simulateDxEvaporator(input);
   if (strategy === 'dxCondenser') return Coil.simulateDxCondenser(input);
 
-  // auto
-  if (input.mode === 'condensation') return Coil.simulateDxCondenser(input);
-  if (input.mode === 'direct_expansion') return Coil.simulateDxEvaporator(input);
+  // auto: usa coilType para decidir
+  if (input.coilType === 'condenser') return Coil.simulateDxCondenser(input);
+  if (input.coilType === 'evaporator') return Coil.simulateDxEvaporator(input);
   return simulatePhysicalSimple(input);
 }
 
