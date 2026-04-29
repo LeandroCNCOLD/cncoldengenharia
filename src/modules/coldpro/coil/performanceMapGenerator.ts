@@ -86,6 +86,18 @@ export interface PerformanceMapSummary {
   capacityMaxW: number;
 }
 
+export interface NominalValidation {
+  /** Capacidade do datasheet Unilab (W). */
+  capacityDatasheetW: number | null;
+  /** Capacidade simulada no ponto nominal (W) — após calibração. */
+  capacitySimulatedW: number;
+  /** Erro relativo (decimal: 0.05 = 5%). null se datasheet ausente. */
+  relativeError: number | null;
+  /** true se |erro| ≤ 5% (ou se datasheet ausente). */
+  reproducesNominal: boolean;
+  message: string;
+}
+
 export interface PerformanceMapResult {
   coilType: "evaporator" | "condenser";
   engine: PerformanceEngine;
@@ -94,6 +106,7 @@ export interface PerformanceMapResult {
   baselineCalibrationConfidence: number;
   points: PerformancePoint[];
   summary: PerformanceMapSummary;
+  nominalValidation: NominalValidation;
 }
 
 export interface GeneratePerformanceMapParams {
@@ -105,6 +118,9 @@ export interface GeneratePerformanceMapParams {
   /** Confiança da calibração (0..1). Default 0.6 quando estimado. */
   calibrationConfidence?: number;
   ranges?: Partial<PerformanceRanges>;
+  /** Identificadores opcionais (debug log). */
+  componentItemId?: string;
+  calibrationId?: string | null;
 }
 
 // --- helpers ---------------------------------------------------------------
