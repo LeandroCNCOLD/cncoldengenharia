@@ -4,13 +4,31 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import type {
+  TechnicalComponent,
+  TechnicalContext,
   TechnicalEntityType,
   TechnicalImportBatch,
   TechnicalMappedRecord,
   TechnicalRawRecord,
   TechnicalRecordStatus,
+  TechnicalSource,
 } from "@/modules/coldpro/library/types";
+import { ENGINE_USABLE_CONTEXTS } from "@/modules/coldpro/library/types";
 import { universalMapper } from "@/modules/coldpro/library/mappers/universalMapper";
+
+/** Heurística: deriva o `source` canônico a partir do nome do fabricante. */
+export function inferSourceFromManufacturer(
+  manufacturer: string | null | undefined,
+): TechnicalSource {
+  const m = (manufacturer ?? "").toUpperCase();
+  if (m.includes("BITZER")) return "BITZER";
+  if (m.includes("DANFOSS")) return "DANFOSS";
+  if (m.includes("TORIN")) return "TORIN";
+  if (m.includes("UNILAB")) return "UNILAB";
+  if (m.includes("VAPCYC")) return "VAPCYC";
+  if (m.includes("CN") || m === "CN_INTERNAL") return "CN_INTERNAL";
+  return "UNKNOWN";
+}
 
 export interface CountByStatus {
   raw_imported: number;
