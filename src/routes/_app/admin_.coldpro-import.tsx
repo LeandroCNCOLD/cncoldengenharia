@@ -86,6 +86,7 @@ function ColdproImportPage() {
         .select("id")
         .single();
       if (batchErr) throw new Error(batchErr.message);
+      if (!batch) throw new Error("Falha ao criar lote (sem retorno).");
 
       setUploaded(refs);
       setBatchId(batch.id);
