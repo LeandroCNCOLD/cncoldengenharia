@@ -151,7 +151,8 @@ async function ingestFile(
     const payload = slice.map((row, idx) => ({
       source_file_id: fileRow.id,
       row_index: i + idx,
-      raw_json: row,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      raw_json: row as any,
     }));
     const { error: rowErr } = await supabaseAdmin.from("unilab_source_rows").insert(payload);
     if (rowErr) {
