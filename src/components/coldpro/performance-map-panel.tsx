@@ -153,8 +153,13 @@ export function PerformanceMapPanel({
         calibration: calFactors,
         calibrationConfidence: calConf,
         ranges,
+        componentItemId,
+        calibrationId: calRow?.id ?? null,
       });
       setResult(r);
+      if (!r.nominalValidation.reproducesNominal) {
+        toast.warning(r.nominalValidation.message);
+      }
       return r;
     },
     onSuccess: (r) => {
@@ -247,7 +252,9 @@ export function PerformanceMapPanel({
 
   const canGenerate = !!simulationInput && (hasCalibration || allowEstimated);
   const summary = result?.summary;
-  const approvable = summary ? canApproveMap(summary) : false;
+  const approvable = summary
+    ? canApproveMap(summary, result?.nominalValidation)
+    : false;
 
   return (
     <Card>
@@ -565,10 +572,14 @@ export function PerformanceMapPanel({
                     summary_json?: { invalidCount?: number; totalPoints?: number };
                   };
                   const sum = row.summary_json ?? { invalidCount: 0, totalPoints: 1 };
+                  const nv = (row.summary_json as { nominalValidation?: { reproducesNominal?: boolean } } | undefined)
+                    ?.nominalValidation;
+                  const reproOk = nv?.reproducesNominal !== false;
                   const ratioOk =
                     (sum.invalidCount ?? 0) /
                       Math.max(sum.totalPoints ?? 1, 1) <=
                     0.3;
+                  const canApprove = ratioOk && reproOk;
                   return (
                     <TableRow key={row.id}>
                       <TableCell className="text-xs">
@@ -589,12 +600,14 @@ export function PerformanceMapPanel({
                           <Button
                             size="sm"
                             variant="ghost"
-                            disabled={!ratioOk || approveMut.isPending}
+                            disabled={!canApprove || approveMut.isPending}
                             onClick={() => approveMut.mutate(row.id)}
                             title={
-                              ratioOk
-                                ? "Aprovar mapa"
-                                : "Mais de 30% inválidos — não aprovável"
+                              !reproOk
+                                ? "Mapa não reproduz o ponto nominal Unilab — recalibre antes de aprovar."
+                                : ratioOk
+                                  ? "Aprovar mapa"
+                                  : "Mais de 30% inválidos — não aprovável"
                             }
                           >
                             Aprovar
@@ -618,7 +631,28 @@ export function PerformanceMapPanel({
           </div>
         )}
 
-        {result && summary && !approvable && (
+        {result && !result.nominalValidation.reproducesNominal && (
+          <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-xs text-destructive">
+            <strong>Validação do ponto nominal falhou.</strong>{" "}
+            {result.nominalValidation.message}
+            {result.nominalValidation.relativeError != null && (
+              <div className="mt-1 text-[11px] opacity-80">
+                Datasheet:{" "}
+                {result.nominalValidation.capacityDatasheetW?.toFixed(0)} W ·
+                Simulado:{" "}
+                {result.nominalValidation.capacitySimulatedW.toFixed(0)} W ·
+                Erro:{" "}
+                {(result.nominalValidation.relativeError * 100).toFixed(2)}%
+              </div>
+            )}
+            <div className="mt-1 text-[11px] opacity-80">
+              Recalibre o componente contra o datasheet Unilab antes de aprovar
+              este mapa.
+            </div>
+          </div>
+        )}
+
+        {result && summary && !approvable && result.nominalValidation.reproducesNominal && (
           <p className="text-xs text-amber-600">
             Mais de 30% dos pontos estão inválidos — este mapa não pode ser
             aprovado. Ajuste as faixas e gere novamente.

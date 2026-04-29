@@ -86,6 +86,18 @@ export interface PerformanceMapSummary {
   capacityMaxW: number;
 }
 
+export interface NominalValidation {
+  /** Capacidade do datasheet Unilab (W). */
+  capacityDatasheetW: number | null;
+  /** Capacidade simulada no ponto nominal (W) — após calibração. */
+  capacitySimulatedW: number;
+  /** Erro relativo (decimal: 0.05 = 5%). null se datasheet ausente. */
+  relativeError: number | null;
+  /** true se |erro| ≤ 5% (ou se datasheet ausente). */
+  reproducesNominal: boolean;
+  message: string;
+}
+
 export interface PerformanceMapResult {
   coilType: "evaporator" | "condenser";
   engine: PerformanceEngine;
@@ -94,6 +106,7 @@ export interface PerformanceMapResult {
   baselineCalibrationConfidence: number;
   points: PerformancePoint[];
   summary: PerformanceMapSummary;
+  nominalValidation: NominalValidation;
 }
 
 export interface GeneratePerformanceMapParams {
@@ -105,6 +118,9 @@ export interface GeneratePerformanceMapParams {
   /** Confiança da calibração (0..1). Default 0.6 quando estimado. */
   calibrationConfidence?: number;
   ranges?: Partial<PerformanceRanges>;
+  /** Identificadores opcionais (debug log). */
+  componentItemId?: string;
+  calibrationId?: string | null;
 }
 
 // --- helpers ---------------------------------------------------------------
@@ -251,6 +267,66 @@ export function generateCoilPerformanceMap(
     ),
   };
 
+  // === Validação ponto nominal ===
+  const datasheetCapW = (() => {
+    const n = baseInput.nominal as { capacityW?: number | null } | undefined;
+    const v = n?.capacityW;
+    return v != null && Number.isFinite(v) && v > 0 ? v : null;
+  })();
+
+  let nominalSimCapW = 0;
+  let nominalRawCapW = 0;
+  try {
+    const nominalInput: CoilSimulatorInput = {
+      ...baseInput,
+      air: {
+        ...baseInput.air,
+        airTempInC: nominal.airInletTempC,
+        airflowM3h: baseAirflow ?? baseInput.air.airflowM3h ?? 0,
+      },
+      refrigerant: { ...baseInput.refrigerant, refTempC: nominal.refTempC },
+    };
+    nominalRawCapW = runSim(nominalInput, engine, NEUTRAL_CALIBRATION).capacityW;
+    nominalSimCapW = runSim(nominalInput, engine, cal).capacityW;
+  } catch {
+    /* validation reports 0 */
+  }
+
+  const relErr =
+    datasheetCapW != null && datasheetCapW > 0
+      ? (nominalSimCapW - datasheetCapW) / datasheetCapW
+      : null;
+  const reproducesNominal = relErr == null ? true : Math.abs(relErr) <= 0.05;
+
+  const nominalValidation: NominalValidation = {
+    capacityDatasheetW: datasheetCapW,
+    capacitySimulatedW: nominalSimCapW,
+    relativeError: relErr,
+    reproducesNominal,
+    message:
+      datasheetCapW == null
+        ? "Capacidade nominal do datasheet ausente — não foi possível validar."
+        : reproducesNominal
+          ? `Ponto nominal reproduzido (erro ${(Math.abs(relErr ?? 0) * 100).toFixed(2)}%).`
+          : `Mapa não reproduz o ponto nominal Unilab. Verifique aplicação da calibração. Erro: ${((relErr ?? 0) * 100).toFixed(2)}% (sim ${nominalSimCapW.toFixed(0)} W vs datasheet ${datasheetCapW.toFixed(0)} W).`,
+  };
+
+  // eslint-disable-next-line no-console
+  console.debug("[performanceMap] nominal validation", {
+    componentItemId: params.componentItemId ?? null,
+    calibrationId: params.calibrationId ?? null,
+    engine,
+    capacityCorrectionFactor: cal.capacityCorrectionFactor,
+    airDpCorrectionFactor: cal.airDpCorrectionFactor,
+    refDpCorrectionFactor: cal.refDpCorrectionFactor,
+    uaCorrectionFactor: cal.uaCorrectionFactor,
+    nominalCapacityWDatasheet: datasheetCapW,
+    nominalPointCapacityW_beforeCalibration: nominalRawCapW,
+    nominalPointCapacityW_afterCalibration: nominalSimCapW,
+    relativeError: relErr,
+    reproducesNominal,
+  });
+
   const refAxis = buildAxis(ranges.refTempC);
   const airAxis = buildAxis(ranges.airInletTempC);
   const flowAxis = buildAxis(ranges.airflowFactor);
@@ -392,6 +468,7 @@ export function generateCoilPerformanceMap(
   return {
     coilType: params.coilType,
     engine,
+    nominalValidation,
     ranges,
     isEstimated,
     baselineCalibrationConfidence: calConf,
@@ -400,10 +477,15 @@ export function generateCoilPerformanceMap(
   };
 }
 
-/** Regra de aprovação: ≤30% de pontos invalid. */
-export function canApproveMap(summary: PerformanceMapSummary): boolean {
+/** Regra de aprovação: ≤30% de pontos invalid E reproduz ponto nominal (±5%). */
+export function canApproveMap(
+  summary: PerformanceMapSummary,
+  nominalValidation?: NominalValidation,
+): boolean {
   if (summary.totalPoints === 0) return false;
-  return summary.invalidCount / summary.totalPoints <= 0.3;
+  if (summary.invalidCount / summary.totalPoints > 0.3) return false;
+  if (nominalValidation && !nominalValidation.reproducesNominal) return false;
+  return true;
 }
 
 /** Exporta o mapa para CSV. */

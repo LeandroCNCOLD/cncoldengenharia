@@ -28,7 +28,10 @@ export async function savePerformanceMap(params: SavePerformanceMapParams) {
     map_name: params.mapName ?? null,
     input_grid_json: params.result.ranges,
     results_json: { points: params.result.points },
-    summary_json: params.result.summary,
+    summary_json: {
+      ...params.result.summary,
+      nominalValidation: params.result.nominalValidation,
+    },
     confidence_score: params.result.summary.avgConfidence,
     status: "generated" satisfies CoilPerformanceMapStatus,
     is_estimated: params.result.isEstimated,
