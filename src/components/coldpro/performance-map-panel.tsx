@@ -153,8 +153,13 @@ export function PerformanceMapPanel({
         calibration: calFactors,
         calibrationConfidence: calConf,
         ranges,
+        componentItemId,
+        calibrationId: calRow?.id ?? null,
       });
       setResult(r);
+      if (!r.nominalValidation.reproducesNominal) {
+        toast.warning(r.nominalValidation.message);
+      }
       return r;
     },
     onSuccess: (r) => {
@@ -247,7 +252,9 @@ export function PerformanceMapPanel({
 
   const canGenerate = !!simulationInput && (hasCalibration || allowEstimated);
   const summary = result?.summary;
-  const approvable = summary ? canApproveMap(summary) : false;
+  const approvable = summary
+    ? canApproveMap(summary, result?.nominalValidation)
+    : false;
 
   return (
     <Card>
