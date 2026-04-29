@@ -27,7 +27,7 @@ import { simulateDxCondenser } from "./dxCondenserSimulator";
 import { simulateHybridCoil } from "./internals/hybridCoilEngine";
 import type { CoilCalibration } from "./internals/types";
 import { buildHybridCalcInput } from "./hybridDebugAdapter";
-import type { UnilabGeometryFactor } from "@/modules/coldpro/unilabData/types";
+import type { UnilabGeometryFactor } from "@/modules/thermalcalc/types/unilabFactorTypes";
 
 export type PerformanceEngine = "physical_simple" | "empirical" | "hybrid";
 export type PointStatus = "valid" | "warning" | "invalid";

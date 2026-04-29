@@ -10,7 +10,7 @@
  */
 
 import type { CoilSimulatorInput } from "@/modules/thermalcalc/types/coilSimulatorTypes";
-import type { UnilabGeometryFactor } from "@/modules/coldpro/unilabData/types";
+import type { UnilabGeometryFactor } from "@/modules/thermalcalc/types/unilabFactorTypes";
 
 export const ENGINE_NAME = "physical_simple";
 /** Bumpar quando a fórmula de U ou Q mudar. */

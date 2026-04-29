@@ -48,7 +48,7 @@ import {
 import type {
   AppliedUnilabFactors,
   UnilabGeometryFactor,
-} from "@/modules/coldpro/unilabData/types";
+} from "@/modules/thermalcalc/types/unilabFactorTypes";
 
 const W_TO_KCALH = 0.859845;
 
