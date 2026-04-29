@@ -237,6 +237,8 @@ async function migrateFluids(userId: string | null, budget: number): Promise<Sou
       model: r.name ?? null,
       code: r.name ?? null,
       status: "approved",
+      source: "UNILAB",
+      context: "reference",
       normalized_json: r as Record<string, unknown>,
       source_raw_id: r.id,
       source_batch_id: null,
