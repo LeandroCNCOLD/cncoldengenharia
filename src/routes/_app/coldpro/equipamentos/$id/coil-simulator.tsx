@@ -381,16 +381,33 @@ function CoilSimulatorPage() {
       {latestCal && (
         <Alert>
           <Sparkles className="h-4 w-4" />
-          <AlertTitle className="flex items-center gap-2">
+          <AlertTitle className="flex flex-wrap items-center gap-2">
             Calibração ativa
-            <Badge variant={latestCal.meets_targets ? "default" : "secondary"}>
-              {latestCal.meets_targets ? "Dentro das metas" : "Fora das metas"}
-            </Badge>
+            {(() => {
+              const lc = latestCal as unknown as { status?: string; confidence_score?: number; meets_targets?: boolean };
+              const status = lc.status ?? (lc.meets_targets ? "calibrated" : "needs_review");
+              const conf = Number(lc.confidence_score ?? (lc.meets_targets ? 0.85 : 0.7));
+              const variant = status === "calibrated" ? "default" : "secondary";
+              const label =
+                status === "calibrated" ? "Calibrado" : status === "needs_review" ? "Revisão" : "Rascunho";
+              return (
+                <>
+                  <Badge variant={variant}>{label}</Badge>
+                  <Badge variant="outline">Confiança: {(conf * 100).toFixed(0)}%</Badge>
+                  <Badge variant="outline">
+                    Motor: {engine === "physical_simple" ? "Físico simples" : "Empírico"}
+                  </Badge>
+                </>
+              );
+            })()}
           </AlertTitle>
           <AlertDescription className="text-xs">
-            Fatores aplicados ao motor físico — capacidade ×{Number(latestCal.capacity_correction_factor).toFixed(3)},
+            Fatores aplicados — capacidade ×{Number(latestCal.capacity_correction_factor).toFixed(3)},
             ΔP ar ×{Number(latestCal.air_dp_correction_factor).toFixed(3)},
             ΔP ref ×{Number(latestCal.ref_dp_correction_factor).toFixed(3)}.
+            {engine === "physical_simple"
+              ? " Aplicados internamente pelo motor físico."
+              : " Aplicados como pós-processamento ao motor empírico."}
           </AlertDescription>
         </Alert>
       )}
