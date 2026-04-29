@@ -59,6 +59,8 @@ import {
   type PerformanceRanges,
 } from "@/modules/coldpro/coil/performanceMapGenerator";
 import type { CoilSimulatorInput } from "@/modules/coldpro/coil/coilSimulatorTypes";
+import { findGeometryFactor } from "@/modules/coldpro/unilabData/unilabGeometryFactorRepository";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
   componentItemId: string;
