@@ -175,15 +175,21 @@ export function PerformanceMapPanel({
         calibrationSignature: calRow?.model_signature ?? null,
       });
       setResult(r);
-      if (!r.nominalValidation.reproducesNominal) {
+      if (r.blocked) {
+        toast.error(r.blockReason ?? "Mapa bloqueado pelo guard rail nominal.");
+      } else if (!r.nominalValidation.reproducesNominal) {
         toast.warning(r.nominalValidation.message);
       }
       return r;
     },
     onSuccess: (r) => {
-      toast.success(
-        `Mapa gerado: ${r.points.length} pontos · ${r.summary.validCount} válidos`,
-      );
+      if (r.blocked) {
+        toast.error("Mapa não foi gerado: ponto nominal fora da faixa.");
+      } else {
+        toast.success(
+          `Mapa gerado: ${r.points.length} pontos · ${r.summary.validCount} válidos`,
+        );
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
