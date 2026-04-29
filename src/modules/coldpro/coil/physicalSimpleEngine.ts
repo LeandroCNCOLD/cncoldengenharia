@@ -117,6 +117,15 @@ export interface PhysicalSimpleResult extends CoilSimulatorResult {
   breakdown: PhysicalSimpleBreakdown;
   /** Fatores Unilab aplicados (espelhado para componentes da UI). */
   unilabFactors: AppliedUnilabFactors | null;
+  /** Assinatura atual do modelo (para validar/persistir calibração). */
+  modelSignature: string;
+  engineName: string;
+  engineVersion: string;
+  correlationSetVersion: string;
+  /** True se a calibração fornecida foi efetivamente aplicada. */
+  calibrationApplied: boolean;
+  /** Motivo do descarte (quando calibrationApplied = false). */
+  calibrationStaleReason: string | null;
 }
 
 export function simulatePhysicalSimple(
