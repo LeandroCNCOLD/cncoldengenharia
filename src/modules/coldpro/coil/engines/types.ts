@@ -80,6 +80,8 @@ export interface CoilCalculationResult {
   correlationAir: string;
   correctionApplied: boolean;
   calibrationApplied: boolean;
+  /** True quando faltam fatores Unilab ou geometria de catálogo. */
+  isEstimated: boolean;
   modelSignature: string;
   warnings: string[];
   debug: Record<string, unknown>;
