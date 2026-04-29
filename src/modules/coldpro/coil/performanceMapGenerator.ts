@@ -435,9 +435,16 @@ export function generateCoilPerformanceMap(
           : `Mapa não reproduz o ponto nominal Unilab. Verifique aplicação da calibração. Erro: ${((relErr ?? 0) * 100).toFixed(2)}% (sim ${nominalSimCapW.toFixed(0)} W vs datasheet ${datasheetCapW.toFixed(0)} W).`,
   };
 
-  // O mapa NÃO é mais bloqueado quando o nominal não bate exatamente.
-  // O modelo é fisicamente consistente; calibração é só ajuste fino ±20%.
-  // A validação nominal vira um aviso (warning), não um erro crítico.
+  // Guard rail: bloqueia o mapa se o nominal não reproduz o datasheet.
+  // (Aplicado apenas quando há datasheet de referência E bloqueio habilitado.)
+  const blocked =
+    blockOnMismatch &&
+    datasheetCapW != null &&
+    !reproducesNominal &&
+    (params.calibration != null || hybridCal != null);
+  const blockReason = blocked
+    ? `Mapa bloqueado: ponto nominal não reproduz o datasheet (sim ${nominalSimCapW.toFixed(0)} W vs ${datasheetCapW?.toFixed(0)} W, erro ${((relErr ?? 0) * 100).toFixed(2)}%). Recalibre ou revise o modelo.`
+    : null;
 
   // eslint-disable-next-line no-console
   console.debug("[performanceMap] nominal validation", {
