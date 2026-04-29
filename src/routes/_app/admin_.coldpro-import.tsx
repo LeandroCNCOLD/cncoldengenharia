@@ -1,7 +1,7 @@
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Upload, Loader2, FileArchive, FileSpreadsheet, FileText, ArrowLeft, Database } from "lucide-react";
+import { Upload, Loader2, FileArchive, FileSpreadsheet, FileText, ArrowLeft, Database, Wand2 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 
 import { PageHeader } from "@/components/page-header";
@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { importColdproPackage } from "@/server/coldproImport.functions";
+import { runColdproMappers } from "@/server/coldproMappers.functions";
 
 export const Route = createFileRoute("/_app/admin_/coldpro-import")({
   component: ColdproImportPage,
@@ -29,6 +30,7 @@ interface UploadedRef {
 function ColdproImportPage() {
   const { isAdmin, loading, user } = useAuth();
   const runImport = useServerFn(importColdproPackage);
+  const runMappers = useServerFn(runColdproMappers);
 
   const [zipFile, setZipFile] = useState<File | null>(null);
   const [indexFile, setIndexFile] = useState<File | null>(null);
@@ -37,6 +39,7 @@ function ColdproImportPage() {
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [mapping, setMapping] = useState(false);
   const [uploaded, setUploaded] = useState<UploadedRef[]>([]);
   const [batchId, setBatchId] = useState<string | null>(null);
   const [importResult, setImportResult] = useState<null | {
@@ -45,6 +48,7 @@ function ColdproImportPage() {
     filesSkipped: number;
     errors: string[];
   }>(null);
+  const [mapperResult, setMapperResult] = useState<Record<string, { inserted: number; skipped: number; errors: string[] }> | null>(null);
 
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/dashboard" />;
@@ -139,6 +143,22 @@ function ColdproImportPage() {
       setImporting(false);
     }
   }
+
+  async function handleMap(target: "all" | "geometries" | "refrigerants" | "compressors" | "fans") {
+    setMapping(true);
+    try {
+      const res = await runMappers({ data: { targets: [target] } });
+      const { totalMs: _ms, ...rest } = res as Record<string, unknown> & { totalMs: number };
+      setMapperResult(rest as Record<string, { inserted: number; skipped: number; errors: string[] }>);
+      const sum = Object.values(rest as Record<string, { inserted: number }>).reduce((a, v) => a + (v?.inserted ?? 0), 0);
+      toast.success("Mapeamento concluído", { description: `${sum} linhas tipadas inseridas em ${(_ms / 1000).toFixed(1)}s.` });
+    } catch (e) {
+      toast.error("Falha no mapeamento", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setMapping(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -280,6 +300,53 @@ function ColdproImportPage() {
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Mapeamento raw → tipado</CardTitle>
+          <CardDescription>
+            Lê <code>unilab_source_rows</code> (último batch) e popula as tabelas tipadas: geometrias,
+            refrigerantes, compressores (+ polinômios AHRI 10 coef.) e ventiladores (+ curvas).
+            Re-execução substitui os dados anteriores.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => handleMap("all")} disabled={mapping} size="sm">
+              {mapping ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Wand2 className="mr-1.5 h-3.5 w-3.5" />}
+              Mapear tudo
+            </Button>
+            <Button onClick={() => handleMap("geometries")} disabled={mapping} size="sm" variant="outline">Geometrias</Button>
+            <Button onClick={() => handleMap("refrigerants")} disabled={mapping} size="sm" variant="outline">Refrigerantes</Button>
+            <Button onClick={() => handleMap("compressors")} disabled={mapping} size="sm" variant="outline">Compressores</Button>
+            <Button onClick={() => handleMap("fans")} disabled={mapping} size="sm" variant="outline">Ventiladores</Button>
+          </div>
+          {mapperResult && (
+            <div className="rounded border bg-muted/40 p-3 text-xs space-y-2">
+              {Object.entries(mapperResult).map(([target, r]) => (
+                <div key={target} className="border-b pb-2 last:border-0 last:pb-0">
+                  <div className="flex gap-4">
+                    <strong className="capitalize">{target}</strong>
+                    <span><strong>{r.inserted.toLocaleString()}</strong> inseridas</span>
+                    <span className="text-muted-foreground">{r.skipped} puladas</span>
+                    <span className={r.errors.length ? "text-destructive" : "text-muted-foreground"}>
+                      {r.errors.length} erro(s)
+                    </span>
+                  </div>
+                  {r.errors.length > 0 && (
+                    <details className="mt-1">
+                      <summary className="cursor-pointer text-destructive">Ver erros</summary>
+                      <ul className="mt-1 max-h-32 list-disc overflow-y-auto pl-5">
+                        {r.errors.slice(0, 30).map((e, i) => <li key={i} className="font-mono">{e}</li>)}
+                      </ul>
+                    </details>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

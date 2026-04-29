@@ -1,201 +1,137 @@
-## Iteração crítica: Verify + Calibração ponto-a-ponto Unilab
+## Diagnóstico do estado atual
 
-A fundação já está pronta (tabela `coil_calibrations`, motor `physical_simple` aplicando os 3 fatores internamente, função `calibrateAgainstReference`, botão "Calibrar c/ Unilab" no header do Coil Simulator). Esta iteração fecha as lacunas para cumprir 100% dos 11 pontos do briefing.
+**Dados raw importados com sucesso** (Etapa 8 OK):
+- `unilab_source_files`: 471 arquivos
+- `unilab_source_rows`: 158.048 linhas (raw_json)
+- 11 source_databases mapeadas (Coils6, Fluids, Materiais, Compressor, Frames, Danfoss, HeatSeries, LinePressureDrop, Recuperatori, FluidManagement, EQUACOES_POLINOMIAIS)
 
----
+**Tabelas tipadas com dados** (parcial):
+- `coil_geometry_factors`: 500 linhas
+- `coil_fluids`: 10 / `coil_materials`: 6
 
-### 1. Schema — `coil_calibrations`
+**Tabelas tipadas vazias — bloqueiam o ciclo completo**:
+- `unilab_geometries` (0) — geometrias normalizadas
+- `compressor_models` (0) e `compressor_polynomials` (0) — bloqueia simulação de sistema completo
+- `fan_models` (0) e `fan_curves` (0) — bloqueia perda de carga real
+- `refrigerants` (0) e `refrigerant_polynomials` (0) — bloqueia propriedades termodinâmicas reais
 
-Adicionar 3 colunas (ALTER TABLE, sem destruir nada):
-
-- `status` text NOT NULL DEFAULT 'draft' CHECK IN ('calibrated','needs_review','draft')
-- `confidence_score` numeric NOT NULL DEFAULT 0.6 CHECK 0..1
-- `calibration_name` text NULL
-
-Mais um índice `(component_item_id, created_at DESC)` para acelerar "última calibração ativa".
-
-A tabela continua append-only — nenhuma policy de UPDATE é adicionada.
-
-### 2. Motor `physical_simple`
-
-Já aplica `capacityCorrectionFactor`, `airDpCorrectionFactor`, `refDpCorrectionFactor` e `uaCorrectionFactor` internamente. Vou:
-
-- Garantir aplicação única: o resultado final já vem com fatores → `applyCalibrationToResult` NUNCA será chamada por cima.
-- Adicionar `heatTransferFactor` no breakdown como alias semântico de `capacityCorrectionFactor` (rastreabilidade).
-
-### 3. Motores empíricos
-
-`dxEvaporatorSimulator.ts` e `dxCondenserSimulator.ts` ganham parâmetro opcional `calibration?: CalibrationFactors`. Quando informado, multiplicam no final:
-
-```text
-capacityW           *= capacityCorrectionFactor
-airPressureDropPa   *= airDpCorrectionFactor
-refPressureDropKpa  *= refDpCorrectionFactor
-sensibleW / latentW *= capacityCorrectionFactor (proporcional)
-```
-
-### 4. Utilitário `coil-calibrations.ts`
-
-Adicionar:
-
-- `getActiveCalibrationForComponent(componentItemId)` — última calibração por `created_at DESC LIMIT 1`.
-- `getActiveCalibrationsForComponent(componentItemId)` — histórico (já existe como `listCoilCalibrations`, vou só renomear/expor).
-- `applyCalibrationToResult(result, calibration)` — multiplicador puro. Documentado: USAR APENAS no engine empírico, NUNCA depois do `physical_simple`.
-- `saveCoilCalibration` ganha campos `status`, `confidence_score`, `calibration_name`.
-- `factorsFromRow(row)` — converte registro do banco em `CalibrationFactors`.
-
-### 5. `coilCalibration.ts` — novo `calibrateCoilFromDatasheet`
-
-Substitui (mantendo compatibilidade) `calibrateAgainstReference`. Assinatura:
-
-```ts
-calibrateCoilFromDatasheet({
-  input: CoilSimulatorInput,
-  datasheet: {
-    capacityW: number;
-    airInletTempC?: number;
-    airOutletTempC?: number;
-    evaporationTempC?: number;
-    condensationTempC?: number;
-    airflowM3h?: number;
-    airPressureDropPa?: number | null;
-    refrigerantPressureDropKpa?: number | null;
-    refrigerant?: string;
-    coilType: "evaporator" | "condenser";
-  };
-})
-```
-
-Fluxo:
-
-```text
-1. baseline = simulatePhysicalSimple(input, NEUTRAL_CALIBRATION)
-2. factors = clamp({
-     capacity = ds.capacityW / baseline.capacityW,
-     airDp    = (ds.airDp && baseline.airDp) ? ds.airDp / baseline.airDp : 1,
-     refDp    = (ds.refDp && baseline.refDp) ? ds.refDp / baseline.refDp : 1,
-     ua       = 1,
-   }, 0.3, 3.0)
-   heatTransferFactor = factors.capacity
-3. calibrated = simulatePhysicalSimple(input, factors)
-4. devBefore / devAfter = (val - ds) / ds * 100
-5. status = "calibrated" se:
-     |devAfter.capacity| ≤ 5 AND
-     (ds.airDp ausente OR |devAfter.airDp| ≤ 10) AND
-     (ds.refDp ausente OR |devAfter.refDp| ≤ 15)
-   senão "needs_review"
-6. confidence = confidenceScoreFor(status, 1)
-7. retorna { status, confidenceScore, factors, heatTransferFactor,
-             baselineResult, calibratedResult,
-             deviationsBefore, deviationsAfter, warnings }
-```
-
-Regras enforced:
-- ΔP ar/refrig ausente → fator = 1.0, alvo não validado, sem warning falso.
-- Nunca inventa dado; nunca toca `raw_fields`.
-
-### 6. Painel reutilizável `calibration-panel.tsx`
-
-Novo componente em `src/components/coldpro/calibration-panel.tsx`:
-
-```text
-Props: { componentItemId, coilType, nominalReference, simulationInput }
-
-Layout:
-- Header: badge status (Calibrado / Revisão / Sem calibração)
-          + barra de confiança (Progress 0..100%)
-- Tabela "Antes vs Depois":
-    Métrica          | Antes  | Depois | Meta
-    Capacidade       | +18.4% | -2.1%  | ≤5%
-    ΔP ar            | …      | …      | ≤10%
-    ΔP refrigerante  | …      | …      | ≤15%
-- Tabela "Fatores aplicados":
-    Capacidade        ×1.184
-    ΔP ar             ×0.95
-    ΔP refrigerante   ×1.10
-    Heat transfer     ×1.184
-- Botões:
-    [ Calibrar com datasheet ]   (disabled se sem nominalReference)
-    [ Recalibrar ]               (idem, mas explícito)
-- Histórico (últimas 5):
-    data · usuário · status · |ΔQ| pós
-```
-
-Usa `useQuery` para `getActiveCalibrationForComponent` e `useMutation` para chamar `calibrateCoilFromDatasheet` + `saveCoilCalibration`.
-
-### 7. Integração nas abas Evaporador/Condensador
-
-`src/components/coldpro/evaporator-tab.tsx` e `condenser-tab.tsx`: após o bloco de campos técnicos, montar:
-
-```tsx
-<CalibrationPanel
-  componentItemId={item.id}
-  coilType="evaporator"
-  nominalReference={{
-    capacityW: model.nominal_capacity_w,
-    airInletTempC: model.nominal_air_temp_in_c,
-    evaporationTempC: model.nominal_evap_temp_c,  // ou condensationTempC
-    airflowM3h: model.nominal_airflow_m3h,
-    airPressureDropPa: model.air_pressure_drop_pa,
-    refrigerantPressureDropKpa: model.refrigerant_pressure_drop_kpa,
-    refrigerant: model.refrigerant,
-  }}
-  simulationInput={buildInputFromModel(model)}
-/>
-```
-
-`buildInputFromModel` é um helper local que monta `CoilSimulatorInput` a partir do registro `evaporator_coil_models` / `condenser_coil_models`.
-
-### 8. Header do Coil Simulator
-
-Em `src/routes/_app/coldpro/equipamentos/$id/coil-simulator.tsx`:
-
-- Substitui o `<Alert>` atual de calibração por uma faixa enxuta com:
-  - Badge de status
-  - "Confiança: 85%"
-  - "Motor: Físico simples / Empírico"
-  - Link "ver detalhes" → expande tabela de fatores
-- Garante que `handleCalculate`:
-  - `physical_simple`: passa calibração para o motor (já faz)
-  - `empirical`: chama `applyCalibrationToResult(empResult, calibration)` quando há calibração ativa
-  - **Nunca** ambos.
-
-### 9. Regras de imutabilidade já garantidas
-
-- `coil_calibrations` sem policy de UPDATE.
-- `raw_fields` dos `*_coil_models` nunca tocados pela calibração.
-- Snapshots (`inputs_snapshot`, `outputs_snapshot`) capturados em cada calibração.
-- Recalibrar = INSERT novo registro; o anterior fica para histórico.
-
-### 10. Critérios de validação (built-in)
-
-A função retorna `meetsTargets` baseada em:
-- Capacidade ≤ 5%
-- ΔP ar ≤ 10% (só se presente no datasheet)
-- ΔP refrigerante ≤ 15% (só se presente no datasheet)
-
-Painel mostra explicitamente o status e cada métrica colorida (verde/âmbar/vermelho).
+Conclusão: o motor híbrido hoje roda em modo "geometria + fatores", mas **sem compressor real, sem ventilador real e sem polinômios de refrigerante** ele não fecha equilíbrio com dados reais.
 
 ---
 
-### Arquivos
+## O que esta etapa entrega
 
-**Novos**
-- `src/components/coldpro/calibration-panel.tsx`
+### Bloco 1 — Mappers raw → tipado (server functions)
 
-**Modificados**
-- `supabase/migrations/...` — ALTER TABLE com 3 colunas + índice
-- `src/modules/coldpro/coil/coilEngineTypes.ts` — `CalibrationStatus`, `confidenceScoreFor`
-- `src/modules/coldpro/coil/coilCalibration.ts` — adiciona `calibrateCoilFromDatasheet` (mantém `calibrateAgainstReference` como wrapper para retrocompat)
-- `src/modules/coldpro/coil/physicalSimpleEngine.ts` — adiciona `heatTransferFactor` no breakdown
-- `src/modules/coldpro/coil/dxEvaporatorSimulator.ts` — aceita `calibration?` e aplica no final
-- `src/modules/coldpro/coil/dxCondenserSimulator.ts` — idem
-- `src/lib/coldpro/coil-calibrations.ts` — `applyCalibrationToResult`, `factorsFromRow`, `getActiveCalibrationForComponent`, salvar `status`/`confidence_score`/`calibration_name`
-- `src/components/coldpro/evaporator-tab.tsx` — monta `CalibrationPanel`
-- `src/components/coldpro/condenser-tab.tsx` — monta `CalibrationPanel`
-- `src/routes/_app/coldpro/equipamentos/$id/coil-simulator.tsx` — header com badge de confiança + aplicação correta da calibração no engine empírico
+Server function `runColdproMappers` que lê `unilab_source_rows` e popula:
 
-### Não-objetivos desta iteração
-- Múltiplos pontos (curva). Vai junto com "curva de desempenho" no próximo passo.
-- Refator das correlações físicas (Wang/Cavallini).
-- Telas admin de gestão de calibrações.
+1. **Geometrias** (`unilab_geometries`)
+   - Fonte: `01_Coils6_Principal` → `Tbl_Geometrie`, `Tbl_Geom_Std`
+   - Normaliza: geometry_code, fin_pitch, tube_pitch, row_pitch, OD/ID tubo, fin_thickness, rows, circuits
+
+2. **Compressores** (`compressor_models` + `compressor_polynomials`)
+   - Fonte: `04_Standard_Compressor` (Tbl_Compressor_Model, Tbl_Compressor_Capacity, AbsorbedPower, Current) + `EQUACOES_POLINOMIAIS` (abas de compressores)
+   - Normaliza: fabricante, modelo, deslocamento, refrigerante, voltagem, frequência
+   - Cria 1 linha de polinômio por curva (capacity, absorbed_power, current) com `curve_type` + `coefficients_json` (10 coef. ANSI/AHRI 540) + faixa T_evap / T_cond
+
+3. **Ventiladores** (`fan_models` + `fan_curves`)
+   - Fonte: `01_Coils6_Principal` → `Tbl_Fan_Model`, `Tbl_Fan_Centr_Dati`, `Tbl_Fan_Axial_*`, `Tbl_Fan_Centr_Curve`
+   - Normaliza: fabricante, modelo, tipo (axial/centrífugo), diâmetro, vazão/pressão/potência nominais
+   - Cria curvas (table_data_json) para axiais e centrífugos
+
+4. **Refrigerantes + polinômios** (`refrigerants` + `refrigerant_polynomials`)
+   - Fonte: `EQUACOES_POLINOMIAIS` (abas R134a, R404A, R407C, R410A, R290, R32, R744, R1234yf, etc.)
+   - 1 refrigerante por código + N polinômios por propriedade (P_sat, ρ_liq, ρ_vap, h_liq, h_vap, c_p, λ, μ)
+
+5. **Geometry factors** já estão populados (500 linhas) — pular.
+
+UI: botão **"Executar mapeamento tipado"** na página `/admin/coldpro-import` que dispara cada mapper individualmente (ou todos), mostra progresso e resumo (rows inseridas / puladas / erro) por destino.
+
+---
+
+### Bloco 2 — Página de Catálogo Técnico
+
+Rota: **`/coldpro/catalogo`** (com sub-abas)
+- Aba **Compressores**: tabela filtrável (fabricante, refrigerante, faixa de capacidade, tipo) → click abre ficha técnica com curvas polinomiais plotadas
+- Aba **Ventiladores**: filtros (tipo, diâmetro, vazão) → ficha + curva PxQ
+- Aba **Refrigerantes**: lista com GWP, ODP, família → ficha com gráficos das propriedades
+- Aba **Geometrias**: lista de geometry_codes com mini-diagrama dos parâmetros + fatores associados
+
+Cada ficha tem botão "Usar este equipamento em projeto" → leva para seleção de projeto e atribui o componente.
+
+---
+
+### Bloco 3 — Página de Seleção Automática
+
+Rota: **`/coldpro/selecao`**
+
+Formulário de entrada:
+- Refrigerante, T_evap (°C), T_cond (°C), Capacidade alvo (W), SH/SC, ambiente
+
+Server function `selectEquipment`:
+1. Filtra compressores que cobrem a faixa (T_evap, T_cond) com capacidade ±15% no polinômio
+2. Para cada candidato → roda `systemSimulator` simplificado (compressor + condensador padrão + evaporador padrão) e calcula equilíbrio
+3. Ranqueia por: COP, proximidade da capacidade alvo, consumo, faixa de operação
+4. Retorna top 5 com tabela comparativa + botão "Criar projeto com esta seleção" (cria `equipment_project` + `component_items` ligados)
+
+---
+
+### Bloco 4 — Proposta Técnica Automática
+
+Rota: **`/coldpro/equipamentos/$id/proposta`**
+
+Lê o projeto + última simulação de sistema completo + componentes selecionados e gera ficha técnica com:
+- Cabeçalho (código, nome comercial, aplicação)
+- Tabela de equipamentos selecionados (compressor, condensador, evaporador, ventilador) com origem (Unilab/calibrado/estimado)
+- Condições de projeto e ponto de equilíbrio (capacidade, COP, consumo, vazão de massa)
+- Curvas de desempenho (mapa)
+- Avisos / nível de confiança
+
+Botão **"Exportar PDF"** usando `react-to-print` ou geração HTML imprimível (sem dependência Node-only — Worker-safe).
+
+---
+
+## Arquivos a criar / editar
+
+**Server**
+- `src/server/coldproMappers.functions.ts` — server function principal `runColdproMappers({ targets: ['geometries'|'compressors'|'fans'|'refrigerants'|'all'] })`
+- `src/server/mappers/geometries.ts`
+- `src/server/mappers/compressors.ts`
+- `src/server/mappers/fans.ts`
+- `src/server/mappers/refrigerants.ts`
+- `src/server/equipmentSelector.functions.ts` — seleção automática
+
+**Routes (TanStack)**
+- `src/routes/_app/coldpro/catalogo.tsx` (layout + tabs)
+- `src/routes/_app/coldpro/catalogo.compressores.tsx`
+- `src/routes/_app/coldpro/catalogo.ventiladores.tsx`
+- `src/routes/_app/coldpro/catalogo.refrigerantes.tsx`
+- `src/routes/_app/coldpro/catalogo.geometrias.tsx`
+- `src/routes/_app/coldpro/selecao.tsx`
+- `src/routes/_app/coldpro/equipamentos/$id/proposta.tsx`
+
+**UI**
+- `src/components/coldpro/catalog/*` (CompressorCard, FanCard, RefrigerantCard, GeometryCard, PolynomialChart)
+- `src/components/coldpro/selecao-form.tsx` + `selecao-results.tsx`
+- `src/components/coldpro/proposta-pdf.tsx`
+- Editar `src/routes/_app/admin_.coldpro-import.tsx` → adicionar painel "Mapeamento tipado"
+- Adicionar links no menu / dashboard ColdPro
+
+**Supabase**
+- Nenhuma migração nova necessária (todas as tabelas já existem). Apenas população via mappers.
+
+---
+
+## Sequência de execução
+
+Recomendo entregar em **2 PRs separados** dentro desta etapa para isolar risco:
+
+**Fase A — Mappers (Bloco 1)**
+- Implementa as 4 server functions de mapping
+- Adiciona painel no `/admin/coldpro-import`
+- Roda mapeamento e valida contagens (esperado: ~50–100 compressores, ~400 fans, ~10 refrigerantes, ~50 geometrias, milhares de polinômios)
+
+**Fase B — Páginas finais (Blocos 2, 3, 4)**
+- Catálogo + Seleção + Proposta usando os dados já mapeados
+
+Posso começar pela **Fase A** agora? Assim que os dados tipados estiverem populados, a Fase B fica trivial (só consome tabelas já normalizadas).
