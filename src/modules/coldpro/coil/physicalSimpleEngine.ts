@@ -367,7 +367,10 @@ export function simulatePhysicalSimple(
     breakdown: {
       uWm2k,
       externalAreaM2: aExt ?? 0,
-      internalAreaM2: aInt ?? 0,
+      internalAreaM2: aIntFinal,
+      effectiveAreaM2: aEffective,
+      finEfficiency: heatArea.finEfficiency,
+      airSideCorrelation: airHtc.correlation,
       uaWk,
       lmtdK,
       qWraw,
