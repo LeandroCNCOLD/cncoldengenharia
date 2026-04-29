@@ -94,12 +94,28 @@ export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculation
   const refDp = refDpBase == null ? null : refDpBase * (calibration?.refrigerantPressureDropFactor ?? 1);
 
   const source = input.unilabSource ?? (input.factors ? 'partial' : 'fallback');
-  const isEstimated = source !== 'unilab';
+  const correlationsEstimated =
+    Boolean((air as any).airCorrelationIsEstimated) ||
+    Boolean((ref as any).refCorrelationIsEstimated);
+  const isEstimated = source !== 'unilab' || correlationsEstimated;
   if (source === 'fallback') {
     warnings.push('Sem geometria/fatores Unilab — cálculo usa fallback genérico.');
   } else if (source === 'partial') {
     warnings.push('Fatores Unilab incompletos ou neutros — resultado parcialmente estimado.');
   }
+
+  // Propaga warnings vindos das correlações
+  for (const w of (air as any).airCorrelationWarnings ?? []) warnings.push(`[ar] ${w}`);
+  for (const w of (ref as any).refCorrelationWarnings ?? []) warnings.push(`[ref] ${w}`);
+  if (correlationsEstimated) {
+    warnings.push('Correlação estimada aplicada. Resultado requer validação.');
+  }
+
+  // Confidence agregado (média ponderada das correlações; reduzido se <0.7).
+  const airConf = Number((air as any).airCorrelationConfidence ?? 0.7);
+  const refConf = Number((ref as any).refCorrelationConfidence ?? 0.7);
+  let confidenceScore = (airConf + refConf) / 2;
+  if (airConf < 0.7 || refConf < 0.7) confidenceScore *= 0.85;
 
   // Calibração só pode ser ajuste fino. >1.3 ou <0.7 → revisão estrutural.
   if (capFactor < 0.7 || capFactor > 1.3) {
@@ -134,6 +150,16 @@ export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculation
       tubeType: input.geometry.tubeType,
       source,
       factorsApplied: input.factors ?? null,
+      airCorrelationName: (air as any).correlationAir,
+      refCorrelationName: (ref as any).correlationRef,
+      hAirBase: (air as any).hAirBaseWm2K,
+      hAirFinal: air.hAirWm2K,
+      hRefBase: (ref as any).hRefBaseWm2K,
+      hRefFinal: ref.hRefWm2K,
+      airCorrelationConfidence: airConf,
+      refCorrelationConfidence: refConf,
+      confidenceScore,
+      isEstimated,
       air,
       ref,
       area,
