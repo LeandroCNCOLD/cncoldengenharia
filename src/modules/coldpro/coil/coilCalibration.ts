@@ -111,7 +111,7 @@ export function calibrateAgainstReference(
 
   if (Math.abs(rawCap - factors.capacityCorrectionFactor) > 1e-6) {
     notes.push(
-      `Fator de capacidade clampado para ${factors.capacityCorrectionFactor.toFixed(2)} (sugerido ${rawCap.toFixed(2)}).`,
+      `Fator de capacidade limitado para ${factors.capacityCorrectionFactor.toFixed(2)} (sugerido ${rawCap.toFixed(2)}).`,
     );
   }
   if (reference.airPressureDropPa && Math.abs(rawAir - factors.airDpCorrectionFactor) > 1e-6) {
