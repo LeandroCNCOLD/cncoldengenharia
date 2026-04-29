@@ -44,6 +44,7 @@ function TechnicalReviewPage() {
   const [rejectReason, setRejectReason] = useState("");
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [asCnStandard, setAsCnStandard] = useState(false);
 
   const refresh = async () => {
     setBusy(true);
