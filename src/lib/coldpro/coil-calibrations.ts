@@ -72,11 +72,29 @@ export async function saveCoilCalibration(params: {
   inputSnapshot: CoilSimulatorInput;
   outputSnapshot: CoilSimulatorResult;
   userId?: string;
+  /** Assinatura do modelo no momento da calibração — invalida quando muda. */
+  modelSignature: string;
+  engineName: string;
+  engineVersion: string;
+  correlationSetVersion: string;
 }) {
+  // Desativa calibrações anteriores deste componente.
+  const { error: deactivateError } = await supabase
+    .from("coil_calibrations")
+    .update({ is_active: false } as never)
+    .eq("component_item_id", params.componentItemId)
+    .eq("is_active", true);
+  if (deactivateError) throw deactivateError;
+
   const payload: Record<string, unknown> = {
     component_item_id: params.componentItemId,
     coil_type: params.coilType,
     engine: "physical_simple",
+    engine_name: params.engineName,
+    engine_version: params.engineVersion,
+    correlation_set_version: params.correlationSetVersion,
+    model_signature: params.modelSignature,
+    is_active: true,
     capacity_correction_factor: params.outcome.factors.capacityCorrectionFactor,
     air_dp_correction_factor: params.outcome.factors.airDpCorrectionFactor,
     ref_dp_correction_factor: params.outcome.factors.refDpCorrectionFactor,
@@ -111,16 +129,28 @@ export async function listCoilCalibrations(componentItemId: string) {
 /** Histórico ordenado (mais recentes primeiro). */
 export const getActiveCalibrationsForComponent = listCoilCalibrations;
 
-/** Calibração ativa = última criada. */
-export async function getActiveCalibrationForComponent(componentItemId: string) {
-  const { data, error } = await supabase
+/** Calibração ativa = última ativa do componente. */
+export async function getActiveCalibrationForComponent(
+  componentItemId: string,
+  currentModelSignature?: string,
+) {
+  const query = supabase
     .from("coil_calibrations")
     .select("*")
     .eq("component_item_id", componentItemId)
+    .eq("is_active", true)
     .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
+  const { data, error } = await query.maybeSingle();
   if (error) throw error;
+  if (!data) return null;
+  // Se signature foi fornecida e não bate, retorna null (calibração inválida).
+  if (
+    currentModelSignature &&
+    (data as { model_signature?: string | null }).model_signature !== currentModelSignature
+  ) {
+    return null;
+  }
   return data;
 }
 

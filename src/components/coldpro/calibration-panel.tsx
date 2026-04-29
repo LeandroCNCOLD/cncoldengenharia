@@ -99,6 +99,12 @@ export function CalibrationPanel({
         input: simulationInput,
         datasheet,
       });
+      const calRes = outcome.calibratedResult as typeof outcome.calibratedResult & {
+        modelSignature?: string;
+        engineName?: string;
+        engineVersion?: string;
+        correlationSetVersion?: string;
+      };
       await saveCoilCalibration({
         componentItemId,
         coilType,
@@ -107,6 +113,10 @@ export function CalibrationPanel({
         inputSnapshot: simulationInput,
         outputSnapshot: outcome.calibratedResult,
         userId: user?.id,
+        modelSignature: calRes.modelSignature ?? "unknown",
+        engineName: calRes.engineName ?? "physical_simple",
+        engineVersion: calRes.engineVersion ?? "v1",
+        correlationSetVersion: calRes.correlationSetVersion ?? "v1",
       });
       return outcome;
     },

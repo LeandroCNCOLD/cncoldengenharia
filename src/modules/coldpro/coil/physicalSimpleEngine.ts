@@ -14,8 +14,15 @@
 import type { CoilSimulatorInput, CoilSimulatorResult } from "./coilSimulatorTypes";
 import { deriveCoilGeometry, type GeometryDerived } from "./geometryDerived";
 import type { CalibrationFactors } from "./coilEngineTypes";
-import { normalizeCalibrationFactors } from "./coilEngineTypes";
+import { NEUTRAL_CALIBRATION, normalizeCalibrationFactors } from "./coilEngineTypes";
 import { computeUnilabFactors } from "./unilabFactorApplication";
+import {
+  generateModelSignature,
+  checkCalibrationValidity,
+  ENGINE_NAME,
+  ENGINE_VERSION,
+  CORRELATION_SET_VERSION,
+} from "./calibrationSignature";
 import type {
   AppliedUnilabFactors,
   UnilabGeometryFactor,
@@ -35,6 +42,14 @@ export interface PhysicalSimpleOptions {
   calibrationId?: string | null;
   nominalCapacityW?: number | null;
   logCalibration?: boolean;
+  /** Fator opcional aplicado ao h_air (lado do ar) — controlado e rastreável. Default 1. */
+  airSideCorrectionFactor?: number;
+  /**
+   * Assinatura do modelo associada à calibração `opts.calibration`.
+   * Se diferente da assinatura atual gerada para os inputs, a calibração
+   * NÃO será aplicada e um warning será adicionado.
+   */
+  calibrationSignature?: string | null;
 }
 
 interface MaterialProps { kTube: number; kFin: number }
@@ -102,13 +117,22 @@ export interface PhysicalSimpleResult extends CoilSimulatorResult {
   breakdown: PhysicalSimpleBreakdown;
   /** Fatores Unilab aplicados (espelhado para componentes da UI). */
   unilabFactors: AppliedUnilabFactors | null;
+  /** Assinatura atual do modelo (para validar/persistir calibração). */
+  modelSignature: string;
+  engineName: string;
+  engineVersion: string;
+  correlationSetVersion: string;
+  /** True se a calibração fornecida foi efetivamente aplicada. */
+  calibrationApplied: boolean;
+  /** Motivo do descarte (quando calibrationApplied = false). */
+  calibrationStaleReason: string | null;
 }
 
 export function simulatePhysicalSimple(
   input: CoilSimulatorInput,
   opts: PhysicalSimpleOptions = {},
 ): PhysicalSimpleResult {
-  const cal = normalizeCalibrationFactors(opts.calibration);
+  const requestedCal = normalizeCalibrationFactors(opts.calibration);
   const warnings: string[] = [];
   const derived = deriveCoilGeometry(input.geometry);
 
@@ -127,13 +151,14 @@ export function simulatePhysicalSimple(
   const airMassFlowKgs = airflowM3s * rho;
 
   // Coeficientes
-  // [TESTE TEMPORÁRIO] Multiplicador 2.5x em h_air para validar hipótese de subestimação
-  // do coeficiente de transferência do lado do ar. Remover após validação.
-  const H_AIR_TEST_MULTIPLIER = 2.5;
+  // Lado do ar: correlação base + fator opcional rastreável (substitui o
+  // hack temporário h_air * 2.5; default = 1).
+  const airSideCorrectionFactor =
+    Number.isFinite(opts.airSideCorrectionFactor) && (opts.airSideCorrectionFactor ?? 0) > 0
+      ? (opts.airSideCorrectionFactor as number)
+      : 1;
   const hArBase = airSideHtc(faceVelocityMs);
-  const hAr = hArBase * H_AIR_TEST_MULTIPLIER;
-  // eslint-disable-next-line no-console
-  console.log("[h_air TEST] base=", hArBase.toFixed(2), "W/m²K × ", H_AIR_TEST_MULTIPLIER, "→ usado=", hAr.toFixed(2), "W/m²K (faceVel=", faceVelocityMs?.toFixed(3), "m/s)");
+  const hAr = hArBase * airSideCorrectionFactor;
   const hRef = refSideHtc(input.coilType, input.refrigerant.refrigerant);
   const { kTube } = materialProps(input.geometry.tubeMaterial, input.geometry.finMaterial);
 
@@ -164,6 +189,31 @@ export function simulatePhysicalSimple(
     lmtdK = dt1 === dt2 ? dt1 : (dt1 - dt2) / Math.log(Math.max(dt1 / Math.max(dt2, 0.01), 1.0001));
   }
 
+  // === Validade da calibração ===
+  // Gera assinatura atual e descarta calibração se ela foi gerada para
+  // um modelo diferente (correlação, fórmula, fatores Unilab, área, etc.)
+  const currentModelSignature = generateModelSignature({
+    input,
+    unilabGeometryFactor: opts.unilabGeometryFactor ?? null,
+    externalAreaM2: aExt ?? null,
+    uBaseWm2k: uWm2k,
+  });
+  let calibrationApplied = true;
+  let cal = requestedCal;
+  let calibrationStaleReason: string | null = null;
+  if (opts.calibration && opts.calibrationSignature !== undefined) {
+    const validity = checkCalibrationValidity(
+      opts.calibrationSignature ?? null,
+      currentModelSignature,
+    );
+    if (!validity.isValid) {
+      calibrationApplied = false;
+      calibrationStaleReason = validity.reason ?? "Calibração desatualizada.";
+      cal = normalizeCalibrationFactors(NEUTRAL_CALIBRATION);
+      warnings.push(calibrationStaleReason);
+    }
+  }
+
   // === Ordem de cálculo (CRÍTICA — não inverter): ===
   // 1) base físico (qWraw)
   // 2) fatores empíricos Unilab (heatTransfer × surface × security)
@@ -182,15 +232,23 @@ export function simulatePhysicalSimple(
   const qFinal = qBase * cal.capacityCorrectionFactor;
 
   if (opts.logCalibration) {
-    // Log obrigatório de rastreabilidade da calibração ativa.
+    // Log obrigatório de rastreabilidade da calibração ativa/validade.
     // eslint-disable-next-line no-console
     console.log({
-      componentItemId: opts.componentItemId,
+      componentId: opts.componentItemId,
+      engineName: ENGINE_NAME,
+      engineVersion: ENGINE_VERSION,
+      correlationSetVersion: CORRELATION_SET_VERSION,
+      modelSignatureCurrent: currentModelSignature,
+      modelSignatureCalibration: opts.calibrationSignature ?? null,
+      calibrationApplied,
+      calibrationStaleReason,
       calibrationId: opts.calibrationId,
       capacityCorrectionFactor: cal.capacityCorrectionFactor,
-      qBase,
-      qFinal,
-      nominalCapacityW: opts.nominalCapacityW,
+      airSideCorrectionFactor,
+      capacityBase: qBase,
+      capacityFinal: qFinal,
+      capacityDatasheet: opts.nominalCapacityW ?? null,
     });
   }
 
@@ -246,6 +304,12 @@ export function simulatePhysicalSimple(
     warnings,
     derived,
     unilabFactors: opts.unilabGeometryFactor ? unilabFactors : null,
+    modelSignature: currentModelSignature,
+    engineName: ENGINE_NAME,
+    engineVersion: ENGINE_VERSION,
+    correlationSetVersion: CORRELATION_SET_VERSION,
+    calibrationApplied,
+    calibrationStaleReason,
     breakdown: {
       uWm2k,
       externalAreaM2: aExt ?? 0,
