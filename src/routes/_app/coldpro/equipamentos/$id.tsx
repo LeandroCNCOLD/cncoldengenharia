@@ -16,6 +16,7 @@ import {
 import { EvaporatorTab } from "@/components/coldpro/evaporator-tab";
 import { CondenserTab } from "@/components/coldpro/condenser-tab";
 import { PlaceholderTab } from "@/components/coldpro/placeholder-tab";
+import { SizingTab } from "@/components/coldpro/sizing-tab";
 
 export const Route = createFileRoute("/_app/coldpro/equipamentos/$id")({
   component: EquipmentDetailPage,
@@ -66,11 +67,14 @@ function EquipmentDetailPage() {
       <Tabs defaultValue="overview">
         <TabsList className="flex flex-wrap">
           <TabsTrigger value="overview">Visão geral</TabsTrigger>
+          <TabsTrigger value="sizing">Dimensionamento</TabsTrigger>
           <TabsTrigger value="components">Componentes</TabsTrigger>
           <TabsTrigger value="evaporator">Evaporador</TabsTrigger>
           <TabsTrigger value="condenser">Condensador</TabsTrigger>
           <TabsTrigger value="compressor">Compressor</TabsTrigger>
-          <TabsTrigger value="simulation">Simulação</TabsTrigger>
+          <TabsTrigger value="fans">Ventiladores</TabsTrigger>
+          <TabsTrigger value="valve">Válvula</TabsTrigger>
+          <TabsTrigger value="simulation">Sistema completo</TabsTrigger>
           <TabsTrigger value="catalog">Catálogo</TabsTrigger>
           <TabsTrigger value="history">Histórico</TabsTrigger>
         </TabsList>
