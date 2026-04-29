@@ -197,6 +197,7 @@ export function PerformanceMapPanel({
   const saveMut = useMutation({
     mutationFn: async () => {
       if (!result) throw new Error("Gere o mapa antes de salvar.");
+      if (result.blocked) throw new Error(result.blockReason ?? "Mapa bloqueado.");
       return savePerformanceMap({
         componentItemId,
         equipmentProjectId: equipmentProjectId ?? null,
