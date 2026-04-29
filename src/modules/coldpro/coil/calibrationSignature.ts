@@ -54,7 +54,7 @@ export function generateModelSignature(params: ModelSignatureInput): string {
     correlationVersion: CORRELATION_SET_VERSION,
     coilType: input.coilType,
     geometry: {
-      code: unilabGeometryFactor?.geometry_code ?? null,
+      code: unilabGeometryFactor?.geometryCode ?? null,
       rows: input.geometry.rows ?? null,
       tubesPerRow: input.geometry.tubesPerRow ?? null,
       circuits: input.geometry.circuits ?? null,
@@ -68,12 +68,12 @@ export function generateModelSignature(params: ModelSignatureInput): string {
     unilabFactors: unilabGeometryFactor
       ? {
           id: unilabGeometryFactor.id ?? null,
-          fat_cor_al: round(unilabGeometryFactor.fat_cor_al),
-          fat_coef_lato_tubo: round(unilabGeometryFactor.fat_coef_lato_tubo),
-          fat_rid_aum_sup: round(unilabGeometryFactor.fat_rid_aum_sup),
-          fat_corr_fat_attr: round(unilabGeometryFactor.fat_corr_fat_attr),
-          fattore_attr_aria: round(unilabGeometryFactor.fattore_attr_aria),
-          security_factor: round(unilabGeometryFactor.security_factor),
+          fatCorAl: round(unilabGeometryFactor.fatCorAl),
+          fatCoefLatoTubo: round(unilabGeometryFactor.fatCoefLatoTubo),
+          fatRidAumSup: round(unilabGeometryFactor.fatRidAumSup),
+          fatCorrFatAttr: round(unilabGeometryFactor.fatCorrFatAttr),
+          fattoreAttrAria: round(unilabGeometryFactor.fattoreAttrAria),
+          securityFactor: round(unilabGeometryFactor.securityFactor),
         }
       : null,
     externalAreaM2: round(externalAreaM2 ?? null, 3),
