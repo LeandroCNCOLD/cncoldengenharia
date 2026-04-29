@@ -14,6 +14,10 @@ import { calculateAirSide } from './airSideEngine';
 import { calculateCoilGeometry } from './geometryEngine';
 import { calculateRefrigerantSide } from './refrigerantSideEngine';
 import { calculateAirPressureDrop, calculateRefrigerantPressureDrop } from './pressureDropEngine';
+import { isCalibrationCompatible, validateCalibrationFactors } from './calibrationEngine';
+
+export const ENGINE_NAME = 'hybrid_unilab';
+export const ENGINE_VERSION = 'v1';
 
 function calcLMTD(dt1: number, dt2: number): number {
   if (dt1 <= 0 || dt2 <= 0) return Math.max(0, (dt1 + dt2) / 2);
@@ -30,32 +34,42 @@ function wallResistance(input: CoilCalculationInput): number {
   return Math.log(doM / diM) / (2 * Math.PI * k);
 }
 
-export function generateModelSignature(
-  input: CoilCalculationInput,
-  correlationAir: string,
-  effectiveAreaM2: number,
-): string {
-  const payload = {
-    engine: 'hybrid_unilab_v1',
-    geometryCode: input.geometry.code,
-    mode: input.mode,
-    finType: input.geometry.finType,
-    tubeType: input.geometry.tubeType,
-    refrigerant: input.refrigerant,
-    correlationAir,
-    effectiveAreaM2: Number(effectiveAreaM2.toFixed(4)),
-    factors: input.factors ?? {},
-  };
-  return hashHex(JSON.stringify(payload));
+function factorsHash(input: CoilCalculationInput): string {
+  return hashHex(JSON.stringify(input.factors ?? {}));
 }
 
-function compatibleCalibration(
-  calibration: CoilCalibration | null | undefined,
-  signature: string,
-) {
-  if (!calibration) return null;
-  if (calibration.modelSignature && calibration.modelSignature !== signature) return null;
-  return calibration;
+export interface SignatureContext {
+  airCorrelationName?: string;
+  refrigerantCorrelationName?: string;
+  effectiveAreaM2?: number;
+  areaSource?: string;
+  hAirBase?: number;
+  hRefBase?: number;
+  uBase?: number;
+}
+
+export function generateModelSignature(
+  input: CoilCalculationInput,
+  ctx: SignatureContext = {},
+): string {
+  const payload = {
+    engineName: ENGINE_NAME,
+    engineVersion: ENGINE_VERSION,
+    geometryCode: input.geometry.code,
+    coilType: input.mode,
+    refrigerant: input.refrigerant,
+    finType: input.geometry.finType,
+    tubeType: input.geometry.tubeType,
+    airCorrelationName: ctx.airCorrelationName,
+    refrigerantCorrelationName: ctx.refrigerantCorrelationName,
+    factorsHash: factorsHash(input),
+    effectiveAreaM2: ctx.effectiveAreaM2 != null ? Number(ctx.effectiveAreaM2.toFixed(4)) : null,
+    areaSource: ctx.areaSource,
+    hAirBase: ctx.hAirBase != null ? Number(ctx.hAirBase.toFixed(2)) : null,
+    hRefBase: ctx.hRefBase != null ? Number(ctx.hRefBase.toFixed(2)) : null,
+    uBase: ctx.uBase != null ? Number(ctx.uBase.toFixed(2)) : null,
+  };
+  return hashHex(JSON.stringify(payload));
 }
 
 export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculationResult {
@@ -106,10 +120,34 @@ export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculation
   const qBase = uBase * areaForHeatTransfer * dtml * securityFactor;
   const qSpecificWm2 = areaForHeatTransfer > 0 ? qBase / areaForHeatTransfer : 0;
 
-  const signature = generateModelSignature(input, air.correlationAir, areaForHeatTransfer);
-  const calibration = compatibleCalibration(input.calibration, signature);
-  if (input.calibration && !calibration) {
-    warnings.push('Calibração incompatível com assinatura atual — recalibre o componente.');
+  const signature = generateModelSignature(input, {
+    airCorrelationName: air.correlationAir,
+    refrigerantCorrelationName: (ref as any).correlationRef,
+    effectiveAreaM2: areaForHeatTransfer,
+    areaSource: geom.areaSource,
+    hAirBase: (air as any).hAirBaseWm2K,
+    hRefBase: (ref as any).hRefBaseWm2K,
+    uBase,
+  });
+
+  // ---- Verificação de compatibilidade da calibração ------------------------
+  const calibrationWarnings: string[] = [];
+  let calibration: CoilCalibration | null = null;
+  let calibrationCompatible = false;
+  if (input.calibration) {
+    calibrationCompatible = isCalibrationCompatible(input.calibration, signature);
+    if (calibrationCompatible) {
+      calibration = input.calibration;
+      const v = validateCalibrationFactors(calibration);
+      if (!v.withinFineRange) {
+        calibrationWarnings.push(...v.warnings);
+        warnings.push(...v.warnings);
+      }
+    } else {
+      const msg = 'Calibração incompatível com a versão atual do modelo. Recalibre o componente.';
+      calibrationWarnings.push(msg);
+      warnings.push(msg);
+    }
   }
 
   const capFactor = calibration?.capacityCorrectionFactor ?? 1;
@@ -138,18 +176,13 @@ export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculation
     warnings.push('Correlação estimada aplicada. Resultado requer validação.');
   }
 
-  // Confidence agregado (média ponderada das correlações; reduzido se <0.7).
+  // Confidence agregado das correlações + boost se calibração compatível.
   const airConf = Number((air as any).airCorrelationConfidence ?? 0.7);
   const refConf = Number((ref as any).refCorrelationConfidence ?? 0.7);
   let confidenceScore = (airConf + refConf) / 2;
   if (airConf < 0.7 || refConf < 0.7) confidenceScore *= 0.85;
-
-  // Calibração só pode ser ajuste fino. >1.3 ou <0.7 → revisão estrutural.
-  if (capFactor < 0.7 || capFactor > 1.3) {
-    warnings.push(
-      `Fator de calibração ${capFactor.toFixed(2)} fora da faixa de ajuste fino (0.7–1.3). ` +
-        'Revisar área, correlação ou fatores Unilab — calibração não corrige erro estrutural.',
-    );
+  if (calibration) {
+    confidenceScore = Math.max(confidenceScore, calibration.confidenceScore ?? 0.85);
   }
 
   return {
@@ -168,6 +201,10 @@ export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculation
     correlationAir: air.correlationAir,
     correctionApplied: Boolean(input.factors),
     calibrationApplied: Boolean(calibration),
+    calibrationCompatible,
+    calibrationId: calibration?.calibrationId ?? calibration?.id,
+    calibrationStatus: calibration?.status,
+    calibrationWarnings,
     isEstimated,
     modelSignature: signature,
     warnings,

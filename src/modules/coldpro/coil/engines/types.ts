@@ -68,14 +68,27 @@ export interface CoilCalculationInput {
   calibration?: CoilCalibration | null;
 }
 
+export type CalibrationStatus = 'draft' | 'calibrated' | 'needs_review';
+
 export interface CoilCalibration {
+  /** Identificadores opcionais — preenchidos quando vem do banco. */
   id?: string;
+  calibrationId?: string;
+  componentId?: string;
+  /** Identificação do motor que gerou a calibração. */
+  engineName?: string;
+  engineVersion?: string;
+  /** Hash do modelo no momento da calibração. Bloqueia aplicação se mudar. */
   modelSignature?: string;
+  /** Fatores de ajuste fino — todos no intervalo recomendado [0.7, 1.3]. */
   capacityCorrectionFactor?: number;
   airPressureDropFactor?: number;
   refrigerantPressureDropFactor?: number;
   heatTransferFactor?: number;
+  /** Estado da calibração e confiança. */
+  status?: CalibrationStatus;
   confidenceScore?: number;
+  createdAt?: string;
 }
 
 export interface CoilCalculationResult {
@@ -94,6 +107,11 @@ export interface CoilCalculationResult {
   correlationAir: string;
   correctionApplied: boolean;
   calibrationApplied: boolean;
+  /** True quando havia calibração mas a assinatura não bate. */
+  calibrationCompatible: boolean;
+  calibrationId?: string;
+  calibrationStatus?: CalibrationStatus;
+  calibrationWarnings: string[];
   /** True quando faltam fatores Unilab ou geometria de catálogo. */
   isEstimated: boolean;
   modelSignature: string;

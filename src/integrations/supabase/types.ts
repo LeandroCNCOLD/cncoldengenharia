@@ -30,6 +30,7 @@ export type Database = {
           engine: string
           engine_name: string
           engine_version: string
+          heat_transfer_factor: number
           id: string
           inputs_snapshot: Json
           is_active: boolean
@@ -38,7 +39,10 @@ export type Database = {
           notes: string | null
           outputs_snapshot: Json
           ref_dp_correction_factor: number
+          reference_json: Json
           reference_source: string | null
+          result_after_json: Json
+          result_before_json: Json
           status: string
           ua_correction_factor: number
         }
@@ -57,6 +61,7 @@ export type Database = {
           engine?: string
           engine_name?: string
           engine_version?: string
+          heat_transfer_factor?: number
           id?: string
           inputs_snapshot?: Json
           is_active?: boolean
@@ -65,7 +70,10 @@ export type Database = {
           notes?: string | null
           outputs_snapshot?: Json
           ref_dp_correction_factor?: number
+          reference_json?: Json
           reference_source?: string | null
+          result_after_json?: Json
+          result_before_json?: Json
           status?: string
           ua_correction_factor?: number
         }
@@ -84,6 +92,7 @@ export type Database = {
           engine?: string
           engine_name?: string
           engine_version?: string
+          heat_transfer_factor?: number
           id?: string
           inputs_snapshot?: Json
           is_active?: boolean
@@ -92,7 +101,10 @@ export type Database = {
           notes?: string | null
           outputs_snapshot?: Json
           ref_dp_correction_factor?: number
+          reference_json?: Json
           reference_source?: string | null
+          result_after_json?: Json
+          result_before_json?: Json
           status?: string
           ua_correction_factor?: number
         }
