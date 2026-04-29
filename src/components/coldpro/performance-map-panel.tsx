@@ -117,7 +117,7 @@ export function PerformanceMapPanel({
   const [allowEstimated, setAllowEstimated] = useState(false);
   const [result, setResult] = useState<PerformanceMapResult | null>(null);
 
-  const { data: calibration } = useQuery({
+  const { data: calibration, isLoading: calibrationLoading } = useQuery({
     queryKey: ["coil-cal-active", componentItemId],
     queryFn: () => getActiveCalibrationForComponent(componentItemId),
     enabled: !!componentItemId,
@@ -149,6 +149,7 @@ export function PerformanceMapPanel({
   const generateMut = useMutation({
     mutationFn: async () => {
       if (!simulationInput) throw new Error("Sem entrada de simulação.");
+      if (calibrationLoading) throw new Error("Aguarde carregar a calibração ativa.");
       if (!hasCalibration && !allowEstimated) {
         throw new Error(
           "Sem calibração ativa. Marque 'mapa estimado' para gerar mesmo assim.",
@@ -265,7 +266,7 @@ export function PerformanceMapPanel({
       }));
   }, [result]);
 
-  const canGenerate = !!simulationInput && (hasCalibration || allowEstimated);
+  const canGenerate = !!simulationInput && !calibrationLoading && (hasCalibration || allowEstimated);
   const summary = result?.summary;
   const approvable = summary
     ? canApproveMap(summary, result?.nominalValidation)
