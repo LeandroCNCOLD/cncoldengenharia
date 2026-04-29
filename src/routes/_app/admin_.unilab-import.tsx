@@ -160,6 +160,93 @@ function UnilabImportPage() {
     }
   }
 
+  function triggerDownload(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function toCsv(rows: Record<string, unknown>[]): string {
+    if (rows.length === 0) return "";
+    const headers = Array.from(
+      rows.reduce((set, r) => {
+        Object.keys(r).forEach((k) => set.add(k));
+        return set;
+      }, new Set<string>()),
+    );
+    const escape = (v: unknown) => {
+      if (v === null || v === undefined) return "";
+      const s = typeof v === "object" ? JSON.stringify(v) : String(v);
+      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = [headers.join(",")];
+    for (const r of rows) lines.push(headers.map((h) => escape(r[h])).join(","));
+    return lines.join("\n");
+  }
+
+  async function handleExportZip() {
+    setBusy(true);
+    try {
+      const zip = new JSZip();
+
+      const originals = zip.folder("originais")!;
+      let okOriginals = 0;
+      for (const name of BUNDLED_CSVS) {
+        const res = await fetch(`/unilab/${name}`);
+        if (!res.ok) continue;
+        originals.file(name, await res.text());
+        okOriginals += 1;
+      }
+
+      const dump = zip.folder("banco")!;
+      const { data, error } = await supabase
+        .from("coil_geometry_factors")
+        .select("*")
+        .order("mode", { ascending: true })
+        .order("geometry_code", { ascending: true });
+      if (error) throw error;
+      const rows = (data ?? []) as Record<string, unknown>[];
+      const byMode = new Map<string, Record<string, unknown>[]>();
+      for (const r of rows) {
+        const mode = String(r.mode ?? "unknown");
+        const list = byMode.get(mode) ?? [];
+        list.push(r);
+        byMode.set(mode, list);
+      }
+      for (const [mode, list] of byMode) {
+        dump.file(`coil_geometry_factors__${mode}.csv`, toCsv(list));
+      }
+      dump.file("coil_geometry_factors__all.csv", toCsv(rows));
+
+      const manifest = {
+        exported_at: new Date().toISOString(),
+        originals_count: okOriginals,
+        db_total_rows: rows.length,
+        db_modes: Object.fromEntries(
+          Array.from(byMode.entries()).map(([m, l]) => [m, l.length]),
+        ),
+      };
+      zip.file("manifest.json", JSON.stringify(manifest, null, 2));
+
+      const blob = await zip.generateAsync({ type: "blob" });
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      triggerDownload(blob, `unilab-export-${stamp}.zip`);
+      toast.success(
+        `ZIP gerado: ${okOriginals} CSV(s) originais + ${rows.length} linha(s) do banco.`,
+      );
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Falha ao gerar ZIP.";
+      toast.error(msg);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
