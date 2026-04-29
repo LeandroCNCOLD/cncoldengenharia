@@ -105,21 +105,33 @@ export function simulateDxEvaporator(
       ? 8 * input.geometry.rows * faceVelocity ** 1.7
       : null;
 
+  // Aplicação da calibração (pós-processamento empírico)
+  const capCal = capacityW * cal.capacityCorrectionFactor;
+  const sensibleCal = sensible != null ? sensible * cal.capacityCorrectionFactor : null;
+  const latentCal = latent != null ? latent * cal.capacityCorrectionFactor : null;
+  const condensateCal =
+    condensateLh != null ? condensateLh * cal.capacityCorrectionFactor : null;
+  const airDpCal = airDp != null ? airDp * cal.airDpCorrectionFactor : null;
+  const refDpCal =
+    ref.refrigerantPressureDropKpa != null
+      ? ref.refrigerantPressureDropKpa * cal.refDpCorrectionFactor
+      : null;
+
   return {
     coilType: "evaporator",
-    capacityW,
-    capacityKcalh: capacityW * W_TO_KCALH,
-    sensibleW: sensible,
-    latentW: latent,
+    capacityW: capCal,
+    capacityKcalh: capCal * W_TO_KCALH,
+    sensibleW: sensibleCal,
+    latentW: latentCal,
     dtRealK: dtReal,
     dtNominalK: dtNom,
     faceAreaM2: faceArea,
     faceVelocityMs: faceVelocity,
     airflowFactor,
     dtFactor,
-    airPressureDropPa: airDp,
-    refPressureDropKpa: ref.refrigerantPressureDropKpa ?? null,
-    condensateLh,
+    airPressureDropPa: airDpCal,
+    refPressureDropKpa: refDpCal,
+    condensateLh: condensateCal,
     warnings,
     rejection: { used: nominal, estimated },
   };
