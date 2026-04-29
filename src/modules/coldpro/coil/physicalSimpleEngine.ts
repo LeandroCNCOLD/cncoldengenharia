@@ -127,7 +127,13 @@ export function simulatePhysicalSimple(
   const airMassFlowKgs = airflowM3s * rho;
 
   // Coeficientes
-  const hAr = airSideHtc(faceVelocityMs);
+  // [TESTE TEMPORÁRIO] Multiplicador 2.5x em h_air para validar hipótese de subestimação
+  // do coeficiente de transferência do lado do ar. Remover após validação.
+  const H_AIR_TEST_MULTIPLIER = 2.5;
+  const hArBase = airSideHtc(faceVelocityMs);
+  const hAr = hArBase * H_AIR_TEST_MULTIPLIER;
+  // eslint-disable-next-line no-console
+  console.log("[h_air TEST] base=", hArBase.toFixed(2), "W/m²K × ", H_AIR_TEST_MULTIPLIER, "→ usado=", hAr.toFixed(2), "W/m²K (faceVel=", faceVelocityMs?.toFixed(3), "m/s)");
   const hRef = refSideHtc(input.coilType, input.refrigerant.refrigerant);
   const { kTube } = materialProps(input.geometry.tubeMaterial, input.geometry.finMaterial);
 
