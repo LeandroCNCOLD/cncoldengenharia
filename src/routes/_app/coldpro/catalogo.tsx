@@ -33,7 +33,7 @@ function CatalogPage() {
         const { data } = await supabase
           .from("equipment_projects")
           .select("*")
-          .eq("status", "published")
+          .eq("status", "validated")
           .order("updated_at", { ascending: false });
         return data ?? [];
       }
