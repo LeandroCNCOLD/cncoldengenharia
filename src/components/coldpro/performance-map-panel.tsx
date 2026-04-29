@@ -572,10 +572,14 @@ export function PerformanceMapPanel({
                     summary_json?: { invalidCount?: number; totalPoints?: number };
                   };
                   const sum = row.summary_json ?? { invalidCount: 0, totalPoints: 1 };
+                  const nv = (row.summary_json as { nominalValidation?: { reproducesNominal?: boolean } } | undefined)
+                    ?.nominalValidation;
+                  const reproOk = nv?.reproducesNominal !== false;
                   const ratioOk =
                     (sum.invalidCount ?? 0) /
                       Math.max(sum.totalPoints ?? 1, 1) <=
                     0.3;
+                  const canApprove = ratioOk && reproOk;
                   return (
                     <TableRow key={row.id}>
                       <TableCell className="text-xs">
