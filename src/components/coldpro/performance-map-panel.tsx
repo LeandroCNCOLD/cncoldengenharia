@@ -278,8 +278,11 @@ export function PerformanceMapPanel({
   const canGenerate = !!simulationInput && !calibrationLoading && (hasCalibration || allowEstimated);
   const summary = result?.summary;
   const approvable = summary
-    ? canApproveMap(summary, result?.nominalValidation)
+    ? canApproveMap(summary, result?.nominalValidation, result ?? undefined)
     : false;
+  const blockReasonText = summary
+    ? approvalBlockReason(summary, result?.nominalValidation, result ?? undefined)
+    : null;
 
   return (
     <Card>
@@ -289,6 +292,11 @@ export function PerformanceMapPanel({
             <Activity className="h-4 w-4" /> Mapa de desempenho
           </span>
           <span className="flex items-center gap-2 text-xs">
+            {engine === "hybrid" && (
+              <Badge variant="outline" className="border-sky-500 text-sky-600">
+                Híbrido
+              </Badge>
+            )}
             {hasCalibration ? (
               <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">
                 <ShieldCheck className="mr-1 h-3 w-3" /> Calibrado
