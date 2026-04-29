@@ -109,7 +109,7 @@ export function PerformanceMapPanel({
   const qc = useQueryClient();
   const { user } = useAuth();
 
-  const [engine, setEngine] = useState<PerformanceEngine>("physical_simple");
+  const [engine, setEngine] = useState<PerformanceEngine>("hybrid");
   const defaults =
     coilType === "evaporator" ? DEFAULT_RANGES_EVAP : DEFAULT_RANGES_COND;
   const [ranges, setRanges] = useState<PerformanceRanges>(defaults);
