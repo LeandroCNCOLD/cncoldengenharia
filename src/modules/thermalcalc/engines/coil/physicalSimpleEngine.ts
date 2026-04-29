@@ -19,10 +19,10 @@
  *  3. Remover este arquivo quando todos os callers tiverem migrado.
  */
 
-import type { CoilSimulatorInput, CoilSimulatorResult } from "./coilSimulatorTypes";
+import type { CoilSimulatorInput, CoilSimulatorResult } from "@/modules/thermalcalc/types/coilSimulatorTypes";
 import { deriveCoilGeometry, type GeometryDerived } from "./geometryDerived";
-import type { CalibrationFactors } from "./coilEngineTypes";
-import { NEUTRAL_CALIBRATION, normalizeCalibrationFactors } from "./coilEngineTypes";
+import type { CalibrationFactors } from "@/modules/thermalcalc/types/coilEngineTypes";
+import { NEUTRAL_CALIBRATION, normalizeCalibrationFactors } from "@/modules/thermalcalc/types/coilEngineTypes";
 import { computeUnilabFactors } from "./unilabFactorApplication";
 import { calcHeatExchangeArea } from "./heatExchangeArea";
 import { selectAirHTC, type AirHtcCorrelation } from "./airSideCorrelations";
@@ -48,7 +48,7 @@ import {
 import type {
   AppliedUnilabFactors,
   UnilabGeometryFactor,
-} from "../unilabData/types";
+} from "@/modules/coldpro/unilabData/types";
 
 const W_TO_KCALH = 0.859845;
 

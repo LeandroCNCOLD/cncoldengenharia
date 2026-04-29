@@ -1,6 +1,6 @@
 // ColdPro — defaults de geometria por código de catálogo.
 // Quando integrado a Unilab, este resolver buscará no banco; por ora usa parâmetros típicos.
-import type { CoilMode, GeometryInput } from '../coil/engines/types';
+import type { CoilMode, GeometryInput } from '../coil/internals/types';
 
 interface GeometryPreset {
   tubeOd: number;

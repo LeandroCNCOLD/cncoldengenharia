@@ -6,7 +6,7 @@
  * clampar entre 0.3 e 3.0, validar contra metas.
  */
 
-import type { CoilSimulatorInput, CoilSimulatorResult } from "./coilSimulatorTypes";
+import type { CoilSimulatorInput, CoilSimulatorResult } from "@/modules/thermalcalc/types/coilSimulatorTypes";
 import { simulatePhysicalSimple } from "./physicalSimpleEngine";
 import {
   NEUTRAL_CALIBRATION,
@@ -16,7 +16,7 @@ import {
   confidenceScoreFor,
   type CalibrationFactors,
   type CalibrationStatus,
-} from "./coilEngineTypes";
+} from "@/modules/thermalcalc/types/coilEngineTypes";
 
 export interface CalibrationReference {
   capacityW: number;

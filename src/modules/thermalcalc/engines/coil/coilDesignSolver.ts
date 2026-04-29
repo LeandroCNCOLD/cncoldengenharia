@@ -7,7 +7,7 @@ import type {
   CoilSimulatorInput,
   CoilGeometry,
   CoilSimulatorResult,
-} from "./coilSimulatorTypes";
+} from "@/modules/thermalcalc/types/coilSimulatorTypes";
 
 export interface DesignTarget {
   desiredCapacityW: number;

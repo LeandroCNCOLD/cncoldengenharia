@@ -9,7 +9,7 @@
  *  - finPitchMm     = distância centro-a-centro entre aletas
  */
 
-import type { CoilGeometry } from "./coilSimulatorTypes";
+import type { CoilGeometry } from "@/modules/thermalcalc/types/coilSimulatorTypes";
 
 export interface GeometryDerived {
   faceAreaM2: number | null;       // altura × largura útil

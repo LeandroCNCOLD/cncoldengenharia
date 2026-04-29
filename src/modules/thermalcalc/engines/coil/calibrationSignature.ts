@@ -9,8 +9,8 @@
  * de Q ou aplicação de fatores Unilab.
  */
 
-import type { CoilSimulatorInput } from "./coilSimulatorTypes";
-import type { UnilabGeometryFactor } from "../unilabData/types";
+import type { CoilSimulatorInput } from "@/modules/thermalcalc/types/coilSimulatorTypes";
+import type { UnilabGeometryFactor } from "@/modules/coldpro/unilabData/types";
 
 export const ENGINE_NAME = "physical_simple";
 /** Bumpar quando a fórmula de U ou Q mudar. */

@@ -10,7 +10,7 @@
  * (raio equivalente da célula hexagonal/quadrada da aleta).
  */
 
-import type { CoilGeometry } from "./coilSimulatorTypes";
+import type { CoilGeometry } from "@/modules/thermalcalc/types/coilSimulatorTypes";
 import { deriveCoilGeometry, type GeometryDerived } from "./geometryDerived";
 
 export interface HeatExchangeArea {

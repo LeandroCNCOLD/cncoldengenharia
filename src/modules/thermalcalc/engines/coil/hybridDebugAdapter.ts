@@ -3,14 +3,14 @@
  * CoilSimulatorInput, sem alterar o número final do simulador legado. Serve
  * APENAS para alimentar o painel de Debug Técnico.
  */
-import type { CoilSimulatorInput, HybridDebugInfo } from "./coilSimulatorTypes";
-import { simulateHybridCoil } from "./engines/hybridCoilEngine";
+import type { CoilSimulatorInput, HybridDebugInfo } from "@/modules/thermalcalc/types/coilSimulatorTypes";
+import { simulateHybridCoil } from "./internals/hybridCoilEngine";
 import type {
   CoilCalculationInput,
   CoilMode,
   FinType,
   GeometryInput,
-} from "./engines/types";
+} from "./internals/types";
 
 function mapFinType(v?: string): FinType {
   const x = (v ?? "").toLowerCase();

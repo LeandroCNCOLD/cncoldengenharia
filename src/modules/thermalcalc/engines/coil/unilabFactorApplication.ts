@@ -3,7 +3,7 @@ import type {
   CoilBaseResult,
   FactorApplicationContext,
   UnilabGeometryFactor,
-} from '../unilabData/types';
+} from "@/modules/coldpro/unilabData/types";
 
 const clamp = (v: number, min = 0.2, max = 5) => Math.min(max, Math.max(min, Number.isFinite(v) ? v : 1));
 

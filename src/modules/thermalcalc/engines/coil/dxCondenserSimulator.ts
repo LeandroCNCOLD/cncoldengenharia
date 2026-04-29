@@ -6,9 +6,9 @@ import type {
   CoilSimulatorInput,
   CoilSimulatorResult,
   NominalReference,
-} from "./coilSimulatorTypes";
-import type { CalibrationFactors } from "./coilEngineTypes";
-import { normalizeCalibrationFactors } from "./coilEngineTypes";
+} from "@/modules/thermalcalc/types/coilSimulatorTypes";
+import type { CalibrationFactors } from "@/modules/thermalcalc/types/coilEngineTypes";
+import { normalizeCalibrationFactors } from "@/modules/thermalcalc/types/coilEngineTypes";
 import { runHybridDebug } from "./hybridDebugAdapter";
 
 export interface DxSimulatorOptions {

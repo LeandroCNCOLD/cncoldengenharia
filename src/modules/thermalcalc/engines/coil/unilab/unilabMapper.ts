@@ -2,7 +2,7 @@
 // que o motor híbrido entende. Mantém os defaults conservadores quando o
 // dado bruto está nulo — o motor decide se marca como estimado.
 
-import type { CoilMode, FinType, TubeType } from '../engines/types';
+import type { CoilMode, FinType, TubeType } from '../internals/types';
 import type {
   UnilabFluidProperties,
   UnilabGeometry,

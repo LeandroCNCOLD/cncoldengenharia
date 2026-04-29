@@ -1,7 +1,7 @@
 // Tipos canônicos da camada Unilab. Espelham o que o motor híbrido consome
 // (não dependem do schema bruto do banco — o mapper faz a tradução).
 
-import type { CoilMode, FinType, TubeType, UnilabFactors } from '../engines/types';
+import type { CoilMode, FinType, TubeType, UnilabFactors } from '../internals/types';
 
 export interface UnilabGeometry {
   geometryCode: string;

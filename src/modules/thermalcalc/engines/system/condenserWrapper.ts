@@ -1,6 +1,6 @@
 // ColdPro — Wrapper do condensador. Usa o mesmo motor híbrido em modo 'condensation'.
-import { simulateHybridCoil } from '../coil/engines/hybridCoilEngine';
-import type { CoilCalculationInput, GeometryInput } from '../coil/engines/types';
+import { simulateHybridCoil } from '../coil/internals/hybridCoilEngine';
+import type { CoilCalculationInput, GeometryInput } from '../coil/internals/types';
 import type { Refrigerant, SectionResult } from './systemTypes';
 import { defaultGeometryFromCode } from './systemGeometryDefaults';
 

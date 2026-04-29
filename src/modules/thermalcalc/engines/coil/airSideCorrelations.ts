@@ -15,7 +15,7 @@
  *      cp_ar = 1006 J/kgK,   Pr_ar = 0.71
  */
 
-import type { CoilGeometry } from "./coilSimulatorTypes";
+import type { CoilGeometry } from "@/modules/thermalcalc/types/coilSimulatorTypes";
 
 const CP_AIR = 1006;
 const PR_AIR = 0.71;

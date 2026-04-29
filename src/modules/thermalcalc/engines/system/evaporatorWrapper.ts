@@ -1,7 +1,7 @@
 // ColdPro — Wrapper do evaporador para o System Simulator.
 // Usa o motor híbrido (simulateHybridCoil), garantindo que não há lógica duplicada.
-import { simulateHybridCoil } from '../coil/engines/hybridCoilEngine';
-import type { CoilCalculationInput, GeometryInput } from '../coil/engines/types';
+import { simulateHybridCoil } from '../coil/internals/hybridCoilEngine';
+import type { CoilCalculationInput, GeometryInput } from '../coil/internals/types';
 import type { Refrigerant, SectionResult } from './systemTypes';
 import { defaultGeometryFromCode } from './systemGeometryDefaults';
 

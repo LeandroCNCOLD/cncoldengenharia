@@ -15,19 +15,19 @@
 import type {
   CoilSimulatorInput,
   CoilSimulatorResult,
-} from "./coilSimulatorTypes";
+} from "@/modules/thermalcalc/types/coilSimulatorTypes";
 import {
   NEUTRAL_CALIBRATION,
   normalizeCalibrationFactors,
   type CalibrationFactors,
-} from "./coilEngineTypes";
+} from "@/modules/thermalcalc/types/coilEngineTypes";
 import { simulatePhysicalSimple } from "./physicalSimpleEngine";
 import { simulateDxEvaporator } from "./dxEvaporatorSimulator";
 import { simulateDxCondenser } from "./dxCondenserSimulator";
-import { simulateHybridCoil } from "./engines/hybridCoilEngine";
-import type { CoilCalibration } from "./engines/types";
+import { simulateHybridCoil } from "./internals/hybridCoilEngine";
+import type { CoilCalibration } from "./internals/types";
 import { buildHybridCalcInput } from "./hybridDebugAdapter";
-import type { UnilabGeometryFactor } from "../unilabData/types";
+import type { UnilabGeometryFactor } from "@/modules/coldpro/unilabData/types";
 
 export type PerformanceEngine = "physical_simple" | "empirical" | "hybrid";
 export type PointStatus = "valid" | "warning" | "invalid";
