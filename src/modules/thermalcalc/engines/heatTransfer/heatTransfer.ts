@@ -47,11 +47,13 @@ export function calculateHeatTransfer(input: HeatTransferInput): HeatTransferRes
   const preliminaryGeometry = calculateCoilGeometry(input.geometry);
   const airSide = calculateAirSideHeatTransfer(input.geometry, input.air);
   const effectiveArea = calculateEffectiveArea(input.geometry, airSide.hAirWm2K);
+  const effectiveAreaM2 =
+    preliminaryGeometry.effectiveExternalAreaM2 * (input.effectiveAreaFactor ?? 1);
   const geometry = {
     ...preliminaryGeometry,
-    effectiveExternalAreaM2: effectiveArea.effectiveAreaM2,
-    finEfficiency: effectiveArea.finEfficiency,
-    overallSurfaceEfficiency: effectiveArea.overallSurfaceEfficiency,
+    effectiveExternalAreaM2: preliminaryGeometry.effectiveExternalAreaM2,
+    finEfficiency: preliminaryGeometry.finEfficiency,
+    overallSurfaceEfficiency: preliminaryGeometry.overallSurfaceEfficiency,
   };
   const refrigerantSide = calculateRefrigerantSideHeatTransfer(
     input.geometry,
@@ -61,11 +63,10 @@ export function calculateHeatTransfer(input: HeatTransferInput): HeatTransferRes
   const u =
     input.overallHeatTransferCoefficientWm2K ??
     calculateOverallHeatTransferCoefficient(
-      airSide.hAirWm2K * effectiveArea.overallSurfaceEfficiency,
+      airSide.hAirWm2K * preliminaryGeometry.overallSurfaceEfficiency,
       refrigerantSide.hRefrigerantWm2K,
       (input.geometry.tube.wallThicknessMm ?? 0.35) / 1000,
     );
-  const effectiveAreaM2 = effectiveArea.effectiveAreaM2 * (input.effectiveAreaFactor ?? 1);
   const lmtd = calculateLogMeanTemperatureDifference(
     input.airInletTemperatureC,
     input.airOutletTemperatureC,
@@ -76,7 +77,7 @@ export function calculateHeatTransfer(input: HeatTransferInput): HeatTransferRes
   const capacityW = u * effectiveAreaM2 * lmtd;
   const warnings: ValidationWarning[] = [
     ...geometry.warnings,
-    ...effectiveArea.warnings,
+    ...(preliminaryGeometry.geometrySource === "calculated" ? effectiveArea.warnings : []),
     ...airSide.warnings,
     ...refrigerantSide.warnings,
   ];
@@ -104,7 +105,13 @@ export function calculateHeatTransfer(input: HeatTransferInput): HeatTransferRes
     airCorrelation: airSide.correlation,
     refrigerantCorrelation: refrigerantSide.correlation,
     geometry,
-    effectiveArea,
+    effectiveArea: {
+      ...effectiveArea,
+      totalExternalAreaM2: preliminaryGeometry.externalAreaM2,
+      effectiveAreaM2: preliminaryGeometry.effectiveExternalAreaM2,
+      finEfficiency: preliminaryGeometry.finEfficiency,
+      overallSurfaceEfficiency: preliminaryGeometry.overallSurfaceEfficiency,
+    },
     warnings,
   };
 }

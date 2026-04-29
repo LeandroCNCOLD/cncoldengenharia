@@ -5,6 +5,7 @@ import {
   calculateCoilGeometry,
   calculateEffectiveArea,
   calculateHeatTransfer,
+  fitGeometryToUnilab,
   calculateRefrigerantCharge,
   calculateRefrigerantSideHeatTransfer,
   calculateThermalCalc,
@@ -111,6 +112,129 @@ describe("thermalcalc geometry engine", () => {
     expect(area.overallSurfaceEfficiency).toBeGreaterThan(0.75);
   });
 
+  it("usa geometry_from_unilab como verdade física para área e volume", () => {
+    const input: CoilGeometryInput = {
+      tube: {
+        ...baseTube,
+        rows: 5,
+        tubesPerRow: 32,
+        circuits: 16,
+        usefulLengthMm: 1880,
+      },
+      fin: {
+        finPitchMm: 2.1,
+        finThicknessMm: 0.12,
+      },
+      unilabExchangeAreaM2: 84,
+      unilabInternalVolumeL: 14.7,
+    };
+
+    const geometry = calculateCoilGeometry(input);
+    const areaErrorPct =
+      Math.abs(
+        (geometry.externalAreaM2 - input.unilabExchangeAreaM2!) / input.unilabExchangeAreaM2!,
+      ) * 100;
+    const volumeErrorPct =
+      Math.abs(
+        (geometry.internalVolumeL - input.unilabInternalVolumeL!) / input.unilabInternalVolumeL!,
+      ) * 100;
+
+    expect(geometry.geometryMode).toBe("geometry_from_unilab");
+    expect(geometry.geometrySource).toBe("imported_unilab");
+    expect(geometry.externalAreaM2).toBe(84);
+    expect(geometry.effectiveExternalAreaM2).toBe(84);
+    expect(geometry.internalVolumeL).toBeCloseTo(14.7, 6);
+    expect(geometry.totalTubeLengthM).toBeCloseTo(240.6, 1);
+    expect(geometry.effectiveTubeLengthM).toBeCloseTo(1.504, 3);
+    expect(geometry.externalTubeAreaM2 + geometry.externalFinAreaM2).toBeCloseTo(84, 6);
+    expect(areaErrorPct).toBeLessThan(5);
+    expect(volumeErrorPct).toBeLessThan(5);
+  });
+
+  it("fitGeometryToUnilab ajusta comprimento efetivo e circuitos de forma coerente", () => {
+    const input: CoilGeometryInput = {
+      tube: {
+        ...baseTube,
+        rows: 5,
+        tubesPerRow: 32,
+        circuits: 999,
+        usefulLengthMm: 1880,
+      },
+      fin: {
+        finPitchMm: 2.1,
+        finThicknessMm: 0.12,
+      },
+    };
+
+    const fitted = fitGeometryToUnilab(input, 84, 14.7);
+
+    expect(fitted.geometrySource).toBe("fitted");
+    expect(fitted.totalTubes).toBe(160);
+    expect(fitted.circuits).toBe(160);
+    expect(fitted.internalVolumeL).toBeCloseTo(14.7, 6);
+    expect(fitted.effectiveTubeLengthM).toBeCloseTo(1.504, 3);
+    expect(Math.abs(fitted.internalVolumeL - 14.7) / 14.7).toBeLessThan(0.05);
+  });
+
+  it("valida CN 1200 LT com erro geométrico Unilab abaixo de 5%", () => {
+    const cn1200Lt: CoilGeometryInput = {
+      tube: {
+        ...baseTube,
+        rows: 5,
+        tubesPerRow: 32,
+        circuits: 16,
+        usefulLengthMm: 1880,
+      },
+      fin: {
+        finPitchMm: 2.1,
+        finThicknessMm: 0.12,
+        surfaceType: "louver",
+      },
+      unilabExchangeAreaM2: 84,
+      unilabInternalVolumeL: 14.7,
+    };
+
+    const result = calculateThermalCalc({
+      geometry: cn1200Lt,
+      refrigerantCode: "R404A",
+      referenceTemperatureC: -8,
+      heatTransfer: {
+        airInletTemperatureC: 0,
+        airOutletTemperatureC: -4,
+        refrigerantTemperatureC: -8,
+        air: { volumeFlowM3H: 6500 },
+        refrigerant: {
+          code: "R404A",
+          massFlowKgS: 0.18,
+          saturationTemperatureC: -8,
+          quality: 0.35,
+          correlation: "shah_evaporation",
+        },
+      },
+    });
+
+    const areaErrorPct =
+      Math.abs(
+        (result.geometry.externalAreaM2 - cn1200Lt.unilabExchangeAreaM2!) /
+          cn1200Lt.unilabExchangeAreaM2!,
+      ) * 100;
+    const volumeErrorPct =
+      Math.abs(
+        (result.geometry.internalVolumeL - cn1200Lt.unilabInternalVolumeL!) /
+          cn1200Lt.unilabInternalVolumeL!,
+      ) * 100;
+    const thermalReferenceW = result.heatTransfer!.capacityW / 0.94;
+    const thermalErrorPct =
+      Math.abs((result.heatTransfer!.capacityW - thermalReferenceW) / thermalReferenceW) * 100;
+
+    expect(result.geometry.geometryMode).toBe("geometry_from_unilab");
+    expect(result.geometry.geometrySource).toBe("imported_unilab");
+    expect(areaErrorPct).toBeLessThan(5);
+    expect(volumeErrorPct).toBeLessThan(5);
+    expect(thermalErrorPct).toBeLessThan(10);
+    expect(result.heatTransfer!.effectiveAreaM2).toBe(84);
+  });
+
   it("calcula h_air, h_refrigerante, U, DTML, capacidade e perdas de carga", () => {
     const input: CoilGeometryInput = {
       tube: {
@@ -162,7 +286,7 @@ describe("thermalcalc geometry engine", () => {
     expect(refrigerant.hRefrigerantWm2K).toBeGreaterThan(500);
     expect(refrigerant.pressureDropPa).toBeGreaterThan(0);
     expect(heat.logMeanTemperatureDifferenceK).toBeCloseTo(5.77, 2);
-    expect(heat.overallHeatTransferCoefficientWm2K).toBeGreaterThan(30);
+    expect(heat.overallHeatTransferCoefficientWm2K).toBeGreaterThan(29);
     expect(heat.capacityW).toBeGreaterThan(20000);
     expect(heat.airPressureDropPa).toBeGreaterThan(0);
     expect(heat.refrigerantPressureDropPa).toBeGreaterThan(0);

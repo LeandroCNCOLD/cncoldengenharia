@@ -37,12 +37,42 @@ export interface FinGeometry {
 export interface CoilGeometryInput {
   tube: TubeGeometry;
   fin: FinGeometry;
+  unilabExchangeAreaM2?: number;
+  unilabInternalVolumeL?: number;
+}
+
+export type GeometrySource = "calculated" | "imported_unilab" | "fitted";
+export type GeometryMode = "calculated" | "geometry_from_unilab";
+
+export interface GeometryFitResult {
+  geometrySource: GeometrySource;
+  geometryMode: GeometryMode;
+  totalTubes: number;
+  tubesPerRow: number;
+  rows: number;
+  circuits: number;
+  effectiveTubeLengthM: number;
+  totalTubeLengthM: number;
+  internalVolumeM3: number;
+  internalVolumeL: number;
+  externalAreaM2: number;
+  externalTubeAreaM2: number;
+  externalFinAreaM2: number;
+  areaDeviationPct: number;
+  volumeDeviationPct: number;
+  warnings: ValidationWarning[];
 }
 
 export interface CoilGeometryResult {
+  geometrySource: GeometrySource;
+  geometryMode: GeometryMode;
   innerDiameterM: number;
   outerDiameterM: number;
   totalTubes: number;
+  tubesPerRow: number;
+  rows: number;
+  circuits: number;
+  effectiveTubeLengthM: number;
   totalTubeLengthM: number;
   internalAreaM2: number;
   externalTubeAreaM2: number;
@@ -59,6 +89,11 @@ export interface CoilGeometryResult {
   freeFlowAreaM2: number | null;
   minimumFlowAreaM2: number | null;
   hydraulicDiameterAirM: number | null;
+  unilabExchangeAreaM2?: number;
+  unilabInternalVolumeL?: number;
+  areaDeviationPct?: number;
+  volumeDeviationPct?: number;
+  fittedGeometry?: GeometryFitResult;
   warnings: ValidationWarning[];
 }
 

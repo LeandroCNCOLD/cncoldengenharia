@@ -16,6 +16,8 @@
 - Global coefficient: `U = 1 / (1 / hAir + Rwall + Rfouling + 1 / hRefrigerant)`.
 - Heat capacity: `Q = U * Aeff * DTML`.
 - Pressure drop: Darcy/Colburn structured estimates for air side and refrigerant side.
+- Unilab geometry mode: when `unilabExchangeAreaM2` and `unilabInternalVolumeL` are present, area and volume are treated as physical truth.
+- Geometry fitting: `fitGeometryToUnilab()` adjusts effective tube length from the Unilab volume while preserving active tube count and clamping circuits to active tubes.
 
 ## Files created
 
@@ -42,6 +44,7 @@
 - Calibrate fill factors by coil family, circuiting pattern, headers, distributor volume, and application.
 - Validate external fin area and free-flow area against CAD/Unilab geometry references.
 - Validate pressure-drop multipliers against lab data for louver, wavy, and plain fin families.
+- Feed CN 1200 LT and other Unilab catalogue area/volume values directly into `thermalcalc` so the model runs in `geometry_from_unilab` mode.
 
 ## Technical limitations
 
@@ -50,3 +53,4 @@
 - Refrigerant charge currently covers the finned core volume only; headers, distributors, liquid line volume, and oil effects are not included.
 - Refrigerant properties are deterministic seed tables with interpolation; they are not a substitute for certified property libraries.
 - Validation catches dimensional inconsistencies but does not yet encode every CN COLD manufacturing rule.
+- In `geometry_from_unilab` mode, area and volume reproduce Unilab by design; detailed fin/tube area decomposition remains diagnostic, not the heat-transfer truth.
