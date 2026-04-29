@@ -122,7 +122,7 @@ export async function approveMapped(
   };
   const { data, error } = await supabase
     .from("technical_components")
-    .insert(insert)
+    .insert([insert])
     .select("id")
     .single();
   if (error || !data) return { ok: false, error: error?.message ?? "insert falhou" };
@@ -187,7 +187,7 @@ export async function remapRaw(
 
   const { data } = await supabase
     .from("technical_mapped_records")
-    .insert(payload)
+    .insert([payload])
     .select("*")
     .single();
   return (data as TechnicalMappedRecord | null) ?? null;
