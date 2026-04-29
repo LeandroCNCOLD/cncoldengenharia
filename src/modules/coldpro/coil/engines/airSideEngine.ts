@@ -1,4 +1,9 @@
 import type { CoilCalculationInput, FinType } from './types';
+import {
+  selectAirCorrelation,
+  type CorrelationContext,
+  type CorrelationResult,
+} from '../correlations';
 
 export function getAirProperties(Tc: number) {
   const Tk = Tc + 273.15;
@@ -12,64 +17,85 @@ export function getAirProperties(Tc: number) {
 }
 
 function hydraulicDiameterM(input: CoilCalculationInput): number {
-  // Practical proxy for fin-and-tube air side. Can be replaced by exact free-flow area later.
   const g = input.geometry;
   return Math.max(0.002, Math.min(0.03, (g.finPitchMm / 1000) * 2.0));
 }
 
-function calcRe(rho: number, velocity: number, dh: number, mu: number): number {
-  return (rho * velocity * dh) / mu;
-}
-
-function calcHtcLouver(input: CoilCalculationInput, velocity: number, props: ReturnType<typeof getAirProperties>) {
+function buildContext(
+  input: CoilCalculationInput,
+  faceVelocity: number,
+  props: ReturnType<typeof getAirProperties>,
+): CorrelationContext {
   const Dh = hydraulicDiameterM(input);
-  const Re = calcRe(props.density, velocity, Dh, props.viscosity);
-  const j = 0.02 * Math.pow(Math.max(Re, 1), -0.4);
-  const h = (j * props.density * velocity * props.specificHeat) / Math.pow(props.prandtl, 2 / 3);
-  return { hAir: h, Re, correlation: 'ChangWangLouverHTC_simplified' };
-}
-
-function calcHtcWavy(input: CoilCalculationInput, velocity: number, props: ReturnType<typeof getAirProperties>) {
-  const Dh = hydraulicDiameterM(input);
-  const Re = calcRe(props.density, velocity, Dh, props.viscosity);
-  const Nu = 0.27 * Math.pow(Math.max(Re, 1), 0.63) * Math.pow(props.prandtl, 0.36);
-  const h = (Nu * props.conductivity) / Dh;
-  return { hAir: h, Re, correlation: 'WangHerringboneWavyHTC_simplified' };
-}
-
-function selectFinType(finType: FinType): FinType {
-  return finType && finType !== 'unknown' ? finType : 'wavy';
+  const Re = (props.density * faceVelocity * Dh) / Math.max(props.viscosity, 1e-9);
+  const phase =
+    input.mode === 'condensation'
+      ? 'two_phase_condensation'
+      : input.mode === 'direct_expansion'
+        ? 'two_phase_evaporation'
+        : 'single_phase';
+  const coilType = input.mode === 'condensation' ? 'condenser' : 'evaporator';
+  return {
+    coilType,
+    mode: input.mode,
+    finType: (input.geometry.finType ?? 'unknown') as FinType,
+    tubeType: input.geometry.tubeType ?? 'unknown',
+    wet: Boolean(input.wet),
+    phase,
+    reynoldsAir: Re,
+    reynoldsRefrigerant: 0,
+    prandtlAir: props.prandtl,
+    prandtlRefrigerant: 3,
+    airVelocityMs: faceVelocity,
+    refrigerantMassFluxKgM2s: 0,
+    airDensityKgM3: props.density,
+    airViscosityPaS: props.viscosity,
+    airConductivityWmK: props.conductivity,
+    airSpecificHeatJkgK: props.specificHeat,
+    hydraulicDiameterAirM: Dh,
+    tubeInnerDiameterM: input.geometry.tubeInnerDiameterMm / 1000,
+    refrigerant: input.refrigerant,
+    geometryCode: input.geometry.code,
+  };
 }
 
 export function calculateAirSide(input: CoilCalculationInput, frontalAreaM2: number) {
   const meanAirTemp = (input.airInletTempC + (input.airOutletTempC ?? input.airInletTempC - 5)) / 2;
   const props = getAirProperties(meanAirTemp);
-  const airFlowM3s = input.airflowM3h / 3600;
-  const faceVelocity = frontalAreaM2 > 0 ? airFlowM3s / frontalAreaM2 : 0;
+  const faceVelocity = frontalAreaM2 > 0 ? input.airflowM3h / 3600 / frontalAreaM2 : 0;
 
-  let raw = input.hAirOverrideWm2K
-    ? { hAir: input.hAirOverrideWm2K, Re: 0, correlation: 'manual_h_air' }
-    : selectFinType(input.geometry.finType) === 'louver'
-      ? calcHtcLouver(input, faceVelocity, props)
-      : calcHtcWavy(input, faceVelocity, props);
-
-  if (input.wet) {
-    raw = { ...raw, hAir: raw.hAir * 0.85, correlation: `${raw.correlation}_wet_factor` };
+  let correlation: CorrelationResult;
+  if (input.hAirOverrideWm2K) {
+    correlation = {
+      correlationName: 'manual_h_air',
+      group: 'air_override',
+      value: input.hAirOverrideWm2K,
+      confidence: 1,
+      isEstimated: false,
+      warnings: ['h_air manual fornecido pelo usuário.'],
+    };
+  } else {
+    const ctx = buildContext(input, faceVelocity, props);
+    correlation = selectAirCorrelation(ctx);
   }
 
   const f = input.factors ?? {};
   const velDelta = faceVelocity - 3.0;
   const fatCorAl = (f.fatCorAl ?? 1) + (f.slopeFatCorAl ?? 0) * velDelta;
   const fatRidAumSup = f.fatRidAumSup ?? 1;
-  const hAirCorrected = raw.hAir * fatCorAl * fatRidAumSup;
+  const hAirBase = correlation.value;
+  const hAirFinal = hAirBase * fatCorAl * fatRidAumSup;
 
   return {
     ...props,
     faceVelocityMs: faceVelocity,
-    hAirBaseWm2K: raw.hAir,
-    hAirWm2K: hAirCorrected,
-    reynoldsAir: raw.Re,
-    correlationAir: raw.correlation,
+    hAirBaseWm2K: hAirBase,
+    hAirWm2K: hAirFinal,
+    reynoldsAir: (props.density * faceVelocity * hydraulicDiameterM(input)) / Math.max(props.viscosity, 1e-9),
+    correlationAir: correlation.correlationName,
+    airCorrelationConfidence: correlation.confidence,
+    airCorrelationWarnings: correlation.warnings,
+    airCorrelationIsEstimated: correlation.isEstimated,
     factors: { fatCorAl, fatRidAumSup },
   };
 }
