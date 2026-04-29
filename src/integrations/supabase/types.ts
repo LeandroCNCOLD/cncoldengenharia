@@ -656,43 +656,100 @@ export type Database = {
       }
       compressor_models: {
         Row: {
+          application_type: string | null
           compressor_type: string | null
           created_at: string
           displacement: number | null
           frequency: string | null
+          frequency_hz: number | null
           id: string
           manufacturer: string | null
+          massflow_correction: number | null
           model: string
+          model_standard: string | null
+          motor_efficiency: number | null
+          phase: number | null
+          power_correction: number | null
           raw_json: Json
           refrigerant: string | null
+          rpm: number | null
+          source_db: string | null
+          source_table_key: string | null
+          subcooling_k: number | null
+          superheat_k: number | null
+          temp_cond_max_c: number | null
+          temp_cond_min_c: number | null
+          temp_evap_max_c: number | null
+          temp_evap_min_c: number | null
+          units_system: string | null
           updated_at: string
+          vapcyc_batch_id: string | null
           voltage: string | null
+          voltage_v: number | null
         }
         Insert: {
+          application_type?: string | null
           compressor_type?: string | null
           created_at?: string
           displacement?: number | null
           frequency?: string | null
+          frequency_hz?: number | null
           id?: string
           manufacturer?: string | null
+          massflow_correction?: number | null
           model: string
+          model_standard?: string | null
+          motor_efficiency?: number | null
+          phase?: number | null
+          power_correction?: number | null
           raw_json?: Json
           refrigerant?: string | null
+          rpm?: number | null
+          source_db?: string | null
+          source_table_key?: string | null
+          subcooling_k?: number | null
+          superheat_k?: number | null
+          temp_cond_max_c?: number | null
+          temp_cond_min_c?: number | null
+          temp_evap_max_c?: number | null
+          temp_evap_min_c?: number | null
+          units_system?: string | null
           updated_at?: string
+          vapcyc_batch_id?: string | null
           voltage?: string | null
+          voltage_v?: number | null
         }
         Update: {
+          application_type?: string | null
           compressor_type?: string | null
           created_at?: string
           displacement?: number | null
           frequency?: string | null
+          frequency_hz?: number | null
           id?: string
           manufacturer?: string | null
+          massflow_correction?: number | null
           model?: string
+          model_standard?: string | null
+          motor_efficiency?: number | null
+          phase?: number | null
+          power_correction?: number | null
           raw_json?: Json
           refrigerant?: string | null
+          rpm?: number | null
+          source_db?: string | null
+          source_table_key?: string | null
+          subcooling_k?: number | null
+          superheat_k?: number | null
+          temp_cond_max_c?: number | null
+          temp_cond_min_c?: number | null
+          temp_evap_max_c?: number | null
+          temp_evap_min_c?: number | null
+          units_system?: string | null
           updated_at?: string
+          vapcyc_batch_id?: string | null
           voltage?: string | null
+          voltage_v?: number | null
         }
         Relationships: []
       }
@@ -1870,6 +1927,87 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      vapcyc_cycle_templates: {
+        Row: {
+          components_json: Json
+          created_at: string
+          cycle_name: string | null
+          cycle_type: string | null
+          id: string
+          raw_json: Json
+          source_db: string | null
+          vapcyc_batch_id: string | null
+        }
+        Insert: {
+          components_json?: Json
+          created_at?: string
+          cycle_name?: string | null
+          cycle_type?: string | null
+          id?: string
+          raw_json?: Json
+          source_db?: string | null
+          vapcyc_batch_id?: string | null
+        }
+        Update: {
+          components_json?: Json
+          created_at?: string
+          cycle_name?: string | null
+          cycle_type?: string | null
+          id?: string
+          raw_json?: Json
+          source_db?: string | null
+          vapcyc_batch_id?: string | null
+        }
+        Relationships: []
+      }
+      vapcyc_import_batches: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          errors_json: Json
+          finished_at: string | null
+          id: string
+          source_zip: string | null
+          started_at: string
+          status: string
+          summary_json: Json
+          total_cycles: number
+          total_fans: number
+          total_models: number
+          total_polynomials: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          errors_json?: Json
+          finished_at?: string | null
+          id?: string
+          source_zip?: string | null
+          started_at?: string
+          status?: string
+          summary_json?: Json
+          total_cycles?: number
+          total_fans?: number
+          total_models?: number
+          total_polynomials?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          errors_json?: Json
+          finished_at?: string | null
+          id?: string
+          source_zip?: string | null
+          started_at?: string
+          status?: string
+          summary_json?: Json
+          total_cycles?: number
+          total_fans?: number
+          total_models?: number
+          total_polynomials?: number
         }
         Relationships: []
       }
