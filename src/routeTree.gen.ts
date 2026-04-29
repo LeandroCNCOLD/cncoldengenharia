@@ -16,7 +16,9 @@ import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppAdminUnilabImportRouteImport } from './routes/_app/admin_.unilab-import'
 import { Route as AppColdproEquipamentosIndexRouteImport } from './routes/_app/coldpro/equipamentos/index'
+import { Route as AppAdminDatabaseIndexRouteImport } from './routes/_app/admin_.database.index'
 import { Route as AppColdproEquipamentosIdRouteImport } from './routes/_app/coldpro/equipamentos/$id'
+import { Route as AppAdminDatabaseModeRouteImport } from './routes/_app/admin_.database.$mode'
 import { Route as AppColdproEquipamentosIdCoilSimulatorRouteImport } from './routes/_app/coldpro/equipamentos/$id/coil-simulator'
 
 const AuthRoute = AuthRouteImport.update({
@@ -54,12 +56,22 @@ const AppColdproEquipamentosIndexRoute =
     path: '/coldpro/equipamentos/',
     getParentRoute: () => AppRoute,
   } as any)
+const AppAdminDatabaseIndexRoute = AppAdminDatabaseIndexRouteImport.update({
+  id: '/admin_/database/',
+  path: '/admin/database/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppColdproEquipamentosIdRoute =
   AppColdproEquipamentosIdRouteImport.update({
     id: '/coldpro/equipamentos/$id',
     path: '/coldpro/equipamentos/$id',
     getParentRoute: () => AppRoute,
   } as any)
+const AppAdminDatabaseModeRoute = AppAdminDatabaseModeRouteImport.update({
+  id: '/admin_/database/$mode',
+  path: '/admin/database/$mode',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppColdproEquipamentosIdCoilSimulatorRoute =
   AppColdproEquipamentosIdCoilSimulatorRouteImport.update({
     id: '/coil-simulator',
@@ -73,7 +85,9 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AppAdminRoute
   '/dashboard': typeof AppDashboardRoute
   '/admin/unilab-import': typeof AppAdminUnilabImportRoute
+  '/admin/database/$mode': typeof AppAdminDatabaseModeRoute
   '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRouteWithChildren
+  '/admin/database/': typeof AppAdminDatabaseIndexRoute
   '/coldpro/equipamentos/': typeof AppColdproEquipamentosIndexRoute
   '/coldpro/equipamentos/$id/coil-simulator': typeof AppColdproEquipamentosIdCoilSimulatorRoute
 }
@@ -83,7 +97,9 @@ export interface FileRoutesByTo {
   '/admin': typeof AppAdminRoute
   '/dashboard': typeof AppDashboardRoute
   '/admin/unilab-import': typeof AppAdminUnilabImportRoute
+  '/admin/database/$mode': typeof AppAdminDatabaseModeRoute
   '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRouteWithChildren
+  '/admin/database': typeof AppAdminDatabaseIndexRoute
   '/coldpro/equipamentos': typeof AppColdproEquipamentosIndexRoute
   '/coldpro/equipamentos/$id/coil-simulator': typeof AppColdproEquipamentosIdCoilSimulatorRoute
 }
@@ -95,7 +111,9 @@ export interface FileRoutesById {
   '/_app/admin': typeof AppAdminRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/admin_/unilab-import': typeof AppAdminUnilabImportRoute
+  '/_app/admin_/database/$mode': typeof AppAdminDatabaseModeRoute
   '/_app/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRouteWithChildren
+  '/_app/admin_/database/': typeof AppAdminDatabaseIndexRoute
   '/_app/coldpro/equipamentos/': typeof AppColdproEquipamentosIndexRoute
   '/_app/coldpro/equipamentos/$id/coil-simulator': typeof AppColdproEquipamentosIdCoilSimulatorRoute
 }
@@ -107,7 +125,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/admin/unilab-import'
+    | '/admin/database/$mode'
     | '/coldpro/equipamentos/$id'
+    | '/admin/database/'
     | '/coldpro/equipamentos/'
     | '/coldpro/equipamentos/$id/coil-simulator'
   fileRoutesByTo: FileRoutesByTo
@@ -117,7 +137,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/admin/unilab-import'
+    | '/admin/database/$mode'
     | '/coldpro/equipamentos/$id'
+    | '/admin/database'
     | '/coldpro/equipamentos'
     | '/coldpro/equipamentos/$id/coil-simulator'
   id:
@@ -128,7 +150,9 @@ export interface FileRouteTypes {
     | '/_app/admin'
     | '/_app/dashboard'
     | '/_app/admin_/unilab-import'
+    | '/_app/admin_/database/$mode'
     | '/_app/coldpro/equipamentos/$id'
+    | '/_app/admin_/database/'
     | '/_app/coldpro/equipamentos/'
     | '/_app/coldpro/equipamentos/$id/coil-simulator'
   fileRoutesById: FileRoutesById
@@ -190,11 +214,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproEquipamentosIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/admin_/database/': {
+      id: '/_app/admin_/database/'
+      path: '/admin/database'
+      fullPath: '/admin/database/'
+      preLoaderRoute: typeof AppAdminDatabaseIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/coldpro/equipamentos/$id': {
       id: '/_app/coldpro/equipamentos/$id'
       path: '/coldpro/equipamentos/$id'
       fullPath: '/coldpro/equipamentos/$id'
       preLoaderRoute: typeof AppColdproEquipamentosIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/admin_/database/$mode': {
+      id: '/_app/admin_/database/$mode'
+      path: '/admin/database/$mode'
+      fullPath: '/admin/database/$mode'
+      preLoaderRoute: typeof AppAdminDatabaseModeRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/coldpro/equipamentos/$id/coil-simulator': {
@@ -226,7 +264,9 @@ interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppAdminUnilabImportRoute: typeof AppAdminUnilabImportRoute
+  AppAdminDatabaseModeRoute: typeof AppAdminDatabaseModeRoute
   AppColdproEquipamentosIdRoute: typeof AppColdproEquipamentosIdRouteWithChildren
+  AppAdminDatabaseIndexRoute: typeof AppAdminDatabaseIndexRoute
   AppColdproEquipamentosIndexRoute: typeof AppColdproEquipamentosIndexRoute
 }
 
@@ -234,7 +274,9 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppAdminUnilabImportRoute: AppAdminUnilabImportRoute,
+  AppAdminDatabaseModeRoute: AppAdminDatabaseModeRoute,
   AppColdproEquipamentosIdRoute: AppColdproEquipamentosIdRouteWithChildren,
+  AppAdminDatabaseIndexRoute: AppAdminDatabaseIndexRoute,
   AppColdproEquipamentosIndexRoute: AppColdproEquipamentosIndexRoute,
 }
 
