@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/lib/auth";
 import { UnilabImportForm } from "@/components/coldpro/unilab-import-form";
 import { CalibrationPanel } from "@/components/coldpro/calibration-panel";
+import { PerformanceMapPanel } from "@/components/coldpro/performance-map-panel";
 import {
   buildDatasheetFromCoilRow,
   buildInputFromCoilRow,
@@ -73,7 +74,7 @@ export function EvaporatorTab({ equipmentProjectId }: Props) {
                 return r as unknown as Record<string, unknown>;
               }}
             />
-            <EvaporatorCalibrationSlot componentId={c.id} />
+            <EvaporatorCalibrationSlot componentId={c.id} equipmentProjectId={equipmentProjectId} />
           </div>
         ))
       )}
@@ -81,7 +82,7 @@ export function EvaporatorTab({ equipmentProjectId }: Props) {
   );
 }
 
-function EvaporatorCalibrationSlot({ componentId }: { componentId: string }) {
+function EvaporatorCalibrationSlot({ componentId, equipmentProjectId }: { componentId: string; equipmentProjectId: string }) {
   const { data: row } = useQuery({
     queryKey: ["evap-model", componentId],
     queryFn: async () => (await getEvaporatorCoilModel(componentId)) as Record<string, unknown> | null,
@@ -89,11 +90,19 @@ function EvaporatorCalibrationSlot({ componentId }: { componentId: string }) {
   const datasheet = buildDatasheetFromCoilRow(row, "evaporator");
   const input = buildInputFromCoilRow(row, "evaporator");
   return (
-    <CalibrationPanel
-      componentItemId={componentId}
-      coilType="evaporator"
-      datasheet={datasheet}
-      simulationInput={input}
-    />
+    <>
+      <CalibrationPanel
+        componentItemId={componentId}
+        coilType="evaporator"
+        datasheet={datasheet}
+        simulationInput={input}
+      />
+      <PerformanceMapPanel
+        componentItemId={componentId}
+        equipmentProjectId={equipmentProjectId}
+        coilType="evaporator"
+        simulationInput={input}
+      />
+    </>
   );
 }
