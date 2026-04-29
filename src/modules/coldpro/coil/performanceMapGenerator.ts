@@ -140,6 +140,10 @@ export interface GeneratePerformanceMapParams {
   calibrationId?: string | null;
   /** Assinatura do modelo associada à calibração persistida. */
   calibrationSignature?: string | null;
+  /** Calibração híbrida persistida (com modelSignature). Necessário para engine='hybrid' aplicar. */
+  hybridCalibration?: CoilCalibration | null;
+  /** Se true (default), bloqueia o mapa quando o ponto nominal não reproduz datasheet. */
+  blockOnNominalMismatch?: boolean;
 }
 
 // --- helpers ---------------------------------------------------------------
