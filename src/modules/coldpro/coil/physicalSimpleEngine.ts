@@ -70,6 +70,12 @@ export interface PhysicalSimpleBreakdown {
   airMassFlowKgs: number | null;
   airDpRawPa: number | null;
   refDpRawKpa: number | null;
+  // Rastreabilidade dos fatores aplicados
+  heatTransferFactor: number;
+  capacityCorrectionFactor: number;
+  airDpCorrectionFactor: number;
+  refDpCorrectionFactor: number;
+  uaCorrectionFactor: number;
 }
 
 export interface PhysicalSimpleResult extends CoilSimulatorResult {
