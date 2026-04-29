@@ -230,9 +230,15 @@ function runSim(
   input: CoilSimulatorInput,
   engine: PerformanceEngine,
   cal: CalibrationFactors,
+  unilabGeometryFactor?: UnilabGeometryFactor | null,
+  nominalFaceVelocityMs?: number,
 ): CoilSimulatorResult {
   if (engine === "physical_simple") {
-    return simulatePhysicalSimple(input, { calibration: cal });
+    return simulatePhysicalSimple(input, {
+      calibration: cal,
+      unilabGeometryFactor,
+      nominalFaceVelocityMs,
+    });
   }
   // empirical: aplica calibração via post (passa direto no options)
   if (input.coilType === "evaporator") {
