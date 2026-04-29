@@ -38,7 +38,7 @@ export function ProcessUnmappedButton({ batchId, variant = "default", size = "sm
       // Loop até que uma rodada não processe nada
       for (let i = 0; i < 80; i++) {
         const res = await processUnmappedRawRecords({
-          data: { batchId: batchId ?? null, pageSize: 500, maxPages: 4 },
+          data: { batchId: batchId ?? null, pageSize: 150, maxPages: 3 },
         });
         totals.iterations++;
         totals.processed += res.processed;

@@ -257,7 +257,7 @@ export const processUnmappedRawRecords = createServerFn({ method: "POST" })
   .inputValidator((data) => InputSchema.parse(data ?? {}))
   .handler(async ({ data }) => {
     const t0 = Date.now();
-    const pageSize = data.pageSize ?? 500;
+    const pageSize = Math.min(data.pageSize ?? 150, 200);
     const maxPages = data.maxPages ?? 50;
 
     const summary = {
@@ -276,7 +276,7 @@ export const processUnmappedRawRecords = createServerFn({ method: "POST" })
         .from("technical_raw_records")
         .select("id, batch_id, source_file, source_table, raw_json, detected_entity_type, detected_manufacturer, status")
         .eq("status", "raw_imported")
-        .order("created_at", { ascending: true })
+        .order("id", { ascending: true })
         .limit(pageSize);
       if (data.batchId) q = q.eq("batch_id", data.batchId);
 
