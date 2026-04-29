@@ -81,12 +81,20 @@ export function parseNumber(s: string): number | null {
   let raw = m[0];
   const lastComma = raw.lastIndexOf(",");
   const lastDot = raw.lastIndexOf(".");
-  if (lastComma > lastDot) {
-    // vírgula é decimal
-    raw = raw.replace(/\./g, "").replace(",", ".");
-  } else {
-    // ponto decimal (ou ausente); remove vírgulas de milhar
-    raw = raw.replace(/,/g, "");
+  if (lastComma >= 0 && lastDot >= 0) {
+    // ambos presentes: o último é decimal
+    if (lastComma > lastDot) raw = raw.replace(/\./g, "").replace(",", ".");
+    else raw = raw.replace(/,/g, "");
+  } else if (lastComma >= 0) {
+    // só vírgula: se for único e seguido de exatamente 3 dígitos, é milhar; senão decimal
+    const parts = raw.split(",");
+    if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) raw = raw.replace(/,/g, "");
+    else raw = raw.replace(",", ".");
+  } else if (lastDot >= 0) {
+    // só ponto: idem heurística
+    const parts = raw.split(".");
+    if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) raw = raw.replace(/\./g, "");
+    // senão mantém como decimal
   }
   const n = Number(raw);
   return Number.isFinite(n) ? n : null;
