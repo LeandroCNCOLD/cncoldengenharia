@@ -24,9 +24,12 @@ import {
 import { simulatePhysicalSimple } from "./physicalSimpleEngine";
 import { simulateDxEvaporator } from "./dxEvaporatorSimulator";
 import { simulateDxCondenser } from "./dxCondenserSimulator";
+import { simulateHybridCoil } from "./engines/hybridCoilEngine";
+import type { CoilCalibration } from "./engines/types";
+import { buildHybridCalcInput } from "./hybridDebugAdapter";
 import type { UnilabGeometryFactor } from "../unilabData/types";
 
-export type PerformanceEngine = "physical_simple" | "empirical";
+export type PerformanceEngine = "physical_simple" | "empirical" | "hybrid";
 export type PointStatus = "valid" | "warning" | "invalid";
 
 export interface RangeSpec {
