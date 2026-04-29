@@ -6,3 +6,4 @@ export {
   getFluidProperties,
   getUnilabBundle,
 } from './unilabRepository';
+export { simulateHybridCoilWithUnilab } from './simulateHybridCoilWithUnilab';
