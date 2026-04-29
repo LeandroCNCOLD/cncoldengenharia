@@ -193,6 +193,12 @@ export function simulatePhysicalSimple(
       airMassFlowKgs,
       airDpRawPa,
       refDpRawKpa,
+      // Rastreabilidade: alias semântico de capacityCorrectionFactor
+      heatTransferFactor: cal.capacityCorrectionFactor,
+      capacityCorrectionFactor: cal.capacityCorrectionFactor,
+      airDpCorrectionFactor: cal.airDpCorrectionFactor,
+      refDpCorrectionFactor: cal.refDpCorrectionFactor,
+      uaCorrectionFactor: cal.uaCorrectionFactor,
     },
   };
 }
