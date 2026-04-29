@@ -140,13 +140,25 @@ function PendingReviewBanner() {
 function InitializeLibraryButton() {
   const qc = useQueryClient();
   const [running, setRunning] = useState(false);
+  const [progress, setProgress] = useState<string>("");
   const handle = async () => {
     setRunning(true);
+    setProgress("");
+    const totals: Record<string, number> = {};
     try {
-      const res = await migrateExistingDataToUniversalLibrary();
-      const s = res.summary ?? {};
-      const parts = Object.entries(s)
-        .filter(([, v]) => (v as number) > 0)
+      // Roda em chunks: cada chamada migra até MAX_PER_RUN registros.
+      // Re-chama até done=true (até ~50 iterações como salvaguarda).
+      for (let i = 0; i < 50; i++) {
+        const res = await migrateExistingDataToUniversalLibrary();
+        for (const [k, v] of Object.entries(res.summary ?? {})) {
+          totals[k] = (totals[k] ?? 0) + (v as number);
+        }
+        const sum = Object.values(totals).reduce((a, b) => a + b, 0);
+        setProgress(`migrados: ${sum}`);
+        if (res.done) break;
+      }
+      const parts = Object.entries(totals)
+        .filter(([, v]) => v > 0)
         .map(([k, v]) => `${k}: ${v}`);
       toast.success(
         parts.length
@@ -160,6 +172,7 @@ function InitializeLibraryButton() {
       );
     } finally {
       setRunning(false);
+      setProgress("");
     }
   };
   return (
@@ -169,7 +182,9 @@ function InitializeLibraryButton() {
       ) : (
         <Database className="mr-2 h-4 w-4" />
       )}
-      Inicializar Biblioteca Técnica
+      {running && progress
+        ? `Inicializando… ${progress}`
+        : "Inicializar Biblioteca Técnica"}
     </Button>
   );
 }
