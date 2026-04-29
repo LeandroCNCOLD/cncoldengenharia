@@ -260,7 +260,34 @@ export function generateCoilPerformanceMap(
   for (const refT of refAxis) {
     for (const airT of airAxis) {
       for (const ff of flowAxis) {
-        const airflowM3h = baseAirflow * ff;
+        const airflowM3h = baseAirflow != null ? baseAirflow * ff : 0;
+
+        // Validação: vazão nominal ausente ou airflow_m3h < 1000 → ponto invalid
+        if (baseAirflow == null || airflowM3h < 1000) {
+          const reason =
+            baseAirflow == null
+              ? "Vazão nominal ausente no datasheet (nominal_airflow_m3h)."
+              : `Vazão calculada muito baixa (${airflowM3h.toFixed(0)} m³/h < 1000).`;
+          points.push({
+            refTempC: refT,
+            airInletTempC: airT,
+            airflowFactor: ff,
+            airflowM3h,
+            capacityW: 0,
+            capacityKcalh: 0,
+            airOutletTempC: null,
+            airPressureDropPa: null,
+            refrigerantPressureDropKpa: null,
+            uWm2k: null,
+            faceVelocityMs: null,
+            dtRealK: 0,
+            status: "invalid",
+            confidenceScore: 0.3,
+            distanceFromNominal: 999,
+            warnings: [reason],
+          });
+          continue;
+        }
 
         const stepInput: CoilSimulatorInput = {
           ...baseInput,
