@@ -12,6 +12,7 @@ import {
   NEUTRAL_CALIBRATION,
   CALIBRATION_TARGETS,
   clampFactor,
+  clampPressureDropFactor,
   confidenceScoreFor,
   type CalibrationFactors,
   type CalibrationStatus,
@@ -100,24 +101,24 @@ export function calibrateAgainstReference(
   const factors: CalibrationFactors = {
     capacityCorrectionFactor: clampFactor(rawCap),
     uaCorrectionFactor: 1,
-    airDpCorrectionFactor: clampFactor(rawAir),
-    refDpCorrectionFactor: clampFactor(rawRef),
-    airPressureDropFactor: clampFactor(rawAir),
-    refrigerantPressureDropFactor: clampFactor(rawRef),
+    airDpCorrectionFactor: clampPressureDropFactor(rawAir),
+    refDpCorrectionFactor: clampPressureDropFactor(rawRef),
+    airPressureDropFactor: clampPressureDropFactor(rawAir),
+    refrigerantPressureDropFactor: clampPressureDropFactor(rawRef),
     heatTransferFactor: 1,
   };
   const heatTransferFactor = factors.capacityCorrectionFactor;
 
   if (Math.abs(rawCap - factors.capacityCorrectionFactor) > 1e-6) {
     notes.push(
-      `Fator de capacidade clampado para ${factors.capacityCorrectionFactor.toFixed(2)} (sugerido ${rawCap.toFixed(2)}).`,
+      `Fator de capacidade limitado para ${factors.capacityCorrectionFactor.toFixed(2)} (sugerido ${rawCap.toFixed(2)}).`,
     );
   }
   if (reference.airPressureDropPa && Math.abs(rawAir - factors.airDpCorrectionFactor) > 1e-6) {
-    notes.push(`Fator ΔP ar clampado para ${factors.airDpCorrectionFactor.toFixed(2)}.`);
+    notes.push(`Fator ΔP ar limitado para ${factors.airDpCorrectionFactor.toFixed(2)}.`);
   }
   if (reference.refPressureDropKpa && Math.abs(rawRef - factors.refDpCorrectionFactor) > 1e-6) {
-    notes.push(`Fator ΔP refrigerante clampado para ${factors.refDpCorrectionFactor.toFixed(2)}.`);
+    notes.push(`Fator ΔP refrigerante limitado para ${factors.refDpCorrectionFactor.toFixed(2)}.`);
   }
 
   const calibratedResult = simulatePhysicalSimple(input, { calibration: factors });
