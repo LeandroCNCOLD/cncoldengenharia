@@ -112,8 +112,15 @@ export const getActiveCalibrationsForComponent = listCoilCalibrations;
 
 /** Calibração ativa = última criada. */
 export async function getActiveCalibrationForComponent(componentItemId: string) {
-  const list = await listCoilCalibrations(componentItemId);
-  return list?.[0] ?? null;
+  const { data, error } = await supabase
+    .from("coil_calibrations")
+    .select("*")
+    .eq("component_item_id", componentItemId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
 }
 
 export const getLatestCalibration = getActiveCalibrationForComponent;
