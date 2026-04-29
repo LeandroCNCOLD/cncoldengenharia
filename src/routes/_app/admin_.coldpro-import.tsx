@@ -1,7 +1,8 @@
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Upload, Loader2, FileArchive, FileSpreadsheet, FileText, ArrowLeft } from "lucide-react";
+import { Upload, Loader2, FileArchive, FileSpreadsheet, FileText, ArrowLeft, Database } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { importColdproPackage } from "@/server/coldproImport.functions";
 
 export const Route = createFileRoute("/_app/admin_/coldpro-import")({
   component: ColdproImportPage,
