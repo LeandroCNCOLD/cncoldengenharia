@@ -76,8 +76,12 @@ function ColdproImportPage() {
         created_by: user?.id ?? null,
         summary_json: { uploads: refs } as unknown as Record<string, unknown>,
       };
-      const { data: batch, error: batchErr } = await supabase
-        .from("unilab_import_batches_v2")
+      const { data: batch, error: batchErr } = await (supabase
+        .from("unilab_import_batches_v2") as unknown as {
+          insert: (row: typeof insertRow) => {
+            select: (cols: string) => { single: () => Promise<{ data: { id: string } | null; error: { message: string } | null }> };
+          };
+        })
         .insert(insertRow)
         .select("id")
         .single();
