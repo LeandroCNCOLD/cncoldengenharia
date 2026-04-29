@@ -326,6 +326,7 @@ export function generateCoilPerformanceMap(
       componentItemId: params.componentItemId,
       calibrationId: params.calibrationId,
       nominalCapacityW: datasheetCapW,
+      calibrationSignature: params.calibrationSignature ?? null,
     }).capacityW;
   } catch {
     /* validation reports 0 */
