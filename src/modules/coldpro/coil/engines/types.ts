@@ -35,10 +35,14 @@ export interface UnilabFactors {
   securityFactor?: number;
 }
 
+export type UnilabSource = 'unilab' | 'partial' | 'fallback';
+
 export interface CoilCalculationInput {
   mode: CoilMode;
   geometry: GeometryInput;
   factors?: UnilabFactors;
+  /** Origem dos dados Unilab (informativo — apenas debug/telemetria). */
+  unilabSource?: UnilabSource;
   airInletTempC: number;
   airOutletTempC?: number;
   refTempC: number;
@@ -84,5 +88,5 @@ export interface CoilCalculationResult {
   isEstimated: boolean;
   modelSignature: string;
   warnings: string[];
-  debug: Record<string, unknown>;
+  debug: Record<string, any>;
 }

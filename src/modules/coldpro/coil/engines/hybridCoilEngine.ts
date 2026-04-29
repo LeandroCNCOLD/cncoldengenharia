@@ -93,9 +93,12 @@ export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculation
   const airDp = airDpBase == null ? null : airDpBase * (calibration?.airPressureDropFactor ?? 1);
   const refDp = refDpBase == null ? null : refDpBase * (calibration?.refrigerantPressureDropFactor ?? 1);
 
-  const isEstimated = !input.factors;
-  if (isEstimated) {
-    warnings.push('Sem fatores de geometria Unilab; resultado continua estimado.');
+  const source = input.unilabSource ?? (input.factors ? 'partial' : 'fallback');
+  const isEstimated = source !== 'unilab';
+  if (source === 'fallback') {
+    warnings.push('Sem geometria/fatores Unilab — cálculo usa fallback genérico.');
+  } else if (source === 'partial') {
+    warnings.push('Fatores Unilab incompletos ou neutros — resultado parcialmente estimado.');
   }
 
   // Calibração só pode ser ajuste fino. >1.3 ou <0.7 → revisão estrutural.
@@ -125,6 +128,21 @@ export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculation
     isEstimated,
     modelSignature: signature,
     warnings,
-    debug: { air, ref, area, rWall, rTotal, qBase, qFinal, securityFactor, capFactor },
+    debug: {
+      geometryCode: input.geometry.code,
+      finType: input.geometry.finType,
+      tubeType: input.geometry.tubeType,
+      source,
+      factorsApplied: input.factors ?? null,
+      air,
+      ref,
+      area,
+      rWall,
+      rTotal,
+      qBase,
+      qFinal,
+      securityFactor,
+      capFactor,
+    },
   };
 }
