@@ -74,7 +74,7 @@ export function CondenserTab({ equipmentProjectId }: Props) {
                 return r as unknown as Record<string, unknown>;
               }}
             />
-            <CondenserCalibrationSlot componentId={c.id} />
+            <CondenserCalibrationSlot componentId={c.id} equipmentProjectId={equipmentProjectId} />
           </div>
         ))
       )}
