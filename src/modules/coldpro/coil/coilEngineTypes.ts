@@ -74,8 +74,10 @@ export const CALIBRATION_TARGETS = {
 
 export type CalibrationStatus = "calibrated" | "needs_review" | "draft";
 
-export const CLAMP_FACTOR_MIN = 0.3;
-export const CLAMP_FACTOR_MAX = 3.0;
+export const CLAMP_FACTOR_MIN = 0.05;
+export const CLAMP_FACTOR_MAX = 20.0;
+export const CLAMP_DP_FACTOR_MIN = 0.1;
+export const CLAMP_DP_FACTOR_MAX = 10.0;
 
 export function confidenceScoreFor(status: CalibrationStatus, numPoints = 1): number {
   if (status === "draft") return 0.6;
@@ -88,4 +90,9 @@ export function confidenceScoreFor(status: CalibrationStatus, numPoints = 1): nu
 export function clampFactor(v: number): number {
   if (!Number.isFinite(v) || v <= 0) return 1;
   return Math.min(CLAMP_FACTOR_MAX, Math.max(CLAMP_FACTOR_MIN, v));
+}
+
+export function clampPressureDropFactor(v: number): number {
+  if (!Number.isFinite(v) || v <= 0) return 1;
+  return Math.min(CLAMP_DP_FACTOR_MAX, Math.max(CLAMP_DP_FACTOR_MIN, v));
 }
