@@ -276,7 +276,17 @@ export function generateCoilPerformanceMap(
     ),
   };
 
-  // === Validação ponto nominal ===
+  // Velocidade frontal nominal (para slope dos fatores Unilab)
+  const unilabFactor = params.unilabGeometryFactor ?? null;
+  const nominalFaceVelocityMs = (() => {
+    const g = baseInput.geometry;
+    if (!g.coilLengthMm || !g.tubesPerRow || !g.tubeSpacingMm || baseAirflow == null) return undefined;
+    const heightM = (g.tubesPerRow * g.tubeSpacingMm) / 1000;
+    const lengthM = g.coilLengthMm / 1000;
+    const faceArea = heightM * lengthM;
+    if (faceArea <= 0) return undefined;
+    return baseAirflow / 3600 / faceArea;
+  })();
   const datasheetCapW = (() => {
     const n = baseInput.nominal as { capacityW?: number | null } | undefined;
     const v = n?.capacityW;
