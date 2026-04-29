@@ -240,11 +240,6 @@ function ColdproImportPage() {
                 </span>
               </div>
             ))}
-            <p className="pt-2 text-xs text-muted-foreground">
-              Próxima etapa (8b): leitura do índice, descompactação do ZIP, parsing do XLSX e mapeamento
-              para as tabelas técnicas (geometrias, fatores, refrigerantes, polinômios, compressores,
-              ventiladores, correlações).
-            </p>
             <div className="flex items-center justify-between gap-2 pt-2">
               <p className="text-xs text-muted-foreground">
                 Importa CSVs do ZIP e abas do XLSX para <code>unilab_source_files</code> e{" "}
