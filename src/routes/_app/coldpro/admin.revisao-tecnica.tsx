@@ -205,12 +205,56 @@ function TechnicalReviewPage() {
         </Card>
       )}
 
+      {checkedIds.size > 0 && (
+        <div className="flex flex-wrap items-center gap-3 rounded-md border bg-accent/40 px-4 py-2 text-sm">
+          <span className="font-medium">{checkedIds.size} selecionado(s)</span>
+          <Button
+            size="sm"
+            onClick={handleBulkApprove}
+            disabled={bulkBusy}
+          >
+            {bulkBusy ? (
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+            ) : (
+              <CheckCircle2 className="mr-1 h-4 w-4" />
+            )}
+            Aprovar selecionados
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={handleBulkReject}
+            disabled={bulkBusy}
+          >
+            <XCircle className="mr-1 h-4 w-4" /> Rejeitar selecionados
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setCheckedIds(new Set())}
+            disabled={bulkBusy}
+          >
+            Limpar seleção
+          </Button>
+          <span className="text-xs text-muted-foreground">
+            (Rejeição usa o motivo informado no painel à direita)
+          </span>
+        </div>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
         <Card>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allChecked ? true : someChecked ? "indeterminate" : false}
+                      onCheckedChange={(v) => toggleAll(v === true)}
+                      aria-label="Selecionar todos"
+                    />
+                  </TableHead>
                   <TableHead>Entidade</TableHead>
                   <TableHead>Fabricante</TableHead>
                   <TableHead>Modelo</TableHead>
@@ -230,6 +274,16 @@ function TechnicalReviewPage() {
                           : "cursor-pointer hover:bg-accent/30"
                       }
                     >
+                      <TableCell
+                        className="w-10"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Checkbox
+                          checked={checkedIds.has(m.id)}
+                          onCheckedChange={(v) => toggleOne(m.id, v === true)}
+                          aria-label={`Selecionar ${m.model ?? m.id}`}
+                        />
+                      </TableCell>
                       <TableCell className="text-xs">{entity}</TableCell>
                       <TableCell className="text-xs">{m.manufacturer ?? "—"}</TableCell>
                       <TableCell className="text-xs">{m.model ?? "—"}</TableCell>
