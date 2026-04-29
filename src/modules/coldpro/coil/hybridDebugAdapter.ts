@@ -21,6 +21,10 @@ function mapFinType(v?: string): FinType {
   return "unknown";
 }
 
+export function buildHybridGeometry(input: CoilSimulatorInput): GeometryInput {
+  return buildGeometry(input);
+}
+
 function buildGeometry(input: CoilSimulatorInput): GeometryInput {
   const g = input.geometry;
   const tubesPerRow = g.tubesPerRow ?? 12;
