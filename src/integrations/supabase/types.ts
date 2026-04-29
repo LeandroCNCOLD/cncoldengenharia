@@ -1758,6 +1758,100 @@ export type Database = {
           },
         ]
       }
+      unilab_source_files: {
+        Row: {
+          column_count: number
+          content_hash: string | null
+          created_at: string
+          file_kind: string
+          headers_json: Json
+          id: string
+          import_batch_id: string | null
+          notes: string | null
+          row_count: number
+          sheet_name: string | null
+          source_database: string
+          source_path: string
+          source_table: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          column_count?: number
+          content_hash?: string | null
+          created_at?: string
+          file_kind?: string
+          headers_json?: Json
+          id?: string
+          import_batch_id?: string | null
+          notes?: string | null
+          row_count?: number
+          sheet_name?: string | null
+          source_database: string
+          source_path: string
+          source_table: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          column_count?: number
+          content_hash?: string | null
+          created_at?: string
+          file_kind?: string
+          headers_json?: Json
+          id?: string
+          import_batch_id?: string | null
+          notes?: string | null
+          row_count?: number
+          sheet_name?: string | null
+          source_database?: string
+          source_path?: string
+          source_table?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unilab_source_files_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "unilab_import_batches_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      unilab_source_rows: {
+        Row: {
+          created_at: string
+          id: string
+          raw_json: Json
+          row_index: number
+          source_file_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          raw_json?: Json
+          row_index: number
+          source_file_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          raw_json?: Json
+          row_index?: number
+          source_file_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unilab_source_rows_source_file_id_fkey"
+            columns: ["source_file_id"]
+            isOneToOne: false
+            referencedRelation: "unilab_source_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
