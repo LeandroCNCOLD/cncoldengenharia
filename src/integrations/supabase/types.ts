@@ -188,6 +188,63 @@ export type Database = {
         }
         Relationships: []
       }
+      coil_performance_maps: {
+        Row: {
+          calibration_id: string | null
+          coil_type: string
+          component_item_id: string
+          confidence_score: number
+          created_at: string
+          created_by: string | null
+          engine: string
+          equipment_project_id: string | null
+          id: string
+          input_grid_json: Json
+          is_estimated: boolean
+          map_name: string | null
+          notes: string | null
+          results_json: Json
+          status: string
+          summary_json: Json
+        }
+        Insert: {
+          calibration_id?: string | null
+          coil_type: string
+          component_item_id: string
+          confidence_score?: number
+          created_at?: string
+          created_by?: string | null
+          engine?: string
+          equipment_project_id?: string | null
+          id?: string
+          input_grid_json?: Json
+          is_estimated?: boolean
+          map_name?: string | null
+          notes?: string | null
+          results_json?: Json
+          status?: string
+          summary_json?: Json
+        }
+        Update: {
+          calibration_id?: string | null
+          coil_type?: string
+          component_item_id?: string
+          confidence_score?: number
+          created_at?: string
+          created_by?: string | null
+          engine?: string
+          equipment_project_id?: string | null
+          id?: string
+          input_grid_json?: Json
+          is_estimated?: boolean
+          map_name?: string | null
+          notes?: string | null
+          results_json?: Json
+          status?: string
+          summary_json?: Json
+        }
+        Relationships: []
+      }
       coil_simulations: {
         Row: {
           coil_type: string | null
