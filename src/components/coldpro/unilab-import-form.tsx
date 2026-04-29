@@ -268,7 +268,7 @@ export function UnilabImportForm({
         </div>
 
         {/* Validação */}
-        {report && (
+        {report && (report.ok !== undefined || (report.issues?.length ?? 0) > 0) && (
           <div
             className={`rounded-md border p-3 text-xs ${
               report.ok
