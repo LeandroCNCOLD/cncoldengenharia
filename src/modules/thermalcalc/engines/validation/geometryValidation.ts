@@ -38,12 +38,31 @@ export function validateCircuits(input: CoilGeometryInput): ValidationWarning[] 
       });
     }
 
+    if (input.tube.circuits < 1) {
+      warnings.push({
+        code: "INVALID_CIRCUIT_COUNT",
+        severity: "error",
+        path: "tube.circuits",
+        message: "Número de circuitos deve ser pelo menos 1.",
+      });
+    }
+
     if (input.tube.circuits > 0 && totalTubes % input.tube.circuits !== 0) {
       warnings.push({
         code: "CIRCUITS_NOT_DIVISIBLE",
         severity: "warning",
         path: "tube.circuits",
         message: "Total de tubos ativos não é divisível pelo número de circuitos.",
+      });
+    }
+
+    const tubesPerCircuit = totalTubes / input.tube.circuits;
+    if (Number.isFinite(tubesPerCircuit) && tubesPerCircuit < 2) {
+      warnings.push({
+        code: "TOO_FEW_TUBES_PER_CIRCUIT",
+        severity: "warning",
+        path: "tube.circuits",
+        message: "Circuitos com menos de 2 tubos ativos podem gerar distribuição inválida.",
       });
     }
   }
@@ -90,6 +109,21 @@ export function validateGeometry(input: CoilGeometryInput): ValidationWarning[] 
 
   if (
     input.tube.innerDiameterMm != null &&
+    input.tube.wallThicknessMm != null &&
+    Math.abs(
+      input.tube.innerDiameterMm - (input.tube.outerDiameterMm - 2 * input.tube.wallThicknessMm),
+    ) > 0.2
+  ) {
+    warnings.push({
+      code: "INNER_DIAMETER_WALL_MISMATCH",
+      severity: "warning",
+      path: "tube.innerDiameterMm",
+      message: "Diâmetro interno informado diverge do diâmetro externo menos duas espessuras.",
+    });
+  }
+
+  if (
+    input.tube.innerDiameterMm != null &&
     input.tube.innerDiameterMm >= input.tube.outerDiameterMm
   ) {
     warnings.push({
@@ -130,12 +164,48 @@ export function validateGeometry(input: CoilGeometryInput): ValidationWarning[] 
     });
   }
 
+  if (input.tube.tubePitchMm != null && input.tube.tubePitchMm <= input.tube.outerDiameterMm) {
+    warnings.push({
+      code: "TUBE_PITCH_TOO_SMALL",
+      severity: "error",
+      path: "tube.tubePitchMm",
+      message: "Passo entre tubos deve ser maior que o diâmetro externo.",
+    });
+  }
+
+  if (input.tube.rowPitchMm != null && input.tube.rowPitchMm <= input.tube.outerDiameterMm) {
+    warnings.push({
+      code: "ROW_PITCH_TOO_SMALL",
+      severity: "error",
+      path: "tube.rowPitchMm",
+      message: "Passo entre fileiras deve ser maior que o diâmetro externo.",
+    });
+  }
+
   if (input.fin.finThicknessMm != null && input.fin.finThicknessMm >= input.fin.finPitchMm) {
     warnings.push({
       code: "FIN_THICKNESS_EXCEEDS_PITCH",
       severity: "warning",
       path: "fin.finThicknessMm",
       message: "Espessura da aleta está maior ou igual ao espaçamento entre aletas.",
+    });
+  }
+
+  if (input.fin.finPitchMm < 0.8 || input.fin.finPitchMm > 12) {
+    warnings.push({
+      code: "FIN_PITCH_OUT_OF_RANGE",
+      severity: "warning",
+      path: "fin.finPitchMm",
+      message: "Espaçamento entre aletas fora da faixa industrial típica para aletados compactos.",
+    });
+  }
+
+  if (input.tube.usefulLengthMm > 6000) {
+    warnings.push({
+      code: "COIL_LENGTH_OUT_OF_RANGE",
+      severity: "warning",
+      path: "tube.usefulLengthMm",
+      message: "Comprimento útil muito alto; validar flecha, suporte e perda de carga.",
     });
   }
 

@@ -1,6 +1,7 @@
 import type { CoilGeometryInput, CoilGeometryResult } from "../../types";
 import { mmToM } from "../units";
 import { validateGeometry } from "../validation/geometryValidation";
+import { calculateEffectiveArea } from "./effectiveArea";
 
 const PI = Math.PI;
 
@@ -75,6 +76,7 @@ export function calculateApproximateExternalAreaM2(input: CoilGeometryInput): {
 
 export function calculateCoilGeometry(input: CoilGeometryInput): CoilGeometryResult {
   const warnings = validateGeometry(input);
+  const outerDiameterM = mmToM(input.tube.outerDiameterMm);
   const innerDiameterM = calculateInnerDiameterM(
     input.tube.outerDiameterMm,
     input.tube.wallThicknessMm,
@@ -85,20 +87,41 @@ export function calculateCoilGeometry(input: CoilGeometryInput): CoilGeometryRes
   const internalAreaM2 = calculateInternalAreaM2(innerDiameterM, totalTubeLengthM);
   const internalVolumeM3 = calculateInternalVolumeM3(innerDiameterM, totalTubeLengthM);
   const external = calculateApproximateExternalAreaM2(input);
+  const effectiveArea = calculateEffectiveArea(input);
 
   return {
     innerDiameterM,
+    outerDiameterM,
     totalTubes,
     totalTubeLengthM,
     internalAreaM2,
     externalTubeAreaM2: external.externalTubeAreaM2,
     externalFinAreaM2: external.externalFinAreaM2,
     externalAreaM2: external.externalAreaM2,
+    effectiveExternalAreaM2: effectiveArea.effectiveAreaM2,
+    finEfficiency: effectiveArea.finEfficiency,
+    overallSurfaceEfficiency: effectiveArea.overallSurfaceEfficiency,
     internalVolumeM3,
     internalVolumeL: internalVolumeM3 * 1000,
     finCount: external.finCount,
     frontalAreaM2: external.frontalAreaM2,
     finnedDepthM: external.finnedDepthM,
-    warnings,
+    freeFlowAreaM2:
+      external.frontalAreaM2 != null
+        ? Math.max(
+            external.frontalAreaM2 - totalTubes * PI * ((outerDiameterM * outerDiameterM) / 4),
+            external.frontalAreaM2 * 0.2,
+          )
+        : null,
+    minimumFlowAreaM2:
+      external.frontalAreaM2 != null
+        ? Math.max(external.frontalAreaM2 * 0.35, external.frontalAreaM2 * (1 - 0.65))
+        : null,
+    hydraulicDiameterAirM:
+      input.fin.finPitchMm > 0
+        ? (4 * mmToM(input.fin.finPitchMm) * mmToM(input.tube.tubePitchMm ?? 25)) /
+          (2 * (mmToM(input.fin.finPitchMm) + mmToM(input.tube.tubePitchMm ?? 25)))
+        : null,
+    warnings: [...warnings, ...effectiveArea.warnings],
   };
 }

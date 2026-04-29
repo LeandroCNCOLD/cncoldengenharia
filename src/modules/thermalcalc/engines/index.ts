@@ -33,7 +33,10 @@ export function calculateThermalCoil(input: ThermalCalcInput): ThermalCalcResult
 export const calculateThermalCalc = calculateThermalCoil;
 
 export * from "./geometry/coilGeometry";
+export * from "./geometry/effectiveArea";
+export * from "./heatTransfer/airSide";
 export * from "./heatTransfer/heatTransfer";
+export * from "./heatTransfer/refrigerantSide";
 export * from "./refrigerants/charge";
 export * from "./units";
 export * from "./validation/geometryValidation";

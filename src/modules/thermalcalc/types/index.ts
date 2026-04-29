@@ -21,11 +21,16 @@ export interface TubeGeometry {
   material?: string;
 }
 
+export type FinSurfaceType = "plain" | "louver" | "wavy" | "herringbone";
+
 export interface FinGeometry {
   finPitchMm: number;
   finThicknessMm?: number;
+  surfaceType?: FinSurfaceType;
   finnedHeightMm?: number;
   finnedDepthMm?: number;
+  louverPitchMm?: number;
+  louverAngleDeg?: number;
   material?: string;
 }
 
@@ -36,17 +41,24 @@ export interface CoilGeometryInput {
 
 export interface CoilGeometryResult {
   innerDiameterM: number;
+  outerDiameterM: number;
   totalTubes: number;
   totalTubeLengthM: number;
   internalAreaM2: number;
   externalTubeAreaM2: number;
   externalFinAreaM2: number;
   externalAreaM2: number;
+  effectiveExternalAreaM2: number;
+  finEfficiency: number;
+  overallSurfaceEfficiency: number;
   internalVolumeM3: number;
   internalVolumeL: number;
   finCount: number;
   frontalAreaM2: number | null;
   finnedDepthM: number | null;
+  freeFlowAreaM2: number | null;
+  minimumFlowAreaM2: number | null;
+  hydraulicDiameterAirM: number | null;
   warnings: ValidationWarning[];
 }
 
@@ -55,10 +67,22 @@ export interface RefrigerantDensityPoint {
   densityKgM3: number;
 }
 
+export interface RefrigerantPropertyPoint {
+  temperatureC: number;
+  densityKgM3: number;
+  cpJKgK: number;
+  viscosityPaS: number;
+  thermalConductivityWmK: number;
+  liquidDensityKgM3?: number;
+  vaporDensityKgM3?: number;
+  latentHeatJKg?: number;
+}
+
 export interface RefrigerantFluid {
   code: string;
   name: string;
   densityPoints: RefrigerantDensityPoint[];
+  propertyPoints: RefrigerantPropertyPoint[];
   defaultFillFactor: number;
 }
 
@@ -72,21 +96,71 @@ export interface RefrigerantChargeResult {
   warnings: ValidationWarning[];
 }
 
+export interface AirSideInput {
+  volumeFlowM3H?: number;
+  massFlowKgS?: number;
+  faceVelocityMS?: number;
+  densityKgM3?: number;
+  cpJKgK?: number;
+  viscosityPaS?: number;
+  thermalConductivityWmK?: number;
+}
+
+export type RefrigerantHeatTransferCorrelation =
+  | "dittus_boelter"
+  | "gnielinski"
+  | "shah_evaporation"
+  | "condensation_base";
+
+export interface RefrigerantSideInput {
+  code?: string;
+  massFlowKgS?: number;
+  massFluxKgM2S?: number;
+  inletTemperatureC?: number;
+  outletTemperatureC?: number;
+  saturationTemperatureC?: number;
+  quality?: number;
+  correlation?: RefrigerantHeatTransferCorrelation;
+}
+
+export interface EffectiveAreaResult {
+  externalTubeAreaM2: number;
+  externalFinAreaM2: number;
+  totalExternalAreaM2: number;
+  effectiveAreaM2: number;
+  finEfficiency: number;
+  overallSurfaceEfficiency: number;
+  finCount: number;
+  warnings: ValidationWarning[];
+}
+
 export interface HeatTransferInput {
   geometry: CoilGeometryInput;
   airInletTemperatureC: number;
+  airOutletTemperatureC?: number;
   refrigerantTemperatureC: number;
+  refrigerantOutletTemperatureC?: number;
   overallHeatTransferCoefficientWm2K?: number;
   effectiveAreaFactor?: number;
+  air?: AirSideInput;
+  refrigerant?: RefrigerantSideInput;
 }
 
 export interface HeatTransferResult {
   deltaTemperatureK: number;
+  logMeanTemperatureDifferenceK: number;
+  airHeatTransferCoefficientWm2K: number;
+  refrigerantHeatTransferCoefficientWm2K: number;
   overallHeatTransferCoefficientWm2K: number;
   effectiveAreaM2: number;
   capacityW: number;
   capacityKcalh: number;
+  airPressureDropPa: number;
+  refrigerantPressureDropPa: number;
+  airCorrelation: string;
+  refrigerantCorrelation: string;
   geometry: CoilGeometryResult;
+  effectiveArea: EffectiveAreaResult;
   warnings: ValidationWarning[];
 }
 

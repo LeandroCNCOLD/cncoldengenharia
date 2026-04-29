@@ -1,4 +1,8 @@
-import { REFRIGERANT_FLUIDS, findRefrigerantFluid } from "../../data/refrigerants";
+import {
+  REFRIGERANT_FLUIDS,
+  findRefrigerantFluid,
+  getRefrigerantProperties,
+} from "../../data/refrigerants";
 import type { RefrigerantChargeResult, RefrigerantFluid, ValidationWarning } from "../../types";
 
 interface RefrigerantChargeOptions {
@@ -10,6 +14,14 @@ export function getDensityForTemperature(
   fluid: RefrigerantFluid,
   referenceTemperatureC = fluid.densityPoints[0]?.referenceTemperatureC ?? 0,
 ): { densityKgM3: number; referenceTemperatureC: number; warning?: ValidationWarning } {
+  const properties = getRefrigerantProperties(fluid.code, referenceTemperatureC);
+  if (properties) {
+    return {
+      densityKgM3: properties.densityKgM3,
+      referenceTemperatureC,
+    };
+  }
+
   const sorted = [...fluid.densityPoints].sort(
     (a, b) => a.referenceTemperatureC - b.referenceTemperatureC,
   );
