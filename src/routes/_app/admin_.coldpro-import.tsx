@@ -300,6 +300,53 @@ function ColdproImportPage() {
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Mapeamento raw → tipado</CardTitle>
+          <CardDescription>
+            Lê <code>unilab_source_rows</code> (último batch) e popula as tabelas tipadas: geometrias,
+            refrigerantes, compressores (+ polinômios AHRI 10 coef.) e ventiladores (+ curvas).
+            Re-execução substitui os dados anteriores.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => handleMap("all")} disabled={mapping} size="sm">
+              {mapping ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Wand2 className="mr-1.5 h-3.5 w-3.5" />}
+              Mapear tudo
+            </Button>
+            <Button onClick={() => handleMap("geometries")} disabled={mapping} size="sm" variant="outline">Geometrias</Button>
+            <Button onClick={() => handleMap("refrigerants")} disabled={mapping} size="sm" variant="outline">Refrigerantes</Button>
+            <Button onClick={() => handleMap("compressors")} disabled={mapping} size="sm" variant="outline">Compressores</Button>
+            <Button onClick={() => handleMap("fans")} disabled={mapping} size="sm" variant="outline">Ventiladores</Button>
+          </div>
+          {mapperResult && (
+            <div className="rounded border bg-muted/40 p-3 text-xs space-y-2">
+              {Object.entries(mapperResult).map(([target, r]) => (
+                <div key={target} className="border-b pb-2 last:border-0 last:pb-0">
+                  <div className="flex gap-4">
+                    <strong className="capitalize">{target}</strong>
+                    <span><strong>{r.inserted.toLocaleString()}</strong> inseridas</span>
+                    <span className="text-muted-foreground">{r.skipped} puladas</span>
+                    <span className={r.errors.length ? "text-destructive" : "text-muted-foreground"}>
+                      {r.errors.length} erro(s)
+                    </span>
+                  </div>
+                  {r.errors.length > 0 && (
+                    <details className="mt-1">
+                      <summary className="cursor-pointer text-destructive">Ver erros</summary>
+                      <ul className="mt-1 max-h-32 list-disc overflow-y-auto pl-5">
+                        {r.errors.slice(0, 30).map((e, i) => <li key={i} className="font-mono">{e}</li>)}
+                      </ul>
+                    </details>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
