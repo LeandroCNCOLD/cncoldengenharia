@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/lib/auth";
 import { UnilabImportForm } from "@/components/coldpro/unilab-import-form";
 import { CalibrationPanel } from "@/components/coldpro/calibration-panel";
+import { PerformanceMapPanel } from "@/components/coldpro/performance-map-panel";
 import {
   buildDatasheetFromCoilRow,
   buildInputFromCoilRow,
