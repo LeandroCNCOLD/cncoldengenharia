@@ -304,6 +304,12 @@ export function simulatePhysicalSimple(
     warnings,
     derived,
     unilabFactors: opts.unilabGeometryFactor ? unilabFactors : null,
+    modelSignature: currentModelSignature,
+    engineName: ENGINE_NAME,
+    engineVersion: ENGINE_VERSION,
+    correlationSetVersion: CORRELATION_SET_VERSION,
+    calibrationApplied,
+    calibrationStaleReason,
     breakdown: {
       uWm2k,
       externalAreaM2: aExt ?? 0,
