@@ -1,7 +1,7 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Upload, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Upload, Loader2, CheckCircle2, AlertCircle, Download } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -104,6 +104,61 @@ function UnilabImportPage() {
     }
   }
 
+  const BUNDLED_CSVS = [
+    "Tbl_GeometrieEspansioneDiretta.csv",
+    "Tbl_GeometrieCondensazione.csv",
+    "Tbl_GeometrieRaffreddamento.csv",
+    "Tbl_GeometrieRiscaldamento.csv",
+    "Tbl_GeometrieEvaporatoriaPompa.csv",
+    "Tbl_GeometrieVapore.csv",
+  ];
+
+  async function handleImportFromServer() {
+    setBusy(true);
+    try {
+      const csvFiles: UnilabCsvFile[] = [];
+      for (const name of BUNDLED_CSVS) {
+        const res = await fetch(`/unilab/${name}`);
+        if (!res.ok) {
+          toast.error(`Falha ao carregar /unilab/${name} (${res.status})`);
+          continue;
+        }
+        csvFiles.push({ filename: name, text: await res.text() });
+      }
+      if (csvFiles.length === 0) {
+        toast.error("Nenhum CSV carregado de /public/unilab.");
+        return;
+      }
+      const factors = importUnilabGeometryFactors(csvFiles);
+      if (factors.length === 0) {
+        toast.error("Nenhuma linha reconhecida nos CSVs do servidor.");
+        return;
+      }
+      const batchId = await createUnilabImportBatch(supabase, {
+        sourceName: "unilab_all_tables",
+        sourceVersion: version || "bundled",
+        notes: notes || "auto-import from /public/unilab",
+      });
+      const total = await upsertUnilabGeometryFactors(supabase, factors, batchId);
+      setResult({ batchId, total });
+      const counts = new Map<string, number>();
+      for (const f of factors) counts.set(f.sourceTable, (counts.get(f.sourceTable) ?? 0) + 1);
+      setSummaries(
+        csvFiles.map((f) => ({
+          name: f.filename,
+          mode: detectModeFromFilename(f.filename),
+          rowCount: counts.get(f.filename.replace(/\.csv$/i, "")) ?? 0,
+        })),
+      );
+      toast.success(`Importados ${total} fatores de ${csvFiles.length} arquivo(s) do servidor.`);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Falha na importação automática.";
+      toast.error(msg);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -173,14 +228,22 @@ function UnilabImportPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <Button variant="outline" onClick={handleImportFromServer} disabled={busy}>
+              {busy ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              Importar todos do servidor (/public/unilab)
+            </Button>
             <Button onClick={handleImport} disabled={busy || files.length === 0}>
               {busy ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Upload className="mr-2 h-4 w-4" />
               )}
-              Importar
+              Importar selecionados
             </Button>
           </div>
 
