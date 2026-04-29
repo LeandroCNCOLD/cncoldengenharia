@@ -1,7 +1,7 @@
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Upload, Loader2, FileArchive, FileSpreadsheet, FileText, ArrowLeft, Database } from "lucide-react";
+import { Upload, Loader2, FileArchive, FileSpreadsheet, FileText, ArrowLeft, Database, Wand2 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 
 import { PageHeader } from "@/components/page-header";
@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { importColdproPackage } from "@/server/coldproImport.functions";
+import { runColdproMappers } from "@/server/coldproMappers.functions";
 
 export const Route = createFileRoute("/_app/admin_/coldpro-import")({
   component: ColdproImportPage,
@@ -29,6 +30,7 @@ interface UploadedRef {
 function ColdproImportPage() {
   const { isAdmin, loading, user } = useAuth();
   const runImport = useServerFn(importColdproPackage);
+  const runMappers = useServerFn(runColdproMappers);
 
   const [zipFile, setZipFile] = useState<File | null>(null);
   const [indexFile, setIndexFile] = useState<File | null>(null);
@@ -37,6 +39,7 @@ function ColdproImportPage() {
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [mapping, setMapping] = useState(false);
   const [uploaded, setUploaded] = useState<UploadedRef[]>([]);
   const [batchId, setBatchId] = useState<string | null>(null);
   const [importResult, setImportResult] = useState<null | {
@@ -45,6 +48,7 @@ function ColdproImportPage() {
     filesSkipped: number;
     errors: string[];
   }>(null);
+  const [mapperResult, setMapperResult] = useState<Record<string, { inserted: number; skipped: number; errors: string[] }> | null>(null);
 
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/dashboard" />;
