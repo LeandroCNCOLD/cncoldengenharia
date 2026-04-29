@@ -8,6 +8,10 @@ import {
   Database,
   ChevronDown,
   ChevronRight,
+  FolderKanban,
+  BookOpen,
+  Upload,
+  FileBarChart,
   type LucideIcon,
 } from "lucide-react";
 
