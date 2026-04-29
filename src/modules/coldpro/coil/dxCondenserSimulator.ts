@@ -7,6 +7,12 @@ import type {
   CoilSimulatorResult,
   NominalReference,
 } from "./coilSimulatorTypes";
+import type { CalibrationFactors } from "./coilEngineTypes";
+import { NEUTRAL_CALIBRATION } from "./coilEngineTypes";
+
+export interface DxSimulatorOptions {
+  calibration?: CalibrationFactors;
+}
 
 const W_TO_KCALH = 0.859845;
 
