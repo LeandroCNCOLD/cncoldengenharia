@@ -235,7 +235,12 @@ export function generateCoilPerformanceMap(
 
   // baseline para calcular distance
   const baseInput = params.input;
-  const baseAirflow = baseInput.air.airflowM3h ?? baseInput.nominal?.airflowM3h ?? 1;
+  // Vazão nominal: SEMPRE do datasheet (nominal.airflowM3h). Nunca usar fallback fixo.
+  const nominalAirflow = baseInput.nominal?.airflowM3h ?? baseInput.air.airflowM3h ?? null;
+  const baseAirflow =
+    nominalAirflow != null && Number.isFinite(nominalAirflow) && nominalAirflow > 0
+      ? nominalAirflow
+      : null;
   const nominal = {
     refTempC: baseInput.nominal?.refTempC ?? baseInput.refrigerant.refTempC ?? 0,
     airInletTempC: baseInput.nominal?.airTempInC ?? baseInput.air.airTempInC ?? 0,
