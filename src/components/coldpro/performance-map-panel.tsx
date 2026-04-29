@@ -600,12 +600,14 @@ export function PerformanceMapPanel({
                           <Button
                             size="sm"
                             variant="ghost"
-                            disabled={!ratioOk || approveMut.isPending}
+                            disabled={!canApprove || approveMut.isPending}
                             onClick={() => approveMut.mutate(row.id)}
                             title={
-                              ratioOk
-                                ? "Aprovar mapa"
-                                : "Mais de 30% inválidos — não aprovável"
+                              !reproOk
+                                ? "Mapa não reproduz o ponto nominal Unilab — recalibre antes de aprovar."
+                                : ratioOk
+                                  ? "Aprovar mapa"
+                                  : "Mais de 30% inválidos — não aprovável"
                             }
                           >
                             Aprovar
