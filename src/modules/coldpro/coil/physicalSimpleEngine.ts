@@ -180,6 +180,31 @@ export function simulatePhysicalSimple(
     lmtdK = dt1 === dt2 ? dt1 : (dt1 - dt2) / Math.log(Math.max(dt1 / Math.max(dt2, 0.01), 1.0001));
   }
 
+  // === Validade da calibração ===
+  // Gera assinatura atual e descarta calibração se ela foi gerada para
+  // um modelo diferente (correlação, fórmula, fatores Unilab, área, etc.)
+  const currentModelSignature = generateModelSignature({
+    input,
+    unilabGeometryFactor: opts.unilabGeometryFactor ?? null,
+    externalAreaM2: aExt ?? null,
+    uBaseWm2k: uWm2k,
+  });
+  let calibrationApplied = true;
+  let cal = requestedCal;
+  let calibrationStaleReason: string | null = null;
+  if (opts.calibration && opts.calibrationSignature !== undefined) {
+    const validity = checkCalibrationValidity(
+      opts.calibrationSignature ?? null,
+      currentModelSignature,
+    );
+    if (!validity.isValid) {
+      calibrationApplied = false;
+      calibrationStaleReason = validity.reason ?? "Calibração desatualizada.";
+      cal = normalizeCalibrationFactors(NEUTRAL_CALIBRATION);
+      warnings.push(calibrationStaleReason);
+    }
+  }
+
   // === Ordem de cálculo (CRÍTICA — não inverter): ===
   // 1) base físico (qWraw)
   // 2) fatores empíricos Unilab (heatTransfer × surface × security)
