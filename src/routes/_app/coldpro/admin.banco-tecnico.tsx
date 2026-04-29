@@ -483,6 +483,7 @@ function TechBankPage() {
       <Tabs defaultValue="universal">
         <TabsList className="flex flex-wrap">
           <TabsTrigger value="universal">Biblioteca Universal</TabsTrigger>
+          <TabsTrigger value="components">Componentes (filtros)</TabsTrigger>
           <TabsTrigger value="geometries">Geometrias</TabsTrigger>
           <TabsTrigger value="factors">Fatores</TabsTrigger>
           <TabsTrigger value="fluids">Fluidos</TabsTrigger>
