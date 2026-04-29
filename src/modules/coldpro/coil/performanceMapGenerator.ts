@@ -267,6 +267,66 @@ export function generateCoilPerformanceMap(
     ),
   };
 
+  // === Validação ponto nominal ===
+  const datasheetCapW = (() => {
+    const n = baseInput.nominal as { capacityW?: number | null } | undefined;
+    const v = n?.capacityW;
+    return v != null && Number.isFinite(v) && v > 0 ? v : null;
+  })();
+
+  let nominalSimCapW = 0;
+  let nominalRawCapW = 0;
+  try {
+    const nominalInput: CoilSimulatorInput = {
+      ...baseInput,
+      air: {
+        ...baseInput.air,
+        airTempInC: nominal.airInletTempC,
+        airflowM3h: baseAirflow ?? baseInput.air.airflowM3h ?? 0,
+      },
+      refrigerant: { ...baseInput.refrigerant, refTempC: nominal.refTempC },
+    };
+    nominalRawCapW = runSim(nominalInput, engine, NEUTRAL_CALIBRATION).capacityW;
+    nominalSimCapW = runSim(nominalInput, engine, cal).capacityW;
+  } catch {
+    /* validation reports 0 */
+  }
+
+  const relErr =
+    datasheetCapW != null && datasheetCapW > 0
+      ? (nominalSimCapW - datasheetCapW) / datasheetCapW
+      : null;
+  const reproducesNominal = relErr == null ? true : Math.abs(relErr) <= 0.05;
+
+  const nominalValidation: NominalValidation = {
+    capacityDatasheetW: datasheetCapW,
+    capacitySimulatedW: nominalSimCapW,
+    relativeError: relErr,
+    reproducesNominal,
+    message:
+      datasheetCapW == null
+        ? "Capacidade nominal do datasheet ausente — não foi possível validar."
+        : reproducesNominal
+          ? `Ponto nominal reproduzido (erro ${(Math.abs(relErr ?? 0) * 100).toFixed(2)}%).`
+          : `Mapa não reproduz o ponto nominal Unilab. Verifique aplicação da calibração. Erro: ${((relErr ?? 0) * 100).toFixed(2)}% (sim ${nominalSimCapW.toFixed(0)} W vs datasheet ${datasheetCapW.toFixed(0)} W).`,
+  };
+
+  // eslint-disable-next-line no-console
+  console.debug("[performanceMap] nominal validation", {
+    componentItemId: params.componentItemId ?? null,
+    calibrationId: params.calibrationId ?? null,
+    engine,
+    capacityCorrectionFactor: cal.capacityCorrectionFactor,
+    airDpCorrectionFactor: cal.airDpCorrectionFactor,
+    refDpCorrectionFactor: cal.refDpCorrectionFactor,
+    uaCorrectionFactor: cal.uaCorrectionFactor,
+    nominalCapacityWDatasheet: datasheetCapW,
+    nominalPointCapacityW_beforeCalibration: nominalRawCapW,
+    nominalPointCapacityW_afterCalibration: nominalSimCapW,
+    relativeError: relErr,
+    reproducesNominal,
+  });
+
   const refAxis = buildAxis(ranges.refTempC);
   const airAxis = buildAxis(ranges.airInletTempC);
   const flowAxis = buildAxis(ranges.airflowFactor);
