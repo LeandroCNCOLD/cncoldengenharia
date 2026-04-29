@@ -125,6 +125,8 @@ async function migrateCompressors(userId: string | null, budget: number): Promis
           model: r.model ?? null,
           code: r.model ?? null,
           status: isUnilab ? "approved" : "validated",
+          source: isUnilab ? "UNILAB" : inferSource(r.manufacturer, "UNKNOWN"),
+          context: "reference",
           normalized_json: r as Record<string, unknown>,
           source_raw_id: r.id,
           source_batch_id: null,
