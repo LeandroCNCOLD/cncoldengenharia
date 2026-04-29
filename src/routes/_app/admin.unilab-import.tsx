@@ -228,14 +228,22 @@ function UnilabImportPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <Button variant="outline" onClick={handleImportFromServer} disabled={busy}>
+              {busy ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              Importar todos do servidor (/public/unilab)
+            </Button>
             <Button onClick={handleImport} disabled={busy || files.length === 0}>
               {busy ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Upload className="mr-2 h-4 w-4" />
               )}
-              Importar
+              Importar selecionados
             </Button>
           </div>
 
