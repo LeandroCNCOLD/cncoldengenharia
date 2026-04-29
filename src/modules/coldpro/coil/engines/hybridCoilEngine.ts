@@ -34,32 +34,42 @@ function wallResistance(input: CoilCalculationInput): number {
   return Math.log(doM / diM) / (2 * Math.PI * k);
 }
 
-export function generateModelSignature(
-  input: CoilCalculationInput,
-  correlationAir: string,
-  effectiveAreaM2: number,
-): string {
-  const payload = {
-    engine: 'hybrid_unilab_v1',
-    geometryCode: input.geometry.code,
-    mode: input.mode,
-    finType: input.geometry.finType,
-    tubeType: input.geometry.tubeType,
-    refrigerant: input.refrigerant,
-    correlationAir,
-    effectiveAreaM2: Number(effectiveAreaM2.toFixed(4)),
-    factors: input.factors ?? {},
-  };
-  return hashHex(JSON.stringify(payload));
+function factorsHash(input: CoilCalculationInput): string {
+  return hashHex(JSON.stringify(input.factors ?? {}));
 }
 
-function compatibleCalibration(
-  calibration: CoilCalibration | null | undefined,
-  signature: string,
-) {
-  if (!calibration) return null;
-  if (calibration.modelSignature && calibration.modelSignature !== signature) return null;
-  return calibration;
+export interface SignatureContext {
+  airCorrelationName?: string;
+  refrigerantCorrelationName?: string;
+  effectiveAreaM2?: number;
+  areaSource?: string;
+  hAirBase?: number;
+  hRefBase?: number;
+  uBase?: number;
+}
+
+export function generateModelSignature(
+  input: CoilCalculationInput,
+  ctx: SignatureContext = {},
+): string {
+  const payload = {
+    engineName: ENGINE_NAME,
+    engineVersion: ENGINE_VERSION,
+    geometryCode: input.geometry.code,
+    coilType: input.mode,
+    refrigerant: input.refrigerant,
+    finType: input.geometry.finType,
+    tubeType: input.geometry.tubeType,
+    airCorrelationName: ctx.airCorrelationName,
+    refrigerantCorrelationName: ctx.refrigerantCorrelationName,
+    factorsHash: factorsHash(input),
+    effectiveAreaM2: ctx.effectiveAreaM2 != null ? Number(ctx.effectiveAreaM2.toFixed(4)) : null,
+    areaSource: ctx.areaSource,
+    hAirBase: ctx.hAirBase != null ? Number(ctx.hAirBase.toFixed(2)) : null,
+    hRefBase: ctx.hRefBase != null ? Number(ctx.hRefBase.toFixed(2)) : null,
+    uBase: ctx.uBase != null ? Number(ctx.uBase.toFixed(2)) : null,
+  };
+  return hashHex(JSON.stringify(payload));
 }
 
 export function simulateHybridCoil(input: CoilCalculationInput): CoilCalculationResult {
