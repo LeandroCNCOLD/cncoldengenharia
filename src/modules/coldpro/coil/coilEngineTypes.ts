@@ -26,6 +26,12 @@ export interface CalibrationFactors {
   airDpCorrectionFactor: number;    // multiplica ΔP ar
   refDpCorrectionFactor: number;    // multiplica ΔP refrigerante
   uaCorrectionFactor: number;       // multiplica U·A
+  /** Alias canônico usado por partes novas da UI/motor. */
+  airPressureDropFactor?: number;
+  /** Alias canônico usado por partes novas da UI/motor. */
+  refrigerantPressureDropFactor?: number;
+  /** Alias canônico para rastreabilidade de troca térmica. */
+  heatTransferFactor?: number;
 }
 
 export const NEUTRAL_CALIBRATION: CalibrationFactors = {
@@ -33,7 +39,31 @@ export const NEUTRAL_CALIBRATION: CalibrationFactors = {
   airDpCorrectionFactor: 1,
   refDpCorrectionFactor: 1,
   uaCorrectionFactor: 1,
+  airPressureDropFactor: 1,
+  refrigerantPressureDropFactor: 1,
+  heatTransferFactor: 1,
 };
+
+/** Normaliza aliases camelCase e campos legados para evitar fator 1 por mismatch de nomes. */
+export function normalizeCalibrationFactors(
+  factors: CalibrationFactors | null | undefined,
+): Required<CalibrationFactors> {
+  const src = factors ?? NEUTRAL_CALIBRATION;
+  const capacityCorrectionFactor = Number(src.capacityCorrectionFactor) || 1;
+  const airPressureDropFactor = Number(src.airPressureDropFactor ?? src.airDpCorrectionFactor) || 1;
+  const refrigerantPressureDropFactor =
+    Number(src.refrigerantPressureDropFactor ?? src.refDpCorrectionFactor) || 1;
+  const uaCorrectionFactor = Number(src.uaCorrectionFactor) || 1;
+  return {
+    capacityCorrectionFactor,
+    airDpCorrectionFactor: airPressureDropFactor,
+    refDpCorrectionFactor: refrigerantPressureDropFactor,
+    uaCorrectionFactor,
+    airPressureDropFactor,
+    refrigerantPressureDropFactor,
+    heatTransferFactor: Number(src.heatTransferFactor ?? uaCorrectionFactor) || 1,
+  };
+}
 
 /** Metas de erro pós-calibração. */
 export const CALIBRATION_TARGETS = {

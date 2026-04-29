@@ -30,7 +30,7 @@ import { simulateDxEvaporator } from "@/modules/coldpro/coil/dxEvaporatorSimulat
 import { simulateDxCondenser } from "@/modules/coldpro/coil/dxCondenserSimulator";
 import { simulatePhysicalSimple } from "@/modules/coldpro/coil/physicalSimpleEngine";
 import { calibrateAgainstReference } from "@/modules/coldpro/coil/coilCalibration";
-import { getLatestCalibration, saveCoilCalibration } from "@/lib/coldpro/coil-calibrations";
+import { factorsFromRow, getLatestCalibration, saveCoilCalibration } from "@/lib/coldpro/coil-calibrations";
 import { NEUTRAL_CALIBRATION, type CalibrationFactors, type CoilEngine } from "@/modules/coldpro/coil/coilEngineTypes";
 import { OriginBadge } from "@/components/coldpro/origin-badge";
 import type {
@@ -188,12 +188,7 @@ function CoilSimulatorPage() {
 
   const calibration: CalibrationFactors = useMemo(() => {
     if (!latestCal) return NEUTRAL_CALIBRATION;
-    return {
-      capacityCorrectionFactor: Number(latestCal.capacity_correction_factor) || 1,
-      airDpCorrectionFactor: Number(latestCal.air_dp_correction_factor) || 1,
-      refDpCorrectionFactor: Number(latestCal.ref_dp_correction_factor) || 1,
-      uaCorrectionFactor: Number(latestCal.ua_correction_factor) || 1,
-    };
+    return factorsFromRow(latestCal as unknown as Parameters<typeof factorsFromRow>[0]);
   }, [latestCal]);
 
   const buildInput = (): CoilSimulatorInput => ({
@@ -257,7 +252,13 @@ function CoilSimulatorPage() {
         ? simulateDxEvaporator(input, { calibration })
         : simulateDxCondenser(input, { calibration });
     // Físico: aplica calibração internamente. NUNCA aplicar de novo por cima.
-    const phy = simulatePhysicalSimple(input, { calibration });
+    const phy = simulatePhysicalSimple(input, {
+      calibration,
+      componentItemId: prefillComponentId ?? undefined,
+      calibrationId: (latestCal as { id?: string } | null)?.id ?? null,
+      nominalCapacityW: prefillNominal?.capacityW ?? null,
+      logCalibration: true,
+    });
     setEmpiricalResult(emp);
     setPhysicalResult(phy);
     const chosen = engine === "physical_simple" ? phy : emp;

@@ -3,25 +3,36 @@ import type { CoilSimulatorInput, CoilSimulatorResult } from "@/modules/coldpro/
 import type { CalibrationOutcome } from "@/modules/coldpro/coil/coilCalibration";
 import {
   NEUTRAL_CALIBRATION,
+  normalizeCalibrationFactors,
   type CalibrationFactors,
 } from "@/modules/coldpro/coil/coilEngineTypes";
 
 type CalRow = {
+  id?: string | null;
   capacity_correction_factor: number | string | null;
   air_dp_correction_factor: number | string | null;
   ref_dp_correction_factor: number | string | null;
   ua_correction_factor: number | string | null;
+  capacityCorrectionFactor?: number | string | null;
+  airPressureDropFactor?: number | string | null;
+  refrigerantPressureDropFactor?: number | string | null;
+  uaCorrectionFactor?: number | string | null;
 };
 
 /** Converte registro do banco em CalibrationFactors. */
 export function factorsFromRow(row: CalRow | null | undefined): CalibrationFactors {
   if (!row) return NEUTRAL_CALIBRATION;
-  return {
-    capacityCorrectionFactor: Number(row.capacity_correction_factor) || 1,
+  return normalizeCalibrationFactors({
+    capacityCorrectionFactor:
+      Number(row.capacityCorrectionFactor ?? row.capacity_correction_factor) || 1,
     airDpCorrectionFactor: Number(row.air_dp_correction_factor) || 1,
     refDpCorrectionFactor: Number(row.ref_dp_correction_factor) || 1,
-    uaCorrectionFactor: Number(row.ua_correction_factor) || 1,
-  };
+    uaCorrectionFactor: Number(row.uaCorrectionFactor ?? row.ua_correction_factor) || 1,
+    airPressureDropFactor:
+      Number(row.airPressureDropFactor ?? row.air_dp_correction_factor) || 1,
+    refrigerantPressureDropFactor:
+      Number(row.refrigerantPressureDropFactor ?? row.ref_dp_correction_factor) || 1,
+  });
 }
 
 /**
@@ -35,9 +46,10 @@ export function applyCalibrationToResult(
   result: CoilSimulatorResult,
   calibration: CalibrationFactors,
 ): CoilSimulatorResult {
-  const cap = calibration.capacityCorrectionFactor;
-  const a = calibration.airDpCorrectionFactor;
-  const r = calibration.refDpCorrectionFactor;
+  const normalized = normalizeCalibrationFactors(calibration);
+  const cap = normalized.capacityCorrectionFactor;
+  const a = normalized.airPressureDropFactor;
+  const r = normalized.refrigerantPressureDropFactor;
   return {
     ...result,
     capacityW: result.capacityW * cap,
@@ -101,8 +113,15 @@ export const getActiveCalibrationsForComponent = listCoilCalibrations;
 
 /** Calibração ativa = última criada. */
 export async function getActiveCalibrationForComponent(componentItemId: string) {
-  const list = await listCoilCalibrations(componentItemId);
-  return list?.[0] ?? null;
+  const { data, error } = await supabase
+    .from("coil_calibrations")
+    .select("*")
+    .eq("component_item_id", componentItemId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
 }
 
 export const getLatestCalibration = getActiveCalibrationForComponent;

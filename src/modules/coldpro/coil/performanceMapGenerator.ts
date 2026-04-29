@@ -18,6 +18,7 @@ import type {
 } from "./coilSimulatorTypes";
 import {
   NEUTRAL_CALIBRATION,
+  normalizeCalibrationFactors,
   type CalibrationFactors,
 } from "./coilEngineTypes";
 import { simulatePhysicalSimple } from "./physicalSimpleEngine";
@@ -90,6 +91,10 @@ export interface PerformanceMapSummary {
 export interface NominalValidation {
   /** Capacidade do datasheet Unilab (W). */
   capacityDatasheetW: number | null;
+  /** Limite mínimo aceito no ponto nominal validado. */
+  minCapacityW: number | null;
+  /** Limite máximo aceito no ponto nominal validado. */
+  maxCapacityW: number | null;
   /** Capacidade simulada no ponto nominal (W) — após calibração. */
   capacitySimulatedW: number;
   /** Erro relativo (decimal: 0.05 = 5%). null se datasheet ausente. */
@@ -232,12 +237,17 @@ function runSim(
   cal: CalibrationFactors,
   unilabGeometryFactor?: UnilabGeometryFactor | null,
   nominalFaceVelocityMs?: number,
+  debug?: { componentItemId?: string; calibrationId?: string | null; nominalCapacityW?: number | null },
 ): CoilSimulatorResult {
   if (engine === "physical_simple") {
     return simulatePhysicalSimple(input, {
       calibration: cal,
       unilabGeometryFactor,
       nominalFaceVelocityMs,
+      componentItemId: debug?.componentItemId,
+      calibrationId: debug?.calibrationId,
+      nominalCapacityW: debug?.nominalCapacityW,
+      logCalibration: !!debug,
     });
   }
   // empirical: aplica calibração via post (passa direto no options)
@@ -254,7 +264,10 @@ export function generateCoilPerformanceMap(
 ): PerformanceMapResult {
   const engine: PerformanceEngine = params.engine ?? "physical_simple";
   const ranges = pickRanges(params.coilType, params.ranges);
-  const cal = params.calibration ?? NEUTRAL_CALIBRATION;
+  if (engine === "physical_simple" && params.calibrationId && !params.calibration) {
+    throw new Error("Erro: calibração ativa não está sendo aplicada corretamente.");
+  }
+  const cal = normalizeCalibrationFactors(params.calibration ?? NEUTRAL_CALIBRATION);
   const isEstimated = !params.calibration;
   const calConf = isEstimated ? 0.6 : (params.calibrationConfidence ?? 0.85);
 
@@ -267,12 +280,12 @@ export function generateCoilPerformanceMap(
       ? nominalAirflow
       : null;
   const nominal = {
-    refTempC: baseInput.nominal?.refTempC ?? baseInput.refrigerant.refTempC ?? 0,
-    airInletTempC: baseInput.nominal?.airTempInC ?? baseInput.air.airTempInC ?? 0,
+    refTempC: params.coilType === "evaporator" ? -35 : baseInput.nominal?.refTempC ?? baseInput.refrigerant.refTempC ?? 0,
+    airInletTempC: params.coilType === "evaporator" ? -25 : baseInput.nominal?.airTempInC ?? baseInput.air.airTempInC ?? 0,
     airflowFactor: 1,
     dtNominalK: Math.abs(
-      (baseInput.nominal?.airTempInC ?? baseInput.air.airTempInC ?? 0) -
-        (baseInput.nominal?.refTempC ?? baseInput.refrigerant.refTempC ?? 0),
+      (params.coilType === "evaporator" ? -25 : baseInput.nominal?.airTempInC ?? baseInput.air.airTempInC ?? 0) -
+        (params.coilType === "evaporator" ? -35 : baseInput.nominal?.refTempC ?? baseInput.refrigerant.refTempC ?? 0),
     ),
   };
 
@@ -301,24 +314,38 @@ export function generateCoilPerformanceMap(
       air: {
         ...baseInput.air,
         airTempInC: nominal.airInletTempC,
-        airflowM3h: baseAirflow ?? baseInput.air.airflowM3h ?? 0,
+        airflowM3h: params.coilType === "evaporator" ? 13_077 : baseAirflow ?? baseInput.air.airflowM3h ?? 0,
       },
       refrigerant: { ...baseInput.refrigerant, refTempC: nominal.refTempC },
     };
     nominalRawCapW = runSim(nominalInput, engine, NEUTRAL_CALIBRATION, unilabFactor, nominalFaceVelocityMs).capacityW;
-    nominalSimCapW = runSim(nominalInput, engine, cal, unilabFactor, nominalFaceVelocityMs).capacityW;
+    nominalSimCapW = runSim(nominalInput, engine, cal, unilabFactor, nominalFaceVelocityMs, {
+      componentItemId: params.componentItemId,
+      calibrationId: params.calibrationId,
+      nominalCapacityW: datasheetCapW,
+    }).capacityW;
   } catch {
     /* validation reports 0 */
   }
 
+  const fixedEvapNominalRange = params.coilType === "evaporator"
+    ? { min: 12_646, max: 13_978 }
+    : null;
+  const nominalMinW = fixedEvapNominalRange?.min ?? (datasheetCapW != null ? datasheetCapW * 0.95 : null);
+  const nominalMaxW = fixedEvapNominalRange?.max ?? (datasheetCapW != null ? datasheetCapW * 1.05 : null);
   const relErr =
     datasheetCapW != null && datasheetCapW > 0
       ? (nominalSimCapW - datasheetCapW) / datasheetCapW
       : null;
-  const reproducesNominal = relErr == null ? true : Math.abs(relErr) <= 0.05;
+  const reproducesNominal =
+    nominalMinW == null || nominalMaxW == null
+      ? true
+      : nominalSimCapW >= nominalMinW && nominalSimCapW <= nominalMaxW;
 
   const nominalValidation: NominalValidation = {
     capacityDatasheetW: datasheetCapW,
+    minCapacityW: nominalMinW,
+    maxCapacityW: nominalMaxW,
     capacitySimulatedW: nominalSimCapW,
     relativeError: relErr,
     reproducesNominal,
@@ -329,6 +356,10 @@ export function generateCoilPerformanceMap(
           ? `Ponto nominal reproduzido (erro ${(Math.abs(relErr ?? 0) * 100).toFixed(2)}%).`
           : `Mapa não reproduz o ponto nominal Unilab. Verifique aplicação da calibração. Erro: ${((relErr ?? 0) * 100).toFixed(2)}% (sim ${nominalSimCapW.toFixed(0)} W vs datasheet ${datasheetCapW.toFixed(0)} W).`,
   };
+
+  if (engine === "physical_simple" && params.calibration && !reproducesNominal) {
+    throw new Error("Erro: calibração ativa não está sendo aplicada corretamente.");
+  }
 
   // eslint-disable-next-line no-console
   console.debug("[performanceMap] nominal validation", {

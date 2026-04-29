@@ -8,7 +8,7 @@ import type {
   NominalReference,
 } from "./coilSimulatorTypes";
 import type { CalibrationFactors } from "./coilEngineTypes";
-import { NEUTRAL_CALIBRATION } from "./coilEngineTypes";
+import { normalizeCalibrationFactors } from "./coilEngineTypes";
 
 export interface DxSimulatorOptions {
   calibration?: CalibrationFactors;
@@ -41,7 +41,7 @@ export function simulateDxEvaporator(
   input: CoilSimulatorInput,
   options: DxSimulatorOptions = {},
 ): CoilSimulatorResult {
-  const cal = options.calibration ?? NEUTRAL_CALIBRATION;
+  const cal = normalizeCalibrationFactors(options.calibration);
   const warnings: string[] = [];
   const air = input.air;
   const ref = input.refrigerant;
@@ -111,10 +111,10 @@ export function simulateDxEvaporator(
   const latentCal = latent != null ? latent * cal.capacityCorrectionFactor : null;
   const condensateCal =
     condensateLh != null ? condensateLh * cal.capacityCorrectionFactor : null;
-  const airDpCal = airDp != null ? airDp * cal.airDpCorrectionFactor : null;
+  const airDpCal = airDp != null ? airDp * cal.airPressureDropFactor : null;
   const refDpCal =
     ref.refrigerantPressureDropKpa != null
-      ? ref.refrigerantPressureDropKpa * cal.refDpCorrectionFactor
+      ? ref.refrigerantPressureDropKpa * cal.refrigerantPressureDropFactor
       : null;
 
   return {
