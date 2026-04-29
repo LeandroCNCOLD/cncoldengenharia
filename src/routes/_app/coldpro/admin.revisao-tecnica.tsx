@@ -91,12 +91,18 @@ function TechnicalReviewPage() {
 
   const handleApprove = async () => {
     if (!selected) return;
-    const res = await approveMapped(selected, user?.id ?? null);
+    const res = await approveMapped(selected, user?.id ?? null, {
+      context: asCnStandard ? "cn_standard" : "reference",
+    });
     if (!res.ok) {
       toast.error(res.error ?? "Falha ao aprovar.");
       return;
     }
-    toast.success("Componente aprovado e adicionado à biblioteca técnica.");
+    toast.success(
+      asCnStandard
+        ? "Componente aprovado como padrão CN."
+        : "Componente aprovado como referência (catálogo).",
+    );
     setSelected(null);
     refresh();
   };
