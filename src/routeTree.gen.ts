@@ -14,6 +14,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
+import { Route as AppAdminUnilabImportRouteImport } from './routes/_app/admin/unilab-import'
 import { Route as AppColdproEquipamentosIndexRouteImport } from './routes/_app/coldpro/equipamentos/index'
 import { Route as AppColdproEquipamentosIdRouteImport } from './routes/_app/coldpro/equipamentos/$id'
 import { Route as AppColdproEquipamentosIdCoilSimulatorRouteImport } from './routes/_app/coldpro/equipamentos/$id/coil-simulator'
@@ -42,6 +43,11 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminUnilabImportRoute = AppAdminUnilabImportRouteImport.update({
+  id: '/unilab-import',
+  path: '/unilab-import',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppColdproEquipamentosIndexRoute =
   AppColdproEquipamentosIndexRouteImport.update({
     id: '/coldpro/equipamentos/',
@@ -64,8 +70,9 @@ const AppColdproEquipamentosIdCoilSimulatorRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/admin': typeof AppAdminRoute
+  '/admin': typeof AppAdminRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
+  '/admin/unilab-import': typeof AppAdminUnilabImportRoute
   '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRouteWithChildren
   '/coldpro/equipamentos/': typeof AppColdproEquipamentosIndexRoute
   '/coldpro/equipamentos/$id/coil-simulator': typeof AppColdproEquipamentosIdCoilSimulatorRoute
@@ -73,8 +80,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/admin': typeof AppAdminRoute
+  '/admin': typeof AppAdminRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
+  '/admin/unilab-import': typeof AppAdminUnilabImportRoute
   '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRouteWithChildren
   '/coldpro/equipamentos': typeof AppColdproEquipamentosIndexRoute
   '/coldpro/equipamentos/$id/coil-simulator': typeof AppColdproEquipamentosIdCoilSimulatorRoute
@@ -84,8 +92,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_app/admin': typeof AppAdminRoute
+  '/_app/admin': typeof AppAdminRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/admin/unilab-import': typeof AppAdminUnilabImportRoute
   '/_app/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRouteWithChildren
   '/_app/coldpro/equipamentos/': typeof AppColdproEquipamentosIndexRoute
   '/_app/coldpro/equipamentos/$id/coil-simulator': typeof AppColdproEquipamentosIdCoilSimulatorRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/dashboard'
+    | '/admin/unilab-import'
     | '/coldpro/equipamentos/$id'
     | '/coldpro/equipamentos/'
     | '/coldpro/equipamentos/$id/coil-simulator'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/dashboard'
+    | '/admin/unilab-import'
     | '/coldpro/equipamentos/$id'
     | '/coldpro/equipamentos'
     | '/coldpro/equipamentos/$id/coil-simulator'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_app/admin'
     | '/_app/dashboard'
+    | '/_app/admin/unilab-import'
     | '/_app/coldpro/equipamentos/$id'
     | '/_app/coldpro/equipamentos/'
     | '/_app/coldpro/equipamentos/$id/coil-simulator'
@@ -164,6 +176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/admin/unilab-import': {
+      id: '/_app/admin/unilab-import'
+      path: '/unilab-import'
+      fullPath: '/admin/unilab-import'
+      preLoaderRoute: typeof AppAdminUnilabImportRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/_app/coldpro/equipamentos/': {
       id: '/_app/coldpro/equipamentos/'
       path: '/coldpro/equipamentos'
@@ -188,6 +207,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppAdminRouteChildren {
+  AppAdminUnilabImportRoute: typeof AppAdminUnilabImportRoute
+}
+
+const AppAdminRouteChildren: AppAdminRouteChildren = {
+  AppAdminUnilabImportRoute: AppAdminUnilabImportRoute,
+}
+
+const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
+  AppAdminRouteChildren,
+)
+
 interface AppColdproEquipamentosIdRouteChildren {
   AppColdproEquipamentosIdCoilSimulatorRoute: typeof AppColdproEquipamentosIdCoilSimulatorRoute
 }
@@ -204,14 +235,14 @@ const AppColdproEquipamentosIdRouteWithChildren =
   )
 
 interface AppRouteChildren {
-  AppAdminRoute: typeof AppAdminRoute
+  AppAdminRoute: typeof AppAdminRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
   AppColdproEquipamentosIdRoute: typeof AppColdproEquipamentosIdRouteWithChildren
   AppColdproEquipamentosIndexRoute: typeof AppColdproEquipamentosIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppAdminRoute: AppAdminRoute,
+  AppAdminRoute: AppAdminRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
   AppColdproEquipamentosIdRoute: AppColdproEquipamentosIdRouteWithChildren,
   AppColdproEquipamentosIndexRoute: AppColdproEquipamentosIndexRoute,
