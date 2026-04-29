@@ -1,14 +1,22 @@
 /**
- * Motor físico simples: Q = U · A · LMTD · CorrectionFactors
+ * @deprecated Use `simulateHybridCoil` from `@/modules/coldpro/coil/engines` em código novo.
  *
- * Esta é a fundação calibrável. Usa correlações simplificadas
- * (não Wang/Cavallini ainda) — a calibração contra o ponto nominal
- * Unilab ajusta os fatores até atingir as metas (≤5% capacidade).
+ * Motor físico simples (legado): Q = U · A_efetiva · LMTD · CorrectionFactors
  *
- * Estimativas:
- *  - h_ar  (W/m²K): correlação simples baseada em velocidade frontal
- *  - h_ref (W/m²K): valor típico por fluido/lado (evap vs cond)
- *  - LMTD: assume Tref constante (mudança de fase)
+ * MANTIDO porque:
+ *  - `coilCalibration.ts`, `performanceMapGenerator.ts` e a tela
+ *    `coil-simulator.tsx` ainda dependem do retorno enriquecido
+ *    (`PhysicalSimpleResult` com `derived`, `breakdown`, `unilabFactors`,
+ *    assinatura, calibrationStaleReason, condensateLh, etc.) que o
+ *    `CoilCalculationResult` do motor híbrido ainda não expõe.
+ *  - As correlações reais Chang-Wang / Wang-Herringbone aqui implementadas
+ *    são mais precisas que as do hybrid engine atual e foram validadas nas
+ *    iterações anteriores.
+ *
+ * Plano de migração:
+ *  1. Estabilizar `simulateHybridCoil` (correlações + breakdown completo).
+ *  2. Migrar callers (UI, mapa, calibração) um por vez.
+ *  3. Remover este arquivo quando todos os callers tiverem migrado.
  */
 
 import type { CoilSimulatorInput, CoilSimulatorResult } from "./coilSimulatorTypes";
