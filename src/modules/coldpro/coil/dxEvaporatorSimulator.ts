@@ -37,7 +37,11 @@ function estimateFaceArea(input: CoilSimulatorInput): number | null {
   return heightM * lengthM;
 }
 
-export function simulateDxEvaporator(input: CoilSimulatorInput): CoilSimulatorResult {
+export function simulateDxEvaporator(
+  input: CoilSimulatorInput,
+  options: DxSimulatorOptions = {},
+): CoilSimulatorResult {
+  const cal = options.calibration ?? NEUTRAL_CALIBRATION;
   const warnings: string[] = [];
   const air = input.air;
   const ref = input.refrigerant;
