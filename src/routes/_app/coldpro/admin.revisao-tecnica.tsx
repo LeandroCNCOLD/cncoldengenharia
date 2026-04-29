@@ -378,7 +378,8 @@ function TechnicalReviewPage() {
                   />
                   <div className="flex gap-2">
                     <Button onClick={handleApprove} className="flex-1">
-                      <CheckCircle2 className="mr-1 h-4 w-4" /> Aprovar
+                      <CheckCircle2 className="mr-1 h-4 w-4" />{" "}
+                      {asCnStandard ? "Aprovar (CN Std)" : "Aprovar"}
                     </Button>
                     <Button
                       onClick={handleReject}
