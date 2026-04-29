@@ -245,6 +245,43 @@ function ColdproImportPage() {
               para as tabelas técnicas (geometrias, fatores, refrigerantes, polinômios, compressores,
               ventiladores, correlações).
             </p>
+            <div className="flex items-center justify-between gap-2 pt-2">
+              <p className="text-xs text-muted-foreground">
+                Importa CSVs do ZIP e abas do XLSX para <code>unilab_source_files</code> e{" "}
+                <code>unilab_source_rows</code>. Bancos de backup/GUI/MRU são ignorados.
+              </p>
+              <Button onClick={handleImport} disabled={importing} size="sm">
+                {importing ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Database className="mr-1.5 h-3.5 w-3.5" />
+                )}
+                Importar agora
+              </Button>
+            </div>
+
+            {importResult && (
+              <div className="mt-2 rounded border bg-muted/40 p-3 text-xs space-y-1">
+                <div className="flex gap-4">
+                  <span><strong>{importResult.filesIngested}</strong> tabelas</span>
+                  <span><strong>{importResult.rowsIngested.toLocaleString()}</strong> linhas</span>
+                  <span className="text-muted-foreground">{importResult.filesSkipped} ignoradas</span>
+                  <span className={importResult.errors.length ? "text-destructive" : "text-muted-foreground"}>
+                    {importResult.errors.length} erro(s)
+                  </span>
+                </div>
+                {importResult.errors.length > 0 && (
+                  <details className="mt-1">
+                    <summary className="cursor-pointer text-destructive">Ver erros</summary>
+                    <ul className="mt-1 max-h-40 list-disc overflow-y-auto pl-5">
+                      {importResult.errors.slice(0, 50).map((err, i) => (
+                        <li key={i} className="font-mono">{err}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
