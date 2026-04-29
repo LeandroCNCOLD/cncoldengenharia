@@ -104,12 +104,18 @@ export interface PhysicalSimpleBreakdown {
   uWm2k: number;
   externalAreaM2: number;
   internalAreaM2: number;
+  /** Área de troca efetiva = A_tubos + A_aletas × η_fin (m²) */
+  effectiveAreaM2: number;
+  /** Eficiência de aleta usada (0..1) */
+  finEfficiency: number;
   uaWk: number;
   lmtdK: number;
   qWraw: number;            // antes de Unilab e calibração
   qWafterUnilab: number;    // após fatores Unilab, antes da calibração fina
   qWcalibrated: number;     // após calibração fina
   airSideH: number;
+  /** Correlação utilizada para h_ar */
+  airSideCorrelation: AirHtcCorrelation;
   refSideH: number;
   faceVelocityMs: number | null;
   airMassFlowKgs: number | null;
