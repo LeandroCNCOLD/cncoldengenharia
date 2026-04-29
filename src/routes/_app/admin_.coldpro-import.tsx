@@ -111,6 +111,34 @@ function ColdproImportPage() {
     }
   }
 
+  async function handleImport() {
+    if (!batchId) return;
+    const zipPath = uploaded.find((u) => u.kind === "zip")?.storagePath;
+    const xlsxPath = uploaded.find((u) => u.kind === "polynomials")?.storagePath;
+    if (!zipPath && !xlsxPath) {
+      toast.error("Envie ao menos o ZIP ou o XLSX antes de importar.");
+      return;
+    }
+    setImporting(true);
+    setImportResult(null);
+    try {
+      const res = await runImport({ data: { batchId, zipPath, xlsxPath } });
+      setImportResult({
+        filesIngested: res.filesIngested,
+        rowsIngested: res.rowsIngested,
+        filesSkipped: res.filesSkipped,
+        errors: res.errors,
+      });
+      toast.success("Import concluído", {
+        description: `${res.filesIngested} tabelas, ${res.rowsIngested} linhas. ${res.errors.length} erro(s).`,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      toast.error("Falha no import", { description: msg });
+    } finally {
+      setImporting(false);
+    }
+  }
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
