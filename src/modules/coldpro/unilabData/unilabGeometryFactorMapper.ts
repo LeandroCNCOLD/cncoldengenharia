@@ -6,6 +6,8 @@ export const GEOMETRY_TABLE_BY_MODE: Record<UnilabCalculationMode, string> = {
   heating: 'Tbl_GeometrieRiscaldamento',
   condensing: 'Tbl_GeometrieCondensazione',
   direct_expansion: 'Tbl_GeometrieEspansioneDiretta',
+  pump_evaporator: 'Tbl_GeometrieEvaporatoriaPompa',
+  steam: 'Tbl_GeometrieVapore',
 };
 
 export function mapUnilabGeometryRow(
