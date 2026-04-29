@@ -51,6 +51,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Administração", to: "/admin", icon: Settings, adminOnly: true },
   { label: "Importar Unilab", to: "/admin/unilab-import", icon: Upload, adminOnly: true },
   { label: "Banco Técnico", to: "/coldpro/admin/banco-tecnico", icon: Database, adminOnly: true },
+  { label: "Revisão Técnica", to: "/coldpro/admin/revisao-tecnica", icon: Database, adminOnly: true },
   {
     label: "Banco de Dados",
     to: "/admin/database",
