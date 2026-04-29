@@ -368,7 +368,7 @@ async function mapFans(): Promise<MapperResult> {
     const batch = modelRows.slice(i, i + 200);
     const { data, error } = await supabaseAdmin
       .from("fan_models")
-      .insert(batch.map((b) => b.row))
+      .insert(batch.map((b) => b.row) as never)
       .select("id, raw_json");
     if (error) {
       result.errors.push(`fan_models batch ${i}: ${error.message}`);
@@ -418,7 +418,7 @@ async function mapFans(): Promise<MapperResult> {
     }
     for (let i = 0; i < rows.length; i += 500) {
       const batch = rows.slice(i, i + 500);
-      const { error } = await supabaseAdmin.from("fan_curves").insert(batch);
+      const { error } = await supabaseAdmin.from("fan_curves").insert(batch as never);
       if (error) result.errors.push(`${src.table} insert: ${error.message}`);
       else result.inserted += batch.length;
     }
