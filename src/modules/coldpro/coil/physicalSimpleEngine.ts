@@ -73,8 +73,9 @@ export interface PhysicalSimpleBreakdown {
   internalAreaM2: number;
   uaWk: number;
   lmtdK: number;
-  qWraw: number;            // antes da calibração
-  qWcalibrated: number;     // após calibração
+  qWraw: number;            // antes de Unilab e calibração
+  qWafterUnilab: number;    // após fatores Unilab, antes da calibração fina
+  qWcalibrated: number;     // após calibração fina
   airSideH: number;
   refSideH: number;
   faceVelocityMs: number | null;
@@ -87,12 +88,16 @@ export interface PhysicalSimpleBreakdown {
   airDpCorrectionFactor: number;
   refDpCorrectionFactor: number;
   uaCorrectionFactor: number;
+  // Fatores reais Unilab usados (ou null quando ausentes)
+  unilabFactors: AppliedUnilabFactors | null;
 }
 
 export interface PhysicalSimpleResult extends CoilSimulatorResult {
   engine: "physical_simple";
   derived: GeometryDerived;
   breakdown: PhysicalSimpleBreakdown;
+  /** Fatores Unilab aplicados (espelhado para componentes da UI). */
+  unilabFactors: AppliedUnilabFactors | null;
 }
 
 export function simulatePhysicalSimple(
