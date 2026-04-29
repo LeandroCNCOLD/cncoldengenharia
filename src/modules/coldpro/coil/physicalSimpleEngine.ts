@@ -15,11 +15,22 @@ import type { CoilSimulatorInput, CoilSimulatorResult } from "./coilSimulatorTyp
 import { deriveCoilGeometry, type GeometryDerived } from "./geometryDerived";
 import type { CalibrationFactors } from "./coilEngineTypes";
 import { NEUTRAL_CALIBRATION } from "./coilEngineTypes";
+import { computeUnilabFactors } from "./unilabFactorApplication";
+import type {
+  AppliedUnilabFactors,
+  UnilabGeometryFactor,
+} from "../unilabData/types";
 
 const W_TO_KCALH = 0.859845;
 
 export interface PhysicalSimpleOptions {
   calibration?: CalibrationFactors;
+  /** Fatores reais de geometria do Unilab (aplicados ANTES da calibração fina). */
+  unilabGeometryFactor?: UnilabGeometryFactor | null;
+  /** Velocidade frontal nominal (para ajuste por slope). */
+  nominalFaceVelocityMs?: number;
+  /** Indicador de coil molhado (latente significativo) para escolher fator de ar correto. */
+  isWetCoil?: boolean;
 }
 
 interface MaterialProps { kTube: number; kFin: number }
