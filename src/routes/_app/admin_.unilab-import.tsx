@@ -22,7 +22,7 @@ import {
   upsertUnilabGeometryFactors,
 } from "@/modules/coldpro/unilabData/unilabGeometryFactorRepository";
 
-export const Route = createFileRoute("/_app/admin/unilab-import")({
+export const Route = createFileRoute("/_app/admin_/unilab-import")({
   component: UnilabImportPage,
 });
 
