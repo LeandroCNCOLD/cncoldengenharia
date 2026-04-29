@@ -11,6 +11,11 @@ import {
 } from "@/lib/coldpro/component-items";
 import { useAuth } from "@/lib/auth";
 import { UnilabImportForm } from "@/components/coldpro/unilab-import-form";
+import { CalibrationPanel } from "@/components/coldpro/calibration-panel";
+import {
+  buildDatasheetFromCoilRow,
+  buildInputFromCoilRow,
+} from "@/lib/coldpro/coil-row-mapper";
 
 interface Props {
   equipmentProjectId: string;
