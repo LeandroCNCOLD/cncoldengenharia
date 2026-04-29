@@ -46,9 +46,10 @@ export function applyCalibrationToResult(
   result: CoilSimulatorResult,
   calibration: CalibrationFactors,
 ): CoilSimulatorResult {
-  const cap = calibration.capacityCorrectionFactor;
-  const a = calibration.airDpCorrectionFactor;
-  const r = calibration.refDpCorrectionFactor;
+  const normalized = normalizeCalibrationFactors(calibration);
+  const cap = normalized.capacityCorrectionFactor;
+  const a = normalized.airPressureDropFactor;
+  const r = normalized.refrigerantPressureDropFactor;
   return {
     ...result,
     capacityW: result.capacityW * cap,
