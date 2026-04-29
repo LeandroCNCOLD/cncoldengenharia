@@ -141,9 +141,13 @@ function TechnicalReviewPage() {
     if (list.length === 0) return;
     setBulkBusy(true);
     try {
-      const res = await approveMappedBulk(list, user?.id ?? null);
+      const res = await approveMappedBulk(list, user?.id ?? null, {
+        context: asCnStandard ? "cn_standard" : "reference",
+      });
       if (res.failed === 0) {
-        toast.success(`${res.ok} registros aprovados.`);
+        toast.success(
+          `${res.ok} registros aprovados${asCnStandard ? " como padrão CN" : ""}.`,
+        );
       } else {
         toast.warning(
           `${res.ok} aprovados, ${res.failed} falharam${res.errors[0] ? `: ${res.errors[0]}` : "."}`,
