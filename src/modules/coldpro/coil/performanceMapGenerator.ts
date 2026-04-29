@@ -116,6 +116,12 @@ export interface PerformanceMapResult {
   points: PerformancePoint[];
   summary: PerformanceMapSummary;
   nominalValidation: NominalValidation;
+  /** Assinatura do motor híbrido no ponto nominal (vincula mapa ao modelo). */
+  modelSignature?: string | null;
+  /** true quando o mapa foi bloqueado pelo guard rail nominal. */
+  blocked?: boolean;
+  /** Mensagem do bloqueio (quando blocked=true). */
+  blockReason?: string | null;
 }
 
 export interface GeneratePerformanceMapParams {
