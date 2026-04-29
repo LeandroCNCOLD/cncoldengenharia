@@ -230,9 +230,9 @@ export async function simulateSystemVapcyc(
       currentA: comp.currentA,
       copHeating: comp.copHeating,
       unitSystem: comp.unitSystem,
-      sourceDb: model.source_db,
-      sourceTableKey: model.source_table_key,
-    },
+      sourceDb: model.source_db ?? '',
+      sourceTableKey: model.source_table_key ?? '',
+    } as Record<string, unknown>,
     energyBalance: {
       qEvapW, qCondW, wCompW, residualW, relativeError: relErr, valid: balanceValid,
     },
