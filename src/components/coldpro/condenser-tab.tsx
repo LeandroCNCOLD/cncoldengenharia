@@ -60,21 +60,40 @@ export function CondenserTab({ equipmentProjectId }: Props) {
         </Card>
       ) : (
         items.map((c) => (
-          <UnilabImportForm
-            key={c.id}
-            componentId={c.id}
-            componentCode={c.code}
-            componentStatus={c.status}
-            expectedKind="condenser"
-            queryKey={["cond-model", c.id]}
-            fetchRow={async () => (await getCondenserCoilModel(c.id)) as Record<string, unknown> | null}
-            upsertRow={async (patch) => {
-              const r = await upsertCondenserCoilModel(patch as never);
-              return r as unknown as Record<string, unknown>;
-            }}
-          />
+          <div key={c.id} className="space-y-3">
+            <UnilabImportForm
+              componentId={c.id}
+              componentCode={c.code}
+              componentStatus={c.status}
+              expectedKind="condenser"
+              queryKey={["cond-model", c.id]}
+              fetchRow={async () => (await getCondenserCoilModel(c.id)) as Record<string, unknown> | null}
+              upsertRow={async (patch) => {
+                const r = await upsertCondenserCoilModel(patch as never);
+                return r as unknown as Record<string, unknown>;
+              }}
+            />
+            <CondenserCalibrationSlot componentId={c.id} />
+          </div>
         ))
       )}
     </div>
+  );
+}
+
+function CondenserCalibrationSlot({ componentId }: { componentId: string }) {
+  const { data: row } = useQuery({
+    queryKey: ["cond-model", componentId],
+    queryFn: async () => (await getCondenserCoilModel(componentId)) as Record<string, unknown> | null,
+  });
+  const datasheet = buildDatasheetFromCoilRow(row, "condenser");
+  const input = buildInputFromCoilRow(row, "condenser");
+  return (
+    <CalibrationPanel
+      componentItemId={componentId}
+      coilType="condenser"
+      datasheet={datasheet}
+      simulationInput={input}
+    />
   );
 }
