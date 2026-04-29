@@ -72,13 +72,23 @@ export async function countMappedByStatus(): Promise<CountByStatus> {
   return out;
 }
 
-/** Conta componentes finais aprovados na biblioteca universal. */
-export async function countApprovedComponents(byEntity?: TechnicalEntityType) {
+/**
+ * Conta componentes finais aprovados na biblioteca universal.
+ * Por padrão, conta apenas o que o motor usa (`cn_standard` + `validated`).
+ * Para a contagem geral, passe `includeAllContexts: true`.
+ */
+export async function countApprovedComponents(
+  byEntity?: TechnicalEntityType,
+  opts: { includeAllContexts?: boolean } = {},
+) {
   let q = supabase
     .from("technical_components")
     .select("id", { count: "exact", head: true })
     .in("status", ["validated", "approved"]);
   if (byEntity) q = q.eq("entity_type", byEntity);
+  if (!opts.includeAllContexts) {
+    q = q.in("context", ENGINE_USABLE_CONTEXTS as unknown as string[]);
+  }
   const { count } = await q;
   return count ?? 0;
 }
