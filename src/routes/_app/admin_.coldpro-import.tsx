@@ -1,7 +1,8 @@
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Upload, Loader2, FileArchive, FileSpreadsheet, FileText, ArrowLeft } from "lucide-react";
+import { Upload, Loader2, FileArchive, FileSpreadsheet, FileText, ArrowLeft, Database } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { importColdproPackage } from "@/server/coldproImport.functions";
 
 export const Route = createFileRoute("/_app/admin_/coldpro-import")({
   component: ColdproImportPage,
@@ -26,6 +28,7 @@ interface UploadedRef {
 
 function ColdproImportPage() {
   const { isAdmin, loading, user } = useAuth();
+  const runImport = useServerFn(importColdproPackage);
 
   const [zipFile, setZipFile] = useState<File | null>(null);
   const [indexFile, setIndexFile] = useState<File | null>(null);
@@ -33,8 +36,15 @@ function ColdproImportPage() {
   const [version, setVersion] = useState("");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [uploaded, setUploaded] = useState<UploadedRef[]>([]);
   const [batchId, setBatchId] = useState<string | null>(null);
+  const [importResult, setImportResult] = useState<null | {
+    filesIngested: number;
+    rowsIngested: number;
+    filesSkipped: number;
+    errors: string[];
+  }>(null);
 
   if (loading) return null;
   if (!isAdmin) return <Navigate to="/dashboard" />;
@@ -101,6 +111,34 @@ function ColdproImportPage() {
     }
   }
 
+  async function handleImport() {
+    if (!batchId) return;
+    const zipPath = uploaded.find((u) => u.kind === "zip")?.storagePath;
+    const xlsxPath = uploaded.find((u) => u.kind === "polynomials")?.storagePath;
+    if (!zipPath && !xlsxPath) {
+      toast.error("Envie ao menos o ZIP ou o XLSX antes de importar.");
+      return;
+    }
+    setImporting(true);
+    setImportResult(null);
+    try {
+      const res = await runImport({ data: { batchId, zipPath, xlsxPath } });
+      setImportResult({
+        filesIngested: res.filesIngested,
+        rowsIngested: res.rowsIngested,
+        filesSkipped: res.filesSkipped,
+        errors: res.errors,
+      });
+      toast.success("Import concluído", {
+        description: `${res.filesIngested} tabelas, ${res.rowsIngested} linhas. ${res.errors.length} erro(s).`,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      toast.error("Falha no import", { description: msg });
+    } finally {
+      setImporting(false);
+    }
+  }
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -202,11 +240,43 @@ function ColdproImportPage() {
                 </span>
               </div>
             ))}
-            <p className="pt-2 text-xs text-muted-foreground">
-              Próxima etapa (8b): leitura do índice, descompactação do ZIP, parsing do XLSX e mapeamento
-              para as tabelas técnicas (geometrias, fatores, refrigerantes, polinômios, compressores,
-              ventiladores, correlações).
-            </p>
+            <div className="flex items-center justify-between gap-2 pt-2">
+              <p className="text-xs text-muted-foreground">
+                Importa CSVs do ZIP e abas do XLSX para <code>unilab_source_files</code> e{" "}
+                <code>unilab_source_rows</code>. Bancos de backup/GUI/MRU são ignorados.
+              </p>
+              <Button onClick={handleImport} disabled={importing} size="sm">
+                {importing ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Database className="mr-1.5 h-3.5 w-3.5" />
+                )}
+                Importar agora
+              </Button>
+            </div>
+
+            {importResult && (
+              <div className="mt-2 rounded border bg-muted/40 p-3 text-xs space-y-1">
+                <div className="flex gap-4">
+                  <span><strong>{importResult.filesIngested}</strong> tabelas</span>
+                  <span><strong>{importResult.rowsIngested.toLocaleString()}</strong> linhas</span>
+                  <span className="text-muted-foreground">{importResult.filesSkipped} ignoradas</span>
+                  <span className={importResult.errors.length ? "text-destructive" : "text-muted-foreground"}>
+                    {importResult.errors.length} erro(s)
+                  </span>
+                </div>
+                {importResult.errors.length > 0 && (
+                  <details className="mt-1">
+                    <summary className="cursor-pointer text-destructive">Ver erros</summary>
+                    <ul className="mt-1 max-h-40 list-disc overflow-y-auto pl-5">
+                      {importResult.errors.slice(0, 50).map((err, i) => (
+                        <li key={i} className="font-mono">{err}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
