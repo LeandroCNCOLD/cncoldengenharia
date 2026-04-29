@@ -376,6 +376,7 @@ export function generateCoilPerformanceMap(
 
   let nominalSimCapW = 0;
   let nominalRawCapW = 0;
+  let modelSignature: string | null = null;
   try {
     const nominalInput: CoilSimulatorInput = {
       ...baseInput,
@@ -386,13 +387,21 @@ export function generateCoilPerformanceMap(
       },
       refrigerant: { ...baseInput.refrigerant, refTempC: nominal.refTempC },
     };
-    nominalRawCapW = runSim(nominalInput, engine, NEUTRAL_CALIBRATION, unilabFactor, nominalFaceVelocityMs).capacityW;
-    nominalSimCapW = runSim(nominalInput, engine, cal, unilabFactor, nominalFaceVelocityMs, {
-      componentItemId: params.componentItemId,
-      calibrationId: params.calibrationId,
-      nominalCapacityW: datasheetCapW,
-      calibrationSignature: params.calibrationSignature ?? null,
-    }).capacityW;
+    if (engine === "hybrid") {
+      const rRaw = runHybridSim(nominalInput, NEUTRAL_CALIBRATION, null);
+      const rCal = runHybridSim(nominalInput, cal, hybridCal);
+      nominalRawCapW = rRaw.result.capacityW;
+      nominalSimCapW = rCal.result.capacityW;
+      modelSignature = rCal.signature || rRaw.signature || null;
+    } else {
+      nominalRawCapW = runSim(nominalInput, engine, NEUTRAL_CALIBRATION, unilabFactor, nominalFaceVelocityMs).capacityW;
+      nominalSimCapW = runSim(nominalInput, engine, cal, unilabFactor, nominalFaceVelocityMs, {
+        componentItemId: params.componentItemId,
+        calibrationId: params.calibrationId,
+        nominalCapacityW: datasheetCapW,
+        calibrationSignature: params.calibrationSignature ?? null,
+      }).capacityW;
+    }
   } catch {
     /* validation reports 0 */
   }
