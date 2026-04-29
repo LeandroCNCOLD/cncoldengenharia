@@ -113,6 +113,63 @@ function TechnicalReviewPage() {
     refresh();
   };
 
+  const toggleOne = (id: string, checked: boolean) => {
+    setCheckedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
+
+  const toggleAll = (checked: boolean) => {
+    setCheckedIds(checked ? new Set(items.map((i) => i.id)) : new Set());
+  };
+
+  const allChecked = items.length > 0 && checkedIds.size === items.length;
+  const someChecked = checkedIds.size > 0 && !allChecked;
+
+  const handleBulkApprove = async () => {
+    const list = items.filter((i) => checkedIds.has(i.id));
+    if (list.length === 0) return;
+    setBulkBusy(true);
+    try {
+      const res = await approveMappedBulk(list, user?.id ?? null);
+      if (res.failed === 0) {
+        toast.success(`${res.ok} registros aprovados.`);
+      } else {
+        toast.warning(
+          `${res.ok} aprovados, ${res.failed} falharam${res.errors[0] ? `: ${res.errors[0]}` : "."}`,
+        );
+      }
+      setCheckedIds(new Set());
+      setSelected(null);
+      refresh();
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleBulkReject = async () => {
+    const ids = Array.from(checkedIds);
+    if (ids.length === 0) return;
+    if (!rejectReason.trim()) {
+      toast.error("Informe um motivo para rejeitar em massa.");
+      return;
+    }
+    setBulkBusy(true);
+    try {
+      await rejectMappedBulk(ids, user?.id ?? null, rejectReason.trim());
+      toast.success(`${ids.length} registros rejeitados.`);
+      setRejectReason("");
+      setCheckedIds(new Set());
+      setSelected(null);
+      refresh();
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-6 p-6">
       <PageHeader
