@@ -267,3 +267,63 @@ export async function remapRaw(
     .single();
   return (data as TechnicalMappedRecord | null) ?? null;
 }
+
+export interface ListComponentsOptions {
+  entityType?: TechnicalEntityType;
+  source?: TechnicalSource | "ALL";
+  context?: TechnicalContext | "ALL";
+  search?: string;
+  limit?: number;
+}
+
+/** Lista componentes da biblioteca universal com filtros por source/context. */
+export async function listApprovedComponents(
+  opts: ListComponentsOptions = {},
+): Promise<TechnicalComponent[]> {
+  const limit = opts.limit ?? 500;
+  let q = supabase
+    .from("technical_components")
+    .select("*")
+    .in("status", ["validated", "approved"])
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (opts.entityType) q = q.eq("entity_type", opts.entityType);
+  if (opts.source && opts.source !== "ALL") q = q.eq("source", opts.source);
+  if (opts.context && opts.context !== "ALL") q = q.eq("context", opts.context);
+  if (opts.search && opts.search.trim()) {
+    const term = `%${opts.search.trim()}%`;
+    q = q.or(
+      `manufacturer.ilike.${term},model.ilike.${term},code.ilike.${term}`,
+    );
+  }
+
+  const { data, error } = await q;
+  if (error) throw new Error(error.message);
+  return (data ?? []) as TechnicalComponent[];
+}
+
+/** Atualiza o `context` de vários componentes em uma única chamada. */
+export async function setComponentsContextBulk(
+  componentIds: string[],
+  context: TechnicalContext,
+): Promise<void> {
+  if (componentIds.length === 0) return;
+  const { error } = await supabase
+    .from("technical_components")
+    .update({ context })
+    .in("id", componentIds);
+  if (error) throw new Error(error.message);
+}
+
+/** Atualiza source/context de um único componente. */
+export async function updateComponentClassification(
+  componentId: string,
+  patch: Partial<{ source: TechnicalSource; context: TechnicalContext }>,
+): Promise<void> {
+  const { error } = await supabase
+    .from("technical_components")
+    .update(patch)
+    .eq("id", componentId);
+  if (error) throw new Error(error.message);
+}
