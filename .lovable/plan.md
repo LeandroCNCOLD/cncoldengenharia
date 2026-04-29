@@ -1,239 +1,201 @@
+## Iteração crítica: Verify + Calibração ponto-a-ponto Unilab
 
-# Coil Simulator — Fundação Técnica (Iteração 1)
-
-## Princípio
-Em vez de saltar para correlações avançadas, criamos uma **fundação calibrável e auditável**: bancos técnicos, geometria derivada, motor físico simples (`Q = U·A·LMTD`) e comparação lado a lado contra Unilab e contra o motor empírico atual. Nada do que existe hoje é removido.
-
-Toggle de motor:
-```
-engine: "empirical" | "physical_simple" | "physical_advanced"
-```
-Apenas **`empirical`** (já existe) e **`physical_simple`** (novo) entram em operação. `physical_advanced` fica reservado nos tipos para fases futuras (Wang, Cavallini, Kandlikar, etc.).
+A fundação já está pronta (tabela `coil_calibrations`, motor `physical_simple` aplicando os 3 fatores internamente, função `calibrateAgainstReference`, botão "Calibrar c/ Unilab" no header do Coil Simulator). Esta iteração fecha as lacunas para cumprir 100% dos 11 pontos do briefing.
 
 ---
 
-## 1. Bancos técnicos (novas tabelas)
+### 1. Schema — `coil_calibrations`
 
-### `coil_materials`
-- `id`, `key` (cobre, aluminio, aco_carbono, inox, microfin, aleta_lisa, aleta_corrugada, aleta_louvered)
-- `name`, `kind` ("tube" | "fin")
-- `thermal_conductivity_w_mk` (numeric)
-- `density_kg_m3`, `specific_heat_j_kgk`, `roughness_mm`
-- `default_thickness_mm`, `surface_correction_factor`
-- `notes`, `created_at`, `updated_at`
+Adicionar 3 colunas (ALTER TABLE, sem destruir nada):
 
-### `coil_fluids`
-- `id`, `key` (R404A, R507, R134a, R448A, R449A, R410A, R32, R290, R744, R717, AGUA, EG30, PG30)
-- `name`, `family` ("hfc" | "hfo" | "natural" | "secondary")
-- `saturation_table` (jsonb): array `{T_c, Psat_kpa, h_l_kjkg, h_v_kjkg, rho_l, rho_v, mu_l, mu_v, k_l, k_v, cp_l, cp_v}`
-- `gwp`, `notes`
+- `status` text NOT NULL DEFAULT 'draft' CHECK IN ('calibrated','needs_review','draft')
+- `confidence_score` numeric NOT NULL DEFAULT 0.6 CHECK 0..1
+- `calibration_name` text NULL
 
-### `coil_geometries`
-- `id`, `name`, `description`
-- Todos os campos geométricos de `CoilGeometry` (tubos, fileiras, passos, materiais por FK opcional para `coil_materials`).
-- `is_template` (boolean) — geometrias-template reutilizáveis.
-- `created_by`, `created_at`, `updated_at`
+Mais um índice `(component_item_id, created_at DESC)` para acelerar "última calibração ativa".
 
-RLS:
-- SELECT: `authenticated` (todos leem).
-- INSERT/UPDATE/DELETE: apenas `has_role(auth.uid(), 'admin')` para `coil_materials` e `coil_fluids`. `coil_geometries` é livre para `authenticated` criarem suas próprias.
+A tabela continua append-only — nenhuma policy de UPDATE é adicionada.
 
-Seed inicial via migration:
-- Materiais: cobre (k=401), alumínio (k=237), aço carbono (k=50), inox 304 (k=16).
-- Fluidos: R-404A, R-134a, R-448A, R-449A, R-744, R-717, água, EG30 — tabela de saturação simplificada (≈10 pontos por fluido).
+### 2. Motor `physical_simple`
 
-Módulos de leitura cacheada:
-- `src/modules/coldpro/data/materials.ts`
-- `src/modules/coldpro/data/fluids.ts` (com helper `interpFluidProps(fluidKey, T_c)`)
-- `src/modules/coldpro/data/geometries.ts`
+Já aplica `capacityCorrectionFactor`, `airDpCorrectionFactor`, `refDpCorrectionFactor` e `uaCorrectionFactor` internamente. Vou:
 
----
+- Garantir aplicação única: o resultado final já vem com fatores → `applyCalibrationToResult` NUNCA será chamada por cima.
+- Adicionar `heatTransferFactor` no breakdown como alias semântico de `capacityCorrectionFactor` (rastreabilidade).
 
-## 2. Geometria derivada
+### 3. Motores empíricos
 
-Novo módulo `src/modules/coldpro/coil/geometryDerived.ts` com função pura:
-```
-deriveGeometry(g: CoilGeometry) => {
-  totalTubes,             // tubesPerRow * rows - skippedTubes
-  totalTubeLengthM,       // totalTubes * coilLengthMm/1000
-  faceAreaM2,             // (tubesPerRow * tubeSpacingMm) * coilLengthMm / 1e6
-  externalAreaM2,         // π * tubeOd * L_total * (1 + finRatio)
-  internalAreaM2,         // π * tubeId * L_total
-  internalVolumeL,        // π/4 * tubeId² * L_total * 1000
-  finRatio,               // razão área aleta/tubo (estimada de finPitch e geometria)
-  source: { [field]: "calculated" | "imported" | "estimated" }
-}
-```
-Usado em todos os formulários (mostra valores derivados read-only com badge de origem) e dentro do motor físico.
+`dxEvaporatorSimulator.ts` e `dxCondenserSimulator.ts` ganham parâmetro opcional `calibration?: CalibrationFactors`. Quando informado, multiplicam no final:
 
----
-
-## 3. Calibração Unilab — `coil_calibrations`
-
-Tabela:
-- `id`, `component_item_id` (FK lógica para `component_items`)
-- `engine_target` ("physical_simple" | "physical_advanced")
-- `capacity_correction_factor` numeric default 1.0
-- `air_pressure_drop_factor` numeric default 1.0
-- `refrigerant_pressure_drop_factor` numeric default 1.0
-- `heat_transfer_correction_factor` numeric default 1.0
-- `nominal_point` (jsonb) — ponto do datasheet usado: `{Tair_in, RH_in, Tref, airflow, Q_unilab, dPair_unilab, dPref_unilab, U_unilab, A_unilab}`
-- `deviation_before` (jsonb) — `{capacityPct, dPairPct, dPrefPct}` antes da calibração
-- `deviation_after` (jsonb) — `{capacityPct, dPairPct, dPrefPct}` depois
-- `meets_targets` (boolean) — true quando os 3 desvios estão dentro das metas
-- `created_by`, `created_at`, `updated_at`
-
-RLS: `authenticated` SELECT/INSERT/UPDATE.
-
-Função `calibrateAgainstUnilab(componentItemId)`:
-1. Lê o ponto nominal do `evaporator_coil_models` / `condenser_coil_models`.
-2. Roda `physical_simple` no mesmo ponto.
-3. Calcula desvios em Q, ΔP_ar, ΔP_ref.
-4. Resolve fatores: `capacityCorrectionFactor = Q_unilab / Q_calc`, idem para ΔPs, `heatTransferCorrectionFactor` ajusta U se vier do Unilab.
-5. Re-roda com calibração, salva `deviation_after`.
-6. Marca `meets_targets` segundo as metas (ver §6).
-
-UI: na aba do componente, botão **"Calibrar contra Unilab"** mostra a tabela antes/depois e o status das metas.
-
----
-
-## 4. Motor `physical_simple`
-
-Novo arquivo `src/modules/coldpro/coil/physicalSimpleSimulator.ts`. Lógica:
-
-```
-1. Resolve A (área de troca):
-   - Se Unilab forneceu surface_area_m2 → A = imported
-   - Senão → A = derived.externalAreaM2 (estimated)
-
-2. Resolve U (coeficiente global):
-   - Se Unilab forneceu global_coeff_w e A → U = global_coeff_w / A (imported)
-   - Senão → U estimado por faixa típica:
-       evap DX ar: U ≈ 25–45 W/m²K (default 35)
-       cond ar:    U ≈ 25–40 W/m²K (default 30)
-     ajustado por airflowFactor^0.6 (estimated)
-
-3. Calcula LMTD:
-   - Evap fase única: ΔT_ml = ((Tar_in − Tref) − (Tar_out − Tref)) / ln(...)
-     Quando Tar_out não fornecido, estima por balanço com airflow + cp_ar do banco.
-   - Evap com mudança de fase: usa ΔH_ml / cp_ar (preparação para Fase 3 psicrometria).
-   - Cond: análogo com Tref constante.
-
-4. Q = U · A · LMTD · capacityCorrectionFactor · heatTransferCorrectionFactor
-
-5. ΔP_ar e ΔP_ref:
-   - Se Unilab forneceu → usa o valor importado * fator de calibração.
-   - Senão → estimativa atual (já existente) * fator.
-
-6. Saída inclui:
-   { engine, U, A, LMTD, capacityW, sources: {U, A, dPair, dPref} }
+```text
+capacityW           *= capacityCorrectionFactor
+airPressureDropPa   *= airDpCorrectionFactor
+refPressureDropKpa  *= refDpCorrectionFactor
+sensibleW / latentW *= capacityCorrectionFactor (proporcional)
 ```
 
-Tipos atualizados:
+### 4. Utilitário `coil-calibrations.ts`
+
+Adicionar:
+
+- `getActiveCalibrationForComponent(componentItemId)` — última calibração por `created_at DESC LIMIT 1`.
+- `getActiveCalibrationsForComponent(componentItemId)` — histórico (já existe como `listCoilCalibrations`, vou só renomear/expor).
+- `applyCalibrationToResult(result, calibration)` — multiplicador puro. Documentado: USAR APENAS no engine empírico, NUNCA depois do `physical_simple`.
+- `saveCoilCalibration` ganha campos `status`, `confidence_score`, `calibration_name`.
+- `factorsFromRow(row)` — converte registro do banco em `CalibrationFactors`.
+
+### 5. `coilCalibration.ts` — novo `calibrateCoilFromDatasheet`
+
+Substitui (mantendo compatibilidade) `calibrateAgainstReference`. Assinatura:
+
 ```ts
-type CoilEngine = "empirical" | "physical_simple" | "physical_advanced";
-type FieldOrigin = "imported" | "calculated" | "calibrated" | "estimated" | "manual";
-
-interface CoilSimulatorResult {
-  // ... existentes
-  engine: CoilEngine;
-  U?: number;
-  areaM2?: number;
-  lmtdK?: number;
-  fieldSources?: Record<string, FieldOrigin>;
-}
+calibrateCoilFromDatasheet({
+  input: CoilSimulatorInput,
+  datasheet: {
+    capacityW: number;
+    airInletTempC?: number;
+    airOutletTempC?: number;
+    evaporationTempC?: number;
+    condensationTempC?: number;
+    airflowM3h?: number;
+    airPressureDropPa?: number | null;
+    refrigerantPressureDropKpa?: number | null;
+    refrigerant?: string;
+    coilType: "evaporator" | "condenser";
+  };
+})
 ```
 
-`physicalAdvancedSimulator.ts` é criado **vazio** (stub) só para reservar o ponto de extensão.
+Fluxo:
 
----
-
-## 5. Comparativo na tela Coil Simulator
-
-Nova aba **"Comparativo"** ao lado de Resultados:
-
+```text
+1. baseline = simulatePhysicalSimple(input, NEUTRAL_CALIBRATION)
+2. factors = clamp({
+     capacity = ds.capacityW / baseline.capacityW,
+     airDp    = (ds.airDp && baseline.airDp) ? ds.airDp / baseline.airDp : 1,
+     refDp    = (ds.refDp && baseline.refDp) ? ds.refDp / baseline.refDp : 1,
+     ua       = 1,
+   }, 0.3, 3.0)
+   heatTransferFactor = factors.capacity
+3. calibrated = simulatePhysicalSimple(input, factors)
+4. devBefore / devAfter = (val - ds) / ds * 100
+5. status = "calibrated" se:
+     |devAfter.capacity| ≤ 5 AND
+     (ds.airDp ausente OR |devAfter.airDp| ≤ 10) AND
+     (ds.refDp ausente OR |devAfter.refDp| ≤ 15)
+   senão "needs_review"
+6. confidence = confidenceScoreFor(status, 1)
+7. retorna { status, confidenceScore, factors, heatTransferFactor,
+             baselineResult, calibratedResult,
+             deviationsBefore, deviationsAfter, warnings }
 ```
-+----------------------+-----------+-----------+----------------+
-|                      |  Unilab   | Empírico  | Physical Simple|
-+----------------------+-----------+-----------+----------------+
-| Capacidade (kW)      |   12.40   |   11.82   |     12.05      |
-| Desvio %             |     —     |   −4.7%   |     −2.8%      |
-| ΔP ar (Pa)           |   85      |   72      |     91         |
-| Desvio %             |     —     |  −15.3%   |    +7.1%       |
-| ΔP refrig. (kPa)     |   18      |   18*     |     21         |
-| Desvio %             |     —     |    0%*    |    +16.7%      |
-| U (W/m²K)            |   32.1    |     —     |     30.4       |
-| Área (m²)            |   8.7     |     —     |     8.7        |
-+----------------------+-----------+-----------+----------------+
-* empírico copia ΔP do datasheet — não é cálculo independente
+
+Regras enforced:
+- ΔP ar/refrig ausente → fator = 1.0, alvo não validado, sem warning falso.
+- Nunca inventa dado; nunca toca `raw_fields`.
+
+### 6. Painel reutilizável `calibration-panel.tsx`
+
+Novo componente em `src/components/coldpro/calibration-panel.tsx`:
+
+```text
+Props: { componentItemId, coilType, nominalReference, simulationInput }
+
+Layout:
+- Header: badge status (Calibrado / Revisão / Sem calibração)
+          + barra de confiança (Progress 0..100%)
+- Tabela "Antes vs Depois":
+    Métrica          | Antes  | Depois | Meta
+    Capacidade       | +18.4% | -2.1%  | ≤5%
+    ΔP ar            | …      | …      | ≤10%
+    ΔP refrigerante  | …      | …      | ≤15%
+- Tabela "Fatores aplicados":
+    Capacidade        ×1.184
+    ΔP ar             ×0.95
+    ΔP refrigerante   ×1.10
+    Heat transfer     ×1.184
+- Botões:
+    [ Calibrar com datasheet ]   (disabled se sem nominalReference)
+    [ Recalibrar ]               (idem, mas explícito)
+- Histórico (últimas 5):
+    data · usuário · status · |ΔQ| pós
 ```
 
-Linha "Status metas" indica em verde/vermelho se as 3 metas (§6) foram atendidas.
+Usa `useQuery` para `getActiveCalibrationForComponent` e `useMutation` para chamar `calibrateCoilFromDatasheet` + `saveCoilCalibration`.
 
-Toggle no header: **Motor: [ Empírico | Físico Simples | Comparar ambos ]** — modo "Comparar" calcula os dois e exibe a tabela.
+### 7. Integração nas abas Evaporador/Condensador
 
----
+`src/components/coldpro/evaporator-tab.tsx` e `condenser-tab.tsx`: após o bloco de campos técnicos, montar:
 
-## 6. Metas de aderência (após calibração)
+```tsx
+<CalibrationPanel
+  componentItemId={item.id}
+  coilType="evaporator"
+  nominalReference={{
+    capacityW: model.nominal_capacity_w,
+    airInletTempC: model.nominal_air_temp_in_c,
+    evaporationTempC: model.nominal_evap_temp_c,  // ou condensationTempC
+    airflowM3h: model.nominal_airflow_m3h,
+    airPressureDropPa: model.air_pressure_drop_pa,
+    refrigerantPressureDropKpa: model.refrigerant_pressure_drop_kpa,
+    refrigerant: model.refrigerant,
+  }}
+  simulationInput={buildInputFromModel(model)}
+/>
+```
 
-Validadas no painel de calibração e na aba Comparativo:
-- Capacidade: erro ≤ **5%**
-- ΔP ar: erro ≤ **10%**
-- ΔP refrigerante: erro ≤ **15%**
+`buildInputFromModel` é um helper local que monta `CoilSimulatorInput` a partir do registro `evaporator_coil_models` / `condenser_coil_models`.
 
-`meets_targets = true` apenas quando os três passam.
+### 8. Header do Coil Simulator
 
----
+Em `src/routes/_app/coldpro/equipamentos/$id/coil-simulator.tsx`:
 
-## 7. Rastreabilidade (origem de campo)
+- Substitui o `<Alert>` atual de calibração por uma faixa enxuta com:
+  - Badge de status
+  - "Confiança: 85%"
+  - "Motor: Físico simples / Empírico"
+  - Link "ver detalhes" → expande tabela de fatores
+- Garante que `handleCalculate`:
+  - `physical_simple`: passa calibração para o motor (já faz)
+  - `empirical`: chama `applyCalibrationToResult(empResult, calibration)` quando há calibração ativa
+  - **Nunca** ambos.
 
-Toda saída do motor e toda linha do componente carrega `field_sources: Record<string, FieldOrigin>` com:
-- `imported` — veio do PDF Unilab
-- `calculated` — derivado por fórmula no front (ex.: área frontal)
-- `calibrated` — corrigido pelo `coil_calibrations`
-- `estimated` — chute por faixa típica (default)
-- `manual` — usuário sobrescreveu
+### 9. Regras de imutabilidade já garantidas
 
-UI: cada campo numérico nos resultados mostra um pequeno **badge colorido** com a origem (já existe componente parecido em `unilab-import-form.tsx` — vamos reaproveitar).
+- `coil_calibrations` sem policy de UPDATE.
+- `raw_fields` dos `*_coil_models` nunca tocados pela calibração.
+- Snapshots (`inputs_snapshot`, `outputs_snapshot`) capturados em cada calibração.
+- Recalibrar = INSERT novo registro; o anterior fica para histórico.
 
----
+### 10. Critérios de validação (built-in)
 
-## Entregáveis desta iteração
+A função retorna `meetsTargets` baseada em:
+- Capacidade ≤ 5%
+- ΔP ar ≤ 10% (só se presente no datasheet)
+- ΔP refrigerante ≤ 15% (só se presente no datasheet)
 
-**Migration**
-- `coil_materials`, `coil_fluids`, `coil_geometries`, `coil_calibrations` + RLS + seed.
-
-**Módulos**
-- `src/modules/coldpro/data/materials.ts`
-- `src/modules/coldpro/data/fluids.ts`
-- `src/modules/coldpro/data/geometries.ts`
-- `src/modules/coldpro/coil/geometryDerived.ts`
-- `src/modules/coldpro/coil/physicalSimpleSimulator.ts`
-- `src/modules/coldpro/coil/physicalAdvancedSimulator.ts` (stub)
-- `src/modules/coldpro/coil/calibration.ts` (`calibrateAgainstUnilab`, `applyCalibration`)
-- Atualização de `coilSimulatorTypes.ts`: `CoilEngine`, `FieldOrigin`, novos campos no resultado.
-
-**UI**
-- Toggle de motor no Coil Simulator (Empírico / Físico Simples / Comparar).
-- Nova aba **Comparativo** com tabela Unilab × Empírico × Physical Simple + status das metas.
-- Badges de origem nos resultados.
-- Botão **"Calibrar contra Unilab"** nas abas Evaporador e Condensador, abrindo dialog com a tabela antes/depois e salvando em `coil_calibrations`.
-- (Opcional desta iteração) Aba admin **"Bancos"** com leitura de materiais/fluidos. CRUD completo pode ficar para uma próxima passada — para esta iteração basta seed + leitura.
-
-**O que NÃO entra agora**
-- Correlações avançadas (Wang, Cavallini, Kandlikar, Schmidt, Friedel) — ficam em `physical_advanced` (stub).
-- Psicrometria ASHRAE completa — usamos cp_ar do banco e balanço simples.
-- Modo Design — só depois do Verify físico calibrado bater as metas em pelo menos 3 datasheets reais.
-- CRUD admin completo dos bancos.
+Painel mostra explicitamente o status e cada métrica colorida (verde/âmbar/vermelho).
 
 ---
 
-## Detalhes técnicos (referência)
+### Arquivos
 
-- Tudo TypeScript puro, Worker-safe, sem dependências nativas.
-- `evaporator_coil_models.global_coeff_w` e `surface_area_m2` já existem — viram fonte primária de U e A.
-- Calibração não modifica os modelos importados; vive em tabela separada e é aplicada **na hora do cálculo**.
-- Histórico (`coil_simulations`) ganha `engine` e `calibration_id` para auditar qual motor/calibração gerou cada resultado.
-- O motor empírico continua sendo o default até que exista calibração validada para o componente; quando houver, o default passa a ser `physical_simple` calibrado.
+**Novos**
+- `src/components/coldpro/calibration-panel.tsx`
 
-Confirma que posso seguir com esta iteração inteira (migration + módulos + UI comparativa + calibração) ou prefere quebrar em duas entregas (primeiro bancos+geometria derivada, depois motor+calibração+comparativo)?
+**Modificados**
+- `supabase/migrations/...` — ALTER TABLE com 3 colunas + índice
+- `src/modules/coldpro/coil/coilEngineTypes.ts` — `CalibrationStatus`, `confidenceScoreFor`
+- `src/modules/coldpro/coil/coilCalibration.ts` — adiciona `calibrateCoilFromDatasheet` (mantém `calibrateAgainstReference` como wrapper para retrocompat)
+- `src/modules/coldpro/coil/physicalSimpleEngine.ts` — adiciona `heatTransferFactor` no breakdown
+- `src/modules/coldpro/coil/dxEvaporatorSimulator.ts` — aceita `calibration?` e aplica no final
+- `src/modules/coldpro/coil/dxCondenserSimulator.ts` — idem
+- `src/lib/coldpro/coil-calibrations.ts` — `applyCalibrationToResult`, `factorsFromRow`, `getActiveCalibrationForComponent`, salvar `status`/`confidence_score`/`calibration_name`
+- `src/components/coldpro/evaporator-tab.tsx` — monta `CalibrationPanel`
+- `src/components/coldpro/condenser-tab.tsx` — monta `CalibrationPanel`
+- `src/routes/_app/coldpro/equipamentos/$id/coil-simulator.tsx` — header com badge de confiança + aplicação correta da calibração no engine empírico
+
+### Não-objetivos desta iteração
+- Múltiplos pontos (curva). Vai junto com "curva de desempenho" no próximo passo.
+- Refator das correlações físicas (Wang/Cavallini).
+- Telas admin de gestão de calibrações.
