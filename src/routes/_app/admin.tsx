@@ -80,7 +80,13 @@ function AdminPage() {
         <Button asChild variant="outline" size="sm">
           <Link to="/admin/unilab-import">
             <Database className="mr-1.5 h-3.5 w-3.5" />
-            Importar tabelas Unilab
+            Importar tabelas Unilab (legado)
+          </Link>
+        </Button>
+        <Button asChild variant="default" size="sm">
+          <Link to="/admin/coldpro-import">
+            <Database className="mr-1.5 h-3.5 w-3.5" />
+            Importar banco técnico ColdPro
           </Link>
         </Button>
       </div>
