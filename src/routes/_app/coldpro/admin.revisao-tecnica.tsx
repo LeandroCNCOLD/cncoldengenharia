@@ -44,6 +44,7 @@ function TechnicalReviewPage() {
   const [rejectReason, setRejectReason] = useState("");
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [asCnStandard, setAsCnStandard] = useState(false);
 
   const refresh = async () => {
     setBusy(true);
@@ -90,12 +91,18 @@ function TechnicalReviewPage() {
 
   const handleApprove = async () => {
     if (!selected) return;
-    const res = await approveMapped(selected, user?.id ?? null);
+    const res = await approveMapped(selected, user?.id ?? null, {
+      context: asCnStandard ? "cn_standard" : "reference",
+    });
     if (!res.ok) {
       toast.error(res.error ?? "Falha ao aprovar.");
       return;
     }
-    toast.success("Componente aprovado e adicionado à biblioteca técnica.");
+    toast.success(
+      asCnStandard
+        ? "Componente aprovado como padrão CN."
+        : "Componente aprovado como referência (catálogo).",
+    );
     setSelected(null);
     refresh();
   };
@@ -134,9 +141,13 @@ function TechnicalReviewPage() {
     if (list.length === 0) return;
     setBulkBusy(true);
     try {
-      const res = await approveMappedBulk(list, user?.id ?? null);
+      const res = await approveMappedBulk(list, user?.id ?? null, {
+        context: asCnStandard ? "cn_standard" : "reference",
+      });
       if (res.failed === 0) {
-        toast.success(`${res.ok} registros aprovados.`);
+        toast.success(
+          `${res.ok} registros aprovados${asCnStandard ? " como padrão CN" : ""}.`,
+        );
       } else {
         toast.warning(
           `${res.ok} aprovados, ${res.failed} falharam${res.errors[0] ? `: ${res.errors[0]}` : "."}`,
@@ -205,6 +216,21 @@ function TechnicalReviewPage() {
         </Card>
       )}
 
+      <div className="flex flex-wrap items-center gap-3 rounded-md border bg-muted/40 px-4 py-2 text-sm">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <Checkbox
+            checked={asCnStandard}
+            onCheckedChange={(v) => setAsCnStandard(v === true)}
+          />
+          <span>
+            Aprovar como <strong>padrão CN</strong>
+            <span className="ml-1 text-xs text-muted-foreground">
+              (motor usa direto; senão entra como referência de catálogo)
+            </span>
+          </span>
+        </label>
+      </div>
+
       {checkedIds.size > 0 && (
         <div className="flex flex-wrap items-center gap-3 rounded-md border bg-accent/40 px-4 py-2 text-sm">
           <span className="font-medium">{checkedIds.size} selecionado(s)</span>
@@ -218,7 +244,7 @@ function TechnicalReviewPage() {
             ) : (
               <CheckCircle2 className="mr-1 h-4 w-4" />
             )}
-            Aprovar selecionados
+            {asCnStandard ? "Aprovar como padrão CN" : "Aprovar selecionados"}
           </Button>
           <Button
             size="sm"
@@ -352,7 +378,8 @@ function TechnicalReviewPage() {
                   />
                   <div className="flex gap-2">
                     <Button onClick={handleApprove} className="flex-1">
-                      <CheckCircle2 className="mr-1 h-4 w-4" /> Aprovar
+                      <CheckCircle2 className="mr-1 h-4 w-4" />{" "}
+                      {asCnStandard ? "Aprovar (CN Std)" : "Aprovar"}
                     </Button>
                     <Button
                       onClick={handleReject}

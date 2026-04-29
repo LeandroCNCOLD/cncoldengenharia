@@ -4,13 +4,31 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import type {
+  TechnicalComponent,
+  TechnicalContext,
   TechnicalEntityType,
   TechnicalImportBatch,
   TechnicalMappedRecord,
   TechnicalRawRecord,
   TechnicalRecordStatus,
+  TechnicalSource,
 } from "@/modules/coldpro/library/types";
+import { ENGINE_USABLE_CONTEXTS } from "@/modules/coldpro/library/types";
 import { universalMapper } from "@/modules/coldpro/library/mappers/universalMapper";
+
+/** Heurística: deriva o `source` canônico a partir do nome do fabricante. */
+export function inferSourceFromManufacturer(
+  manufacturer: string | null | undefined,
+): TechnicalSource {
+  const m = (manufacturer ?? "").toUpperCase();
+  if (m.includes("BITZER")) return "BITZER";
+  if (m.includes("DANFOSS")) return "DANFOSS";
+  if (m.includes("TORIN")) return "TORIN";
+  if (m.includes("UNILAB")) return "UNILAB";
+  if (m.includes("VAPCYC")) return "VAPCYC";
+  if (m.includes("CN") || m === "CN_INTERNAL") return "CN_INTERNAL";
+  return "UNKNOWN";
+}
 
 export interface CountByStatus {
   raw_imported: number;
@@ -54,13 +72,23 @@ export async function countMappedByStatus(): Promise<CountByStatus> {
   return out;
 }
 
-/** Conta componentes finais aprovados na biblioteca universal. */
-export async function countApprovedComponents(byEntity?: TechnicalEntityType) {
+/**
+ * Conta componentes finais aprovados na biblioteca universal.
+ * Por padrão, conta apenas o que o motor usa (`cn_standard` + `validated`).
+ * Para a contagem geral, passe `includeAllContexts: true`.
+ */
+export async function countApprovedComponents(
+  byEntity?: TechnicalEntityType,
+  opts: { includeAllContexts?: boolean } = {},
+) {
   let q = supabase
     .from("technical_components")
     .select("id", { count: "exact", head: true })
     .in("status", ["validated", "approved"]);
   if (byEntity) q = q.eq("entity_type", byEntity);
+  if (!opts.includeAllContexts) {
+    q = q.in("context", ENGINE_USABLE_CONTEXTS as unknown as string[]);
+  }
   const { count } = await q;
   return count ?? 0;
 }
@@ -106,13 +134,18 @@ export async function getRawRecord(id: string): Promise<TechnicalRawRecord | nul
 export async function approveMapped(
   mapped: TechnicalMappedRecord,
   reviewerUserId: string | null,
+  opts: { source?: TechnicalSource; context?: TechnicalContext } = {},
 ): Promise<{ ok: boolean; error?: string; componentId?: string }> {
+  const source = opts.source ?? inferSourceFromManufacturer(mapped.manufacturer);
+  const context: TechnicalContext = opts.context ?? "reference";
   const insert = {
     entity_type: mapped.entity_type,
     manufacturer: mapped.manufacturer,
     model: mapped.model,
     code: mapped.code,
     status: "approved" as const,
+    source,
+    context,
     source_batch_id: mapped.batch_id,
     source_raw_id: mapped.raw_record_id,
     source_mapped_id: mapped.id,
@@ -145,13 +178,14 @@ export async function approveMapped(
 export async function approveMappedBulk(
   mappedList: TechnicalMappedRecord[],
   reviewerUserId: string | null,
+  opts: { source?: TechnicalSource; context?: TechnicalContext } = {},
 ): Promise<{ ok: number; failed: number; errors: string[] }> {
   let ok = 0;
   let failed = 0;
   const errors: string[] = [];
   // Sequencial (volume modesto + evita exceder rate limits do PostgREST).
   for (const m of mappedList) {
-    const res = await approveMapped(m, reviewerUserId);
+    const res = await approveMapped(m, reviewerUserId, opts);
     if (res.ok) ok += 1;
     else {
       failed += 1;
@@ -232,4 +266,64 @@ export async function remapRaw(
     .select("*")
     .single();
   return (data as TechnicalMappedRecord | null) ?? null;
+}
+
+export interface ListComponentsOptions {
+  entityType?: TechnicalEntityType;
+  source?: TechnicalSource | "ALL";
+  context?: TechnicalContext | "ALL";
+  search?: string;
+  limit?: number;
+}
+
+/** Lista componentes da biblioteca universal com filtros por source/context. */
+export async function listApprovedComponents(
+  opts: ListComponentsOptions = {},
+): Promise<TechnicalComponent[]> {
+  const limit = opts.limit ?? 500;
+  let q = supabase
+    .from("technical_components")
+    .select("*")
+    .in("status", ["validated", "approved"])
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (opts.entityType) q = q.eq("entity_type", opts.entityType);
+  if (opts.source && opts.source !== "ALL") q = q.eq("source", opts.source);
+  if (opts.context && opts.context !== "ALL") q = q.eq("context", opts.context);
+  if (opts.search && opts.search.trim()) {
+    const term = `%${opts.search.trim()}%`;
+    q = q.or(
+      `manufacturer.ilike.${term},model.ilike.${term},code.ilike.${term}`,
+    );
+  }
+
+  const { data, error } = await q;
+  if (error) throw new Error(error.message);
+  return (data ?? []) as TechnicalComponent[];
+}
+
+/** Atualiza o `context` de vários componentes em uma única chamada. */
+export async function setComponentsContextBulk(
+  componentIds: string[],
+  context: TechnicalContext,
+): Promise<void> {
+  if (componentIds.length === 0) return;
+  const { error } = await supabase
+    .from("technical_components")
+    .update({ context })
+    .in("id", componentIds);
+  if (error) throw new Error(error.message);
+}
+
+/** Atualiza source/context de um único componente. */
+export async function updateComponentClassification(
+  componentId: string,
+  patch: Partial<{ source: TechnicalSource; context: TechnicalContext }>,
+): Promise<void> {
+  const { error } = await supabase
+    .from("technical_components")
+    .update(patch)
+    .eq("id", componentId);
+  if (error) throw new Error(error.message);
 }

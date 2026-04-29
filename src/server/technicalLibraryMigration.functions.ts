@@ -25,6 +25,8 @@ interface Inserted {
   model: string | null;
   code: string | null;
   status: Status;
+  source: string;
+  context: string;
   normalized_json: Record<string, unknown>;
   source_raw_id: string;
   source_batch_id: null;
@@ -33,6 +35,16 @@ interface Inserted {
   approved_by: string | null;
   family: string | null;
   application: string | null;
+}
+
+function inferSource(manufacturer: string | null | undefined, fallback: string): string {
+  const m = (manufacturer ?? "").toUpperCase();
+  if (m.includes("BITZER")) return "BITZER";
+  if (m.includes("DANFOSS")) return "DANFOSS";
+  if (m.includes("TORIN")) return "TORIN";
+  if (m.includes("UNILAB")) return "UNILAB";
+  if (m.includes("VAPCYC")) return "VAPCYC";
+  return fallback;
 }
 
 // Limites conservadores para caber no Worker (CPU/memória/tempo).
@@ -113,6 +125,8 @@ async function migrateCompressors(userId: string | null, budget: number): Promis
           model: r.model ?? null,
           code: r.model ?? null,
           status: isUnilab ? "approved" : "validated",
+          source: isUnilab ? "UNILAB" : inferSource(r.manufacturer, "UNKNOWN"),
+          context: "reference",
           normalized_json: r as Record<string, unknown>,
           source_raw_id: r.id,
           source_batch_id: null,
@@ -155,6 +169,8 @@ async function migrateFans(userId: string | null, budget: number): Promise<Sourc
           model: r.model ?? null,
           code: r.model ?? null,
           status,
+          source: inferSource(r.manufacturer, "UNKNOWN"),
+          context: "reference",
           normalized_json: r as Record<string, unknown>,
           source_raw_id: r.id,
           source_batch_id: null,
@@ -189,6 +205,8 @@ async function migrateRefrigerants(userId: string | null, budget: number): Promi
       model: r.code ?? r.name ?? null,
       code: r.code ?? null,
       status: "approved",
+      source: "UNILAB",
+      context: "reference",
       normalized_json: r as Record<string, unknown>,
       source_raw_id: r.id,
       source_batch_id: null,
@@ -219,6 +237,8 @@ async function migrateFluids(userId: string | null, budget: number): Promise<Sou
       model: r.name ?? null,
       code: r.name ?? null,
       status: "approved",
+      source: "UNILAB",
+      context: "reference",
       normalized_json: r as Record<string, unknown>,
       source_raw_id: r.id,
       source_batch_id: null,
@@ -273,6 +293,8 @@ async function migrateCoilGeometry(userId: string | null, budget: number): Promi
         model: f.geometry_code ?? f.sigla ?? null,
         code: f.sigla ?? null,
         status: "approved",
+        source: "UNILAB",
+        context: "reference",
         normalized_json: f as Record<string, unknown>,
         source_raw_id: f.id,
         source_batch_id: null,

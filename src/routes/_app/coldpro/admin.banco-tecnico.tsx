@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Database, Loader2 } from "lucide-react";
+import { AlertTriangle, Database, Loader2, Filter } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/page-header";
@@ -9,14 +9,42 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ContextBadge } from "@/components/coldpro/context-badge";
 import { supabase } from "@/integrations/supabase/client";
 import {
   countApprovedComponents,
   countMappedByStatus,
   countRawRecords,
   countUnmappedRaw,
+  listApprovedComponents,
+  setComponentsContextBulk,
 } from "@/lib/coldpro/technical-library";
-import type { TechnicalEntityType } from "@/modules/coldpro/library/types";
+import type {
+  TechnicalContext,
+  TechnicalEntityType,
+  TechnicalSource,
+} from "@/modules/coldpro/library/types";
+import {
+  TECHNICAL_CONTEXTS,
+  TECHNICAL_SOURCES,
+} from "@/modules/coldpro/library/types";
 import { migrateExistingDataToUniversalLibrary } from "@/server/technicalLibraryMigration.functions";
 
 export const Route = createFileRoute("/_app/coldpro/admin/banco-tecnico")({
@@ -189,6 +217,248 @@ function InitializeLibraryButton() {
   );
 }
 
+const ENTITY_OPTIONS: Array<{ value: TechnicalEntityType | "ALL"; label: string }> = [
+  { value: "ALL", label: "Todos" },
+  { value: "compressor", label: "Compressores" },
+  { value: "fan", label: "Ventiladores" },
+  { value: "evaporator_coil", label: "Coils evap." },
+  { value: "condenser_coil", label: "Coils cond." },
+  { value: "refrigerant", label: "Refrigerantes" },
+  { value: "fluid", label: "Fluidos" },
+  { value: "expansion_valve", label: "Válvulas expansão" },
+  { value: "solenoid_valve", label: "Solenoides" },
+  { value: "hot_gas_valve", label: "Hot gas" },
+];
+
+function ComponentsExplorer() {
+  const qc = useQueryClient();
+  const [entity, setEntity] = useState<TechnicalEntityType | "ALL">("ALL");
+  const [source, setSource] = useState<TechnicalSource | "ALL">("ALL");
+  const [context, setContext] = useState<TechnicalContext | "ALL">("ALL");
+  const [search, setSearch] = useState("");
+  const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["tech-components-list", entity, source, context, search],
+    queryFn: () =>
+      listApprovedComponents({
+        entityType: entity === "ALL" ? undefined : entity,
+        source,
+        context,
+        search,
+        limit: 500,
+      }),
+  });
+
+  const items = useMemo(() => data ?? [], [data]);
+  const allChecked = items.length > 0 && checked.size === items.length;
+  const someChecked = checked.size > 0 && !allChecked;
+
+  const toggleAll = (v: boolean) =>
+    setChecked(v ? new Set(items.map((i) => i.id)) : new Set());
+  const toggleOne = (id: string, v: boolean) =>
+    setChecked((prev) => {
+      const next = new Set(prev);
+      if (v) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+
+  const markAs = async (target: TechnicalContext) => {
+    if (checked.size === 0) return;
+    setBulkBusy(true);
+    try {
+      await setComponentsContextBulk(Array.from(checked), target);
+      toast.success(`${checked.size} componente(s) marcados como ${target}.`);
+      setChecked(new Set());
+      await refetch();
+      await qc.invalidateQueries({ queryKey: ["tech-universal-count"] });
+    } catch (err) {
+      toast.error(
+        `Falha ao atualizar: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-end gap-3 rounded-md border bg-muted/30 p-3">
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-muted-foreground">Entidade</span>
+          <Select value={entity} onValueChange={(v) => setEntity(v as never)}>
+            <SelectTrigger className="h-9 w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ENTITY_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-muted-foreground">Source</span>
+          <Select value={source} onValueChange={(v) => setSource(v as never)}>
+            <SelectTrigger className="h-9 w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Todas as origens</SelectItem>
+              {TECHNICAL_SOURCES.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-muted-foreground">Context</span>
+          <Select value={context} onValueChange={(v) => setContext(v as never)}>
+            <SelectTrigger className="h-9 w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Todos os contextos</SelectItem>
+              {TECHNICAL_CONTEXTS.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {c}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-1 flex-col gap-1 min-w-[200px]">
+          <span className="text-xs text-muted-foreground">Buscar</span>
+          <Input
+            placeholder="manufacturer, model, code…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-9"
+          />
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setEntity("ALL");
+            setSource("ALL");
+            setContext("ALL");
+            setSearch("");
+          }}
+        >
+          <Filter className="mr-1 h-4 w-4" /> Limpar
+        </Button>
+      </div>
+
+      {checked.size > 0 && (
+        <div className="flex flex-wrap items-center gap-2 rounded-md border bg-accent/40 px-4 py-2 text-sm">
+          <span className="font-medium">{checked.size} selecionado(s)</span>
+          <Button
+            size="sm"
+            onClick={() => markAs("cn_standard")}
+            disabled={bulkBusy}
+          >
+            {bulkBusy && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
+            Marcar como CN Standard
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => markAs("reference")}
+            disabled={bulkBusy}
+          >
+            Voltar para Reference
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => markAs("test")}
+            disabled={bulkBusy}
+          >
+            Marcar como Test
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setChecked(new Set())}
+            disabled={bulkBusy}
+          >
+            Limpar seleção
+          </Button>
+        </div>
+      )}
+
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-10">
+                  <Checkbox
+                    checked={allChecked ? true : someChecked ? "indeterminate" : false}
+                    onCheckedChange={(v) => toggleAll(v === true)}
+                    aria-label="Selecionar todos"
+                  />
+                </TableHead>
+                <TableHead>Entidade</TableHead>
+                <TableHead>Source</TableHead>
+                <TableHead>Context</TableHead>
+                <TableHead>Fabricante</TableHead>
+                <TableHead>Modelo</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-sm text-muted-foreground">
+                    <Loader2 className="mr-2 inline h-4 w-4 animate-spin" /> Carregando…
+                  </TableCell>
+                </TableRow>
+              )}
+              {!isLoading && items.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-sm text-muted-foreground">
+                    Nenhum componente encontrado para os filtros atuais.
+                  </TableCell>
+                </TableRow>
+              )}
+              {items.map((c) => (
+                <TableRow key={c.id}>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={checked.has(c.id)}
+                      onCheckedChange={(v) => toggleOne(c.id, v === true)}
+                    />
+                  </TableCell>
+                  <TableCell className="text-xs">{c.entity_type}</TableCell>
+                  <TableCell className="text-xs">
+                    <Badge variant="outline" className="text-[10px]">
+                      {c.source ?? "—"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <ContextBadge context={c.context} />
+                  </TableCell>
+                  <TableCell className="text-xs">{c.manufacturer ?? "—"}</TableCell>
+                  <TableCell className="text-xs">{c.model ?? "—"}</TableCell>
+                  <TableCell className="text-xs">{c.status}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 function TechBankPage() {
   return (
     <div className="space-y-6">
@@ -213,6 +483,7 @@ function TechBankPage() {
       <Tabs defaultValue="universal">
         <TabsList className="flex flex-wrap">
           <TabsTrigger value="universal">Biblioteca Universal</TabsTrigger>
+          <TabsTrigger value="components">Componentes (filtros)</TabsTrigger>
           <TabsTrigger value="geometries">Geometrias</TabsTrigger>
           <TabsTrigger value="factors">Fatores</TabsTrigger>
           <TabsTrigger value="fluids">Fluidos</TabsTrigger>
@@ -230,6 +501,10 @@ function TechBankPage() {
           <UniversalLibraryCard title="Coils evap." entity="evaporator_coil" />
           <UniversalLibraryCard title="Coils cond." entity="condenser_coil" />
           <UniversalLibraryCard title="Refrigerantes" entity="refrigerant" />
+        </TabsContent>
+
+        <TabsContent value="components" className="mt-6">
+          <ComponentsExplorer />
         </TabsContent>
 
         <TabsContent value="geometries" className="mt-6 grid gap-4 sm:grid-cols-2">

@@ -1516,6 +1516,7 @@ export type Database = {
           approved_by: string | null
           code: string | null
           compatible_refrigerants_json: Json
+          context: string
           created_at: string
           entity_type: Database["public"]["Enums"]["technical_entity_type"]
           family: string | null
@@ -1524,6 +1525,7 @@ export type Database = {
           model: string | null
           normalized_json: Json
           notes: string | null
+          source: string | null
           source_batch_id: string | null
           source_mapped_id: string | null
           source_raw_id: string | null
@@ -1536,6 +1538,7 @@ export type Database = {
           approved_by?: string | null
           code?: string | null
           compatible_refrigerants_json?: Json
+          context?: string
           created_at?: string
           entity_type: Database["public"]["Enums"]["technical_entity_type"]
           family?: string | null
@@ -1544,6 +1547,7 @@ export type Database = {
           model?: string | null
           normalized_json?: Json
           notes?: string | null
+          source?: string | null
           source_batch_id?: string | null
           source_mapped_id?: string | null
           source_raw_id?: string | null
@@ -1556,6 +1560,7 @@ export type Database = {
           approved_by?: string | null
           code?: string | null
           compatible_refrigerants_json?: Json
+          context?: string
           created_at?: string
           entity_type?: Database["public"]["Enums"]["technical_entity_type"]
           family?: string | null
@@ -1564,6 +1569,7 @@ export type Database = {
           model?: string | null
           normalized_json?: Json
           notes?: string | null
+          source?: string | null
           source_batch_id?: string | null
           source_mapped_id?: string | null
           source_raw_id?: string | null

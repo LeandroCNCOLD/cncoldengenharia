@@ -96,6 +96,46 @@ export interface TechnicalMappedRecord {
   updated_at: string;
 }
 
+/** Origem do dado: catálogo do fabricante ou interno CN. */
+export type TechnicalSource =
+  | "UNILAB"
+  | "BITZER"
+  | "DANFOSS"
+  | "TORIN"
+  | "VAPCYC"
+  | "CN_INTERNAL"
+  | "UNKNOWN";
+
+/** Contexto de uso. O motor consome apenas `cn_standard` e `validated` por padrão. */
+export type TechnicalContext =
+  | "reference"
+  | "cn_standard"
+  | "test"
+  | "legacy"
+  | "validated";
+
+/** Lista canônica de sources para popular UIs (filtros, selects). */
+export const TECHNICAL_SOURCES: TechnicalSource[] = [
+  "UNILAB",
+  "BITZER",
+  "DANFOSS",
+  "TORIN",
+  "VAPCYC",
+  "CN_INTERNAL",
+  "UNKNOWN",
+];
+
+export const TECHNICAL_CONTEXTS: TechnicalContext[] = [
+  "reference",
+  "cn_standard",
+  "validated",
+  "test",
+  "legacy",
+];
+
+/** Contextos que o motor aceita por padrão. */
+export const ENGINE_USABLE_CONTEXTS: TechnicalContext[] = ["cn_standard", "validated"];
+
 export interface TechnicalComponent {
   id: string;
   entity_type: TechnicalEntityType;
@@ -106,6 +146,8 @@ export interface TechnicalComponent {
   application: string | null;
   compatible_refrigerants_json: string[];
   status: TechnicalRecordStatus;
+  source: TechnicalSource | null;
+  context: TechnicalContext;
   source_batch_id: string | null;
   source_raw_id: string | null;
   source_mapped_id: string | null;
