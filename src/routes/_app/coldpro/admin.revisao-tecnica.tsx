@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -19,9 +20,11 @@ import {
 import { useAuth } from "@/lib/auth";
 import {
   approveMapped,
+  approveMappedBulk,
   getRawRecord,
   listMappedForReview,
   rejectMapped,
+  rejectMappedBulk,
 } from "@/lib/coldpro/technical-library";
 import type {
   TechnicalMappedRecord,
