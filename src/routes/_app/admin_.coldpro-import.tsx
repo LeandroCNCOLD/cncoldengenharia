@@ -146,12 +146,24 @@ function ColdproImportPage() {
 
   async function handleMap(target: "all" | "geometries" | "refrigerants" | "compressors" | "fans") {
     setMapping(true);
+    // "all" é executado como múltiplas chamadas separadas para evitar timeout do edge worker.
+    const list: Array<"geometries" | "refrigerants" | "compressors" | "fans"> =
+      target === "all"
+        ? ["refrigerants", "geometries", "compressors", "fans"]
+        : [target];
+    const accumulated: Record<string, { inserted: number; skipped: number; errors: string[] }> = {};
+    let totalMs = 0;
     try {
-      const res = await runMappers({ data: { targets: [target] } });
-      const { totalMs: _ms, ...rest } = res as Record<string, unknown> & { totalMs: number };
-      setMapperResult(rest as Record<string, { inserted: number; skipped: number; errors: string[] }>);
-      const sum = Object.values(rest as Record<string, { inserted: number }>).reduce((a, v) => a + (v?.inserted ?? 0), 0);
-      toast.success("Mapeamento concluído", { description: `${sum} linhas tipadas inseridas em ${(_ms / 1000).toFixed(1)}s.` });
+      for (const t of list) {
+        toast.info(`Mapeando ${t}…`);
+        const res = await runMappers({ data: { targets: [t] } });
+        const { totalMs: ms, ...rest } = res as Record<string, unknown> & { totalMs: number };
+        Object.assign(accumulated, rest);
+        totalMs += ms;
+        setMapperResult({ ...accumulated });
+      }
+      const sum = Object.values(accumulated).reduce((a, v) => a + (v?.inserted ?? 0), 0);
+      toast.success("Mapeamento concluído", { description: `${sum} linhas tipadas inseridas em ${(totalMs / 1000).toFixed(1)}s.` });
     } catch (e) {
       toast.error("Falha no mapeamento", { description: e instanceof Error ? e.message : String(e) });
     } finally {
