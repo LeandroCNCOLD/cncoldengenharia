@@ -468,6 +468,7 @@ export function generateCoilPerformanceMap(
   return {
     coilType: params.coilType,
     engine,
+    nominalValidation,
     ranges,
     isEstimated,
     baselineCalibrationConfidence: calConf,
