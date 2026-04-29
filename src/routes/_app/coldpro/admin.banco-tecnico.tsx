@@ -503,6 +503,10 @@ function TechBankPage() {
           <UniversalLibraryCard title="Refrigerantes" entity="refrigerant" />
         </TabsContent>
 
+        <TabsContent value="components" className="mt-6">
+          <ComponentsExplorer />
+        </TabsContent>
+
         <TabsContent value="geometries" className="mt-6 grid gap-4 sm:grid-cols-2">
           <ApprovedStat title="Geometrias Unilab" table="unilab_geometries" />
           <Card>
