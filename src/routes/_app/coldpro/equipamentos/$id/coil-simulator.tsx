@@ -258,6 +258,8 @@ function CoilSimulatorPage() {
       calibrationId: (latestCal as { id?: string } | null)?.id ?? null,
       nominalCapacityW: prefillNominal?.capacityW ?? null,
       logCalibration: true,
+      calibrationSignature:
+        (latestCal as { model_signature?: string | null } | null)?.model_signature ?? null,
     });
     setEmpiricalResult(emp);
     setPhysicalResult(phy);
