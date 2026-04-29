@@ -342,6 +342,7 @@ export function PerformanceMapPanel({
               value={engine}
               onChange={(e) => setEngine(e.target.value as PerformanceEngine)}
             >
+              <option value="hybrid">Híbrido (Unilab + correlações)</option>
               <option value="physical_simple">Físico simples</option>
               <option value="empirical">Empírico</option>
             </select>
