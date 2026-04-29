@@ -46,7 +46,7 @@ export function generateModelSignature(
     effectiveAreaM2: Number(effectiveAreaM2.toFixed(4)),
     factors: input.factors ?? {},
   };
-  return createHash('sha256').update(JSON.stringify(payload)).digest('hex');
+  return hashHex(JSON.stringify(payload));
 }
 
 function compatibleCalibration(
