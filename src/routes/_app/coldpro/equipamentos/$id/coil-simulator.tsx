@@ -279,6 +279,12 @@ function CoilSimulatorPage() {
         airPressureDropPa: NUM(a.airPressureDropPa) ?? null,
         refPressureDropKpa: NUM(r.refrigerantPressureDropKpa) ?? null,
       });
+      const calRes = outcome.calibratedResult as typeof outcome.calibratedResult & {
+        modelSignature?: string;
+        engineName?: string;
+        engineVersion?: string;
+        correlationSetVersion?: string;
+      };
       await saveCoilCalibration({
         componentItemId: prefillComponentId,
         coilType,
@@ -287,6 +293,10 @@ function CoilSimulatorPage() {
         inputSnapshot: input,
         outputSnapshot: outcome.calibratedResult,
         userId: user?.id,
+        modelSignature: calRes.modelSignature ?? "unknown",
+        engineName: calRes.engineName ?? "physical_simple",
+        engineVersion: calRes.engineVersion ?? "v1",
+        correlationSetVersion: calRes.correlationSetVersion ?? "v1",
       });
       return outcome;
     },
