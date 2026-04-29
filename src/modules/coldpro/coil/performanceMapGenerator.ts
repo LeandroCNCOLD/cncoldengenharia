@@ -305,8 +305,8 @@ export function generateCoilPerformanceMap(
       },
       refrigerant: { ...baseInput.refrigerant, refTempC: nominal.refTempC },
     };
-    nominalRawCapW = runSim(nominalInput, engine, NEUTRAL_CALIBRATION).capacityW;
-    nominalSimCapW = runSim(nominalInput, engine, cal).capacityW;
+    nominalRawCapW = runSim(nominalInput, engine, NEUTRAL_CALIBRATION, unilabFactor, nominalFaceVelocityMs).capacityW;
+    nominalSimCapW = runSim(nominalInput, engine, cal, unilabFactor, nominalFaceVelocityMs).capacityW;
   } catch {
     /* validation reports 0 */
   }
