@@ -15,11 +15,22 @@ import type { CoilSimulatorInput, CoilSimulatorResult } from "./coilSimulatorTyp
 import { deriveCoilGeometry, type GeometryDerived } from "./geometryDerived";
 import type { CalibrationFactors } from "./coilEngineTypes";
 import { NEUTRAL_CALIBRATION } from "./coilEngineTypes";
+import { computeUnilabFactors } from "./unilabFactorApplication";
+import type {
+  AppliedUnilabFactors,
+  UnilabGeometryFactor,
+} from "../unilabData/types";
 
 const W_TO_KCALH = 0.859845;
 
 export interface PhysicalSimpleOptions {
   calibration?: CalibrationFactors;
+  /** Fatores reais de geometria do Unilab (aplicados ANTES da calibração fina). */
+  unilabGeometryFactor?: UnilabGeometryFactor | null;
+  /** Velocidade frontal nominal (para ajuste por slope). */
+  nominalFaceVelocityMs?: number;
+  /** Indicador de coil molhado (latente significativo) para escolher fator de ar correto. */
+  isWetCoil?: boolean;
 }
 
 interface MaterialProps { kTube: number; kFin: number }
@@ -62,8 +73,9 @@ export interface PhysicalSimpleBreakdown {
   internalAreaM2: number;
   uaWk: number;
   lmtdK: number;
-  qWraw: number;            // antes da calibração
-  qWcalibrated: number;     // após calibração
+  qWraw: number;            // antes de Unilab e calibração
+  qWafterUnilab: number;    // após fatores Unilab, antes da calibração fina
+  qWcalibrated: number;     // após calibração fina
   airSideH: number;
   refSideH: number;
   faceVelocityMs: number | null;
@@ -76,12 +88,16 @@ export interface PhysicalSimpleBreakdown {
   airDpCorrectionFactor: number;
   refDpCorrectionFactor: number;
   uaCorrectionFactor: number;
+  // Fatores reais Unilab usados (ou null quando ausentes)
+  unilabFactors: AppliedUnilabFactors | null;
 }
 
 export interface PhysicalSimpleResult extends CoilSimulatorResult {
   engine: "physical_simple";
   derived: GeometryDerived;
   breakdown: PhysicalSimpleBreakdown;
+  /** Fatores Unilab aplicados (espelhado para componentes da UI). */
+  unilabFactors: AppliedUnilabFactors | null;
 }
 
 export function simulatePhysicalSimple(
@@ -138,15 +154,35 @@ export function simulatePhysicalSimple(
     lmtdK = dt1 === dt2 ? dt1 : (dt1 - dt2) / Math.log(Math.max(dt1 / Math.max(dt2, 0.01), 1.0001));
   }
 
-  const qWraw = uaWk * lmtdK * cal.uaCorrectionFactor;
-  const qWcalibrated = qWraw * cal.capacityCorrectionFactor;
+  // === Ordem de cálculo (CRÍTICA — não inverter): ===
+  // 1) base físico (qWraw)
+  // 2) fatores empíricos Unilab (heatTransfer × surface × security)
+  // 3) calibração fina do componente (capacityCorrectionFactor)
+  const qWraw = uaWk * lmtdK;
 
-  // Perdas de carga (estimativas grosseiras — calibráveis)
-  const airDpRawPa = faceVelocityMs && input.geometry.rows
-    ? 8 * input.geometry.rows * faceVelocityMs * faceVelocityMs * cal.airDpCorrectionFactor
+  const unilabFactors = computeUnilabFactors(opts.unilabGeometryFactor ?? null, {
+    engine: "physical_simple",
+    mode: input.coilType === "evaporator" ? "direct_expansion" : "condensing",
+    isWetCoil: opts.isWetCoil,
+    currentFaceVelocityMs: faceVelocityMs ?? undefined,
+    nominalFaceVelocityMs: opts.nominalFaceVelocityMs,
+  });
+
+  const qWafterUnilab = qWraw * unilabFactors.effectiveCapacityFactor * cal.uaCorrectionFactor;
+  const qWcalibrated = qWafterUnilab * cal.capacityCorrectionFactor;
+
+  // Perdas de carga: base × Unilab × calibração
+  const airDpBase = faceVelocityMs && input.geometry.rows
+    ? 8 * input.geometry.rows * faceVelocityMs * faceVelocityMs
     : null;
-  const refDpRawKpa = derived.totalTubes
-    ? 0.5 * (input.geometry.rows ?? 1) * cal.refDpCorrectionFactor
+  const airDpRawPa = airDpBase != null
+    ? airDpBase * unilabFactors.airPressureDropFactor * cal.airDpCorrectionFactor
+    : null;
+  const refDpBase = derived.totalTubes
+    ? 0.5 * (input.geometry.rows ?? 1)
+    : null;
+  const refDpRawKpa = refDpBase != null
+    ? refDpBase * unilabFactors.refrigerantPressureDropFactor * cal.refDpCorrectionFactor
     : null;
 
   // Sensível/latente: assume sensível = m·cp·ΔT, latente = resto
@@ -162,6 +198,7 @@ export function simulatePhysicalSimple(
   if (qWcalibrated <= 0) warnings.push("Capacidade física calculada ≤ 0 — verifique geometria, vazão e ΔT.");
   if (faceVelocityMs && faceVelocityMs > 4) warnings.push(`Velocidade frontal alta (${faceVelocityMs.toFixed(2)} m/s).`);
   if (faceVelocityMs && faceVelocityMs < 1) warnings.push(`Velocidade frontal baixa (${faceVelocityMs.toFixed(2)} m/s).`);
+  for (const w of unilabFactors.warnings) warnings.push(w);
 
   const dtNominal =
     input.nominal ? input.nominal.airTempInC - input.nominal.refTempC : dt1;
@@ -185,6 +222,7 @@ export function simulatePhysicalSimple(
     condensateLh,
     warnings,
     derived,
+    unilabFactors: opts.unilabGeometryFactor ? unilabFactors : null,
     breakdown: {
       uWm2k,
       externalAreaM2: aExt ?? 0,
@@ -192,6 +230,7 @@ export function simulatePhysicalSimple(
       uaWk,
       lmtdK,
       qWraw,
+      qWafterUnilab,
       qWcalibrated,
       airSideH: hAr,
       refSideH: hRef,
@@ -199,12 +238,12 @@ export function simulatePhysicalSimple(
       airMassFlowKgs,
       airDpRawPa,
       refDpRawKpa,
-      // Rastreabilidade: alias semântico de capacityCorrectionFactor
-      heatTransferFactor: cal.capacityCorrectionFactor,
+      heatTransferFactor: unilabFactors.heatTransferFactor * cal.capacityCorrectionFactor,
       capacityCorrectionFactor: cal.capacityCorrectionFactor,
       airDpCorrectionFactor: cal.airDpCorrectionFactor,
       refDpCorrectionFactor: cal.refDpCorrectionFactor,
       uaCorrectionFactor: cal.uaCorrectionFactor,
+      unilabFactors: opts.unilabGeometryFactor ? unilabFactors : null,
     },
   };
 }

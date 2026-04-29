@@ -23,6 +23,7 @@ import {
 import { simulatePhysicalSimple } from "./physicalSimpleEngine";
 import { simulateDxEvaporator } from "./dxEvaporatorSimulator";
 import { simulateDxCondenser } from "./dxCondenserSimulator";
+import type { UnilabGeometryFactor } from "../unilabData/types";
 
 export type PerformanceEngine = "physical_simple" | "empirical";
 export type PointStatus = "valid" | "warning" | "invalid";
@@ -118,6 +119,8 @@ export interface GeneratePerformanceMapParams {
   /** Confiança da calibração (0..1). Default 0.6 quando estimado. */
   calibrationConfidence?: number;
   ranges?: Partial<PerformanceRanges>;
+  /** Fatores reais Unilab da geometria do componente (opcional, mas recomendado). */
+  unilabGeometryFactor?: UnilabGeometryFactor | null;
   /** Identificadores opcionais (debug log). */
   componentItemId?: string;
   calibrationId?: string | null;
@@ -227,9 +230,15 @@ function runSim(
   input: CoilSimulatorInput,
   engine: PerformanceEngine,
   cal: CalibrationFactors,
+  unilabGeometryFactor?: UnilabGeometryFactor | null,
+  nominalFaceVelocityMs?: number,
 ): CoilSimulatorResult {
   if (engine === "physical_simple") {
-    return simulatePhysicalSimple(input, { calibration: cal });
+    return simulatePhysicalSimple(input, {
+      calibration: cal,
+      unilabGeometryFactor,
+      nominalFaceVelocityMs,
+    });
   }
   // empirical: aplica calibração via post (passa direto no options)
   if (input.coilType === "evaporator") {
@@ -267,7 +276,17 @@ export function generateCoilPerformanceMap(
     ),
   };
 
-  // === Validação ponto nominal ===
+  // Velocidade frontal nominal (para slope dos fatores Unilab)
+  const unilabFactor = params.unilabGeometryFactor ?? null;
+  const nominalFaceVelocityMs = (() => {
+    const g = baseInput.geometry;
+    if (!g.coilLengthMm || !g.tubesPerRow || !g.tubeSpacingMm || baseAirflow == null) return undefined;
+    const heightM = (g.tubesPerRow * g.tubeSpacingMm) / 1000;
+    const lengthM = g.coilLengthMm / 1000;
+    const faceArea = heightM * lengthM;
+    if (faceArea <= 0) return undefined;
+    return baseAirflow / 3600 / faceArea;
+  })();
   const datasheetCapW = (() => {
     const n = baseInput.nominal as { capacityW?: number | null } | undefined;
     const v = n?.capacityW;
@@ -286,8 +305,8 @@ export function generateCoilPerformanceMap(
       },
       refrigerant: { ...baseInput.refrigerant, refTempC: nominal.refTempC },
     };
-    nominalRawCapW = runSim(nominalInput, engine, NEUTRAL_CALIBRATION).capacityW;
-    nominalSimCapW = runSim(nominalInput, engine, cal).capacityW;
+    nominalRawCapW = runSim(nominalInput, engine, NEUTRAL_CALIBRATION, unilabFactor, nominalFaceVelocityMs).capacityW;
+    nominalSimCapW = runSim(nominalInput, engine, cal, unilabFactor, nominalFaceVelocityMs).capacityW;
   } catch {
     /* validation reports 0 */
   }
@@ -374,7 +393,7 @@ export function generateCoilPerformanceMap(
         let result: CoilSimulatorResult;
         let simWarnings: string[] = [];
         try {
-          result = runSim(stepInput, engine, cal);
+          result = runSim(stepInput, engine, cal, unilabFactor, nominalFaceVelocityMs);
           simWarnings = result.warnings ?? [];
         } catch (e) {
           const msg = e instanceof Error ? e.message : "Falha na simulação";

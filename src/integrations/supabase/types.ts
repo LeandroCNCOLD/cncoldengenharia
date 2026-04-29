@@ -83,6 +83,56 @@ export type Database = {
         }
         Relationships: []
       }
+      coil_factor_application_logs: {
+        Row: {
+          base_result_json: Json
+          component_item_id: string | null
+          created_at: string
+          created_by: string | null
+          engine: string
+          equipment_project_id: string | null
+          factors_json: Json
+          final_result_json: Json
+          geometry_factor_id: string | null
+          id: string
+          mode: string | null
+        }
+        Insert: {
+          base_result_json?: Json
+          component_item_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          engine: string
+          equipment_project_id?: string | null
+          factors_json?: Json
+          final_result_json?: Json
+          geometry_factor_id?: string | null
+          id?: string
+          mode?: string | null
+        }
+        Update: {
+          base_result_json?: Json
+          component_item_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          engine?: string
+          equipment_project_id?: string | null
+          factors_json?: Json
+          final_result_json?: Json
+          geometry_factor_id?: string | null
+          id?: string
+          mode?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coil_factor_application_logs_geometry_factor_id_fkey"
+            columns: ["geometry_factor_id"]
+            isOneToOne: false
+            referencedRelation: "coil_geometry_factors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coil_fluids: {
         Row: {
           created_at: string
@@ -151,6 +201,146 @@ export type Database = {
           vapour_viscosity_upa_s?: number | null
         }
         Relationships: []
+      }
+      coil_geometry_factors: {
+        Row: {
+          battery_code: string | null
+          created_at: string
+          description: string | null
+          factor_a0: number | null
+          factor_a1: number | null
+          factor_a2: number | null
+          factor_fatc: number | null
+          fat_coef_lato_tubo: number | null
+          fat_cor_al: number | null
+          fat_corr_fat_attr: number | null
+          fat_rid_aum_sup: number | null
+          fatt_pdc_concentrate: number | null
+          fattore_attr_aria: number | null
+          fattore_attr_aria_latente: number | null
+          fin_height_mm: number | null
+          fin_thickness_mm: number | null
+          fin_type: string | null
+          geometry_code: string
+          id: string
+          import_batch_id: string | null
+          mode: string
+          raw_json: Json
+          rid_area_pass_tubo: number | null
+          row_spacing_mm: number | null
+          security_factor: number | null
+          sigla: string | null
+          slope_fat_coef_lato_tubo: number | null
+          slope_fat_cor_al: number | null
+          slope_fat_corr_fat_attr: number | null
+          slope_fattore_attr_aria: number | null
+          source_row_hash: string | null
+          source_table: string
+          tube_arrangement: string | null
+          tube_height_mm: number | null
+          tube_outer_diameter_mm: number | null
+          tube_shape: string | null
+          tube_spacing_mm: number | null
+          tube_thickness_mm: number | null
+          tube_type: string | null
+          tube_width_mm: number | null
+          updated_at: string
+        }
+        Insert: {
+          battery_code?: string | null
+          created_at?: string
+          description?: string | null
+          factor_a0?: number | null
+          factor_a1?: number | null
+          factor_a2?: number | null
+          factor_fatc?: number | null
+          fat_coef_lato_tubo?: number | null
+          fat_cor_al?: number | null
+          fat_corr_fat_attr?: number | null
+          fat_rid_aum_sup?: number | null
+          fatt_pdc_concentrate?: number | null
+          fattore_attr_aria?: number | null
+          fattore_attr_aria_latente?: number | null
+          fin_height_mm?: number | null
+          fin_thickness_mm?: number | null
+          fin_type?: string | null
+          geometry_code: string
+          id?: string
+          import_batch_id?: string | null
+          mode: string
+          raw_json?: Json
+          rid_area_pass_tubo?: number | null
+          row_spacing_mm?: number | null
+          security_factor?: number | null
+          sigla?: string | null
+          slope_fat_coef_lato_tubo?: number | null
+          slope_fat_cor_al?: number | null
+          slope_fat_corr_fat_attr?: number | null
+          slope_fattore_attr_aria?: number | null
+          source_row_hash?: string | null
+          source_table: string
+          tube_arrangement?: string | null
+          tube_height_mm?: number | null
+          tube_outer_diameter_mm?: number | null
+          tube_shape?: string | null
+          tube_spacing_mm?: number | null
+          tube_thickness_mm?: number | null
+          tube_type?: string | null
+          tube_width_mm?: number | null
+          updated_at?: string
+        }
+        Update: {
+          battery_code?: string | null
+          created_at?: string
+          description?: string | null
+          factor_a0?: number | null
+          factor_a1?: number | null
+          factor_a2?: number | null
+          factor_fatc?: number | null
+          fat_coef_lato_tubo?: number | null
+          fat_cor_al?: number | null
+          fat_corr_fat_attr?: number | null
+          fat_rid_aum_sup?: number | null
+          fatt_pdc_concentrate?: number | null
+          fattore_attr_aria?: number | null
+          fattore_attr_aria_latente?: number | null
+          fin_height_mm?: number | null
+          fin_thickness_mm?: number | null
+          fin_type?: string | null
+          geometry_code?: string
+          id?: string
+          import_batch_id?: string | null
+          mode?: string
+          raw_json?: Json
+          rid_area_pass_tubo?: number | null
+          row_spacing_mm?: number | null
+          security_factor?: number | null
+          sigla?: string | null
+          slope_fat_coef_lato_tubo?: number | null
+          slope_fat_cor_al?: number | null
+          slope_fat_corr_fat_attr?: number | null
+          slope_fattore_attr_aria?: number | null
+          source_row_hash?: string | null
+          source_table?: string
+          tube_arrangement?: string | null
+          tube_height_mm?: number | null
+          tube_outer_diameter_mm?: number | null
+          tube_shape?: string | null
+          tube_spacing_mm?: number | null
+          tube_thickness_mm?: number | null
+          tube_type?: string | null
+          tube_width_mm?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coil_geometry_factors_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "unilab_import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       coil_materials: {
         Row: {
@@ -940,6 +1130,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      unilab_import_batches: {
+        Row: {
+          id: string
+          imported_at: string
+          imported_by: string | null
+          notes: string | null
+          source_hash: string | null
+          source_name: string
+          source_version: string | null
+        }
+        Insert: {
+          id?: string
+          imported_at?: string
+          imported_by?: string | null
+          notes?: string | null
+          source_hash?: string | null
+          source_name?: string
+          source_version?: string | null
+        }
+        Update: {
+          id?: string
+          imported_at?: string
+          imported_by?: string | null
+          notes?: string | null
+          source_hash?: string | null
+          source_name?: string
+          source_version?: string | null
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

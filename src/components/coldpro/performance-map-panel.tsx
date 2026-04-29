@@ -59,6 +59,8 @@ import {
   type PerformanceRanges,
 } from "@/modules/coldpro/coil/performanceMapGenerator";
 import type { CoilSimulatorInput } from "@/modules/coldpro/coil/coilSimulatorTypes";
+import { findGeometryFactor } from "@/modules/coldpro/unilabData/unilabGeometryFactorRepository";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
   componentItemId: string;
@@ -127,6 +129,18 @@ export function PerformanceMapPanel({
     enabled: !!componentItemId,
   });
 
+  // Lookup do fator real Unilab pela descrição da geometria do componente
+  const geometryDescription = simulationInput?.geometry.description?.trim() || null;
+  const { data: unilabFactor = null } = useQuery({
+    queryKey: ["coil-unilab-factor", coilType, geometryDescription],
+    queryFn: () =>
+      findGeometryFactor(supabase, {
+        mode: coilType === "evaporator" ? "direct_expansion" : "condensing",
+        description: geometryDescription ?? undefined,
+      }),
+    enabled: !!geometryDescription,
+  });
+
   const calRow = calibration as
     | { id: string; confidence_score?: number; status?: string }
     | null;
@@ -153,6 +167,7 @@ export function PerformanceMapPanel({
         calibration: calFactors,
         calibrationConfidence: calConf,
         ranges,
+        unilabGeometryFactor: unilabFactor,
         componentItemId,
         calibrationId: calRow?.id ?? null,
       });
