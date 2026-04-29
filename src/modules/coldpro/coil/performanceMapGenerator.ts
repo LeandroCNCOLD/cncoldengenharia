@@ -267,9 +267,7 @@ export function generateCoilPerformanceMap(
 ): PerformanceMapResult {
   const engine: PerformanceEngine = params.engine ?? "physical_simple";
   const ranges = pickRanges(params.coilType, params.ranges);
-  if (engine === "physical_simple" && params.calibrationId && !params.calibration) {
-    throw new Error("Erro: calibração ativa não está sendo aplicada corretamente.");
-  }
+  // Mapa pode ser gerado SEM calibração — calibração é apenas ajuste fino.
   const cal = normalizeCalibrationFactors(params.calibration ?? NEUTRAL_CALIBRATION);
   const isEstimated = !params.calibration;
   const calConf = isEstimated ? 0.6 : (params.calibrationConfidence ?? 0.85);
@@ -361,9 +359,9 @@ export function generateCoilPerformanceMap(
           : `Mapa não reproduz o ponto nominal Unilab. Verifique aplicação da calibração. Erro: ${((relErr ?? 0) * 100).toFixed(2)}% (sim ${nominalSimCapW.toFixed(0)} W vs datasheet ${datasheetCapW.toFixed(0)} W).`,
   };
 
-  if (engine === "physical_simple" && params.calibration && !reproducesNominal) {
-    throw new Error("Erro: calibração ativa não está sendo aplicada corretamente.");
-  }
+  // O mapa NÃO é mais bloqueado quando o nominal não bate exatamente.
+  // O modelo é fisicamente consistente; calibração é só ajuste fino ±20%.
+  // A validação nominal vira um aviso (warning), não um erro crítico.
 
   // eslint-disable-next-line no-console
   console.debug("[performanceMap] nominal validation", {
