@@ -31,6 +31,10 @@ export async function savePerformanceMap(params: SavePerformanceMapParams) {
     summary_json: {
       ...params.result.summary,
       nominalValidation: params.result.nominalValidation,
+      modelSignature: params.result.modelSignature ?? null,
+      blocked: params.result.blocked ?? false,
+      blockReason: params.result.blockReason ?? null,
+      engine: params.engine,
     },
     confidence_score: params.result.summary.avgConfidence,
     status: "generated" satisfies CoilPerformanceMapStatus,

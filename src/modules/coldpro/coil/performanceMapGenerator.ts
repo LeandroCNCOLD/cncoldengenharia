@@ -645,11 +645,35 @@ export function generateCoilPerformanceMap(
 export function canApproveMap(
   summary: PerformanceMapSummary,
   nominalValidation?: NominalValidation,
+  result?: Pick<PerformanceMapResult, "modelSignature" | "engine" | "blocked">,
 ): boolean {
   if (summary.totalPoints === 0) return false;
   if (summary.invalidCount / summary.totalPoints > 0.3) return false;
+  if (summary.avgConfidence < 0.7) return false;
   if (nominalValidation && !nominalValidation.reproducesNominal) return false;
+  if (result?.blocked) return false;
+  if (result && !result.modelSignature) return false;
+  if (result && !result.engine) return false;
   return true;
+}
+
+/** Detalhe do motivo de bloqueio de aprovação (texto humano). */
+export function approvalBlockReason(
+  summary: PerformanceMapSummary,
+  nominalValidation?: NominalValidation,
+  result?: Pick<PerformanceMapResult, "modelSignature" | "engine" | "blocked" | "blockReason">,
+): string | null {
+  if (result?.blocked) return result.blockReason ?? "Mapa bloqueado pelo guard rail nominal.";
+  if (summary.totalPoints === 0) return "Mapa vazio.";
+  if (summary.invalidCount / summary.totalPoints > 0.3)
+    return `Pontos inválidos acima de 30% (${summary.invalidCount}/${summary.totalPoints}).`;
+  if (summary.avgConfidence < 0.7)
+    return `Confiança média abaixo de 0.70 (${summary.avgConfidence.toFixed(2)}).`;
+  if (nominalValidation && !nominalValidation.reproducesNominal)
+    return "Ponto nominal não reproduz o datasheet.";
+  if (result && !result.modelSignature) return "modelSignature ausente.";
+  if (result && !result.engine) return "engine não definido.";
+  return null;
 }
 
 /** Exporta o mapa para CSV. */

@@ -51,6 +51,7 @@ import {
 import {
   DEFAULT_RANGES_COND,
   DEFAULT_RANGES_EVAP,
+  approvalBlockReason,
   canApproveMap,
   generateCoilPerformanceMap,
   performanceMapToCsv,
@@ -108,7 +109,7 @@ export function PerformanceMapPanel({
   const qc = useQueryClient();
   const { user } = useAuth();
 
-  const [engine, setEngine] = useState<PerformanceEngine>("physical_simple");
+  const [engine, setEngine] = useState<PerformanceEngine>("hybrid");
   const defaults =
     coilType === "evaporator" ? DEFAULT_RANGES_EVAP : DEFAULT_RANGES_COND;
   const [ranges, setRanges] = useState<PerformanceRanges>(defaults);
@@ -174,15 +175,21 @@ export function PerformanceMapPanel({
         calibrationSignature: calRow?.model_signature ?? null,
       });
       setResult(r);
-      if (!r.nominalValidation.reproducesNominal) {
+      if (r.blocked) {
+        toast.error(r.blockReason ?? "Mapa bloqueado pelo guard rail nominal.");
+      } else if (!r.nominalValidation.reproducesNominal) {
         toast.warning(r.nominalValidation.message);
       }
       return r;
     },
     onSuccess: (r) => {
-      toast.success(
-        `Mapa gerado: ${r.points.length} pontos · ${r.summary.validCount} válidos`,
-      );
+      if (r.blocked) {
+        toast.error("Mapa não foi gerado: ponto nominal fora da faixa.");
+      } else {
+        toast.success(
+          `Mapa gerado: ${r.points.length} pontos · ${r.summary.validCount} válidos`,
+        );
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -190,6 +197,7 @@ export function PerformanceMapPanel({
   const saveMut = useMutation({
     mutationFn: async () => {
       if (!result) throw new Error("Gere o mapa antes de salvar.");
+      if (result.blocked) throw new Error(result.blockReason ?? "Mapa bloqueado.");
       return savePerformanceMap({
         componentItemId,
         equipmentProjectId: equipmentProjectId ?? null,
@@ -270,8 +278,11 @@ export function PerformanceMapPanel({
   const canGenerate = !!simulationInput && !calibrationLoading && (hasCalibration || allowEstimated);
   const summary = result?.summary;
   const approvable = summary
-    ? canApproveMap(summary, result?.nominalValidation)
+    ? canApproveMap(summary, result?.nominalValidation, result ?? undefined)
     : false;
+  const blockReasonText = summary
+    ? approvalBlockReason(summary, result?.nominalValidation, result ?? undefined)
+    : null;
 
   return (
     <Card>
@@ -281,6 +292,11 @@ export function PerformanceMapPanel({
             <Activity className="h-4 w-4" /> Mapa de desempenho
           </span>
           <span className="flex items-center gap-2 text-xs">
+            {engine === "hybrid" && (
+              <Badge variant="outline" className="border-sky-500 text-sky-600">
+                Híbrido
+              </Badge>
+            )}
             {hasCalibration ? (
               <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">
                 <ShieldCheck className="mr-1 h-3 w-3" /> Calibrado
@@ -326,6 +342,7 @@ export function PerformanceMapPanel({
               value={engine}
               onChange={(e) => setEngine(e.target.value as PerformanceEngine)}
             >
+              <option value="hybrid">Híbrido (Unilab + correlações)</option>
               <option value="physical_simple">Físico simples</option>
               <option value="empirical">Empírico</option>
             </select>
@@ -669,10 +686,14 @@ export function PerformanceMapPanel({
           </div>
         )}
 
-        {result && summary && !approvable && result.nominalValidation.reproducesNominal && (
+        {result && summary && !approvable && blockReasonText && (
           <p className="text-xs text-amber-600">
-            Mais de 30% dos pontos estão inválidos — este mapa não pode ser
-            aprovado. Ajuste as faixas e gere novamente.
+            Aprovação bloqueada: {blockReasonText}
+          </p>
+        )}
+        {result?.modelSignature && (
+          <p className="text-[10px] text-muted-foreground font-mono">
+            modelSignature: {result.modelSignature}
           </p>
         )}
       </CardContent>
