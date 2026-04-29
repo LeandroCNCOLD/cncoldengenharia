@@ -54,7 +54,9 @@ export async function savePerformanceMap(params: SavePerformanceMapParams) {
 export async function listPerformanceMaps(componentItemId: string) {
   const { data, error } = await supabase
     .from("coil_performance_maps")
-    .select("*")
+    .select(
+      "id, component_item_id, equipment_project_id, coil_type, engine, calibration_id, map_name, summary_json, confidence_score, status, is_estimated, notes, created_at, created_by",
+    )
     .eq("component_item_id", componentItemId)
     .order("created_at", { ascending: false })
     .limit(20);
@@ -62,10 +64,7 @@ export async function listPerformanceMaps(componentItemId: string) {
   return data ?? [];
 }
 
-export async function updatePerformanceMapStatus(
-  id: string,
-  status: CoilPerformanceMapStatus,
-) {
+export async function updatePerformanceMapStatus(id: string, status: CoilPerformanceMapStatus) {
   const { error } = await supabase
     .from("coil_performance_maps")
     .update({ status } as never)

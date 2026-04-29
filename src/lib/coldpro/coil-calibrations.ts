@@ -1,5 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { CoilSimulatorInput, CoilSimulatorResult } from "@/modules/coldpro/coil/coilSimulatorTypes";
+import type {
+  CoilSimulatorInput,
+  CoilSimulatorResult,
+} from "@/modules/coldpro/coil/coilSimulatorTypes";
 import type { CalibrationOutcome } from "@/modules/coldpro/coil/coilCalibration";
 import {
   NEUTRAL_CALIBRATION,
@@ -28,8 +31,7 @@ export function factorsFromRow(row: CalRow | null | undefined): CalibrationFacto
     airDpCorrectionFactor: Number(row.air_dp_correction_factor) || 1,
     refDpCorrectionFactor: Number(row.ref_dp_correction_factor) || 1,
     uaCorrectionFactor: Number(row.uaCorrectionFactor ?? row.ua_correction_factor) || 1,
-    airPressureDropFactor:
-      Number(row.airPressureDropFactor ?? row.air_dp_correction_factor) || 1,
+    airPressureDropFactor: Number(row.airPressureDropFactor ?? row.air_dp_correction_factor) || 1,
     refrigerantPressureDropFactor:
       Number(row.refrigerantPressureDropFactor ?? row.ref_dp_correction_factor) || 1,
   });
@@ -118,7 +120,20 @@ export async function saveCoilCalibration(params: {
 export async function listCoilCalibrations(componentItemId: string) {
   const { data, error } = await supabase
     .from("coil_calibrations")
-    .select("*")
+    .select(
+      [
+        "id",
+        "created_at",
+        "status",
+        "confidence_score",
+        "capacity_correction_factor",
+        "air_dp_correction_factor",
+        "ref_dp_correction_factor",
+        "deviation_after",
+        "is_active",
+        "model_signature",
+      ].join(","),
+    )
     .eq("component_item_id", componentItemId)
     .order("created_at", { ascending: false })
     .limit(20);

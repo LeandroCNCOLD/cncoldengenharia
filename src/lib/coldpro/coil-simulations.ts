@@ -1,5 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { CoilSimulatorInput, CoilSimulatorResult } from "@/modules/coldpro/coil/coilSimulatorTypes";
+import type {
+  CoilSimulatorInput,
+  CoilSimulatorResult,
+} from "@/modules/coldpro/coil/coilSimulatorTypes";
 
 export async function saveCoilSimulatorRun(params: {
   equipmentProjectId: string;
@@ -29,7 +32,7 @@ function result_warnings(r: CoilSimulatorResult) {
 export async function listEquipmentCoilSimulations(equipmentProjectId: string) {
   const { data, error } = await supabase
     .from("coil_simulations")
-    .select("*")
+    .select("id, created_at, label, coil_type, mode, outputs")
     .eq("equipment_project_id", equipmentProjectId)
     .order("created_at", { ascending: false })
     .limit(50);
