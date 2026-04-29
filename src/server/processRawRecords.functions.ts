@@ -235,6 +235,25 @@ function dispatchMapper(raw: RawRow): MapperOutput | null {
 
 /* ---------- main ---------- */
 
+// Retry helper: tolera blips transitórios do Supabase/Cloudflare (521/522/timeouts).
+async function withRetry<T>(label: string, fn: () => Promise<T>, attempts = 4): Promise<T> {
+  let lastErr: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      lastErr = e;
+      const msg = e instanceof Error ? e.message : String(e);
+      // Não tenta de novo se for erro lógico claro (sintaxe SQL, RLS, etc.)
+      if (/permission denied|violates|duplicate key|invalid input syntax/i.test(msg)) throw e;
+      const delay = 500 * Math.pow(2, i); // 0.5s, 1s, 2s, 4s
+      console.warn(`[processRaw] ${label} attempt ${i + 1} failed: ${msg.slice(0, 200)} — retrying in ${delay}ms`);
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
+}
+
 export const processUnmappedRawRecords = createServerFn({ method: "POST" })
   .inputValidator((data) => InputSchema.parse(data ?? {}))
   .handler(async ({ data }) => {
