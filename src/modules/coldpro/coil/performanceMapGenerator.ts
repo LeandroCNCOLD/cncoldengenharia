@@ -119,6 +119,8 @@ export interface GeneratePerformanceMapParams {
   /** Confiança da calibração (0..1). Default 0.6 quando estimado. */
   calibrationConfidence?: number;
   ranges?: Partial<PerformanceRanges>;
+  /** Fatores reais Unilab da geometria do componente (opcional, mas recomendado). */
+  unilabGeometryFactor?: UnilabGeometryFactor | null;
   /** Identificadores opcionais (debug log). */
   componentItemId?: string;
   calibrationId?: string | null;
