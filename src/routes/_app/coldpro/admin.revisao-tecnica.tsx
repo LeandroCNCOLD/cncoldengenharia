@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -19,9 +20,11 @@ import {
 import { useAuth } from "@/lib/auth";
 import {
   approveMapped,
+  approveMappedBulk,
   getRawRecord,
   listMappedForReview,
   rejectMapped,
+  rejectMappedBulk,
 } from "@/lib/coldpro/technical-library";
 import type {
   TechnicalMappedRecord,
@@ -39,9 +42,12 @@ function TechnicalReviewPage() {
   const [selected, setSelected] = useState<TechnicalMappedRecord | null>(null);
   const [rawSelected, setRawSelected] = useState<TechnicalRawRecord | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const refresh = async () => {
     setBusy(true);
+    setCheckedIds(new Set());
     try {
       const list = await listMappedForReview(200);
       setItems(list);
@@ -107,6 +113,63 @@ function TechnicalReviewPage() {
     refresh();
   };
 
+  const toggleOne = (id: string, checked: boolean) => {
+    setCheckedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
+
+  const toggleAll = (checked: boolean) => {
+    setCheckedIds(checked ? new Set(items.map((i) => i.id)) : new Set());
+  };
+
+  const allChecked = items.length > 0 && checkedIds.size === items.length;
+  const someChecked = checkedIds.size > 0 && !allChecked;
+
+  const handleBulkApprove = async () => {
+    const list = items.filter((i) => checkedIds.has(i.id));
+    if (list.length === 0) return;
+    setBulkBusy(true);
+    try {
+      const res = await approveMappedBulk(list, user?.id ?? null);
+      if (res.failed === 0) {
+        toast.success(`${res.ok} registros aprovados.`);
+      } else {
+        toast.warning(
+          `${res.ok} aprovados, ${res.failed} falharam${res.errors[0] ? `: ${res.errors[0]}` : "."}`,
+        );
+      }
+      setCheckedIds(new Set());
+      setSelected(null);
+      refresh();
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleBulkReject = async () => {
+    const ids = Array.from(checkedIds);
+    if (ids.length === 0) return;
+    if (!rejectReason.trim()) {
+      toast.error("Informe um motivo para rejeitar em massa.");
+      return;
+    }
+    setBulkBusy(true);
+    try {
+      await rejectMappedBulk(ids, user?.id ?? null, rejectReason.trim());
+      toast.success(`${ids.length} registros rejeitados.`);
+      setRejectReason("");
+      setCheckedIds(new Set());
+      setSelected(null);
+      refresh();
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-6 p-6">
       <PageHeader
@@ -142,12 +205,56 @@ function TechnicalReviewPage() {
         </Card>
       )}
 
+      {checkedIds.size > 0 && (
+        <div className="flex flex-wrap items-center gap-3 rounded-md border bg-accent/40 px-4 py-2 text-sm">
+          <span className="font-medium">{checkedIds.size} selecionado(s)</span>
+          <Button
+            size="sm"
+            onClick={handleBulkApprove}
+            disabled={bulkBusy}
+          >
+            {bulkBusy ? (
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+            ) : (
+              <CheckCircle2 className="mr-1 h-4 w-4" />
+            )}
+            Aprovar selecionados
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={handleBulkReject}
+            disabled={bulkBusy}
+          >
+            <XCircle className="mr-1 h-4 w-4" /> Rejeitar selecionados
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setCheckedIds(new Set())}
+            disabled={bulkBusy}
+          >
+            Limpar seleção
+          </Button>
+          <span className="text-xs text-muted-foreground">
+            (Rejeição usa o motivo informado no painel à direita)
+          </span>
+        </div>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
         <Card>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allChecked ? true : someChecked ? "indeterminate" : false}
+                      onCheckedChange={(v) => toggleAll(v === true)}
+                      aria-label="Selecionar todos"
+                    />
+                  </TableHead>
                   <TableHead>Entidade</TableHead>
                   <TableHead>Fabricante</TableHead>
                   <TableHead>Modelo</TableHead>
@@ -167,6 +274,16 @@ function TechnicalReviewPage() {
                           : "cursor-pointer hover:bg-accent/30"
                       }
                     >
+                      <TableCell
+                        className="w-10"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Checkbox
+                          checked={checkedIds.has(m.id)}
+                          onCheckedChange={(v) => toggleOne(m.id, v === true)}
+                          aria-label={`Selecionar ${m.model ?? m.id}`}
+                        />
+                      </TableCell>
                       <TableCell className="text-xs">{entity}</TableCell>
                       <TableCell className="text-xs">{m.manufacturer ?? "—"}</TableCell>
                       <TableCell className="text-xs">{m.model ?? "—"}</TableCell>

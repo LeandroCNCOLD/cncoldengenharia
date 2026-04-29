@@ -141,6 +141,44 @@ export async function approveMapped(
   return { ok: true, componentId: data.id };
 }
 
+/** Aprova vários mapped records em sequência. Retorna contagem de sucesso/erro. */
+export async function approveMappedBulk(
+  mappedList: TechnicalMappedRecord[],
+  reviewerUserId: string | null,
+): Promise<{ ok: number; failed: number; errors: string[] }> {
+  let ok = 0;
+  let failed = 0;
+  const errors: string[] = [];
+  // Sequencial (volume modesto + evita exceder rate limits do PostgREST).
+  for (const m of mappedList) {
+    const res = await approveMapped(m, reviewerUserId);
+    if (res.ok) ok += 1;
+    else {
+      failed += 1;
+      if (res.error && errors.length < 5) errors.push(res.error);
+    }
+  }
+  return { ok, failed, errors };
+}
+
+/** Rejeita vários mapped records em uma única chamada. */
+export async function rejectMappedBulk(
+  mappedIds: string[],
+  reviewerUserId: string | null,
+  reason: string,
+): Promise<void> {
+  if (mappedIds.length === 0) return;
+  await supabase
+    .from("technical_mapped_records")
+    .update({
+      mapping_status: "rejected",
+      reviewed_by: reviewerUserId,
+      reviewed_at: new Date().toISOString(),
+      validation_errors_json: [{ rejected_reason: reason }] as never,
+    })
+    .in("id", mappedIds);
+}
+
 export async function rejectMapped(
   mappedId: string,
   reviewerUserId: string | null,
