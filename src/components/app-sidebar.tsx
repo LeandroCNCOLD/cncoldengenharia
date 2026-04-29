@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, Boxes, Settings, LogOut, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, Boxes, Settings, LogOut, Database, type LucideIcon } from "lucide-react";
 
 import { CnLogo } from "@/components/cn-logo";
 import { useAuth } from "@/lib/auth";
