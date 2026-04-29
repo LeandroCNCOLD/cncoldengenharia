@@ -89,6 +89,7 @@ export function runHybridDebug(input: CoilSimulatorInput): HybridDebugInfo | und
       isEstimated: r.isEstimated,
       factorsApplied: d.factorsApplied,
       warnings: r.warnings,
+      geometry: r.geometryResult,
     };
   } catch {
     return undefined;
