@@ -116,7 +116,7 @@ async function mapGeometries(): Promise<MapperResult> {
     // Insere em batches de 500
     for (let i = 0; i < rowsToInsert.length; i += 500) {
       const batch = rowsToInsert.slice(i, i + 500);
-      const { error } = await supabaseAdmin.from("unilab_geometries").insert(batch);
+      const { error } = await supabaseAdmin.from("unilab_geometries").insert(batch as never);
       if (error) {
         result.errors.push(`${table}: insert ${error.message}`);
       } else {
@@ -166,7 +166,7 @@ async function mapRefrigerants(): Promise<MapperResult> {
 
   // Upsert por code (limpa antes para garantir consistência)
   await supabaseAdmin.from("refrigerants").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-  const { error } = await supabaseAdmin.from("refrigerants").insert(rows);
+  const { error } = await supabaseAdmin.from("refrigerants").insert(rows as never);
   if (error) result.errors.push(`refrigerants insert: ${error.message}`);
   else result.inserted = rows.length;
   return result;
@@ -311,7 +311,7 @@ async function mapCompressors(): Promise<MapperResult> {
     }
     for (let i = 0; i < polyRows.length; i += 500) {
       const batch = polyRows.slice(i, i + 500);
-      const { error } = await supabaseAdmin.from("compressor_polynomials").insert(batch);
+      const { error } = await supabaseAdmin.from("compressor_polynomials").insert(batch as never);
       if (error) result.errors.push(`${table} insert: ${error.message}`);
       else result.inserted += batch.length;
     }
