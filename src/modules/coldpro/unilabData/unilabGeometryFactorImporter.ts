@@ -12,6 +12,8 @@ const MODE_BY_FILENAME: Array<[RegExp, UnilabCalculationMode]> = [
   [/GeometrieCondensazione/i, 'condensing'],
   [/GeometrieRaffreddamento/i, 'cooling'],
   [/GeometrieRiscaldamento/i, 'heating'],
+  [/GeometrieEvaporatoriaPompa/i, 'pump_evaporator'],
+  [/GeometrieVapore/i, 'steam'],
 ];
 
 export function detectModeFromFilename(filename: string): UnilabCalculationMode | null {
