@@ -25,6 +25,8 @@ interface Inserted {
   model: string | null;
   code: string | null;
   status: Status;
+  source: string;
+  context: string;
   normalized_json: Record<string, unknown>;
   source_raw_id: string;
   source_batch_id: null;
@@ -33,6 +35,16 @@ interface Inserted {
   approved_by: string | null;
   family: string | null;
   application: string | null;
+}
+
+function inferSource(manufacturer: string | null | undefined, fallback: string): string {
+  const m = (manufacturer ?? "").toUpperCase();
+  if (m.includes("BITZER")) return "BITZER";
+  if (m.includes("DANFOSS")) return "DANFOSS";
+  if (m.includes("TORIN")) return "TORIN";
+  if (m.includes("UNILAB")) return "UNILAB";
+  if (m.includes("VAPCYC")) return "VAPCYC";
+  return fallback;
 }
 
 // Limites conservadores para caber no Worker (CPU/memória/tempo).
