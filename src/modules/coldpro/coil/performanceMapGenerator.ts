@@ -23,6 +23,7 @@ import {
 import { simulatePhysicalSimple } from "./physicalSimpleEngine";
 import { simulateDxEvaporator } from "./dxEvaporatorSimulator";
 import { simulateDxCondenser } from "./dxCondenserSimulator";
+import type { UnilabGeometryFactor } from "../unilabData/types";
 
 export type PerformanceEngine = "physical_simple" | "empirical";
 export type PointStatus = "valid" | "warning" | "invalid";
