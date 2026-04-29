@@ -85,11 +85,19 @@ export function simulateDxCondenser(
       ? 6 * input.geometry.rows * faceVelocity ** 1.7
       : null;
 
+  // Aplicação da calibração (pós-processamento empírico)
+  const capCal = capacityW * cal.capacityCorrectionFactor;
+  const airDpCal = airDp != null ? airDp * cal.airDpCorrectionFactor : null;
+  const refDpCal =
+    ref.refrigerantPressureDropKpa != null
+      ? ref.refrigerantPressureDropKpa * cal.refDpCorrectionFactor
+      : null;
+
   return {
     coilType: "condenser",
-    capacityW,
-    capacityKcalh: capacityW * W_TO_KCALH,
-    sensibleW: capacityW,
+    capacityW: capCal,
+    capacityKcalh: capCal * W_TO_KCALH,
+    sensibleW: capCal,
     latentW: 0,
     dtRealK: dtReal,
     dtNominalK: dtNom,
@@ -97,8 +105,8 @@ export function simulateDxCondenser(
     faceVelocityMs: faceVelocity,
     airflowFactor,
     dtFactor,
-    airPressureDropPa: airDp,
-    refPressureDropKpa: ref.refrigerantPressureDropKpa ?? null,
+    airPressureDropPa: airDpCal,
+    refPressureDropKpa: refDpCal,
     condensateLh: null,
     warnings,
     rejection: { used: nominal, estimated },
