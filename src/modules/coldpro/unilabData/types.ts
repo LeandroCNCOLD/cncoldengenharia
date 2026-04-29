@@ -1,4 +1,10 @@
-export type UnilabCalculationMode = 'cooling' | 'heating' | 'condensing' | 'direct_expansion';
+export type UnilabCalculationMode =
+  | 'cooling'
+  | 'heating'
+  | 'condensing'
+  | 'direct_expansion'
+  | 'pump_evaporator'
+  | 'steam';
 
 export type UnilabGeometryFactor = {
   id?: string;
