@@ -143,6 +143,22 @@ function ColdproImportPage() {
       setImporting(false);
     }
   }
+
+  async function handleMap(target: "all" | "geometries" | "refrigerants" | "compressors" | "fans") {
+    setMapping(true);
+    try {
+      const res = await runMappers({ data: { targets: [target] } });
+      const { totalMs: _ms, ...rest } = res as Record<string, unknown> & { totalMs: number };
+      setMapperResult(rest as Record<string, { inserted: number; skipped: number; errors: string[] }>);
+      const sum = Object.values(rest as Record<string, { inserted: number }>).reduce((a, v) => a + (v?.inserted ?? 0), 0);
+      toast.success("Mapeamento concluído", { description: `${sum} linhas tipadas inseridas em ${(_ms / 1000).toFixed(1)}s.` });
+    } catch (e) {
+      toast.error("Falha no mapeamento", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setMapping(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
