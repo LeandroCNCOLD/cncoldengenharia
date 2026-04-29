@@ -625,7 +625,28 @@ export function PerformanceMapPanel({
           </div>
         )}
 
-        {result && summary && !approvable && (
+        {result && !result.nominalValidation.reproducesNominal && (
+          <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-xs text-destructive">
+            <strong>Validação do ponto nominal falhou.</strong>{" "}
+            {result.nominalValidation.message}
+            {result.nominalValidation.relativeError != null && (
+              <div className="mt-1 text-[11px] opacity-80">
+                Datasheet:{" "}
+                {result.nominalValidation.capacityDatasheetW?.toFixed(0)} W ·
+                Simulado:{" "}
+                {result.nominalValidation.capacitySimulatedW.toFixed(0)} W ·
+                Erro:{" "}
+                {(result.nominalValidation.relativeError * 100).toFixed(2)}%
+              </div>
+            )}
+            <div className="mt-1 text-[11px] opacity-80">
+              Recalibre o componente contra o datasheet Unilab antes de aprovar
+              este mapa.
+            </div>
+          </div>
+        )}
+
+        {result && summary && !approvable && result.nominalValidation.reproducesNominal && (
           <p className="text-xs text-amber-600">
             Mais de 30% dos pontos estão inválidos — este mapa não pode ser
             aprovado. Ajuste as faixas e gere novamente.
