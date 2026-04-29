@@ -124,7 +124,8 @@ async function ingestFile(
         sheet_name: meta.sheetName,
         column_count: meta.headers.length,
         row_count: meta.rows.length,
-        headers_json: meta.headers,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        headers_json: meta.headers as any,
         status: "imported",
       },
       { onConflict: "source_database,source_table,sheet_name" },
