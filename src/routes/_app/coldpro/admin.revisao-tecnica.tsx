@@ -42,9 +42,12 @@ function TechnicalReviewPage() {
   const [selected, setSelected] = useState<TechnicalMappedRecord | null>(null);
   const [rawSelected, setRawSelected] = useState<TechnicalRawRecord | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const refresh = async () => {
     setBusy(true);
+    setCheckedIds(new Set());
     try {
       const list = await listMappedForReview(200);
       setItems(list);
