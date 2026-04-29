@@ -164,27 +164,37 @@ export function simulatePhysicalSimple(
   const rho = input.air.airDensityKgM3 ?? airDensity(input.air.altitudeM, input.air.atmPressureKpa, input.air.airTempInC);
   const airMassFlowKgs = airflowM3s * rho;
 
-  // Coeficientes
-  // Lado do ar: correlação base + fator opcional rastreável (substitui o
-  // hack temporário h_air * 2.5; default = 1).
+  // === Lado do ar: correlação real (Chang-Wang / Wang-Herringbone / fallback) ===
   const airSideCorrectionFactor =
     Number.isFinite(opts.airSideCorrectionFactor) && (opts.airSideCorrectionFactor ?? 0) > 0
       ? (opts.airSideCorrectionFactor as number)
       : 1;
-  const hArBase = airSideHtc(faceVelocityMs);
+  const airHtc = selectAirHTC({
+    geometry: input.geometry,
+    faceVelocityMs,
+    airDensityKgM3: rho,
+  });
+  const hArBase = airHtc.hAirWm2k;
   const hAr = hArBase * airSideCorrectionFactor;
   const hRef = refSideHtc(input.coilType, input.refrigerant.refrigerant);
   const { kTube } = materialProps(input.geometry.tubeMaterial, input.geometry.finMaterial);
 
+  // === Área de troca real com eficiência de aleta ===
+  //   A_total = A_tubos + (A_aletas × eta_fin)
+  const heatArea = calcHeatExchangeArea(input.geometry, hAr);
+  const aEffective = heatArea.effectiveAreaM2 || aExt || 0;
+  const aIntFinal = heatArea.internalAreaM2 || aInt || 0;
+
   // 1/U_ext = 1/h_ar + (A_ext/A_int) * 1/h_ref + R_parede + R_fouling
   const tubeWallM = (input.geometry.tubeWallMm ?? 0.5) / 1000;
-  const rWall = tubeWallM / kTube; // simplificação plana
-  const rFouling = ((input.foulingFactor ?? 1) - 1) >= 0 ? 0.0001 : 0; // padrão 1e-4
+  const rWall = tubeWallM / kTube;
+  const rFouling = ((input.foulingFactor ?? 1) - 1) >= 0 ? 0.0001 : 0;
 
-  const aRatio = aExt && aInt && aInt > 0 ? aExt / aInt : 15; // razão típica
+  const aRatio = aEffective && aIntFinal && aIntFinal > 0 ? aEffective / aIntFinal : 15;
   const invU = 1 / hAr + aRatio / hRef + rWall + rFouling;
   const uWm2k = 1 / invU;
-  const uaWk = aExt ? uWm2k * aExt : 0;
+  // UA = U · A_efetiva (já inclui eficiência de aleta)
+  const uaWk = aEffective > 0 ? uWm2k * aEffective : 0;
 
   // LMTD assumindo Tref constante (mudança de fase) — modelo de coil cruzado simplificado
   const Tin = input.air.airTempInC ?? input.nominal?.airTempInC ?? 0;
