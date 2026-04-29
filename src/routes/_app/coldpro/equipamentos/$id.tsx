@@ -96,6 +96,10 @@ function EquipmentDetailPage() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="sizing" className="mt-6">
+          <SizingTab project={project} />
+        </TabsContent>
+
         <TabsContent value="components" className="mt-6">
           <PlaceholderTab
             title="Lista geral de componentes"
@@ -118,10 +122,24 @@ function EquipmentDetailPage() {
           />
         </TabsContent>
 
+        <TabsContent value="fans" className="mt-6">
+          <PlaceholderTab
+            title="Ventiladores"
+            description="Em breve: seleção de ventilador a partir do banco fan_models e curvas de pressão x vazão."
+          />
+        </TabsContent>
+
+        <TabsContent value="valve" className="mt-6">
+          <PlaceholderTab
+            title="Válvula de expansão"
+            description="Em breve: dimensionamento de válvula termostática ou eletrônica."
+          />
+        </TabsContent>
+
         <TabsContent value="simulation" className="mt-6">
           <PlaceholderTab
-            title="Simulação do equipamento"
-            description="Será liberada após validar evaporador, condensador e compressor."
+            title="Sistema completo"
+            description="Solver de equilíbrio Qcond ≈ Qevap + Wcomp. Liberado após validar todos os componentes."
           />
         </TabsContent>
 
