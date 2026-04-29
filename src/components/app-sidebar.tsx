@@ -44,9 +44,13 @@ export const UNILAB_DB_TABLES: { mode: string; label: string }[] = [
 
 const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
+  { label: "Painel ColdPro", to: "/coldpro/dashboard", icon: FileBarChart },
+  { label: "Projetos", to: "/coldpro/projetos", icon: FolderKanban },
   { label: "Equipamentos", to: "/coldpro/equipamentos", icon: Boxes },
+  { label: "Catálogo Técnico", to: "/coldpro/catalogo", icon: BookOpen },
   { label: "Administração", to: "/admin", icon: Settings, adminOnly: true },
-  { label: "Importar Unilab", to: "/admin/unilab-import", icon: Database, adminOnly: true },
+  { label: "Importar Unilab", to: "/admin/unilab-import", icon: Upload, adminOnly: true },
+  { label: "Banco Técnico", to: "/coldpro/admin/banco-tecnico", icon: Database, adminOnly: true },
   {
     label: "Banco de Dados",
     to: "/admin/database",

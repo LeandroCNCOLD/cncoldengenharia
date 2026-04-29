@@ -14,11 +14,15 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
+import { Route as AppColdproProjetosRouteImport } from './routes/_app/coldpro/projetos'
+import { Route as AppColdproDashboardRouteImport } from './routes/_app/coldpro/dashboard'
+import { Route as AppColdproCatalogoRouteImport } from './routes/_app/coldpro/catalogo'
 import { Route as AppAdminUnilabImportRouteImport } from './routes/_app/admin_.unilab-import'
 import { Route as AppAdminColdproImportRouteImport } from './routes/_app/admin_.coldpro-import'
 import { Route as AppColdproEquipamentosIndexRouteImport } from './routes/_app/coldpro/equipamentos/index'
 import { Route as AppAdminDatabaseIndexRouteImport } from './routes/_app/admin_.database.index'
 import { Route as AppColdproEquipamentosIdRouteImport } from './routes/_app/coldpro/equipamentos/$id'
+import { Route as AppColdproAdminBancoTecnicoRouteImport } from './routes/_app/coldpro/admin.banco-tecnico'
 import { Route as AppAdminDatabaseModeRouteImport } from './routes/_app/admin_.database.$mode'
 import { Route as AppColdproEquipamentosIdCoilSimulatorRouteImport } from './routes/_app/coldpro/equipamentos/$id/coil-simulator'
 
@@ -44,6 +48,21 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
 const AppAdminRoute = AppAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppColdproProjetosRoute = AppColdproProjetosRouteImport.update({
+  id: '/coldpro/projetos',
+  path: '/coldpro/projetos',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppColdproDashboardRoute = AppColdproDashboardRouteImport.update({
+  id: '/coldpro/dashboard',
+  path: '/coldpro/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppColdproCatalogoRoute = AppColdproCatalogoRouteImport.update({
+  id: '/coldpro/catalogo',
+  path: '/coldpro/catalogo',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAdminUnilabImportRoute = AppAdminUnilabImportRouteImport.update({
@@ -73,6 +92,12 @@ const AppColdproEquipamentosIdRoute =
     path: '/coldpro/equipamentos/$id',
     getParentRoute: () => AppRoute,
   } as any)
+const AppColdproAdminBancoTecnicoRoute =
+  AppColdproAdminBancoTecnicoRouteImport.update({
+    id: '/coldpro/admin/banco-tecnico',
+    path: '/coldpro/admin/banco-tecnico',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppAdminDatabaseModeRoute = AppAdminDatabaseModeRouteImport.update({
   id: '/admin_/database/$mode',
   path: '/admin/database/$mode',
@@ -92,7 +117,11 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/admin/coldpro-import': typeof AppAdminColdproImportRoute
   '/admin/unilab-import': typeof AppAdminUnilabImportRoute
+  '/coldpro/catalogo': typeof AppColdproCatalogoRoute
+  '/coldpro/dashboard': typeof AppColdproDashboardRoute
+  '/coldpro/projetos': typeof AppColdproProjetosRoute
   '/admin/database/$mode': typeof AppAdminDatabaseModeRoute
+  '/coldpro/admin/banco-tecnico': typeof AppColdproAdminBancoTecnicoRoute
   '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRouteWithChildren
   '/admin/database/': typeof AppAdminDatabaseIndexRoute
   '/coldpro/equipamentos/': typeof AppColdproEquipamentosIndexRoute
@@ -105,7 +134,11 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/admin/coldpro-import': typeof AppAdminColdproImportRoute
   '/admin/unilab-import': typeof AppAdminUnilabImportRoute
+  '/coldpro/catalogo': typeof AppColdproCatalogoRoute
+  '/coldpro/dashboard': typeof AppColdproDashboardRoute
+  '/coldpro/projetos': typeof AppColdproProjetosRoute
   '/admin/database/$mode': typeof AppAdminDatabaseModeRoute
+  '/coldpro/admin/banco-tecnico': typeof AppColdproAdminBancoTecnicoRoute
   '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRouteWithChildren
   '/admin/database': typeof AppAdminDatabaseIndexRoute
   '/coldpro/equipamentos': typeof AppColdproEquipamentosIndexRoute
@@ -120,7 +153,11 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/admin_/coldpro-import': typeof AppAdminColdproImportRoute
   '/_app/admin_/unilab-import': typeof AppAdminUnilabImportRoute
+  '/_app/coldpro/catalogo': typeof AppColdproCatalogoRoute
+  '/_app/coldpro/dashboard': typeof AppColdproDashboardRoute
+  '/_app/coldpro/projetos': typeof AppColdproProjetosRoute
   '/_app/admin_/database/$mode': typeof AppAdminDatabaseModeRoute
+  '/_app/coldpro/admin/banco-tecnico': typeof AppColdproAdminBancoTecnicoRoute
   '/_app/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRouteWithChildren
   '/_app/admin_/database/': typeof AppAdminDatabaseIndexRoute
   '/_app/coldpro/equipamentos/': typeof AppColdproEquipamentosIndexRoute
@@ -135,7 +172,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/admin/coldpro-import'
     | '/admin/unilab-import'
+    | '/coldpro/catalogo'
+    | '/coldpro/dashboard'
+    | '/coldpro/projetos'
     | '/admin/database/$mode'
+    | '/coldpro/admin/banco-tecnico'
     | '/coldpro/equipamentos/$id'
     | '/admin/database/'
     | '/coldpro/equipamentos/'
@@ -148,7 +189,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/admin/coldpro-import'
     | '/admin/unilab-import'
+    | '/coldpro/catalogo'
+    | '/coldpro/dashboard'
+    | '/coldpro/projetos'
     | '/admin/database/$mode'
+    | '/coldpro/admin/banco-tecnico'
     | '/coldpro/equipamentos/$id'
     | '/admin/database'
     | '/coldpro/equipamentos'
@@ -162,7 +207,11 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/admin_/coldpro-import'
     | '/_app/admin_/unilab-import'
+    | '/_app/coldpro/catalogo'
+    | '/_app/coldpro/dashboard'
+    | '/_app/coldpro/projetos'
     | '/_app/admin_/database/$mode'
+    | '/_app/coldpro/admin/banco-tecnico'
     | '/_app/coldpro/equipamentos/$id'
     | '/_app/admin_/database/'
     | '/_app/coldpro/equipamentos/'
@@ -212,6 +261,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/coldpro/projetos': {
+      id: '/_app/coldpro/projetos'
+      path: '/coldpro/projetos'
+      fullPath: '/coldpro/projetos'
+      preLoaderRoute: typeof AppColdproProjetosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/coldpro/dashboard': {
+      id: '/_app/coldpro/dashboard'
+      path: '/coldpro/dashboard'
+      fullPath: '/coldpro/dashboard'
+      preLoaderRoute: typeof AppColdproDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/coldpro/catalogo': {
+      id: '/_app/coldpro/catalogo'
+      path: '/coldpro/catalogo'
+      fullPath: '/coldpro/catalogo'
+      preLoaderRoute: typeof AppColdproCatalogoRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin_/unilab-import': {
       id: '/_app/admin_/unilab-import'
       path: '/admin/unilab-import'
@@ -245,6 +315,13 @@ declare module '@tanstack/react-router' {
       path: '/coldpro/equipamentos/$id'
       fullPath: '/coldpro/equipamentos/$id'
       preLoaderRoute: typeof AppColdproEquipamentosIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/coldpro/admin/banco-tecnico': {
+      id: '/_app/coldpro/admin/banco-tecnico'
+      path: '/coldpro/admin/banco-tecnico'
+      fullPath: '/coldpro/admin/banco-tecnico'
+      preLoaderRoute: typeof AppColdproAdminBancoTecnicoRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/admin_/database/$mode': {
@@ -284,7 +361,11 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppAdminColdproImportRoute: typeof AppAdminColdproImportRoute
   AppAdminUnilabImportRoute: typeof AppAdminUnilabImportRoute
+  AppColdproCatalogoRoute: typeof AppColdproCatalogoRoute
+  AppColdproDashboardRoute: typeof AppColdproDashboardRoute
+  AppColdproProjetosRoute: typeof AppColdproProjetosRoute
   AppAdminDatabaseModeRoute: typeof AppAdminDatabaseModeRoute
+  AppColdproAdminBancoTecnicoRoute: typeof AppColdproAdminBancoTecnicoRoute
   AppColdproEquipamentosIdRoute: typeof AppColdproEquipamentosIdRouteWithChildren
   AppAdminDatabaseIndexRoute: typeof AppAdminDatabaseIndexRoute
   AppColdproEquipamentosIndexRoute: typeof AppColdproEquipamentosIndexRoute
@@ -295,7 +376,11 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppAdminColdproImportRoute: AppAdminColdproImportRoute,
   AppAdminUnilabImportRoute: AppAdminUnilabImportRoute,
+  AppColdproCatalogoRoute: AppColdproCatalogoRoute,
+  AppColdproDashboardRoute: AppColdproDashboardRoute,
+  AppColdproProjetosRoute: AppColdproProjetosRoute,
   AppAdminDatabaseModeRoute: AppAdminDatabaseModeRoute,
+  AppColdproAdminBancoTecnicoRoute: AppColdproAdminBancoTecnicoRoute,
   AppColdproEquipamentosIdRoute: AppColdproEquipamentosIdRouteWithChildren,
   AppAdminDatabaseIndexRoute: AppAdminDatabaseIndexRoute,
   AppColdproEquipamentosIndexRoute: AppColdproEquipamentosIndexRoute,

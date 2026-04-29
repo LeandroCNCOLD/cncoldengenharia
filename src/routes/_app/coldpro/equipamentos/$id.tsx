@@ -16,6 +16,7 @@ import {
 import { EvaporatorTab } from "@/components/coldpro/evaporator-tab";
 import { CondenserTab } from "@/components/coldpro/condenser-tab";
 import { PlaceholderTab } from "@/components/coldpro/placeholder-tab";
+import { SizingTab } from "@/components/coldpro/sizing-tab";
 
 export const Route = createFileRoute("/_app/coldpro/equipamentos/$id")({
   component: EquipmentDetailPage,
@@ -66,11 +67,14 @@ function EquipmentDetailPage() {
       <Tabs defaultValue="overview">
         <TabsList className="flex flex-wrap">
           <TabsTrigger value="overview">Visão geral</TabsTrigger>
+          <TabsTrigger value="sizing">Dimensionamento</TabsTrigger>
           <TabsTrigger value="components">Componentes</TabsTrigger>
           <TabsTrigger value="evaporator">Evaporador</TabsTrigger>
           <TabsTrigger value="condenser">Condensador</TabsTrigger>
           <TabsTrigger value="compressor">Compressor</TabsTrigger>
-          <TabsTrigger value="simulation">Simulação</TabsTrigger>
+          <TabsTrigger value="fans">Ventiladores</TabsTrigger>
+          <TabsTrigger value="valve">Válvula</TabsTrigger>
+          <TabsTrigger value="simulation">Sistema completo</TabsTrigger>
           <TabsTrigger value="catalog">Catálogo</TabsTrigger>
           <TabsTrigger value="history">Histórico</TabsTrigger>
         </TabsList>
@@ -90,6 +94,10 @@ function EquipmentDetailPage() {
               <Info label="Observações">{project.notes ?? "—"}</Info>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="sizing" className="mt-6">
+          <SizingTab project={project} />
         </TabsContent>
 
         <TabsContent value="components" className="mt-6">
@@ -114,10 +122,24 @@ function EquipmentDetailPage() {
           />
         </TabsContent>
 
+        <TabsContent value="fans" className="mt-6">
+          <PlaceholderTab
+            title="Ventiladores"
+            description="Em breve: seleção de ventilador a partir do banco fan_models e curvas de pressão x vazão."
+          />
+        </TabsContent>
+
+        <TabsContent value="valve" className="mt-6">
+          <PlaceholderTab
+            title="Válvula de expansão"
+            description="Em breve: dimensionamento de válvula termostática ou eletrônica."
+          />
+        </TabsContent>
+
         <TabsContent value="simulation" className="mt-6">
           <PlaceholderTab
-            title="Simulação do equipamento"
-            description="Será liberada após validar evaporador, condensador e compressor."
+            title="Sistema completo"
+            description="Solver de equilíbrio Qcond ≈ Qevap + Wcomp. Liberado após validar todos os componentes."
           />
         </TabsContent>
 
