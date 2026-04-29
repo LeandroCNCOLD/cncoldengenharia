@@ -1,13 +1,20 @@
 /**
  * Tipos TypeScript compartilhados do ColdPro.
- * Re-exportados das fontes canônicas para uso por screens/components/services.
+ * Exposto como namespaces para evitar colisões entre subsistemas
+ * (ex.: FinType existe em coilSimulatorTypes e em engines/types).
+ *
+ * Para tipos específicos, importe diretamente do módulo de origem:
+ *   import type { CoilSimulatorInput } from "@/modules/coldpro/coil/coilSimulatorTypes";
  */
 
-export type * from "../coil/coilSimulatorTypes";
-export type * from "../coil/coilEngineTypes";
-export type * from "../coil/engines/types";
-export type * from "../coil/correlations/correlationTypes";
-export type * from "../coil/unilab/unilabTypes";
+export type * as CoilSimulatorTypes from "../coil/coilSimulatorTypes";
+export type * as CoilEngineTypes from "../coil/coilEngineTypes";
+export type * as CoilEnginesTypes from "../coil/engines/types";
+export type * as CorrelationTypes from "../coil/correlations/correlationTypes";
+export type * as UnilabTypes from "../coil/unilab/unilabTypes";
+export type * as UnilabDataTypes from "../unilabData/types";
+
+// Tipos do sistema (sem conflitos — re-export plano)
 export type {
   SystemInput,
   SystemResult,
@@ -28,4 +35,3 @@ export type {
   VapcycPolynomialRecord,
   VapcycCurveType,
 } from "../system/vapcycCompressorEngine";
-export type * from "../unilabData/types";
