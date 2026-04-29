@@ -1,4 +1,14 @@
-import { createHash } from 'node:crypto';
+// Hash determinística leve (FNV-1a 64-bit em hex) — funciona no browser e no server.
+function hashHex(input: string): string {
+  let h1 = 0x811c9dc5;
+  let h2 = 0xc9dc5118;
+  for (let i = 0; i < input.length; i++) {
+    const c = input.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 0x01000193) >>> 0;
+    h2 = Math.imul(h2 ^ c, 0x85ebca6b) >>> 0;
+  }
+  return h1.toString(16).padStart(8, '0') + h2.toString(16).padStart(8, '0');
+}
 import type { CoilCalculationInput, CoilCalculationResult, CoilCalibration } from './types';
 import { calculateAirSide } from './airSideEngine';
 import { calculateCoilGeometry } from './geometryEngine';
@@ -36,7 +46,7 @@ export function generateModelSignature(
     effectiveAreaM2: Number(effectiveAreaM2.toFixed(4)),
     factors: input.factors ?? {},
   };
-  return createHash('sha256').update(JSON.stringify(payload)).digest('hex');
+  return hashHex(JSON.stringify(payload));
 }
 
 function compatibleCalibration(
