@@ -104,6 +104,61 @@ function UnilabImportPage() {
     }
   }
 
+  const BUNDLED_CSVS = [
+    "Tbl_GeometrieEspansioneDiretta.csv",
+    "Tbl_GeometrieCondensazione.csv",
+    "Tbl_GeometrieRaffreddamento.csv",
+    "Tbl_GeometrieRiscaldamento.csv",
+    "Tbl_GeometrieEvaporatoriaPompa.csv",
+    "Tbl_GeometrieVapore.csv",
+  ];
+
+  async function handleImportFromServer() {
+    setBusy(true);
+    try {
+      const csvFiles: UnilabCsvFile[] = [];
+      for (const name of BUNDLED_CSVS) {
+        const res = await fetch(`/unilab/${name}`);
+        if (!res.ok) {
+          toast.error(`Falha ao carregar /unilab/${name} (${res.status})`);
+          continue;
+        }
+        csvFiles.push({ filename: name, text: await res.text() });
+      }
+      if (csvFiles.length === 0) {
+        toast.error("Nenhum CSV carregado de /public/unilab.");
+        return;
+      }
+      const factors = importUnilabGeometryFactors(csvFiles);
+      if (factors.length === 0) {
+        toast.error("Nenhuma linha reconhecida nos CSVs do servidor.");
+        return;
+      }
+      const batchId = await createUnilabImportBatch(supabase, {
+        sourceName: "unilab_all_tables",
+        sourceVersion: version || "bundled",
+        notes: notes || "auto-import from /public/unilab",
+      });
+      const total = await upsertUnilabGeometryFactors(supabase, factors, batchId);
+      setResult({ batchId, total });
+      const counts = new Map<string, number>();
+      for (const f of factors) counts.set(f.sourceTable, (counts.get(f.sourceTable) ?? 0) + 1);
+      setSummaries(
+        csvFiles.map((f) => ({
+          name: f.filename,
+          mode: detectModeFromFilename(f.filename),
+          rowCount: counts.get(f.filename.replace(/\.csv$/i, "")) ?? 0,
+        })),
+      );
+      toast.success(`Importados ${total} fatores de ${csvFiles.length} arquivo(s) do servidor.`);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Falha na importação automática.";
+      toast.error(msg);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
