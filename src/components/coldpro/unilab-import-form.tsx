@@ -289,9 +289,9 @@ export function UnilabImportForm({
                 </>
               )}
             </div>
-            {report.issues.length > 0 && (
+            {(report.issues?.length ?? 0) > 0 && (
               <ul className="mt-1 list-disc pl-5">
-                {report.issues.map((i, idx) => (
+                {report.issues!.map((i, idx) => (
                   <li key={idx} className={i.level === "error" ? "text-rose-600" : "text-amber-600"}>
                     {i.message}
                   </li>
