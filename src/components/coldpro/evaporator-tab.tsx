@@ -82,7 +82,7 @@ export function EvaporatorTab({ equipmentProjectId }: Props) {
   );
 }
 
-function EvaporatorCalibrationSlot({ componentId }: { componentId: string }) {
+function EvaporatorCalibrationSlot({ componentId, equipmentProjectId }: { componentId: string; equipmentProjectId: string }) {
   const { data: row } = useQuery({
     queryKey: ["evap-model", componentId],
     queryFn: async () => (await getEvaporatorCoilModel(componentId)) as Record<string, unknown> | null,
@@ -90,11 +90,19 @@ function EvaporatorCalibrationSlot({ componentId }: { componentId: string }) {
   const datasheet = buildDatasheetFromCoilRow(row, "evaporator");
   const input = buildInputFromCoilRow(row, "evaporator");
   return (
-    <CalibrationPanel
-      componentItemId={componentId}
-      coilType="evaporator"
-      datasheet={datasheet}
-      simulationInput={input}
-    />
+    <>
+      <CalibrationPanel
+        componentItemId={componentId}
+        coilType="evaporator"
+        datasheet={datasheet}
+        simulationInput={input}
+      />
+      <PerformanceMapPanel
+        componentItemId={componentId}
+        equipmentProjectId={equipmentProjectId}
+        coilType="evaporator"
+        simulationInput={input}
+      />
+    </>
   );
 }
