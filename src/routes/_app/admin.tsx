@@ -70,11 +70,20 @@ function AdminPage() {
   };
 
   return (
-    <div>
+    <div className="space-y-4">
       <PageHeader
         title="Administração Técnica"
         description="Gestão de usuários e papéis do sistema."
       />
+
+      <div className="flex flex-wrap gap-2">
+        <Button asChild variant="outline" size="sm">
+          <Link to="/admin/unilab-import">
+            <Database className="mr-1.5 h-3.5 w-3.5" />
+            Importar tabelas Unilab
+          </Link>
+        </Button>
+      </div>
 
       <Card>
         <CardContent className="p-0">
