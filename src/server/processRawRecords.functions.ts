@@ -281,7 +281,7 @@ export const processUnmappedRawRecords = createServerFn({ method: "POST" })
         .limit(pageSize);
       if (data.batchId) q = q.eq("batch_id", data.batchId);
 
-      const { data: rows, error } = await q;
+      const { data: rows, error } = await withRetry("fetch raw", () => q);
       if (error) throw new Error(`fetch raw: ${error.message}`);
       if (!rows || rows.length === 0) break;
       summary.pages++;
@@ -293,10 +293,12 @@ export const processUnmappedRawRecords = createServerFn({ method: "POST" })
       const CHUNK = 100;
       for (let i = 0; i < ids.length; i += CHUNK) {
         const slice = ids.slice(i, i + CHUNK);
-        const { data: existing, error: exErr } = await supabaseAdmin
-          .from("technical_mapped_records")
-          .select("raw_record_id")
-          .in("raw_record_id", slice);
+        const { data: existing, error: exErr } = await withRetry("fetch existing", () =>
+          supabaseAdmin
+            .from("technical_mapped_records")
+            .select("raw_record_id")
+            .in("raw_record_id", slice),
+        );
         if (exErr) throw new Error(`fetch existing: ${exErr.message}`);
         for (const r of existing ?? []) {
           if (r.raw_record_id) alreadyMapped.add(r.raw_record_id as string);
