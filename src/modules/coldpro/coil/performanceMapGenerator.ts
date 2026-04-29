@@ -18,6 +18,7 @@ import type {
 } from "./coilSimulatorTypes";
 import {
   NEUTRAL_CALIBRATION,
+  normalizeCalibrationFactors,
   type CalibrationFactors,
 } from "./coilEngineTypes";
 import { simulatePhysicalSimple } from "./physicalSimpleEngine";
@@ -232,12 +233,17 @@ function runSim(
   cal: CalibrationFactors,
   unilabGeometryFactor?: UnilabGeometryFactor | null,
   nominalFaceVelocityMs?: number,
+  debug?: { componentItemId?: string; calibrationId?: string | null; nominalCapacityW?: number | null },
 ): CoilSimulatorResult {
   if (engine === "physical_simple") {
     return simulatePhysicalSimple(input, {
       calibration: cal,
       unilabGeometryFactor,
       nominalFaceVelocityMs,
+      componentItemId: debug?.componentItemId,
+      calibrationId: debug?.calibrationId,
+      nominalCapacityW: debug?.nominalCapacityW,
+      logCalibration: !!debug,
     });
   }
   // empirical: aplica calibração via post (passa direto no options)
@@ -254,7 +260,7 @@ export function generateCoilPerformanceMap(
 ): PerformanceMapResult {
   const engine: PerformanceEngine = params.engine ?? "physical_simple";
   const ranges = pickRanges(params.coilType, params.ranges);
-  const cal = params.calibration ?? NEUTRAL_CALIBRATION;
+  const cal = normalizeCalibrationFactors(params.calibration ?? NEUTRAL_CALIBRATION);
   const isEstimated = !params.calibration;
   const calConf = isEstimated ? 0.6 : (params.calibrationConfidence ?? 0.85);
 
