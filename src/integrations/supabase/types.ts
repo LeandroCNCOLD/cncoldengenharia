@@ -22,14 +22,19 @@ export type Database = {
           coil_type: string
           component_item_id: string
           confidence_score: number
+          correlation_set_version: string
           created_at: string
           created_by: string | null
           deviation_after: Json
           deviation_before: Json
           engine: string
+          engine_name: string
+          engine_version: string
           id: string
           inputs_snapshot: Json
+          is_active: boolean
           meets_targets: boolean
+          model_signature: string | null
           notes: string | null
           outputs_snapshot: Json
           ref_dp_correction_factor: number
@@ -44,14 +49,19 @@ export type Database = {
           coil_type: string
           component_item_id: string
           confidence_score?: number
+          correlation_set_version?: string
           created_at?: string
           created_by?: string | null
           deviation_after?: Json
           deviation_before?: Json
           engine?: string
+          engine_name?: string
+          engine_version?: string
           id?: string
           inputs_snapshot?: Json
+          is_active?: boolean
           meets_targets?: boolean
+          model_signature?: string | null
           notes?: string | null
           outputs_snapshot?: Json
           ref_dp_correction_factor?: number
@@ -66,14 +76,19 @@ export type Database = {
           coil_type?: string
           component_item_id?: string
           confidence_score?: number
+          correlation_set_version?: string
           created_at?: string
           created_by?: string | null
           deviation_after?: Json
           deviation_before?: Json
           engine?: string
+          engine_name?: string
+          engine_version?: string
           id?: string
           inputs_snapshot?: Json
+          is_active?: boolean
           meets_targets?: boolean
+          model_signature?: string | null
           notes?: string | null
           outputs_snapshot?: Json
           ref_dp_correction_factor?: number
