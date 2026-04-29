@@ -41,7 +41,8 @@ export const runVapcycSystemSimulation = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => systemInput.parse(d))
   .handler(async ({ data, context }) => {
-    return simulateSystemVapcyc(context.supabase, data);
+    const result = await simulateSystemVapcyc(context.supabase, data);
+    return JSON.parse(JSON.stringify(result)) as Record<string, unknown>;
   });
 
 const searchInput = z.object({
