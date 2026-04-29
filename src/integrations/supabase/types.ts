@@ -207,6 +207,7 @@ export type Database = {
       }
       coil_fluids: {
         Row: {
+          approval_status: Database["public"]["Enums"]["technical_record_status"]
           created_at: string
           critical_pressure_bar: number | null
           critical_temp_c: number | null
@@ -229,6 +230,7 @@ export type Database = {
           vapour_viscosity_upa_s: number | null
         }
         Insert: {
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           created_at?: string
           critical_pressure_bar?: number | null
           critical_temp_c?: number | null
@@ -251,6 +253,7 @@ export type Database = {
           vapour_viscosity_upa_s?: number | null
         }
         Update: {
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           created_at?: string
           critical_pressure_bar?: number | null
           critical_temp_c?: number | null
@@ -657,6 +660,7 @@ export type Database = {
       compressor_models: {
         Row: {
           application_type: string | null
+          approval_status: Database["public"]["Enums"]["technical_record_status"]
           compressor_type: string | null
           created_at: string
           displacement: number | null
@@ -689,6 +693,7 @@ export type Database = {
         }
         Insert: {
           application_type?: string | null
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           compressor_type?: string | null
           created_at?: string
           displacement?: number | null
@@ -721,6 +726,7 @@ export type Database = {
         }
         Update: {
           application_type?: string | null
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           compressor_type?: string | null
           created_at?: string
           displacement?: number | null
@@ -809,6 +815,7 @@ export type Database = {
           air_mass_flow_kgh: number | null
           air_pressure_drop_pa: number | null
           altitude_m: number | null
+          approval_status: Database["public"]["Enums"]["technical_record_status"]
           atm_pressure_bar: number | null
           circuits: number | null
           component_item_id: string
@@ -867,6 +874,7 @@ export type Database = {
           air_mass_flow_kgh?: number | null
           air_pressure_drop_pa?: number | null
           altitude_m?: number | null
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           atm_pressure_bar?: number | null
           circuits?: number | null
           component_item_id: string
@@ -925,6 +933,7 @@ export type Database = {
           air_mass_flow_kgh?: number | null
           air_pressure_drop_pa?: number | null
           altitude_m?: number | null
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           atm_pressure_bar?: number | null
           circuits?: number | null
           component_item_id?: string
@@ -1082,6 +1091,7 @@ export type Database = {
           air_density_in_kg_m3: number | null
           air_pressure_drop_pa: number | null
           altitude_m: number | null
+          approval_status: Database["public"]["Enums"]["technical_record_status"]
           atm_pressure_bar: number | null
           circuits: number | null
           component_item_id: string
@@ -1144,6 +1154,7 @@ export type Database = {
           air_density_in_kg_m3?: number | null
           air_pressure_drop_pa?: number | null
           altitude_m?: number | null
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           atm_pressure_bar?: number | null
           circuits?: number | null
           component_item_id: string
@@ -1206,6 +1217,7 @@ export type Database = {
           air_density_in_kg_m3?: number | null
           air_pressure_drop_pa?: number | null
           altitude_m?: number | null
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           atm_pressure_bar?: number | null
           circuits?: number | null
           component_item_id?: string
@@ -1314,6 +1326,7 @@ export type Database = {
       }
       fan_models: {
         Row: {
+          approval_status: Database["public"]["Enums"]["technical_record_status"]
           created_at: string
           diameter_mm: number | null
           fan_type: string | null
@@ -1327,6 +1340,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           created_at?: string
           diameter_mm?: number | null
           fan_type?: string | null
@@ -1340,6 +1354,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           created_at?: string
           diameter_mm?: number | null
           fan_type?: string | null
@@ -1451,6 +1466,7 @@ export type Database = {
       }
       refrigerants: {
         Row: {
+          approval_status: Database["public"]["Enums"]["technical_record_status"]
           code: string
           created_at: string
           family: string | null
@@ -1464,6 +1480,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           code: string
           created_at?: string
           family?: string | null
@@ -1477,6 +1494,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           code?: string
           created_at?: string
           family?: string | null
@@ -1490,6 +1508,276 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      technical_components: {
+        Row: {
+          application: string | null
+          approved_at: string | null
+          approved_by: string | null
+          code: string | null
+          compatible_refrigerants_json: Json
+          created_at: string
+          entity_type: Database["public"]["Enums"]["technical_entity_type"]
+          family: string | null
+          id: string
+          manufacturer: string | null
+          model: string | null
+          normalized_json: Json
+          notes: string | null
+          source_batch_id: string | null
+          source_mapped_id: string | null
+          source_raw_id: string | null
+          status: Database["public"]["Enums"]["technical_record_status"]
+          updated_at: string
+        }
+        Insert: {
+          application?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          code?: string | null
+          compatible_refrigerants_json?: Json
+          created_at?: string
+          entity_type: Database["public"]["Enums"]["technical_entity_type"]
+          family?: string | null
+          id?: string
+          manufacturer?: string | null
+          model?: string | null
+          normalized_json?: Json
+          notes?: string | null
+          source_batch_id?: string | null
+          source_mapped_id?: string | null
+          source_raw_id?: string | null
+          status?: Database["public"]["Enums"]["technical_record_status"]
+          updated_at?: string
+        }
+        Update: {
+          application?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          code?: string | null
+          compatible_refrigerants_json?: Json
+          created_at?: string
+          entity_type?: Database["public"]["Enums"]["technical_entity_type"]
+          family?: string | null
+          id?: string
+          manufacturer?: string | null
+          model?: string | null
+          normalized_json?: Json
+          notes?: string | null
+          source_batch_id?: string | null
+          source_mapped_id?: string | null
+          source_raw_id?: string | null
+          status?: Database["public"]["Enums"]["technical_record_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technical_components_source_batch_id_fkey"
+            columns: ["source_batch_id"]
+            isOneToOne: false
+            referencedRelation: "technical_import_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_components_source_mapped_id_fkey"
+            columns: ["source_mapped_id"]
+            isOneToOne: false
+            referencedRelation: "technical_mapped_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_components_source_raw_id_fkey"
+            columns: ["source_raw_id"]
+            isOneToOne: false
+            referencedRelation: "technical_raw_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technical_import_batches: {
+        Row: {
+          approved_rows: number
+          created_at: string
+          created_by: string | null
+          errors_json: Json
+          file_name: string | null
+          id: string
+          manufacturer: string | null
+          mapped_rows: number
+          notes: string | null
+          source_name: string
+          source_type: string | null
+          status: Database["public"]["Enums"]["technical_batch_status"]
+          summary_json: Json
+          total_files: number
+          total_rows: number
+          updated_at: string
+          validated_rows: number
+        }
+        Insert: {
+          approved_rows?: number
+          created_at?: string
+          created_by?: string | null
+          errors_json?: Json
+          file_name?: string | null
+          id?: string
+          manufacturer?: string | null
+          mapped_rows?: number
+          notes?: string | null
+          source_name: string
+          source_type?: string | null
+          status?: Database["public"]["Enums"]["technical_batch_status"]
+          summary_json?: Json
+          total_files?: number
+          total_rows?: number
+          updated_at?: string
+          validated_rows?: number
+        }
+        Update: {
+          approved_rows?: number
+          created_at?: string
+          created_by?: string | null
+          errors_json?: Json
+          file_name?: string | null
+          id?: string
+          manufacturer?: string | null
+          mapped_rows?: number
+          notes?: string | null
+          source_name?: string
+          source_type?: string | null
+          status?: Database["public"]["Enums"]["technical_batch_status"]
+          summary_json?: Json
+          total_files?: number
+          total_rows?: number
+          updated_at?: string
+          validated_rows?: number
+        }
+        Relationships: []
+      }
+      technical_mapped_records: {
+        Row: {
+          approved_component_id: string | null
+          batch_id: string
+          code: string | null
+          confidence_score: number
+          created_at: string
+          entity_type: Database["public"]["Enums"]["technical_entity_type"]
+          id: string
+          manufacturer: string | null
+          mapper_name: string | null
+          mapping_status: Database["public"]["Enums"]["technical_record_status"]
+          model: string | null
+          normalized_json: Json
+          raw_record_id: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          updated_at: string
+          validation_errors_json: Json
+        }
+        Insert: {
+          approved_component_id?: string | null
+          batch_id: string
+          code?: string | null
+          confidence_score?: number
+          created_at?: string
+          entity_type: Database["public"]["Enums"]["technical_entity_type"]
+          id?: string
+          manufacturer?: string | null
+          mapper_name?: string | null
+          mapping_status?: Database["public"]["Enums"]["technical_record_status"]
+          model?: string | null
+          normalized_json?: Json
+          raw_record_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+          validation_errors_json?: Json
+        }
+        Update: {
+          approved_component_id?: string | null
+          batch_id?: string
+          code?: string | null
+          confidence_score?: number
+          created_at?: string
+          entity_type?: Database["public"]["Enums"]["technical_entity_type"]
+          id?: string
+          manufacturer?: string | null
+          mapper_name?: string | null
+          mapping_status?: Database["public"]["Enums"]["technical_record_status"]
+          model?: string | null
+          normalized_json?: Json
+          raw_record_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+          validation_errors_json?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technical_mapped_records_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "technical_import_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_mapped_records_raw_record_id_fkey"
+            columns: ["raw_record_id"]
+            isOneToOne: false
+            referencedRelation: "technical_raw_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technical_raw_records: {
+        Row: {
+          batch_id: string
+          created_at: string
+          detected_entity_type: Database["public"]["Enums"]["technical_entity_type"]
+          detected_manufacturer: string | null
+          id: string
+          notes: string | null
+          raw_json: Json
+          row_index: number | null
+          source_file: string | null
+          source_table: string | null
+          status: Database["public"]["Enums"]["technical_record_status"]
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          detected_entity_type?: Database["public"]["Enums"]["technical_entity_type"]
+          detected_manufacturer?: string | null
+          id?: string
+          notes?: string | null
+          raw_json?: Json
+          row_index?: number | null
+          source_file?: string | null
+          source_table?: string | null
+          status?: Database["public"]["Enums"]["technical_record_status"]
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          detected_entity_type?: Database["public"]["Enums"]["technical_entity_type"]
+          detected_manufacturer?: string | null
+          id?: string
+          notes?: string | null
+          raw_json?: Json
+          row_index?: number | null
+          source_file?: string | null
+          source_table?: string | null
+          status?: Database["public"]["Enums"]["technical_record_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technical_raw_records_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "technical_import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       unilab_extractions: {
         Row: {
@@ -1547,6 +1835,7 @@ export type Database = {
       }
       unilab_geometries: {
         Row: {
+          approval_status: Database["public"]["Enums"]["technical_record_status"]
           circuits: number | null
           created_at: string
           description: string | null
@@ -1568,6 +1857,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           circuits?: number | null
           created_at?: string
           description?: string | null
@@ -1589,6 +1879,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           circuits?: number | null
           created_at?: string
           description?: string | null
@@ -1621,6 +1912,7 @@ export type Database = {
       }
       unilab_geometries_factors: {
         Row: {
+          approval_status: Database["public"]["Enums"]["technical_record_status"]
           created_at: string
           factor_a0: number | null
           factor_a1: number | null
@@ -1644,6 +1936,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           created_at?: string
           factor_a0?: number | null
           factor_a1?: number | null
@@ -1667,6 +1960,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_status?: Database["public"]["Enums"]["technical_record_status"]
           created_at?: string
           factor_a0?: number | null
           factor_a1?: number | null
@@ -2066,6 +2360,27 @@ export type Database = {
         | "in_progress"
         | "validated"
         | "archived"
+      technical_batch_status:
+        | "pending"
+        | "processing"
+        | "mapped"
+        | "partially_validated"
+        | "completed"
+        | "failed"
+      technical_entity_type:
+        | "compressor"
+        | "fan"
+        | "expansion_valve"
+        | "solenoid_valve"
+        | "hot_gas_valve"
+        | "condenser_coil"
+        | "evaporator_coil"
+        | "refrigerant"
+        | "fluid"
+        | "controller"
+        | "sensor"
+        | "accessory"
+        | "unknown"
       technical_file_category:
         | "ficha_tecnica"
         | "laudo_teste"
@@ -2085,6 +2400,14 @@ export type Database = {
         | "imagens"
         | "documentos"
         | "outros"
+      technical_record_status:
+        | "raw_imported"
+        | "mapped"
+        | "needs_review"
+        | "validated"
+        | "approved"
+        | "rejected"
+        | "unmapped"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2258,6 +2581,29 @@ export const Constants = {
         "validated",
         "archived",
       ],
+      technical_batch_status: [
+        "pending",
+        "processing",
+        "mapped",
+        "partially_validated",
+        "completed",
+        "failed",
+      ],
+      technical_entity_type: [
+        "compressor",
+        "fan",
+        "expansion_valve",
+        "solenoid_valve",
+        "hot_gas_valve",
+        "condenser_coil",
+        "evaporator_coil",
+        "refrigerant",
+        "fluid",
+        "controller",
+        "sensor",
+        "accessory",
+        "unknown",
+      ],
       technical_file_category: [
         "ficha_tecnica",
         "laudo_teste",
@@ -2278,6 +2624,15 @@ export const Constants = {
         "imagens",
         "documentos",
         "outros",
+      ],
+      technical_record_status: [
+        "raw_imported",
+        "mapped",
+        "needs_review",
+        "validated",
+        "approved",
+        "rejected",
+        "unmapped",
       ],
     },
   },
