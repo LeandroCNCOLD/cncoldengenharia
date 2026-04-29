@@ -78,7 +78,7 @@ function AdminPage() {
 
       <div className="flex flex-wrap gap-2">
         <Button asChild variant="outline" size="sm">
-          <Link to="/admin_/unilab-import">
+          <Link to="/admin/unilab-import">
             <Database className="mr-1.5 h-3.5 w-3.5" />
             Importar tabelas Unilab
           </Link>
