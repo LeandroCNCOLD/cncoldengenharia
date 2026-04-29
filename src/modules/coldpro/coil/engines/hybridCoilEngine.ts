@@ -14,6 +14,10 @@ import { calculateAirSide } from './airSideEngine';
 import { calculateCoilGeometry } from './geometryEngine';
 import { calculateRefrigerantSide } from './refrigerantSideEngine';
 import { calculateAirPressureDrop, calculateRefrigerantPressureDrop } from './pressureDropEngine';
+import { isCalibrationCompatible, validateCalibrationFactors } from './calibrationEngine';
+
+export const ENGINE_NAME = 'hybrid_unilab';
+export const ENGINE_VERSION = 'v1';
 
 function calcLMTD(dt1: number, dt2: number): number {
   if (dt1 <= 0 || dt2 <= 0) return Math.max(0, (dt1 + dt2) / 2);
