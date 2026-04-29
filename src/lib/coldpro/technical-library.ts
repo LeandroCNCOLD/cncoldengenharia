@@ -112,11 +112,11 @@ export async function approveMapped(
     manufacturer: mapped.manufacturer,
     model: mapped.model,
     code: mapped.code,
-    status: "approved" as TechnicalRecordStatus,
+    status: "approved" as const,
     source_batch_id: mapped.batch_id,
     source_raw_id: mapped.raw_record_id,
     source_mapped_id: mapped.id,
-    normalized_json: mapped.normalized_json,
+    normalized_json: mapped.normalized_json as never,
     approved_by: reviewerUserId,
     approved_at: new Date().toISOString(),
   };
@@ -152,7 +152,7 @@ export async function rejectMapped(
       mapping_status: "rejected",
       reviewed_by: reviewerUserId,
       reviewed_at: new Date().toISOString(),
-      validation_errors_json: [{ rejected_reason: reason }],
+      validation_errors_json: [{ rejected_reason: reason }] as never,
     })
     .eq("id", mappedId);
 }
@@ -169,6 +169,9 @@ export async function remapRaw(
     hintEntityType: raw.detected_entity_type,
   });
 
+  const mappingStatus: TechnicalRecordStatus = result.errors.length
+    ? "needs_review"
+    : "mapped";
   const payload = {
     batch_id: raw.batch_id,
     raw_record_id: raw.id,
@@ -176,12 +179,12 @@ export async function remapRaw(
     manufacturer: result.manufacturer,
     model: result.model,
     code: result.code,
-    normalized_json: result.normalized,
+    normalized_json: result.normalized as never,
     confidence_score: result.confidence,
-    mapping_status: result.errors.length ? "needs_review" : "mapped",
-    validation_errors_json: result.errors.length
+    mapping_status: mappingStatus,
+    validation_errors_json: (result.errors.length
       ? result.errors.map((e) => ({ message: e }))
-      : [],
+      : []) as never,
     mapper_name: result.mapperName,
   };
 
