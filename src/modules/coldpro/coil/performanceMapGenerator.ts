@@ -330,12 +330,14 @@ function runSim(
 export function generateCoilPerformanceMap(
   params: GeneratePerformanceMapParams,
 ): PerformanceMapResult {
-  const engine: PerformanceEngine = params.engine ?? "physical_simple";
+  const engine: PerformanceEngine = params.engine ?? "hybrid";
   const ranges = pickRanges(params.coilType, params.ranges);
   // Mapa pode ser gerado SEM calibração — calibração é apenas ajuste fino.
   const cal = normalizeCalibrationFactors(params.calibration ?? NEUTRAL_CALIBRATION);
-  const isEstimated = !params.calibration;
+  const isEstimated = !params.calibration && !params.hybridCalibration;
   const calConf = isEstimated ? 0.6 : (params.calibrationConfidence ?? 0.85);
+  const hybridCal = params.hybridCalibration ?? null;
+  const blockOnMismatch = params.blockOnNominalMismatch ?? true;
 
   // baseline para calcular distance
   const baseInput = params.input;
