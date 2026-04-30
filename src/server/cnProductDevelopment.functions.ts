@@ -230,6 +230,43 @@ export const ensureEquipmentProject = createServerFn({ method: "POST" })
       return { equipmentProjectId: prod.equipment_project_id };
     }
 
+    // Carrega dados técnicos da curva mais detalhada para pré-preencher o equipamento
+    const { data: curve } = await supabase
+      .from("cn_catalog_performance_curves")
+      .select("raw_json")
+      .eq("modelo", prod.catalog_model)
+      .order("total_pontos", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    let tech: Record<string, string | number | null> = {};
+    if (curve?.raw_json && typeof curve.raw_json === "object") {
+      const raw = curve.raw_json as Record<string, unknown>;
+      const curvaRaw = raw.curva_raw;
+      if (typeof curvaRaw === "string") {
+        try { tech = JSON.parse(curvaRaw); } catch { /* ignore */ }
+      } else if (curvaRaw && typeof curvaRaw === "object") {
+        tech = curvaRaw as Record<string, string | number | null>;
+      }
+    }
+
+    const num = (k: string): number | null => {
+      const v = tech[k];
+      if (typeof v === "number") return v;
+      if (typeof v === "string" && v.trim() !== "" && !Number.isNaN(Number(v))) return Number(v);
+      return null;
+    };
+
+    const tempEvap = num("TEMPERATURA DE EVAPORAÇÃO  (°C)");
+    const capKcal = num("CAPACIDADE FRIGORÍFICA DO COMPRESSOR (Kcal/h)");
+    const capWatts = capKcal != null ? Math.round(capKcal * 1.163) : null;
+
+    const notesParts: string[] = ["Criado a partir do Desenvolvimento de Produtos CN."];
+    if (tech["GABINETE"]) notesParts.push(`Gabinete: ${tech["GABINETE"]}`);
+    if (tech["TENSÃO ELÉTRICA (v)"]) notesParts.push(`Tensão: ${tech["TENSÃO ELÉTRICA (v)"]}`);
+    if (tech["MODELO EVAPORADOR"]) notesParts.push(`Evaporador: ${tech["MODELO EVAPORADOR"]}`);
+    if (tech["VENTILADOR EVAPORADOR"]) notesParts.push(`Ventilador: ${tech["VENTILADOR EVAPORADOR"]}`);
+
     const { data: proj, error: ce } = await supabase
       .from("equipment_projects")
       .insert({
@@ -238,9 +275,11 @@ export const ensureEquipmentProject = createServerFn({ method: "POST" })
         equipment_kind: "unidade_condensadora" as never,
         application: "outro" as never,
         family: prod.linha ?? null,
-        refrigerant: prod.refrigerante ?? null,
+        refrigerant: prod.refrigerante ?? (tech["REFRIGERANTE"] as string) ?? null,
+        target_temperature: tempEvap,
+        target_capacity: capWatts,
         status: "draft" as never,
-        notes: `Criado a partir do Desenvolvimento de Produtos CN.`,
+        notes: notesParts.join("\n"),
         created_by: userId,
       })
       .select()
