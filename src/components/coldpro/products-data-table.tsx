@@ -39,6 +39,8 @@ export type UnifiedRow =
       status: string;
       curveCount: number;
       equipmentProjectId: string | null;
+      capacity_w: number | null;
+      tevap_c: number | null;
       raw: ProductCardData;
     }
   | {
@@ -51,6 +53,8 @@ export type UnifiedRow =
       status: "ready" | "partial" | "empty";
       curveCount: number;
       equipmentProjectId: string | null;
+      capacity_w: number | null;
+      tevap_c: number | null;
       raw: Cn480ListItem;
     };
 
@@ -73,6 +77,8 @@ export function ProductsDataTable({ rows, onRowClick }: Props) {
               <TableHead className="w-[120px]">Linha</TableHead>
               <TableHead className="w-[80px]">HP</TableHead>
               <TableHead className="w-[110px]">Refrigerante</TableHead>
+              <TableHead className="w-[140px] text-right">Capacidade</TableHead>
+              <TableHead className="w-[110px] text-right">T. evap.</TableHead>
               <TableHead className="w-[160px]">Status</TableHead>
               <TableHead className="w-[90px] text-right">Curvas</TableHead>
               <TableHead className="w-[60px]" />
