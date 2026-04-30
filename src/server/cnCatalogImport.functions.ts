@@ -64,7 +64,7 @@ export const importCnCatalogCurves = createServerFn({ method: "POST" })
       }));
       const { error } = await supabaseAdmin
         .from("cn_catalog_performance_curves")
-        .insert(slice);
+        .insert(slice as never);
       if (error) throw new Error(`Erro inserindo lote ${i}: ${error.message}`);
       inserted += slice.length;
     }
