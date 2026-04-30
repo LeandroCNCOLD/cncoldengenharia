@@ -15,11 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
 import {
   approveProduct,
   archiveProduct,
   ensureEquipmentProject,
+  getProductFullDetails,
   unarchiveProduct,
 } from "@/server/cnProductDevelopment.functions";
 import type { ProductCardData } from "./product-kanban-card";
@@ -29,42 +29,90 @@ interface Props {
   onOpenChange: (open: boolean) => void;
 }
 
+// Agrupamento dos campos técnicos vindos do raw_json do CSV importado
+const FIELD_GROUPS: Array<{ title: string; fields: Array<{ key: string; label: string; unit?: string }> }> = [
+  {
+    title: "Cadastro",
+    fields: [
+      { key: "MODELO", label: "Modelo" },
+      { key: "GABINETE", label: "Gabinete" },
+      { key: "HP", label: "HP" },
+      { key: "REFRIGERANTE", label: "Refrigerante" },
+      { key: "TENSÃO ELÉTRICA (v)", label: "Tensão elétrica" },
+      { key: "ALTITUDE (m)", label: "Altitude", unit: "m" },
+      { key: "source_sheet", label: "Origem (planilha)" },
+    ],
+  },
+  {
+    title: "Condições térmicas",
+    fields: [
+      { key: "TEMPERATURA DE EVAPORAÇÃO  (°C)", label: "Temp. evaporação", unit: "°C" },
+      { key: "TEMPERATURA DE CONDENSAÇÃO  (°C)", label: "Temp. condensação", unit: "°C" },
+      { key: "SUBRESFRIAMENTO (K)", label: "Subresfriamento", unit: "K" },
+      { key: "SUPERAQUECIMENTO TOTAL (K)", label: "Superaq. total", unit: "K" },
+      { key: "SUPERAQUECIMENTO ÚTIL (K)", label: "Superaq. útil", unit: "K" },
+      { key: "UMIDADE INTERNA (%)", label: "Umidade interna", unit: "%" },
+    ],
+  },
+  {
+    title: "Capacidade & Potência",
+    fields: [
+      { key: "CAPACIDADE FRIGORÍFICA DO COMPRESSOR (Kcal/h)", label: "Cap. frigorífica", unit: "kcal/h" },
+      { key: "POTÊNCIA ELÉTRICA REQUERIDA TOTAL (kW)", label: "Potência total", unit: "kW" },
+      { key: "POTÊNCIA ELÉTRICA REQUERIDA VENTILADOR (kW)", label: "Pot. ventilador", unit: "kW" },
+      { key: "POTÊNCIA ELÉTRICA REQUERIDA RESISTÊNCIA (kW)", label: "Pot. resistência", unit: "kW" },
+    ],
+  },
+  {
+    title: "Correntes elétricas",
+    fields: [
+      { key: "CORRENTE ELÉTRICA ESTIMADA (A)", label: "Estimada", unit: "A" },
+      { key: "CORRENTE ELÉTRICA DE PARTIDA (A)", label: "Partida", unit: "A" },
+      { key: "CORRENTE ELÉTRICA VENTILADORES (A)", label: "Ventiladores", unit: "A" },
+      { key: "CORRENTE ELÉTRICA RESISTÊNCIA (A)", label: "Resistência", unit: "A" },
+    ],
+  },
+  {
+    title: "Evaporador & Ventilador",
+    fields: [
+      { key: "MODELO EVAPORADOR", label: "Modelo evaporador" },
+      { key: "VENTILADOR EVAPORADOR", label: "Ventilador" },
+      { key: "VAZÃO VENTILADOR EVAPORADOR (m³/h)", label: "Vazão de ar", unit: "m³/h" },
+    ],
+  },
+];
+
+function fmt(value: string | number | null | undefined, unit?: string) {
+  if (value === null || value === undefined || value === "") return "—";
+  const display = typeof value === "number" ? value.toLocaleString("pt-BR") : String(value);
+  return unit ? `${display} ${unit}` : display;
+}
+
 export function ProductDetailDrawer({ product, onOpenChange }: Props) {
   const qc = useQueryClient();
   const [archiveReason, setArchiveReason] = useState("");
   const open = !!product;
   const navigate = useNavigate();
 
+  const { data: details, isLoading: detailsLoading } = useQuery({
+    queryKey: ["cn-product-dev-details", product?.id],
+    enabled: open && !!product,
+    queryFn: () => getProductFullDetails({ data: { id: product!.id } }),
+  });
+
   const ensureMutation = useMutation({
     mutationFn: () => ensureEquipmentProject({ data: { id: product!.id } }),
     onSuccess: ({ equipmentProjectId }) => {
       qc.invalidateQueries({ queryKey: ["cn-product-dev"] });
       onOpenChange(false);
-      navigate({
-        to: "/coldpro/equipamentos/$id",
-        params: { id: equipmentProjectId },
-      });
+      navigate({ to: "/coldpro/equipamentos/$id", params: { id: equipmentProjectId } });
     },
     onError: (e) => toast.error(`Falha: ${(e as Error).message}`),
   });
 
-  const { data: curves } = useQuery({
-    queryKey: ["cn-curves", product?.catalog_model],
-    enabled: open,
-    queryFn: async () => {
-      if (!product) return [];
-      const { data } = await supabase
-        .from("cn_catalog_performance_curves")
-        .select("id, modelo, hp, refrigerante, total_pontos, corrente_estimada, corrente_partida, carga_fluido")
-        .eq("modelo", product.catalog_model)
-        .limit(20);
-      return data ?? [];
-    },
-  });
-
   const approveMutation = useMutation({
     mutationFn: () => approveProduct({ data: { id: product!.id } }),
-    onSuccess: (res) => {
+    onSuccess: () => {
       toast.success("Produto aprovado e publicado no catálogo de produção.");
       qc.invalidateQueries({ queryKey: ["cn-product-dev"] });
       onOpenChange(false);
@@ -95,10 +143,12 @@ export function ProductDetailDrawer({ product, onOpenChange }: Props) {
   if (!product) return null;
   const isArchived = product.status === "arquivado";
   const isApproved = product.status === "aprovado";
+  const tech = details?.technical ?? {};
+  const curves = details?.curves ?? [];
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg">
+      <SheetContent className="w-full overflow-y-auto sm:max-w-2xl">
         <SheetHeader>
           <SheetTitle>{product.catalog_model}</SheetTitle>
           <SheetDescription>
@@ -109,44 +159,73 @@ export function ProductDetailDrawer({ product, onOpenChange }: Props) {
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
-          <div>
-            <h3 className="mb-2 text-sm font-semibold">Status</h3>
+          <div className="flex items-center gap-2">
             <Badge variant="secondary">{product.status}</Badge>
-          </div>
-
-          {product.equipment_project_id && (
-            <div>
-              <h3 className="mb-2 text-sm font-semibold">Equipamento publicado</h3>
+            {curves.length > 0 && (
+              <Badge variant="outline" className="gap-1">
+                <LineChart className="h-3 w-3" /> {curves.length} curva(s) · {curves[0]?.total_pontos ?? 0} pts
+              </Badge>
+            )}
+            {product.equipment_project_id && (
               <Link
                 to="/coldpro/equipamentos/$id"
                 params={{ id: product.equipment_project_id }}
-                className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                className="ml-auto inline-flex items-center gap-1 text-xs text-primary hover:underline"
               >
-                Abrir equipamento <ExternalLink className="h-3 w-3" />
+                Equipamento <ExternalLink className="h-3 w-3" />
               </Link>
-            </div>
+            )}
+          </div>
+
+          {detailsLoading && (
+            <p className="text-sm text-muted-foreground">Carregando dados técnicos…</p>
           )}
 
-          <div>
-            <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">
-              <LineChart className="h-4 w-4" /> Curvas reais ({curves?.length ?? 0})
-            </h3>
-            <div className="max-h-48 space-y-1 overflow-y-auto rounded-md border border-border p-2">
-              {(curves ?? []).map((c) => (
-                <div key={c.id} className="flex items-center justify-between text-xs">
-                  <span className="truncate">
-                    {c.refrigerante ?? "—"} · {c.total_pontos ?? 0} pts
-                  </span>
-                  <span className="text-muted-foreground">
-                    {c.corrente_estimada ? `${c.corrente_estimada}A` : ""}
-                  </span>
+          {!detailsLoading && Object.keys(tech).length === 0 && (
+            <p className="rounded-md border border-dashed border-border p-4 text-xs text-muted-foreground">
+              Nenhum dado técnico encontrado no catálogo importado para este modelo.
+            </p>
+          )}
+
+          {!detailsLoading &&
+            Object.keys(tech).length > 0 &&
+            FIELD_GROUPS.map((group) => {
+              const items = group.fields.filter((f) => tech[f.key] !== undefined && tech[f.key] !== null && tech[f.key] !== "");
+              if (items.length === 0) return null;
+              return (
+                <div key={group.title}>
+                  <h3 className="mb-2 text-sm font-semibold text-foreground">{group.title}</h3>
+                  <div className="grid grid-cols-2 gap-3 rounded-md border border-border bg-muted/30 p-3">
+                    {items.map((f) => (
+                      <div key={f.key} className="min-w-0">
+                        <p className="truncate text-[10px] uppercase tracking-wide text-muted-foreground">
+                          {f.label}
+                        </p>
+                        <p className="truncate text-sm font-medium text-foreground">
+                          {fmt(tech[f.key], f.unit)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
-              {(!curves || curves.length === 0) && (
-                <p className="text-xs text-muted-foreground">Sem curvas vinculadas.</p>
-              )}
+              );
+            })}
+
+          {curves.length > 1 && (
+            <div>
+              <h3 className="mb-2 text-sm font-semibold">Curvas disponíveis ({curves.length})</h3>
+              <div className="max-h-40 space-y-1 overflow-y-auto rounded-md border border-border p-2">
+                {curves.map((c) => (
+                  <div key={c.id} className="flex items-center justify-between text-xs">
+                    <span className="truncate">
+                      #{c.curva_indice ?? "?"} · {c.refrigerante ?? "—"} · {c.total_pontos ?? 0} pts
+                    </span>
+                    <span className="text-muted-foreground">{c.gabinete ?? ""}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {product.notes && (
             <div>
