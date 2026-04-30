@@ -498,17 +498,17 @@ export function UnilabCoilFormPanel({
             <CardTitle className="text-base">Geometria do aletado</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Field label="Tubos por fila" value={geo.tubesPerRow} onChange={(v) => setGeo({ ...geo, tubesPerRow: v })} />
-            <Field label="Número de filas" value={geo.rows} onChange={(v) => setGeo({ ...geo, rows: v })} />
-            <Field label="Comprimento do aletado (mm)" value={geo.coilLengthMm} onChange={(v) => setGeo({ ...geo, coilLengthMm: v })} />
-            <Field label="Número de circuitos" value={geo.circuits} onChange={(v) => setGeo({ ...geo, circuits: v })} />
-            <Field label="Passo da aleta (mm)" value={geo.finPitchMm} onChange={(v) => setGeo({ ...geo, finPitchMm: v })} />
-            <Field label="Tubos não utilizados" value={geo.skippedTubes} onChange={(v) => setGeo({ ...geo, skippedTubes: v })} />
-            <Field label="Diâmetro externo do tubo (mm)" value={geo.tubeOdMm} onChange={(v) => setGeo({ ...geo, tubeOdMm: v })} />
-            <Field label="Espessura do tubo (mm)" value={geo.tubeWallMm} onChange={(v) => setGeo({ ...geo, tubeWallMm: v })} />
+            <Field label="Tubos por fila" value={geo.tubesPerRow} onChange={(v) => editGeo({ tubesPerRow: v })} />
+            <Field label="Número de filas" value={geo.rows} onChange={(v) => editGeo({ rows: v })} />
+            <Field label="Comprimento do aletado (mm)" value={geo.coilLengthMm} onChange={(v) => editGeo({ coilLengthMm: v })} />
+            <Field label="Número de circuitos" value={geo.circuits} onChange={(v) => editGeo({ circuits: v })} />
+            <Field label="Passo da aleta (mm)" value={geo.finPitchMm} onChange={(v) => editGeo({ finPitchMm: v })} />
+            <Field label="Tubos não utilizados" value={geo.skippedTubes} onChange={(v) => editGeo({ skippedTubes: v })} />
+            <Field label="Diâmetro externo do tubo (mm)" value={geo.tubeOdMm} onChange={(v) => editGeo({ tubeOdMm: v })} />
+            <Field label="Espessura do tubo (mm)" value={geo.tubeWallMm} onChange={(v) => editGeo({ tubeWallMm: v })} />
             <div>
               <Label className="text-xs">Material do tubo</Label>
-              <Select value={geo.tubeMaterialId} onValueChange={(v) => setGeo({ ...geo, tubeMaterialId: v })}>
+              <Select value={geo.tubeMaterialId} onValueChange={(v) => editGeo({ tubeMaterialId: v })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione…" />
                 </SelectTrigger>
@@ -523,7 +523,7 @@ export function UnilabCoilFormPanel({
             </div>
             <div>
               <Label className="text-xs">Material da aleta</Label>
-              <Select value={geo.finMaterialId} onValueChange={(v) => setGeo({ ...geo, finMaterialId: v })}>
+              <Select value={geo.finMaterialId} onValueChange={(v) => editGeo({ finMaterialId: v })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione…" />
                 </SelectTrigger>
@@ -539,9 +539,9 @@ export function UnilabCoilFormPanel({
             <details className="text-xs text-muted-foreground">
               <summary className="cursor-pointer">Geometria avançada</summary>
               <div className="mt-2 space-y-2">
-                <Field label="Passo entre tubos (mm)" value={geo.tubePitchMm} onChange={(v) => setGeo({ ...geo, tubePitchMm: v })} />
-                <Field label="Passo entre filas (mm)" value={geo.rowPitchMm} onChange={(v) => setGeo({ ...geo, rowPitchMm: v })} />
-                <Field label="Espessura da aleta (mm)" value={geo.finThicknessMm} onChange={(v) => setGeo({ ...geo, finThicknessMm: v })} />
+                <Field label="Passo entre tubos (mm)" value={geo.tubePitchMm} onChange={(v) => editGeo({ tubePitchMm: v })} />
+                <Field label="Passo entre filas (mm)" value={geo.rowPitchMm} onChange={(v) => editGeo({ rowPitchMm: v })} />
+                <Field label="Espessura da aleta (mm)" value={geo.finThicknessMm} onChange={(v) => editGeo({ finThicknessMm: v })} />
               </div>
             </details>
           </CardContent>
@@ -553,9 +553,9 @@ export function UnilabCoilFormPanel({
             <CardTitle className="text-base">Lado Ar</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Field label="Vazão de ar (m³/h)" value={air.airflowM3h} onChange={(v) => setAir({ ...air, airflowM3h: v })} />
-            <Field label="Temperatura entrada (°C)" value={air.airTempInC} onChange={(v) => setAir({ ...air, airTempInC: v })} />
-            <Field label="Umidade relativa (%)" value={air.rhInPct} onChange={(v) => setAir({ ...air, rhInPct: v })} />
+            <Field label="Vazão de ar (m³/h)" value={air.airflowM3h} onChange={(v) => editAir({ airflowM3h: v })} />
+            <Field label="Temperatura entrada (°C)" value={air.airTempInC} onChange={(v) => editAir({ airTempInC: v })} />
+            <Field label="Umidade relativa (%)" value={air.rhInPct} onChange={(v) => editAir({ rhInPct: v })} />
             <div className="mt-4 rounded-md border bg-muted/30 p-3">
               <div className="mb-2 text-xs font-medium uppercase text-muted-foreground">Resultados</div>
               <Result label="Temperatura saída" value={fmt(result?.debug?.airOutletTempC as number | undefined, 2, "°C")} />
@@ -578,7 +578,7 @@ export function UnilabCoilFormPanel({
           <CardContent className="space-y-3">
             <div>
               <Label className="text-xs">Fluido</Label>
-              <Select value={ref.refrigerant} onValueChange={(v) => setRef({ ...ref, refrigerant: v })}>
+              <Select value={ref.refrigerant} onValueChange={(v) => editRef({ refrigerant: v })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -592,10 +592,10 @@ export function UnilabCoilFormPanel({
             <Field
               label={coilKind === "evaporator" ? "Temperatura evaporação (°C)" : "Temperatura condensação (°C)"}
               value={ref.refTempC}
-              onChange={(v) => setRef({ ...ref, refTempC: v })}
+              onChange={(v) => editRef({ refTempC: v })}
             />
-            <Field label="Superaquecimento (K)" value={ref.superheatK} onChange={(v) => setRef({ ...ref, superheatK: v })} />
-            <Field label="Subresfriamento (K)" value={ref.subcoolingK} onChange={(v) => setRef({ ...ref, subcoolingK: v })} />
+            <Field label="Superaquecimento (K)" value={ref.superheatK} onChange={(v) => editRef({ superheatK: v })} />
+            <Field label="Subresfriamento (K)" value={ref.subcoolingK} onChange={(v) => editRef({ subcoolingK: v })} />
             <div className="mt-4 rounded-md border bg-muted/30 p-3">
               <div className="mb-2 text-xs font-medium uppercase text-muted-foreground">Resultados</div>
               <Result
