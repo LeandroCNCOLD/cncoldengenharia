@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      cn_catalog_component_suggestions: {
+        Row: {
+          catalog_model: string
+          catalog_model_id: string
+          component_type: string
+          created_at: string
+          created_by: string | null
+          id: string
+          ranking: number
+          reason_json: Json
+          refrigerante: string | null
+          score: number
+          simulated_values_json: Json
+          status: string
+          suggested_component_id: string
+          suggested_table: string
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          catalog_model: string
+          catalog_model_id: string
+          component_type: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          ranking?: number
+          reason_json?: Json
+          refrigerante?: string | null
+          score?: number
+          simulated_values_json?: Json
+          status?: string
+          suggested_component_id: string
+          suggested_table: string
+          tier?: string
+          updated_at?: string
+        }
+        Update: {
+          catalog_model?: string
+          catalog_model_id?: string
+          component_type?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          ranking?: number
+          reason_json?: Json
+          refrigerante?: string | null
+          score?: number
+          simulated_values_json?: Json
+          status?: string
+          suggested_component_id?: string
+          suggested_table?: string
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cn_catalog_component_suggestions_catalog_model_id_fkey"
+            columns: ["catalog_model_id"]
+            isOneToOne: false
+            referencedRelation: "cn_catalog_performance_curves"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cn_catalog_performance_curves: {
         Row: {
           carga_fluido: number | null
@@ -2418,6 +2483,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      invalidate_cn_suggestions_for_type: {
+        Args: { _component_type: string }
+        Returns: undefined
       }
     }
     Enums: {
