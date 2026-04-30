@@ -40,12 +40,21 @@ interface NavChild {
   adminOnly?: boolean;
 }
 
+interface NavSubGroup {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  adminOnly?: boolean;
+  children: NavChild[];
+}
+
 interface NavGroup {
   id: string;
   label: string;
   icon: LucideIcon;
   adminOnly?: boolean;
   children: NavChild[];
+  subGroups?: NavSubGroup[];
 }
 
 export const UNILAB_DB_TABLES: { mode: string; label: string }[] = [
