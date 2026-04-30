@@ -667,7 +667,7 @@ export function UnilabCoilFormPanel({
               <Label>Modelo CN:</Label>
               <Select value={manualModelId} onValueChange={setManualModelId}>
                 <SelectTrigger className="w-72">
-                  <SelectValue placeholder={cnAutoPoint ? `Auto: ${cnAutoPoint.modelo}` : "Selecione um modelo…"} />
+                  <SelectValue placeholder={cnAutoPointEager ? `Auto: ${cnAutoPointEager.modelo}` : "Selecione um modelo…"} />
                 </SelectTrigger>
                 <SelectContent className="max-h-80">
                   {cnModels.map((m) => (
