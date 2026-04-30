@@ -142,13 +142,6 @@ export const setSuggestionStatus = createServerFn({ method: "POST" })
 // 3. Criar equipamento a partir das sugestões aceitas
 // ============================================================================
 
-const KIND_BY_COMPONENT: Record<ComponentType, string> = {
-  compressor: "compressor",
-  fan: "ventilador",
-  coil: "evaporador", // padrão; o usuário pode trocar depois
-  valve: "valvula_expansao",
-};
-
 export const createEquipmentFromCatalog = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
