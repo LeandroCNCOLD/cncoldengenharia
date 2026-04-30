@@ -468,6 +468,7 @@ function CoilSimulatorPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const errors = useMemo(() => result?.warnings.filter((w) => w.startsWith("ERRO")) ?? [], [result]);
   const warns = useMemo(() => result?.warnings.filter((w) => !w.startsWith("ERRO")) ?? [], [result]);
 
   return (
