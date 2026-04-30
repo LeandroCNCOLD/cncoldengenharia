@@ -86,20 +86,6 @@ const NAV_GROUPS: NavGroup[] = [
     icon: Library,
     children: [
       {
-        label: "Banco de Dados",
-        to: "/admin/database",
-        icon: Database,
-        description: "Tabelas Unilab por modo de operação",
-        adminOnly: true,
-      },
-      {
-        label: "Banco Técnico",
-        to: "/coldpro/admin/banco-tecnico",
-        icon: Database,
-        description: "Componentes técnicos consolidados (compressores, válvulas, ventiladores)",
-        adminOnly: true,
-      },
-      {
         label: "Catálogo Técnico",
         to: "/coldpro/catalogo",
         icon: BookOpen,
@@ -179,6 +165,30 @@ const NAV_GROUPS: NavGroup[] = [
         icon: Settings,
         description: "Usuários, permissões e configurações",
         adminOnly: true,
+      },
+    ],
+    subGroups: [
+      {
+        id: "admin-settings",
+        label: "Configurações",
+        icon: SlidersHorizontal,
+        adminOnly: true,
+        children: [
+          {
+            label: "Banco de Dados",
+            to: "/admin/database",
+            icon: Database,
+            description: "Tabelas Unilab por modo de operação",
+            adminOnly: true,
+          },
+          {
+            label: "Banco Técnico",
+            to: "/coldpro/admin/banco-tecnico",
+            icon: Database,
+            description: "Componentes técnicos consolidados (compressores, válvulas, ventiladores)",
+            adminOnly: true,
+          },
+        ],
       },
     ],
   },
