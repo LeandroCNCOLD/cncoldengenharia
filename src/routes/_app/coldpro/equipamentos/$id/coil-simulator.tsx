@@ -26,6 +26,12 @@ import {
   listEquipmentCoilSimulations,
   saveCoilSimulatorRun,
 } from "@/lib/coldpro/coil-simulations";
+import { createComponent } from "@/lib/coldpro/component-items";
+import { listApprovedComponents } from "@/lib/coldpro/technical-library";
+import { supabase } from "@/integrations/supabase/client";
+import { Checkbox } from "@/components/ui/checkbox";
+import { PerformanceMapPanel } from "@/components/coldpro/performance-map-panel";
+import { BookOpen, Wand2, Activity } from "lucide-react";
 import {
   simulateDxEvaporator,
   simulateDxCondenser,
@@ -182,6 +188,64 @@ function CoilSimulatorPage() {
   const [empiricalResult, setEmpiricalResult] = useState<CoilSimulatorResult | null>(null);
   const [lastInput, setLastInput] = useState<CoilSimulatorInput | null>(null);
 
+  // Origem dos dados (manual / biblioteca / unilab)
+  const [dataOrigin, setDataOrigin] = useState<"manual" | "library" | "unilab" | "cn_internal">(
+    prefillComponentId ? "unilab" : "manual",
+  );
+  useEffect(() => {
+    if (prefillComponentId) setDataOrigin("unilab");
+  }, [prefillComponentId]);
+
+  // Salvar como componente
+  const [savedComponentId, setSavedComponentId] = useState<string | null>(null);
+  const [saveAlsoToLibrary, setSaveAlsoToLibrary] = useState(false);
+  const [saveLibraryContext, setSaveLibraryContext] = useState<"reference" | "cn_standard">("reference");
+  const [saveStatus, setSaveStatus] = useState<"draft" | "validated">("draft");
+  const effectiveComponentId = savedComponentId ?? prefillComponentId;
+
+  // Biblioteca
+  const { data: libraryComponents = [] } = useQuery({
+    queryKey: ["library-coils", coilType],
+    queryFn: () =>
+      listApprovedComponents({
+        entityType: coilType === "evaporator" ? "evaporator_coil" : "condenser_coil",
+        limit: 100,
+      }),
+  });
+
+  const handleLoadFromLibrary = (componentId: string) => {
+    const c = libraryComponents.find((x) => x.id === componentId);
+    if (!c) return;
+    const norm = (c.normalized_json ?? {}) as Record<string, unknown>;
+    const numStr = (k: string): string => {
+      const v = norm[k];
+      if (v == null || v === "") return "";
+      const n = Number(v);
+      return Number.isFinite(n) ? String(n) : "";
+    };
+    setLabel(`${c.manufacturer ?? ""} ${c.model ?? c.code ?? ""}`.trim());
+    setG((s) => ({
+      ...s,
+      description: (norm.description as string) ?? s.description,
+      tubeOdMm: numStr("tube_od_mm") || numStr("tubeOdMm") || s.tubeOdMm,
+      tubeIdMm: numStr("tube_id_mm") || numStr("tubeIdMm") || s.tubeIdMm,
+      tubeWallMm: numStr("tube_wall_mm") || s.tubeWallMm,
+      finThicknessMm: numStr("fin_thickness_mm") || s.finThicknessMm,
+      tubesPerRow: numStr("tubes_per_row") || s.tubesPerRow,
+      rows: numStr("rows") || s.rows,
+      circuits: numStr("circuits") || s.circuits,
+      coilLengthMm: numStr("length_mm") || numStr("coil_length_mm") || s.coilLengthMm,
+      finPitchMm: numStr("fin_pitch_mm") || s.finPitchMm,
+      tubeMaterial: (norm.tube_material as string) ?? s.tubeMaterial,
+      finMaterial: (norm.fin_material as string) ?? s.finMaterial,
+    }));
+    if (norm.refrigerant) setR((s) => ({ ...s, refrigerant: String(norm.refrigerant) }));
+    setDataOrigin("library");
+    setSavedComponentId(null);
+    toast.success(`Geometria de "${c.model ?? c.code}" carregada.`);
+  };
+
+
   // Última calibração para o componente prefilled
   const { data: latestCal } = useQuery({
     queryKey: ["coil-cal-latest", prefillComponentId],
@@ -337,6 +401,73 @@ function CoilSimulatorPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // Salvar como componente (component_items + opcionalmente technical_components)
+  const saveAsComponentMutation = useMutation({
+    mutationFn: async () => {
+      if (!lastInput || !result) throw new Error("Calcule a simulação antes de salvar.");
+      const kind = coilType === "evaporator" ? "evaporador" : "condensador";
+      const entityType = coilType === "evaporator" ? "evaporator_coil" : "condenser_coil";
+      const geometryJson = lastInput.geometry as Record<string, unknown>;
+      const validatedFields: Record<string, unknown> = {
+        ...geometryJson,
+        refrigerant: lastInput.refrigerant.refrigerant,
+        nominal_capacity_w: result.capacityW,
+        air_inlet_c: lastInput.air.airTempInC,
+        ref_temp_c: lastInput.refrigerant.refTempC,
+        source: "CN_INTERNAL",
+        origin: dataOrigin,
+      };
+      const created = await createComponent({
+        equipment_project_id: id,
+        kind,
+        model: label || `${kind}-manual-${Date.now().toString(36)}`,
+        manufacturer: "CN COLD",
+        description: g.description || `Aletado manual ${kind}`,
+        status: saveStatus === "validated" ? "validated" : "draft",
+        raw_fields: { input: lastInput, result } as never,
+        validated_fields: validatedFields as never,
+        created_by: user?.id ?? null,
+      });
+      let publishedId: string | null = null;
+      if (saveAlsoToLibrary) {
+        const { data: tc, error: tcErr } = await supabase
+          .from("technical_components")
+          .insert({
+            entity_type: entityType,
+            manufacturer: "CN COLD",
+            model: label || created.model,
+            code: created.id,
+            status: saveStatus === "validated" ? "validated" : "approved",
+            source: "CN_INTERNAL",
+            context: saveLibraryContext,
+            normalized_json: {
+              ...validatedFields,
+              geometry_json: geometryJson,
+              simulation_result_json: result,
+            } as never,
+            approved_by: user?.id ?? null,
+            approved_at: new Date().toISOString(),
+          } as never)
+          .select("id")
+          .single();
+        if (tcErr) throw tcErr;
+        publishedId = (tc as { id: string }).id;
+      }
+      return { componentId: created.id, publishedId };
+    },
+    onSuccess: ({ componentId, publishedId }) => {
+      setSavedComponentId(componentId);
+      qc.invalidateQueries({ queryKey: ["library-coils"] });
+      qc.invalidateQueries({ queryKey: ["components", id] });
+      toast.success(
+        publishedId
+          ? "Componente salvo no equipamento e publicado na Biblioteca."
+          : "Componente salvo no equipamento.",
+      );
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const errors = useMemo(() => result?.warnings.filter((w) => w.startsWith("ERRO")) ?? [], [result]);
   const warns = useMemo(() => result?.warnings.filter((w) => !w.startsWith("ERRO")) ?? [], [result]);
 
@@ -352,8 +483,16 @@ function CoilSimulatorPage() {
         <PageHeader
           title="Coil Simulator"
           description={
-            <span className="text-sm">
+            <span className="flex flex-wrap items-center gap-2 text-sm">
               {project?.commercial_name ?? "—"} · modo <strong>VERIFY</strong>
+              <Badge variant={dataOrigin === "manual" ? "outline" : "secondary"} className="ml-1">
+                Origem: {dataOrigin === "manual" ? "Manual" : dataOrigin === "library" ? "Biblioteca" : dataOrigin === "unilab" ? "Unilab" : "CN Internal"}
+              </Badge>
+              {effectiveComponentId && (
+                <Badge variant="outline" className="font-mono text-[10px]">
+                  Componente: {effectiveComponentId.slice(0, 8)}…
+                </Badge>
+              )}
             </span>
           }
           actions={
@@ -363,6 +502,26 @@ function CoilSimulatorPage() {
                 <SelectContent>
                   <SelectItem value="evaporator">Evaporador (DX)</SelectItem>
                   <SelectItem value="condenser">Condensador</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value=""
+                onValueChange={(v) => v && handleLoadFromLibrary(v)}
+              >
+                <SelectTrigger className="w-56">
+                  <BookOpen className="mr-1 h-4 w-4" />
+                  <SelectValue placeholder="Carregar da Biblioteca…" />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {libraryComponents.length === 0 ? (
+                    <div className="p-2 text-xs text-muted-foreground">Nenhum {coilType === "evaporator" ? "evaporador" : "condensador"} na biblioteca.</div>
+                  ) : (
+                    libraryComponents.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {(c.manufacturer ?? "—")} · {c.model ?? c.code ?? c.id.slice(0, 8)}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               <Select value={engine} onValueChange={(v) => setEngine(v as CoilEngine)}>
@@ -388,12 +547,13 @@ function CoilSimulatorPage() {
                 disabled={!result || saveMutation.isPending}
                 onClick={() => saveMutation.mutate()}
               >
-                <Save className="mr-1 h-4 w-4" /> Salvar
+                <Save className="mr-1 h-4 w-4" /> Salvar histórico
               </Button>
             </div>
           }
         />
       </div>
+
 
       {latestCal && (
         <Alert>
@@ -449,6 +609,8 @@ function CoilSimulatorPage() {
           </TabsTrigger>
           <TabsTrigger value="debug">Debug técnico</TabsTrigger>
           <TabsTrigger value="system">Sistema</TabsTrigger>
+          <TabsTrigger value="perfmap"><Activity className="mr-1 h-3 w-3" />Mapa de desempenho</TabsTrigger>
+          <TabsTrigger value="save"><Wand2 className="mr-1 h-3 w-3" />Salvar componente</TabsTrigger>
           <TabsTrigger value="history">Histórico</TabsTrigger>
         </TabsList>
 
@@ -874,6 +1036,107 @@ function CoilSimulatorPage() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="save" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wand2 className="h-4 w-4" /> Salvar como componente
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!result ? (
+                <Alert>
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Calcule a simulação primeiro</AlertTitle>
+                  <AlertDescription>Rode o cálculo na aba Resultados antes de salvar como componente.</AlertDescription>
+                </Alert>
+              ) : (
+                <>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <Label className="text-xs">Status do componente</Label>
+                      <Select value={saveStatus} onValueChange={(v) => setSaveStatus(v as "draft" | "validated")}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft">Rascunho</SelectItem>
+                          <SelectItem value="validated">Validado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Modelo / nome</Label>
+                      <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Ex.: EVAP-CN-300x4f" />
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 rounded-md border p-3">
+                    <Checkbox
+                      id="pubLib"
+                      checked={saveAlsoToLibrary}
+                      onCheckedChange={(v) => setSaveAlsoToLibrary(v === true)}
+                    />
+                    <div className="flex-1 space-y-2">
+                      <Label htmlFor="pubLib" className="cursor-pointer">
+                        Também publicar na Biblioteca Técnica
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Cria um <code>technical_component</code> reutilizável (entity_type ={" "}
+                        <code>{coilType === "evaporator" ? "evaporator_coil" : "condenser_coil"}</code>).
+                      </p>
+                      {saveAlsoToLibrary && (
+                        <div className="max-w-xs">
+                          <Label className="text-xs">Contexto</Label>
+                          <Select
+                            value={saveLibraryContext}
+                            onValueChange={(v) => setSaveLibraryContext(v as "reference" | "cn_standard")}
+                          >
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="reference">Referência</SelectItem>
+                              <SelectItem value="cn_standard">Padrão CN COLD</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    disabled={saveAsComponentMutation.isPending}
+                    onClick={() => saveAsComponentMutation.mutate()}
+                  >
+                    <Save className="mr-1 h-4 w-4" /> Salvar como componente
+                  </Button>
+                  {savedComponentId && (
+                    <Alert>
+                      <Sparkles className="h-4 w-4" />
+                      <AlertTitle>Componente salvo</AlertTitle>
+                      <AlertDescription className="font-mono text-xs">{savedComponentId}</AlertDescription>
+                    </Alert>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="perfmap" className="mt-4">
+          {!effectiveComponentId ? (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Salve o aletado antes de gerar mapa de desempenho</AlertTitle>
+              <AlertDescription>
+                Vá para a aba <strong>Salvar componente</strong> e grave-o. O mapa precisa de um{" "}
+                <code>component_item_id</code> para ser persistido.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <PerformanceMapPanel
+              componentItemId={effectiveComponentId}
+              equipmentProjectId={id}
+              coilType={coilType}
+              simulationInput={lastInput}
+            />
+          )}
         </TabsContent>
       </Tabs>
     </div>

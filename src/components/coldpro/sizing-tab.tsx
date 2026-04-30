@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Sparkles, Search } from "lucide-react";
+import { Sparkles, Search, Wand2, BookOpen, ExternalLink, Calculator } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { listApprovedComponents } from "@/lib/coldpro/technical-library";
+import { toast } from "sonner";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -269,22 +272,140 @@ export function SizingTab({ project }: Props) {
         </TabsContent>
 
         <TabsContent value="manual" className="mt-4">
-          <Card>
-            <CardContent className="space-y-3 p-6 text-sm text-muted-foreground">
-              <p>
-                Modo manual: defina geometria completa (tubos, aletas, circuitos)
-                diretamente nas abas <strong>Evaporador</strong> ou{" "}
-                <strong>Condensador</strong> e use o <em>Coil Simulator</em> para
-                rodar o motor híbrido com seus parâmetros.
-              </p>
-              <p>
-                O modo manual reaproveita o mesmo motor de cálculo (geometria → área
-                → correlação → U → Q → ΔP → calibração).
-              </p>
-            </CardContent>
-          </Card>
+          <ManualCoilDesignSection projectId={project.id} />
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+interface ManualCoilDesignSectionProps {
+  projectId: string;
+}
+
+function ManualCoilDesignSection({ projectId }: ManualCoilDesignSectionProps) {
+  const [coilType, setCoilType] = useState<"evaporator" | "condenser">("evaporator");
+  const [selectedLib, setSelectedLib] = useState<string>("");
+
+  const { data: libraryComponents = [] } = useQuery({
+    queryKey: ["library-coils", coilType],
+    queryFn: () =>
+      listApprovedComponents({
+        entityType: coilType === "evaporator" ? "evaporator_coil" : "condenser_coil",
+        limit: 100,
+      }),
+  });
+
+  const handleOpenWithLibrary = () => {
+    if (!selectedLib) {
+      toast.error("Selecione um componente da Biblioteca primeiro.");
+      return;
+    }
+    const c = libraryComponents.find((x) => x.id === selectedLib);
+    if (!c) return;
+    const norm = (c.normalized_json ?? {}) as Record<string, unknown>;
+    const num = (k: string): number | undefined => {
+      const v = norm[k];
+      if (v == null || v === "") return undefined;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : undefined;
+    };
+    const payload = {
+      coilType,
+      label: `${c.manufacturer ?? ""} ${c.model ?? c.code ?? ""}`.trim(),
+      componentItemId: undefined,
+      refrigerant: (norm.refrigerant as string) ?? undefined,
+      geometry: {
+        rows: num("rows"),
+        tubesPerRow: num("tubes_per_row"),
+        circuits: num("circuits"),
+        coilLengthMm: num("length_mm"),
+        finPitchMm: num("fin_pitch_mm"),
+        tubeOdMm: num("tube_od_mm"),
+        tubeIdMm: num("tube_id_mm"),
+      },
+    };
+    localStorage.setItem(`coilsim:prefill:${projectId}`, JSON.stringify(payload));
+    window.location.href = `/coldpro/equipamentos/${projectId}/coil-simulator`;
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Wand2 className="h-4 w-4" /> Dimensionamento Manual de Aletado
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        <p className="text-sm text-muted-foreground">
+          Crie um aletado do zero ou parta de um componente já existente na Biblioteca.
+          Toda a simulação é executada pelo motor <strong>thermalcalc</strong> (geometria → U → Q → ΔP).
+        </p>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <div>
+            <Label className="text-xs">Tipo de aletado</Label>
+            <Select value={coilType} onValueChange={(v) => { setSelectedLib(""); setCoilType(v as "evaporator" | "condenser"); }}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="evaporator">Evaporador (DX)</SelectItem>
+                <SelectItem value="condenser">Condensador</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="md:col-span-2">
+            <Label className="text-xs">Selecionar da Biblioteca</Label>
+            <Select value={selectedLib} onValueChange={setSelectedLib}>
+              <SelectTrigger>
+                <BookOpen className="mr-1 h-3.5 w-3.5" />
+                <SelectValue placeholder={`Escolher ${coilType === "evaporator" ? "evaporador" : "condensador"} aprovado…`} />
+              </SelectTrigger>
+              <SelectContent className="max-h-72">
+                {libraryComponents.length === 0 ? (
+                  <div className="p-2 text-xs text-muted-foreground">Nenhum item na biblioteca para este tipo.</div>
+                ) : (
+                  libraryComponents.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {(c.manufacturer ?? "—")} · {c.model ?? c.code ?? c.id.slice(0, 8)}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 border-t pt-4">
+          <Button asChild>
+            <Link to="/coldpro/equipamentos/$id/coil-simulator" params={{ id: projectId }}>
+              <Wand2 className="mr-1 h-4 w-4" /> Novo aletado manual
+            </Link>
+          </Button>
+          <Button variant="secondary" onClick={handleOpenWithLibrary} disabled={!selectedLib}>
+            <BookOpen className="mr-1 h-4 w-4" /> Carregar selecionado e abrir
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/coldpro/equipamentos/$id/coil-simulator" params={{ id: projectId }}>
+              <Calculator className="mr-1 h-4 w-4" /> Abrir Coil Simulator
+            </Link>
+          </Button>
+          <Button asChild variant="ghost">
+            <Link to="/coldpro/equipamentos/$id/coil-simulator" params={{ id: projectId }}>
+              <ExternalLink className="mr-1 h-4 w-4" /> Simular / Salvar / Mapa de desempenho
+            </Link>
+          </Button>
+        </div>
+
+        <div className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
+          <p className="font-medium text-foreground">Fluxo recomendado</p>
+          <ol className="mt-1 list-decimal pl-5 space-y-0.5">
+            <li>Escolha o tipo (evap/cond) e — opcional — um item da Biblioteca.</li>
+            <li>No <em>Coil Simulator</em>, ajuste geometria, ar, refrigerante e clique <strong>Calcular</strong>.</li>
+            <li>Use a aba <strong>Salvar componente</strong> para gravar (e opcionalmente publicar na Biblioteca).</li>
+            <li>Depois, na aba <strong>Mapa de desempenho</strong>, gere o grid completo.</li>
+          </ol>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
