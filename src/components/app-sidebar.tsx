@@ -12,7 +12,7 @@ import {
   BookOpen,
   Upload,
   FileBarChart,
-  KanbanSquare,
+  
   ClipboardCheck,
   Library,
   Cpu,
