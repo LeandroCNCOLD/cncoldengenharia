@@ -309,6 +309,7 @@ export type Database = {
           geometry: string | null
           id: string
           internal_volume: number | null
+          length_mm: number | null
           model_id: string
           raw_json: Json
           rows: number | null
@@ -324,6 +325,7 @@ export type Database = {
           geometry?: string | null
           id?: string
           internal_volume?: number | null
+          length_mm?: number | null
           model_id: string
           raw_json?: Json
           rows?: number | null
@@ -339,6 +341,7 @@ export type Database = {
           geometry?: string | null
           id?: string
           internal_volume?: number | null
+          length_mm?: number | null
           model_id?: string
           raw_json?: Json
           rows?: number | null
@@ -366,6 +369,7 @@ export type Database = {
           geometry: string | null
           id: string
           internal_volume: number | null
+          length_mm: number | null
           model_id: string
           raw_json: Json
           rows: number | null
@@ -382,6 +386,7 @@ export type Database = {
           geometry?: string | null
           id?: string
           internal_volume?: number | null
+          length_mm?: number | null
           model_id: string
           raw_json?: Json
           rows?: number | null
@@ -398,6 +403,7 @@ export type Database = {
           geometry?: string | null
           id?: string
           internal_volume?: number | null
+          length_mm?: number | null
           model_id?: string
           raw_json?: Json
           rows?: number | null
@@ -507,6 +513,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "cn_equipment_performance_master_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "cn_equipment_master"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cn_equipment_reheat_master: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          geometry: string | null
+          id: string
+          length_mm: number | null
+          model_id: string
+          raw_json: Json
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          geometry?: string | null
+          id?: string
+          length_mm?: number | null
+          model_id: string
+          raw_json?: Json
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          geometry?: string | null
+          id?: string
+          length_mm?: number | null
+          model_id?: string
+          raw_json?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cn_equipment_reheat_master_model_id_fkey"
             columns: ["model_id"]
             isOneToOne: false
             referencedRelation: "cn_equipment_master"
