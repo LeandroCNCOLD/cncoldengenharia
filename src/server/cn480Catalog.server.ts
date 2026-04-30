@@ -36,7 +36,7 @@ export type Cn480Master = {
   tipo_degelo: string | null;
   origem_dados: string;
   confianca: number;
-  raw_sources_json: unknown;
+  raw_sources_json: Record<string, unknown> | unknown[] | null;
 };
 
 export type Cn480EvaporatorMaster = {
@@ -51,7 +51,7 @@ export type Cn480EvaporatorMaster = {
   airflow: number | null;
   internal_volume: number | null;
   exchange_area: number | null;
-  raw_json: unknown;
+  raw_json: Record<string, unknown> | unknown[] | null;
 };
 
 export type Cn480CondenserMaster = Omit<Cn480EvaporatorMaster, "exchange_area">;
@@ -63,7 +63,7 @@ export type Cn480CompressorMaster = {
   danfoss: string | null;
   dorin: string | null;
   secondary: string | null;
-  raw_json: unknown;
+  raw_json: Record<string, unknown> | unknown[] | null;
 };
 
 export type Cn480PerformancePoint = {
@@ -77,7 +77,7 @@ export type Cn480PerformancePoint = {
   cop: number | null;
   airflow: number | null;
   source: string;
-  raw_json: unknown;
+  raw_json: Record<string, unknown> | unknown[] | null;
 };
 
 export type Cn480Detail = {
