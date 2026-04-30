@@ -1108,7 +1108,7 @@ function CoilSimulatorPage() {
                   </Button>
                   {savedComponentId && (
                     <Alert>
-                      <CheckCircle2Icon />
+                      <Sparkles className="h-4 w-4" />
                       <AlertTitle>Componente salvo</AlertTitle>
                       <AlertDescription className="font-mono text-xs">{savedComponentId}</AlertDescription>
                     </Alert>
