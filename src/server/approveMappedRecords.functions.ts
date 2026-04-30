@@ -146,7 +146,7 @@ export const approveAllMappedRecords = createServerFn({ method: "POST" })
             const { error: upErr } = await supabaseAdmin
               .from("technical_components")
               .update({
-                normalized_json: m.normalized_json,
+                normalized_json: m.normalized_json as never,
                 source_batch_id: m.batch_id,
                 source_raw_id: m.raw_record_id,
                 source_mapped_id: m.id,
@@ -159,25 +159,26 @@ export const approveAllMappedRecords = createServerFn({ method: "POST" })
             componentId = existing.id;
             summary.updated++;
           } else {
+            const insertRow = {
+              entity_type: m.entity_type as never,
+              manufacturer: m.manufacturer,
+              model: m.model,
+              code: m.code,
+              normalized_json: m.normalized_json as never,
+              source_batch_id: m.batch_id,
+              source_raw_id: m.raw_record_id,
+              source_mapped_id: m.id,
+              status: "approved" as const,
+              approved_at: now,
+              context: "reference",
+            };
             const { data: ins, error: insErr } = await supabaseAdmin
               .from("technical_components")
-              .insert({
-                entity_type: m.entity_type as never,
-                manufacturer: m.manufacturer,
-                model: m.model,
-                code: m.code,
-                normalized_json: m.normalized_json,
-                source_batch_id: m.batch_id,
-                source_raw_id: m.raw_record_id,
-                source_mapped_id: m.id,
-                status: "approved",
-                approved_at: now,
-                context: "reference",
-              })
+              .insert(insertRow as never)
               .select("id")
               .single();
             if (insErr) throw insErr;
-            componentId = ins?.id ?? null;
+            componentId = (ins as { id?: string } | null)?.id ?? null;
             summary.created++;
           }
 
