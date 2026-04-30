@@ -22,17 +22,17 @@ import type { CatalogCurve } from "@/lib/coldpro/catalog-curves";
 // 1. Gerar e cachear sugestões
 // ============================================================================
 
-const generateInput = z.object({
-  catalogModelId: z.string().uuid(),
-  fanCount: z.number().int().min(1).max(20).optional(),
-  airflowM3h: z.number().positive().optional(),
-  pressurePa: z.number().nonnegative().optional(),
-  forceRefresh: z.boolean().optional(),
-});
-
 export const generateAndCacheCnSuggestions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => generateInput.parse(d))
+  .inputValidator((d) =>
+    z.object({
+      catalogModelId: z.string().uuid(),
+      fanCount: z.number().int().min(1).max(20).optional(),
+      airflowM3h: z.number().positive().optional(),
+      pressurePa: z.number().nonnegative().optional(),
+      forceRefresh: z.boolean().optional(),
+    }).parse(d),
+  )
   .handler(async ({ data, context }) => {
     try {
     const { supabase, userId } = context;
