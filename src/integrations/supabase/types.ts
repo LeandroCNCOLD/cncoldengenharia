@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      cn_catalog_columns_audit: {
+        Row: {
+          batch_id: string
+          column_name: string
+          created_at: string
+          detected_type: string
+          id: string
+          mapped: boolean
+          notes: string | null
+          source_type: string
+          target_table: string | null
+        }
+        Insert: {
+          batch_id: string
+          column_name: string
+          created_at?: string
+          detected_type: string
+          id?: string
+          mapped?: boolean
+          notes?: string | null
+          source_type: string
+          target_table?: string | null
+        }
+        Update: {
+          batch_id?: string
+          column_name?: string
+          created_at?: string
+          detected_type?: string
+          id?: string
+          mapped?: boolean
+          notes?: string | null
+          source_type?: string
+          target_table?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cn_catalog_columns_audit_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "cn_catalog_import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cn_catalog_component_suggestions: {
         Row: {
           catalog_model: string
@@ -79,6 +123,45 @@ export type Database = {
           },
         ]
       }
+      cn_catalog_import_batches: {
+        Row: {
+          created_at: string
+          errors_json: Json
+          file_name: string
+          id: string
+          imported_rows: number
+          sheet_name: string | null
+          source_type: string
+          status: string
+          total_columns: number
+          total_rows: number
+        }
+        Insert: {
+          created_at?: string
+          errors_json?: Json
+          file_name: string
+          id?: string
+          imported_rows?: number
+          sheet_name?: string | null
+          source_type: string
+          status?: string
+          total_columns?: number
+          total_rows?: number
+        }
+        Update: {
+          created_at?: string
+          errors_json?: Json
+          file_name?: string
+          id?: string
+          imported_rows?: number
+          sheet_name?: string | null
+          source_type?: string
+          status?: string
+          total_columns?: number
+          total_rows?: number
+        }
+        Relationships: []
+      }
       cn_catalog_performance_curves: {
         Row: {
           carga_fluido: number | null
@@ -138,6 +221,298 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      cn_catalog_raw_rows: {
+        Row: {
+          batch_id: string
+          created_at: string
+          id: string
+          modelo: string | null
+          raw_json: Json
+          row_number: number
+          source_type: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          id?: string
+          modelo?: string | null
+          raw_json: Json
+          row_number: number
+          source_type: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          id?: string
+          modelo?: string | null
+          raw_json?: Json
+          row_number?: number
+          source_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cn_catalog_raw_rows_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "cn_catalog_import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cn_equipment_compressor_master: {
+        Row: {
+          bitzer: string | null
+          copeland: string | null
+          danfoss: string | null
+          dorin: string | null
+          id: string
+          model_id: string
+          raw_json: Json
+          secondary: string | null
+        }
+        Insert: {
+          bitzer?: string | null
+          copeland?: string | null
+          danfoss?: string | null
+          dorin?: string | null
+          id?: string
+          model_id: string
+          raw_json?: Json
+          secondary?: string | null
+        }
+        Update: {
+          bitzer?: string | null
+          copeland?: string | null
+          danfoss?: string | null
+          dorin?: string | null
+          id?: string
+          model_id?: string
+          raw_json?: Json
+          secondary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cn_equipment_compressor_master_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "cn_equipment_master"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cn_equipment_condenser_master: {
+        Row: {
+          airflow: number | null
+          circuits: number | null
+          fin_spacing: number | null
+          geometry: string | null
+          id: string
+          internal_volume: number | null
+          model_id: string
+          raw_json: Json
+          rows: number | null
+          source_priority: number
+          tube_diameter: number | null
+          tube_thickness: number | null
+          tubes_per_row: number | null
+        }
+        Insert: {
+          airflow?: number | null
+          circuits?: number | null
+          fin_spacing?: number | null
+          geometry?: string | null
+          id?: string
+          internal_volume?: number | null
+          model_id: string
+          raw_json?: Json
+          rows?: number | null
+          source_priority?: number
+          tube_diameter?: number | null
+          tube_thickness?: number | null
+          tubes_per_row?: number | null
+        }
+        Update: {
+          airflow?: number | null
+          circuits?: number | null
+          fin_spacing?: number | null
+          geometry?: string | null
+          id?: string
+          internal_volume?: number | null
+          model_id?: string
+          raw_json?: Json
+          rows?: number | null
+          source_priority?: number
+          tube_diameter?: number | null
+          tube_thickness?: number | null
+          tubes_per_row?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cn_equipment_condenser_master_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "cn_equipment_master"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cn_equipment_evaporator_master: {
+        Row: {
+          airflow: number | null
+          circuits: number | null
+          exchange_area: number | null
+          fin_spacing: number | null
+          geometry: string | null
+          id: string
+          internal_volume: number | null
+          model_id: string
+          raw_json: Json
+          rows: number | null
+          source_priority: number
+          tube_diameter: number | null
+          tube_thickness: number | null
+          tubes_per_row: number | null
+        }
+        Insert: {
+          airflow?: number | null
+          circuits?: number | null
+          exchange_area?: number | null
+          fin_spacing?: number | null
+          geometry?: string | null
+          id?: string
+          internal_volume?: number | null
+          model_id: string
+          raw_json?: Json
+          rows?: number | null
+          source_priority?: number
+          tube_diameter?: number | null
+          tube_thickness?: number | null
+          tubes_per_row?: number | null
+        }
+        Update: {
+          airflow?: number | null
+          circuits?: number | null
+          exchange_area?: number | null
+          fin_spacing?: number | null
+          geometry?: string | null
+          id?: string
+          internal_volume?: number | null
+          model_id?: string
+          raw_json?: Json
+          rows?: number | null
+          source_priority?: number
+          tube_diameter?: number | null
+          tube_thickness?: number | null
+          tubes_per_row?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cn_equipment_evaporator_master_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "cn_equipment_master"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cn_equipment_master: {
+        Row: {
+          confianca: number
+          created_at: string
+          gabinete: string | null
+          hp: string | null
+          id: string
+          linha: string | null
+          modelo: string
+          origem_dados: string
+          raw_sources_json: Json
+          refrigerante: string | null
+          tipo_degelo: string | null
+          tipo_gabinete: string | null
+        }
+        Insert: {
+          confianca?: number
+          created_at?: string
+          gabinete?: string | null
+          hp?: string | null
+          id?: string
+          linha?: string | null
+          modelo: string
+          origem_dados: string
+          raw_sources_json?: Json
+          refrigerante?: string | null
+          tipo_degelo?: string | null
+          tipo_gabinete?: string | null
+        }
+        Update: {
+          confianca?: number
+          created_at?: string
+          gabinete?: string | null
+          hp?: string | null
+          id?: string
+          linha?: string | null
+          modelo?: string
+          origem_dados?: string
+          raw_sources_json?: Json
+          refrigerante?: string | null
+          tipo_degelo?: string | null
+          tipo_gabinete?: string | null
+        }
+        Relationships: []
+      }
+      cn_equipment_performance_master: {
+        Row: {
+          airflow: number | null
+          capacity_cond: number | null
+          capacity_evap: number | null
+          cop: number | null
+          id: string
+          model_id: string
+          point_index: number
+          power: number | null
+          raw_json: Json
+          source: string
+          tcond: number | null
+          tevap: number | null
+        }
+        Insert: {
+          airflow?: number | null
+          capacity_cond?: number | null
+          capacity_evap?: number | null
+          cop?: number | null
+          id?: string
+          model_id: string
+          point_index?: number
+          power?: number | null
+          raw_json?: Json
+          source: string
+          tcond?: number | null
+          tevap?: number | null
+        }
+        Update: {
+          airflow?: number | null
+          capacity_cond?: number | null
+          capacity_evap?: number | null
+          cop?: number | null
+          id?: string
+          model_id?: string
+          point_index?: number
+          power?: number | null
+          raw_json?: Json
+          source?: string
+          tcond?: number | null
+          tevap?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cn_equipment_performance_master_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "cn_equipment_master"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cn_product_development: {
         Row: {

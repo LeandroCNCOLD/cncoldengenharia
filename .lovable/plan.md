@@ -1,99 +1,104 @@
-# Desenvolvimento de Produtos — Kanban CN
+## Objetivo
 
-Nova área no menu lateral para gerenciar o ciclo de vida dos produtos do catálogo CN COLD: desde a importação inicial até virarem equipamento publicado pronto para uso (ou serem arquivados).
+Conectar a interface ao Catálogo 480 consolidado (`cn_equipment_master` + masters de evap/cond/comp/perf), permitindo navegar 481 modelos, criar `equipment_project` completo a partir de um modelo, abrir o Coil Simulator já preenchido e exibir a origem do equipamento na tela de detalhes.
 
-## Fluxo de status
+## Backend
 
-```text
-A Analisar  →  Em Análise  →  Sugestões OK  →  Aprovado ──► vira equipment_project (catálogo de produção)
-                                                  │
-                                                  └──► Arquivado (descarte / incompatível)
-```
+### 1. `src/server/cn480Catalog.server.ts`
+Helpers server-only:
+- `loadCn480List(supabase)` — `SELECT m.*, em.id as evap_id, cm.id as cond_id, comp.copeland/bitzer/danfoss/dorin/secondary, perf.cnt` via joins. Retorna lista achatada com flags `has_evaporator`, `has_condenser`, `has_compressor`, `perf_points`, `compressor_label`.
+- `loadCn480Detail(supabase, modelId)` — retorna `{ master, evaporator, condenser, compressor, performance[] }`.
+- `mapEvaporatorToCoilModel(detail)` / `mapCondenserToCoilModel(detail)` — converte schemas master → schema dos `*_coil_models` (mapeia `tube_diameter`→`tube_od_mm`, `tube_thickness`→`fin_thickness_mm` quando aplicável, `fin_spacing`→`fin_pitch_mm`, `airflow`→`nominal_airflow_m3h`, `internal_volume`→`internal_volume_l`, `exchange_area`→`surface_area_m2`, `tubes_per_row`/`rows`/`circuits` diretos).
+- `pickNominalPerformancePoint(perf[])` — escolhe o ponto nominal (menor `point_index` ou heurística por COP máximo, definida no plano).
+- `pickCompressorLabel(comp)` — primeiro não-nulo entre copeland/bitzer/danfoss/dorin/secondary com fabricante.
 
-- **Aprovado** = produto publicado no catálogo de produção (cria/vincula `equipment_projects` com status `published`). Disponível para uso real em projetos e simulações.
-- **Arquivado** = caminho separado, só para descartes. Não é "fim do fluxo aprovado".
-- Filtro padrão do Kanban esconde "Arquivado" (toggle "Mostrar arquivados" no header).
+### 2. `src/server/cn480Catalog.functions.ts`
+Server functions com `[attachSupabaseAuth, requireSupabaseAuth]`:
+- `listCn480Catalog()` — GET, retorna lista com filtros opcionais (linha, refrigerante, busca textual). Sem paginação inicial (481 linhas).
+- `getCn480Detail({ modelId })` — GET, retorna detalhe completo.
+- `createEquipmentFromCn480({ modelId })` — POST. Em uma sequência:
+  1. Carrega detalhe.
+  2. Insere `equipment_projects` (code = `modelo`, commercial_name = `modelo`, refrigerant, equipment_kind/application heurístico por `linha` LT/MT, status `draft`, notes referenciando origem).
+  3. Cria `component_items` (kind `evaporador`) + upsert `evaporator_coil_models` com mapeamento + `nominal_evap_temp_c` / `nominal_capacity_w` do ponto nominal.
+  4. Cria `component_items` (kind `condensador`) + upsert `condenser_coil_models` com mapeamento + `nominal_cond_temp_c`.
+  5. Salva compressor textual em `equipment_projects.notes` ou em `raw_sources_json` do projeto via campo `raw_fields` do `component_items` `compressor` (criamos um `component_item` kind `compressor` com `manufacturer`/`model`/`raw_fields`).
+  6. Vincula refrigerante já no projeto.
+  7. Persiste rastreabilidade: cada `component_items.raw_fields.source = "cn_equipment_master"`, `catalog_model_id`, `catalog_model`. Também grava `raw_sources_json` snapshot dentro de `raw_fields` para o evaporador (cópia do master).
+  8. Retorna `{ equipmentProjectId, created: {...} }`.
 
-## Estrutura
+  Idempotência: se já existe `equipment_project` com `code = modelo` e flag `raw_fields.source=cn_equipment_master` no projeto (via `notes`/`code`), retorna o existente em vez de duplicar — controlamos por `code` (UNIQUE não existe; checamos manualmente).
 
-### 1. Sidebar
-Adicionar item **"Desenvolvimento"** (ícone Kanban) em `src/components/app-sidebar.tsx`, apontando para `/coldpro/desenvolvimento`. Visível para todos (não admin-only).
+### 3. AutoFill — prioridade Catálogo 480
+Editar `src/server/equipmentAutoFill.server.ts` e `equipmentAutoFill.functions.ts`:
+- Nova função `findMasterForEquipment(supabase, code, commercial_name)` que busca em `cn_equipment_master` (igualdade case-insensitive em `modelo`, depois fallback `ilike %x%`).
+- Em `previewAutoFillFromCnCatalog` e `commitAutoFillFromCnCatalog`, antes de chamar `findCurveForEquipment`, tentar `findMasterForEquipment`. Se houver match: usar dados de evap/cond/perf masters via `mapEvaporator/CondenserToCoilModel`. Caso contrário, manter caminho atual (`cn_catalog_performance_curves`). Adicionar campo `source: "cn_equipment_master" | "cn_catalog_performance_curves"` no preview.
+- Nenhuma alteração em motor/mapper/importação.
 
-### 2. Nova rota
-`src/routes/_app/coldpro/desenvolvimento.tsx`
-- Header com: título, botão **"Importar Catálogo CN COLD"** (reutiliza `CatalogUploadButton`), botão **"+ Novo Produto"**, toggle "Mostrar arquivados", busca por modelo.
-- Board Kanban em 5 colunas com drag-and-drop.
+## Frontend
 
-### 3. Tabela nova: `cn_product_development`
-```sql
-- id uuid pk
-- catalog_model text (modelo CN, ex: "MCC 250")
-- linha text, hp text, refrigerante text   -- denormalizado pra card
-- status text check in ('a_analisar','em_analise','sugestoes_ok','aprovado','arquivado')
-- position int                              -- ordem dentro da coluna
-- equipment_project_id uuid                 -- preenchido quando aprovado
-- notes text
-- archived_reason text
-- approved_at timestamptz
-- archived_at timestamptz
-- created_by uuid, created_at, updated_at
-- unique(catalog_model)
-```
-RLS: select/insert/update authenticated; delete admin.
+### 4. Rota `src/routes/_app/coldpro/catalogo-480.tsx`
+File-based route que renderiza `Cn480CatalogPage`. Sidebar: nova entrada **"Catálogo 480"** entre "Catálogo Técnico" e "Administração" em `src/components/app-sidebar.tsx`.
 
-**Backfill**: popular automaticamente com modelos distintos de `cn_catalog_performance_curves` que ainda não existem na tabela (status inicial `a_analisar`).
+### 5. `src/components/coldpro/cn480-catalog-page.tsx`
+Página com:
+- `PageHeader` "Catálogo 480 — modelos consolidados".
+- Filtros: input de busca (modelo), select linha, select refrigerante.
+- Tabela (`Table`) com colunas: Modelo · Linha · HP · Refrigerante · Compressor · Evap · Cond · Perf · Status · Ações.
+  - Badges verdes/cinzas para `has_*`.
+  - Status: "Pronto" (todos presentes), "Parcial" (algum faltando), "Vazio".
+- Ações por linha:
+  - **Criar equipamento** → `useServerFn(createEquipmentFromCn480)`. Em sucesso: toast + navega para `/coldpro/equipamentos/$id`.
+  - **Abrir no Coil Simulator** (visível só se já existe projeto vinculado, opcional) → navega para `/coldpro/equipamentos/$id/coil-simulator`. No primeiro release: o botão sempre cria-ou-reutiliza e depois navega para o coil simulator (rota já existe em `src/routes/_app/coldpro/equipamentos/$id/coil-simulator.tsx`).
 
-**Trigger**: ao inserir nova curva no catálogo, criar registro em `cn_product_development` se modelo novo.
+Detalhe expandido (Drawer ao clicar na linha): mostra raw geometry, ponto nominal, compressor textual.
 
-### 4. Componentes
+### 6. Card "Origem: Catálogo 480" no equipamento
+Editar `src/routes/_app/coldpro/equipamentos/$id.tsx` (ou o componente principal renderizado por ela):
+- Buscar `component_items` do projeto e detectar se algum tem `raw_fields.source === "cn_equipment_master"` (ou checar `equipment_project.notes`).
+- Se sim, renderizar acima de `EquipmentReadinessPanel` um card resumo:
+  - Título "Origem: Catálogo 480" + badge.
+  - Linhas: modelo de origem, evaporador preenchido (geometria resumida), condensador preenchido, compressor textual, refrigerante, ponto nominal (Tevap/Tcond/Capacidade/COP).
+  - Botão "Abrir no Coil Simulator".
 
-- `src/components/coldpro/product-kanban-board.tsx` — colunas + dnd-kit
-- `src/components/coldpro/product-kanban-card.tsx` — card com modelo, linha, HP, refrigerante, badge de tier de sugestão, contador de curvas
-- `src/components/coldpro/product-detail-drawer.tsx` — abre ao clicar no card: mostra curvas reais, botão "Gerar sugestões CN", lista de componentes aceitos, botão "Aprovar e publicar"
-- `src/components/coldpro/new-product-dialog.tsx` — formulário manual (modelo, linha, HP, refrigerante, notas)
+### 7. Coil Simulator pré-preenchido
+A rota `coil-simulator.tsx` já carrega evaporator/condenser_coil_models por `component_item_id`. Verificar e, se necessário, garantir que ela:
+- Carrega ponto nominal de `equipment_projects` ou de `raw_fields.nominal_point` (gravamos isso no commit).
+- Mostra "vs Catálogo": comparar `outputs` calculado x `nominal_capacity_w`/`nominal_cond_temp_c` do master, com badge OK/divergente (>10%). Reaproveita componente `coil-tab-header`/`equipment-readiness-panel` quando possível.
 
-### 5. Server functions
-`src/server/cnProductDevelopment.functions.ts`:
-- `listProducts({ includeArchived })`
-- `updateProductStatus({ id, status, position })` — usado pelo drag-and-drop
-- `reorderProducts({ status, orderedIds })`
-- `createProduct(input)` — manual
-- `approveProduct({ id })` — cria/atualiza `equipment_projects` (status `published`), grava `equipment_project_id` e `approved_at`, move card pra coluna Aprovado
-- `archiveProduct({ id, reason })`
-- `unarchiveProduct({ id })`
+(Se o escopo do simulador for grande, o ajuste comparativo entra como segundo passo dentro do mesmo PR.)
 
-### 6. Aprovação → catálogo de produção
-`approveProduct` cria um `equipment_projects` com:
-- `code` = modelo CN
-- `commercial_name` = modelo CN
-- `refrigerant`, `family` herdados das curvas
-- `status` = `published`
-- vincula component_items que já foram aceitos via `cn_catalog_component_suggestions`
+## Não-objetivos
 
-A coluna "Aprovado" mostra link direto pro equipamento publicado (`/coldpro/equipamentos/$id`).
-
-### 7. Limpeza
-- Remover ou simplificar o `CatalogCnColdCard` da página `banco-tecnico` (mover botão de import pra nova área é o canal principal; deixar card lá só como atalho informativo).
-
-## Dependências
-- `bun add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities` (drag-and-drop)
+- Não alterar `src/modules/thermalcalc/**` (motor).
+- Não alterar `src/modules/coldpro/library/mappers/**`.
+- Não reimportar `Tabela 480.xlsx`.
+- Não criar nova tabela no banco (usa apenas `cn_equipment_*` existentes).
 
 ## Detalhes técnicos
 
-- Drag-and-drop persiste otimisticamente (atualiza UI antes da resposta do servidor; rollback em erro).
-- `position` recalculada por coluna (passos de 1000 pra evitar reordenação completa frequente).
-- Cache react-query invalidado em mutations.
-- Colunas com altura fixa + scroll interno; cabeçalho do board sticky.
-- Dark mode via tokens semânticos existentes.
+- Mapeamento de campos master → coil_models tratado em `cn480Catalog.server.ts` para ficar isolado e testável; números nulos permanecem nulos (sem coerção a 0).
+- `equipment_kind`/`application` derivados de `linha` (`LT*` → `congelados`, `MT*` → `resfriados`, default `outro`); `family` recebe `linha`.
+- Heurística de "ponto nominal" do catálogo: ponto com menor `point_index`; se houver múltiplos, o de maior `cop`.
+- Busca textual feita client-side no `useQuery` (lista pequena ~481).
+- Idempotência: verifica `equipment_projects.code = modelo`. Se existir, `createEquipmentFromCn480` retorna o `id` existente sem duplicar evap/cond.
+- RLS já permite SELECT/INSERT por `authenticated` em todas as tabelas envolvidas.
 
-## Arquivos
-- novo: `src/routes/_app/coldpro/desenvolvimento.tsx`
-- novo: `src/components/coldpro/product-kanban-board.tsx`
-- novo: `src/components/coldpro/product-kanban-card.tsx`
-- novo: `src/components/coldpro/product-detail-drawer.tsx`
-- novo: `src/components/coldpro/new-product-dialog.tsx`
-- novo: `src/server/cnProductDevelopment.functions.ts`
-- novo: `src/lib/coldpro/product-development.ts` (queries client-side)
-- nova migration: tabela + trigger + backfill
-- editado: `src/components/app-sidebar.tsx`
-- editado: `src/routes/_app/coldpro/admin.banco-tecnico.tsx` (atalho informativo)
+## Arquivos novos/alterados
+
+Novos:
+- `src/server/cn480Catalog.server.ts`
+- `src/server/cn480Catalog.functions.ts`
+- `src/routes/_app/coldpro/catalogo-480.tsx`
+- `src/components/coldpro/cn480-catalog-page.tsx`
+- `src/components/coldpro/cn480-origin-card.tsx`
+
+Editados:
+- `src/components/app-sidebar.tsx` (entrada "Catálogo 480")
+- `src/server/equipmentAutoFill.server.ts` (helper `findMasterForEquipment` + mappers)
+- `src/server/equipmentAutoFill.functions.ts` (preview/commit priorizando master)
+- `src/routes/_app/coldpro/equipamentos/$id.tsx` (renderiza `Cn480OriginCard` quando aplicável)
+- `src/routes/_app/coldpro/equipamentos/$id/coil-simulator.tsx` (carregar ponto nominal + comparativo, se necessário)
+
+## Resultado esperado
+
+Usuário acessa **Catálogo 480** no menu, vê os 481 modelos com flags de completude, clica em **Criar equipamento** num modelo válido (ex.: `CN_1200_LT_COPELAND_ZF41K5E_380V_3F_60HZ`) e cai num `equipment_project` com evaporador + condensador preenchidos, compressor identificado, refrigerante R404A e card "Origem: Catálogo 480". Botão **Abrir no Coil Simulator** leva direto à simulação com geometria + ponto nominal carregados.

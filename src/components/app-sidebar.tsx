@@ -50,6 +50,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Equipamentos", to: "/coldpro/equipamentos", icon: Boxes },
   { label: "Desenvolvimento", to: "/coldpro/desenvolvimento", icon: KanbanSquare },
   { label: "Catálogo Técnico", to: "/coldpro/catalogo", icon: BookOpen },
+  { label: "Catálogo 480", to: "/coldpro/catalogo-480", icon: BookOpen },
   { label: "Administração", to: "/admin", icon: Settings, adminOnly: true },
   { label: "Importar Unilab", to: "/admin/unilab-import", icon: Upload, adminOnly: true },
   { label: "Banco Técnico", to: "/coldpro/admin/banco-tecnico", icon: Database, adminOnly: true },
