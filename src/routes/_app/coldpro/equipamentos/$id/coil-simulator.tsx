@@ -42,7 +42,7 @@ import { factorsFromRow, getLatestCalibration, saveCoilCalibration } from "@/lib
 import { NEUTRAL_CALIBRATION, type CalibrationFactors, type CoilEngine } from "@/modules/coldpro/coil/coilEngineTypes";
 import { OriginBadge } from "@/components/coldpro/origin-badge";
 import { SystemSimulatorPanel } from "@/components/coldpro/system-simulator-panel";
-import { UnilabCoilFormPanel } from "@/components/coldpro/coil/unilab-coil-form-panel";
+import { UnilabCoilFormPanel, type UnilabCoilPrefill } from "@/components/coldpro/coil/unilab-coil-form-panel";
 import type {
   CoilSimulatorInput,
   CoilSimulatorResult,
@@ -134,6 +134,7 @@ function CoilSimulatorPage() {
     capacityW: number; airTempInC: number; refTempC: number; airflowM3h: number;
   } | null>(null);
   const [prefillComponentId, setPrefillComponentId] = useState<string | null>(null);
+  const [unilabPrefill, setUnilabPrefill] = useState<UnilabCoilPrefill | null>(null);
 
   // Carrega prefill vindo do botão dentro da aba Evaporador/Condensador
   useEffect(() => {
@@ -151,6 +152,7 @@ function CoilSimulatorPage() {
         geometry?: Record<string, number | null | undefined>;
       };
       if (p.coilType) setCoilType(p.coilType);
+      setUnilabPrefill(p);
       if (p.label) setLabel(p.label);
       if (p.componentItemId) setPrefillComponentId(p.componentItemId);
       if (p.nominal) {
@@ -631,6 +633,7 @@ function CoilSimulatorPage() {
             equipmentCommercialName={project?.commercial_name ?? null}
             defaultRefrigerant={project?.refrigerant ?? r.refrigerant}
             label={label}
+            prefill={unilabPrefill}
             onCoilKindChange={setCoilType}
             onSimulationComplete={(input, output) => {
               setResult(output);
