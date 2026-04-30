@@ -251,7 +251,7 @@ function CompressorResultPanel({ out }: { out: CompressorSimulationOutput }) {
           <Metric label="Vazão massa" value={`${r.massFlowKgh.toFixed(1)} kg/h`} />
           <Metric label="Tevap" value={`${r.evaporatingTempC.toFixed(1)} °C`} />
           <Metric label="Tcond" value={`${r.condensingTempC.toFixed(1)} °C`} />
-          <Metric label="Unidades" value={r.unitSystem} />
+          <Metric label="Unidades" value={formatUnitSystem(r.unitSystem)} />
         </div>
         {(r.warnings.length > 0 || r.envelopeWarnings.length > 0) && (
           <Alert>
@@ -320,4 +320,11 @@ function Metric({ label, value }: { label: string; value: string }) {
       <div className="text-lg font-semibold">{value}</div>
     </div>
   );
+}
+
+function formatUnitSystem(unitSystem: string) {
+  if (!unitSystem) return "—";
+  if (/btu|lbm|degf|ft/i.test(unitSystem)) return "Imperial (VAPCYC)";
+  if (/kw|degc|si/i.test(unitSystem)) return "SI";
+  return unitSystem;
 }
