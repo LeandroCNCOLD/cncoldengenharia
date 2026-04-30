@@ -152,7 +152,7 @@ export function ComponentsTab({ equipmentProjectId }: Props) {
                           </div>
                           <div className="flex items-center gap-1">
                             <Button asChild variant="ghost" size="sm">
-                              <Link to="/coldpro/admin/banco-tecnico" search={{ id: c?.id ?? "" } as never}>
+                              <Link to="/coldpro/admin/banco-tecnico">
                                 <ExternalLink className="h-4 w-4" />
                               </Link>
                             </Button>
