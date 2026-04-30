@@ -483,8 +483,16 @@ function CoilSimulatorPage() {
         <PageHeader
           title="Coil Simulator"
           description={
-            <span className="text-sm">
+            <span className="flex flex-wrap items-center gap-2 text-sm">
               {project?.commercial_name ?? "—"} · modo <strong>VERIFY</strong>
+              <Badge variant={dataOrigin === "manual" ? "outline" : "secondary"} className="ml-1">
+                Origem: {dataOrigin === "manual" ? "Manual" : dataOrigin === "library" ? "Biblioteca" : dataOrigin === "unilab" ? "Unilab" : "CN Internal"}
+              </Badge>
+              {effectiveComponentId && (
+                <Badge variant="outline" className="font-mono text-[10px]">
+                  Componente: {effectiveComponentId.slice(0, 8)}…
+                </Badge>
+              )}
             </span>
           }
           actions={
@@ -494,6 +502,26 @@ function CoilSimulatorPage() {
                 <SelectContent>
                   <SelectItem value="evaporator">Evaporador (DX)</SelectItem>
                   <SelectItem value="condenser">Condensador</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value=""
+                onValueChange={(v) => v && handleLoadFromLibrary(v)}
+              >
+                <SelectTrigger className="w-56">
+                  <BookOpen className="mr-1 h-4 w-4" />
+                  <SelectValue placeholder="Carregar da Biblioteca…" />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {libraryComponents.length === 0 ? (
+                    <div className="p-2 text-xs text-muted-foreground">Nenhum {coilType === "evaporator" ? "evaporador" : "condensador"} na biblioteca.</div>
+                  ) : (
+                    libraryComponents.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {(c.manufacturer ?? "—")} · {c.model ?? c.code ?? c.id.slice(0, 8)}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               <Select value={engine} onValueChange={(v) => setEngine(v as CoilEngine)}>
@@ -519,12 +547,13 @@ function CoilSimulatorPage() {
                 disabled={!result || saveMutation.isPending}
                 onClick={() => saveMutation.mutate()}
               >
-                <Save className="mr-1 h-4 w-4" /> Salvar
+                <Save className="mr-1 h-4 w-4" /> Salvar histórico
               </Button>
             </div>
           }
         />
       </div>
+
 
       {latestCal && (
         <Alert>
