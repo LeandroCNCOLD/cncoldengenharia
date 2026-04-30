@@ -609,6 +609,8 @@ function CoilSimulatorPage() {
           </TabsTrigger>
           <TabsTrigger value="debug">Debug técnico</TabsTrigger>
           <TabsTrigger value="system">Sistema</TabsTrigger>
+          <TabsTrigger value="perfmap"><Activity className="mr-1 h-3 w-3" />Mapa de desempenho</TabsTrigger>
+          <TabsTrigger value="save"><Wand2 className="mr-1 h-3 w-3" />Salvar componente</TabsTrigger>
           <TabsTrigger value="history">Histórico</TabsTrigger>
         </TabsList>
 
