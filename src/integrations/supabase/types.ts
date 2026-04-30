@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      cn_catalog_performance_curves: {
+        Row: {
+          carga_fluido: number | null
+          corrente_estimada: number | null
+          corrente_partida: number | null
+          created_at: string
+          curva_indice: number | null
+          curva_json: Json
+          gabinete: string | null
+          hp: string | null
+          id: string
+          linha: string | null
+          modelo: string
+          origem: string | null
+          raw_json: Json
+          refrigerante: string | null
+          tipo: string | null
+          total_pontos: number | null
+          updated_at: string
+        }
+        Insert: {
+          carga_fluido?: number | null
+          corrente_estimada?: number | null
+          corrente_partida?: number | null
+          created_at?: string
+          curva_indice?: number | null
+          curva_json?: Json
+          gabinete?: string | null
+          hp?: string | null
+          id?: string
+          linha?: string | null
+          modelo: string
+          origem?: string | null
+          raw_json?: Json
+          refrigerante?: string | null
+          tipo?: string | null
+          total_pontos?: number | null
+          updated_at?: string
+        }
+        Update: {
+          carga_fluido?: number | null
+          corrente_estimada?: number | null
+          corrente_partida?: number | null
+          created_at?: string
+          curva_indice?: number | null
+          curva_json?: Json
+          gabinete?: string | null
+          hp?: string | null
+          id?: string
+          linha?: string | null
+          modelo?: string
+          origem?: string | null
+          raw_json?: Json
+          refrigerante?: string | null
+          tipo?: string | null
+          total_pontos?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coil_calibrations: {
         Row: {
           air_dp_correction_factor: number
