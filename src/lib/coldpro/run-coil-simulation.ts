@@ -53,8 +53,8 @@ export async function runCoilSimulation(params: {
   try {
     result =
       params.kind === "evaporator"
-        ? Coil.simulateEvaporator(input as never)
-        : Coil.simulateCondenser(input as never);
+        ? Coil.simulateDxEvaporator(input, {})
+        : Coil.simulateDxCondenser(input, {});
   } catch (e) {
     return { ok: false, reason: (e as Error).message ?? "Erro no solver." };
   }
