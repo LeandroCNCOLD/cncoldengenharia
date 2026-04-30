@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Calculator } from "lucide-react";
@@ -26,6 +27,7 @@ import { CatalogComparePanel } from "@/components/coldpro/catalog-compare-panel"
 import { CnSuggestionsTab } from "@/components/coldpro/cn-suggestions-tab";
 import { HistoryTab } from "@/components/coldpro/history-tab";
 import { AutoFillFromCnCatalogPrompt } from "@/components/coldpro/auto-fill-from-cn-catalog-prompt";
+import { EquipmentReadinessPanel } from "@/components/coldpro/equipment-readiness-panel";
 
 export const Route = createFileRoute("/_app/coldpro/equipamentos/$id")({
   component: EquipmentDetailPage,
@@ -33,6 +35,7 @@ export const Route = createFileRoute("/_app/coldpro/equipamentos/$id")({
 
 function EquipmentDetailPage() {
   const { id } = useParams({ from: "/_app/coldpro/equipamentos/$id" });
+  const [tab, setTab] = useState("overview");
   const { data: project, isLoading } = useQuery({
     queryKey: ["equipment-project", id],
     queryFn: () => getEquipmentProject(id),
@@ -74,7 +77,29 @@ function EquipmentDetailPage() {
         />
       </div>
 
-      <Tabs defaultValue="overview">
+      <EquipmentReadinessPanel
+        equipmentProjectId={project.id}
+        onPrimaryAction={(action) => {
+          switch (action) {
+            case "load_from_catalog":
+            case "complete_components":
+              setTab("components");
+              break;
+            case "simulate_coils":
+              setTab("evaporator");
+              break;
+            case "simulate_system":
+              setTab("simulation");
+              break;
+            case "all_done":
+            default:
+              setTab("validation");
+          }
+        }}
+      />
+
+      <Tabs value={tab} onValueChange={setTab}>
+
         <TabsList className="flex flex-wrap">
           <TabsTrigger value="overview">Visão geral</TabsTrigger>
           <TabsTrigger value="sizing">Dimensionamento</TabsTrigger>

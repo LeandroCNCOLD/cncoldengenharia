@@ -13,6 +13,7 @@ import { useAuth } from "@/lib/auth";
 import { UnilabImportForm } from "@/components/coldpro/unilab-import-form";
 import { CalibrationPanel } from "@/components/coldpro/calibration-panel";
 import { PerformanceMapPanel } from "@/components/coldpro/performance-map-panel";
+import { CoilTabHeader } from "@/components/coldpro/coil-tab-header";
 import {
   buildDatasheetFromCoilRow,
   buildInputFromCoilRow,
@@ -46,6 +47,8 @@ export function CondenserTab({ equipmentProjectId }: Props) {
 
   return (
     <div className="space-y-6">
+      <CoilTabHeader equipmentProjectId={equipmentProjectId} kind="condenser" />
+
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Condensadores</h2>
         <Button onClick={() => create.mutate()} disabled={create.isPending}>
