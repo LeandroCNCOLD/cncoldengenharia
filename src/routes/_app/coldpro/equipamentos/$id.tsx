@@ -35,6 +35,7 @@ export const Route = createFileRoute("/_app/coldpro/equipamentos/$id")({
 
 function EquipmentDetailPage() {
   const { id } = useParams({ from: "/_app/coldpro/equipamentos/$id" });
+  const [tab, setTab] = useState("overview");
   const { data: project, isLoading } = useQuery({
     queryKey: ["equipment-project", id],
     queryFn: () => getEquipmentProject(id),
