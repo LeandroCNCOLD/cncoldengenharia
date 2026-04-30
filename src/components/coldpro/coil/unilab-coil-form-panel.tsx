@@ -465,7 +465,7 @@ export function UnilabCoilFormPanel({
     <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Label className="text-sm">Tipo:</Label>
           <Select value={coilKind} onValueChange={(v) => handleCoilKindChange(v as CoilKind)}>
             <SelectTrigger className="w-48">
@@ -476,9 +476,33 @@ export function UnilabCoilFormPanel({
               <SelectItem value="condenser">Condensador</SelectItem>
             </SelectContent>
           </Select>
-          <Badge variant="outline" className="ml-2">engine: hybrid_unilab</Badge>
+          <Badge variant="outline">engine: hybrid_unilab</Badge>
+          {filledFromCatalog && (
+            <Badge className="bg-blue-600 hover:bg-blue-600">
+              Pré-preenchido pelo Catálogo CN
+              {catalogModelo ? ` · ${catalogModelo}` : ""}
+              {referenceCurveIdx != null ? ` · ponto #${referenceCurveIdx}` : ""}
+            </Badge>
+          )}
+          {filledFromCatalog && manuallyEdited && (
+            <Badge variant="destructive">Editado manualmente</Badge>
+          )}
+          {cnAutoFetching && !filledFromCatalog && (
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Buscando no catálogo CN…
+            </span>
+          )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={handleLoadFromCatalog} disabled={loadingCatalog}>
+            {loadingCatalog ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Database className="mr-2 h-4 w-4" />
+            )}
+            Carregar dados do catálogo
+          </Button>
           <Button variant="outline" onClick={() => setShowCompare((s) => !s)}>
             <GitCompare className="mr-2 h-4 w-4" />
             Comparar com catálogo
@@ -489,6 +513,32 @@ export function UnilabCoilFormPanel({
           </Button>
         </div>
       </div>
+
+      {/* Seletor de ponto da curva CN, quando há modelo carregado */}
+      {filledFromCatalog && cnPoints.length > 1 && (
+        <Card>
+          <CardContent className="flex flex-wrap items-center gap-3 py-3 text-sm">
+            <Label className="text-sm">Ponto da curva CN:</Label>
+            <Select value={selectedCurveId ?? ""} onValueChange={handleSelectCurvePoint}>
+              <SelectTrigger className="w-[420px]">
+                <SelectValue placeholder="Selecione um ponto…" />
+              </SelectTrigger>
+              <SelectContent className="max-h-80">
+                {cnPoints.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    #{p.curvaIndice ?? "—"} · Tev {fmt(p.tempEvapC, 1, "°C")} · Tcond{" "}
+                    {fmt(p.tempCondC, 1, "°C")} · {fmt(p.capacityKcalh, 0, "kcal/h")} ·{" "}
+                    {p.refrigerante ?? "—"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-xs text-muted-foreground">
+              {cnPoints.length} pontos disponíveis
+            </span>
+          </CardContent>
+        </Card>
+      )}
 
       {/* 3 blocos lado a lado */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
