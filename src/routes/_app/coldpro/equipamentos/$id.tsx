@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Calculator } from "lucide-react";
@@ -26,6 +27,7 @@ import { CatalogComparePanel } from "@/components/coldpro/catalog-compare-panel"
 import { CnSuggestionsTab } from "@/components/coldpro/cn-suggestions-tab";
 import { HistoryTab } from "@/components/coldpro/history-tab";
 import { AutoFillFromCnCatalogPrompt } from "@/components/coldpro/auto-fill-from-cn-catalog-prompt";
+import { EquipmentReadinessPanel } from "@/components/coldpro/equipment-readiness-panel";
 
 export const Route = createFileRoute("/_app/coldpro/equipamentos/$id")({
   component: EquipmentDetailPage,
