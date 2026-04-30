@@ -36,7 +36,13 @@ interface QueryBuilder {
 }
 
 function cnDb(): UntypedSupabase {
-  return supabase as unknown as UntypedSupabase;
+  return injectedDb ?? (supabase as unknown as UntypedSupabase);
+}
+
+let injectedDb: UntypedSupabase | null = null;
+
+export function setCnCatalogDb(client: UntypedSupabase | null) {
+  injectedDb = client;
 }
 
 export type CnCatalogSourceType = "official" | "480" | "csv";
