@@ -235,7 +235,13 @@ function pointFromRow(row: {
     : ((cj as Record<string, unknown>) ?? {});
   const num = (k: string): number | null => toNum(objRaw[k]);
   const kcal = num(POINT_KEYS.capacityKcalh);
-  const raw = (row.raw_json as Record<string, unknown>) ?? {};
+  const rawSrc = (row.raw_json as Record<string, unknown>) ?? {};
+  const raw: Record<string, string | number | boolean | null> = {};
+  for (const [k, v] of Object.entries(rawSrc)) {
+    if (v == null) raw[k] = null;
+    else if (typeof v === "number" || typeof v === "string" || typeof v === "boolean") raw[k] = v;
+    else raw[k] = String(v);
+  }
 
   return {
     id: row.id,
