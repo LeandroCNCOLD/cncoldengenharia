@@ -49,6 +49,7 @@ import {
 } from "@/modules/coldpro/library/types";
 import { migrateExistingDataToUniversalLibrary } from "@/server/technicalLibraryMigration.functions";
 import { ProcessUnmappedButton } from "@/components/coldpro/process-unmapped-button";
+import { ProcessAndApproveAllButton } from "@/components/coldpro/process-and-approve-all-button";
 
 export const Route = createFileRoute("/_app/coldpro/admin/banco-tecnico")({
   component: TechBankPage,
