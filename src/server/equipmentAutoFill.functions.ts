@@ -451,12 +451,13 @@ export const commitAutoFillFromCnCatalog = createServerFn({ method: "POST" })
         project.commercial_name as string | null,
       );
       if (!curve) throw new Error("Modelo CN não encontrado para este equipamento.");
+      const c: CnCurveRow = curve;
 
-      const raw = (curve.raw_json as Record<string, unknown>) ?? {};
+      const raw = (c.raw_json as Record<string, unknown>) ?? {};
       const evapGeo = extractGeometry(raw, "evaporador");
       const condGeo = extractGeometry(raw, "condensador");
-      const ops = extractMidPointOps(curve.curva_json);
-      const refrig = (curve.refrigerante as string | null) ?? (project.refrigerant as string | null) ?? null;
+      const ops = extractMidPointOps(c.curva_json);
+      const refrig = c.refrigerante ?? (project.refrigerant as string | null) ?? null;
 
       const created: { role: AutoFillRoleKey; id: string }[] = [];
       const skipped: { role: AutoFillRoleKey; reason: string }[] = [];
