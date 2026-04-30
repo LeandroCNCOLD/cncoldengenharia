@@ -33,9 +33,10 @@ export const listCn480Catalog = createServerFn({ method: "GET" })
 export const getCn480Detail = createServerFn({ method: "POST" })
   .middleware([attachSupabaseAuth, requireSupabaseAuth])
   .inputValidator((d) => z.object({ modelId: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }): Promise<Cn480Detail> => {
+  .handler(async ({ data, context }) => {
     const { supabase } = context;
-    return loadCn480Detail(supabase, data.modelId);
+    const detail = await loadCn480Detail(supabase, data.modelId);
+    return detail as unknown as Cn480Detail;
   });
 
 export type CreateFromCn480Result = {
