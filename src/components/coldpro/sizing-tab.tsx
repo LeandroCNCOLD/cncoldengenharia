@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Sparkles, Search, Wand2, BookOpen, ExternalLink, Calculator } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { listApprovedComponents } from "@/lib/coldpro/technical-library";
 import { toast } from "sonner";
 
@@ -284,6 +284,7 @@ interface ManualCoilDesignSectionProps {
 }
 
 function ManualCoilDesignSection({ projectId }: ManualCoilDesignSectionProps) {
+  const navigate = useNavigate();
   const [coilType, setCoilType] = useState<"evaporator" | "condenser">("evaporator");
   const [selectedLib, setSelectedLib] = useState<string>("");
 
@@ -295,6 +296,14 @@ function ManualCoilDesignSection({ projectId }: ManualCoilDesignSectionProps) {
         limit: 100,
       }),
   });
+
+  const openSimulator = (tab: "unilab" | "perfmap" | "save" = "unilab") => {
+    localStorage.setItem(`coilsim:tab:${projectId}`, tab);
+    navigate({
+      to: "/coldpro/equipamentos/$id/coil-simulator",
+      params: { id: projectId },
+    });
+  };
 
   const handleOpenWithLibrary = () => {
     if (!selectedLib) {
@@ -326,7 +335,7 @@ function ManualCoilDesignSection({ projectId }: ManualCoilDesignSectionProps) {
       },
     };
     localStorage.setItem(`coilsim:prefill:${projectId}`, JSON.stringify(payload));
-    window.location.href = `/coldpro/equipamentos/${projectId}/coil-simulator`;
+    openSimulator("unilab");
   };
 
   return (
@@ -376,23 +385,17 @@ function ManualCoilDesignSection({ projectId }: ManualCoilDesignSectionProps) {
         </div>
 
         <div className="flex flex-wrap gap-2 border-t pt-4">
-          <Button asChild>
-            <Link to="/coldpro/equipamentos/$id/coil-simulator" params={{ id: projectId }}>
-              <Wand2 className="mr-1 h-4 w-4" /> Novo aletado manual
-            </Link>
+          <Button onClick={() => openSimulator("unilab")}>
+            <Wand2 className="mr-1 h-4 w-4" /> Novo aletado manual
           </Button>
           <Button variant="secondary" onClick={handleOpenWithLibrary} disabled={!selectedLib}>
             <BookOpen className="mr-1 h-4 w-4" /> Carregar selecionado e abrir
           </Button>
-          <Button asChild variant="outline">
-            <Link to="/coldpro/equipamentos/$id/coil-simulator" params={{ id: projectId }}>
-              <Calculator className="mr-1 h-4 w-4" /> Abrir Coil Simulator
-            </Link>
+          <Button variant="outline" onClick={() => openSimulator("unilab")}>
+            <Calculator className="mr-1 h-4 w-4" /> Abrir Coil Simulator
           </Button>
-          <Button asChild variant="ghost">
-            <Link to="/coldpro/equipamentos/$id/coil-simulator" params={{ id: projectId }}>
-              <ExternalLink className="mr-1 h-4 w-4" /> Simular / Salvar / Mapa de desempenho
-            </Link>
+          <Button variant="ghost" onClick={() => openSimulator("perfmap")}>
+            <ExternalLink className="mr-1 h-4 w-4" /> Simular / Salvar / Mapa de desempenho
           </Button>
         </div>
 

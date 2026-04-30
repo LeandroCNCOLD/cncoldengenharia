@@ -13,7 +13,7 @@
  *
  * NÃO faz cálculos no React — apenas monta input e exibe o que o engine retorna.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Calculator, GitCompare, Info } from "lucide-react";
 import { toast } from "sonner";
@@ -37,6 +37,7 @@ import {
   type CoilCalculationInput,
   type CoilCalculationResult,
 } from "@/modules/thermalcalc/engines/coil";
+import type { CoilSimulatorInput, CoilSimulatorResult, CoilType } from "@/modules/coldpro/coil/coilSimulatorTypes";
 import {
   listCoilMaterials,
   listCnCatalogModelsLite,
@@ -47,11 +48,38 @@ import {
 
 type CoilKind = "evaporator" | "condenser";
 
+type UnilabGeometryState = {
+  tubesPerRow: string;
+  rows: string;
+  coilLengthMm: string;
+  circuits: string;
+  finPitchMm: string;
+  skippedTubes: string;
+  tubeOdMm: string;
+  tubeWallMm: string;
+  tubeMaterialId: string;
+  finMaterialId: string;
+  tubePitchMm: string;
+  rowPitchMm: string;
+  finThicknessMm: string;
+};
+
 interface Props {
   equipmentCode?: string | null;
   equipmentCommercialName?: string | null;
   defaultRefrigerant?: string | null;
+  label?: string;
+  prefill?: UnilabCoilPrefill | null;
+  onSimulationComplete?: (input: CoilSimulatorInput, result: CoilSimulatorResult) => void;
+  onCoilKindChange?: (coilType: CoilType) => void;
 }
+
+export type UnilabCoilPrefill = {
+  coilType?: CoilType;
+  refrigerant?: string;
+  nominal?: { airTempInC?: number; refTempC?: number; airflowM3h?: number };
+  geometry?: Record<string, number | null | undefined>;
+};
 
 const REFRIGERANTS = ["R-404A", "R-449A", "R-448A", "R-134a", "R-22", "R-290", "R-744"];
 
@@ -71,6 +99,10 @@ export function UnilabCoilFormPanel({
   equipmentCode,
   equipmentCommercialName,
   defaultRefrigerant,
+  label,
+  prefill,
+  onSimulationComplete,
+  onCoilKindChange,
 }: Props) {
   const [coilKind, setCoilKind] = useState<CoilKind>("evaporator");
 
@@ -107,6 +139,32 @@ export function UnilabCoilFormPanel({
     subcoolingK: "3",
   });
 
+  useEffect(() => {
+    if (!prefill) return;
+    if (prefill.coilType) setCoilKind(prefill.coilType);
+    const geometry = prefill.geometry ?? {};
+    setGeo((s) => ({
+      ...s,
+      rows: geometry.rows != null ? String(geometry.rows) : s.rows,
+      tubesPerRow: geometry.tubesPerRow != null ? String(geometry.tubesPerRow) : s.tubesPerRow,
+      circuits: geometry.circuits != null ? String(geometry.circuits) : s.circuits,
+      coilLengthMm: geometry.coilLengthMm != null ? String(geometry.coilLengthMm) : s.coilLengthMm,
+      finPitchMm: geometry.finPitchMm != null ? String(geometry.finPitchMm) : s.finPitchMm,
+      tubeOdMm: geometry.tubeOdMm != null ? String(geometry.tubeOdMm) : s.tubeOdMm,
+      tubeWallMm: geometry.tubeWallMm != null ? String(geometry.tubeWallMm) : s.tubeWallMm,
+    }));
+    setAir((s) => ({
+      ...s,
+      airTempInC: prefill.nominal?.airTempInC != null ? String(prefill.nominal.airTempInC) : s.airTempInC,
+      airflowM3h: prefill.nominal?.airflowM3h != null ? String(prefill.nominal.airflowM3h) : s.airflowM3h,
+    }));
+    setRef((s) => ({
+      ...s,
+      refrigerant: prefill.refrigerant ?? s.refrigerant,
+      refTempC: prefill.nominal?.refTempC != null ? String(prefill.nominal.refTempC) : s.refTempC,
+    }));
+  }, [prefill]);
+
   // ============= MATERIAIS =============
   const { data: materials = [] } = useQuery({
     queryKey: ["coil-materials"],
@@ -122,7 +180,7 @@ export function UnilabCoilFormPanel({
   );
 
   // Defaults inteligentes quando lista chega
-  useMemo(() => {
+  useEffect(() => {
     if (!geo.tubeMaterialId && tubeMaterials.length) {
       const cu = tubeMaterials.find((m) => /cobre/i.test(m.name)) ?? tubeMaterials[0];
       setGeo((s) => ({ ...s, tubeMaterialId: cu.id }));
@@ -191,6 +249,7 @@ export function UnilabCoilFormPanel({
       const input = buildEngineInput();
       const r = simulateHybridCoil(input);
       setResult(r);
+      onSimulationComplete?.(toLegacyInput(input, label, coilKind, geo, air, ref, tubeMaterial?.name, finMaterial?.name), toLegacyResult(r, coilKind));
       const errs = r.warnings.filter((w) => /^ERRO/i.test(w));
       if (errs.length) toast.error(errs[0]);
       else toast.success(`Q = ${(r.capacityW / 1000).toFixed(2)} kW`);
@@ -239,6 +298,7 @@ export function UnilabCoilFormPanel({
   // Reaplica defaults razoáveis quando o tipo muda
   const handleCoilKindChange = (k: CoilKind) => {
     setCoilKind(k);
+    onCoilKindChange?.(k);
     setAir((s) => ({ ...s, airTempInC: k === "evaporator" ? "0" : "35" }));
     setRef((s) => ({ ...s, refTempC: k === "evaporator" ? "-10" : "48" }));
     setResult(null);
@@ -537,6 +597,72 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
       <Input value={value} onChange={(e) => onChange(e.target.value)} inputMode="decimal" />
     </div>
   );
+}
+
+function toLegacyInput(
+  input: CoilCalculationInput,
+  label: string | undefined,
+  coilType: CoilKind,
+  geo: UnilabGeometryState,
+  air: { airflowM3h: string; airTempInC: string; rhInPct: string },
+  ref: { refrigerant: string; refTempC: string; superheatK: string; subcoolingK: string },
+  tubeMaterial?: string,
+  finMaterial?: string,
+): CoilSimulatorInput {
+  return {
+    mode: "verify",
+    coilType,
+    label: label || undefined,
+    geometry: {
+      finType: "integral",
+      tubeArrangement: "staggered",
+      tubeSpacingMm: input.geometry.tubePitchMm,
+      rowSpacingMm: input.geometry.rowPitchMm,
+      tubeOdMm: input.geometry.tubeOuterDiameterMm,
+      tubeIdMm: input.geometry.tubeInnerDiameterMm,
+      tubeWallMm: numOrUndef(geo.tubeWallMm),
+      finThicknessMm: input.geometry.finThicknessMm,
+      tubesPerRow: input.geometry.tubesPerRow,
+      rows: input.geometry.rows,
+      circuits: input.geometry.circuits,
+      coilLengthMm: input.geometry.coilLengthMm,
+      finPitchMm: input.geometry.finPitchMm,
+      skippedTubes: input.geometry.skippedTubes,
+      tubeMaterial,
+      finMaterial,
+    },
+    air: {
+      airflowM3h: numOrUndef(air.airflowM3h),
+      airTempInC: numOrUndef(air.airTempInC),
+      rhInPct: numOrUndef(air.rhInPct),
+    },
+    refrigerant: {
+      refrigerant: ref.refrigerant,
+      refTempC: numOrUndef(ref.refTempC),
+      superheatK: numOrUndef(ref.superheatK),
+      subcoolingK: numOrUndef(ref.subcoolingK),
+    },
+  };
+}
+
+function toLegacyResult(r: CoilCalculationResult, coilType: CoilKind): CoilSimulatorResult {
+  return {
+    coilType,
+    capacityW: r.capacityW,
+    capacityKcalh: r.capacityKcalh,
+    sensibleW: null,
+    latentW: null,
+    dtRealK: r.dtmlK,
+    dtNominalK: r.dtmlK,
+    faceAreaM2: r.frontalAreaM2,
+    faceVelocityMs: typeof r.debug?.frontalVelocityMs === "number" ? r.debug.frontalVelocityMs : null,
+    airflowFactor: 1,
+    dtFactor: 1,
+    airPressureDropPa: r.airPressureDropPa,
+    refPressureDropKpa: r.refrigerantPressureDropKpa,
+    condensateLh: null,
+    warnings: r.warnings,
+  };
 }
 
 function Result({ label, value }: { label: string; value: string }) {
