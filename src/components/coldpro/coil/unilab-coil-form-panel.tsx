@@ -69,9 +69,17 @@ interface Props {
   equipmentCommercialName?: string | null;
   defaultRefrigerant?: string | null;
   label?: string;
+  prefill?: UnilabCoilPrefill | null;
   onSimulationComplete?: (input: CoilSimulatorInput, result: CoilSimulatorResult) => void;
   onCoilKindChange?: (coilType: CoilType) => void;
 }
+
+export type UnilabCoilPrefill = {
+  coilType?: CoilType;
+  refrigerant?: string;
+  nominal?: { airTempInC?: number; refTempC?: number; airflowM3h?: number };
+  geometry?: Record<string, number | null | undefined>;
+};
 
 const REFRIGERANTS = ["R-404A", "R-449A", "R-448A", "R-134a", "R-22", "R-290", "R-744"];
 
@@ -92,6 +100,7 @@ export function UnilabCoilFormPanel({
   equipmentCommercialName,
   defaultRefrigerant,
   label,
+  prefill,
   onSimulationComplete,
   onCoilKindChange,
 }: Props) {
@@ -129,6 +138,32 @@ export function UnilabCoilFormPanel({
     superheatK: "7",
     subcoolingK: "3",
   });
+
+  useEffect(() => {
+    if (!prefill) return;
+    if (prefill.coilType) setCoilKind(prefill.coilType);
+    const geometry = prefill.geometry ?? {};
+    setGeo((s) => ({
+      ...s,
+      rows: geometry.rows != null ? String(geometry.rows) : s.rows,
+      tubesPerRow: geometry.tubesPerRow != null ? String(geometry.tubesPerRow) : s.tubesPerRow,
+      circuits: geometry.circuits != null ? String(geometry.circuits) : s.circuits,
+      coilLengthMm: geometry.coilLengthMm != null ? String(geometry.coilLengthMm) : s.coilLengthMm,
+      finPitchMm: geometry.finPitchMm != null ? String(geometry.finPitchMm) : s.finPitchMm,
+      tubeOdMm: geometry.tubeOdMm != null ? String(geometry.tubeOdMm) : s.tubeOdMm,
+      tubeWallMm: geometry.tubeWallMm != null ? String(geometry.tubeWallMm) : s.tubeWallMm,
+    }));
+    setAir((s) => ({
+      ...s,
+      airTempInC: prefill.nominal?.airTempInC != null ? String(prefill.nominal.airTempInC) : s.airTempInC,
+      airflowM3h: prefill.nominal?.airflowM3h != null ? String(prefill.nominal.airflowM3h) : s.airflowM3h,
+    }));
+    setRef((s) => ({
+      ...s,
+      refrigerant: prefill.refrigerant ?? s.refrigerant,
+      refTempC: prefill.nominal?.refTempC != null ? String(prefill.nominal.refTempC) : s.refTempC,
+    }));
+  }, [prefill]);
 
   // ============= MATERIAIS =============
   const { data: materials = [] } = useQuery({
