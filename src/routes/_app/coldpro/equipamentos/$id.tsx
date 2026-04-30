@@ -23,6 +23,7 @@ import { ValveTab } from "@/components/coldpro/valve-tab";
 import { SystemTab } from "@/components/coldpro/system-tab";
 import { CatalogTab } from "@/components/coldpro/catalog-tab";
 import { CatalogComparePanel } from "@/components/coldpro/catalog-compare-panel";
+import { CnSuggestionsTab } from "@/components/coldpro/cn-suggestions-tab";
 import { HistoryTab } from "@/components/coldpro/history-tab";
 
 export const Route = createFileRoute("/_app/coldpro/equipamentos/$id")({
@@ -84,6 +85,7 @@ function EquipmentDetailPage() {
           <TabsTrigger value="simulation">Sistema completo</TabsTrigger>
           <TabsTrigger value="catalog">Catálogo</TabsTrigger>
           <TabsTrigger value="validation">Validação</TabsTrigger>
+          <TabsTrigger value="cn-suggestions">Sugestões CN</TabsTrigger>
           <TabsTrigger value="history">Histórico</TabsTrigger>
         </TabsList>
 
@@ -142,6 +144,10 @@ function EquipmentDetailPage() {
 
         <TabsContent value="validation" className="mt-6">
           <CatalogComparePanel equipmentProjectId={project.id} />
+        </TabsContent>
+
+        <TabsContent value="cn-suggestions" className="mt-6">
+          <CnSuggestionsTab equipmentProjectId={project.id} />
         </TabsContent>
 
         <TabsContent value="history" className="mt-6">
