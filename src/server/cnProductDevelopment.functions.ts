@@ -22,20 +22,71 @@ export const listProducts = createServerFn({ method: "POST" })
     const { data: rows, error } = await q;
     if (error) throw error;
 
-    // Conta curvas por modelo
+    // Conta curvas por modelo + extrai ponto nominal (capacidade / Tevap)
     const models = (rows ?? []).map((r) => r.catalog_model);
     let curvesByModel: Record<string, number> = {};
+    let nominalByModel: Record<string, { capacity_w: number | null; tevap_c: number | null }> = {};
     if (models.length > 0) {
       const { data: curves } = await supabase
         .from("cn_catalog_performance_curves")
-        .select("modelo")
+        .select("modelo,raw_json,curva_json")
         .in("modelo", models);
       for (const c of curves ?? []) {
         curvesByModel[c.modelo] = (curvesByModel[c.modelo] ?? 0) + 1;
+        if (nominalByModel[c.modelo]) continue;
+        const nom = extractNominalFromCurve(c.raw_json, c.curva_json);
+        if (nom) nominalByModel[c.modelo] = nom;
       }
     }
-    return { products: rows ?? [], curvesByModel };
+    return { products: rows ?? [], curvesByModel, nominalByModel };
   });
+
+function extractNominalFromCurve(
+  rawJson: unknown,
+  curvaJson: unknown,
+): { capacity_w: number | null; tevap_c: number | null } | null {
+  // 1) tenta curva_raw → campos tabulares
+  let tech: Record<string, unknown> = {};
+  if (rawJson && typeof rawJson === "object") {
+    const raw = rawJson as Record<string, unknown>;
+    const curvaRaw = raw.curva_raw;
+    if (typeof curvaRaw === "string") {
+      try { tech = JSON.parse(curvaRaw); } catch { /* ignore */ }
+    } else if (curvaRaw && typeof curvaRaw === "object") {
+      tech = curvaRaw as Record<string, unknown>;
+    }
+  }
+  const num = (k: string): number | null => {
+    const v = tech[k];
+    if (typeof v === "number" && Number.isFinite(v)) return v;
+    if (typeof v === "string" && v.trim() !== "" && !Number.isNaN(Number(v))) return Number(v);
+    return null;
+  };
+  const tEvap = num("TEMPERATURA DE EVAPORAÇÃO  (°C)") ?? num("TEMPERATURA DE EVAPORAÇÃO (°C)");
+  const capKcal = num("CAPACIDADE FRIGORÍFICA DO COMPRESSOR (Kcal/h)");
+  let capW = capKcal != null ? Math.round(capKcal * 1.163) : null;
+
+  // 2) fallback: curva_json (array de pontos)
+  if ((capW == null || tEvap == null) && Array.isArray(curvaJson) && curvaJson.length > 0) {
+    const p = curvaJson[0] as Record<string, unknown>;
+    const pickNum = (...keys: string[]): number | null => {
+      for (const k of keys) {
+        const v = p[k];
+        if (typeof v === "number" && Number.isFinite(v)) return v;
+        if (typeof v === "string" && v.trim() !== "" && !Number.isNaN(Number(v))) return Number(v);
+      }
+      return null;
+    };
+    if (capW == null) {
+      const cw = pickNum("capacity_w", "capacidade_w", "capacity");
+      const ck = pickNum("capacity_kcal_h", "capacidade_kcal_h");
+      capW = cw ?? (ck != null ? Math.round(ck * 1.163) : null);
+    }
+  }
+
+  if (capW == null && tEvap == null) return null;
+  return { capacity_w: capW, tevap_c: tEvap };
+}
 
 export const getProductFullDetails = createServerFn({ method: "POST" })
   .middleware([attachSupabaseAuth, requireSupabaseAuth])
