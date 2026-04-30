@@ -13,7 +13,7 @@
  *
  * NÃO faz cálculos no React — apenas monta input e exibe o que o engine retorna.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Calculator, GitCompare, Info } from "lucide-react";
 import { toast } from "sonner";
@@ -37,6 +37,7 @@ import {
   type CoilCalculationInput,
   type CoilCalculationResult,
 } from "@/modules/thermalcalc/engines/coil";
+import type { CoilSimulatorInput, CoilSimulatorResult, CoilType } from "@/modules/coldpro/coil/coilSimulatorTypes";
 import {
   listCoilMaterials,
   listCnCatalogModelsLite,
@@ -51,6 +52,9 @@ interface Props {
   equipmentCode?: string | null;
   equipmentCommercialName?: string | null;
   defaultRefrigerant?: string | null;
+  label?: string;
+  onSimulationComplete?: (input: CoilSimulatorInput, result: CoilSimulatorResult) => void;
+  onCoilKindChange?: (coilType: CoilType) => void;
 }
 
 const REFRIGERANTS = ["R-404A", "R-449A", "R-448A", "R-134a", "R-22", "R-290", "R-744"];
@@ -71,6 +75,9 @@ export function UnilabCoilFormPanel({
   equipmentCode,
   equipmentCommercialName,
   defaultRefrigerant,
+  label,
+  onSimulationComplete,
+  onCoilKindChange,
 }: Props) {
   const [coilKind, setCoilKind] = useState<CoilKind>("evaporator");
 
@@ -122,7 +129,7 @@ export function UnilabCoilFormPanel({
   );
 
   // Defaults inteligentes quando lista chega
-  useMemo(() => {
+  useEffect(() => {
     if (!geo.tubeMaterialId && tubeMaterials.length) {
       const cu = tubeMaterials.find((m) => /cobre/i.test(m.name)) ?? tubeMaterials[0];
       setGeo((s) => ({ ...s, tubeMaterialId: cu.id }));
@@ -191,6 +198,7 @@ export function UnilabCoilFormPanel({
       const input = buildEngineInput();
       const r = simulateHybridCoil(input);
       setResult(r);
+      onSimulationComplete?.(toLegacyInput(input, label, coilKind, geo, air, ref, tubeMaterial?.name, finMaterial?.name), toLegacyResult(r, coilKind));
       const errs = r.warnings.filter((w) => /^ERRO/i.test(w));
       if (errs.length) toast.error(errs[0]);
       else toast.success(`Q = ${(r.capacityW / 1000).toFixed(2)} kW`);
@@ -239,6 +247,7 @@ export function UnilabCoilFormPanel({
   // Reaplica defaults razoáveis quando o tipo muda
   const handleCoilKindChange = (k: CoilKind) => {
     setCoilKind(k);
+    onCoilKindChange?.(k);
     setAir((s) => ({ ...s, airTempInC: k === "evaporator" ? "0" : "35" }));
     setRef((s) => ({ ...s, refTempC: k === "evaporator" ? "-10" : "48" }));
     setResult(null);
