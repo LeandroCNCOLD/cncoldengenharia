@@ -33,6 +33,20 @@ export function ProductDetailDrawer({ product, onOpenChange }: Props) {
   const qc = useQueryClient();
   const [archiveReason, setArchiveReason] = useState("");
   const open = !!product;
+  const navigate = useNavigate();
+
+  const ensureMutation = useMutation({
+    mutationFn: () => ensureEquipmentProject({ data: { id: product!.id } }),
+    onSuccess: ({ equipmentProjectId }) => {
+      qc.invalidateQueries({ queryKey: ["cn-product-dev"] });
+      onOpenChange(false);
+      navigate({
+        to: "/coldpro/equipamentos/$id",
+        params: { id: equipmentProjectId },
+      });
+    },
+    onError: (e) => toast.error(`Falha: ${(e as Error).message}`),
+  });
 
   const { data: curves } = useQuery({
     queryKey: ["cn-curves", product?.catalog_model],
