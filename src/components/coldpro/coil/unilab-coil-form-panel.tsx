@@ -548,6 +548,90 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
   );
 }
 
+function toLegacyInput(
+  input: CoilCalculationInput,
+  label: string | undefined,
+  coilType: CoilKind,
+  geo: ReturnType<typeof useUnilabGeometrySnapshot>,
+  air: { airflowM3h: string; airTempInC: string; rhInPct: string },
+  ref: { refrigerant: string; refTempC: string; superheatK: string; subcoolingK: string },
+  tubeMaterial?: string,
+  finMaterial?: string,
+): CoilSimulatorInput {
+  return {
+    mode: "verify",
+    coilType,
+    label: label || undefined,
+    geometry: {
+      finType: "integral",
+      tubeArrangement: "staggered",
+      tubeSpacingMm: input.geometry.tubePitchMm,
+      rowSpacingMm: input.geometry.rowPitchMm,
+      tubeOdMm: input.geometry.tubeOuterDiameterMm,
+      tubeIdMm: input.geometry.tubeInnerDiameterMm,
+      tubeWallMm: numOrUndef(geo.tubeWallMm),
+      finThicknessMm: input.geometry.finThicknessMm,
+      tubesPerRow: input.geometry.tubesPerRow,
+      rows: input.geometry.rows,
+      circuits: input.geometry.circuits,
+      coilLengthMm: input.geometry.coilLengthMm,
+      finPitchMm: input.geometry.finPitchMm,
+      skippedTubes: input.geometry.skippedTubes,
+      tubeMaterial,
+      finMaterial,
+    },
+    air: {
+      airflowM3h: numOrUndef(air.airflowM3h),
+      airTempInC: numOrUndef(air.airTempInC),
+      rhInPct: numOrUndef(air.rhInPct),
+    },
+    refrigerant: {
+      refrigerant: ref.refrigerant,
+      refTempC: numOrUndef(ref.refTempC),
+      superheatK: numOrUndef(ref.superheatK),
+      subcoolingK: numOrUndef(ref.subcoolingK),
+    },
+  };
+}
+
+function toLegacyResult(r: CoilCalculationResult, coilType: CoilKind): CoilSimulatorResult {
+  return {
+    coilType,
+    capacityW: r.capacityW,
+    capacityKcalh: r.capacityKcalh,
+    sensibleW: null,
+    latentW: null,
+    dtRealK: r.dtmlK,
+    dtNominalK: r.dtmlK,
+    faceAreaM2: r.frontalAreaM2,
+    faceVelocityMs: typeof r.debug?.frontalVelocityMs === "number" ? r.debug.frontalVelocityMs : null,
+    airflowFactor: 1,
+    dtFactor: 1,
+    airPressureDropPa: r.airPressureDropPa,
+    refPressureDropKpa: r.refrigerantPressureDropKpa,
+    condensateLh: null,
+    warnings: r.warnings,
+  };
+}
+
+function useUnilabGeometrySnapshot() {
+  return {
+    tubesPerRow: "",
+    rows: "",
+    coilLengthMm: "",
+    circuits: "",
+    finPitchMm: "",
+    skippedTubes: "",
+    tubeOdMm: "",
+    tubeWallMm: "",
+    tubeMaterialId: "",
+    finMaterialId: "",
+    tubePitchMm: "",
+    rowPitchMm: "",
+    finThicknessMm: "",
+  };
+}
+
 function Result({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between text-sm">
