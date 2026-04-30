@@ -79,7 +79,9 @@ export const approveAllMappedRecords = createServerFn({ method: "POST" })
       ms: 0,
     };
 
-    const statuses = includeNeedsReview ? ["mapped", "needs_review"] : ["mapped"];
+    const statuses = (includeNeedsReview ? ["mapped", "needs_review"] : ["mapped"]) as Array<
+      "mapped" | "needs_review"
+    >;
 
     for (let page = 0; page < maxPages; page++) {
       const { data: rows, error } = await withRetry("fetch mapped", () =>
