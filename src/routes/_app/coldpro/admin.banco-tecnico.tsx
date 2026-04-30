@@ -52,6 +52,7 @@ import { migrateExistingDataToUniversalLibrary } from "@/server/technicalLibrary
 import { archiveUnmappableRawRecords } from "@/server/archiveUnmappableRecords.functions";
 import { ProcessUnmappedButton } from "@/components/coldpro/process-unmapped-button";
 import { ProcessAndApproveAllButton } from "@/components/coldpro/process-and-approve-all-button";
+import { CatalogCnColdCard } from "@/components/coldpro/catalog-cn-cold-card";
 import { subscribePipeline, type PipelineState } from "@/lib/coldpro/background-pipeline";
 
 export const Route = createFileRoute("/_app/coldpro/admin/banco-tecnico")({
@@ -667,6 +668,7 @@ function TechBankPage() {
       />
 
       <PendingReviewBanner />
+      <CatalogCnColdCard />
       <ArchivedRawCard />
 
       <Tabs defaultValue="universal">
