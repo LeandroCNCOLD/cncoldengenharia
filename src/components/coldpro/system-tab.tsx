@@ -33,8 +33,8 @@ export function SystemTab({ equipmentProjectId }: Props) {
     queryFn: () => listEquipmentComponentLinks(equipmentProjectId),
   });
 
-  const evap = items?.find((i) => i.kind === "evaporator");
-  const cond = items?.find((i) => i.kind === "condenser");
+  const evap = items?.find((i) => i.kind === "evaporador");
+  const cond = items?.find((i) => i.kind === "condensador");
   const compressor = links?.find((l) => l.role === "compressor");
   const fanEvap = links?.find((l) => l.role === "fan_evaporator");
   const fanCond = links?.find((l) => l.role === "fan_condenser");
