@@ -15,8 +15,14 @@ import {
 } from "@/lib/coldpro/labels";
 import { EvaporatorTab } from "@/components/coldpro/evaporator-tab";
 import { CondenserTab } from "@/components/coldpro/condenser-tab";
-import { PlaceholderTab } from "@/components/coldpro/placeholder-tab";
 import { SizingTab } from "@/components/coldpro/sizing-tab";
+import { ComponentsTab } from "@/components/coldpro/components-tab";
+import { CompressorTab } from "@/components/coldpro/compressor-tab";
+import { FansTab } from "@/components/coldpro/fans-tab";
+import { ValveTab } from "@/components/coldpro/valve-tab";
+import { SystemTab } from "@/components/coldpro/system-tab";
+import { CatalogTab } from "@/components/coldpro/catalog-tab";
+import { HistoryTab } from "@/components/coldpro/history-tab";
 
 export const Route = createFileRoute("/_app/coldpro/equipamentos/$id")({
   component: EquipmentDetailPage,
@@ -101,10 +107,7 @@ function EquipmentDetailPage() {
         </TabsContent>
 
         <TabsContent value="components" className="mt-6">
-          <PlaceholderTab
-            title="Lista geral de componentes"
-            description="Em breve: visão consolidada de todos os componentes (evap, cond, compressor, ventilador, válvulas, painel, etc.)."
-          />
+          <ComponentsTab equipmentProjectId={project.id} />
         </TabsContent>
 
         <TabsContent value="evaporator" className="mt-6">
@@ -116,39 +119,27 @@ function EquipmentDetailPage() {
         </TabsContent>
 
         <TabsContent value="compressor" className="mt-6">
-          <PlaceholderTab
-            title="Compressor"
-            description="Em breve: cadastro de compressor com coeficientes ARI/AHRI e curvas."
-          />
+          <CompressorTab equipmentProjectId={project.id} />
         </TabsContent>
 
         <TabsContent value="fans" className="mt-6">
-          <PlaceholderTab
-            title="Ventiladores"
-            description="Em breve: seleção de ventilador a partir do banco fan_models e curvas de pressão x vazão."
-          />
+          <FansTab equipmentProjectId={project.id} />
         </TabsContent>
 
         <TabsContent value="valve" className="mt-6">
-          <PlaceholderTab
-            title="Válvula de expansão"
-            description="Em breve: dimensionamento de válvula termostática ou eletrônica."
-          />
+          <ValveTab equipmentProjectId={project.id} />
         </TabsContent>
 
         <TabsContent value="simulation" className="mt-6">
-          <PlaceholderTab
-            title="Sistema completo"
-            description="Solver de equilíbrio Qcond ≈ Qevap + Wcomp. Liberado após validar todos os componentes."
-          />
+          <SystemTab equipmentProjectId={project.id} />
         </TabsContent>
 
         <TabsContent value="catalog" className="mt-6">
-          <PlaceholderTab title="Catálogo" description="Em breve." />
+          <CatalogTab equipmentProjectId={project.id} />
         </TabsContent>
 
         <TabsContent value="history" className="mt-6">
-          <PlaceholderTab title="Histórico" description="Em breve." />
+          <HistoryTab equipmentProjectId={project.id} />
         </TabsContent>
       </Tabs>
     </div>
