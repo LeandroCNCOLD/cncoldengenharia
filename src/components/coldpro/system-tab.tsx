@@ -79,8 +79,12 @@ export function SystemTab({ equipmentProjectId }: Props) {
       if (compressor?.technical_component_id) {
         const comp = await resolveCompressorComponent(compressor.technical_component_id);
         warnings.push(...comp.warnings);
-        if (comp.data?.thermalcalc.systemCompressor) {
-          resolved.compressor = comp.data.thermalcalc.systemCompressor;
+        if (comp.data?.thermalcalc) {
+          resolved.compressor = {
+            vapcycModel: comp.data.thermalcalc.vapcycModel,
+            vapcycPolynomials: comp.data.thermalcalc.vapcycPolynomials,
+            warnings: comp.warnings,
+          };
         }
       }
       if (linkedEvap?.technical_component_id) {

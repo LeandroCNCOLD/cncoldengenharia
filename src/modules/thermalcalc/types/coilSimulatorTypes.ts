@@ -5,9 +5,17 @@
 
 export type CoilSimulatorMode = "verify" | "design";
 export type CoilType = "evaporator" | "condenser";
+export type CoilMode = CoilType;
 export type CoilOperatingMode = CoilType;
 
-export type FinType = "integral" | "espiral";
+export type FinType =
+  | "integral"
+  | "espiral"
+  | "plain"
+  | "wavy"
+  | "louver"
+  | "herringbone"
+  | "unknown";
 export type TubeArrangement = "staggered" | "aligned";
 
 export interface CoilGeometry {
@@ -84,7 +92,7 @@ export interface Coil {
   id: string;
   type: "coil";
   mode: CoilOperatingMode;
-  geometry: CoilGeometry;
+  geometry: import("@/modules/thermalcalc/engines/coil/internals/types").GeometryInput;
   air: AirSide;
   refrigerantSide: RefrigerantSide;
   datasheetReference?: DatasheetReference | null;
@@ -97,6 +105,11 @@ export interface Coil {
     refrigerantPressureDropFactor?: number;
     heatTransferFactor?: number;
   } | null;
+  technical?: {
+    factors?: import("@/modules/thermalcalc/engines/coil/internals/types").UnilabFactors;
+    unilabSource?: import("@/modules/thermalcalc/engines/coil/internals/types").UnilabSource;
+    warnings?: string[];
+  };
   label?: string;
   frostFactor?: number;
   foulingFactor?: number;

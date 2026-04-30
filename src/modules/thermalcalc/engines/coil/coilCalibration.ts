@@ -7,10 +7,10 @@
  */
 
 import type {
+  Coil,
   CoilSimulatorInput,
   CoilSimulatorResult,
 } from "@/modules/thermalcalc/types/coilSimulatorTypes";
-import type { Coil } from "@/modules/thermalcalc/types/coilSimulatorTypes";
 import { simulatePhysicalSimple } from "./physicalSimpleEngine";
 import {
   NEUTRAL_CALIBRATION,
@@ -92,8 +92,27 @@ export function calibrateCoilFromDatasheet(params: {
 }
 
 export function calibrateCoil(coil: Coil, datasheet: DatasheetPoint): CalibrationOutcome {
+  const input = {
+    mode: "verify" as const,
+    coilType: coil.mode,
+    label: coil.label,
+    geometry: coil.geometry,
+    air: coil.air,
+    refrigerant: coil.refrigerantSide,
+    nominal: coil.datasheetReference?.capacityW
+      ? {
+          capacityW: coil.datasheetReference.capacityW,
+          airTempInC: coil.air.airTempInC ?? coil.datasheetReference.airInletTempC ?? 0,
+          refTempC: coil.refrigerantSide.refTempC ?? 0,
+          airflowM3h: coil.air.airflowM3h ?? coil.datasheetReference.airflowM3h ?? 0,
+        }
+      : undefined,
+    frostFactor: coil.frostFactor,
+    foulingFactor: coil.foulingFactor,
+    altitudeFactor: coil.altitudeFactor,
+  } satisfies CoilSimulatorInput;
   return calibrateCoilFromDatasheet({
-    input: coil,
+    input,
     datasheet,
   });
 }

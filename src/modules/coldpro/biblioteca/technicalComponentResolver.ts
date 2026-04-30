@@ -7,6 +7,7 @@ import type {
   UnilabFactors,
   UnilabSource,
 } from "@/modules/thermalcalc/engines/coil/internals/types";
+import type { SystemResolvedCompressorData } from "@/modules/thermalcalc/engines/system/systemTypes";
 import type {
   VapcycCompressorRecord,
   VapcycCurveType,
@@ -14,15 +15,30 @@ import type {
 } from "@/modules/thermalcalc/engines/system/vapcycCompressorEngine";
 
 type TechnicalStatus =
+  | "raw_imported"
   | "approved"
   | "validated"
   | "mapped"
   | "needs_review"
   | "rejected"
+  | "unmapped"
   | "archived";
 
 const BLOCKED_STATUSES = new Set<string>(["rejected", "archived"]);
-const USABLE_STATUSES = ["approved", "validated", "mapped", "needs_review"];
+const USABLE_COMPONENT_STATUSES: Array<TechnicalComponent["status"]> = [
+  "approved",
+  "validated",
+  "mapped",
+  "needs_review",
+];
+const USABLE_APPROVAL_STATUSES: Array<Exclude<TechnicalStatus, "archived">> = [
+  "approved",
+  "validated",
+  "mapped",
+  "needs_review",
+];
+const USABLE_STATUSES = USABLE_APPROVAL_STATUSES;
+const USABLE_COMPONENT_STATUS_VALUES = USABLE_COMPONENT_STATUSES;
 
 interface ResolverBase<TKind extends string, TData> {
   kind: TKind;
@@ -155,6 +171,7 @@ export interface ResolvedCompressorData {
   thermalcalc: {
     vapcycModel: VapcycCompressorRecord;
     vapcycPolynomials: VapcycPolynomialRecord[];
+    systemCompressor: SystemResolvedCompressorData;
     compressorId: string;
     sourceTableKey: string | null;
   };
@@ -392,6 +409,11 @@ export async function resolveCompressorComponent(
       thermalcalc: {
         vapcycModel: model,
         vapcycPolynomials: polynomials,
+        systemCompressor: {
+          vapcycModel: model,
+          vapcycPolynomials: polynomials,
+          warnings,
+        },
         compressorId: model.id,
         sourceTableKey: model.source_table_key,
       },
@@ -628,7 +650,7 @@ function buildGeometry(
   return {
     ...fallback,
     code: code || fallback.code,
-    finType: normalizeFinType(geometry?.fin_type ?? factor?.description),
+    finType: normalizeFinType(geometry?.fin_type ?? legacyFactor?.description),
     tubeType: normalizeTubeType(geometry?.tube_type),
     tubeOuterDiameterMm: tubeOuter ?? fallback.tubeOuterDiameterMm,
     tubeInnerDiameterMm: tubeInner ?? fallback.tubeInnerDiameterMm,

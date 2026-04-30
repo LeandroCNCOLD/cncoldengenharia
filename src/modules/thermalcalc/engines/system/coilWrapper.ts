@@ -4,9 +4,11 @@ import { simulateHybridCoil } from "../coil/internals/hybridCoilEngine";
 import type { CoilCalculationInput } from "../coil/internals/types";
 import type {
   Coil,
+  CoilGeometry,
   CoilMode,
   CoilSimulatorResult,
 } from "@/modules/thermalcalc/types/coilSimulatorTypes";
+import type { GeometryInput } from "../coil/internals/types";
 import type { Refrigerant, SectionResult, SystemResolvedCoilData } from "./systemTypes";
 import { defaultGeometryFromCode } from "./systemGeometryDefaults";
 
@@ -23,6 +25,8 @@ export interface CoilRunInput {
   relativeHumidityPct?: number;
 }
 
+export type CoilSectionRunInput = CoilRunInput;
+
 function thermalModeFor(mode: CoilMode): CoilCalculationInput["mode"] {
   return mode === "condenser" ? "condensation" : "direct_expansion";
 }
@@ -35,11 +39,12 @@ export function buildCoil(input: CoilRunInput): Coil {
   const thermalMode = thermalModeFor(input.mode);
   const resolved = input.resolvedCoil;
   const rh = defaultHumidityFor(input.mode, input.relativeHumidityPct);
+  const geometry = resolved?.geometry ?? defaultGeometryFromCode(input.geometryCode, thermalMode);
   return {
-    id: input.id,
+    id: input.id ?? input.geometryCode,
     type: "coil",
     mode: input.mode,
-    geometry: resolved?.geometry ?? defaultGeometryFromCode(input.geometryCode, thermalMode),
+    geometry,
     air: {
       airflowM3h: input.airflowM3h,
       airTempInC: input.airInletTempC,
@@ -60,12 +65,44 @@ export function buildCoil(input: CoilRunInput): Coil {
   };
 }
 
+function toHybridGeometry(
+  geometry: CoilGeometry | GeometryInput,
+  mode: CoilCalculationInput["mode"],
+): GeometryInput {
+  const source = geometry as Partial<GeometryInput> & CoilGeometry;
+  return {
+    code: source.code ?? source.description ?? "COIL",
+    mode,
+    finType: source.finType ?? "unknown",
+    tubeType: source.tubeType ?? "unknown",
+    tubeOuterDiameterMm: source.tubeOuterDiameterMm ?? source.tubeOdMm ?? 9.52,
+    tubeInnerDiameterMm: source.tubeInnerDiameterMm ?? source.tubeIdMm ?? 8.92,
+    tubePitchMm: source.tubePitchMm ?? source.tubeSpacingMm ?? 25,
+    rowPitchMm: source.rowPitchMm ?? source.rowSpacingMm ?? 22,
+    finPitchMm: source.finPitchMm ?? 3,
+    finThicknessMm: source.finThicknessMm ?? 0.13,
+    coilLengthMm: source.coilLengthMm ?? 1000,
+    coilHeightMm:
+      source.coilHeightMm ??
+      (source.tubesPerRow ?? 12) * (source.tubePitchMm ?? source.tubeSpacingMm ?? 25),
+    coilDepthMm: source.coilDepthMm,
+    rows: source.rows ?? 3,
+    tubesPerRow: source.tubesPerRow ?? 12,
+    circuits: source.circuits ?? 4,
+    skippedTubes: source.skippedTubes,
+    tubeMaterialConductivityWmK: source.tubeMaterialConductivityWmK,
+    finMaterialConductivityWmK: source.finMaterialConductivityWmK,
+    unilabExchangeAreaM2: source.unilabExchangeAreaM2,
+    unilabInternalVolumeL: source.unilabInternalVolumeL,
+  };
+}
+
 export function simulateCoil(coil: Coil): SectionResult {
   const thermalMode = thermalModeFor(coil.mode);
   const rh = coil.air.rhInPct ?? defaultHumidityFor(coil.mode);
   const calcInput: CoilCalculationInput = {
     mode: thermalMode,
-    geometry: coil.geometry,
+    geometry: toHybridGeometry(coil.geometry, thermalMode),
     factors: coil.technical?.factors,
     unilabSource: coil.technical?.unilabSource,
     airInletTempC: coil.air.airTempInC ?? 0,
@@ -102,6 +139,8 @@ export function simulateCoilRun(input: CoilRunInput): SectionResult {
   return simulateCoil(buildCoil(input));
 }
 
+export const runCoilSection = simulateCoilRun;
+
 export function runCoilCollection(coils: Coil[]): SectionResult[] {
   return coils.map((coil) => simulateCoil(coil));
 }
@@ -137,22 +176,26 @@ function simulatorResultFromSection(coil: Coil, section: SectionResult): CoilSim
   };
 }
 
-export function calibrateCoil(coil: Coil): {
+export function calibrateCoil(
+  coil: Coil,
+  datasheet: Coil["datasheetReference"] = coil.datasheetReference,
+): {
   baseline: CoilSimulatorResult;
   calibrated: CoilSimulatorResult;
   factor: number;
   warnings: string[];
 } {
-  const missing = missingDatasheetFields(coil);
+  const coilWithDatasheet: Coil = { ...coil, datasheetReference: datasheet };
+  const missing = missingDatasheetFields(coilWithDatasheet);
   if (missing.length > 0) {
     throw new Error(`Calibração bloqueada: faltam ${missing.join(", ")}.`);
   }
 
-  const baselineSection = simulateCoil(coil);
-  const datasheetCapacity = coil.datasheetReference!.capacityW;
+  const baselineSection = simulateCoil(coilWithDatasheet);
+  const datasheetCapacity = coilWithDatasheet.datasheetReference!.capacityW ?? 0;
   const factor = baselineSection.capacityW > 0 ? datasheetCapacity / baselineSection.capacityW : 1;
   const calibratedCoil: Coil = {
-    ...coil,
+    ...coilWithDatasheet,
     calibration: {
       ...(coil.calibration ?? {}),
       heatTransferFactor: factor,
@@ -162,7 +205,7 @@ export function calibrateCoil(coil: Coil): {
   const calibratedSection = simulateCoil(calibratedCoil);
 
   return {
-    baseline: simulatorResultFromSection(coil, baselineSection),
+    baseline: simulatorResultFromSection(coilWithDatasheet, baselineSection),
     calibrated: simulatorResultFromSection(coil, calibratedSection),
     factor,
     warnings: calibratedSection.warnings,

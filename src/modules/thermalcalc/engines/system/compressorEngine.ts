@@ -4,7 +4,7 @@ import type {
   CompressorPolynomial,
   CompressorResult,
   Refrigerant,
-} from './systemTypes';
+} from "./systemTypes";
 
 /** Avalia polinômio de 10 coeficientes (Te, Tc em °C). */
 export function evalPolynomial(p: CompressorPolynomial, teC: number, tcC: number): number {
@@ -36,77 +36,53 @@ export function evalPolynomial(p: CompressorPolynomial, teC: number, tcC: number
  */
 const COMPRESSOR_LIBRARY: Record<string, CompressorModelData> = {
   // ===== R404A — média potência (LBP/MBP) =====
-  'GENERIC_R404A_2HP': {
-    model: 'GENERIC_R404A_2HP',
-    refrigerant: 'R404A',
+  GENERIC_R404A_2HP: {
+    model: "GENERIC_R404A_2HP",
+    refrigerant: "R404A",
     capacity: {
-      c: [
-        4200, 110, -55, 1.2, -0.8, 0.4,
-        0.005, -0.002, -0.002, 0.001,
-      ],
+      c: [4200, 110, -55, 1.2, -0.8, 0.4, 0.005, -0.002, -0.002, 0.001],
     },
     power: {
-      c: [
-        1100, 5, 22, 0.05, 0.15, 0.1,
-        0, 0, 0, 0,
-      ],
+      c: [1100, 5, 22, 0.05, 0.15, 0.1, 0, 0, 0, 0],
     },
     envelope: { teMinC: -35, teMaxC: 10, tcMinC: 25, tcMaxC: 60 },
     refSuperheatK: 10,
     refSubcoolingK: 0,
   },
-  'GENERIC_R404A_5HP': {
-    model: 'GENERIC_R404A_5HP',
-    refrigerant: 'R404A',
+  GENERIC_R404A_5HP: {
+    model: "GENERIC_R404A_5HP",
+    refrigerant: "R404A",
     capacity: {
-      c: [
-        10500, 275, -135, 3.0, -2.0, 1.0,
-        0.012, -0.005, -0.005, 0.0025,
-      ],
+      c: [10500, 275, -135, 3.0, -2.0, 1.0, 0.012, -0.005, -0.005, 0.0025],
     },
     power: {
-      c: [
-        2750, 12, 55, 0.12, 0.38, 0.25,
-        0, 0, 0, 0,
-      ],
+      c: [2750, 12, 55, 0.12, 0.38, 0.25, 0, 0, 0, 0],
     },
     envelope: { teMinC: -35, teMaxC: 10, tcMinC: 25, tcMaxC: 60 },
     refSuperheatK: 10,
   },
   // ===== R134a — alta temperatura (HBP) =====
-  'GENERIC_R134A_3HP': {
-    model: 'GENERIC_R134A_3HP',
-    refrigerant: 'R134a',
+  GENERIC_R134A_3HP: {
+    model: "GENERIC_R134A_3HP",
+    refrigerant: "R134a",
     capacity: {
-      c: [
-        6300, 165, -82, 1.8, -1.2, 0.6,
-        0.007, -0.003, -0.003, 0.0015,
-      ],
+      c: [6300, 165, -82, 1.8, -1.2, 0.6, 0.007, -0.003, -0.003, 0.0015],
     },
     power: {
-      c: [
-        1650, 7, 33, 0.07, 0.22, 0.15,
-        0, 0, 0, 0,
-      ],
+      c: [1650, 7, 33, 0.07, 0.22, 0.15, 0, 0, 0, 0],
     },
     envelope: { teMinC: -15, teMaxC: 15, tcMinC: 30, tcMaxC: 65 },
     refSuperheatK: 10,
   },
   // ===== R290 (propano) =====
-  'GENERIC_R290_2HP': {
-    model: 'GENERIC_R290_2HP',
-    refrigerant: 'R290',
+  GENERIC_R290_2HP: {
+    model: "GENERIC_R290_2HP",
+    refrigerant: "R290",
     capacity: {
-      c: [
-        4400, 115, -57, 1.25, -0.85, 0.42,
-        0.005, -0.002, -0.002, 0.001,
-      ],
+      c: [4400, 115, -57, 1.25, -0.85, 0.42, 0.005, -0.002, -0.002, 0.001],
     },
     power: {
-      c: [
-        1050, 5, 21, 0.05, 0.14, 0.095,
-        0, 0, 0, 0,
-      ],
+      c: [1050, 5, 21, 0.05, 0.14, 0.095, 0, 0, 0, 0],
     },
     envelope: { teMinC: -30, teMaxC: 10, tcMinC: 25, tcMaxC: 55 },
     refSuperheatK: 10,
@@ -161,12 +137,13 @@ export function runCompressor(input: CompressorRunInput): CompressorResult {
   const te = input.evaporatingTempC;
   const tc = input.condensingTempC;
 
+  const envelope = data.envelope;
   const inEnvelope =
-    !data.envelope ||
-    (te >= data.envelope.teMinC &&
-      te <= data.envelope.teMaxC &&
-      tc >= data.envelope.tcMinC &&
-      tc <= data.envelope.tcMaxC);
+    !envelope ||
+    ((envelope.teMinC == null || te >= envelope.teMinC) &&
+      (envelope.teMaxC == null || te <= envelope.teMaxC) &&
+      (envelope.tcMinC == null || tc >= envelope.tcMinC) &&
+      (envelope.tcMaxC == null || tc <= envelope.tcMaxC));
   if (!inEnvelope) {
     warnings.push(
       `Te=${te.toFixed(1)}°C / Tc=${tc.toFixed(1)}°C fora do envelope ${JSON.stringify(data.envelope)}.`,

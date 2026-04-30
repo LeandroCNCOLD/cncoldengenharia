@@ -20,8 +20,9 @@ import type {
   SystemInput,
   SystemResult,
 } from "./systemTypes";
-import { evalPolynomial, runCompressor } from "./compressorEngine";
-import { simulateCoil } from "./coilWrapper";
+import { runCompressor } from "./compressorEngine";
+import { evaluateCompressor } from "./vapcycCompressorEngine";
+import { runCoilSection } from "./coilWrapper";
 import { runExpansionDevice } from "./expansionDeviceEngine";
 
 function clamp(v: number, lo: number, hi: number): number {
@@ -45,35 +46,15 @@ function runResolvedCompressor(input: SystemInput, te: number, tc: number): Comp
   }
 
   const warnings: string[] = [...(resolved.warnings ?? [])];
-  const capacity = resolved.capacityPolynomial;
-  const power = resolved.powerPolynomial;
-  const capacityW = capacity ? Math.max(0, evalPolynomial(capacity, te, tc)) : 0;
-  const powerW = power ? Math.max(1, evalPolynomial(power, te, tc)) : 0;
-
-  if (!capacity) warnings.push("Compressor resolvido sem polinômio de capacidade.");
-  if (!power) warnings.push("Compressor resolvido sem polinômio de potência.");
-
-  const envelope = resolved.envelope;
-  const inEnvelope =
-    !envelope ||
-    ((envelope.teMinC == null || te >= envelope.teMinC) &&
-      (envelope.teMaxC == null || te <= envelope.teMaxC) &&
-      (envelope.tcMinC == null || tc >= envelope.tcMinC) &&
-      (envelope.tcMaxC == null || tc <= envelope.tcMaxC));
-
-  if (!inEnvelope) {
-    warnings.push(`Te=${te.toFixed(1)}°C / Tc=${tc.toFixed(1)}°C fora do envelope resolvido.`);
-  }
-
-  const hLat = resolved.latentHeatJkg ?? 180_000;
+  const result = evaluateCompressor(resolved.vapcycModel, resolved.vapcycPolynomials, te, tc);
   return {
-    model: resolved.model,
-    refrigerant: resolved.refrigerant,
-    qCompW: capacityW,
-    powerW,
-    massFlowKgh: resolved.massFlowPolynomial ? 0 : (capacityW / hLat) * 3600,
-    inEnvelope,
-    warnings,
+    model: result.model,
+    refrigerant: result.refrigerant,
+    qCompW: result.capacityW,
+    powerW: result.powerW,
+    massFlowKgh: result.massFlowKgh,
+    inEnvelope: result.inEnvelope,
+    warnings: [...warnings, ...result.warnings, ...result.envelopeWarnings],
   };
 }
 
@@ -130,7 +111,7 @@ export function simulateSystem(input: SystemInput): SystemResult {
       compressorMassFlowKgh: comp.massFlowKgh,
     });
 
-    evap = simulateCoil({
+    evap = runCoilSection({
       mode: "evaporator",
       geometryCode: input.evaporatorGeometryCode,
       refrigerant: input.refrigerant,
@@ -142,7 +123,7 @@ export function simulateSystem(input: SystemInput): SystemResult {
       resolvedCoil: input.resolvedTechnicalData?.evaporatorCoil,
     });
 
-    cond = simulateCoil({
+    cond = runCoilSection({
       mode: "condenser",
       geometryCode: input.condenserGeometryCode,
       refrigerant: input.refrigerant,

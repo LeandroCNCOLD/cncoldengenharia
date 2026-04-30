@@ -16,8 +16,9 @@ export type {
   VapcycCurveType,
 } from "./vapcycCompressorEngine";
 
-export { runCoilCollection, runCoilSection, simulateCoil } from "./coilWrapper";
-export type { Coil, CoilMode, CoilSectionRunInput } from "./coilWrapper";
+export { runCoilCollection, runCoilSection, simulateCoil, simulateCoilRun } from "./coilWrapper";
+export type { Coil, CoilMode } from "@/modules/thermalcalc/types/coilSimulatorTypes";
+export type { CoilRunInput } from "./coilWrapper";
 export { runExpansionDevice } from "./expansionDeviceEngine";
 export { defaultGeometryFromCode } from "./systemGeometryDefaults";
 
@@ -29,4 +30,5 @@ export type {
   CompressorModelData,
   Bottleneck,
   Refrigerant,
+  SystemResolvedTechnicalData,
 } from "./systemTypes";
