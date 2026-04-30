@@ -35,9 +35,7 @@ function StatBlock({
   return (
     <Card>
       <CardContent className="p-5">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {title}
-        </p>
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</p>
         <p className="mt-2 text-2xl font-semibold">{count ?? "—"}</p>
         <p className="mt-1 text-xs text-muted-foreground">registros</p>
       </CardContent>
@@ -72,8 +70,11 @@ function TechBankPage() {
           <StatBlock title="Geometrias Unilab" table="unilab_geometries" />
           <Card>
             <CardContent className="p-5 text-sm text-muted-foreground">
-              Use a tela <Link to="/admin/database/$mode" params={{ mode: 'cooling' }} className="underline">Banco de Dados → modo</Link> para inspecionar
-              registros por modo (cooling, heating etc.).
+              Use a tela{" "}
+              <Link to="/admin/database/$mode" params={{ mode: "cooling" }} className="underline">
+                Banco de Dados → modo
+              </Link>{" "}
+              para inspecionar registros por modo (cooling, heating etc.).
             </CardContent>
           </Card>
         </TabsContent>

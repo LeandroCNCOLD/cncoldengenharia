@@ -48,7 +48,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Projetos", to: "/coldpro/projetos", icon: FolderKanban },
   { label: "Equipamentos", to: "/coldpro/equipamentos", icon: Boxes },
   { label: "Catálogo Técnico", to: "/coldpro/catalogo", icon: BookOpen },
-  { label: "Administração", to: "/admin", icon: Settings, adminOnly: true },
+  { label: "Administração", to: "/admin/coldpro-import", icon: Settings, adminOnly: true },
   { label: "Importar Unilab", to: "/admin/unilab-import", icon: Upload, adminOnly: true },
   { label: "Banco Técnico", to: "/coldpro/admin/banco-tecnico", icon: Database, adminOnly: true },
   {
@@ -98,9 +98,7 @@ export function AppSidebar() {
               <div key={item.to}>
                 <button
                   type="button"
-                  onClick={() =>
-                    setOpenGroups((prev) => ({ ...prev, [item.to]: !isOpen }))
-                  }
+                  onClick={() => setOpenGroups((prev) => ({ ...prev, [item.to]: !isOpen }))}
                   className={cn(
                     "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
                     active
