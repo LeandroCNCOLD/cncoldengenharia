@@ -22,13 +22,8 @@ import { CompressorTab } from "@/components/coldpro/compressor-tab";
 import { FansTab } from "@/components/coldpro/fans-tab";
 import { ValveTab } from "@/components/coldpro/valve-tab";
 import { SystemTab } from "@/components/coldpro/system-tab";
-import { CatalogTab } from "@/components/coldpro/catalog-tab";
-import { CatalogComparePanel } from "@/components/coldpro/catalog-compare-panel";
-import { CnSuggestionsTab } from "@/components/coldpro/cn-suggestions-tab";
 import { HistoryTab } from "@/components/coldpro/history-tab";
-import { AutoFillFromCnCatalogPrompt } from "@/components/coldpro/auto-fill-from-cn-catalog-prompt";
 import { EquipmentReadinessPanel } from "@/components/coldpro/equipment-readiness-panel";
-import { Cn480OriginCard } from "@/components/coldpro/cn480-origin-card";
 
 export const Route = createFileRoute("/_app/coldpro/equipamentos/$id")({
   component: EquipmentDetailPage,
