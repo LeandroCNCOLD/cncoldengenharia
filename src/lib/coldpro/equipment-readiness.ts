@@ -11,6 +11,8 @@ export interface EquipmentReadiness {
   hasEvapFan: boolean;
   hasCondFan: boolean;
   hasRefrigerant: boolean;
+  hasCondenserGeometry: boolean;
+  hasRefrigerantLinked: boolean;
   canSimulateEvaporator: boolean;
   canSimulateCondenser: boolean;
   canSimulateSystem: boolean;
@@ -54,21 +56,36 @@ async function hasEvaporatorModel(componentId: string | undefined): Promise<bool
   );
 }
 
-async function hasCondenserModel(componentId: string | undefined): Promise<boolean> {
-  if (!componentId) return false;
+async function getCondenserModelReadiness(componentId: string | undefined): Promise<{
+  hasGeometry: boolean;
+  canSimulate: boolean;
+}> {
+  if (!componentId) return { hasGeometry: false, canSimulate: false };
   const { data } = await supabase
     .from("condenser_coil_models")
     .select(
-      "component_item_id, nominal_capacity_w, nominal_airflow_m3h, nominal_cond_temp_c, refrigerant",
+      "component_item_id, nominal_capacity_w, nominal_airflow_m3h, nominal_cond_temp_c, refrigerant, tubes_per_row, rows, circuits, fin_pitch_mm, tube_od_mm, length_mm",
     )
     .eq("component_item_id", componentId)
     .maybeSingle();
-  return Boolean(
-    data?.nominal_capacity_w &&
-    data.nominal_airflow_m3h &&
-    data.nominal_cond_temp_c != null &&
-    data.refrigerant,
+  const hasGeometry = Boolean(
+    data &&
+    data.tubes_per_row &&
+    data.rows &&
+    data.circuits &&
+    data.fin_pitch_mm &&
+    data.tube_od_mm &&
+    data.length_mm,
   );
+  return {
+    hasGeometry,
+    canSimulate: Boolean(
+      hasGeometry &&
+      data?.nominal_airflow_m3h &&
+      data.nominal_cond_temp_c != null &&
+      data.refrigerant,
+    ),
+  };
 }
 
 export async function getEquipmentReadiness(
@@ -96,19 +113,23 @@ export async function getEquipmentReadiness(
   const hasCompressor = roles.has("compressor");
   const hasEvapFan = roles.has("fan_evaporator");
   const hasCondFan = roles.has("fan_condenser");
-  const hasRefrigerant = roles.has("fluid");
+  const hasRefrigerant = roles.has("fluid") || (roles as Set<string>).has("refrigerant");
+  const hasRefrigerantLinked = hasRefrigerant;
+  const condenserModel = await getCondenserModelReadiness(condenser?.id);
   const canSimulateEvaporator =
     hasEvaporator &&
     hasUsableStatus(evaporator?.status) &&
     (await hasEvaporatorModel(evaporator?.id));
   const canSimulateCondenser =
-    hasCondenser && hasUsableStatus(condenser?.status) && (await hasCondenserModel(condenser?.id));
+    hasCondenser && hasUsableStatus(condenser?.status) && condenserModel.canSimulate;
 
   const missingFields: string[] = [];
   if (!hasEvaporator) missingFields.push("evaporator component_item");
   if (hasEvaporator && !canSimulateEvaporator) missingFields.push("evaporator_coil_model completo");
   if (!hasCondenser) missingFields.push("condenser component_item");
-  if (hasCondenser && !canSimulateCondenser) missingFields.push("condenser_coil_model completo");
+  if (hasCondenser && !condenserModel.hasGeometry) missingFields.push("geometria do condensador");
+  if (hasCondenser && condenserModel.hasGeometry && !canSimulateCondenser)
+    missingFields.push("campos operacionais do condensador");
   if (!hasCompressor) missingFields.push("compressor sugerido");
   if (!hasEvapFan) missingFields.push("ventilador do evaporador");
   if (!hasCondFan) missingFields.push("ventilador do condensador");
@@ -122,6 +143,8 @@ export async function getEquipmentReadiness(
     hasEvapFan,
     hasCondFan,
     hasRefrigerant,
+    hasCondenserGeometry: condenserModel.hasGeometry,
+    hasRefrigerantLinked,
     canSimulateEvaporator,
     canSimulateCondenser,
     canSimulateSystem:
@@ -144,6 +167,8 @@ export async function getEquipmentReadiness(
     hasEvapFan,
     hasCondFan,
     hasRefrigerant,
+    hasCondenserGeometry: condenserModel.hasGeometry,
+    hasRefrigerantLinked,
     canSimulateEvaporator,
     canSimulateCondenser,
     canSimulateSystem:

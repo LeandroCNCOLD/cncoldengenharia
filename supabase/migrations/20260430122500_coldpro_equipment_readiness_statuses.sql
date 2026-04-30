@@ -10,3 +10,5 @@ ALTER TYPE public.equipment_project_status ADD VALUE IF NOT EXISTS 'simulated';
 ALTER TYPE public.equipment_project_status ADD VALUE IF NOT EXISTS 'needs_review';
 
 ALTER TYPE public.component_status ADD VALUE IF NOT EXISTS 'needs_mapping';
+
+ALTER TYPE public.equipment_component_role ADD VALUE IF NOT EXISTS 'refrigerant';
