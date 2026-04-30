@@ -452,13 +452,17 @@ export function UnilabCoilFormPanel({
     return ((result.capacityW - refW) / refW) * 100;
   }, [result, cnPoint, referenceCapacityW]);
 
-  // Reaplica defaults razoáveis quando o tipo muda
+  // Reaplica defaults razoáveis quando o tipo muda; se já há modelo CN carregado,
+  // reaproveita a geometria do outro lado (evap ↔ cond) sem precisar recarregar.
   const handleCoilKindChange = (k: CoilKind) => {
     setCoilKind(k);
     onCoilKindChange?.(k);
     setAir((s) => ({ ...s, airTempInC: k === "evaporator" ? "0" : "35" }));
     setRef((s) => ({ ...s, refTempC: k === "evaporator" ? "-10" : "48" }));
     setResult(null);
+    if (cnAutoPointEager) {
+      autoAppliedKey.current = null; // força reapply pro novo lado
+    }
   };
 
   return (
