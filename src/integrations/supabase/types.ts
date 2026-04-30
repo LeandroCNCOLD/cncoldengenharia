@@ -997,6 +997,42 @@ export type Database = {
           },
         ]
       }
+      equipment_component_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          equipment_project_id: string
+          id: string
+          notes: string | null
+          quantity: number
+          role: Database["public"]["Enums"]["equipment_component_role"]
+          technical_component_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          equipment_project_id: string
+          id?: string
+          notes?: string | null
+          quantity?: number
+          role: Database["public"]["Enums"]["equipment_component_role"]
+          technical_component_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          equipment_project_id?: string
+          id?: string
+          notes?: string | null
+          quantity?: number
+          role?: Database["public"]["Enums"]["equipment_component_role"]
+          technical_component_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       equipment_projects: {
         Row: {
           application: Database["public"]["Enums"]["equipment_application"]
@@ -2351,6 +2387,15 @@ export type Database = {
         | "processo_industrial"
         | "climatizacao_industrial"
         | "outro"
+      equipment_component_role:
+        | "evaporator"
+        | "condenser"
+        | "compressor"
+        | "fan_evaporator"
+        | "fan_condenser"
+        | "valve"
+        | "fluid"
+        | "other"
       equipment_kind:
         | "plugin"
         | "split"
@@ -2569,6 +2614,16 @@ export const Constants = {
         "processo_industrial",
         "climatizacao_industrial",
         "outro",
+      ],
+      equipment_component_role: [
+        "evaporator",
+        "condenser",
+        "compressor",
+        "fan_evaporator",
+        "fan_condenser",
+        "valve",
+        "fluid",
+        "other",
       ],
       equipment_kind: [
         "plugin",
