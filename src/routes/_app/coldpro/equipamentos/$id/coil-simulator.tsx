@@ -1037,6 +1037,107 @@ function CoilSimulatorPage() {
             </CardContent>
           </Card>
         </TabsContent>
+        <TabsContent value="save" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wand2 className="h-4 w-4" /> Salvar como componente
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!result ? (
+                <Alert>
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Calcule a simulação primeiro</AlertTitle>
+                  <AlertDescription>Rode o cálculo na aba Resultados antes de salvar como componente.</AlertDescription>
+                </Alert>
+              ) : (
+                <>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <Label className="text-xs">Status do componente</Label>
+                      <Select value={saveStatus} onValueChange={(v) => setSaveStatus(v as "draft" | "validated")}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft">Rascunho</SelectItem>
+                          <SelectItem value="validated">Validado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Modelo / nome</Label>
+                      <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Ex.: EVAP-CN-300x4f" />
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 rounded-md border p-3">
+                    <Checkbox
+                      id="pubLib"
+                      checked={saveAlsoToLibrary}
+                      onCheckedChange={(v) => setSaveAlsoToLibrary(v === true)}
+                    />
+                    <div className="flex-1 space-y-2">
+                      <Label htmlFor="pubLib" className="cursor-pointer">
+                        Também publicar na Biblioteca Técnica
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Cria um <code>technical_component</code> reutilizável (entity_type ={" "}
+                        <code>{coilType === "evaporator" ? "evaporator_coil" : "condenser_coil"}</code>).
+                      </p>
+                      {saveAlsoToLibrary && (
+                        <div className="max-w-xs">
+                          <Label className="text-xs">Contexto</Label>
+                          <Select
+                            value={saveLibraryContext}
+                            onValueChange={(v) => setSaveLibraryContext(v as "reference" | "cn_standard")}
+                          >
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="reference">Referência</SelectItem>
+                              <SelectItem value="cn_standard">Padrão CN COLD</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    disabled={saveAsComponentMutation.isPending}
+                    onClick={() => saveAsComponentMutation.mutate()}
+                  >
+                    <Save className="mr-1 h-4 w-4" /> Salvar como componente
+                  </Button>
+                  {savedComponentId && (
+                    <Alert>
+                      <CheckCircle2Icon />
+                      <AlertTitle>Componente salvo</AlertTitle>
+                      <AlertDescription className="font-mono text-xs">{savedComponentId}</AlertDescription>
+                    </Alert>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="perfmap" className="mt-4">
+          {!effectiveComponentId ? (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Salve o aletado antes de gerar mapa de desempenho</AlertTitle>
+              <AlertDescription>
+                Vá para a aba <strong>Salvar componente</strong> e grave-o. O mapa precisa de um{" "}
+                <code>component_item_id</code> para ser persistido.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <PerformanceMapPanel
+              componentItemId={effectiveComponentId}
+              equipmentProjectId={id}
+              coilType={coilType}
+              simulationInput={lastInput}
+            />
+          )}
+        </TabsContent>
       </Tabs>
     </div>
   );
