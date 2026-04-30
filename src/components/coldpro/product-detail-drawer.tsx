@@ -168,6 +168,18 @@ export function ProductDetailDrawer({ product, onOpenChange }: Props) {
           )}
 
           <div className="flex flex-col gap-2 border-t border-border pt-4">
+            <Button
+              variant="secondary"
+              onClick={() => ensureMutation.mutate()}
+              disabled={ensureMutation.isPending}
+            >
+              {ensureMutation.isPending ? (
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+              ) : (
+                <Wrench className="mr-1 h-4 w-4" />
+              )}
+              Abrir ferramentas de análise
+            </Button>
             {!isApproved && !isArchived && (
               <Button onClick={() => approveMutation.mutate()} disabled={approveMutation.isPending}>
                 {approveMutation.isPending ? (
