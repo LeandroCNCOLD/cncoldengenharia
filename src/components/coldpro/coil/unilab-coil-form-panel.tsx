@@ -48,6 +48,22 @@ import {
 
 type CoilKind = "evaporator" | "condenser";
 
+type UnilabGeometryState = {
+  tubesPerRow: string;
+  rows: string;
+  coilLengthMm: string;
+  circuits: string;
+  finPitchMm: string;
+  skippedTubes: string;
+  tubeOdMm: string;
+  tubeWallMm: string;
+  tubeMaterialId: string;
+  finMaterialId: string;
+  tubePitchMm: string;
+  rowPitchMm: string;
+  finThicknessMm: string;
+};
+
 interface Props {
   equipmentCode?: string | null;
   equipmentCommercialName?: string | null;
@@ -552,7 +568,7 @@ function toLegacyInput(
   input: CoilCalculationInput,
   label: string | undefined,
   coilType: CoilKind,
-  geo: ReturnType<typeof useUnilabGeometrySnapshot>,
+  geo: UnilabGeometryState,
   air: { airflowM3h: string; airTempInC: string; rhInPct: string },
   ref: { refrigerant: string; refTempC: string; superheatK: string; subcoolingK: string },
   tubeMaterial?: string,
@@ -611,24 +627,6 @@ function toLegacyResult(r: CoilCalculationResult, coilType: CoilKind): CoilSimul
     refPressureDropKpa: r.refrigerantPressureDropKpa,
     condensateLh: null,
     warnings: r.warnings,
-  };
-}
-
-function useUnilabGeometrySnapshot() {
-  return {
-    tubesPerRow: "",
-    rows: "",
-    coilLengthMm: "",
-    circuits: "",
-    finPitchMm: "",
-    skippedTubes: "",
-    tubeOdMm: "",
-    tubeWallMm: "",
-    tubeMaterialId: "",
-    finMaterialId: "",
-    tubePitchMm: "",
-    rowPitchMm: "",
-    finThicknessMm: "",
   };
 }
 
