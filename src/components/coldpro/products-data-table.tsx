@@ -119,6 +119,12 @@ export function ProductsDataTable({ rows, onRowClick }: Props) {
                   <TableCell className="text-muted-foreground">{r.linha ?? "—"}</TableCell>
                   <TableCell className="text-muted-foreground">{r.hp ?? "—"}</TableCell>
                   <TableCell className="text-muted-foreground">{r.refrigerante ?? "—"}</TableCell>
+                  <TableCell className="text-right tabular-nums text-foreground">
+                    {formatCapacity(r.capacity_w)}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums text-foreground">
+                    {formatTemp(r.tevap_c)}
+                  </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={statusMeta.className}>
                       {statusMeta.label}
@@ -150,23 +156,40 @@ export function ProductsDataTable({ rows, onRowClick }: Props) {
   );
 }
 
+function formatCapacity(w: number | null): string {
+  if (w == null || !Number.isFinite(w)) return "—";
+  if (Math.abs(w) >= 1000) return `${(w / 1000).toFixed(1)} kW`;
+  return `${Math.round(w)} W`;
+}
+
+function formatTemp(c: number | null): string {
+  if (c == null || !Number.isFinite(c)) return "—";
+  return `${c.toFixed(1)} °C`;
+}
+
 export function buildUnifiedRows(args: {
   products: ProductCardData[];
   curvesByModel: Record<string, number>;
+  nominalByModel: Record<string, { capacity_w: number | null; tevap_c: number | null }>;
   cn480: Cn480ListItem[];
 }): UnifiedRow[] {
-  const kanban: UnifiedRow[] = args.products.map((p) => ({
-    origin: "kanban",
-    id: p.id,
-    modelo: p.catalog_model,
-    linha: p.linha,
-    hp: p.hp,
-    refrigerante: p.refrigerante,
-    status: p.status,
-    curveCount: args.curvesByModel[p.catalog_model] ?? 0,
-    equipmentProjectId: p.equipment_project_id,
-    raw: p,
-  }));
+  const kanban: UnifiedRow[] = args.products.map((p) => {
+    const nom = args.nominalByModel[p.catalog_model];
+    return {
+      origin: "kanban",
+      id: p.id,
+      modelo: p.catalog_model,
+      linha: p.linha,
+      hp: p.hp,
+      refrigerante: p.refrigerante,
+      status: p.status,
+      curveCount: args.curvesByModel[p.catalog_model] ?? 0,
+      equipmentProjectId: p.equipment_project_id,
+      capacity_w: nom?.capacity_w ?? null,
+      tevap_c: nom?.tevap_c ?? null,
+      raw: p,
+    };
+  });
   const kanbanModels = new Set(kanban.map((k) => k.modelo));
   const cn480Rows: UnifiedRow[] = args.cn480
     .filter((c) => !kanbanModels.has(c.modelo))
@@ -180,6 +203,8 @@ export function buildUnifiedRows(args: {
       status: c.status,
       curveCount: c.perf_points,
       equipmentProjectId: null,
+      capacity_w: c.nominal_capacity_w,
+      tevap_c: c.nominal_tevap_c,
       raw: c,
     }));
   return [...kanban, ...cn480Rows];
