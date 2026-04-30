@@ -433,6 +433,17 @@ const ALIASES = {
   evapRows: ["MODELO EVAPORADOR (Circuito pincipal)"],
   evapCircuits: ["MODELO EVAPORADOR (Circuito pincipal)"],
   evapFinSpacing: ["MODELO EVAPORADOR (Circuito pincipal)"],
+  evapLength: [
+    "length_mm",
+    "comprimento_mm",
+    "comprimento",
+    "length",
+    "comprimento_aletado",
+    "comprimento_trocador",
+    "evap_length_mm",
+    "MODELO EVAPORADOR (Circuito pincipal)",
+    "MODELO EVAPORADOR",
+  ],
   evapAirflow: ["VAZÃO VENTILADOR EVAPORADOR (m³/h)", "VAZAO VENTILADOR EVAPORADOR"],
   evapVolume: ["VOLUME INTERNO EVAPORADOR [dm³ = L]", "VOLUME INTERNO EVAPORADOR"],
   evapArea: [
@@ -447,8 +458,31 @@ const ALIASES = {
   condRows: ["MODELO CONDENSADOR"],
   condCircuits: ["MODELO CONDENSADOR"],
   condFinSpacing: ["MODELO CONDENSADOR"],
+  condLength: [
+    "length_mm",
+    "comprimento_mm",
+    "comprimento",
+    "length",
+    "comprimento_aletado",
+    "comprimento_trocador",
+    "cond_length_mm",
+    "MODELO CONDENSADOR",
+  ],
   condAirflow: ["VAZÃO VENTILADOR CONDENSADOR (m³/h)", "VAZAO VENTILADOR CONDENSADOR"],
   condVolume: ["VOLUME INTERNO CONDENSADOR [dm³ = L]", "VOLUME INTERNO CONDENSADOR"],
+  reheatDescription: ["reheat", "reaquecimento", "coil_description", "description", "descricao"],
+  reheatLength: [
+    "length_mm",
+    "comprimento_mm",
+    "comprimento",
+    "length",
+    "comprimento_aletado",
+    "comprimento_trocador",
+    "reheat_length_mm",
+    "reheat",
+    "reaquecimento",
+    "coil_description",
+  ],
   compressor: ["COMPRESSOR", "COMPRESSOR_CODIGO"],
   copeland: ["COMPRESSOR", "COMPRESSOR_CODIGO"],
   bitzer: ["COMPRESSOR", "COMPRESSOR_CODIGO"],
@@ -473,6 +507,64 @@ const ALIASES = {
   cop: ["COP (kW/kW)", "COP global (kW/kW)"],
   airflow: ["VAZÃO VENTILADOR EVAPORADOR (m³/h)", "VAZÃO VENTILADOR CONDENSADOR (m³/h)"],
 } as const;
+
+export function parseLengthMm(raw: Record<string, unknown>): number | null {
+  const directValue = getRawValue(raw, [
+    "length_mm",
+    "comprimento_mm",
+    "comprimento",
+    "length",
+    "comprimento_aletado",
+    "comprimento_trocador",
+    "evap_length_mm",
+    "cond_length_mm",
+    "reheat_length_mm",
+  ]);
+
+  if (directValue) {
+    const parsed = Number(
+      String(directValue)
+        .replace(",", ".")
+        .replace(/[^\d.]/g, ""),
+    );
+    if (Number.isFinite(parsed) && parsed > 300) return parsed;
+  }
+
+  const description = String(
+    getRawValue(raw, [
+      "description",
+      "descricao",
+      "evaporador",
+      "condensador",
+      "reheat",
+      "coil_description",
+    ]) || "",
+  );
+
+  const matches = [...description.matchAll(/(\d+(?:[.,]\d+)?)\s*mm/gi)]
+    .map((match) => Number(match[1].replace(",", ".")))
+    .filter((value) => Number.isFinite(value));
+
+  const likely = matches.filter((value) => value > 300);
+
+  if (likely.length > 0) {
+    return Math.max(...likely);
+  }
+
+  return null;
+}
+
+function parseLengthFromAliases(
+  raw: Record<string, unknown>,
+  aliases: readonly string[],
+): number | null {
+  const rawValue = getRawValue(raw, aliases);
+  if (rawValue) {
+    const parsed = parseLengthMm({ length_mm: rawValue });
+    if (parsed != null) return parsed;
+  }
+  return parseLengthMm(raw);
+}
 
 function parseCoilModelField(value: unknown): {
   rows: number | null;
@@ -635,6 +727,7 @@ export async function mergeCnCatalogs() {
       .insert({
         model_id: master.id,
         geometry: stringValue(getRawValue(chosen, ALIASES.evapGeometry)),
+        length_mm: parseLengthFromAliases(chosen, ALIASES.evapLength),
         tube_diameter: numberValue(getRawValue(chosen, ALIASES.evapTubeDiameter)),
         tube_thickness: numberValue(getRawValue(chosen, ALIASES.evapTubeThickness)),
         tubes_per_row: parseGeometryCount(getRawValue(chosen, ALIASES.evapModel), "tubesPerRow"),
@@ -652,6 +745,7 @@ export async function mergeCnCatalogs() {
       .insert({
         model_id: master.id,
         geometry: stringValue(getRawValue(chosen, ALIASES.condGeometry)),
+        length_mm: parseLengthFromAliases(chosen, ALIASES.condLength),
         tube_diameter: numberValue(getRawValue(chosen, ALIASES.condTubeDiameter)),
         tube_thickness: numberValue(getRawValue(chosen, ALIASES.condTubeThickness)),
         tubes_per_row: parseGeometryCount(getRawValue(chosen, ALIASES.condModel), "tubesPerRow"),

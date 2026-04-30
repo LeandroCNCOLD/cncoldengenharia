@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS public.cn_equipment_evaporator_master (
   rows numeric,
   circuits numeric,
   fin_spacing numeric,
+  length_mm numeric,
   airflow numeric,
   internal_volume numeric,
   exchange_area numeric,
@@ -77,10 +78,21 @@ CREATE TABLE IF NOT EXISTS public.cn_equipment_condenser_master (
   rows numeric,
   circuits numeric,
   fin_spacing numeric,
+  length_mm numeric,
   airflow numeric,
   internal_volume numeric,
   source_priority integer NOT NULL DEFAULT 999,
   raw_json jsonb NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE TABLE IF NOT EXISTS public.cn_equipment_reheat_master (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  model_id uuid NOT NULL REFERENCES public.cn_equipment_master(id) ON DELETE CASCADE,
+  enabled boolean NOT NULL DEFAULT false,
+  geometry text,
+  length_mm numeric,
+  raw_json jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS public.cn_equipment_compressor_master (
@@ -121,6 +133,7 @@ ALTER TABLE public.cn_equipment_evaporator_master ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cn_equipment_condenser_master ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cn_equipment_compressor_master ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cn_equipment_performance_master ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cn_equipment_reheat_master ENABLE ROW LEVEL SECURITY;
 
 DO $$ BEGIN
   CREATE POLICY "CN catalog read batches" ON public.cn_catalog_import_batches FOR SELECT TO authenticated USING (true);
@@ -135,6 +148,8 @@ DO $$ BEGIN
   CREATE POLICY "CN evap master write" ON public.cn_equipment_evaporator_master FOR ALL TO authenticated USING (true) WITH CHECK (true);
   CREATE POLICY "CN cond master read" ON public.cn_equipment_condenser_master FOR SELECT TO authenticated USING (true);
   CREATE POLICY "CN cond master write" ON public.cn_equipment_condenser_master FOR ALL TO authenticated USING (true) WITH CHECK (true);
+  CREATE POLICY "CN reheat master read" ON public.cn_equipment_reheat_master FOR SELECT TO authenticated USING (true);
+  CREATE POLICY "CN reheat master write" ON public.cn_equipment_reheat_master FOR ALL TO authenticated USING (true) WITH CHECK (true);
   CREATE POLICY "CN comp master read" ON public.cn_equipment_compressor_master FOR SELECT TO authenticated USING (true);
   CREATE POLICY "CN comp master write" ON public.cn_equipment_compressor_master FOR ALL TO authenticated USING (true) WITH CHECK (true);
   CREATE POLICY "CN perf master read" ON public.cn_equipment_performance_master FOR SELECT TO authenticated USING (true);

@@ -39,21 +39,29 @@ function hasUsableStatus(status: string | null | undefined) {
   return status === "validated" || status === "approved" || status === "simulated";
 }
 
-async function hasEvaporatorModel(componentId: string | undefined): Promise<boolean> {
-  if (!componentId) return false;
+async function getEvaporatorModelReadiness(componentId: string | undefined): Promise<{
+  hasLength: boolean;
+  canSimulate: boolean;
+}> {
+  if (!componentId) return { hasLength: false, canSimulate: false };
   const { data } = await supabase
     .from("evaporator_coil_models")
     .select(
-      "component_item_id, nominal_capacity_w, nominal_airflow_m3h, nominal_evap_temp_c, refrigerant",
+      "component_item_id, nominal_capacity_w, nominal_airflow_m3h, nominal_evap_temp_c, refrigerant, length_mm",
     )
     .eq("component_item_id", componentId)
     .maybeSingle();
-  return Boolean(
-    data?.nominal_capacity_w &&
-    data.nominal_airflow_m3h &&
-    data.nominal_evap_temp_c != null &&
-    data.refrigerant,
-  );
+  const hasLength = Boolean(data?.length_mm);
+  return {
+    hasLength,
+    canSimulate: Boolean(
+      hasLength &&
+      data?.nominal_capacity_w &&
+      data.nominal_airflow_m3h &&
+      data.nominal_evap_temp_c != null &&
+      data.refrigerant,
+    ),
+  };
 }
 
 async function getCondenserModelReadiness(componentId: string | undefined): Promise<{
@@ -115,19 +123,22 @@ export async function getEquipmentReadiness(
   const hasCondFan = roles.has("fan_condenser");
   const hasRefrigerant = roles.has("fluid") || (roles as Set<string>).has("refrigerant");
   const hasRefrigerantLinked = hasRefrigerant;
+  const evaporatorModel = await getEvaporatorModelReadiness(evaporator?.id);
   const condenserModel = await getCondenserModelReadiness(condenser?.id);
   const canSimulateEvaporator =
-    hasEvaporator &&
-    hasUsableStatus(evaporator?.status) &&
-    (await hasEvaporatorModel(evaporator?.id));
+    hasEvaporator && hasUsableStatus(evaporator?.status) && evaporatorModel.canSimulate;
   const canSimulateCondenser =
     hasCondenser && hasUsableStatus(condenser?.status) && condenserModel.canSimulate;
 
   const missingFields: string[] = [];
   if (!hasEvaporator) missingFields.push("evaporator component_item");
-  if (hasEvaporator && !canSimulateEvaporator) missingFields.push("evaporator_coil_model completo");
+  if (hasEvaporator && !evaporatorModel.hasLength)
+    missingFields.push("Evaporador incompleto: Faltam: length_mm");
+  if (hasEvaporator && evaporatorModel.hasLength && !canSimulateEvaporator)
+    missingFields.push("campos operacionais do evaporador");
   if (!hasCondenser) missingFields.push("condenser component_item");
-  if (hasCondenser && !condenserModel.hasGeometry) missingFields.push("geometria do condensador");
+  if (hasCondenser && !condenserModel.hasGeometry)
+    missingFields.push("Condensador incompleto: Faltam: length_mm");
   if (hasCondenser && condenserModel.hasGeometry && !canSimulateCondenser)
     missingFields.push("campos operacionais do condensador");
   if (!hasCompressor) missingFields.push("compressor sugerido");
