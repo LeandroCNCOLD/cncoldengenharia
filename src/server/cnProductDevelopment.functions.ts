@@ -37,6 +37,53 @@ export const listProducts = createServerFn({ method: "POST" })
     return { products: rows ?? [], curvesByModel };
   });
 
+export const getProductFullDetails = createServerFn({ method: "POST" })
+  .middleware([attachSupabaseAuth, requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+
+    const { data: product, error: pe } = await supabase
+      .from("cn_product_development")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (pe) throw pe;
+    if (!product) throw new Error("Produto não encontrado.");
+
+    const { data: curves, error: ce } = await supabase
+      .from("cn_catalog_performance_curves")
+      .select(
+        "id, modelo, linha, hp, gabinete, tipo, refrigerante, curva_indice, total_pontos, corrente_estimada, corrente_partida, carga_fluido, origem, raw_json, curva_json",
+      )
+      .eq("modelo", product.catalog_model)
+      .order("curva_indice", { ascending: true });
+    if (ce) throw ce;
+
+    // Extrai dados técnicos consolidados a partir do raw_json da primeira curva
+    let technical: Record<string, unknown> = {};
+    const first = curves?.[0];
+    if (first?.raw_json && typeof first.raw_json === "object") {
+      const raw = first.raw_json as Record<string, unknown>;
+      const curvaRaw = raw.curva_raw;
+      if (typeof curvaRaw === "string") {
+        try {
+          technical = JSON.parse(curvaRaw);
+        } catch {
+          technical = {};
+        }
+      } else if (curvaRaw && typeof curvaRaw === "object") {
+        technical = curvaRaw as Record<string, unknown>;
+      }
+    }
+
+    return {
+      product,
+      curves: curves ?? [],
+      technical,
+    };
+  });
+
 export const updateProductStatus = createServerFn({ method: "POST" })
   .middleware([attachSupabaseAuth, requireSupabaseAuth])
   .inputValidator((d) =>
