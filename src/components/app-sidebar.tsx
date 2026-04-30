@@ -12,8 +12,6 @@ import {
   BookOpen,
   Upload,
   FileBarChart,
-  
-  ClipboardCheck,
   Library,
   Cpu,
   Plug,
@@ -91,19 +89,6 @@ const NAV_GROUPS: NavGroup[] = [
         icon: BookOpen,
         description: "Curvas e dados técnicos publicados",
       },
-      {
-        label: "Catálogo 480",
-        to: "/coldpro/catalogo-480",
-        icon: BookOpen,
-        description: "Modelos consolidados prontos para gerar equipamentos",
-      },
-      {
-        label: "Revisão Técnica",
-        to: "/coldpro/admin/revisao-tecnica",
-        icon: ClipboardCheck,
-        description: "Aprovação e auditoria dos dados técnicos",
-        adminOnly: true,
-      },
     ],
   },
   {
@@ -179,13 +164,6 @@ const NAV_GROUPS: NavGroup[] = [
             to: "/admin/database",
             icon: Database,
             description: "Tabelas Unilab por modo de operação",
-            adminOnly: true,
-          },
-          {
-            label: "Banco Técnico",
-            to: "/coldpro/admin/banco-tecnico",
-            icon: Database,
-            description: "Componentes técnicos consolidados (compressores, válvulas, ventiladores)",
             adminOnly: true,
           },
         ],

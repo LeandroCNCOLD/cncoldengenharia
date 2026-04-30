@@ -151,11 +151,6 @@ export function ComponentsTab({ equipmentProjectId }: Props) {
                             </div>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Button asChild variant="ghost" size="sm">
-                              <Link to="/coldpro/admin/banco-tecnico">
-                                <ExternalLink className="h-4 w-4" />
-                              </Link>
-                            </Button>
                             <Button
                               variant="ghost"
                               size="sm"

@@ -22,13 +22,8 @@ import { CompressorTab } from "@/components/coldpro/compressor-tab";
 import { FansTab } from "@/components/coldpro/fans-tab";
 import { ValveTab } from "@/components/coldpro/valve-tab";
 import { SystemTab } from "@/components/coldpro/system-tab";
-import { CatalogTab } from "@/components/coldpro/catalog-tab";
-import { CatalogComparePanel } from "@/components/coldpro/catalog-compare-panel";
-import { CnSuggestionsTab } from "@/components/coldpro/cn-suggestions-tab";
 import { HistoryTab } from "@/components/coldpro/history-tab";
-import { AutoFillFromCnCatalogPrompt } from "@/components/coldpro/auto-fill-from-cn-catalog-prompt";
 import { EquipmentReadinessPanel } from "@/components/coldpro/equipment-readiness-panel";
-import { Cn480OriginCard } from "@/components/coldpro/cn480-origin-card";
 
 export const Route = createFileRoute("/_app/coldpro/equipamentos/$id")({
   component: EquipmentDetailPage,
@@ -64,7 +59,6 @@ function EquipmentDetailPage() {
           }
           actions={
             <div className="flex items-center gap-2">
-              <AutoFillFromCnCatalogPrompt equipmentProjectId={project.id} />
               <Button asChild variant="outline" size="sm">
                 <Link to="/coldpro/equipamentos/$id/coil-simulator" params={{ id: project.id }}>
                   <Calculator className="mr-1 h-4 w-4" /> Coil Simulator
@@ -77,8 +71,6 @@ function EquipmentDetailPage() {
           }
         />
       </div>
-
-      <Cn480OriginCard equipmentProjectId={project.id} refrigerant={project.refrigerant} />
 
       <EquipmentReadinessPanel
         equipmentProjectId={project.id}
@@ -113,9 +105,6 @@ function EquipmentDetailPage() {
           <TabsTrigger value="fans">Ventiladores</TabsTrigger>
           <TabsTrigger value="valve">Válvula</TabsTrigger>
           <TabsTrigger value="simulation">Sistema completo</TabsTrigger>
-          <TabsTrigger value="catalog">Catálogo</TabsTrigger>
-          <TabsTrigger value="validation">Validação</TabsTrigger>
-          <TabsTrigger value="cn-suggestions">Sugestões CN</TabsTrigger>
           <TabsTrigger value="history">Histórico</TabsTrigger>
         </TabsList>
 
@@ -166,18 +155,6 @@ function EquipmentDetailPage() {
 
         <TabsContent value="simulation" className="mt-6">
           <SystemTab equipmentProjectId={project.id} />
-        </TabsContent>
-
-        <TabsContent value="catalog" className="mt-6">
-          <CatalogTab equipmentProjectId={project.id} />
-        </TabsContent>
-
-        <TabsContent value="validation" className="mt-6">
-          <CatalogComparePanel equipmentProjectId={project.id} />
-        </TabsContent>
-
-        <TabsContent value="cn-suggestions" className="mt-6">
-          <CnSuggestionsTab equipmentProjectId={project.id} />
         </TabsContent>
 
         <TabsContent value="history" className="mt-6">

@@ -46,8 +46,8 @@ function ColdProDashboard() {
 
   const kpis = [
     { label: "Projetos ativos", value: active.length, icon: FolderKanban, to: "/coldpro/projetos" },
-    { label: "Geometrias Unilab", value: counts?.geometries ?? "—", icon: Database, to: "/coldpro/admin/banco-tecnico" },
-    { label: "Compressores", value: counts?.compressors ?? "—", icon: Boxes, to: "/coldpro/admin/banco-tecnico" },
+    { label: "Geometrias Unilab", value: counts?.geometries ?? "—", icon: Database, to: "/admin/database" },
+    { label: "Compressores", value: counts?.compressors ?? "—", icon: Boxes, to: "/admin/database" },
     { label: "Mapas gerados", value: counts?.maps ?? "—", icon: Activity, to: "/coldpro/catalogo" },
   ];
 

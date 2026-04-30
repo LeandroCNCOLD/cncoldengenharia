@@ -83,12 +83,6 @@ function AdminPage() {
             Importar tabelas Unilab (legado)
           </Link>
         </Button>
-        <Button asChild variant="default" size="sm">
-          <Link to="/admin/coldpro-import">
-            <Database className="mr-1.5 h-3.5 w-3.5" />
-            Importar banco técnico ColdPro
-          </Link>
-        </Button>
       </div>
 
       <Card>

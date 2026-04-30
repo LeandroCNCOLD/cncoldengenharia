@@ -14,6 +14,4 @@ export * from "@/lib/coldpro/labels";
 export * from "@/lib/coldpro/unilab-import";
 
 // Server functions (createServerFn) — invocáveis a partir de componentes
-export * as ColdproImport from "@/server/coldproImport.functions";
-export * as ColdproMappers from "@/server/coldproMappers.functions";
 export * as VapcycServices from "@/server/vapcyc.functions";
