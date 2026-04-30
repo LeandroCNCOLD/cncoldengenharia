@@ -68,6 +68,16 @@ export const previewAutoFillFromCnCatalog = createServerFn({ method: "POST" })
     );
 
     if (!curve) {
+      // Fallback: tenta achar no Catálogo 480 (cn_equipment_master) e indica isso
+      const { data: master } = await supabase
+        .from("cn_equipment_master")
+        .select("id,modelo")
+        .ilike("modelo", project.code as string)
+        .limit(1)
+        .maybeSingle();
+      const hint = master
+        ? ` Encontrado no Catálogo 480 (${master.modelo}). Use "Criar equipamento do Catálogo 480" ou abra a página /coldpro/catalogo-480.`
+        : "";
       return {
         matched: false,
         catalogModelId: null,
@@ -75,7 +85,7 @@ export const previewAutoFillFromCnCatalog = createServerFn({ method: "POST" })
         refrigerante: null,
         items: [],
         warnings: [
-          `Nenhum modelo do catálogo CN casa com "${project.code ?? project.commercial_name}".`,
+          `Nenhuma curva CN casa com "${project.code ?? project.commercial_name}".${hint}`,
         ],
       };
     }
