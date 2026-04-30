@@ -28,6 +28,7 @@ import { CnSuggestionsTab } from "@/components/coldpro/cn-suggestions-tab";
 import { HistoryTab } from "@/components/coldpro/history-tab";
 import { AutoFillFromCnCatalogPrompt } from "@/components/coldpro/auto-fill-from-cn-catalog-prompt";
 import { EquipmentReadinessPanel } from "@/components/coldpro/equipment-readiness-panel";
+import { Cn480OriginCard } from "@/components/coldpro/cn480-origin-card";
 
 export const Route = createFileRoute("/_app/coldpro/equipamentos/$id")({
   component: EquipmentDetailPage,
@@ -76,6 +77,8 @@ function EquipmentDetailPage() {
           }
         />
       </div>
+
+      <Cn480OriginCard equipmentProjectId={project.id} refrigerant={project.refrigerant} />
 
       <EquipmentReadinessPanel
         equipmentProjectId={project.id}
