@@ -50,4 +50,5 @@ Arquivos `official` e `csv` nao foram usados nesta etapa.
 
 - Todas as linhas foram persistidas em `cn_catalog_raw_rows.raw_json`.
 - As colunas nao mapeadas foram preservadas no RAW e registradas em `cn_catalog_columns_audit`.
-- O mapeamento atual ainda precisa ser ampliado para preencher campos normalizados de geometria e performance a partir das colunas especificas da planilha 480.
+- O mapeamento da planilha 480 foi ajustado e os masters foram reprocessados sem novo upload.
+- `cn_equipment_performance_master` possui 474 pontos apos o reprocessamento.

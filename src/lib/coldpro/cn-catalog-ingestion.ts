@@ -399,6 +399,129 @@ function numberValue(value: unknown): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function normalizeKey(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+}
+
+export function getRawValue(raw: Record<string, unknown>, aliases: readonly string[]): unknown {
+  const byKey = new Map(Object.keys(raw).map((key) => [normalizeKey(key), key]));
+  for (const alias of aliases) {
+    const key = byKey.get(normalizeKey(alias));
+    if (key && isMeaningful(raw[key])) return raw[key];
+  }
+  return null;
+}
+
+const ALIASES = {
+  model: ["MODELO", "MODELO_UNICO", "MODELO_CATALOGO_ORIGINAL", "modelo", "model"],
+  baseModel: ["MODELO_BASE_REFERENCIA", "MODELO_CATALOGO_ORIGINAL"],
+  line: ["LINHA"],
+  hp: ['DESIGNAÇÃO COMERCIAL EM "HP"', "HP", "DESIGNACAO COMERCIAL EM HP"],
+  cabinet: ["GABINETE"],
+  cabinetType: ["TIPO DE GABINETE"],
+  refrigerant: ["REFRIGERANTE", "refrigerante", "refrigerant"],
+  defrost: ["TIPO DE DEGELO"],
+  evapGeometry: ["Geometria evaporador", "GEOMETRIA EVAPORADOR"],
+  evapModel: ["MODELO EVAPORADOR (Circuito pincipal)", "MODELO EVAPORADOR", "EVAPORADOR"],
+  evapTubeDiameter: ["Ø Tubo_EVAP [mm]", "TUBO_EVAP_MM", "DIAMETRO TUBO EVAP"],
+  evapTubeThickness: ["ESP. Tubo_EVAP [mm]", "ESP TUBO EVAP"],
+  evapTubesPerRow: ["MODELO EVAPORADOR (Circuito pincipal)"],
+  evapRows: ["MODELO EVAPORADOR (Circuito pincipal)"],
+  evapCircuits: ["MODELO EVAPORADOR (Circuito pincipal)"],
+  evapFinSpacing: ["MODELO EVAPORADOR (Circuito pincipal)"],
+  evapAirflow: ["VAZÃO VENTILADOR EVAPORADOR (m³/h)", "VAZAO VENTILADOR EVAPORADOR"],
+  evapVolume: ["VOLUME INTERNO EVAPORADOR [dm³ = L]", "VOLUME INTERNO EVAPORADOR"],
+  evapArea: [
+    "ÁREA DA SUPERFICIE DE TROCA EVAPORADOR [m²]",
+    "AREA DA SUPERFICIE DE TROCA EVAPORADOR",
+  ],
+  condGeometry: ["GEOMETRIA CONDENSADOR", "Geometria condensador"],
+  condModel: ["MODELO CONDENSADOR", "CONDENSADOR"],
+  condTubeDiameter: ["Ø Tubo_cond [mm]", "TUBO_COND_MM", "DIAMETRO TUBO COND"],
+  condTubeThickness: ["ESP. Tubo_cond [mm]", "ESP TUBO COND"],
+  condTubesPerRow: ["MODELO CONDENSADOR"],
+  condRows: ["MODELO CONDENSADOR"],
+  condCircuits: ["MODELO CONDENSADOR"],
+  condFinSpacing: ["MODELO CONDENSADOR"],
+  condAirflow: ["VAZÃO VENTILADOR CONDENSADOR (m³/h)", "VAZAO VENTILADOR CONDENSADOR"],
+  condVolume: ["VOLUME INTERNO CONDENSADOR [dm³ = L]", "VOLUME INTERNO CONDENSADOR"],
+  compressor: ["COMPRESSOR", "COMPRESSOR_CODIGO"],
+  copeland: ["COMPRESSOR", "COMPRESSOR_CODIGO"],
+  bitzer: ["COMPRESSOR", "COMPRESSOR_CODIGO"],
+  danfoss: ["COMPRESSOR", "COMPRESSOR_CODIGO"],
+  dorin: ["COMPRESSOR", "COMPRESSOR_CODIGO"],
+  manufacturer: ["FABRICANTE", "FABRICANTE_ORIGEM"],
+  secondaryCompressor: ["COMPRESSOR SECUNDÁRIO", "COMPRESSOR_SECUNDARIO"],
+  tevap: ["TEMPERATURA DE EVAPORAÇÃO  (°C)", "TEMPERATURA DE EVAPORAÇÃO (°C)", "TEVAP"],
+  tcond: ["TEMPERATURA DE CONDENSAÇÃO  (°C)", "TEMPERATURA DE CONDENSAÇÃO (°C)", "TCOND"],
+  capacityEvap: [
+    "CAPACIDADE FRIGORÍFICA (Kcal/h) [Capacidade do evaporador]",
+    "CAPACIDADE FRIGORIFICA [CAPACIDADE DO EVAPORADOR]",
+  ],
+  capacityCond: [
+    "CALOR REJEITADO (Kcal/h) [Capacidade do condensador]",
+    "CALOR REJEITADO [CAPACIDADE DO CONDENSADOR]",
+  ],
+  power: [
+    "POTÊNCIA ELÉTRICA REQUERIDA TOTAL [CIRCUITO COMPLETO] (kW)",
+    "POTÊNCIA ELÉTRICA REQUERIDA TOTAL (kW)",
+  ],
+  cop: ["COP (kW/kW)", "COP global (kW/kW)"],
+  airflow: ["VAZÃO VENTILADOR EVAPORADOR (m³/h)", "VAZÃO VENTILADOR CONDENSADOR (m³/h)"],
+} as const;
+
+function parseCoilModelField(value: unknown): {
+  rows: number | null;
+  tubesPerRow: number | null;
+  circuits: number | null;
+  finSpacing: number | null;
+  lengthMm: number | null;
+} {
+  const text = stringValue(value) ?? "";
+  const first = text.match(/(\d+(?:[,.]\d+)?)\s*x\s*(\d+(?:[,.]\d+)?)/i);
+  const circuits = text.match(/(\d+(?:[,.]\d+)?)\s*CIRCUITOS?/i);
+  const spacing = text.match(/ESPA[ÇC]AMENTO\s*(\d+(?:[,.]\d+)?)/i);
+  const length = text.match(/-\s*(\d+(?:[,.]\d+)?)\s*mm/i);
+  return {
+    rows: first ? numberValue(first[1]) : null,
+    tubesPerRow: first ? numberValue(first[2]) : null,
+    circuits: circuits ? numberValue(circuits[1]) : null,
+    finSpacing: spacing ? numberValue(spacing[1]) : null,
+    lengthMm: length ? numberValue(length[1]) : null,
+  };
+}
+
+function kcalhToW(value: unknown): number | null {
+  const kcalh = numberValue(value);
+  return kcalh == null ? null : kcalh * 1.163;
+}
+
+function parseGeometryCount(value: unknown, position: "rows" | "tubesPerRow"): number | null {
+  const parsed = parseCoilModelField(value);
+  return position === "rows" ? parsed.rows : parsed.tubesPerRow;
+}
+
+function parseCircuits(value: unknown): number | null {
+  return parseCoilModelField(value).circuits;
+}
+
+function parseFinSpacing(value: unknown): number | null {
+  return parseCoilModelField(value).finSpacing;
+}
+
+function compressorForManufacturer(
+  raw: Record<string, unknown>,
+  manufacturer: string,
+): string | null {
+  const detected = stringValue(getRawValue(raw, ALIASES.manufacturer))?.toUpperCase() ?? "";
+  const compressor = stringValue(getRawValue(raw, ALIASES.compressor));
+  return detected.includes(manufacturer.toUpperCase()) ? compressor : null;
+}
+
 export async function mergeCnCatalogs() {
   const { data: rawRows, error } = await cnDb()
     .from("cn_catalog_raw_rows")
@@ -511,22 +634,16 @@ export async function mergeCnCatalogs() {
       .from("cn_equipment_evaporator_master")
       .insert({
         model_id: master.id,
-        geometry: stringValue(valueByPatterns(chosen, [/evap.*geo|evaporador.*geo|geometry/i])),
-        tube_diameter: numberValue(
-          valueByPatterns(chosen, [/evap.*tube.*diam|evap.*tubo.*diam|tube_od/i]),
-        ),
-        tube_thickness: numberValue(
-          valueByPatterns(chosen, [/evap.*wall|espessura.*tubo|tube_wall/i]),
-        ),
-        tubes_per_row: numberValue(valueByPatterns(chosen, [/evap.*tubes.*row|tubes_per_row/i])),
-        rows: numberValue(valueByPatterns(chosen, [/evap.*rows|fileiras|rows/i])),
-        circuits: numberValue(valueByPatterns(chosen, [/evap.*circuit|circuit/i])),
-        fin_spacing: numberValue(valueByPatterns(chosen, [/evap.*fin|passo.*aleta|fin_spacing/i])),
-        airflow: numberValue(valueByPatterns(chosen, [/evap.*airflow|vaz[aã]o.*ar|airflow/i])),
-        internal_volume: numberValue(valueByPatterns(chosen, [/evap.*volume|internal_volume/i])),
-        exchange_area: numberValue(
-          valueByPatterns(chosen, [/evap.*area|exchange_area|surface_area/i]),
-        ),
+        geometry: stringValue(getRawValue(chosen, ALIASES.evapGeometry)),
+        tube_diameter: numberValue(getRawValue(chosen, ALIASES.evapTubeDiameter)),
+        tube_thickness: numberValue(getRawValue(chosen, ALIASES.evapTubeThickness)),
+        tubes_per_row: parseGeometryCount(getRawValue(chosen, ALIASES.evapModel), "tubesPerRow"),
+        rows: parseGeometryCount(getRawValue(chosen, ALIASES.evapModel), "rows"),
+        circuits: parseCircuits(getRawValue(chosen, ALIASES.evapModel)),
+        fin_spacing: parseFinSpacing(getRawValue(chosen, ALIASES.evapModel)),
+        airflow: numberValue(getRawValue(chosen, ALIASES.evapAirflow)),
+        internal_volume: numberValue(getRawValue(chosen, ALIASES.evapVolume)),
+        exchange_area: numberValue(getRawValue(chosen, ALIASES.evapArea)),
         source_priority: sorted[0].source_type,
         raw_json: rawPayload,
       } as never);
@@ -534,19 +651,15 @@ export async function mergeCnCatalogs() {
       .from("cn_equipment_condenser_master")
       .insert({
         model_id: master.id,
-        geometry: stringValue(valueByPatterns(chosen, [/cond.*geo|condensador.*geo|geometry/i])),
-        tube_diameter: numberValue(
-          valueByPatterns(chosen, [/cond.*tube.*diam|cond.*tubo.*diam|tube_od/i]),
-        ),
-        tube_thickness: numberValue(
-          valueByPatterns(chosen, [/cond.*wall|espessura.*tubo|tube_wall/i]),
-        ),
-        tubes_per_row: numberValue(valueByPatterns(chosen, [/cond.*tubes.*row|tubes_per_row/i])),
-        rows: numberValue(valueByPatterns(chosen, [/cond.*rows|fileiras|rows/i])),
-        circuits: numberValue(valueByPatterns(chosen, [/cond.*circuit|circuit/i])),
-        fin_spacing: numberValue(valueByPatterns(chosen, [/cond.*fin|passo.*aleta|fin_spacing/i])),
-        airflow: numberValue(valueByPatterns(chosen, [/cond.*airflow|vaz[aã]o.*ar|airflow/i])),
-        internal_volume: numberValue(valueByPatterns(chosen, [/cond.*volume|internal_volume/i])),
+        geometry: stringValue(getRawValue(chosen, ALIASES.condGeometry)),
+        tube_diameter: numberValue(getRawValue(chosen, ALIASES.condTubeDiameter)),
+        tube_thickness: numberValue(getRawValue(chosen, ALIASES.condTubeThickness)),
+        tubes_per_row: parseGeometryCount(getRawValue(chosen, ALIASES.condModel), "tubesPerRow"),
+        rows: parseGeometryCount(getRawValue(chosen, ALIASES.condModel), "rows"),
+        circuits: parseCircuits(getRawValue(chosen, ALIASES.condModel)),
+        fin_spacing: parseFinSpacing(getRawValue(chosen, ALIASES.condModel)),
+        airflow: numberValue(getRawValue(chosen, ALIASES.condAirflow)),
+        internal_volume: numberValue(getRawValue(chosen, ALIASES.condVolume)),
         source_priority: sorted[0].source_type,
         raw_json: rawPayload,
       } as never);
@@ -554,13 +667,53 @@ export async function mergeCnCatalogs() {
       .from("cn_equipment_compressor_master")
       .insert({
         model_id: master.id,
-        copeland: stringValue(valueByPatterns(chosen, [/copeland/i])),
-        bitzer: stringValue(valueByPatterns(chosen, [/bitzer/i])),
-        danfoss: stringValue(valueByPatterns(chosen, [/danfoss/i])),
-        dorin: stringValue(valueByPatterns(chosen, [/dorin/i])),
-        secondary: stringValue(valueByPatterns(chosen, [/compressor.*2|secund/i])),
+        copeland: compressorForManufacturer(chosen, "COPELAND"),
+        bitzer: compressorForManufacturer(chosen, "BITZER"),
+        danfoss:
+          compressorForManufacturer(chosen, "DANFOSS") ?? compressorForManufacturer(chosen, "BOCK"),
+        dorin: compressorForManufacturer(chosen, "DORIN"),
+        secondary: stringValue(
+          getRawValue(chosen, ["COMPRESSOR SECUNDÁRIO", "COMPRESSOR_CODIGO_SECUNDARIO"]),
+        ),
         raw_json: rawPayload,
       } as never);
+
+    const performancePoint = {
+      model_id: master.id,
+      point_index: 0,
+      tevap: numberValue(
+        getRawValue(chosen, ["TEMPERATURA DE EVAPORAÇÃO  (°C)", "TEMPERATURA DE EVAPORAÇÃO"]),
+      ),
+      tcond: numberValue(
+        getRawValue(chosen, ["TEMPERATURA DE CONDENSAÇÃO  (°C)", "TEMPERATURA DE CONDENSAÇÃO"]),
+      ),
+      capacity_evap: kcalhToW(
+        getRawValue(chosen, ["CAPACIDADE FRIGORÍFICA (Kcal/h) [Capacidade do evaporador]"]),
+      ),
+      capacity_cond: kcalhToW(
+        getRawValue(chosen, ["CALOR REJEITADO (Kcal/h) [Capacidade do condensador]"]),
+      ),
+      power: numberValue(
+        getRawValue(chosen, [
+          "POTÊNCIA ELÉTRICA REQUERIDA TOTAL [CIRCUITO COMPLETO] (kW)",
+          "POTÊNCIA ELÉTRICA REQUERIDA TOTAL (kW)",
+        ]),
+      ),
+      cop: numberValue(getRawValue(chosen, ["COP global (kW/kW)", "COP (kW/kW)"])),
+      airflow: numberValue(getRawValue(chosen, ["VAZÃO VENTILADOR EVAPORADOR (m³/h)"])),
+      source: sorted[0].source_type,
+      raw_json: rawPayload,
+    };
+    if (
+      performancePoint.tevap != null ||
+      performancePoint.tcond != null ||
+      performancePoint.capacity_evap != null ||
+      performancePoint.capacity_cond != null
+    ) {
+      await cnDb()
+        .from("cn_equipment_performance_master")
+        .insert(performancePoint as never);
+    }
 
     inserted += 1;
   }

@@ -2,7 +2,7 @@
 
 ## Status
 
-Implementacao pronta; consolidacao real pendente porque os arquivos de origem CN Cold nao estao presentes no workspace.
+Consolidacao real executada com a fonte `480`.
 
 ## Engine implementado
 
@@ -47,8 +47,38 @@ Modelo validado: `CN_1200_LT_COPELAND_ZF41K5E_380V_3F_60HZ`
 - Evaporador no master: sim
 - Condensador no master: sim
 - Compressor sugerido no master: sim
-- Curva em `cn_equipment_performance_master`: nao
-- Observacao: dados detalhados de evaporador/condensador foram preservados em `raw_json`, mas o mapeamento atual ainda nao extraiu todos os campos geometricos para colunas estruturadas (`tube_diameter`, `rows`, `airflow`, etc.).
+- Curva em `cn_equipment_performance_master`: sim
+
+Evaporador estruturado:
+
+- `geometry`: `27 x 31,5`
+- `tube_diameter`: 12,7 mm
+- `tube_thickness`: 0,5 mm
+- `rows`: 4
+- `tubes_per_row`: 24
+- `circuits`: 12
+- `fin_spacing`: 7 mm
+- `airflow`: 12950 m3/h
+
+Condensador estruturado:
+
+- `geometry`: `22 x 25,4`
+- `tube_diameter`: 9,525 mm
+- `tube_thickness`: 0,3 mm
+- `rows`: 6
+- `tubes_per_row`: 24
+- `circuits`: 12
+- `fin_spacing`: 2,1 mm
+- `airflow`: 8505 m3/h
+
+Performance:
+
+- `tevap`: -23 C
+- `tcond`: 53,8 C
+- `capacity_evap`: 14950,365 W
+- `capacity_cond`: 28353,94 W
+- `power`: 16,14 kW
+- `cop`: 1,137570351491983
 
 ## Preservacao de conflitos
 
@@ -64,6 +94,6 @@ Conflitos entre fontes sao preservados em `raw_sources_json`, junto com todas as
 
 ## Pendencias de consolidacao
 
-1. Mapear colunas geometricas da planilha 480 para preencher colunas estruturadas dos masters.
-2. Popular `cn_equipment_performance_master` a partir das colunas de capacidade, calor rejeitado, potencia, COP e temperaturas.
+1. Mapear volume interno e area de troca quando a planilha trouxer valores preenchidos.
+2. Reclassificar colunas de auditoria que agora estao mapeadas pelo helper de aliases.
 3. Reexecutar futuramente com fontes `official` e `csv` para detectar divergencias reais entre fontes.
