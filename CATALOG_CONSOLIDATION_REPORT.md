@@ -30,6 +30,26 @@ Smoke test sintetico:
 - entrada: `Modelo=CN 1000 LT`, `HP=1.0`, `Evaporador=EVP-01`, `Condensador=COND-01`
 - fingerprint: `CN 1000 LT|1.0|EVP-01|COND-01`
 
+## Consolidacao executada - fonte 480
+
+- Arquivo consolidado: `catalogo_480_modelos_codigo_completo_corrigido.xlsx`
+- `mergeCnCatalogs()` executado.
+- Modelos unicos: 481
+- Grupos duplicados: 216
+- Conflitos entre fontes: 0
+- Fontes usadas nesta etapa: apenas `480`
+
+## Validacao de modelo real
+
+Modelo validado: `CN_1200_LT_COPELAND_ZF41K5E_380V_3F_60HZ`
+
+- Refrigerante definido: sim (`R404A`)
+- Evaporador no master: sim
+- Condensador no master: sim
+- Compressor sugerido no master: sim
+- Curva em `cn_equipment_performance_master`: nao
+- Observacao: dados detalhados de evaporador/condensador foram preservados em `raw_json`, mas o mapeamento atual ainda nao extraiu todos os campos geometricos para colunas estruturadas (`tube_diameter`, `rows`, `airflow`, etc.).
+
 ## Preservacao de conflitos
 
 Conflitos entre fontes sao preservados em `raw_sources_json`, junto com todas as linhas raw usadas na consolidacao.
@@ -42,15 +62,8 @@ Conflitos entre fontes sao preservados em `raw_sources_json`, junto com todas as
 - `cn_equipment_compressor_master`
 - `cn_equipment_performance_master`
 
-## Pendencias para consolidacao real
+## Pendencias de consolidacao
 
-1. Disponibilizar os 3 arquivos de origem no workspace ou via Storage.
-2. Executar `importCnCatalog()` para cada arquivo.
-3. Executar `mergeCnCatalogs()`.
-4. Executar `validateCatalogImport()`.
-5. Atualizar este relatorio com:
-   - modelos unicos
-   - duplicados
-   - conflitos
-   - divergencias entre fontes
-   - confiabilidade final dos dados
+1. Mapear colunas geometricas da planilha 480 para preencher colunas estruturadas dos masters.
+2. Popular `cn_equipment_performance_master` a partir das colunas de capacidade, calor rejeitado, potencia, COP e temperaturas.
+3. Reexecutar futuramente com fontes `official` e `csv` para detectar divergencias reais entre fontes.

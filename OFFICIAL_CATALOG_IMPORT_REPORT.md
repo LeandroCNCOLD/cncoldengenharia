@@ -2,11 +2,12 @@
 
 ## Status
 
-Importacao real nao executada nesta iteracao: os arquivos abaixo nao existem no workspace atual.
+Importacao real executada somente para:
 
-- `CATÁLOGO OFICIAL 60Hz 2027–2029` (Excel)
 - `catalogo_480_modelos_codigo_completo_corrigido.xlsx`
-- `catalogo-coldpro-2026-04-30.csv`
+- `source_type = 480`
+
+Arquivos `official` e `csv` nao foram usados nesta etapa.
 
 ## Implementado
 
@@ -17,19 +18,36 @@ Importacao real nao executada nesta iteracao: os arquivos abaixo nao existem no 
 - Auditoria automatica de colunas em `cn_catalog_columns_audit`.
 - Colunas desconhecidas marcadas como nao mapeadas, sem descarte.
 
-## Smoke test local
+## Resultado da importacao 480
 
-Fixture sintetico:
+- Arquivo localizado em `coldpro-imports/catalogo_480_modelos_codigo_completo_corrigido.xlsx`
+- Download via storage: OK
+- Batches criados: 3
+- Linhas importadas em RAW: 704
+- Colunas auditadas: 212
+- Erros de parsing/importacao: 0
+- Colunas nao mapeadas: 94
 
-- Total linhas: 1
-- Total colunas: 5
-- Coluna desconhecida preservada: `Coluna Desconhecida X`
-- Fingerprint gerado: `CN 1000 LT|1.0|EVP-01|COND-01`
+## Amostra de colunas nao mapeadas
 
-## Pendencias para importacao oficial
+- `FABRICANTE`
+- `FABRICANTE_ORIGEM`
+- `CONFIGURACAO_ELETRICA`
+- `TENSÃO ELÉTRICA [v]`
+- `TENSAO_V`
+- `NUMERO_FASES`
+- `FREQUENCIA_HZ`
+- `LINHA`
+- `GABINETE`
+- `TIPO DE GABINETE`
+- `GWP-AR6`
+- `ODP-AR6`
+- `TIPO DE DEGELO`
+- `TEMPERATURA DA CÂMARA (°C)`
+- `TEMPERATURA EXTERNA  (°C)`
 
-1. Disponibilizar os tres arquivos de origem no workspace ou via upload/storage.
-2. Executar `importCnCatalog` para cada arquivo.
-3. Executar `mergeCnCatalogs`.
-4. Executar `validateCatalogImport`.
-5. Regenerar este relatorio com contagens reais.
+## Observacoes
+
+- Todas as linhas foram persistidas em `cn_catalog_raw_rows.raw_json`.
+- As colunas nao mapeadas foram preservadas no RAW e registradas em `cn_catalog_columns_audit`.
+- O mapeamento atual ainda precisa ser ampliado para preencher campos normalizados de geometria e performance a partir das colunas especificas da planilha 480.
