@@ -59,7 +59,6 @@ function EquipmentDetailPage() {
           }
           actions={
             <div className="flex items-center gap-2">
-              <AutoFillFromCnCatalogPrompt equipmentProjectId={project.id} />
               <Button asChild variant="outline" size="sm">
                 <Link to="/coldpro/equipamentos/$id/coil-simulator" params={{ id: project.id }}>
                   <Calculator className="mr-1 h-4 w-4" /> Coil Simulator
@@ -72,8 +71,6 @@ function EquipmentDetailPage() {
           }
         />
       </div>
-
-      <Cn480OriginCard equipmentProjectId={project.id} refrigerant={project.refrigerant} />
 
       <EquipmentReadinessPanel
         equipmentProjectId={project.id}
