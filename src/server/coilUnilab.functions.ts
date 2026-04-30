@@ -101,7 +101,8 @@ export type CnCatalogPoint = {
   evaporatorGeometry: CnCatalogGeometry;
   /** Geometria do condensador inferida do raw_json. */
   condenserGeometry: CnCatalogGeometry;
-  raw: Record<string, unknown>;
+  /** Resumo serializável do raw_json (apenas chaves escalar/string). */
+  raw: Record<string, string | number | boolean | null>;
 };
 
 const POINT_KEYS = {
