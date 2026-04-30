@@ -401,7 +401,73 @@ function CoilSimulatorPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const errors = useMemo(() => result?.warnings.filter((w) => w.startsWith("ERRO")) ?? [], [result]);
+  // Salvar como componente (component_items + opcionalmente technical_components)
+  const saveAsComponentMutation = useMutation({
+    mutationFn: async () => {
+      if (!lastInput || !result) throw new Error("Calcule a simulação antes de salvar.");
+      const kind = coilType === "evaporator" ? "evaporador" : "condensador";
+      const entityType = coilType === "evaporator" ? "evaporator_coil" : "condenser_coil";
+      const geometryJson = lastInput.geometry as Record<string, unknown>;
+      const validatedFields: Record<string, unknown> = {
+        ...geometryJson,
+        refrigerant: lastInput.refrigerant.refrigerant,
+        nominal_capacity_w: result.capacityW,
+        air_inlet_c: lastInput.air.airTempInC,
+        ref_temp_c: lastInput.refrigerant.refTempC,
+        source: "CN_INTERNAL",
+        origin: dataOrigin,
+      };
+      const created = await createComponent({
+        equipment_project_id: id,
+        kind,
+        model: label || `${kind}-manual-${Date.now().toString(36)}`,
+        manufacturer: "CN COLD",
+        description: g.description || `Aletado manual ${kind}`,
+        status: saveStatus === "validated" ? "validated" : "draft",
+        raw_fields: { input: lastInput, result } as never,
+        validated_fields: validatedFields as never,
+        created_by: user?.id ?? null,
+      });
+      let publishedId: string | null = null;
+      if (saveAlsoToLibrary) {
+        const { data: tc, error: tcErr } = await supabase
+          .from("technical_components")
+          .insert({
+            entity_type: entityType,
+            manufacturer: "CN COLD",
+            model: label || created.model,
+            code: created.id,
+            status: saveStatus === "validated" ? "validated" : "approved",
+            source: "CN_INTERNAL",
+            context: saveLibraryContext,
+            normalized_json: {
+              ...validatedFields,
+              geometry_json: geometryJson,
+              simulation_result_json: result,
+            } as never,
+            approved_by: user?.id ?? null,
+            approved_at: new Date().toISOString(),
+          } as never)
+          .select("id")
+          .single();
+        if (tcErr) throw tcErr;
+        publishedId = (tc as { id: string }).id;
+      }
+      return { componentId: created.id, publishedId };
+    },
+    onSuccess: ({ componentId, publishedId }) => {
+      setSavedComponentId(componentId);
+      qc.invalidateQueries({ queryKey: ["library-coils"] });
+      qc.invalidateQueries({ queryKey: ["components", id] });
+      toast.success(
+        publishedId
+          ? "Componente salvo no equipamento e publicado na Biblioteca."
+          : "Componente salvo no equipamento.",
+      );
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const warns = useMemo(() => result?.warnings.filter((w) => !w.startsWith("ERRO")) ?? [], [result]);
 
   return (
