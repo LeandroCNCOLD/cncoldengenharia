@@ -34,6 +34,7 @@ export const generateAndCacheCnSuggestions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => generateInput.parse(d))
   .handler(async ({ data, context }) => {
+    try {
     const { supabase, userId } = context;
 
     // 1. Carrega curva CN
@@ -42,7 +43,7 @@ export const generateAndCacheCnSuggestions = createServerFn({ method: "POST" })
       .select("*")
       .eq("id", data.catalogModelId)
       .maybeSingle();
-    if (curveErr) throw curveErr;
+    if (curveErr) throw new Error(curveErr.message ?? "Erro ao carregar curva CN.");
     if (!curveRow) throw new Error("Modelo CN não encontrado.");
 
     const curve = curveRow as unknown as CatalogCurve;
@@ -99,7 +100,7 @@ export const generateAndCacheCnSuggestions = createServerFn({ method: "POST" })
       const { error: insErr } = await supabase
         .from("cn_catalog_component_suggestions")
         .insert(rows);
-      if (insErr) throw insErr;
+      if (insErr) throw new Error(insErr.message ?? "Erro ao salvar sugestões.");
     }
 
     const { data: saved } = await supabase
@@ -109,6 +110,10 @@ export const generateAndCacheCnSuggestions = createServerFn({ method: "POST" })
       .order("ranking", { ascending: true });
 
     return { fromCache: false, suggestions: saved ?? [], warnings: result.warnings };
+    } catch (err) {
+      console.error("generateAndCacheCnSuggestions failed:", err);
+      throw err instanceof Error ? err : new Error(String((err as { message?: string })?.message ?? err));
+    }
   });
 
 // ============================================================================
@@ -129,7 +134,7 @@ export const setSuggestionStatus = createServerFn({ method: "POST" })
       .from("cn_catalog_component_suggestions")
       .update({ status: data.status })
       .eq("id", data.suggestionId);
-    if (error) throw error;
+    if (error) throw new Error(error.message ?? "Erro ao atualizar sugestão.");
     return { ok: true };
   });
 
@@ -162,7 +167,7 @@ export const createEquipmentFromCatalog = createServerFn({ method: "POST" })
       .select("modelo,refrigerante,linha")
       .eq("id", data.catalogModelId)
       .maybeSingle();
-    if (ce) throw ce;
+    if (ce) throw new Error(ce.message ?? "Erro ao carregar curva CN.");
     if (!curve) throw new Error("Modelo CN não encontrado.");
 
     const { data: accepted, error: ae } = await supabase
@@ -170,7 +175,7 @@ export const createEquipmentFromCatalog = createServerFn({ method: "POST" })
       .select("*")
       .eq("catalog_model_id", data.catalogModelId)
       .eq("status", "accepted");
-    if (ae) throw ae;
+    if (ae) throw new Error(ae.message ?? "Erro ao carregar sugestões aceitas.");
 
     // Cria equipment_project
     const { data: proj, error: pe } = await supabase
@@ -187,7 +192,7 @@ export const createEquipmentFromCatalog = createServerFn({ method: "POST" })
       })
       .select()
       .single();
-    if (pe) throw pe;
+    if (pe) throw new Error(pe.message ?? "Erro ao criar equipamento.");
 
     // Cria component_items + links
     const createdItems: { id: string; type: string }[] = [];
@@ -209,7 +214,7 @@ export const createEquipmentFromCatalog = createServerFn({ method: "POST" })
         })
         .select()
         .single();
-      if (ie) throw ie;
+      if (ie) throw new Error(ie.message ?? "Erro ao criar componente.");
       createdItems.push({ id: item.id, type: s.component_type });
     }
 
