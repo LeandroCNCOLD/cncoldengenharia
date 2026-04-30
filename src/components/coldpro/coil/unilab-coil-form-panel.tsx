@@ -13,9 +13,9 @@
  *
  * NÃO faz cálculos no React — apenas monta input e exibe o que o engine retorna.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calculator, GitCompare, Info } from "lucide-react";
+import { Calculator, Database, GitCompare, Info, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -41,9 +41,11 @@ import type { CoilSimulatorInput, CoilSimulatorResult, CoilType } from "@/module
 import {
   listCoilMaterials,
   listCnCatalogModelsLite,
+  listCnCatalogPointsByModelo,
   getCnCatalogPointByModelId,
   findCnCatalogPointByCode,
   type CnCatalogPoint,
+  type CnCatalogGeometry,
 } from "@/server/coilUnilab.functions";
 
 type CoilKind = "evaporator" | "condenser";
