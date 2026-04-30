@@ -50,11 +50,21 @@ const EMPTY_COUNTS: CountByStatus = {
   unmapped: 0,
 };
 
-/** Conta registros raw na biblioteca (todos os batches). */
+/** Conta registros raw "ativos" — exclui os arquivados (não mapeáveis). */
 export async function countRawRecords(): Promise<number> {
   const { count } = await supabase
     .from("technical_raw_records")
-    .select("id", { count: "exact", head: true });
+    .select("id", { count: "exact", head: true })
+    .neq("status", "archived" as never);
+  return count ?? 0;
+}
+
+/** Conta registros raw arquivados (descartados por não serem reconhecidos). */
+export async function countArchivedRawRecords(): Promise<number> {
+  const { count } = await supabase
+    .from("technical_raw_records")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "archived" as never);
   return count ?? 0;
 }
 
@@ -93,7 +103,7 @@ export async function countApprovedComponents(
   return count ?? 0;
 }
 
-/** Detecta se há raw sem mapping correspondente (mostra aviso no Banco Técnico). */
+/** Pendentes de mapeamento — exclui arquivados. */
 export async function countUnmappedRaw(): Promise<number> {
   const { count } = await supabase
     .from("technical_raw_records")

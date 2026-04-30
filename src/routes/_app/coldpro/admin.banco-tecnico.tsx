@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Database, Loader2, Filter } from "lucide-react";
+import { AlertTriangle, Archive, Database, Loader2, Filter } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/page-header";
@@ -31,6 +31,7 @@ import { TechnicalComponentDetailDrawer } from "@/components/coldpro/technical-c
 import { supabase } from "@/integrations/supabase/client";
 import {
   countApprovedComponents,
+  countArchivedRawRecords,
   countMappedByStatus,
   countRawRecords,
   countUnmappedRaw,
@@ -48,8 +49,10 @@ import {
   TECHNICAL_SOURCES,
 } from "@/modules/coldpro/library/types";
 import { migrateExistingDataToUniversalLibrary } from "@/server/technicalLibraryMigration.functions";
+import { archiveUnmappableRawRecords } from "@/server/archiveUnmappableRecords.functions";
 import { ProcessUnmappedButton } from "@/components/coldpro/process-unmapped-button";
 import { ProcessAndApproveAllButton } from "@/components/coldpro/process-and-approve-all-button";
+import { subscribePipeline, type PipelineState } from "@/lib/coldpro/background-pipeline";
 
 export const Route = createFileRoute("/_app/coldpro/admin/banco-tecnico")({
   component: TechBankPage,
@@ -85,32 +88,172 @@ function UniversalLibraryCard({
   );
 }
 
+/** Hook: assina o pipeline em background e força refetch dos contadores. */
+function usePipelineAutoRefresh() {
+  const qc = useQueryClient();
+  const [state, setState] = useState<PipelineState | null>(null);
+  useEffect(() => {
+    const unsub = subscribePipeline((s) => {
+      setState(s);
+      // enquanto roda, refresca contadores em cada transição
+      void qc.invalidateQueries({ queryKey: ["tech-raw-count"] });
+      void qc.invalidateQueries({ queryKey: ["tech-unmapped-count"] });
+      void qc.invalidateQueries({ queryKey: ["tech-archived-count"] });
+      void qc.invalidateQueries({ queryKey: ["tech-mapped-counts"] });
+    });
+    return unsub;
+  }, [qc]);
+
+  // Polling de respaldo enquanto o pipeline roda (cobre janelas entre transições)
+  useEffect(() => {
+    const running =
+      state?.phase && state.phase !== "idle" && state.phase !== "done" && state.phase !== "error";
+    if (!running) return;
+    const id = setInterval(() => {
+      void qc.invalidateQueries({ queryKey: ["tech-raw-count"] });
+      void qc.invalidateQueries({ queryKey: ["tech-unmapped-count"] });
+      void qc.invalidateQueries({ queryKey: ["tech-archived-count"] });
+      void qc.invalidateQueries({ queryKey: ["tech-mapped-counts"] });
+    }, 3000);
+    return () => clearInterval(id);
+  }, [state?.phase, qc]);
+
+  return state;
+}
+
 function PendingReviewBanner() {
+  const pipeline = usePipelineAutoRefresh();
   const { data: rawCount } = useQuery({ queryKey: ["tech-raw-count"], queryFn: countRawRecords });
-  const { data: unmappedCount } = useQuery({ queryKey: ["tech-unmapped-count"], queryFn: countUnmappedRaw });
+  const { data: unmappedCount } = useQuery({
+    queryKey: ["tech-unmapped-count"],
+    queryFn: countUnmappedRaw,
+  });
   const { data: mappedByStatus } = useQuery({
     queryKey: ["tech-mapped-counts"],
     queryFn: countMappedByStatus,
   });
   const pendingReview = (mappedByStatus?.mapped ?? 0) + (mappedByStatus?.needs_review ?? 0);
-  if (!rawCount && !pendingReview && !unmappedCount) return null;
+  const pending = unmappedCount ?? 0;
+  const running =
+    pipeline?.phase &&
+    pipeline.phase !== "idle" &&
+    pipeline.phase !== "done" &&
+    pipeline.phase !== "error";
+
+  // Some quando não há nada pendente nem rodando
+  if (!pending && !pendingReview && !running) return null;
+
   return (
     <Card className="border-yellow-500/50 bg-yellow-500/5">
       <CardContent className="flex items-start gap-3 p-4">
         <AlertTriangle className="mt-0.5 h-5 w-5 text-yellow-600" />
         <div className="flex-1 space-y-1">
           <p className="text-sm font-medium">
-            Existem dados importados aguardando mapeamento técnico.
+            {pending > 0
+              ? `Existem ${pending.toLocaleString("pt-BR")} dado(s) importado(s) aguardando o mapeamento técnico.`
+              : pendingReview > 0
+                ? `${pendingReview.toLocaleString("pt-BR")} registro(s) mapeado(s) aguardando revisão.`
+                : "Pipeline rodando — atualizando contadores…"}
           </p>
           <p className="text-xs text-muted-foreground">
-            Raw importado: <Badge variant="outline">{rawCount ?? 0}</Badge> · Não mapeado:{" "}
-            <Badge variant="outline">{unmappedCount ?? 0}</Badge> · Mapeado aguardando revisão:{" "}
-            <Badge variant="outline">{pendingReview}</Badge> · Aprovado:{" "}
+            Raw ativos: <Badge variant="outline">{rawCount ?? 0}</Badge> · Pendentes:{" "}
+            <Badge variant="outline">{pending}</Badge> · Aguardando revisão:{" "}
+            <Badge variant="outline">{pendingReview}</Badge> · Aprovados:{" "}
             <Badge variant="outline">{mappedByStatus?.approved ?? 0}</Badge>
           </p>
+          {running && pipeline?.message && (
+            <p className="text-xs text-yellow-700">
+              <Loader2 className="mr-1 inline h-3 w-3 animate-spin" />
+              Em segundo plano · {pipeline.message}
+            </p>
+          )}
         </div>
-        <Button asChild size="sm">
+        <Button asChild size="sm" variant="outline">
           <Link to="/coldpro/admin/revisao-tecnica">Abrir revisão</Link>
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+/** Card mostrando quantos RAW foram arquivados (não reconhecidos por nenhum mapper). */
+function ArchivedRawCard() {
+  const qc = useQueryClient();
+  const { data: archived } = useQuery({
+    queryKey: ["tech-archived-count"],
+    queryFn: countArchivedRawRecords,
+  });
+  const [busy, setBusy] = useState(false);
+
+  const handleArchive = async () => {
+    setBusy(true);
+    try {
+      let total = 0;
+      for (let i = 0; i < 50; i++) {
+        const res = await archiveUnmappableRawRecords({ data: { pageSize: 500, maxPages: 5 } });
+        total += res.archived;
+        if (res.archived === 0) break;
+      }
+      toast.success(`${total} registro(s) arquivado(s).`);
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["tech-archived-count"] }),
+        qc.invalidateQueries({ queryKey: ["tech-raw-count"] }),
+        qc.invalidateQueries({ queryKey: ["tech-unmapped-count"] }),
+      ]);
+    } catch (err) {
+      toast.error(`Falha ao arquivar: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!archived) {
+    return (
+      <Card className="border-dashed">
+        <CardContent className="flex items-center justify-between gap-3 p-4">
+          <div className="flex items-center gap-3">
+            <Archive className="h-4 w-4 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-medium">Nenhum arquivo arquivado</p>
+              <p className="text-xs text-muted-foreground">
+                Use "Arquivar não mapeáveis" para mover RAW que nenhum mapper reconheceu.
+              </p>
+            </div>
+          </div>
+          <Button size="sm" variant="outline" onClick={handleArchive} disabled={busy}>
+            {busy ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Archive className="mr-2 h-4 w-4" />
+            )}
+            Arquivar não mapeáveis
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-muted-foreground/30 bg-muted/20">
+      <CardContent className="flex items-center justify-between gap-3 p-4">
+        <div className="flex items-center gap-3">
+          <Archive className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <p className="text-sm font-medium">
+              {archived.toLocaleString("pt-BR")} arquivo(s) arquivado(s)
+            </p>
+            <p className="text-xs text-muted-foreground">
+              RAW que nenhum mapper reconheceu — não aparecem nas listas principais.
+            </p>
+          </div>
+        </div>
+        <Button size="sm" variant="outline" onClick={handleArchive} disabled={busy}>
+          {busy ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Archive className="mr-2 h-4 w-4" />
+          )}
+          Arquivar mais
         </Button>
       </CardContent>
     </Card>
@@ -524,6 +667,7 @@ function TechBankPage() {
       />
 
       <PendingReviewBanner />
+      <ArchivedRawCard />
 
       <Tabs defaultValue="universal">
         <TabsList className="flex flex-wrap">

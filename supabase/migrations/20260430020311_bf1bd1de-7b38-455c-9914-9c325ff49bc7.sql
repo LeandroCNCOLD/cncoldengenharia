@@ -1,0 +1,1 @@
+ALTER TYPE public.technical_record_status ADD VALUE IF NOT EXISTS 'archived';

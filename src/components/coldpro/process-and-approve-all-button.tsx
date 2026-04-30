@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -15,8 +15,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { processUnmappedRawRecords } from "@/server/processRawRecords.functions";
-import { approveAllMappedRecords } from "@/server/approveMappedRecords.functions";
+import {
+  startPipelineInBackground,
+  subscribePipeline,
+  type PipelineState,
+} from "@/lib/coldpro/background-pipeline";
 
 interface Props {
   variant?: "default" | "outline" | "secondary";
@@ -25,93 +28,69 @@ interface Props {
 }
 
 /**
- * Botão "Processar e aprovar tudo" — roda o pipeline completo:
- * 1. processUnmappedRawRecords em loop até esvaziar
- * 2. approveAllMappedRecords em loop até esvaziar
- * Sobrescreve duplicatas. Apenas mapeados com confidence > 0 viram componentes.
+ * Botão "Processar e aprovar tudo" — dispara o pipeline em background
+ * (continua rodando se o usuário trocar de aba/rota). O progresso é lido
+ * de um singleton compartilhado.
  */
 export function ProcessAndApproveAllButton({ variant = "default", size = "sm", onDone }: Props) {
   const qc = useQueryClient();
-  const [running, setRunning] = useState(false);
-  const [progress, setProgress] = useState("");
+  const [state, setState] = useState<PipelineState | null>(null);
 
-  const handle = async () => {
-    setRunning(true);
-    setProgress("iniciando…");
-    const totals = {
-      processed: 0,
-      mapped: 0,
-      created: 0,
-      updated: 0,
-      errors: 0,
-    };
-    try {
-      // Fase 1: mapear tudo
-      setProgress("mapeando…");
-      for (let i = 0; i < 200; i++) {
-        const res = await processUnmappedRawRecords({
-          data: { batchId: null, pageSize: 200, maxPages: 3 },
-        });
-        totals.processed += res.processed;
-        totals.mapped += res.mapped;
-        setProgress(`mapeando · ${totals.processed} processados, ${totals.mapped} mapeados`);
-        if (res.processed === 0) break;
+  useEffect(() => {
+    const unsub = subscribePipeline((s) => {
+      setState(s);
+      if (s.phase === "done" || s.phase === "error" || s.phase === "archiving") {
+        // invalida contadores em transições importantes
+        void qc.invalidateQueries({ queryKey: ["tech-raw-count"] });
+        void qc.invalidateQueries({ queryKey: ["tech-unmapped-count"] });
+        void qc.invalidateQueries({ queryKey: ["tech-archived-count"] });
+        void qc.invalidateQueries({ queryKey: ["tech-mapped-counts"] });
+        void qc.invalidateQueries({ queryKey: ["technical_components"] });
       }
+    });
+    return unsub;
+  }, [qc]);
 
-      // Fase 2: aprovar e instalar no banco
-      setProgress("aprovando…");
-      for (let i = 0; i < 200; i++) {
-        const res = await approveAllMappedRecords({
-          data: { pageSize: 200, maxPages: 3, includeNeedsReview: false },
-        });
-        totals.created += res.created;
-        totals.updated += res.updated;
-        totals.errors += res.errors;
-        setProgress(
-          `aprovando · ${totals.created} novos, ${totals.updated} atualizados, ${totals.errors} erros`,
-        );
-        if (res.processed === 0) break;
-      }
+  const running = state?.phase && state.phase !== "idle" && state.phase !== "done" && state.phase !== "error";
 
+  // toast quando finaliza
+  useEffect(() => {
+    if (!state) return;
+    if (state.phase === "done") {
       toast.success(
-        `Pipeline concluído — ${totals.mapped} mapeado(s), ${totals.created} novo(s) componente(s), ${totals.updated} atualizado(s).`,
+        `Pipeline concluído — ${state.totals.mapped} mapeado(s), ${state.totals.created} novo(s), ${state.totals.updated} atualizado(s), ${state.totals.archived} arquivado(s).`,
       );
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: ["tech-raw-count"] }),
-        qc.invalidateQueries({ queryKey: ["tech-unmapped-count"] }),
-        qc.invalidateQueries({ queryKey: ["tech-mapped-counts"] }),
-        qc.invalidateQueries({ queryKey: ["technical_components"] }),
-      ]);
       onDone?.();
-    } catch (err) {
-      toast.error(`Falha no pipeline: ${err instanceof Error ? err.message : String(err)}`);
-    } finally {
-      setRunning(false);
-      setProgress("");
     }
+    if (state.phase === "error") {
+      toast.error(`Falha no pipeline: ${state.error ?? "erro desconhecido"}`);
+    }
+  }, [state?.phase]);
+
+  const handle = () => {
+    void startPipelineInBackground();
   };
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button size={size} variant={variant} disabled={running}>
+        <Button size={size} variant={variant} disabled={!!running}>
           {running ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <Sparkles className="mr-2 h-4 w-4" />
           )}
-          {running && progress ? `Rodando · ${progress}` : "Processar e aprovar tudo"}
+          {running && state?.message ? `Rodando · ${state.message}` : "Processar e aprovar tudo"}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Processar e aprovar todos os RAW?</AlertDialogTitle>
           <AlertDialogDescription>
-            Vai mapear todos os ~13k registros pendentes e instalar como componentes técnicos
-            aprovados. Apenas registros que algum mapper reconheceu (confidence &gt; 0) viram
-            componentes — o resto fica como <code>unmapped</code>. Duplicatas (mesmo
-            fabricante+modelo+código) serão <strong>sobrescritas</strong>. Operação pode levar
-            alguns minutos.
+            O sistema vai mapear todos os pendentes, instalar os reconhecidos
+            como componentes aprovados (sobrescrevendo duplicatas) e{" "}
+            <strong>arquivar</strong> os que nenhum mapper reconheceu. A operação roda em
+            <strong> segundo plano</strong> — você pode trocar de tela à vontade que ela continua.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
