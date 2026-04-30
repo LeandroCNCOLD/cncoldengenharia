@@ -426,21 +426,9 @@ export function UnilabCoilFormPanel({
     }
   };
 
-  // ============= COMPARATIVO COM CATÁLOGO CN =============
+  // ============= COMPARATIVO COM CATÁLOGO CN (modo manual: outro modelo) =============
   const [showCompare, setShowCompare] = useState(false);
   const [manualModelId, setManualModelId] = useState<string>("");
-
-  const { data: cnAutoPoint } = useQuery({
-    queryKey: ["cn-auto-point", equipmentCode, equipmentCommercialName],
-    queryFn: () =>
-      findCnCatalogPointByCode({
-        data: {
-          code: equipmentCode ?? undefined,
-          commercialName: equipmentCommercialName ?? undefined,
-        },
-      }),
-    enabled: showCompare && (!!equipmentCode || !!equipmentCommercialName),
-  });
 
   const { data: cnModels = [] } = useQuery({
     queryKey: ["cn-models-lite"],
@@ -454,12 +442,15 @@ export function UnilabCoilFormPanel({
     enabled: !!manualModelId,
   });
 
-  const cnPoint: CnCatalogPoint | null = cnManualPoint ?? cnAutoPoint ?? null;
+  // Ponto efetivo para comparação: manual (se selecionado) > auto-load
+  const cnPoint: CnCatalogPoint | null = cnManualPoint ?? cnAutoPointEager ?? null;
 
   const errorPct = useMemo(() => {
-    if (!result || !cnPoint?.capacityW) return null;
-    return ((result.capacityW - cnPoint.capacityW) / cnPoint.capacityW) * 100;
-  }, [result, cnPoint]);
+    if (!result) return null;
+    const refW = referenceCapacityW ?? cnPoint?.capacityW ?? null;
+    if (!refW) return null;
+    return ((result.capacityW - refW) / refW) * 100;
+  }, [result, cnPoint, referenceCapacityW]);
 
   // Reaplica defaults razoáveis quando o tipo muda
   const handleCoilKindChange = (k: CoilKind) => {
