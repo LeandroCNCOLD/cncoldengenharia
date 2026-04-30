@@ -105,9 +105,6 @@ function EquipmentDetailPage() {
           <TabsTrigger value="fans">Ventiladores</TabsTrigger>
           <TabsTrigger value="valve">Válvula</TabsTrigger>
           <TabsTrigger value="simulation">Sistema completo</TabsTrigger>
-          <TabsTrigger value="catalog">Catálogo</TabsTrigger>
-          <TabsTrigger value="validation">Validação</TabsTrigger>
-          <TabsTrigger value="cn-suggestions">Sugestões CN</TabsTrigger>
           <TabsTrigger value="history">Histórico</TabsTrigger>
         </TabsList>
 
