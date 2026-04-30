@@ -121,12 +121,6 @@ const NAV_GROUPS: NavGroup[] = [
         icon: Boxes,
         description: "Produtos consolidados e prontos para uso",
       },
-      {
-        label: "Desenvolvimento",
-        to: "/coldpro/desenvolvimento",
-        icon: KanbanSquare,
-        description: "Produtos em desenvolvimento — Kanban e tabela",
-      },
     ],
   },
   {
