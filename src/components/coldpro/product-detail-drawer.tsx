@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Link } from "@tanstack/react-router";
-import { CheckCircle2, Archive, ExternalLink, LineChart, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { CheckCircle2, Archive, ExternalLink, LineChart, Loader2, Wrench } from "lucide-react";
 
 import {
   Sheet,
@@ -16,7 +16,12 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { approveProduct, archiveProduct, unarchiveProduct } from "@/server/cnProductDevelopment.functions";
+import {
+  approveProduct,
+  archiveProduct,
+  ensureEquipmentProject,
+  unarchiveProduct,
+} from "@/server/cnProductDevelopment.functions";
 import type { ProductCardData } from "./product-kanban-card";
 
 interface Props {
