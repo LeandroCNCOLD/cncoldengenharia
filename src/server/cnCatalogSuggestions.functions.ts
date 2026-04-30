@@ -91,8 +91,8 @@ export const generateAndCacheCnSuggestions = createServerFn({ method: "POST" })
         score: s.score,
         ranking: s.ranking,
         tier: s.tier,
-        reason_json: { ...s.reason, label: s.label, manufacturer: s.manufacturer, model: s.model },
-        simulated_values_json: s.simulatedValues,
+        reason_json: { ...s.reason, label: s.label, manufacturer: s.manufacturer, model: s.model } as never,
+        simulated_values_json: s.simulatedValues as never,
         status: "suggested" as const,
         created_by: userId,
       }));
