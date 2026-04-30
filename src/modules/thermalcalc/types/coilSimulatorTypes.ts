@@ -5,6 +5,7 @@
 
 export type CoilSimulatorMode = "verify" | "design";
 export type CoilType = "evaporator" | "condenser";
+export type CoilOperatingMode = CoilType;
 
 export type FinType = "integral" | "espiral";
 export type TubeArrangement = "staggered" | "aligned";
@@ -13,8 +14,8 @@ export interface CoilGeometry {
   description?: string;
   finType?: FinType;
   tubeArrangement?: TubeArrangement;
-  tubeSpacingMm?: number;        // espaçamento entre tubos
-  rowSpacingMm?: number;         // espaçamento entre fileiras
+  tubeSpacingMm?: number; // espaçamento entre tubos
+  rowSpacingMm?: number; // espaçamento entre fileiras
   tubeOdMm?: number;
   tubeIdMm?: number;
   tubeWallMm?: number;
@@ -48,7 +49,7 @@ export interface AirSide {
 
 export interface RefrigerantSide {
   refrigerant?: string;
-  refTempC?: number;             // Tevap (evap) ou Tcond (cond)
+  refTempC?: number; // Tevap (evap) ou Tcond (cond)
   pressureKpa?: number;
   massFlowKgs?: number;
   superheatK?: number;
@@ -74,9 +75,44 @@ export interface CoilSimulatorInput {
   refrigerant: RefrigerantSide;
   /** Ponto nominal de referência (datasheet). Quando ausente, é estimado. */
   nominal?: NominalReference;
-  frostFactor?: number;          // evap, default 0.90
-  foulingFactor?: number;        // default 1.00
-  altitudeFactor?: number;       // cond, default 1.00
+  frostFactor?: number; // evap, default 0.90
+  foulingFactor?: number; // default 1.00
+  altitudeFactor?: number; // cond, default 1.00
+}
+
+export interface Coil {
+  id: string;
+  type: "coil";
+  mode: CoilOperatingMode;
+  geometry: CoilGeometry;
+  air: AirSide;
+  refrigerantSide: RefrigerantSide;
+  datasheetReference?: DatasheetReference | null;
+  calibration?: {
+    capacityCorrectionFactor?: number;
+    uaCorrectionFactor?: number;
+    airDpCorrectionFactor?: number;
+    refDpCorrectionFactor?: number;
+    airPressureDropFactor?: number;
+    refrigerantPressureDropFactor?: number;
+    heatTransferFactor?: number;
+  } | null;
+  label?: string;
+  frostFactor?: number;
+  foulingFactor?: number;
+  altitudeFactor?: number;
+}
+
+export interface DatasheetReference {
+  capacityW?: number | null;
+  airInletTempC?: number | null;
+  airOutletTempC?: number | null;
+  evaporationTempC?: number | null;
+  condensationTempC?: number | null;
+  airflowM3h?: number | null;
+  airPressureDropPa?: number | null;
+  refrigerantPressureDropKpa?: number | null;
+  refrigerant?: string | null;
 }
 
 /** Snapshot técnico do motor híbrido (correlações + fatores Unilab). */
@@ -110,7 +146,7 @@ export interface HybridDebugInfo {
     totalTubeCount: number;
     totalTubeLengthM: number;
     qSpecificWm2: number;
-    areaSource: 'calculated_geometry' | 'imported_unilab';
+    areaSource: "calculated_geometry" | "imported_unilab";
     areaDeviationPct?: number;
     volumeDeviationPct?: number;
   };

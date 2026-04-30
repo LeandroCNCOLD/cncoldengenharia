@@ -4,6 +4,7 @@
  */
 
 export { CalibrationPanel } from "@/components/coldpro/calibration-panel";
+export { CoilTab } from "@/components/coldpro/coil-tab";
 export { CondenserTab } from "@/components/coldpro/condenser-tab";
 export { EquipmentListPage } from "@/components/coldpro/equipment-list-page";
 export { EvaporatorTab } from "@/components/coldpro/evaporator-tab";

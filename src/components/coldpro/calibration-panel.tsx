@@ -93,8 +93,8 @@ export function CalibrationPanel({
 
   const calMutation = useMutation({
     mutationFn: async (): Promise<CalibrationOutcome> => {
-      if (!datasheet) throw new Error("Sem ponto nominal do datasheet.");
       if (!simulationInput) throw new Error("Sem entrada de simulação.");
+      if (!datasheet) throw new Error("Sem ponto nominal do datasheet.");
       const outcome = calibrateCoilFromDatasheet({
         input: simulationInput,
         datasheet,
@@ -135,15 +135,31 @@ export function CalibrationPanel({
   });
 
   const status = (active as { status?: string } | null)?.status ?? "draft";
-  const confidence = Number((active as { confidence_score?: number } | null)?.confidence_score ?? 0.6);
-  const devBefore = (active as { deviation_before?: { capacityPct?: number; airDpPct?: number; refDpPct?: number } } | null)?.deviation_before;
-  const devAfter = (active as { deviation_after?: { capacityPct?: number; airDpPct?: number; refDpPct?: number } } | null)?.deviation_after;
+  const confidence = Number(
+    (active as { confidence_score?: number } | null)?.confidence_score ?? 0.6,
+  );
+  const devBefore = (
+    active as {
+      deviation_before?: { capacityPct?: number; airDpPct?: number; refDpPct?: number };
+    } | null
+  )?.deviation_before;
+  const devAfter = (
+    active as {
+      deviation_after?: { capacityPct?: number; airDpPct?: number; refDpPct?: number };
+    } | null
+  )?.deviation_after;
 
   const factors = active
     ? {
-        capacity: Number((active as { capacity_correction_factor?: number }).capacity_correction_factor ?? 1),
-        air: Number((active as { air_dp_correction_factor?: number }).air_dp_correction_factor ?? 1),
-        ref: Number((active as { ref_dp_correction_factor?: number }).ref_dp_correction_factor ?? 1),
+        capacity: Number(
+          (active as { capacity_correction_factor?: number }).capacity_correction_factor ?? 1,
+        ),
+        air: Number(
+          (active as { air_dp_correction_factor?: number }).air_dp_correction_factor ?? 1,
+        ),
+        ref: Number(
+          (active as { ref_dp_correction_factor?: number }).ref_dp_correction_factor ?? 1,
+        ),
       }
     : null;
 
@@ -187,33 +203,51 @@ export function CalibrationPanel({
                 <TableBody>
                   <TableRow>
                     <TableCell>Capacidade</TableCell>
-                    <TableCell className={`text-right ${devClass(devBefore?.capacityPct, CALIBRATION_TARGETS.capacityPct)}`}>
+                    <TableCell
+                      className={`text-right ${devClass(devBefore?.capacityPct, CALIBRATION_TARGETS.capacityPct)}`}
+                    >
                       {fmtPct(devBefore?.capacityPct)}
                     </TableCell>
-                    <TableCell className={`text-right ${devClass(devAfter?.capacityPct, CALIBRATION_TARGETS.capacityPct)}`}>
+                    <TableCell
+                      className={`text-right ${devClass(devAfter?.capacityPct, CALIBRATION_TARGETS.capacityPct)}`}
+                    >
                       {fmtPct(devAfter?.capacityPct)}
                     </TableCell>
-                    <TableCell className="text-right text-muted-foreground">≤{CALIBRATION_TARGETS.capacityPct}%</TableCell>
+                    <TableCell className="text-right text-muted-foreground">
+                      ≤{CALIBRATION_TARGETS.capacityPct}%
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>ΔP ar</TableCell>
-                    <TableCell className={`text-right ${devClass(devBefore?.airDpPct, CALIBRATION_TARGETS.airDpPct)}`}>
+                    <TableCell
+                      className={`text-right ${devClass(devBefore?.airDpPct, CALIBRATION_TARGETS.airDpPct)}`}
+                    >
                       {fmtPct(devBefore?.airDpPct)}
                     </TableCell>
-                    <TableCell className={`text-right ${devClass(devAfter?.airDpPct, CALIBRATION_TARGETS.airDpPct)}`}>
+                    <TableCell
+                      className={`text-right ${devClass(devAfter?.airDpPct, CALIBRATION_TARGETS.airDpPct)}`}
+                    >
                       {fmtPct(devAfter?.airDpPct)}
                     </TableCell>
-                    <TableCell className="text-right text-muted-foreground">≤{CALIBRATION_TARGETS.airDpPct}%</TableCell>
+                    <TableCell className="text-right text-muted-foreground">
+                      ≤{CALIBRATION_TARGETS.airDpPct}%
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>ΔP refrigerante</TableCell>
-                    <TableCell className={`text-right ${devClass(devBefore?.refDpPct, CALIBRATION_TARGETS.refDpPct)}`}>
+                    <TableCell
+                      className={`text-right ${devClass(devBefore?.refDpPct, CALIBRATION_TARGETS.refDpPct)}`}
+                    >
                       {fmtPct(devBefore?.refDpPct)}
                     </TableCell>
-                    <TableCell className={`text-right ${devClass(devAfter?.refDpPct, CALIBRATION_TARGETS.refDpPct)}`}>
+                    <TableCell
+                      className={`text-right ${devClass(devAfter?.refDpPct, CALIBRATION_TARGETS.refDpPct)}`}
+                    >
                       {fmtPct(devAfter?.refDpPct)}
                     </TableCell>
-                    <TableCell className="text-right text-muted-foreground">≤{CALIBRATION_TARGETS.refDpPct}%</TableCell>
+                    <TableCell className="text-right text-muted-foreground">
+                      ≤{CALIBRATION_TARGETS.refDpPct}%
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>

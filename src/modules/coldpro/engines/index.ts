@@ -31,7 +31,7 @@ export {
   getCompressorModel,
   simulateCompressor,
   evaluateCompressor,
-  runEvaporator,
-  runCondenser,
+  simulateCoil,
+  runCoilSection,
   runExpansionDevice,
 } from "../system";

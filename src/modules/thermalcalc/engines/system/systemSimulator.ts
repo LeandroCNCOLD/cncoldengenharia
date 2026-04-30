@@ -21,8 +21,7 @@ import type {
   SystemResult,
 } from "./systemTypes";
 import { evalPolynomial, runCompressor } from "./compressorEngine";
-import { runEvaporator } from "./evaporatorWrapper";
-import { runCondenser } from "./condenserWrapper";
+import { simulateCoil } from "./coilWrapper";
 import { runExpansionDevice } from "./expansionDeviceEngine";
 
 function clamp(v: number, lo: number, hi: number): number {
@@ -131,22 +130,24 @@ export function simulateSystem(input: SystemInput): SystemResult {
       compressorMassFlowKgh: comp.massFlowKgh,
     });
 
-    evap = runEvaporator({
+    evap = simulateCoil({
+      mode: "evaporator",
       geometryCode: input.evaporatorGeometryCode,
       refrigerant: input.refrigerant,
       airInletTempC: input.airInletEvapC,
-      evaporatingTempC: te,
+      refTempC: te,
       airflowM3h: input.airflowEvapM3h,
       refrigerantMassFlowKgh: comp.massFlowKgh,
       relativeHumidityPct: 85,
       resolvedCoil: input.resolvedTechnicalData?.evaporatorCoil,
     });
 
-    cond = runCondenser({
+    cond = simulateCoil({
+      mode: "condenser",
       geometryCode: input.condenserGeometryCode,
       refrigerant: input.refrigerant,
       airInletTempC: input.airInletCondC,
-      condensingTempC: tc,
+      refTempC: tc,
       airflowM3h: input.airflowCondM3h,
       refrigerantMassFlowKgh: comp.massFlowKgh,
       resolvedCoil: input.resolvedTechnicalData?.condenserCoil,

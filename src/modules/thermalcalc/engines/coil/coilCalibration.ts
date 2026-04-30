@@ -6,7 +6,11 @@
  * clampar entre 0.3 e 3.0, validar contra metas.
  */
 
-import type { CoilSimulatorInput, CoilSimulatorResult } from "@/modules/thermalcalc/types/coilSimulatorTypes";
+import type {
+  CoilSimulatorInput,
+  CoilSimulatorResult,
+} from "@/modules/thermalcalc/types/coilSimulatorTypes";
+import type { Coil } from "@/modules/thermalcalc/types/coilSimulatorTypes";
 import { simulatePhysicalSimple } from "./physicalSimpleEngine";
 import {
   NEUTRAL_CALIBRATION,
@@ -43,7 +47,15 @@ export interface CalibrationOutcome {
   calibratedResult: CoilSimulatorResult;
 }
 
-function pctDeviation(actual: number | null | undefined, ref: number | null | undefined): number | null {
+export interface CoilCalibrationValidation {
+  ok: boolean;
+  missing: string[];
+}
+
+function pctDeviation(
+  actual: number | null | undefined,
+  ref: number | null | undefined,
+): number | null {
   if (actual == null || ref == null || ref === 0) return null;
   return ((actual - ref) / ref) * 100;
 }
@@ -67,12 +79,42 @@ export function calibrateCoilFromDatasheet(params: {
   datasheet: DatasheetPoint;
 }): CalibrationOutcome {
   const { input, datasheet } = params;
+  const validation = validateDatasheetForCalibration(input.coilType, input, datasheet);
+  if (!validation.ok) {
+    throw new Error(`Calibração bloqueada: faltam ${validation.missing.join(", ")}.`);
+  }
   const reference: CalibrationReference = {
     capacityW: datasheet.capacityW,
     airPressureDropPa: datasheet.airPressureDropPa ?? null,
     refPressureDropKpa: datasheet.refrigerantPressureDropKpa ?? null,
   };
   return calibrateAgainstReference(input, reference);
+}
+
+export function calibrateCoil(coil: Coil, datasheet: DatasheetPoint): CalibrationOutcome {
+  return calibrateCoilFromDatasheet({
+    input: coil,
+    datasheet,
+  });
+}
+
+export function validateDatasheetForCalibration(
+  coilType: "evaporator" | "condenser",
+  input: CoilSimulatorInput,
+  datasheet: DatasheetPoint,
+): CoilCalibrationValidation {
+  const missing: string[] = [];
+  if (!input.air.airflowM3h && !datasheet.airflowM3h) missing.push("airflow");
+  if (!datasheet.capacityW) missing.push("capacidade");
+  if (!input.refrigerant.refrigerant && !datasheet.refrigerant) missing.push("refrigerante");
+  if (coilType === "evaporator") {
+    if (input.refrigerant.refTempC == null && datasheet.evaporationTempC == null) {
+      missing.push("Tevap");
+    }
+  } else if (input.refrigerant.refTempC == null && datasheet.condensationTempC == null) {
+    missing.push("Tcond");
+  }
+  return { ok: missing.length === 0, missing };
 }
 
 export function calibrateAgainstReference(
@@ -125,7 +167,10 @@ export function calibrateAgainstReference(
   const deviationAfter: CalibrationDeviation = {
     capacityPct: pctDeviation(calibratedResult.capacityW, reference.capacityW),
     airDpPct: pctDeviation(calibratedResult.airPressureDropPa, reference.airPressureDropPa ?? null),
-    refDpPct: pctDeviation(calibratedResult.refPressureDropKpa, reference.refPressureDropKpa ?? null),
+    refDpPct: pctDeviation(
+      calibratedResult.refPressureDropKpa,
+      reference.refPressureDropKpa ?? null,
+    ),
   };
 
   const capOk = Math.abs(deviationAfter.capacityPct ?? 999) <= CALIBRATION_TARGETS.capacityPct;

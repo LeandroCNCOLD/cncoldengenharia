@@ -7,16 +7,15 @@
 //      iteration,
 //   3) Adds an explicit energy-balance validation Qcond ≈ Qevap + Wcomp.
 
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { runEvaporator } from './evaporatorWrapper';
-import { runCondenser } from './condenserWrapper';
-import { runExpansionDevice } from './expansionDeviceEngine';
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { simulateCoilRun } from "./coilWrapper";
+import { runExpansionDevice } from "./expansionDeviceEngine";
 import {
   evaluateCompressor,
   type VapcycCompressorRecord,
   type VapcycPolynomialRecord,
-} from './vapcycCompressorEngine';
-import type { SectionResult, SystemResult, Bottleneck } from './systemTypes';
+} from "./vapcycCompressorEngine";
+import type { SectionResult, SystemResult, Bottleneck } from "./systemTypes";
 
 export interface VapcycSystemInput {
   evaporatorGeometryCode: string;
@@ -52,20 +51,15 @@ function clamp(v: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, v));
 }
 
-function pickBottleneck(
-  qEvap: number,
-  qComp: number,
-  qCond: number,
-  tol: number,
-): Bottleneck {
+function pickBottleneck(qEvap: number, qComp: number, qCond: number, tol: number): Bottleneck {
   const xs = [
-    { name: 'evaporator' as const, q: qEvap },
-    { name: 'compressor' as const, q: qComp },
-    { name: 'condenser' as const, q: qCond },
+    { name: "evaporator" as const, q: qEvap },
+    { name: "compressor" as const, q: qComp },
+    { name: "condenser" as const, q: qCond },
   ].sort((a, b) => a.q - b.q);
   const min = xs[0];
   const max = xs[xs.length - 1];
-  if (max.q > 0 && (max.q - min.q) / max.q < tol * 2) return 'balanced';
+  if (max.q > 0 && (max.q - min.q) / max.q < tol * 2) return "balanced";
   return min.name;
 }
 
@@ -74,27 +68,25 @@ export async function simulateSystemVapcyc(
   input: VapcycSystemInput,
 ): Promise<VapcycSystemResult> {
   // ---- 1) Pre-fetch compressor model + polynomials ----
-  let q = supabase.from('compressor_models').select('*').limit(1);
-  if (input.compressorId) q = q.eq('id', input.compressorId);
+  let q = supabase.from("compressor_models").select("*").limit(1);
+  if (input.compressorId) q = q.eq("id", input.compressorId);
   else if (input.compressorSourceTableKey)
-    q = q.eq('source_table_key', input.compressorSourceTableKey);
-  else throw new Error('compressorId ou compressorSourceTableKey é obrigatório');
+    q = q.eq("source_table_key", input.compressorSourceTableKey);
+  else throw new Error("compressorId ou compressorSourceTableKey é obrigatório");
   const { data: models, error: mErr } = await q;
   if (mErr) throw new Error(`compressor_models: ${mErr.message}`);
-  if (!models?.length) throw new Error('Compressor não encontrado');
+  if (!models?.length) throw new Error("Compressor não encontrado");
   const model = models[0] as VapcycCompressorRecord;
 
   const { data: polysRaw, error: pErr } = await supabase
-    .from('compressor_polynomials')
-    .select('curve_type, unit_system, coefficients_json')
-    .eq('compressor_id', model.id);
+    .from("compressor_polynomials")
+    .select("curve_type, unit_system, coefficients_json")
+    .eq("compressor_id", model.id);
   if (pErr) throw new Error(`compressor_polynomials: ${pErr.message}`);
   const polys: VapcycPolynomialRecord[] = (polysRaw ?? []).map((p) => ({
-    curve_type: p.curve_type as VapcycPolynomialRecord['curve_type'],
-    unit_system: p.unit_system ?? '',
-    coefficients_json: Array.isArray(p.coefficients_json)
-      ? (p.coefficients_json as number[])
-      : [],
+    curve_type: p.curve_type as VapcycPolynomialRecord["curve_type"],
+    unit_system: p.unit_system ?? "",
+    coefficients_json: Array.isArray(p.coefficients_json) ? (p.coefficients_json as number[]) : [],
   }));
 
   // ---- 2) Solver loop ----
@@ -111,7 +103,12 @@ export async function simulateSystemVapcyc(
 
   let comp = evaluateCompressor(model, polys, te, tc);
   let evap: SectionResult = {
-    capacityW: 0, uWm2K: 0, hAirWm2K: 0, hRefWm2K: 0, effectiveAreaM2: 0, warnings: [],
+    capacityW: 0,
+    uWm2K: 0,
+    hAirWm2K: 0,
+    hRefWm2K: 0,
+    effectiveAreaM2: 0,
+    warnings: [],
   };
   let cond: SectionResult = { ...evap };
 
@@ -130,21 +127,23 @@ export async function simulateSystemVapcyc(
       compressorMassFlowKgh: comp.massFlowKgh,
     });
 
-    evap = runEvaporator({
+    evap = simulateCoilRun({
+      mode: "evaporator",
       geometryCode: input.evaporatorGeometryCode,
       refrigerant: input.refrigerant,
       airInletTempC: input.airInletEvapC,
-      evaporatingTempC: te,
+      refTempC: te,
       airflowM3h: input.airflowEvapM3h,
       refrigerantMassFlowKgh: comp.massFlowKgh,
       relativeHumidityPct: 85,
     });
 
-    cond = runCondenser({
+    cond = simulateCoilRun({
+      mode: "condenser",
       geometryCode: input.condenserGeometryCode,
       refrigerant: input.refrigerant,
       airInletTempC: input.airInletCondC,
-      condensingTempC: tc,
+      refTempC: tc,
       airflowM3h: input.airflowCondM3h,
       refrigerantMassFlowKgh: comp.massFlowKgh,
     });
@@ -157,7 +156,10 @@ export async function simulateSystemVapcyc(
     const errEvap = qComp > 0 ? Math.abs(qEvap - qComp) / qComp : 1;
     const errCond = qCondTarget > 0 ? Math.abs(qCond - qCondTarget) / qCondTarget : 1;
     lastError = Math.max(errEvap, errCond);
-    if (lastError < tol) { converged = true; break; }
+    if (lastError < tol) {
+      converged = true;
+      break;
+    }
 
     const damping = 0.4;
     const cpAir = 1005;
@@ -171,7 +173,9 @@ export async function simulateSystemVapcyc(
   }
 
   if (!converged)
-    warnings.push(`Solver não convergiu em ${maxIter} iter (erro ${(lastError * 100).toFixed(1)}%).`);
+    warnings.push(
+      `Solver não convergiu em ${maxIter} iter (erro ${(lastError * 100).toFixed(1)}%).`,
+    );
 
   // ---- 3) Energy-balance validation ----
   const qEvapW = evap.capacityW;
@@ -179,19 +183,24 @@ export async function simulateSystemVapcyc(
   const wCompW = comp.powerW;
   const residualW = qCondW - (qEvapW + wCompW);
   const relErr = qEvapW > 0 ? Math.abs(residualW) / qEvapW : 1;
-  const balanceValid = relErr <= 0.10;
+  const balanceValid = relErr <= 0.1;
   if (!balanceValid)
-    warnings.push(`Balanço energético: |Qcond - (Qevap + W)| / Qevap = ${(relErr * 100).toFixed(1)}% (>10%).`);
+    warnings.push(
+      `Balanço energético: |Qcond - (Qevap + W)| / Qevap = ${(relErr * 100).toFixed(1)}% (>10%).`,
+    );
 
   const capacityRealW = Math.min(evap.capacityW, comp.capacityW);
   const cop = comp.powerW > 0 ? capacityRealW / comp.powerW : 0;
 
   const compNominal = evaluateCompressor(model, polys, -10, 45);
-  const utilizationComp = compNominal.capacityW > 0 ? clamp(comp.capacityW / compNominal.capacityW, 0, 2) : 0;
+  const utilizationComp =
+    compNominal.capacityW > 0 ? clamp(comp.capacityW / compNominal.capacityW, 0, 2) : 0;
   const utilizationEvap = evap.capacityW > 0 ? clamp(capacityRealW / evap.capacityW, 0, 1) : 0;
-  const utilizationCond = cond.capacityW > 0 ? clamp((comp.capacityW + comp.powerW) / cond.capacityW, 0, 2) : 0;
+  const utilizationCond =
+    cond.capacityW > 0 ? clamp((comp.capacityW + comp.powerW) / cond.capacityW, 0, 2) : 0;
 
-  if (!comp.inEnvelope) warnings.push(...comp.envelopeWarnings.map((w) => `Compressor envelope: ${w}`));
+  if (!comp.inEnvelope)
+    warnings.push(...comp.envelopeWarnings.map((w) => `Compressor envelope: ${w}`));
   warnings.push(...comp.warnings, ...evap.warnings, ...cond.warnings);
 
   return {
@@ -229,12 +238,17 @@ export async function simulateSystemVapcyc(
       compressorNominalW: compNominal.capacityW,
       currentA: comp.currentA,
       copHeating: comp.copHeating,
-      unitSystem: String(comp.unitSystem ?? ''),
-      sourceDb: String(model.source_db ?? ''),
-      sourceTableKey: String(model.source_table_key ?? ''),
+      unitSystem: String(comp.unitSystem ?? ""),
+      sourceDb: String(model.source_db ?? ""),
+      sourceTableKey: String(model.source_table_key ?? ""),
     },
     energyBalance: {
-      qEvapW, qCondW, wCompW, residualW, relativeError: relErr, valid: balanceValid,
+      qEvapW,
+      qCondW,
+      wCompW,
+      residualW,
+      relativeError: relErr,
+      valid: balanceValid,
     },
   };
 }

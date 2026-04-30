@@ -2,27 +2,24 @@
  * thermalcalc — Motor de sistema (ciclo completo).
  */
 
-export { simulateSystem } from './systemSimulator';
-export { simulateSystemVapcyc } from './vapcycSystemSimulator';
-export type { VapcycSystemInput, VapcycSystemResult } from './vapcycSystemSimulator';
+export { simulateSystem } from "./systemSimulator";
+export { simulateSystemVapcyc } from "./vapcycSystemSimulator";
+export type { VapcycSystemInput, VapcycSystemResult } from "./vapcycSystemSimulator";
 
-export { runCompressor, listCompressorModels, getCompressorModel } from './compressorEngine';
-export {
-  simulateCompressor,
-  evaluateCompressor,
-} from './vapcycCompressorEngine';
+export { runCompressor, listCompressorModels, getCompressorModel } from "./compressorEngine";
+export { simulateCompressor, evaluateCompressor } from "./vapcycCompressorEngine";
 export type {
   SimulateCompressorInput,
   SimulateCompressorResult,
   VapcycCompressorRecord,
   VapcycPolynomialRecord,
   VapcycCurveType,
-} from './vapcycCompressorEngine';
+} from "./vapcycCompressorEngine";
 
-export { runEvaporator } from './evaporatorWrapper';
-export { runCondenser } from './condenserWrapper';
-export { runExpansionDevice } from './expansionDeviceEngine';
-export { defaultGeometryFromCode } from './systemGeometryDefaults';
+export { runCoilSection, simulateCoil } from "./coilWrapper";
+export type { Coil, CoilMode, CoilSectionRunInput } from "./coilWrapper";
+export { runExpansionDevice } from "./expansionDeviceEngine";
+export { defaultGeometryFromCode } from "./systemGeometryDefaults";
 
 export type {
   SystemInput,
@@ -32,4 +29,4 @@ export type {
   CompressorModelData,
   Bottleneck,
   Refrigerant,
-} from './systemTypes';
+} from "./systemTypes";
