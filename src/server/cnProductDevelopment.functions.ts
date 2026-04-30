@@ -61,7 +61,7 @@ export const getProductFullDetails = createServerFn({ method: "POST" })
     if (ce) throw ce;
 
     // Extrai dados técnicos consolidados a partir do raw_json da primeira curva
-    let technical: Record<string, unknown> = {};
+    let technical: Record<string, string | number | null> = {};
     const first = curves?.[0];
     if (first?.raw_json && typeof first.raw_json === "object") {
       const raw = first.raw_json as Record<string, unknown>;
