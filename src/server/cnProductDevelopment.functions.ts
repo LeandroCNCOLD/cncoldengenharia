@@ -7,7 +7,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const STATUS = ["a_analisar", "em_analise", "sugestoes_ok", "aprovado", "arquivado"] as const;
 
-export const listProducts = createServerFn({ method: "GET" })
+export const listProducts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ includeArchived: z.boolean().optional() }).parse(d ?? {}))
   .handler(async ({ data, context }) => {
