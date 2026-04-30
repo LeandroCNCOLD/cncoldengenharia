@@ -667,6 +667,7 @@ function TechBankPage() {
       />
 
       <PendingReviewBanner />
+      <ArchivedRawCard />
 
       <Tabs defaultValue="universal">
         <TabsList className="flex flex-wrap">
