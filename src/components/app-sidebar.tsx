@@ -12,6 +12,7 @@ import {
   BookOpen,
   Upload,
   FileBarChart,
+  KanbanSquare,
   type LucideIcon,
 } from "lucide-react";
 
@@ -47,6 +48,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Painel ColdPro", to: "/coldpro/dashboard", icon: FileBarChart },
   { label: "Projetos", to: "/coldpro/projetos", icon: FolderKanban },
   { label: "Equipamentos", to: "/coldpro/equipamentos", icon: Boxes },
+  { label: "Desenvolvimento", to: "/coldpro/desenvolvimento", icon: KanbanSquare },
   { label: "Catálogo Técnico", to: "/coldpro/catalogo", icon: BookOpen },
   { label: "Administração", to: "/admin", icon: Settings, adminOnly: true },
   { label: "Importar Unilab", to: "/admin/unilab-import", icon: Upload, adminOnly: true },
