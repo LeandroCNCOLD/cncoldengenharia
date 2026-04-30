@@ -91,19 +91,6 @@ const NAV_GROUPS: NavGroup[] = [
         icon: BookOpen,
         description: "Curvas e dados técnicos publicados",
       },
-      {
-        label: "Catálogo 480",
-        to: "/coldpro/catalogo-480",
-        icon: BookOpen,
-        description: "Modelos consolidados prontos para gerar equipamentos",
-      },
-      {
-        label: "Revisão Técnica",
-        to: "/coldpro/admin/revisao-tecnica",
-        icon: ClipboardCheck,
-        description: "Aprovação e auditoria dos dados técnicos",
-        adminOnly: true,
-      },
     ],
   },
   {
