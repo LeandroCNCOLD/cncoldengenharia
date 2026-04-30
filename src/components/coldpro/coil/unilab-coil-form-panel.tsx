@@ -13,9 +13,9 @@
  *
  * NÃO faz cálculos no React — apenas monta input e exibe o que o engine retorna.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calculator, GitCompare, Info } from "lucide-react";
+import { Calculator, Database, GitCompare, Info, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -41,9 +41,11 @@ import type { CoilSimulatorInput, CoilSimulatorResult, CoilType } from "@/module
 import {
   listCoilMaterials,
   listCnCatalogModelsLite,
+  listCnCatalogPointsByModelo,
   getCnCatalogPointByModelId,
   findCnCatalogPointByCode,
   type CnCatalogPoint,
+  type CnCatalogGeometry,
 } from "@/server/coilUnilab.functions";
 
 type CoilKind = "evaporator" | "condenser";
@@ -139,6 +141,94 @@ export function UnilabCoilFormPanel({
     subcoolingK: "3",
   });
 
+  // ============= ESTADO DE PRÉ-PREENCHIMENTO PELO CATÁLOGO CN =============
+  // Track se vieram do catálogo (badge azul) e se o usuário editou alguma coisa.
+  const [filledFromCatalog, setFilledFromCatalog] = useState(false);
+  const [manuallyEdited, setManuallyEdited] = useState(false);
+  const [catalogModelo, setCatalogModelo] = useState<string | null>(null);
+  const [selectedCurveId, setSelectedCurveId] = useState<string | null>(null);
+  const [referenceCapacityW, setReferenceCapacityW] = useState<number | null>(null);
+  const [referenceCurveIdx, setReferenceCurveIdx] = useState<number | null>(null);
+  // ref para diferenciar mudanças "programáticas" (carregamento) de mudanças do usuário
+  const isApplyingFromCatalog = useRef(false);
+
+  // Wrappers que marcam "editado manualmente" sem perder a tipagem.
+  const editGeo = (patch: Partial<typeof geo>) => {
+    if (!isApplyingFromCatalog.current && filledFromCatalog) setManuallyEdited(true);
+    setGeo((s) => ({ ...s, ...patch }));
+  };
+  const editAir = (patch: Partial<typeof air>) => {
+    if (!isApplyingFromCatalog.current && filledFromCatalog) setManuallyEdited(true);
+    setAir((s) => ({ ...s, ...patch }));
+  };
+  const editRef = (patch: Partial<typeof ref>) => {
+    if (!isApplyingFromCatalog.current && filledFromCatalog) setManuallyEdited(true);
+    setRef((s) => ({ ...s, ...patch }));
+  };
+
+  // Aplica um ponto do catálogo no formulário (geometria + ar + fluido).
+  const applyCatalogPoint = (point: CnCatalogPoint, kind: CoilKind) => {
+    isApplyingFromCatalog.current = true;
+    try {
+      const g: CnCatalogGeometry =
+        kind === "evaporator" ? point.evaporatorGeometry : point.condenserGeometry;
+      const tEvap = point.tempEvapC;
+      const tCond = point.tempCondC;
+
+      setGeo((s) => ({
+        ...s,
+        rows: g.rows != null ? String(g.rows) : s.rows,
+        tubesPerRow: g.tubesPerRow != null ? String(g.tubesPerRow) : s.tubesPerRow,
+        circuits: g.circuits != null ? String(g.circuits) : s.circuits,
+        coilLengthMm: g.coilLengthMm != null ? String(g.coilLengthMm) : s.coilLengthMm,
+        finPitchMm: g.finPitchMm != null ? String(g.finPitchMm) : s.finPitchMm,
+        tubeOdMm: g.tubeOdMm != null ? String(g.tubeOdMm) : s.tubeOdMm,
+        tubeWallMm: g.tubeWallMm != null ? String(g.tubeWallMm) : s.tubeWallMm,
+        tubePitchMm: g.tubePitchMm != null ? String(g.tubePitchMm) : s.tubePitchMm,
+        rowPitchMm: g.rowPitchMm != null ? String(g.rowPitchMm) : s.rowPitchMm,
+        finThicknessMm: g.finThicknessMm != null ? String(g.finThicknessMm) : s.finThicknessMm,
+        skippedTubes: g.skippedTubes != null ? String(g.skippedTubes) : s.skippedTubes,
+      }));
+      setAir((s) => ({
+        ...s,
+        airflowM3h: g.airflowM3h != null ? String(g.airflowM3h) : s.airflowM3h,
+        airTempInC:
+          kind === "evaporator"
+            ? tEvap != null
+              ? String(tEvap)
+              : s.airTempInC
+            : s.airTempInC,
+        rhInPct: point.rhInPct != null ? String(point.rhInPct) : s.rhInPct,
+      }));
+      setRef((s) => ({
+        ...s,
+        refrigerant: point.refrigerante ?? s.refrigerant,
+        refTempC:
+          kind === "evaporator"
+            ? tEvap != null
+              ? String(tEvap)
+              : s.refTempC
+            : tCond != null
+              ? String(tCond)
+              : s.refTempC,
+        superheatK: point.superheatK != null ? String(point.superheatK) : s.superheatK,
+        subcoolingK: point.subcoolingK != null ? String(point.subcoolingK) : s.subcoolingK,
+      }));
+      setCatalogModelo(point.modelo);
+      setSelectedCurveId(point.id);
+      setReferenceCapacityW(point.capacityW);
+      setReferenceCurveIdx(point.curvaIndice);
+      setFilledFromCatalog(true);
+      setManuallyEdited(false);
+    } finally {
+      // libera no próximo tick para garantir que os setters acima já rodaram.
+      setTimeout(() => {
+        isApplyingFromCatalog.current = false;
+      }, 0);
+    }
+  };
+
+  // Compatibilidade com o prefill antigo (do "Carregar e abrir" de outras telas).
   useEffect(() => {
     if (!prefill) return;
     if (prefill.coilType) setCoilKind(prefill.coilType);
@@ -164,6 +254,82 @@ export function UnilabCoilFormPanel({
       refTempC: prefill.nominal?.refTempC != null ? String(prefill.nominal.refTempC) : s.refTempC,
     }));
   }, [prefill]);
+
+  // Auto-load do catálogo CN ao abrir, usando code → commercial_name.
+  const { data: cnAutoPointEager, isFetching: cnAutoFetching } = useQuery({
+    queryKey: ["cn-auto-point-eager", equipmentCode, equipmentCommercialName],
+    queryFn: () =>
+      findCnCatalogPointByCode({
+        data: {
+          code: equipmentCode ?? undefined,
+          commercialName: equipmentCommercialName ?? undefined,
+        },
+      }),
+    enabled: !!equipmentCode || !!equipmentCommercialName,
+    staleTime: 60_000,
+  });
+
+  // Aplica auto-load quando o ponto chegar (apenas uma vez por modelo).
+  const autoAppliedKey = useRef<string | null>(null);
+  useEffect(() => {
+    if (!cnAutoPointEager) return;
+    const key = `${cnAutoPointEager.id}:${coilKind}`;
+    if (autoAppliedKey.current === key) return;
+    autoAppliedKey.current = key;
+    applyCatalogPoint(cnAutoPointEager, coilKind);
+    toast.success(`Pré-preenchido: ${cnAutoPointEager.modelo} (ponto #${cnAutoPointEager.curvaIndice ?? "—"})`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cnAutoPointEager, coilKind]);
+
+  // Lista de pontos da curva do modelo carregado (para o seletor "Ponto da curva CN").
+  const { data: cnPoints = [] } = useQuery({
+    queryKey: ["cn-points-by-modelo", catalogModelo],
+    queryFn: () => listCnCatalogPointsByModelo({ data: { modelo: catalogModelo! } }),
+    enabled: !!catalogModelo,
+  });
+
+  // Troca de ponto na mesma curva: re-busca o ponto inteiro e re-aplica (preserva geometria).
+  const handleSelectCurvePoint = async (curveId: string) => {
+    const point = await getCnCatalogPointByModelId({ data: { modelId: curveId } });
+    if (!point) {
+      toast.error("Ponto não encontrado");
+      return;
+    }
+    if (manuallyEdited) {
+      const ok = window.confirm("Há campos editados manualmente. Deseja sobrescrevê-los com este ponto?");
+      if (!ok) return;
+    }
+    applyCatalogPoint(point, coilKind);
+    toast.success(`Ponto #${point.curvaIndice ?? "—"} carregado`);
+  };
+
+  // Botão "Carregar dados do catálogo" (manual)
+  const [loadingCatalog, setLoadingCatalog] = useState(false);
+  const handleLoadFromCatalog = async () => {
+    if (manuallyEdited) {
+      const ok = window.confirm("Há campos editados manualmente. Deseja sobrescrevê-los com os dados do catálogo CN?");
+      if (!ok) return;
+    }
+    setLoadingCatalog(true);
+    try {
+      const point = await findCnCatalogPointByCode({
+        data: {
+          code: equipmentCode ?? undefined,
+          commercialName: equipmentCommercialName ?? undefined,
+        },
+      });
+      if (!point) {
+        toast.error("Modelo não encontrado no catálogo CN");
+        return;
+      }
+      applyCatalogPoint(point, coilKind);
+      toast.success("Dados do catálogo carregados");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao carregar do catálogo");
+    } finally {
+      setLoadingCatalog(false);
+    }
+  };
 
   // ============= MATERIAIS =============
   const { data: materials = [] } = useQuery({
@@ -260,21 +426,9 @@ export function UnilabCoilFormPanel({
     }
   };
 
-  // ============= COMPARATIVO COM CATÁLOGO CN =============
+  // ============= COMPARATIVO COM CATÁLOGO CN (modo manual: outro modelo) =============
   const [showCompare, setShowCompare] = useState(false);
   const [manualModelId, setManualModelId] = useState<string>("");
-
-  const { data: cnAutoPoint } = useQuery({
-    queryKey: ["cn-auto-point", equipmentCode, equipmentCommercialName],
-    queryFn: () =>
-      findCnCatalogPointByCode({
-        data: {
-          code: equipmentCode ?? undefined,
-          commercialName: equipmentCommercialName ?? undefined,
-        },
-      }),
-    enabled: showCompare && (!!equipmentCode || !!equipmentCommercialName),
-  });
 
   const { data: cnModels = [] } = useQuery({
     queryKey: ["cn-models-lite"],
@@ -288,27 +442,34 @@ export function UnilabCoilFormPanel({
     enabled: !!manualModelId,
   });
 
-  const cnPoint: CnCatalogPoint | null = cnManualPoint ?? cnAutoPoint ?? null;
+  // Ponto efetivo para comparação: manual (se selecionado) > auto-load
+  const cnPoint: CnCatalogPoint | null = cnManualPoint ?? cnAutoPointEager ?? null;
 
   const errorPct = useMemo(() => {
-    if (!result || !cnPoint?.capacityW) return null;
-    return ((result.capacityW - cnPoint.capacityW) / cnPoint.capacityW) * 100;
-  }, [result, cnPoint]);
+    if (!result) return null;
+    const refW = referenceCapacityW ?? cnPoint?.capacityW ?? null;
+    if (!refW) return null;
+    return ((result.capacityW - refW) / refW) * 100;
+  }, [result, cnPoint, referenceCapacityW]);
 
-  // Reaplica defaults razoáveis quando o tipo muda
+  // Reaplica defaults razoáveis quando o tipo muda; se já há modelo CN carregado,
+  // reaproveita a geometria do outro lado (evap ↔ cond) sem precisar recarregar.
   const handleCoilKindChange = (k: CoilKind) => {
     setCoilKind(k);
     onCoilKindChange?.(k);
     setAir((s) => ({ ...s, airTempInC: k === "evaporator" ? "0" : "35" }));
     setRef((s) => ({ ...s, refTempC: k === "evaporator" ? "-10" : "48" }));
     setResult(null);
+    if (cnAutoPointEager) {
+      autoAppliedKey.current = null; // força reapply pro novo lado
+    }
   };
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Label className="text-sm">Tipo:</Label>
           <Select value={coilKind} onValueChange={(v) => handleCoilKindChange(v as CoilKind)}>
             <SelectTrigger className="w-48">
@@ -319,9 +480,33 @@ export function UnilabCoilFormPanel({
               <SelectItem value="condenser">Condensador</SelectItem>
             </SelectContent>
           </Select>
-          <Badge variant="outline" className="ml-2">engine: hybrid_unilab</Badge>
+          <Badge variant="outline">engine: hybrid_unilab</Badge>
+          {filledFromCatalog && (
+            <Badge className="bg-blue-600 hover:bg-blue-600">
+              Pré-preenchido pelo Catálogo CN
+              {catalogModelo ? ` · ${catalogModelo}` : ""}
+              {referenceCurveIdx != null ? ` · ponto #${referenceCurveIdx}` : ""}
+            </Badge>
+          )}
+          {filledFromCatalog && manuallyEdited && (
+            <Badge variant="destructive">Editado manualmente</Badge>
+          )}
+          {cnAutoFetching && !filledFromCatalog && (
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Buscando no catálogo CN…
+            </span>
+          )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={handleLoadFromCatalog} disabled={loadingCatalog}>
+            {loadingCatalog ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Database className="mr-2 h-4 w-4" />
+            )}
+            Carregar dados do catálogo
+          </Button>
           <Button variant="outline" onClick={() => setShowCompare((s) => !s)}>
             <GitCompare className="mr-2 h-4 w-4" />
             Comparar com catálogo
@@ -333,6 +518,32 @@ export function UnilabCoilFormPanel({
         </div>
       </div>
 
+      {/* Seletor de ponto da curva CN, quando há modelo carregado */}
+      {filledFromCatalog && cnPoints.length > 1 && (
+        <Card>
+          <CardContent className="flex flex-wrap items-center gap-3 py-3 text-sm">
+            <Label className="text-sm">Ponto da curva CN:</Label>
+            <Select value={selectedCurveId ?? ""} onValueChange={handleSelectCurvePoint}>
+              <SelectTrigger className="w-[420px]">
+                <SelectValue placeholder="Selecione um ponto…" />
+              </SelectTrigger>
+              <SelectContent className="max-h-80">
+                {cnPoints.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    #{p.curvaIndice ?? "—"} · Tev {fmt(p.tempEvapC, 1, "°C")} · Tcond{" "}
+                    {fmt(p.tempCondC, 1, "°C")} · {fmt(p.capacityKcalh, 0, "kcal/h")} ·{" "}
+                    {p.refrigerante ?? "—"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-xs text-muted-foreground">
+              {cnPoints.length} pontos disponíveis
+            </span>
+          </CardContent>
+        </Card>
+      )}
+
       {/* 3 blocos lado a lado */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* GEOMETRIA */}
@@ -341,17 +552,17 @@ export function UnilabCoilFormPanel({
             <CardTitle className="text-base">Geometria do aletado</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Field label="Tubos por fila" value={geo.tubesPerRow} onChange={(v) => setGeo({ ...geo, tubesPerRow: v })} />
-            <Field label="Número de filas" value={geo.rows} onChange={(v) => setGeo({ ...geo, rows: v })} />
-            <Field label="Comprimento do aletado (mm)" value={geo.coilLengthMm} onChange={(v) => setGeo({ ...geo, coilLengthMm: v })} />
-            <Field label="Número de circuitos" value={geo.circuits} onChange={(v) => setGeo({ ...geo, circuits: v })} />
-            <Field label="Passo da aleta (mm)" value={geo.finPitchMm} onChange={(v) => setGeo({ ...geo, finPitchMm: v })} />
-            <Field label="Tubos não utilizados" value={geo.skippedTubes} onChange={(v) => setGeo({ ...geo, skippedTubes: v })} />
-            <Field label="Diâmetro externo do tubo (mm)" value={geo.tubeOdMm} onChange={(v) => setGeo({ ...geo, tubeOdMm: v })} />
-            <Field label="Espessura do tubo (mm)" value={geo.tubeWallMm} onChange={(v) => setGeo({ ...geo, tubeWallMm: v })} />
+            <Field label="Tubos por fila" value={geo.tubesPerRow} onChange={(v) => editGeo({ tubesPerRow: v })} />
+            <Field label="Número de filas" value={geo.rows} onChange={(v) => editGeo({ rows: v })} />
+            <Field label="Comprimento do aletado (mm)" value={geo.coilLengthMm} onChange={(v) => editGeo({ coilLengthMm: v })} />
+            <Field label="Número de circuitos" value={geo.circuits} onChange={(v) => editGeo({ circuits: v })} />
+            <Field label="Passo da aleta (mm)" value={geo.finPitchMm} onChange={(v) => editGeo({ finPitchMm: v })} />
+            <Field label="Tubos não utilizados" value={geo.skippedTubes} onChange={(v) => editGeo({ skippedTubes: v })} />
+            <Field label="Diâmetro externo do tubo (mm)" value={geo.tubeOdMm} onChange={(v) => editGeo({ tubeOdMm: v })} />
+            <Field label="Espessura do tubo (mm)" value={geo.tubeWallMm} onChange={(v) => editGeo({ tubeWallMm: v })} />
             <div>
               <Label className="text-xs">Material do tubo</Label>
-              <Select value={geo.tubeMaterialId} onValueChange={(v) => setGeo({ ...geo, tubeMaterialId: v })}>
+              <Select value={geo.tubeMaterialId} onValueChange={(v) => editGeo({ tubeMaterialId: v })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione…" />
                 </SelectTrigger>
@@ -366,7 +577,7 @@ export function UnilabCoilFormPanel({
             </div>
             <div>
               <Label className="text-xs">Material da aleta</Label>
-              <Select value={geo.finMaterialId} onValueChange={(v) => setGeo({ ...geo, finMaterialId: v })}>
+              <Select value={geo.finMaterialId} onValueChange={(v) => editGeo({ finMaterialId: v })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione…" />
                 </SelectTrigger>
@@ -382,9 +593,9 @@ export function UnilabCoilFormPanel({
             <details className="text-xs text-muted-foreground">
               <summary className="cursor-pointer">Geometria avançada</summary>
               <div className="mt-2 space-y-2">
-                <Field label="Passo entre tubos (mm)" value={geo.tubePitchMm} onChange={(v) => setGeo({ ...geo, tubePitchMm: v })} />
-                <Field label="Passo entre filas (mm)" value={geo.rowPitchMm} onChange={(v) => setGeo({ ...geo, rowPitchMm: v })} />
-                <Field label="Espessura da aleta (mm)" value={geo.finThicknessMm} onChange={(v) => setGeo({ ...geo, finThicknessMm: v })} />
+                <Field label="Passo entre tubos (mm)" value={geo.tubePitchMm} onChange={(v) => editGeo({ tubePitchMm: v })} />
+                <Field label="Passo entre filas (mm)" value={geo.rowPitchMm} onChange={(v) => editGeo({ rowPitchMm: v })} />
+                <Field label="Espessura da aleta (mm)" value={geo.finThicknessMm} onChange={(v) => editGeo({ finThicknessMm: v })} />
               </div>
             </details>
           </CardContent>
@@ -396,9 +607,9 @@ export function UnilabCoilFormPanel({
             <CardTitle className="text-base">Lado Ar</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Field label="Vazão de ar (m³/h)" value={air.airflowM3h} onChange={(v) => setAir({ ...air, airflowM3h: v })} />
-            <Field label="Temperatura entrada (°C)" value={air.airTempInC} onChange={(v) => setAir({ ...air, airTempInC: v })} />
-            <Field label="Umidade relativa (%)" value={air.rhInPct} onChange={(v) => setAir({ ...air, rhInPct: v })} />
+            <Field label="Vazão de ar (m³/h)" value={air.airflowM3h} onChange={(v) => editAir({ airflowM3h: v })} />
+            <Field label="Temperatura entrada (°C)" value={air.airTempInC} onChange={(v) => editAir({ airTempInC: v })} />
+            <Field label="Umidade relativa (%)" value={air.rhInPct} onChange={(v) => editAir({ rhInPct: v })} />
             <div className="mt-4 rounded-md border bg-muted/30 p-3">
               <div className="mb-2 text-xs font-medium uppercase text-muted-foreground">Resultados</div>
               <Result label="Temperatura saída" value={fmt(result?.debug?.airOutletTempC as number | undefined, 2, "°C")} />
@@ -421,7 +632,7 @@ export function UnilabCoilFormPanel({
           <CardContent className="space-y-3">
             <div>
               <Label className="text-xs">Fluido</Label>
-              <Select value={ref.refrigerant} onValueChange={(v) => setRef({ ...ref, refrigerant: v })}>
+              <Select value={ref.refrigerant} onValueChange={(v) => editRef({ refrigerant: v })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -435,10 +646,10 @@ export function UnilabCoilFormPanel({
             <Field
               label={coilKind === "evaporator" ? "Temperatura evaporação (°C)" : "Temperatura condensação (°C)"}
               value={ref.refTempC}
-              onChange={(v) => setRef({ ...ref, refTempC: v })}
+              onChange={(v) => editRef({ refTempC: v })}
             />
-            <Field label="Superaquecimento (K)" value={ref.superheatK} onChange={(v) => setRef({ ...ref, superheatK: v })} />
-            <Field label="Subresfriamento (K)" value={ref.subcoolingK} onChange={(v) => setRef({ ...ref, subcoolingK: v })} />
+            <Field label="Superaquecimento (K)" value={ref.superheatK} onChange={(v) => editRef({ superheatK: v })} />
+            <Field label="Subresfriamento (K)" value={ref.subcoolingK} onChange={(v) => editRef({ subcoolingK: v })} />
             <div className="mt-4 rounded-md border bg-muted/30 p-3">
               <div className="mb-2 text-xs font-medium uppercase text-muted-foreground">Resultados</div>
               <Result
@@ -510,7 +721,7 @@ export function UnilabCoilFormPanel({
               <Label>Modelo CN:</Label>
               <Select value={manualModelId} onValueChange={setManualModelId}>
                 <SelectTrigger className="w-72">
-                  <SelectValue placeholder={cnAutoPoint ? `Auto: ${cnAutoPoint.modelo}` : "Selecione um modelo…"} />
+                  <SelectValue placeholder={cnAutoPointEager ? `Auto: ${cnAutoPointEager.modelo}` : "Selecione um modelo…"} />
                 </SelectTrigger>
                 <SelectContent className="max-h-80">
                   {cnModels.map((m) => (
