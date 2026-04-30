@@ -448,7 +448,7 @@ function ConsolidatedPanel({
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
           <span>
             <span className="font-semibold">Divergência relevante</span> entre cálculo e
-            catálogo (> 10%). Reveja a geometria, fatores Unilab ou ponto nominal.
+            catálogo (&gt; 10%). Reveja a geometria, fatores Unilab ou ponto nominal.
           </span>
         </div>
       )}
