@@ -14,6 +14,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { attachSupabaseAuth } from "@/integrations/supabase/attach-auth";
 import {
   REQUIRED_COND_FIELDS,
   REQUIRED_EVAP_FIELDS,
@@ -32,7 +33,7 @@ export type {
 } from "./equipmentReadiness.server";
 
 export const getEquipmentReadiness = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([attachSupabaseAuth, requireSupabaseAuth])
   .inputValidator((d) => z.object({ equipmentProjectId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }): Promise<EquipmentReadinessResult> => {
     const { supabase } = context;
@@ -320,7 +321,7 @@ export const getEquipmentReadiness = createServerFn({ method: "POST" })
 // ============================================================================
 
 export const autoSimulateCoilsIfReady = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([attachSupabaseAuth, requireSupabaseAuth])
   .inputValidator((d) => z.object({ equipmentProjectId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase } = context;

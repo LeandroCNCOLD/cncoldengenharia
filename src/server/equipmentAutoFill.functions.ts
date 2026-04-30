@@ -21,6 +21,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { attachSupabaseAuth } from "@/integrations/supabase/attach-auth";
 import {
   suggestComponentsForCatalogModel,
   type ComponentSuggestion,
@@ -46,7 +47,7 @@ export type {
 // ============================================================================
 
 export const previewAutoFillFromCnCatalog = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([attachSupabaseAuth, requireSupabaseAuth])
   .inputValidator((d) => z.object({ equipmentProjectId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }): Promise<AutoFillPreview> => {
     const { supabase } = context;
@@ -213,7 +214,7 @@ export const previewAutoFillFromCnCatalog = createServerFn({ method: "POST" })
 // ============================================================================
 
 export const commitAutoFillFromCnCatalog = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([attachSupabaseAuth, requireSupabaseAuth])
   .inputValidator((d) =>
     z
       .object({
