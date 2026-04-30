@@ -141,6 +141,94 @@ export function UnilabCoilFormPanel({
     subcoolingK: "3",
   });
 
+  // ============= ESTADO DE PRÉ-PREENCHIMENTO PELO CATÁLOGO CN =============
+  // Track se vieram do catálogo (badge azul) e se o usuário editou alguma coisa.
+  const [filledFromCatalog, setFilledFromCatalog] = useState(false);
+  const [manuallyEdited, setManuallyEdited] = useState(false);
+  const [catalogModelo, setCatalogModelo] = useState<string | null>(null);
+  const [selectedCurveId, setSelectedCurveId] = useState<string | null>(null);
+  const [referenceCapacityW, setReferenceCapacityW] = useState<number | null>(null);
+  const [referenceCurveIdx, setReferenceCurveIdx] = useState<number | null>(null);
+  // ref para diferenciar mudanças "programáticas" (carregamento) de mudanças do usuário
+  const isApplyingFromCatalog = useRef(false);
+
+  // Wrappers que marcam "editado manualmente" sem perder a tipagem.
+  const editGeo = (patch: Partial<typeof geo>) => {
+    if (!isApplyingFromCatalog.current && filledFromCatalog) setManuallyEdited(true);
+    setGeo((s) => ({ ...s, ...patch }));
+  };
+  const editAir = (patch: Partial<typeof air>) => {
+    if (!isApplyingFromCatalog.current && filledFromCatalog) setManuallyEdited(true);
+    setAir((s) => ({ ...s, ...patch }));
+  };
+  const editRef = (patch: Partial<typeof ref>) => {
+    if (!isApplyingFromCatalog.current && filledFromCatalog) setManuallyEdited(true);
+    setRef((s) => ({ ...s, ...patch }));
+  };
+
+  // Aplica um ponto do catálogo no formulário (geometria + ar + fluido).
+  const applyCatalogPoint = (point: CnCatalogPoint, kind: CoilKind) => {
+    isApplyingFromCatalog.current = true;
+    try {
+      const g: CnCatalogGeometry =
+        kind === "evaporator" ? point.evaporatorGeometry : point.condenserGeometry;
+      const tEvap = point.tempEvapC;
+      const tCond = point.tempCondC;
+
+      setGeo((s) => ({
+        ...s,
+        rows: g.rows != null ? String(g.rows) : s.rows,
+        tubesPerRow: g.tubesPerRow != null ? String(g.tubesPerRow) : s.tubesPerRow,
+        circuits: g.circuits != null ? String(g.circuits) : s.circuits,
+        coilLengthMm: g.coilLengthMm != null ? String(g.coilLengthMm) : s.coilLengthMm,
+        finPitchMm: g.finPitchMm != null ? String(g.finPitchMm) : s.finPitchMm,
+        tubeOdMm: g.tubeOdMm != null ? String(g.tubeOdMm) : s.tubeOdMm,
+        tubeWallMm: g.tubeWallMm != null ? String(g.tubeWallMm) : s.tubeWallMm,
+        tubePitchMm: g.tubePitchMm != null ? String(g.tubePitchMm) : s.tubePitchMm,
+        rowPitchMm: g.rowPitchMm != null ? String(g.rowPitchMm) : s.rowPitchMm,
+        finThicknessMm: g.finThicknessMm != null ? String(g.finThicknessMm) : s.finThicknessMm,
+        skippedTubes: g.skippedTubes != null ? String(g.skippedTubes) : s.skippedTubes,
+      }));
+      setAir((s) => ({
+        ...s,
+        airflowM3h: g.airflowM3h != null ? String(g.airflowM3h) : s.airflowM3h,
+        airTempInC:
+          kind === "evaporator"
+            ? tEvap != null
+              ? String(tEvap)
+              : s.airTempInC
+            : s.airTempInC,
+        rhInPct: point.rhInPct != null ? String(point.rhInPct) : s.rhInPct,
+      }));
+      setRef((s) => ({
+        ...s,
+        refrigerant: point.refrigerante ?? s.refrigerant,
+        refTempC:
+          kind === "evaporator"
+            ? tEvap != null
+              ? String(tEvap)
+              : s.refTempC
+            : tCond != null
+              ? String(tCond)
+              : s.refTempC,
+        superheatK: point.superheatK != null ? String(point.superheatK) : s.superheatK,
+        subcoolingK: point.subcoolingK != null ? String(point.subcoolingK) : s.subcoolingK,
+      }));
+      setCatalogModelo(point.modelo);
+      setSelectedCurveId(point.id);
+      setReferenceCapacityW(point.capacityW);
+      setReferenceCurveIdx(point.curvaIndice);
+      setFilledFromCatalog(true);
+      setManuallyEdited(false);
+    } finally {
+      // libera no próximo tick para garantir que os setters acima já rodaram.
+      setTimeout(() => {
+        isApplyingFromCatalog.current = false;
+      }, 0);
+    }
+  };
+
+  // Compatibilidade com o prefill antigo (do "Carregar e abrir" de outras telas).
   useEffect(() => {
     if (!prefill) return;
     if (prefill.coilType) setCoilKind(prefill.coilType);
@@ -166,6 +254,82 @@ export function UnilabCoilFormPanel({
       refTempC: prefill.nominal?.refTempC != null ? String(prefill.nominal.refTempC) : s.refTempC,
     }));
   }, [prefill]);
+
+  // Auto-load do catálogo CN ao abrir, usando code → commercial_name.
+  const { data: cnAutoPointEager, isFetching: cnAutoFetching } = useQuery({
+    queryKey: ["cn-auto-point-eager", equipmentCode, equipmentCommercialName],
+    queryFn: () =>
+      findCnCatalogPointByCode({
+        data: {
+          code: equipmentCode ?? undefined,
+          commercialName: equipmentCommercialName ?? undefined,
+        },
+      }),
+    enabled: !!equipmentCode || !!equipmentCommercialName,
+    staleTime: 60_000,
+  });
+
+  // Aplica auto-load quando o ponto chegar (apenas uma vez por modelo).
+  const autoAppliedKey = useRef<string | null>(null);
+  useEffect(() => {
+    if (!cnAutoPointEager) return;
+    const key = `${cnAutoPointEager.id}:${coilKind}`;
+    if (autoAppliedKey.current === key) return;
+    autoAppliedKey.current = key;
+    applyCatalogPoint(cnAutoPointEager, coilKind);
+    toast.success(`Pré-preenchido: ${cnAutoPointEager.modelo} (ponto #${cnAutoPointEager.curvaIndice ?? "—"})`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cnAutoPointEager, coilKind]);
+
+  // Lista de pontos da curva do modelo carregado (para o seletor "Ponto da curva CN").
+  const { data: cnPoints = [] } = useQuery({
+    queryKey: ["cn-points-by-modelo", catalogModelo],
+    queryFn: () => listCnCatalogPointsByModelo({ data: { modelo: catalogModelo! } }),
+    enabled: !!catalogModelo,
+  });
+
+  // Troca de ponto na mesma curva: re-busca o ponto inteiro e re-aplica (preserva geometria).
+  const handleSelectCurvePoint = async (curveId: string) => {
+    const point = await getCnCatalogPointByModelId({ data: { modelId: curveId } });
+    if (!point) {
+      toast.error("Ponto não encontrado");
+      return;
+    }
+    if (manuallyEdited) {
+      const ok = window.confirm("Há campos editados manualmente. Deseja sobrescrevê-los com este ponto?");
+      if (!ok) return;
+    }
+    applyCatalogPoint(point, coilKind);
+    toast.success(`Ponto #${point.curvaIndice ?? "—"} carregado`);
+  };
+
+  // Botão "Carregar dados do catálogo" (manual)
+  const [loadingCatalog, setLoadingCatalog] = useState(false);
+  const handleLoadFromCatalog = async () => {
+    if (manuallyEdited) {
+      const ok = window.confirm("Há campos editados manualmente. Deseja sobrescrevê-los com os dados do catálogo CN?");
+      if (!ok) return;
+    }
+    setLoadingCatalog(true);
+    try {
+      const point = await findCnCatalogPointByCode({
+        data: {
+          code: equipmentCode ?? undefined,
+          commercialName: equipmentCommercialName ?? undefined,
+        },
+      });
+      if (!point) {
+        toast.error("Modelo não encontrado no catálogo CN");
+        return;
+      }
+      applyCatalogPoint(point, coilKind);
+      toast.success("Dados do catálogo carregados");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao carregar do catálogo");
+    } finally {
+      setLoadingCatalog(false);
+    }
+  };
 
   // ============= MATERIAIS =============
   const { data: materials = [] } = useQuery({
