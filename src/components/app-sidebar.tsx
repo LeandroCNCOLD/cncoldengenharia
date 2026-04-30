@@ -17,6 +17,7 @@ import {
   Library,
   Cpu,
   Plug,
+  SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
 
