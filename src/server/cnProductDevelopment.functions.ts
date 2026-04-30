@@ -68,12 +68,12 @@ export const getProductFullDetails = createServerFn({ method: "POST" })
       const curvaRaw = raw.curva_raw;
       if (typeof curvaRaw === "string") {
         try {
-          technical = JSON.parse(curvaRaw);
+          technical = JSON.parse(curvaRaw) as Record<string, string | number | null>;
         } catch {
           technical = {};
         }
       } else if (curvaRaw && typeof curvaRaw === "object") {
-        technical = curvaRaw as Record<string, unknown>;
+        technical = curvaRaw as Record<string, string | number | null>;
       }
     }
 
