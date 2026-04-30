@@ -17,6 +17,7 @@ import {
   Library,
   Cpu,
   Plug,
+  SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
 
@@ -39,12 +40,21 @@ interface NavChild {
   adminOnly?: boolean;
 }
 
+interface NavSubGroup {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  adminOnly?: boolean;
+  children: NavChild[];
+}
+
 interface NavGroup {
   id: string;
   label: string;
   icon: LucideIcon;
   adminOnly?: boolean;
   children: NavChild[];
+  subGroups?: NavSubGroup[];
 }
 
 export const UNILAB_DB_TABLES: { mode: string; label: string }[] = [
@@ -75,20 +85,6 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Engenharia / Base Técnica",
     icon: Library,
     children: [
-      {
-        label: "Banco de Dados",
-        to: "/admin/database",
-        icon: Database,
-        description: "Tabelas Unilab por modo de operação",
-        adminOnly: true,
-      },
-      {
-        label: "Banco Técnico",
-        to: "/coldpro/admin/banco-tecnico",
-        icon: Database,
-        description: "Componentes técnicos consolidados (compressores, válvulas, ventiladores)",
-        adminOnly: true,
-      },
       {
         label: "Catálogo Técnico",
         to: "/coldpro/catalogo",
@@ -171,6 +167,30 @@ const NAV_GROUPS: NavGroup[] = [
         adminOnly: true,
       },
     ],
+    subGroups: [
+      {
+        id: "admin-settings",
+        label: "Configurações",
+        icon: SlidersHorizontal,
+        adminOnly: true,
+        children: [
+          {
+            label: "Banco de Dados",
+            to: "/admin/database",
+            icon: Database,
+            description: "Tabelas Unilab por modo de operação",
+            adminOnly: true,
+          },
+          {
+            label: "Banco Técnico",
+            to: "/coldpro/admin/banco-tecnico",
+            icon: Database,
+            description: "Componentes técnicos consolidados (compressores, válvulas, ventiladores)",
+            adminOnly: true,
+          },
+        ],
+      },
+    ],
   },
 ];
 
@@ -182,19 +202,60 @@ export function AppSidebar() {
   const visibleGroups = NAV_GROUPS.map((g) => ({
     ...g,
     children: g.children.filter((c) => !c.adminOnly || isAdmin),
-  })).filter((g) => g.children.length > 0 && (!g.adminOnly || isAdmin));
+    subGroups: (g.subGroups ?? [])
+      .map((sg) => ({
+        ...sg,
+        children: sg.children.filter((c) => !c.adminOnly || isAdmin),
+      }))
+      .filter((sg) => sg.children.length > 0 && (!sg.adminOnly || isAdmin)),
+  })).filter(
+    (g) =>
+      (g.children.length > 0 || g.subGroups.length > 0) &&
+      (!g.adminOnly || isAdmin),
+  );
 
+  // Default: all groups and subgroups open
   const initialOpen: Record<string, boolean> = {};
   for (const g of visibleGroups) {
-    initialOpen[g.id] = g.children.some(
-      (c) => pathname === c.to || pathname.startsWith(c.to + "/"),
-    );
-    // Default: keep first 4 main groups open
-    if (["overview", "engineering", "products", "projects"].includes(g.id)) {
-      initialOpen[g.id] = initialOpen[g.id] || true;
+    initialOpen[g.id] = true;
+    for (const sg of g.subGroups) {
+      initialOpen[`${g.id}:${sg.id}`] = true;
     }
   }
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(initialOpen);
+
+  const renderLink = (item: NavChild) => {
+    const Icon = item.icon;
+    const active =
+      pathname === item.to || pathname.startsWith(item.to + "/");
+    const link = (
+      <Link
+        to={item.to}
+        className={cn(
+          "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+          active
+            ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground shadow-sm ring-1 ring-sidebar-border"
+            : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+        )}
+      >
+        {active && (
+          <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r bg-primary" />
+        )}
+        <Icon className="h-4 w-4 shrink-0" />
+        <span className="truncate">{item.label}</span>
+      </Link>
+    );
+    return item.description ? (
+      <Tooltip key={item.to}>
+        <TooltipTrigger asChild>{link}</TooltipTrigger>
+        <TooltipContent side="right" className="max-w-xs">
+          {item.description}
+        </TooltipContent>
+      </Tooltip>
+    ) : (
+      <div key={item.to}>{link}</div>
+    );
+  };
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -212,10 +273,16 @@ export function AppSidebar() {
         <nav className="flex-1 space-y-4 overflow-y-auto px-3 pb-4">
           {visibleGroups.map((group, idx) => {
             const GroupIcon = group.icon;
-            const isOpen = openGroups[group.id] ?? false;
-            const hasActive = group.children.some(
-              (c) => pathname === c.to || pathname.startsWith(c.to + "/"),
-            );
+            const isOpen = openGroups[group.id] ?? true;
+            const hasActive =
+              group.children.some(
+                (c) => pathname === c.to || pathname.startsWith(c.to + "/"),
+              ) ||
+              group.subGroups.some((sg) =>
+                sg.children.some(
+                  (c) => pathname === c.to || pathname.startsWith(c.to + "/"),
+                ),
+              );
 
             return (
               <div key={group.id}>
@@ -245,37 +312,38 @@ export function AppSidebar() {
 
                 {isOpen && (
                   <div className="mt-1 space-y-0.5">
-                    {group.children.map((item) => {
-                      const Icon = item.icon;
-                      const active =
-                        pathname === item.to ||
-                        pathname.startsWith(item.to + "/");
-                      const link = (
-                        <Link
-                          to={item.to}
-                          className={cn(
-                            "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                            active
-                              ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground shadow-sm ring-1 ring-sidebar-border"
-                              : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+                    {group.children.map(renderLink)}
+
+                    {group.subGroups.map((sg) => {
+                      const SubIcon = sg.icon;
+                      const subKey = `${group.id}:${sg.id}`;
+                      const subOpen = openGroups[subKey] ?? true;
+                      return (
+                        <div key={sg.id} className="mt-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setOpenGroups((prev) => ({
+                                ...prev,
+                                [subKey]: !subOpen,
+                              }))
+                            }
+                            className="ml-2 flex w-[calc(100%-0.5rem)] items-center gap-2 rounded-md px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 hover:text-sidebar-foreground/80"
+                          >
+                            <SubIcon className="h-3 w-3 opacity-70" />
+                            <span className="flex-1 text-left">{sg.label}</span>
+                            {subOpen ? (
+                              <ChevronDown className="h-3 w-3 opacity-60" />
+                            ) : (
+                              <ChevronRight className="h-3 w-3 opacity-60" />
+                            )}
+                          </button>
+                          {subOpen && (
+                            <div className="ml-3 mt-1 space-y-0.5 border-l border-sidebar-border/40 pl-2">
+                              {sg.children.map(renderLink)}
+                            </div>
                           )}
-                        >
-                          {active && (
-                            <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r bg-primary" />
-                          )}
-                          <Icon className="h-4 w-4 shrink-0" />
-                          <span className="truncate">{item.label}</span>
-                        </Link>
-                      );
-                      return item.description ? (
-                        <Tooltip key={item.to}>
-                          <TooltipTrigger asChild>{link}</TooltipTrigger>
-                          <TooltipContent side="right" className="max-w-xs">
-                            {item.description}
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        <div key={item.to}>{link}</div>
+                        </div>
                       );
                     })}
                   </div>
