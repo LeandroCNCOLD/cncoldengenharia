@@ -272,20 +272,7 @@ export function SizingTab({ project }: Props) {
         </TabsContent>
 
         <TabsContent value="manual" className="mt-4">
-          <Card>
-            <CardContent className="space-y-3 p-6 text-sm text-muted-foreground">
-              <p>
-                Modo manual: defina geometria completa (tubos, aletas, circuitos)
-                diretamente nas abas <strong>Evaporador</strong> ou{" "}
-                <strong>Condensador</strong> e use o <em>Coil Simulator</em> para
-                rodar o motor híbrido com seus parâmetros.
-              </p>
-              <p>
-                O modo manual reaproveita o mesmo motor de cálculo (geometria → área
-                → correlação → U → Q → ΔP → calibração).
-              </p>
-            </CardContent>
-          </Card>
+          <ManualCoilDesignSection projectId={project.id} />
         </TabsContent>
       </Tabs>
     </div>
