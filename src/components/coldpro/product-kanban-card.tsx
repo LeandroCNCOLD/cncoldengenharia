@@ -13,6 +13,7 @@ export interface ProductCardData {
   hp: string | null;
   refrigerante: string | null;
   status: string;
+  position: number;
   equipment_project_id: string | null;
   notes: string | null;
 }

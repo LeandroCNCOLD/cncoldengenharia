@@ -47,8 +47,11 @@ export const updateProductStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const patch: Record<string, unknown> = { status: data.status, position: data.position };
-    if (data.status === "arquivado") patch.archived_at = new Date().toISOString();
+    const patch = {
+      status: data.status,
+      position: data.position,
+      ...(data.status === "arquivado" ? { archived_at: new Date().toISOString() } : {}),
+    };
     const { error } = await supabase
       .from("cn_product_development")
       .update(patch)

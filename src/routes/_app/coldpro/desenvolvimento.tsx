@@ -45,7 +45,7 @@ function DesenvolvimentoPage() {
     <div className="space-y-4 p-6">
       <PageHeader
         title="Desenvolvimento de Produtos"
-        subtitle="Kanban dos produtos do catálogo CN — do bruto ao publicado."
+        description="Kanban dos produtos do catálogo CN — do bruto ao publicado."
       />
 
       <div className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-card p-3">
