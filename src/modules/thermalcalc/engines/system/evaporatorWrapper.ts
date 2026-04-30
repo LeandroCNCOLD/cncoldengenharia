@@ -1,12 +1,15 @@
 // ColdPro — Wrapper do evaporador para o System Simulator.
 // Usa o motor híbrido (simulateHybridCoil), garantindo que não há lógica duplicada.
-import { simulateHybridCoil } from '../coil/internals/hybridCoilEngine';
-import type { CoilCalculationInput, GeometryInput } from '../coil/internals/types';
-import type { Refrigerant, SectionResult } from './systemTypes';
-import { defaultGeometryFromCode } from './systemGeometryDefaults';
+import { simulateHybridCoil } from "../coil/internals/hybridCoilEngine";
+import type { CoilCalculationInput, GeometryInput } from "../coil/internals/types";
+import type { Refrigerant, SectionResult } from "./systemTypes";
+import { defaultGeometryFromCode } from "./systemGeometryDefaults";
 
 export interface EvaporatorRunInput {
   geometryCode: string;
+  geometry?: GeometryInput;
+  factors?: CoilCalculationInput["factors"];
+  unilabSource?: CoilCalculationInput["unilabSource"];
   refrigerant: Refrigerant;
   airInletTempC: number;
   evaporatingTempC: number;
@@ -16,10 +19,13 @@ export interface EvaporatorRunInput {
 }
 
 export function runEvaporator(input: EvaporatorRunInput): SectionResult {
-  const geometry: GeometryInput = defaultGeometryFromCode(input.geometryCode, 'direct_expansion');
+  const geometry: GeometryInput =
+    input.geometry ?? defaultGeometryFromCode(input.geometryCode, "direct_expansion");
   const calcInput: CoilCalculationInput = {
-    mode: 'direct_expansion',
+    mode: "direct_expansion",
     geometry,
+    factors: input.factors,
+    unilabSource: input.unilabSource,
     airInletTempC: input.airInletTempC,
     refTempC: input.evaporatingTempC,
     airflowM3h: input.airflowM3h,

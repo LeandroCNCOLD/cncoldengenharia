@@ -3,12 +3,7 @@
 
 export type Refrigerant = string; // 'R404A' | 'R134a' | 'R290' | 'R744' | ...
 
-export type Bottleneck =
-  | 'evaporator'
-  | 'compressor'
-  | 'condenser'
-  | 'balanced'
-  | 'unknown';
+export type Bottleneck = "evaporator" | "compressor" | "condenser" | "balanced" | "unknown";
 
 /** Entrada do simulador de sistema completo. */
 export interface SystemInput {
@@ -33,6 +28,7 @@ export interface SystemInput {
 
   /** Modelo do compressor (chave para lookup de polinômios). */
   compressorModel: string;
+  resolvedTechnicalData?: SystemResolvedTechnicalData;
 
   superheatK: number;
   subcoolingK: number;
@@ -41,6 +37,36 @@ export interface SystemInput {
   tolerance?: number;
   /** Máximo de iterações (default 25). */
   maxIterations?: number;
+}
+
+export interface SystemResolvedCoilData {
+  geometry: import("../coil/internals/types").GeometryInput;
+  factors?: import("../coil/internals/types").UnilabFactors;
+  unilabSource?: import("../coil/internals/types").UnilabSource;
+  warnings?: string[];
+}
+
+export interface SystemResolvedFanData {
+  nominalAirflowM3h?: number | null;
+  nominalPressurePa?: number | null;
+  nominalPowerW?: number | null;
+  warnings?: string[];
+}
+
+export interface SystemResolvedCompressorData {
+  vapcycModel: import("./vapcycCompressorEngine").VapcycCompressorRecord;
+  vapcycPolynomials: import("./vapcycCompressorEngine").VapcycPolynomialRecord[];
+  warnings?: string[];
+}
+
+export interface SystemResolvedTechnicalData {
+  compressor?: SystemResolvedCompressorData;
+  evaporatorCoil?: SystemResolvedCoilData;
+  condenserCoil?: SystemResolvedCoilData;
+  fans?: {
+    evaporator?: SystemResolvedFanData;
+    condenser?: SystemResolvedFanData;
+  };
 }
 
 /** Polinômio AHRI 540 / EN 12900 (10 coeficientes). */
@@ -59,12 +85,13 @@ export interface CompressorModelData {
   refrigerant: Refrigerant;
   capacity: CompressorPolynomial;
   power: CompressorPolynomial;
+  massFlow?: CompressorPolynomial;
   /** Faixa válida — usado para warning. */
   envelope?: {
-    teMinC: number;
-    teMaxC: number;
-    tcMinC: number;
-    tcMaxC: number;
+    teMinC?: number | null;
+    teMaxC?: number | null;
+    tcMinC?: number | null;
+    tcMaxC?: number | null;
   };
   /** Superaquecimento de referência da curva (K). */
   refSuperheatK?: number;

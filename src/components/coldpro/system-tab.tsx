@@ -10,6 +10,13 @@ import { Info as InfoIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SystemSimulatorPanel } from "@/components/coldpro/system-simulator-panel";
 import { listEquipmentComponentLinks } from "@/lib/coldpro/equipment-component-links";
+import type { EquipmentComponentLinkExpanded } from "@/lib/coldpro/equipment-component-links";
+import {
+  resolveCoilComponent,
+  resolveCompressorComponent,
+  resolveFanComponent,
+} from "@/modules/coldpro/biblioteca/technicalComponentResolver";
+import type { SystemResolvedTechnicalData } from "@/modules/coldpro/system";
 
 interface Props {
   equipmentProjectId: string;
@@ -48,6 +55,75 @@ export function SystemTab({ equipmentProjectId }: Props) {
   const compressor = links?.find((l) => l.role === "compressor");
   const fanEvap = links?.find((l) => l.role === "fan_evaporator");
   const fanCond = links?.find((l) => l.role === "fan_condenser");
+  const linkedEvap = links?.find((l) => l.role === "evaporator");
+  const linkedCond = links?.find((l) => l.role === "condenser");
+
+  const {
+    data: resolvedSystemData,
+    isFetching: isResolvingSystemData,
+    isError: isResolverError,
+    error: resolverError,
+  } = useQuery({
+    queryKey: [
+      "equip-system-resolved-components",
+      compressor?.technical_component_id,
+      linkedEvap?.technical_component_id,
+      linkedCond?.technical_component_id,
+      fanEvap?.technical_component_id,
+      fanCond?.technical_component_id,
+    ],
+    queryFn: async () => {
+      const resolved: SystemResolvedTechnicalData = {};
+      const warnings: string[] = [];
+
+      if (compressor?.technical_component_id) {
+        const comp = await resolveCompressorComponent(compressor.technical_component_id);
+        warnings.push(...comp.warnings);
+        if (comp.data?.thermalcalc.systemCompressor) {
+          resolved.compressor = comp.data.thermalcalc.systemCompressor;
+        }
+      }
+      if (linkedEvap?.technical_component_id) {
+        const evapResolved = await resolveCoilComponent(linkedEvap.technical_component_id);
+        warnings.push(...evapResolved.warnings);
+        if (evapResolved.data) resolved.evaporatorCoil = evapResolved.data.thermalcalc;
+      }
+      if (linkedCond?.technical_component_id) {
+        const condResolved = await resolveCoilComponent(linkedCond.technical_component_id);
+        warnings.push(...condResolved.warnings);
+        if (condResolved.data) resolved.condenserCoil = condResolved.data.thermalcalc;
+      }
+      if (fanEvap?.technical_component_id) {
+        const fan = await resolveFanComponent(fanEvap.technical_component_id);
+        warnings.push(...fan.warnings);
+        if (fan.data?.thermalcalc.nominalAirflowM3h) {
+          resolved.fans = {
+            ...resolved.fans,
+            evaporator: fan.data.thermalcalc,
+          };
+        }
+      }
+      if (fanCond?.technical_component_id) {
+        const fan = await resolveFanComponent(fanCond.technical_component_id);
+        warnings.push(...fan.warnings);
+        if (fan.data?.thermalcalc.nominalAirflowM3h) {
+          resolved.fans = {
+            ...resolved.fans,
+            condenser: fan.data.thermalcalc,
+          };
+        }
+      }
+
+      return { resolved, warnings };
+    },
+    enabled: Boolean(
+      compressor?.technical_component_id ||
+      linkedEvap?.technical_component_id ||
+      linkedCond?.technical_component_id ||
+      fanEvap?.technical_component_id ||
+      fanCond?.technical_component_id,
+    ),
+  });
 
   const missing: string[] = [];
   if (!evap) missing.push("evaporador");
@@ -95,9 +171,25 @@ export function SystemTab({ equipmentProjectId }: Props) {
       <SystemSimulatorPanel
         defaultEvaporatorCode={evap?.code ?? undefined}
         defaultCondenserCode={cond?.code ?? undefined}
+        resolvedTechnicalData={resolvedSystemData?.resolved}
+        resolverWarnings={[
+          ...(resolvedSystemData?.warnings ?? []),
+          ...(isResolverError
+            ? [`Erro ao resolver dados técnicos: ${(resolverError as Error).message}`]
+            : []),
+        ]}
+        isResolvingTechnicalData={isResolvingSystemData}
       />
     </div>
   );
+}
+
+export interface SystemTabComponentLinks {
+  compressor?: EquipmentComponentLinkExpanded;
+  evaporator?: EquipmentComponentLinkExpanded;
+  condenser?: EquipmentComponentLinkExpanded;
+  fanEvaporator?: EquipmentComponentLinkExpanded;
+  fanCondenser?: EquipmentComponentLinkExpanded;
 }
 
 function Item({ label, value }: { label: string; value: string | null | undefined }) {

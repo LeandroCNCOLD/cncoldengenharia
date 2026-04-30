@@ -20,6 +20,7 @@ import {
   simulateSystem,
   listCompressorModels,
   type SystemInput,
+  type SystemResolvedTechnicalData,
   type SystemResult,
   type Bottleneck,
 } from "@/modules/coldpro/system";
@@ -37,9 +38,18 @@ const BOTTLENECK_LABEL: Record<Bottleneck, { label: string; color: string }> = {
 interface Props {
   defaultEvaporatorCode?: string;
   defaultCondenserCode?: string;
+  resolvedTechnicalData?: SystemResolvedTechnicalData;
+  resolverWarnings?: string[];
+  isResolvingTechnicalData?: boolean;
 }
 
-export function SystemSimulatorPanel({ defaultEvaporatorCode, defaultCondenserCode }: Props) {
+export function SystemSimulatorPanel({
+  defaultEvaporatorCode,
+  defaultCondenserCode,
+  resolvedTechnicalData,
+  resolverWarnings = [],
+  isResolvingTechnicalData = false,
+}: Props) {
   const compressorModels = useMemo(() => listCompressorModels(), []);
 
   const [form, setForm] = useState<SystemInput>({
@@ -66,8 +76,9 @@ export function SystemSimulatorPanel({ defaultEvaporatorCode, defaultCondenserCo
       ...prev,
       evaporatorGeometryCode: defaultEvaporatorCode ?? prev.evaporatorGeometryCode,
       condenserGeometryCode: defaultCondenserCode ?? prev.condenserGeometryCode,
+      resolvedTechnicalData,
     }));
-  }, [defaultCondenserCode, defaultEvaporatorCode]);
+  }, [defaultCondenserCode, defaultEvaporatorCode, resolvedTechnicalData]);
 
   const set = <K extends keyof SystemInput>(k: K, v: SystemInput[K]) =>
     setForm((p) => ({ ...p, [k]: v }));
@@ -169,13 +180,47 @@ export function SystemSimulatorPanel({ defaultEvaporatorCode, defaultCondenserCo
           </Field>
 
           <div className="md:col-span-3">
-            <Button onClick={run} disabled={running} className="w-full md:w-auto">
+            <Button
+              onClick={run}
+              disabled={running || isResolvingTechnicalData}
+              className="w-full md:w-auto"
+            >
               <Play className="mr-2 h-4 w-4" />
               {running ? "Simulando..." : "Simular sistema"}
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {isResolvingTechnicalData && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>Resolvendo dados técnicos da Biblioteca Técnica…</AlertDescription>
+        </Alert>
+      )}
+
+      {resolverWarnings.length > 0 && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Dados técnicos resolvidos com avisos</AlertTitle>
+          <AlertDescription>
+            <ul className="ml-4 mt-1 list-disc space-y-1 text-sm">
+              {resolverWarnings.map((warning, index) => (
+                <li key={index}>{warning}</li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {resolvedTechnicalData && (
+        <Alert>
+          <CheckCircle2 className="h-4 w-4" />
+          <AlertDescription>
+            Simulação conectada a dados resolvidos da Biblioteca Técnica.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {runError && (
         <Alert variant="destructive">

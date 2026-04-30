@@ -1,8 +1,13 @@
 // ColdPro — Wrapper do condensador. Usa o mesmo motor híbrido em modo 'condensation'.
-import { simulateHybridCoil } from '../coil/internals/hybridCoilEngine';
-import type { CoilCalculationInput, GeometryInput } from '../coil/internals/types';
-import type { Refrigerant, SectionResult } from './systemTypes';
-import { defaultGeometryFromCode } from './systemGeometryDefaults';
+import { simulateHybridCoil } from "../coil/internals/hybridCoilEngine";
+import type {
+  CoilCalculationInput,
+  GeometryInput,
+  UnilabFactors,
+  UnilabSource,
+} from "../coil/internals/types";
+import type { Refrigerant, SectionResult } from "./systemTypes";
+import { defaultGeometryFromCode } from "./systemGeometryDefaults";
 
 export interface CondenserRunInput {
   geometryCode: string;
@@ -11,13 +16,19 @@ export interface CondenserRunInput {
   condensingTempC: number;
   airflowM3h: number;
   refrigerantMassFlowKgh: number;
+  resolvedGeometry?: GeometryInput;
+  resolvedFactors?: UnilabFactors;
+  unilabSource?: UnilabSource;
 }
 
 export function runCondenser(input: CondenserRunInput): SectionResult {
-  const geometry: GeometryInput = defaultGeometryFromCode(input.geometryCode, 'condensation');
+  const geometry: GeometryInput =
+    input.resolvedGeometry ?? defaultGeometryFromCode(input.geometryCode, "condensation");
   const calcInput: CoilCalculationInput = {
-    mode: 'condensation',
+    mode: "condensation",
     geometry,
+    factors: input.resolvedFactors,
+    unilabSource: input.unilabSource,
     airInletTempC: input.airInletTempC,
     refTempC: input.condensingTempC,
     airflowM3h: input.airflowM3h,

@@ -19,11 +19,11 @@ import type {
   SectionResult,
   SystemInput,
   SystemResult,
-} from './systemTypes';
-import { runCompressor } from './compressorEngine';
-import { runEvaporator } from './evaporatorWrapper';
-import { runCondenser } from './condenserWrapper';
-import { runExpansionDevice } from './expansionDeviceEngine';
+} from "./systemTypes";
+import { evalPolynomial, runCompressor } from "./compressorEngine";
+import { runEvaporator } from "./evaporatorWrapper";
+import { runCondenser } from "./condenserWrapper";
+import { runExpansionDevice } from "./expansionDeviceEngine";
 
 function clamp(v: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, v));
@@ -34,15 +34,59 @@ function computeUtilization(realW: number, capW: number): number {
   return clamp(realW / capW, 0, 1);
 }
 
+function runResolvedCompressor(input: SystemInput, te: number, tc: number): CompressorResult {
+  const resolved = input.resolvedTechnicalData?.compressor;
+  if (!resolved) {
+    return runCompressor({
+      model: input.compressorModel,
+      refrigerant: input.refrigerant,
+      evaporatingTempC: te,
+      condensingTempC: tc,
+    });
+  }
+
+  const warnings: string[] = [...(resolved.warnings ?? [])];
+  const capacity = resolved.capacityPolynomial;
+  const power = resolved.powerPolynomial;
+  const capacityW = capacity ? Math.max(0, evalPolynomial(capacity, te, tc)) : 0;
+  const powerW = power ? Math.max(1, evalPolynomial(power, te, tc)) : 0;
+
+  if (!capacity) warnings.push("Compressor resolvido sem polinômio de capacidade.");
+  if (!power) warnings.push("Compressor resolvido sem polinômio de potência.");
+
+  const envelope = resolved.envelope;
+  const inEnvelope =
+    !envelope ||
+    ((envelope.teMinC == null || te >= envelope.teMinC) &&
+      (envelope.teMaxC == null || te <= envelope.teMaxC) &&
+      (envelope.tcMinC == null || tc >= envelope.tcMinC) &&
+      (envelope.tcMaxC == null || tc <= envelope.tcMaxC));
+
+  if (!inEnvelope) {
+    warnings.push(`Te=${te.toFixed(1)}°C / Tc=${tc.toFixed(1)}°C fora do envelope resolvido.`);
+  }
+
+  const hLat = resolved.latentHeatJkg ?? 180_000;
+  return {
+    model: resolved.model,
+    refrigerant: resolved.refrigerant,
+    qCompW: capacityW,
+    powerW,
+    massFlowKgh: resolved.massFlowPolynomial ? 0 : (capacityW / hLat) * 3600,
+    inEnvelope,
+    warnings,
+  };
+}
+
 function pickBottleneck(qEvap: number, qComp: number, qCond: number, tol: number): Bottleneck {
   const xs = [
-    { name: 'evaporator' as const, q: qEvap },
-    { name: 'compressor' as const, q: qComp },
-    { name: 'condenser' as const, q: qCond },
+    { name: "evaporator" as const, q: qEvap },
+    { name: "compressor" as const, q: qComp },
+    { name: "condenser" as const, q: qCond },
   ].sort((a, b) => a.q - b.q);
   const min = xs[0];
   const max = xs[xs.length - 1];
-  if (max.q > 0 && (max.q - min.q) / max.q < tol * 2) return 'balanced';
+  if (max.q > 0 && (max.q - min.q) / max.q < tol * 2) return "balanced";
   return min.name;
 }
 
@@ -60,12 +104,7 @@ export function simulateSystem(input: SystemInput): SystemResult {
   const tcMin = input.airInletCondC + 1; // sempre acima do ar
   const tcMax = input.airInletCondC + 35;
 
-  let comp: CompressorResult = runCompressor({
-    model: input.compressorModel,
-    refrigerant: input.refrigerant,
-    evaporatingTempC: te,
-    condensingTempC: tc,
-  });
+  let comp: CompressorResult = runResolvedCompressor(input, te, tc);
 
   let evap: SectionResult = {
     capacityW: 0,
@@ -82,12 +121,7 @@ export function simulateSystem(input: SystemInput): SystemResult {
   let lastError = Number.POSITIVE_INFINITY;
 
   for (iter = 1; iter <= maxIter; iter++) {
-    comp = runCompressor({
-      model: input.compressorModel,
-      refrigerant: input.refrigerant,
-      evaporatingTempC: te,
-      condensingTempC: tc,
-    });
+    comp = runResolvedCompressor(input, te, tc);
 
     runExpansionDevice({
       refrigerant: input.refrigerant,
@@ -105,6 +139,7 @@ export function simulateSystem(input: SystemInput): SystemResult {
       airflowM3h: input.airflowEvapM3h,
       refrigerantMassFlowKgh: comp.massFlowKgh,
       relativeHumidityPct: 85,
+      resolvedCoil: input.resolvedTechnicalData?.evaporatorCoil,
     });
 
     cond = runCondenser({
@@ -114,6 +149,7 @@ export function simulateSystem(input: SystemInput): SystemResult {
       condensingTempC: tc,
       airflowM3h: input.airflowCondM3h,
       refrigerantMassFlowKgh: comp.massFlowKgh,
+      resolvedCoil: input.resolvedTechnicalData?.condenserCoil,
     });
 
     // ----- Critério de equilíbrio -----
@@ -164,25 +200,18 @@ export function simulateSystem(input: SystemInput): SystemResult {
   // Capacidades nominais (referência teórica) para utilização:
   // - comp em Te=-10, Tc=45
   // - evap/cond em DT 10K — proxy: usamos a capacidade computada como denominador máximo.
-  const compNominal = runCompressor({
-    model: input.compressorModel,
-    refrigerant: input.refrigerant,
-    evaporatingTempC: -10,
-    condensingTempC: 45,
-  });
+  const compNominal = runResolvedCompressor(input, -10, 45);
 
   const utilizationComp = computeUtilization(comp.qCompW, compNominal.qCompW || comp.qCompW);
   const utilizationEvap = computeUtilization(capacityRealW, evap.capacityW || capacityRealW);
   const utilizationCond = computeUtilization(comp.qCompW + comp.powerW, cond.capacityW || 1);
 
   const energyBalance =
-    evap.capacityW > 0
-      ? (cond.capacityW - (evap.capacityW + comp.powerW)) / evap.capacityW
-      : 0;
+    evap.capacityW > 0 ? (cond.capacityW - (evap.capacityW + comp.powerW)) / evap.capacityW : 0;
 
   const bottleneck = pickBottleneck(evap.capacityW, comp.qCompW, cond.capacityW, tol);
 
-  if (Math.abs(energyBalance) > 0.10) {
+  if (Math.abs(energyBalance) > 0.1) {
     warnings.push(
       `Balanço energético com desvio ${(energyBalance * 100).toFixed(1)}% (qCond vs qEvap+W).`,
     );
@@ -218,6 +247,7 @@ export function simulateSystem(input: SystemInput): SystemResult {
       maxIterations: maxIter,
       finalError: lastError,
       compressorNominalW: compNominal.qCompW,
+      resolvedTechnicalData: Boolean(input.resolvedTechnicalData),
     },
   };
 }

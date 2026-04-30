@@ -21,6 +21,7 @@ import {
   type EquipmentComponentLinkExpanded,
   type EquipmentComponentRole,
 } from "@/lib/coldpro/equipment-component-links";
+import { resolveFanComponent } from "@/modules/coldpro/biblioteca/technicalComponentResolver";
 
 interface Props {
   equipmentProjectId: string;
@@ -132,10 +133,20 @@ function FanSlot({
   onRemove: (linkId: string) => void;
 }) {
   const c = link?.component;
-  const norm = (c?.normalized_json ?? {}) as Record<string, unknown>;
-  const airflow = (norm["nominal_airflow_m3h"] ?? norm["airflow_m3h"]) as number | undefined;
-  const pressure = (norm["nominal_pressure_pa"] ?? norm["pressure_pa"]) as number | undefined;
-  const power = (norm["nominal_power_w"] ?? norm["power_w"]) as number | undefined;
+  const {
+    data: resolved,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["resolved-fan-component", c?.id],
+    queryFn: () => resolveFanComponent(c!.id),
+    enabled: Boolean(c),
+  });
+  const fanData = resolved?.data;
+  const airflow = fanData?.thermalcalc.nominalAirflowM3h;
+  const pressure = fanData?.thermalcalc.nominalPressurePa;
+  const power = fanData?.thermalcalc.nominalPowerW;
 
   return (
     <Card>
@@ -167,12 +178,23 @@ function FanSlot({
             <Info label="Origem">
               <Badge variant="secondary">{c.source ?? "—"}</Badge>
             </Info>
-            <Info label="Vazão nominal">{airflow ? `${airflow} m³/h` : "—"}</Info>
-            <Info label="Pressão nominal">{pressure ? `${pressure} Pa` : "—"}</Info>
-            <Info label="Potência nominal">{power ? `${power} W` : "—"}</Info>
+            {isLoading && <Info label="Resolver técnico">Carregando dados finais…</Info>}
+            {isError && (
+              <Info label="Resolver técnico">
+                <span className="text-destructive">{(error as Error).message}</span>
+              </Info>
+            )}
+            <Info label="Vazão nominal">{airflow != null ? `${airflow} m³/h` : "—"}</Info>
+            <Info label="Pressão nominal">{pressure != null ? `${pressure} Pa` : "—"}</Info>
+            <Info label="Potência nominal">{power != null ? `${power} W` : "—"}</Info>
             <Info label="Curva disponível">
-              {(norm["has_curve"] as boolean) ? "Sim" : "Verificar fan_curves"}
+              {fanData ? (fanData.curves.length > 0 ? "Sim" : "Verificar fan_curves") : "—"}
             </Info>
+            {resolved?.warnings.map((warning) => (
+              <Info key={warning} label="Aviso técnico">
+                <span className="text-amber-600">{warning}</span>
+              </Info>
+            ))}
           </div>
         )}
       </CardContent>
