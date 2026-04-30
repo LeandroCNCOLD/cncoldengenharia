@@ -4,11 +4,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { attachSupabaseAuth } from "@/integrations/supabase/attach-auth";
 
 const STATUS = ["a_analisar", "em_analise", "sugestoes_ok", "aprovado", "arquivado"] as const;
 
 export const listProducts = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([attachSupabaseAuth, requireSupabaseAuth])
   .inputValidator((d) => z.object({ includeArchived: z.boolean().optional() }).parse(d ?? {}))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
@@ -37,7 +38,7 @@ export const listProducts = createServerFn({ method: "POST" })
   });
 
 export const updateProductStatus = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([attachSupabaseAuth, requireSupabaseAuth])
   .inputValidator((d) =>
     z.object({
       id: z.string().uuid(),
@@ -61,7 +62,7 @@ export const updateProductStatus = createServerFn({ method: "POST" })
   });
 
 export const createProduct = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([attachSupabaseAuth, requireSupabaseAuth])
   .inputValidator((d) =>
     z.object({
       catalog_model: z.string().min(1).max(200),
@@ -100,7 +101,7 @@ export const createProduct = createServerFn({ method: "POST" })
   });
 
 export const approveProduct = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([attachSupabaseAuth, requireSupabaseAuth])
   .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
@@ -165,7 +166,7 @@ export const approveProduct = createServerFn({ method: "POST" })
   });
 
 export const archiveProduct = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([attachSupabaseAuth, requireSupabaseAuth])
   .inputValidator((d) =>
     z.object({
       id: z.string().uuid(),
@@ -187,7 +188,7 @@ export const archiveProduct = createServerFn({ method: "POST" })
   });
 
 export const unarchiveProduct = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([attachSupabaseAuth, requireSupabaseAuth])
   .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
