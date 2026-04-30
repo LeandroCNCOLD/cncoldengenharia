@@ -42,6 +42,7 @@ import { factorsFromRow, getLatestCalibration, saveCoilCalibration } from "@/lib
 import { NEUTRAL_CALIBRATION, type CalibrationFactors, type CoilEngine } from "@/modules/coldpro/coil/coilEngineTypes";
 import { OriginBadge } from "@/components/coldpro/origin-badge";
 import { SystemSimulatorPanel } from "@/components/coldpro/system-simulator-panel";
+import { UnilabCoilFormPanel } from "@/components/coldpro/coil/unilab-coil-form-panel";
 import type {
   CoilSimulatorInput,
   CoilSimulatorResult,
@@ -595,8 +596,9 @@ function CoilSimulatorPage() {
         <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Ex.: Verify base R404A -8°C" />
       </div>
 
-      <Tabs defaultValue="geometry">
+      <Tabs defaultValue="unilab">
         <TabsList className="flex flex-wrap">
+          <TabsTrigger value="unilab"><Sparkles className="mr-1 h-3 w-3" />Unilab</TabsTrigger>
           <TabsTrigger value="geometry">Geometria</TabsTrigger>
           <TabsTrigger value="air">Lado do Ar</TabsTrigger>
           <TabsTrigger value="ref">Lado Refrigerante</TabsTrigger>
@@ -613,6 +615,15 @@ function CoilSimulatorPage() {
           <TabsTrigger value="save"><Wand2 className="mr-1 h-3 w-3" />Salvar componente</TabsTrigger>
           <TabsTrigger value="history">Histórico</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="unilab" className="mt-4">
+          <UnilabCoilFormPanel
+            equipmentCode={project?.code ?? null}
+            equipmentCommercialName={project?.commercial_name ?? null}
+            defaultRefrigerant={project?.refrigerant ?? r.refrigerant}
+          />
+        </TabsContent>
+
 
         <TabsContent value="system" className="mt-4">
           <SystemSimulatorPanel
