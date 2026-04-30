@@ -510,7 +510,8 @@ function TechBankPage() {
         description="Biblioteca técnica oficial consumida pelo motor. Mostra apenas registros aprovados ou validados."
         actions={
           <div className="flex gap-2">
-            <ProcessUnmappedButton />
+            <ProcessAndApproveAllButton />
+            <ProcessUnmappedButton variant="outline" />
             <InitializeLibraryButton />
             <Button asChild variant="outline" size="sm">
               <Link to="/admin/unilab-import">Importar Unilab</Link>
