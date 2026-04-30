@@ -98,18 +98,44 @@ function toHybridGeometry(
 }
 
 export function simulateCoil(coil: Coil): SectionResult {
-  const thermalMode = thermalModeFor(coil.mode);
+  return coil.mode === "evaporator" ? simulateEvaporatorCoil(coil) : simulateCondenserCoil(coil);
+}
+
+function simulateEvaporatorCoil(coil: Coil): SectionResult {
+  return simulateHybridCoilAsSection(coil, {
+    thermalMode: "direct_expansion",
+    wet: (coil.air.rhInPct ?? defaultHumidityFor("evaporator")) >= 70,
+    outletSign: -1,
+  });
+}
+
+function simulateCondenserCoil(coil: Coil): SectionResult {
+  return simulateHybridCoilAsSection(coil, {
+    thermalMode: "condensation",
+    wet: false,
+    outletSign: 1,
+  });
+}
+
+function simulateHybridCoilAsSection(
+  coil: Coil,
+  opts: {
+    thermalMode: CoilCalculationInput["mode"];
+    wet: boolean;
+    outletSign: -1 | 1;
+  },
+): SectionResult {
   const rh = coil.air.rhInPct ?? defaultHumidityFor(coil.mode);
   const calcInput: CoilCalculationInput = {
-    mode: thermalMode,
-    geometry: toHybridGeometry(coil.geometry, thermalMode),
+    mode: opts.thermalMode,
+    geometry: toHybridGeometry(coil.geometry, opts.thermalMode),
     factors: coil.technical?.factors,
     unilabSource: coil.technical?.unilabSource,
     airInletTempC: coil.air.airTempInC ?? 0,
     refTempC: coil.refrigerantSide.refTempC ?? 0,
     airflowM3h: coil.air.airflowM3h ?? 0,
     relativeHumidityPct: rh,
-    wet: coil.mode === "evaporator" ? rh >= 70 : false,
+    wet: opts.wet,
     refrigerant: coil.refrigerantSide.refrigerant,
     refrigerantMassFlowKgH: (coil.refrigerantSide.massFlowKgs ?? 0) * 3600,
     calibration: coil.calibration,
@@ -122,7 +148,7 @@ export function simulateCoil(coil: Coil): SectionResult {
   const airInletTempC = coil.air.airTempInC ?? 0;
   const massFlowAirKgs = (airflowM3h / 3600) * rhoAir;
   const dT = massFlowAirKgs > 0 ? r.capacityW / (massFlowAirKgs * cpAir) : 0;
-  const airOutletTempC = coil.mode === "evaporator" ? airInletTempC - dT : airInletTempC + dT;
+  const airOutletTempC = airInletTempC + opts.outletSign * dT;
 
   return {
     capacityW: r.capacityW,

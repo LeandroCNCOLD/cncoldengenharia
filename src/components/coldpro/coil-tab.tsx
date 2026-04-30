@@ -15,6 +15,7 @@ import { useAuth } from "@/lib/auth";
 import { UnilabImportForm } from "@/components/coldpro/unilab-import-form";
 import { CalibrationPanel } from "@/components/coldpro/calibration-panel";
 import { PerformanceMapPanel } from "@/components/coldpro/performance-map-panel";
+import { CoilTechnicalForm } from "@/components/coldpro/coil-technical-form";
 import { buildDatasheetFromCoilRow, buildInputFromCoilRow } from "@/lib/coldpro/coil-row-mapper";
 
 type CoilMode = "evaporator" | "condenser";
@@ -88,32 +89,83 @@ export function CoilTab({ equipmentProjectId, mode }: CoilTabProps) {
       ) : (
         items.map((component) => (
           <div key={component.id} className="space-y-3">
-            <UnilabImportForm
-              componentId={component.id}
-              componentCode={component.code}
-              componentStatus={component.status}
-              expectedKind={config.expectedKind}
-              queryKey={[config.queryPrefix, component.id]}
-              fetchRow={async () =>
-                (await config.fetchRow(component.id)) as Record<string, unknown> | null
-              }
-              upsertRow={async (patch) => {
-                const row = await config.upsertRow(patch as never);
-                return row as unknown as Record<string, unknown>;
-              }}
-            />
-            <CoilCalibrationSlot
-              componentId={component.id}
-              equipmentProjectId={equipmentProjectId}
-              mode={mode}
-              queryPrefix={config.queryPrefix}
-              fetchRow={config.fetchRow}
-            />
+            <CoilTechnicalForm
+              coilType={mode}
+              value={buildTechnicalFormValue(component, null, mode)}
+            >
+              <UnilabImportForm
+                componentId={component.id}
+                componentCode={component.code}
+                componentStatus={component.status}
+                expectedKind={config.expectedKind}
+                queryKey={[config.queryPrefix, component.id]}
+                fetchRow={async () =>
+                  (await config.fetchRow(component.id)) as Record<string, unknown> | null
+                }
+                upsertRow={async (patch) => {
+                  const row = await config.upsertRow(patch as never);
+                  return row as unknown as Record<string, unknown>;
+                }}
+              />
+              <CoilCalibrationSlot
+                componentId={component.id}
+                equipmentProjectId={equipmentProjectId}
+                mode={mode}
+                queryPrefix={config.queryPrefix}
+                fetchRow={config.fetchRow}
+              />
+            </CoilTechnicalForm>
           </div>
         ))
       )}
     </div>
   );
+}
+
+function buildTechnicalFormValue(
+  component: { manufacturer: string | null; model: string | null; code: string | null },
+  row: Record<string, unknown> | null,
+  mode: CoilMode,
+) {
+  const value = {
+    manufacturer: component.manufacturer ?? undefined,
+    model: component.model ?? undefined,
+    code: component.code ?? undefined,
+    refrigerant: (row?.refrigerant as string | null | undefined) ?? undefined,
+    nominalCapacityW: numberValue(row?.nominal_capacity_w),
+    geometry: {
+      tubesPerRow: numberValue(row?.tubes_per_row),
+      rows: numberValue(row?.rows),
+      circuits: numberValue(row?.circuits),
+    },
+    dimensions: {
+      lengthMm: numberValue(row?.length_mm),
+    },
+    airflowM3h: numberValue(row?.nominal_airflow_m3h),
+    airOutletTempC: numberValue(row?.nominal_air_temp_out_c),
+  };
+  if (mode === "evaporator") {
+    return {
+      ...value,
+      evaporationTempC: numberValue(row?.nominal_evap_temp_c),
+      superheatK: numberValue(row?.superheat_k),
+      airInletTempC: numberValue(row?.nominal_air_temp_in_c),
+      evaporatorCapacityW: numberValue(row?.nominal_capacity_w),
+    };
+  }
+  return {
+    ...value,
+    condensationTempC: numberValue(row?.nominal_cond_temp_c),
+    subcoolingK: numberValue(row?.subcooling_k),
+    ambientAirTempC: numberValue(row?.nominal_air_temp_in_c),
+    heatRejectionW: numberValue(row?.nominal_capacity_w),
+  };
+}
+
+function numberValue(value: unknown): number | undefined {
+  if (value == null || value === "") return undefined;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : undefined;
 }
 
 function CoilCalibrationSlot({

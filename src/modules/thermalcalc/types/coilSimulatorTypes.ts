@@ -128,6 +128,42 @@ export interface DatasheetReference {
   refrigerant?: string | null;
 }
 
+export interface CoilTechnicalBaseInput {
+  manufacturer?: string | null;
+  model?: string | null;
+  code?: string | null;
+  refrigerant?: string | null;
+  geometry: CoilGeometry;
+  dimensions?: {
+    lengthMm?: number | null;
+    heightMm?: number | null;
+    depthMm?: number | null;
+  };
+  airflowM3h?: number | null;
+  areaM2?: number | null;
+  volumeL?: number | null;
+  datasheetFileId?: string | null;
+  nominalCapacityW?: number | null;
+}
+
+export interface EvaporatorTechnicalInput extends CoilTechnicalBaseInput {
+  coilType: "evaporator";
+  evaporationTempC?: number | null;
+  superheatK?: number | null;
+  airInletTempC?: number | null;
+  airOutletTempC?: number | null;
+  evaporatorCapacityW?: number | null;
+}
+
+export interface CondenserTechnicalInput extends CoilTechnicalBaseInput {
+  coilType: "condenser";
+  condensationTempC?: number | null;
+  subcoolingK?: number | null;
+  ambientAirTempC?: number | null;
+  airOutletTempC?: number | null;
+  heatRejectionW?: number | null;
+}
+
 /** Snapshot técnico do motor híbrido (correlações + fatores Unilab). */
 export interface HybridDebugInfo {
   source: "unilab" | "partial" | "fallback";

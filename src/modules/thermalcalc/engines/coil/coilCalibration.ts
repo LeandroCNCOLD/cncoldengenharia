@@ -91,6 +91,26 @@ export function calibrateCoilFromDatasheet(params: {
   return calibrateAgainstReference(input, reference);
 }
 
+export function calibrateEvaporatorAgainstDatasheet(params: {
+  input: CoilSimulatorInput;
+  datasheet: DatasheetPoint;
+}): CalibrationOutcome {
+  return calibrateCoilFromDatasheet({
+    input: { ...params.input, coilType: "evaporator" },
+    datasheet: { ...params.datasheet, coilType: "evaporator" },
+  });
+}
+
+export function calibrateCondenserAgainstDatasheet(params: {
+  input: CoilSimulatorInput;
+  datasheet: DatasheetPoint;
+}): CalibrationOutcome {
+  return calibrateCoilFromDatasheet({
+    input: { ...params.input, coilType: "condenser" },
+    datasheet: { ...params.datasheet, coilType: "condenser" },
+  });
+}
+
 export function calibrateCoil(coil: Coil, datasheet: DatasheetPoint): CalibrationOutcome {
   const input = {
     mode: "verify" as const,
@@ -111,10 +131,9 @@ export function calibrateCoil(coil: Coil, datasheet: DatasheetPoint): Calibratio
     foulingFactor: coil.foulingFactor,
     altitudeFactor: coil.altitudeFactor,
   } satisfies CoilSimulatorInput;
-  return calibrateCoilFromDatasheet({
-    input,
-    datasheet,
-  });
+  return coil.mode === "evaporator"
+    ? calibrateEvaporatorAgainstDatasheet({ input, datasheet })
+    : calibrateCondenserAgainstDatasheet({ input, datasheet });
 }
 
 export function validateDatasheetForCalibration(
