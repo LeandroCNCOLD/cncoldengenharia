@@ -29,6 +29,13 @@ export const EQUIPMENT_APPLICATION_LABELS: Record<EquipmentApplication, string> 
 
 export const EQUIPMENT_PROJECT_STATUS_LABELS: Record<EquipmentProjectStatus, string> = {
   draft: "Rascunho",
+  autofilled: "AutoFill",
+  evap_ready: "Evaporador pronto",
+  cond_ready: "Condensador pronto",
+  components_ready: "Componentes prontos",
+  simulation_ready: "Pronto para simular",
+  simulated: "Simulado",
+  needs_review: "Revisar",
   in_progress: "Em projeto",
   validated: "Validado",
   archived: "Arquivado",
@@ -52,6 +59,7 @@ export const COMPONENT_STATUS_LABELS: Record<ComponentStatus, string> = {
   imported: "Importado",
   simulated: "Simulado",
   validated: "Validado",
+  needs_mapping: "Mapear",
   needs_review: "Revisar",
   approved: "Aprovado",
 };
@@ -61,6 +69,7 @@ export const COMPONENT_STATUS_COLORS: Record<ComponentStatus, string> = {
   imported: "bg-blue-500/15 text-blue-600 dark:text-blue-400",
   simulated: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
   validated: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+  needs_mapping: "bg-orange-500/15 text-orange-600 dark:text-orange-400",
   needs_review: "bg-rose-500/15 text-rose-600 dark:text-rose-400",
   approved: "bg-primary/15 text-primary",
 };
