@@ -267,14 +267,14 @@ export const getEquipmentReadiness = createServerFn({ method: "POST" })
           message: `Bloqueado: ${reasons.join(", ")}.`,
         });
       } else {
-        // Verifica se há um VapCyc/system run salvo (heurística: tabela vapcyc_runs)
+        // Verifica se há simulação de sistema salva
         const { data: sysRuns } = await supabase
-          .from("vapcyc_runs")
+          .from("equipment_simulations")
           .select("id,created_at")
           .eq("equipment_project_id", eqId)
           .order("created_at", { ascending: false })
           .limit(1);
-        const hasSys = sysRuns && sysRuns.length > 0;
+        const hasSys = sysRuns != null && sysRuns.length > 0;
         out.push({
           key: "sim_system",
           label: "Simulação de sistema",
