@@ -76,6 +76,7 @@ function CoilSimulatorPage() {
 
   const [coilType, setCoilType] = useState<CoilType>("evaporator");
   const [label, setLabel] = useState("");
+  const [activeTab, setActiveTab] = useState("unilab");
 
   // Geometria
   const [g, setG] = useState({
@@ -181,6 +182,14 @@ function CoilSimulatorPage() {
       // noop
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  useEffect(() => {
+    const key = `coilsim:tab:${id}`;
+    const tab = localStorage.getItem(key);
+    if (!tab) return;
+    localStorage.removeItem(key);
+    setActiveTab(tab);
   }, [id]);
 
   const [engine, setEngine] = useState<CoilEngine>("empirical");
@@ -596,7 +605,7 @@ function CoilSimulatorPage() {
         <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Ex.: Verify base R404A -8°C" />
       </div>
 
-      <Tabs defaultValue="unilab">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex flex-wrap">
           <TabsTrigger value="unilab"><Sparkles className="mr-1 h-3 w-3" />Unilab</TabsTrigger>
           <TabsTrigger value="geometry">Geometria</TabsTrigger>
@@ -621,6 +630,14 @@ function CoilSimulatorPage() {
             equipmentCode={project?.code ?? null}
             equipmentCommercialName={project?.commercial_name ?? null}
             defaultRefrigerant={project?.refrigerant ?? r.refrigerant}
+            label={label}
+            onCoilKindChange={setCoilType}
+            onSimulationComplete={(input, output) => {
+              setResult(output);
+              setLastInput(input);
+              setEmpiricalResult(output);
+              setPhysicalResult(output);
+            }}
           />
         </TabsContent>
 
