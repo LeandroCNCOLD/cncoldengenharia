@@ -3,7 +3,7 @@
  * e grava o resultado em `coil_simulations`. Usado tanto pelo botão manual
  * quanto pelo auto-simulate.
  */
-import { simulateEvaporator, simulateCondenser } from "@/modules/thermalcalc";
+import { Coil } from "@/modules/thermalcalc";
 import type {
   CoilSimulatorInput,
   CoilSimulatorResult,
@@ -53,8 +53,8 @@ export async function runCoilSimulation(params: {
   try {
     result =
       params.kind === "evaporator"
-        ? simulateEvaporator(input as never)
-        : simulateCondenser(input as never);
+        ? Coil.simulateEvaporator(input as never)
+        : Coil.simulateCondenser(input as never);
   } catch (e) {
     return { ok: false, reason: (e as Error).message ?? "Erro no solver." };
   }
