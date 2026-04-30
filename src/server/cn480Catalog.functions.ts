@@ -25,9 +25,10 @@ export type { Cn480Detail, Cn480ListItem } from "./cn480Catalog.server";
 
 export const listCn480Catalog = createServerFn({ method: "GET" })
   .middleware([attachSupabaseAuth, requireSupabaseAuth])
-  .handler(async ({ context }): Promise<Cn480ListItem[]> => {
+  .handler(async ({ context }) => {
     const { supabase } = context;
-    return loadCn480List(supabase);
+    const list = await loadCn480List(supabase);
+    return list as unknown as Cn480ListItem[];
   });
 
 export const getCn480Detail = createServerFn({ method: "POST" })
