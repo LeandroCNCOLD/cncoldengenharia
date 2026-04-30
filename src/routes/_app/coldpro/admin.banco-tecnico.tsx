@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Database, Loader2, Filter } from "lucide-react";
+import { AlertTriangle, Archive, Database, Loader2, Filter } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/page-header";
@@ -31,6 +31,7 @@ import { TechnicalComponentDetailDrawer } from "@/components/coldpro/technical-c
 import { supabase } from "@/integrations/supabase/client";
 import {
   countApprovedComponents,
+  countArchivedRawRecords,
   countMappedByStatus,
   countRawRecords,
   countUnmappedRaw,
@@ -48,8 +49,10 @@ import {
   TECHNICAL_SOURCES,
 } from "@/modules/coldpro/library/types";
 import { migrateExistingDataToUniversalLibrary } from "@/server/technicalLibraryMigration.functions";
+import { archiveUnmappableRawRecords } from "@/server/archiveUnmappableRecords.functions";
 import { ProcessUnmappedButton } from "@/components/coldpro/process-unmapped-button";
 import { ProcessAndApproveAllButton } from "@/components/coldpro/process-and-approve-all-button";
+import { subscribePipeline, type PipelineState } from "@/lib/coldpro/background-pipeline";
 
 export const Route = createFileRoute("/_app/coldpro/admin/banco-tecnico")({
   component: TechBankPage,
