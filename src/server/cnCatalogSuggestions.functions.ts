@@ -110,6 +110,10 @@ export const generateAndCacheCnSuggestions = createServerFn({ method: "POST" })
       .order("ranking", { ascending: true });
 
     return { fromCache: false, suggestions: saved ?? [], warnings: result.warnings };
+    } catch (err) {
+      console.error("generateAndCacheCnSuggestions failed:", err);
+      throw err instanceof Error ? err : new Error(String((err as { message?: string })?.message ?? err));
+    }
   });
 
 // ============================================================================
