@@ -66,7 +66,7 @@ export type CnCatalogPoint = {
   superheatK: number | null;
   subcoolingK: number | null;
   airflowM3h: number | null;
-  raw: Record<string, unknown>;
+  raw: Record<string, number | string | boolean | null>;
 };
 
 const POINT_KEYS = {
@@ -83,9 +83,17 @@ function pointFromRow(row: {
   refrigerante: string | null;
   curva_json: unknown;
 }): CnCatalogPoint {
-  const cj = row.curva_json as Record<string, unknown>;
+  const cj = row.curva_json as unknown;
   // curva_json no banco é OBJETO único (não array) representando o ponto nominal.
-  const obj: Record<string, unknown> = Array.isArray(cj) ? ((cj[0] as Record<string, unknown>) ?? {}) : (cj ?? {});
+  const objRaw: Record<string, unknown> = Array.isArray(cj)
+    ? ((cj[0] as Record<string, unknown>) ?? {})
+    : ((cj as Record<string, unknown>) ?? {});
+  const obj: Record<string, number | string | boolean | null> = {};
+  for (const [k, v] of Object.entries(objRaw)) {
+    if (v == null) obj[k] = null;
+    else if (typeof v === "number" || typeof v === "string" || typeof v === "boolean") obj[k] = v;
+    else obj[k] = String(v);
+  }
   const num = (k: string): number | null => {
     const v = obj[k];
     if (v == null) return null;
