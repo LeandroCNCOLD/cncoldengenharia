@@ -16,7 +16,12 @@ interface Props {
 }
 
 export function SystemTab({ equipmentProjectId }: Props) {
-  const { data: items } = useQuery({
+  const {
+    data: items,
+    isLoading: isLoadingItems,
+    isError: isItemsError,
+    error: itemsError,
+  } = useQuery({
     queryKey: ["equip-coil-items", equipmentProjectId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -28,7 +33,12 @@ export function SystemTab({ equipmentProjectId }: Props) {
     },
   });
 
-  const { data: links } = useQuery({
+  const {
+    data: links,
+    isLoading: isLoadingLinks,
+    isError: isLinksError,
+    error: linksError,
+  } = useQuery({
     queryKey: ["equip-component-links", equipmentProjectId],
     queryFn: () => listEquipmentComponentLinks(equipmentProjectId),
   });
@@ -53,11 +63,22 @@ export function SystemTab({ equipmentProjectId }: Props) {
           <CardTitle className="text-base">Componentes do sistema</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-2">
-          <Item label="Evaporador" value={evap?.code ?? evap?.model ?? null} />
-          <Item label="Condensador" value={cond?.code ?? cond?.model ?? null} />
-          <Item label="Compressor" value={compressor?.component?.model ?? null} />
-          <Item label="Ventilador evap." value={fanEvap?.component?.model ?? null} />
-          <Item label="Ventilador cond." value={fanCond?.component?.model ?? null} />
+          {isLoadingItems || isLoadingLinks ? (
+            <p className="text-sm text-muted-foreground">Carregando componentes…</p>
+          ) : isItemsError || isLinksError ? (
+            <p className="text-sm text-destructive">
+              Erro ao carregar componentes:{" "}
+              {((itemsError ?? linksError) as Error | undefined)?.message}
+            </p>
+          ) : (
+            <>
+              <Item label="Evaporador" value={evap?.code ?? evap?.model ?? null} />
+              <Item label="Condensador" value={cond?.code ?? cond?.model ?? null} />
+              <Item label="Compressor" value={compressor?.component?.model ?? null} />
+              <Item label="Ventilador evap." value={fanEvap?.component?.model ?? null} />
+              <Item label="Ventilador cond." value={fanCond?.component?.model ?? null} />
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -65,8 +86,8 @@ export function SystemTab({ equipmentProjectId }: Props) {
         <Alert>
           <InfoIcon className="h-4 w-4" />
           <AlertDescription>
-            Faltam: <strong>{missing.join(", ")}</strong>. A simulação roda mesmo assim
-            com os defaults abaixo, mas os resultados serão indicativos.
+            Faltam: <strong>{missing.join(", ")}</strong>. A simulação roda mesmo assim com os
+            defaults abaixo, mas os resultados serão indicativos.
           </AlertDescription>
         </Alert>
       )}

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Play, Activity, Zap, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -58,13 +58,23 @@ export function SystemSimulatorPanel({ defaultEvaporatorCode, defaultCondenserCo
   });
 
   const [result, setResult] = useState<SystemResult | null>(null);
+  const [runError, setRunError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
+
+  useEffect(() => {
+    setForm((prev) => ({
+      ...prev,
+      evaporatorGeometryCode: defaultEvaporatorCode ?? prev.evaporatorGeometryCode,
+      condenserGeometryCode: defaultCondenserCode ?? prev.condenserGeometryCode,
+    }));
+  }, [defaultCondenserCode, defaultEvaporatorCode]);
 
   const set = <K extends keyof SystemInput>(k: K, v: SystemInput[K]) =>
     setForm((p) => ({ ...p, [k]: v }));
 
   const run = () => {
     setRunning(true);
+    setRunError(null);
     try {
       const r = simulateSystem(form);
       setResult(r);
@@ -74,7 +84,10 @@ export function SystemSimulatorPanel({ defaultEvaporatorCode, defaultCondenserCo
         toast.warning(`Solver não convergiu — verifique alertas`);
       }
     } catch (e) {
-      toast.error(`Erro na simulação: ${(e as Error).message}`);
+      const message = (e as Error).message;
+      setResult(null);
+      setRunError(message);
+      toast.error(`Erro na simulação: ${message}`);
     } finally {
       setRunning(false);
     }
@@ -90,29 +103,43 @@ export function SystemSimulatorPanel({ defaultEvaporatorCode, defaultCondenserCo
         <CardContent className="grid gap-4 md:grid-cols-3">
           <Field label="Refrigerante">
             <Select value={form.refrigerant} onValueChange={(v) => set("refrigerant", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {REFRIGERANTS.map((r) => (
-                  <SelectItem key={r} value={r}>{r}</SelectItem>
+                  <SelectItem key={r} value={r}>
+                    {r}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </Field>
           <Field label="Modelo do compressor">
             <Select value={form.compressorModel} onValueChange={(v) => set("compressorModel", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {compressorModels.map((m) => (
-                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                  <SelectItem key={m} value={m}>
+                    {m}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </Field>
           <Field label="Código geometria evap.">
-            <Input value={form.evaporatorGeometryCode} onChange={(e) => set("evaporatorGeometryCode", e.target.value)} />
+            <Input
+              value={form.evaporatorGeometryCode}
+              onChange={(e) => set("evaporatorGeometryCode", e.target.value)}
+            />
           </Field>
           <Field label="Código geometria cond.">
-            <Input value={form.condenserGeometryCode} onChange={(e) => set("condenserGeometryCode", e.target.value)} />
+            <Input
+              value={form.condenserGeometryCode}
+              onChange={(e) => set("condenserGeometryCode", e.target.value)}
+            />
           </Field>
 
           <Field label="Tar entrada evap. (°C)">
@@ -149,6 +176,14 @@ export function SystemSimulatorPanel({ defaultEvaporatorCode, defaultCondenserCo
           </div>
         </CardContent>
       </Card>
+
+      {runError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Simulação não executada</AlertTitle>
+          <AlertDescription>{runError}</AlertDescription>
+        </Alert>
+      )}
 
       {/* Resultado */}
       {result && (
@@ -201,8 +236,14 @@ export function SystemSimulatorPanel({ defaultEvaporatorCode, defaultCondenserCo
               />
               <Metric label="Tevap equilíbrio" value={`${result.evaporatingTempC.toFixed(1)} °C`} />
               <Metric label="Tcond equilíbrio" value={`${result.condensingTempC.toFixed(1)} °C`} />
-              <Metric label="Tar saída evap." value={`${(result.evaporator.airOutletTempC ?? 0).toFixed(1)} °C`} />
-              <Metric label="Tar saída cond." value={`${(result.condenser.airOutletTempC ?? 0).toFixed(1)} °C`} />
+              <Metric
+                label="Tar saída evap."
+                value={`${(result.evaporator.airOutletTempC ?? 0).toFixed(1)} °C`}
+              />
+              <Metric
+                label="Tar saída cond."
+                value={`${(result.condenser.airOutletTempC ?? 0).toFixed(1)} °C`}
+              />
             </CardContent>
           </Card>
 
@@ -314,10 +355,16 @@ function StageCard({
   extras: Array<[string, string]>;
 }) {
   return (
-    <div className={`rounded-md border p-4 ${isBottleneck ? "border-orange-500 bg-orange-500/5" : ""}`}>
+    <div
+      className={`rounded-md border p-4 ${isBottleneck ? "border-orange-500 bg-orange-500/5" : ""}`}
+    >
       <div className="flex items-center justify-between">
         <div className="font-medium">{title}</div>
-        {isBottleneck && <Badge variant="destructive" className="text-[10px]">GARGALO</Badge>}
+        {isBottleneck && (
+          <Badge variant="destructive" className="text-[10px]">
+            GARGALO
+          </Badge>
+        )}
       </div>
       <div className="mt-2 text-2xl font-bold">{(capacity / 1000).toFixed(2)} kW</div>
       <div className="mt-1 text-xs text-muted-foreground">

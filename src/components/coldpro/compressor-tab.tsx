@@ -36,15 +36,17 @@ export function CompressorTab({ equipmentProjectId }: Props) {
   const [tc, setTc] = useState(45);
   const [result, setResult] = useState<CompressorSimulationOutput | null>(null);
 
-  const { data: links } = useQuery({
+  const {
+    data: links,
+    isLoading: isLoadingLinks,
+    isError: isLinksError,
+    error: linksError,
+  } = useQuery({
     queryKey: ["equip-component-links", equipmentProjectId],
     queryFn: () => listEquipmentComponentLinks(equipmentProjectId),
   });
 
-  const compressorLink = useMemo(
-    () => links?.find((l) => l.role === "compressor"),
-    [links],
-  );
+  const compressorLink = useMemo(() => links?.find((l) => l.role === "compressor"), [links]);
 
   const linkMut = useMutation({
     mutationFn: (technicalComponentId: string) =>
@@ -63,9 +65,11 @@ export function CompressorTab({ equipmentProjectId }: Props) {
   const removeMut = useMutation({
     mutationFn: removeEquipmentComponentLink,
     onSuccess: () => {
+      toast.success("Compressor desvinculado");
       qc.invalidateQueries({ queryKey: ["equip-component-links", equipmentProjectId] });
       setResult(null);
     },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const simulateMut = useMutation({
@@ -115,13 +119,21 @@ export function CompressorTab({ equipmentProjectId }: Props) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {!c ? (
+          {isLoadingLinks ? (
+            <p className="text-sm text-muted-foreground">Carregando compressor…</p>
+          ) : isLinksError ? (
+            <p className="text-sm text-destructive">
+              Erro ao carregar compressor: {(linksError as Error).message}
+            </p>
+          ) : !c ? (
             <p className="text-sm text-muted-foreground">
               Nenhum compressor vinculado. Use o botão acima para escolher um da Biblioteca Técnica.
             </p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
-              <Info label="Fabricante / Modelo">{c.manufacturer ?? "—"} · {c.model ?? c.code ?? "—"}</Info>
+              <Info label="Fabricante / Modelo">
+                {c.manufacturer ?? "—"} · {c.model ?? c.code ?? "—"}
+              </Info>
               <Info label="Refrigerante(s)">
                 {c.compatible_refrigerants_json?.join(", ") || "—"}
               </Info>
@@ -129,7 +141,9 @@ export function CompressorTab({ equipmentProjectId }: Props) {
                 <Badge variant="secondary">{c.source ?? "—"}</Badge>{" "}
                 <Badge variant="outline">{c.context}</Badge>
               </Info>
-              <Info label="Família / Aplicação">{c.family ?? "—"} · {c.application ?? "—"}</Info>
+              <Info label="Família / Aplicação">
+                {c.family ?? "—"} · {c.application ?? "—"}
+              </Info>
             </div>
           )}
         </CardContent>
@@ -144,19 +158,11 @@ export function CompressorTab({ equipmentProjectId }: Props) {
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">Tevap (°C)</Label>
-                <Input
-                  type="number"
-                  value={te}
-                  onChange={(e) => setTe(Number(e.target.value))}
-                />
+                <Input type="number" value={te} onChange={(e) => setTe(Number(e.target.value))} />
               </div>
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">Tcond (°C)</Label>
-                <Input
-                  type="number"
-                  value={tc}
-                  onChange={(e) => setTc(Number(e.target.value))}
-                />
+                <Input type="number" value={tc} onChange={(e) => setTc(Number(e.target.value))} />
               </div>
               <div className="flex items-end">
                 <Button
@@ -214,7 +220,9 @@ function CompressorResultPanel({ out }: { out: CompressorSimulationOutput }) {
         <AlertTitle>Sem dados de performance</AlertTitle>
         <AlertDescription>
           <ul className="ml-4 mt-1 list-disc space-y-1 text-sm">
-            {out.warnings.map((w, i) => <li key={i}>{w}</li>)}
+            {out.warnings.map((w, i) => (
+              <li key={i}>{w}</li>
+            ))}
           </ul>
         </AlertDescription>
       </Alert>
@@ -251,7 +259,9 @@ function CompressorResultPanel({ out }: { out: CompressorSimulationOutput }) {
             <AlertTitle>Alertas</AlertTitle>
             <AlertDescription>
               <ul className="ml-4 mt-1 list-disc space-y-1 text-sm">
-                {[...r.warnings, ...r.envelopeWarnings].map((w, i) => <li key={i}>{w}</li>)}
+                {[...r.warnings, ...r.envelopeWarnings].map((w, i) => (
+                  <li key={i}>{w}</li>
+                ))}
               </ul>
             </AlertDescription>
           </Alert>
@@ -283,7 +293,9 @@ function CompressorResultPanel({ out }: { out: CompressorSimulationOutput }) {
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             <ul className="ml-4 mt-1 list-disc space-y-1 text-sm">
-              {r.warnings.map((w, i) => <li key={i}>{w}</li>)}
+              {r.warnings.map((w, i) => (
+                <li key={i}>{w}</li>
+              ))}
             </ul>
           </AlertDescription>
         </Alert>

@@ -4,7 +4,7 @@
  * ventiladores, válvula, fluido via `equipment_component_links`).
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Trash2, Plus, ExternalLink, AlertCircle } from "lucide-react";
+import { Trash2, ExternalLink, AlertCircle } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
@@ -36,7 +36,12 @@ interface ComponentItemRow {
 export function ComponentsTab({ equipmentProjectId }: Props) {
   const qc = useQueryClient();
 
-  const { data: localComponents } = useQuery({
+  const {
+    data: localComponents,
+    isLoading: isLoadingLocalComponents,
+    isError: isLocalComponentsError,
+    error: localComponentsError,
+  } = useQuery({
     queryKey: ["equip-local-components", equipmentProjectId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -49,7 +54,12 @@ export function ComponentsTab({ equipmentProjectId }: Props) {
     },
   });
 
-  const { data: links, isLoading } = useQuery({
+  const {
+    data: links,
+    isLoading: isLoadingLinks,
+    isError: isLinksError,
+    error: linksError,
+  } = useQuery({
     queryKey: ["equip-component-links", equipmentProjectId],
     queryFn: () => listEquipmentComponentLinks(equipmentProjectId),
   });
@@ -75,8 +85,8 @@ export function ComponentsTab({ equipmentProjectId }: Props) {
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Adicione compressor, ventiladores, válvula e fluido nas respectivas abas.
-          Evaporador e condensador são cadastrados nas abas dedicadas.
+          Adicione compressor, ventiladores, válvula e fluido nas respectivas abas. Evaporador e
+          condensador são cadastrados nas abas dedicadas.
         </AlertDescription>
       </Alert>
 
@@ -85,7 +95,13 @@ export function ComponentsTab({ equipmentProjectId }: Props) {
           <CardTitle className="text-base">Bobinas do equipamento</CardTitle>
         </CardHeader>
         <CardContent>
-          {!localComponents || localComponents.length === 0 ? (
+          {isLoadingLocalComponents ? (
+            <p className="text-sm text-muted-foreground">Carregando bobinas…</p>
+          ) : isLocalComponentsError ? (
+            <p className="text-sm text-destructive">
+              Erro ao carregar bobinas: {(localComponentsError as Error).message}
+            </p>
+          ) : !localComponents || localComponents.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               Nenhuma bobina cadastrada. Use as abas Evaporador / Condensador.
             </p>
@@ -98,8 +114,12 @@ export function ComponentsTab({ equipmentProjectId }: Props) {
                       {c.manufacturer ?? "—"} · {c.model ?? c.code ?? "Sem modelo"}
                     </div>
                     <div className="mt-0.5 flex gap-2 text-xs text-muted-foreground">
-                      <Badge variant="outline" className="text-[10px]">{c.kind}</Badge>
-                      <Badge variant="secondary" className="text-[10px]">{c.status}</Badge>
+                      <Badge variant="outline" className="text-[10px]">
+                        {c.kind}
+                      </Badge>
+                      <Badge variant="secondary" className="text-[10px]">
+                        {c.status}
+                      </Badge>
                     </div>
                   </div>
                 </li>
@@ -111,16 +131,19 @@ export function ComponentsTab({ equipmentProjectId }: Props) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">
-            Componentes vinculados da Biblioteca Técnica
-          </CardTitle>
+          <CardTitle className="text-base">Componentes vinculados da Biblioteca Técnica</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {isLoadingLinks ? (
             <p className="text-sm text-muted-foreground">Carregando…</p>
+          ) : isLinksError ? (
+            <p className="text-sm text-destructive">
+              Erro ao carregar vínculos: {(linksError as Error).message}
+            </p>
           ) : !links || links.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Nenhum componente vinculado. Adicione compressor / ventilador / válvula / fluido nas abas dedicadas.
+              Nenhum componente vinculado. Adicione compressor / ventilador / válvula / fluido nas
+              abas dedicadas.
             </p>
           ) : (
             <div className="space-y-4">
@@ -133,17 +156,25 @@ export function ComponentsTab({ equipmentProjectId }: Props) {
                     {items?.map((l) => {
                       const c = l.component;
                       return (
-                        <li key={l.id} className="flex items-center justify-between gap-2 p-3 text-sm">
+                        <li
+                          key={l.id}
+                          className="flex items-center justify-between gap-2 p-3 text-sm"
+                        >
                           <div className="min-w-0">
                             <div className="font-medium">
-                              {c?.manufacturer ?? "—"} · {c?.model ?? c?.code ?? "Componente removido"}
+                              {c?.manufacturer ?? "—"} ·{" "}
+                              {c?.model ?? c?.code ?? "Componente removido"}
                             </div>
                             <div className="mt-0.5 flex flex-wrap gap-1 text-xs text-muted-foreground">
                               {c?.entity_type && (
-                                <Badge variant="outline" className="text-[10px]">{c.entity_type}</Badge>
+                                <Badge variant="outline" className="text-[10px]">
+                                  {c.entity_type}
+                                </Badge>
                               )}
                               {c?.source && (
-                                <Badge variant="secondary" className="text-[10px]">{c.source}</Badge>
+                                <Badge variant="secondary" className="text-[10px]">
+                                  {c.source}
+                                </Badge>
                               )}
                               {l.quantity > 1 && (
                                 <Badge className="text-[10px]">×{l.quantity}</Badge>
@@ -178,6 +209,3 @@ export function ComponentsTab({ equipmentProjectId }: Props) {
     </div>
   );
 }
-
-// Re-export to satisfy unused imports rule when needed
-void Plus;

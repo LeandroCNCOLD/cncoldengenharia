@@ -128,7 +128,7 @@ const KIND_LABEL: Record<HistoryEvent["kind"], { label: string; color: string }>
 };
 
 export function HistoryTab({ equipmentProjectId }: Props) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["equip-history", equipmentProjectId],
     queryFn: () => loadHistory(equipmentProjectId),
   });
@@ -144,6 +144,10 @@ export function HistoryTab({ equipmentProjectId }: Props) {
       <CardContent>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando…</p>
+        ) : isError ? (
+          <p className="text-sm text-destructive">
+            Erro ao carregar histórico: {(error as Error).message}
+          </p>
         ) : !data || data.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhum evento registrado.</p>
         ) : (
@@ -152,9 +156,7 @@ export function HistoryTab({ equipmentProjectId }: Props) {
               <li key={e.id} className="flex items-center justify-between gap-2 p-3 text-sm">
                 <div className="min-w-0">
                   <div className="font-medium">{e.label}</div>
-                  {e.detail && (
-                    <div className="text-xs text-muted-foreground">{e.detail}</div>
-                  )}
+                  {e.detail && <div className="text-xs text-muted-foreground">{e.detail}</div>}
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <Badge className={`text-[10px] ${KIND_LABEL[e.kind].color}`}>

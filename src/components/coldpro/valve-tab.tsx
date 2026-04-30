@@ -42,7 +42,12 @@ export function ValveTab({ equipmentProjectId }: Props) {
   const qc = useQueryClient();
   const [valveType, setValveType] = useState<TechnicalEntityType>("expansion_valve");
 
-  const { data: links } = useQuery({
+  const {
+    data: links,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["equip-component-links", equipmentProjectId],
     queryFn: () => listEquipmentComponentLinks(equipmentProjectId),
   });
@@ -65,7 +70,9 @@ export function ValveTab({ equipmentProjectId }: Props) {
 
   const removeMut = useMutation({
     mutationFn: removeEquipmentComponentLink,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["equip-component-links", equipmentProjectId] }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ["equip-component-links", equipmentProjectId] }),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const c = valveLink?.component;
@@ -110,7 +117,13 @@ export function ValveTab({ equipmentProjectId }: Props) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {!c ? (
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Carregando vínculo…</p>
+          ) : isError ? (
+            <p className="text-sm text-destructive">
+              Erro ao carregar vínculo: {(error as Error).message}
+            </p>
+          ) : !c ? (
             <p className="text-sm text-muted-foreground">
               Selecione o tipo de válvula e escolha um modelo da Biblioteca Técnica.
             </p>

@@ -62,9 +62,7 @@ function EquipmentDetailPage() {
                   <Calculator className="mr-1 h-4 w-4" /> Coil Simulator
                 </Link>
               </Button>
-              <Badge variant="secondary">
-                {EQUIPMENT_PROJECT_STATUS_LABELS[project.status]}
-              </Badge>
+              <Badge variant="secondary">{EQUIPMENT_PROJECT_STATUS_LABELS[project.status]}</Badge>
             </div>
           }
         />

@@ -2,7 +2,7 @@
  * Picker reutilizável para selecionar um componente da Biblioteca Técnica.
  * Usado por compressor / ventilador / válvula / fluido tabs.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 
@@ -55,7 +55,13 @@ export function LibraryComponentPicker({
   const [ctx, setCtx] = useState<TechnicalContext | "ALL">("ALL");
   const [entityType, setEntityType] = useState<TechnicalEntityType>(entityTypes[0]);
 
-  const { data, isLoading } = useQuery({
+  useEffect(() => {
+    if (!entityTypes.includes(entityType)) {
+      setEntityType(entityTypes[0]);
+    }
+  }, [entityType, entityTypes]);
+
+  const { data, isError, error, isLoading } = useQuery({
     queryKey: ["library-picker", entityType, source, ctx],
     queryFn: () =>
       listApprovedComponents({
@@ -146,6 +152,10 @@ export function LibraryComponentPicker({
         <ScrollArea className="h-[420px] rounded border">
           {isLoading ? (
             <p className="p-4 text-sm text-muted-foreground">Carregando…</p>
+          ) : isError ? (
+            <p className="p-4 text-sm text-destructive">
+              Erro ao carregar Biblioteca Técnica: {(error as Error).message}
+            </p>
           ) : filtered.length === 0 ? (
             <p className="p-4 text-sm text-muted-foreground">
               Nenhum componente encontrado com esses filtros.

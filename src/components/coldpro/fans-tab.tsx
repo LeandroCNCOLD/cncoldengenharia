@@ -18,6 +18,7 @@ import {
   addEquipmentComponentLink,
   listEquipmentComponentLinks,
   removeEquipmentComponentLink,
+  type EquipmentComponentLinkExpanded,
   type EquipmentComponentRole,
 } from "@/lib/coldpro/equipment-component-links";
 
@@ -27,7 +28,12 @@ interface Props {
 
 export function FansTab({ equipmentProjectId }: Props) {
   const qc = useQueryClient();
-  const { data: links } = useQuery({
+  const {
+    data: links,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["equip-component-links", equipmentProjectId],
     queryFn: () => listEquipmentComponentLinks(equipmentProjectId),
   });
@@ -53,8 +59,24 @@ export function FansTab({ equipmentProjectId }: Props) {
 
   const removeMut = useMutation({
     mutationFn: removeEquipmentComponentLink,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["equip-component-links", equipmentProjectId] }),
+    onSuccess: () => {
+      toast.success("Ventilador desvinculado");
+      qc.invalidateQueries({ queryKey: ["equip-component-links", equipmentProjectId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
+
+  if (isLoading) {
+    return <p className="text-sm text-muted-foreground">Carregando ventiladores…</p>;
+  }
+
+  if (isError) {
+    return (
+      <p className="text-sm text-destructive">
+        Erro ao carregar ventiladores: {(error as Error).message}
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -75,8 +97,8 @@ export function FansTab({ equipmentProjectId }: Props) {
 
       <Alert>
         <AlertDescription className="text-sm">
-          Ponto de operação (vazão real × pressão estática do duto) ainda não está
-          implementado. Use o botão abaixo para registrar próximos passos.
+          Ponto de operação (vazão real × pressão estática do duto) ainda não está implementado. Use
+          o botão abaixo para registrar próximos passos.
         </AlertDescription>
       </Alert>
 
@@ -105,7 +127,7 @@ function FanSlot({
 }: {
   title: string;
   role: EquipmentComponentRole;
-  link: ReturnType<typeof useDummy> | null;
+  link: EquipmentComponentLinkExpanded | null;
   onAdd: (id: string) => void;
   onRemove: (linkId: string) => void;
 }) {
@@ -156,16 +178,6 @@ function FanSlot({
       </CardContent>
     </Card>
   );
-}
-
-// helper só para tipagem (TS infere do array via useQuery)
-type DummyLink = {
-  id: string;
-  role: EquipmentComponentRole;
-  component: { id: string; manufacturer: string | null; model: string | null; code: string | null; source: string | null; normalized_json: Record<string, unknown> } | null;
-};
-function useDummy(): DummyLink {
-  return null as unknown as DummyLink;
 }
 
 function Info({ label, children }: { label: string; children: React.ReactNode }) {

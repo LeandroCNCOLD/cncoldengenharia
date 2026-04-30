@@ -60,9 +60,7 @@ export async function countRawRecords(): Promise<number> {
 
 /** Conta registros mapped/needs_review/validated/approved/rejected/unmapped. */
 export async function countMappedByStatus(): Promise<CountByStatus> {
-  const { data, error } = await supabase
-    .from("technical_mapped_records")
-    .select("mapping_status");
+  const { data, error } = await supabase.from("technical_mapped_records").select("mapping_status");
   if (error || !data) return { ...EMPTY_COUNTS };
   const out: CountByStatus = { ...EMPTY_COUNTS };
   for (const row of data) {
@@ -230,9 +228,7 @@ export async function rejectMapped(
 }
 
 /** Re-roda o universalMapper sobre um raw e atualiza/insere mapped. */
-export async function remapRaw(
-  raw: TechnicalRawRecord,
-): Promise<TechnicalMappedRecord | null> {
+export async function remapRaw(raw: TechnicalRawRecord): Promise<TechnicalMappedRecord | null> {
   const result = universalMapper.map({
     raw: raw.raw_json,
     sourceFile: raw.source_file,
@@ -241,9 +237,7 @@ export async function remapRaw(
     hintEntityType: raw.detected_entity_type,
   });
 
-  const mappingStatus: TechnicalRecordStatus = result.errors.length
-    ? "needs_review"
-    : "mapped";
+  const mappingStatus: TechnicalRecordStatus = result.errors.length ? "needs_review" : "mapped";
   const payload = {
     batch_id: raw.batch_id,
     raw_record_id: raw.id,
@@ -293,9 +287,7 @@ export async function listApprovedComponents(
   if (opts.context && opts.context !== "ALL") q = q.eq("context", opts.context);
   if (opts.search && opts.search.trim()) {
     const term = `%${opts.search.trim()}%`;
-    q = q.or(
-      `manufacturer.ilike.${term},model.ilike.${term},code.ilike.${term}`,
-    );
+    q = q.or(`manufacturer.ilike.${term},model.ilike.${term},code.ilike.${term}`);
   }
 
   const { data, error } = await q;
@@ -321,9 +313,6 @@ export async function updateComponentClassification(
   componentId: string,
   patch: Partial<{ source: TechnicalSource; context: TechnicalContext }>,
 ): Promise<void> {
-  const { error } = await supabase
-    .from("technical_components")
-    .update(patch)
-    .eq("id", componentId);
+  const { error } = await supabase.from("technical_components").update(patch).eq("id", componentId);
   if (error) throw new Error(error.message);
 }

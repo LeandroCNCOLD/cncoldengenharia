@@ -100,9 +100,6 @@ export async function addEquipmentComponentLink(input: {
 }
 
 export async function removeEquipmentComponentLink(linkId: string): Promise<void> {
-  const { error } = await supabase
-    .from("equipment_component_links")
-    .delete()
-    .eq("id", linkId);
+  const { error } = await supabase.from("equipment_component_links").delete().eq("id", linkId);
   if (error) throw new Error(error.message);
 }
