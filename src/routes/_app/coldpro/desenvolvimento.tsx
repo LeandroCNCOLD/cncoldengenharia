@@ -54,11 +54,12 @@ function DesenvolvimentoPage() {
 
   const products = (productsQuery.data?.products ?? []) as unknown as ProductCardData[];
   const curvesByModel = productsQuery.data?.curvesByModel ?? {};
+  const nominalByModel = productsQuery.data?.nominalByModel ?? {};
   const cn480 = cn480Query.data ?? [];
 
   const allRows = useMemo(
-    () => buildUnifiedRows({ products, curvesByModel, cn480 }),
-    [products, curvesByModel, cn480],
+    () => buildUnifiedRows({ products, curvesByModel, nominalByModel, cn480 }),
+    [products, curvesByModel, nominalByModel, cn480],
   );
   const filteredRows = useFilteredRows(allRows, { search, origin });
 
