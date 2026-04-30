@@ -77,7 +77,29 @@ function EquipmentDetailPage() {
         />
       </div>
 
-      <Tabs defaultValue="overview">
+      <EquipmentReadinessPanel
+        equipmentProjectId={project.id}
+        onPrimaryAction={(action) => {
+          switch (action) {
+            case "load_from_catalog":
+            case "complete_components":
+              setTab("components");
+              break;
+            case "simulate_coils":
+              setTab("evaporator");
+              break;
+            case "simulate_system":
+              setTab("simulation");
+              break;
+            case "all_done":
+            default:
+              setTab("validation");
+          }
+        }}
+      />
+
+      <Tabs value={tab} onValueChange={setTab}>
+
         <TabsList className="flex flex-wrap">
           <TabsTrigger value="overview">Visão geral</TabsTrigger>
           <TabsTrigger value="sizing">Dimensionamento</TabsTrigger>
