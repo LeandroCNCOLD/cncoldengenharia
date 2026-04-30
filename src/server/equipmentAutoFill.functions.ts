@@ -189,11 +189,24 @@ function extractMidPointOps(curva: unknown): {
 // Match: equipment.code → curva CN
 // ============================================================================
 
+type CnCurveRow = {
+  id: string;
+  modelo: string;
+  refrigerante: string | null;
+  raw_json: unknown;
+  curva_json: unknown;
+};
+
+// `supabase` vem do contexto do middleware — usamos um tipo estrutural mínimo
+// para não acoplar ao SupabaseClient<Database>.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SupabaseLike = any;
+
 async function findCurveForEquipment(
-  supabase: ReturnType<typeof require_supabase>,
+  supabase: SupabaseLike,
   code: string | null,
   commercialName: string | null,
-) {
+): Promise<CnCurveRow | null> {
   const candidates = [code, commercialName].filter((x): x is string => !!x && x.length > 0);
   for (const cand of candidates) {
     const { data: row } = await supabase
@@ -203,7 +216,7 @@ async function findCurveForEquipment(
       .order("curva_indice", { ascending: true, nullsFirst: false })
       .limit(1)
       .maybeSingle();
-    if (row) return row;
+    if (row) return row as CnCurveRow;
   }
   for (const cand of candidates) {
     const { data: row } = await supabase
@@ -213,17 +226,9 @@ async function findCurveForEquipment(
       .order("curva_indice", { ascending: true, nullsFirst: false })
       .limit(1)
       .maybeSingle();
-    if (row) return row;
+    if (row) return row as CnCurveRow;
   }
   return null;
-}
-
-// helper só para tipagem do parâmetro supabase acima
-type AnySupabase = {
-  from: (...a: unknown[]) => unknown;
-};
-function require_supabase(): AnySupabase {
-  return null as unknown as AnySupabase;
 }
 
 // ============================================================================
