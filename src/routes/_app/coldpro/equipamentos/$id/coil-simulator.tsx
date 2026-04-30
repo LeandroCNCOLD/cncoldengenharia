@@ -188,6 +188,64 @@ function CoilSimulatorPage() {
   const [empiricalResult, setEmpiricalResult] = useState<CoilSimulatorResult | null>(null);
   const [lastInput, setLastInput] = useState<CoilSimulatorInput | null>(null);
 
+  // Origem dos dados (manual / biblioteca / unilab)
+  const [dataOrigin, setDataOrigin] = useState<"manual" | "library" | "unilab" | "cn_internal">(
+    prefillComponentId ? "unilab" : "manual",
+  );
+  useEffect(() => {
+    if (prefillComponentId) setDataOrigin("unilab");
+  }, [prefillComponentId]);
+
+  // Salvar como componente
+  const [savedComponentId, setSavedComponentId] = useState<string | null>(null);
+  const [saveAlsoToLibrary, setSaveAlsoToLibrary] = useState(false);
+  const [saveLibraryContext, setSaveLibraryContext] = useState<"reference" | "cn_standard">("reference");
+  const [saveStatus, setSaveStatus] = useState<"draft" | "validated">("draft");
+  const effectiveComponentId = savedComponentId ?? prefillComponentId;
+
+  // Biblioteca
+  const { data: libraryComponents = [] } = useQuery({
+    queryKey: ["library-coils", coilType],
+    queryFn: () =>
+      listApprovedComponents({
+        entityType: coilType === "evaporator" ? "evaporator_coil" : "condenser_coil",
+        limit: 100,
+      }),
+  });
+
+  const handleLoadFromLibrary = (componentId: string) => {
+    const c = libraryComponents.find((x) => x.id === componentId);
+    if (!c) return;
+    const norm = (c.normalized_json ?? {}) as Record<string, unknown>;
+    const numStr = (k: string): string => {
+      const v = norm[k];
+      if (v == null || v === "") return "";
+      const n = Number(v);
+      return Number.isFinite(n) ? String(n) : "";
+    };
+    setLabel(`${c.manufacturer ?? ""} ${c.model ?? c.code ?? ""}`.trim());
+    setG((s) => ({
+      ...s,
+      description: (norm.description as string) ?? s.description,
+      tubeOdMm: numStr("tube_od_mm") || numStr("tubeOdMm") || s.tubeOdMm,
+      tubeIdMm: numStr("tube_id_mm") || numStr("tubeIdMm") || s.tubeIdMm,
+      tubeWallMm: numStr("tube_wall_mm") || s.tubeWallMm,
+      finThicknessMm: numStr("fin_thickness_mm") || s.finThicknessMm,
+      tubesPerRow: numStr("tubes_per_row") || s.tubesPerRow,
+      rows: numStr("rows") || s.rows,
+      circuits: numStr("circuits") || s.circuits,
+      coilLengthMm: numStr("length_mm") || numStr("coil_length_mm") || s.coilLengthMm,
+      finPitchMm: numStr("fin_pitch_mm") || s.finPitchMm,
+      tubeMaterial: (norm.tube_material as string) ?? s.tubeMaterial,
+      finMaterial: (norm.fin_material as string) ?? s.finMaterial,
+    }));
+    if (norm.refrigerant) setR((s) => ({ ...s, refrigerant: String(norm.refrigerant) }));
+    setDataOrigin("library");
+    setSavedComponentId(null);
+    toast.success(`Geometria de "${c.model ?? c.code}" carregada.`);
+  };
+
+
   // Última calibração para o componente prefilled
   const { data: latestCal } = useQuery({
     queryKey: ["coil-cal-latest", prefillComponentId],
