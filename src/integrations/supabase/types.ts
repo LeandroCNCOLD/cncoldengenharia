@@ -139,6 +139,60 @@ export type Database = {
         }
         Relationships: []
       }
+      cn_product_development: {
+        Row: {
+          approved_at: string | null
+          archived_at: string | null
+          archived_reason: string | null
+          catalog_model: string
+          created_at: string
+          created_by: string | null
+          equipment_project_id: string | null
+          hp: string | null
+          id: string
+          linha: string | null
+          notes: string | null
+          position: number
+          refrigerante: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          archived_at?: string | null
+          archived_reason?: string | null
+          catalog_model: string
+          created_at?: string
+          created_by?: string | null
+          equipment_project_id?: string | null
+          hp?: string | null
+          id?: string
+          linha?: string | null
+          notes?: string | null
+          position?: number
+          refrigerante?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          archived_at?: string | null
+          archived_reason?: string | null
+          catalog_model?: string
+          created_at?: string
+          created_by?: string | null
+          equipment_project_id?: string | null
+          hp?: string | null
+          id?: string
+          linha?: string | null
+          notes?: string | null
+          position?: number
+          refrigerante?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coil_calibrations: {
         Row: {
           air_dp_correction_factor: number
