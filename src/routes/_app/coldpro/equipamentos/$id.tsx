@@ -25,6 +25,7 @@ import { CatalogTab } from "@/components/coldpro/catalog-tab";
 import { CatalogComparePanel } from "@/components/coldpro/catalog-compare-panel";
 import { CnSuggestionsTab } from "@/components/coldpro/cn-suggestions-tab";
 import { HistoryTab } from "@/components/coldpro/history-tab";
+import { AutoFillFromCnCatalogPrompt } from "@/components/coldpro/auto-fill-from-cn-catalog-prompt";
 
 export const Route = createFileRoute("/_app/coldpro/equipamentos/$id")({
   component: EquipmentDetailPage,
@@ -59,6 +60,7 @@ function EquipmentDetailPage() {
           }
           actions={
             <div className="flex items-center gap-2">
+              <AutoFillFromCnCatalogPrompt equipmentProjectId={project.id} />
               <Button asChild variant="outline" size="sm">
                 <Link to="/coldpro/equipamentos/$id/coil-simulator" params={{ id: project.id }}>
                   <Calculator className="mr-1 h-4 w-4" /> Coil Simulator
