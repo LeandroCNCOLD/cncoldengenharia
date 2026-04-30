@@ -26,6 +26,12 @@ import {
   listEquipmentCoilSimulations,
   saveCoilSimulatorRun,
 } from "@/lib/coldpro/coil-simulations";
+import { createComponent } from "@/lib/coldpro/component-items";
+import { listApprovedComponents } from "@/lib/coldpro/technical-library";
+import { supabase } from "@/integrations/supabase/client";
+import { Checkbox } from "@/components/ui/checkbox";
+import { PerformanceMapPanel } from "@/components/coldpro/performance-map-panel";
+import { BookOpen, Wand2, Activity } from "lucide-react";
 import {
   simulateDxEvaporator,
   simulateDxCondenser,
