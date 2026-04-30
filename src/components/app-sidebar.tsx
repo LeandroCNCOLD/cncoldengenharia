@@ -168,13 +168,6 @@ const NAV_GROUPS: NavGroup[] = [
             description: "Tabelas Unilab por modo de operação",
             adminOnly: true,
           },
-          {
-            label: "Banco Técnico",
-            to: "/coldpro/admin/banco-tecnico",
-            icon: Database,
-            description: "Componentes técnicos consolidados (compressores, válvulas, ventiladores)",
-            adminOnly: true,
-          },
         ],
       },
     ],
