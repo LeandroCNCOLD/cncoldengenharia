@@ -257,8 +257,8 @@ function pointFromRow(row: {
     subcoolingK: num(POINT_KEYS.subcooling),
     airflowM3h: num(POINT_KEYS.airflow),
     rhInPct: num(POINT_KEYS.rhIn),
-    evaporatorGeometry: extractGeometry(raw, "evaporador"),
-    condenserGeometry: extractGeometry(raw, "condensador"),
+    evaporatorGeometry: extractGeometry(rawSrc, "evaporador"),
+    condenserGeometry: extractGeometry(rawSrc, "condensador"),
     raw,
   };
 }
