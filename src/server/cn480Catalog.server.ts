@@ -23,6 +23,9 @@ export type Cn480ListItem = {
   perf_points: number;
   compressor_label: string | null;
   status: "ready" | "partial" | "empty";
+  nominal_capacity_w: number | null;
+  nominal_tevap_c: number | null;
+  nominal_tcond_c: number | null;
 };
 
 export type Cn480Master = {
@@ -140,7 +143,10 @@ export async function loadCn480List(supabase: SupabaseLike): Promise<Cn480ListIt
       supabase
         .from("cn_equipment_compressor_master")
         .select("model_id,copeland,bitzer,danfoss,dorin,secondary"),
-      supabase.from("cn_equipment_performance_master").select("model_id"),
+      supabase
+        .from("cn_equipment_performance_master")
+        .select("model_id,point_index,tevap,tcond,capacity_evap,cop")
+        .order("point_index", { ascending: true }),
     ]);
   if (me) throw new Error(me.message ?? "Erro ao carregar catálogo 480.");
 
@@ -150,10 +156,12 @@ export async function loadCn480List(supabase: SupabaseLike): Promise<Cn480ListIt
   for (const r of comps ?? []) {
     compMap.set((r as { model_id: string }).model_id, r as unknown as Cn480CompressorMaster);
   }
-  const perfCount = new Map<string, number>();
+  const perfByModel = new Map<string, Cn480PerformancePoint[]>();
   for (const r of perfs ?? []) {
     const k = (r as { model_id: string }).model_id;
-    perfCount.set(k, (perfCount.get(k) ?? 0) + 1);
+    const arr = perfByModel.get(k) ?? [];
+    arr.push(r as unknown as Cn480PerformancePoint);
+    perfByModel.set(k, arr);
   }
 
   return (masters ?? []).map((m: Record<string, unknown>) => {
@@ -163,7 +171,9 @@ export async function loadCn480List(supabase: SupabaseLike): Promise<Cn480ListIt
     const has_evaporator = evapSet.has(id);
     const has_condenser = condSet.has(id);
     const has_compressor = !!compLabel;
-    const perf_points = perfCount.get(id) ?? 0;
+    const perfPoints = perfByModel.get(id) ?? [];
+    const perf_points = perfPoints.length;
+    const nom = pickNominalPerformancePoint(perfPoints);
     const completeCount = [has_evaporator, has_condenser, has_compressor, perf_points > 0].filter(
       Boolean,
     ).length;
@@ -182,6 +192,9 @@ export async function loadCn480List(supabase: SupabaseLike): Promise<Cn480ListIt
       perf_points,
       compressor_label: compLabel?.label ?? null,
       status,
+      nominal_capacity_w: nom?.capacity_evap != null ? Number(nom.capacity_evap) : null,
+      nominal_tevap_c: nom?.tevap != null ? Number(nom.tevap) : null,
+      nominal_tcond_c: nom?.tcond != null ? Number(nom.tcond) : null,
     };
   });
 }
