@@ -486,12 +486,12 @@ export const commitAutoFillFromCnCatalog = createServerFn({ method: "POST" })
           .insert({
             equipment_project_id: data.equipmentProjectId,
             kind: kind as never,
-            description: `Pré-preenchido pelo catálogo CN (${curve.modelo}).`,
+            description: `Pré-preenchido pelo catálogo CN (${c.modelo}).`,
             status: "draft" as never,
             raw_fields: {
               source: "cn_catalog",
-              catalog_model_id: curve.id,
-              catalog_model: curve.modelo,
+              catalog_model_id: c.id,
+              catalog_model: c.modelo,
             } as never,
             validated_fields: {} as never,
             created_by: userId,
@@ -527,7 +527,7 @@ export const commitAutoFillFromCnCatalog = createServerFn({ method: "POST" })
                 rh_in_pct: ops.rhInPct,
                 superheat_k: ops.superheatK,
                 subcooling_k: ops.subcoolingK,
-                raw_fields: { source: "cn_catalog", catalog_model: curve.modelo } as never,
+                raw_fields: { source: "cn_catalog", catalog_model: c.modelo } as never,
               },
               { onConflict: "component_item_id" },
             );
@@ -559,7 +559,7 @@ export const commitAutoFillFromCnCatalog = createServerFn({ method: "POST" })
                 fin_thickness_mm: condGeo.finThicknessMm,
                 nominal_airflow_m3h: condGeo.airflowM3h,
                 nominal_cond_temp_c: ops.tempCondC,
-                raw_fields: { source: "cn_catalog", catalog_model: curve.modelo } as never,
+                raw_fields: { source: "cn_catalog", catalog_model: c.modelo } as never,
               },
               { onConflict: "component_item_id" },
             );
@@ -654,7 +654,7 @@ export const commitAutoFillFromCnCatalog = createServerFn({ method: "POST" })
             technical_component_id: tcId,
             role: role as never,
             quantity: 1,
-            notes: `Auto-vinculado pelo catálogo CN (${curve.modelo}).`,
+            notes: `Auto-vinculado pelo catálogo CN (${c.modelo}).`,
             created_by: userId,
           })
           .select("id")
@@ -673,7 +673,7 @@ export const commitAutoFillFromCnCatalog = createServerFn({ method: "POST" })
 
       return {
         ok: true,
-        catalogModel: curve.modelo,
+        catalogModel: c.modelo,
         created,
         skipped,
       };
