@@ -14,7 +14,7 @@
 
 ## Fixes applied
 
-- Redirected the sidebar `Administracao` item to `/coldpro/admin/banco-tecnico`, an existing admin route.
+- Redirected the sidebar `Administracao` item to `/admin/coldpro-import`, an existing admin route.
 - Normalized the `Banco Tecnico` database link formatting while preserving behavior.
 
 ## Validation
