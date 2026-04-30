@@ -157,18 +157,6 @@ function EquipmentDetailPage() {
           <SystemTab equipmentProjectId={project.id} />
         </TabsContent>
 
-        <TabsContent value="catalog" className="mt-6">
-          <CatalogTab equipmentProjectId={project.id} />
-        </TabsContent>
-
-        <TabsContent value="validation" className="mt-6">
-          <CatalogComparePanel equipmentProjectId={project.id} />
-        </TabsContent>
-
-        <TabsContent value="cn-suggestions" className="mt-6">
-          <CnSuggestionsTab equipmentProjectId={project.id} />
-        </TabsContent>
-
         <TabsContent value="history" className="mt-6">
           <HistoryTab equipmentProjectId={project.id} />
         </TabsContent>
