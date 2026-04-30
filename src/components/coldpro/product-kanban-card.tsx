@@ -1,10 +1,14 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, ExternalLink, LineChart } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { GripVertical, ExternalLink, LineChart, Wrench, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ensureEquipmentProject } from "@/server/cnProductDevelopment.functions";
 
 export interface ProductCardData {
   id: string;
@@ -25,8 +29,20 @@ interface Props {
 }
 
 export function ProductKanbanCard({ product, curveCount, onClick }: Props) {
+  const navigate = useNavigate();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: product.id,
+  });
+
+  const ensureMutation = useMutation({
+    mutationFn: () => ensureEquipmentProject({ data: { id: product.id } }),
+    onSuccess: ({ equipmentProjectId }) => {
+      navigate({
+        to: "/coldpro/equipamentos/$id",
+        params: { id: equipmentProjectId },
+      });
+    },
+    onError: (e) => toast.error(`Falha ao abrir análise: ${(e as Error).message}`),
   });
 
   const style = {
@@ -88,6 +104,26 @@ export function ProductKanbanCard({ product, curveCount, onClick }: Props) {
           <div className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
             <LineChart className="h-3 w-3" />
             <span>{curveCount} curva(s)</span>
+          </div>
+          <div className="mt-2 flex items-center gap-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 w-full justify-start gap-1 text-[11px]"
+              disabled={ensureMutation.isPending}
+              onClick={(e) => {
+                e.stopPropagation();
+                ensureMutation.mutate();
+              }}
+            >
+              {ensureMutation.isPending ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Wrench className="h-3 w-3" />
+              )}
+              Abrir ferramentas de análise
+            </Button>
           </div>
         </div>
       </div>

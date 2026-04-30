@@ -165,6 +165,50 @@ export const approveProduct = createServerFn({ method: "POST" })
     return { equipmentProjectId };
   });
 
+export const ensureEquipmentProject = createServerFn({ method: "POST" })
+  .middleware([attachSupabaseAuth, requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    const { data: prod, error: pe } = await supabase
+      .from("cn_product_development")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (pe) throw pe;
+    if (!prod) throw new Error("Produto não encontrado.");
+
+    if (prod.equipment_project_id) {
+      return { equipmentProjectId: prod.equipment_project_id };
+    }
+
+    const { data: proj, error: ce } = await supabase
+      .from("equipment_projects")
+      .insert({
+        commercial_name: prod.catalog_model,
+        code: prod.catalog_model,
+        equipment_kind: "unidade_condensadora" as never,
+        application: "outro" as never,
+        family: prod.linha ?? null,
+        refrigerant: prod.refrigerante ?? null,
+        status: "draft" as never,
+        notes: `Criado a partir do Desenvolvimento de Produtos CN.`,
+        created_by: userId,
+      })
+      .select()
+      .single();
+    if (ce) throw ce;
+
+    const { error: ue } = await supabase
+      .from("cn_product_development")
+      .update({ equipment_project_id: proj.id })
+      .eq("id", data.id);
+    if (ue) throw ue;
+
+    return { equipmentProjectId: proj.id };
+  });
+
 export const archiveProduct = createServerFn({ method: "POST" })
   .middleware([attachSupabaseAuth, requireSupabaseAuth])
   .inputValidator((d) =>
