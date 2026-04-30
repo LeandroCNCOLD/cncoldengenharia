@@ -153,6 +153,12 @@ export const createEquipmentFromCatalog = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const KIND_BY_COMPONENT: Record<ComponentType, string> = {
+      compressor: "compressor",
+      fan: "ventilador",
+      coil: "evaporador",
+      valve: "valvula_expansao",
+    };
 
     // Carrega curva e sugestões aceitas
     const { data: curve, error: ce } = await supabase
