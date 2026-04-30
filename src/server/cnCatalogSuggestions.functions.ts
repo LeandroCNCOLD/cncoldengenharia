@@ -34,6 +34,7 @@ export const generateAndCacheCnSuggestions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => generateInput.parse(d))
   .handler(async ({ data, context }) => {
+    try {
     const { supabase, userId } = context;
 
     // 1. Carrega curva CN
