@@ -16,7 +16,7 @@ export type {
   VapcycCurveType,
 } from "./vapcycCompressorEngine";
 
-export { runCoilSection, simulateCoil } from "./coilWrapper";
+export { runCoilCollection, runCoilSection, simulateCoil } from "./coilWrapper";
 export type { Coil, CoilMode, CoilSectionRunInput } from "./coilWrapper";
 export { runExpansionDevice } from "./expansionDeviceEngine";
 export { defaultGeometryFromCode } from "./systemGeometryDefaults";

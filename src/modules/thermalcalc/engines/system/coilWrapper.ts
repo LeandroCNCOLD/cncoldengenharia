@@ -102,6 +102,10 @@ export function simulateCoilRun(input: CoilRunInput): SectionResult {
   return simulateCoil(buildCoil(input));
 }
 
+export function runCoilCollection(coils: Coil[]): SectionResult[] {
+  return coils.map((coil) => simulateCoil(coil));
+}
+
 function missingDatasheetFields(coil: Coil): string[] {
   const missing: string[] = [];
   const capacity = coil.datasheetReference?.capacityW;
