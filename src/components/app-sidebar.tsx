@@ -12,8 +12,6 @@ import {
   BookOpen,
   Upload,
   FileBarChart,
-  
-  ClipboardCheck,
   Library,
   Cpu,
   Plug,
