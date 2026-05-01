@@ -167,6 +167,10 @@ export interface CoilAdvancedInput {
   tube_pitch_transverse_m?: number;
   tube_pitch_longitudinal_m?: number;
   fin_thickness_mm?: number;
+  air_relative_humidity?: number;
+  air_mass_flow_kg_s?: number;
+  enable_psychrometrics?: boolean;
+  reheat_capacity_w?: number;
 }
 
 export interface CoilAdvancedResult {
@@ -269,6 +273,13 @@ export interface CoilIterativeResult {
   h_liquid_base: number | null;
   circuit_results: CircuitPerformanceResult[] | null;
   circuit_aggregation: CircuitAggregationResult | null;
+  air_humidity_in: number | null;
+  air_humidity_out: number | null;
+  water_removed_kg_h: number | null;
+  latent_load_w: number | null;
+  sensible_load_w: number | null;
+  final_air_temperature: number | null;
+  final_air_RH: number | null;
   error_w: number;
   iteration_history: IterationRecord[];
   warnings: string[];
@@ -318,6 +329,42 @@ export interface CircuitAggregationResult {
   max_pressure_drop_kpa: number;
   average_pressure_drop_kpa: number;
   limiting_circuit_index: number;
+  warnings: string[];
+}
+
+export interface WetCoilInput {
+  T_air_in: number;
+  RH_in: number;
+  T_surface: number;
+  air_mass_flow_kg_s: number;
+  P_atm?: number;
+}
+
+export interface WetCoilResult {
+  mode: "wet" | "dry";
+  T_air_out: number;
+  RH_out: number;
+  W_in: number;
+  W_out: number;
+  water_removed_kg_s: number;
+  latent_load_w: number;
+  sensible_load_w: number;
+  total_load_w: number;
+  warnings: string[];
+}
+
+export interface ReheatInput {
+  T_air_in: number;
+  RH_in: number;
+  air_mass_flow_kg_s: number;
+  Q_reheat_w: number;
+  P_atm?: number;
+}
+
+export interface ReheatResult {
+  T_air_out: number;
+  RH_out: number;
+  W_out: number;
   warnings: string[];
 }
 

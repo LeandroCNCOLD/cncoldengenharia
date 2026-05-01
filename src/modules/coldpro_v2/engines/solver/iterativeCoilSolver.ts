@@ -29,6 +29,9 @@ import { calculateTwoPhaseHTC } from "../fluidSide/twoPhaseHeatTransfer";
 import { calculateAirGeometry } from "../airSide/airGeometry";
 import { calculateAirSideHTC } from "../airSide/airHeatTransfer";
 import { calculateAirPressureDrop as calculateAirSidePressureDrop } from "../airSide/airPressureDrop";
+import { calculateWetCoil } from "../psychrometrics/wetCoil";
+import { calculateReheat } from "../psychrometrics/reheatCoil";
+import type { WetCoilResult, ReheatResult } from "../../domain/types";
 
 const KCALH_PER_KW = 859.845;
 const KCALH_PER_TR = 3024;
@@ -544,6 +547,36 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
     warnings.push("Capacidade calculada abaixo de 1 W. Resultado fisicamente inválido.");
   }
 
+  let wetResult: WetCoilResult | null = null;
+  let reheatResult: ReheatResult | null = null;
+
+  if (input.enable_psychrometrics) {
+    const airMassFlow = input.air_mass_flow_kg_s ?? m_air;
+
+    wetResult = calculateWetCoil({
+      T_air_in: T_air_in,
+      RH_in: input.air_relative_humidity ?? 0.5,
+      T_surface: T_f_in,
+      air_mass_flow_kg_s: airMassFlow,
+    });
+    warnings.push(...wetResult.warnings);
+
+    if (wetResult.mode === "wet") {
+      lastQ = wetResult.total_load_w;
+    }
+
+    const reheatW = input.reheat_capacity_w ?? 0;
+    if (reheatW > 0) {
+      reheatResult = calculateReheat({
+        T_air_in: wetResult.T_air_out,
+        RH_in: wetResult.RH_out,
+        air_mass_flow_kg_s: airMassFlow,
+        Q_reheat_w: reheatW,
+      });
+      warnings.push(...reheatResult.warnings);
+    }
+  }
+
   const capacity_w = lastQ;
   const capacity_kw = capacity_w / 1000;
   const capacity_kcalh = capacity_kw * KCALH_PER_KW;
@@ -587,6 +620,13 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
     h_liquid_base: lastHLiquidBase,
     circuit_results: lastCircuitResults,
     circuit_aggregation: lastCircuitAgg,
+    air_humidity_in: wetResult?.W_in ?? null,
+    air_humidity_out: wetResult?.W_out ?? null,
+    water_removed_kg_h: wetResult ? wetResult.water_removed_kg_s * 3600 : null,
+    latent_load_w: wetResult?.latent_load_w ?? null,
+    sensible_load_w: wetResult?.sensible_load_w ?? null,
+    final_air_temperature: reheatResult?.T_air_out ?? wetResult?.T_air_out ?? null,
+    final_air_RH: reheatResult?.RH_out ?? wetResult?.RH_out ?? null,
     error_w: lastError,
     iteration_history,
     warnings,
@@ -632,6 +672,13 @@ function buildErrorResult(
     h_liquid_base: null,
     circuit_results: null,
     circuit_aggregation: null,
+    air_humidity_in: null,
+    air_humidity_out: null,
+    water_removed_kg_h: null,
+    latent_load_w: null,
+    sensible_load_w: null,
+    final_air_temperature: null,
+    final_air_RH: null,
     error_w: 0,
     iteration_history,
     warnings,

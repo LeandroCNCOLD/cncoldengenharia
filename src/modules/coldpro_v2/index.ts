@@ -63,6 +63,17 @@ export { calculateInternalFluidPressureDrop } from "./engines/fluidSide/fluidPre
 export { calculateTwoPhaseProperties } from "./engines/fluidSide/twoPhaseProperties";
 export { calculateTwoPhaseHTC } from "./engines/fluidSide/twoPhaseHeatTransfer";
 
+// Engines — psychrometrics
+export {
+  saturationPressure,
+  humidityRatio,
+  enthalpyMoistAir,
+  dewPoint,
+  cpMoistAir,
+} from "./engines/psychrometrics/psychrometricCore";
+export { calculateWetCoil } from "./engines/psychrometrics/wetCoil";
+export { calculateReheat } from "./engines/psychrometrics/reheatCoil";
+
 // Engines — circuit
 export { calculateCircuitFlowDistribution } from "./engines/circuit/flowDistribution";
 export { calculateCircuitPerformance } from "./engines/circuit/circuitPerformance";
