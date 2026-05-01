@@ -545,6 +545,41 @@ export interface ReheatCoilSizingResult {
   status: "ok" | "warning" | "error";
 }
 
+export interface FrostFormationInput {
+  air_temperature_c: number;
+  air_relative_humidity: number;
+  air_mass_flow_kg_s: number;
+  coil_surface_temperature_c: number;
+  evaporating_temperature_c?: number;
+  operation_time_h: number;
+  evaporator_external_area_m2: number;
+  airflow_reduction_factor?: number;
+  frost_density_kg_m3?: number;
+  defrost_threshold_frost_mass_kg?: number;
+  defrost_threshold_frost_thickness_mm?: number;
+  P_atm?: number;
+}
+
+export interface FrostFormationResult {
+  mode: "dry" | "condensation_only" | "frosting";
+  dew_point_c: number;
+  W_in: number;
+  W_surface: number;
+  water_condensed_kg_h: number;
+  frost_fraction: number;
+  frost_formation_kg_h: number;
+  frost_mass_kg: number;
+  frost_density_kg_m3: number;
+  frost_volume_m3: number;
+  frost_thickness_mm: number;
+  airflow_reduction_factor: number;
+  estimated_capacity_loss_pct: number;
+  recommended_defrost: boolean;
+  estimated_time_to_defrost_h: number | null;
+  warnings: string[];
+  status: "ok" | "warning" | "error";
+}
+
 export type DefrostMethod = "hot_gas_reversal" | "hot_gas_bypass" | "electric";
 
 export interface DefrostCycleInput {

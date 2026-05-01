@@ -86,6 +86,7 @@ export { calculateReheatCoilSizing } from "./engines/agro/reheatCoilSizing";
 
 // Engines — defrost
 export { calculateDefrostCycle } from "./engines/defrost/defrostCycle";
+export { calculateFrostFormation } from "./engines/defrost/frostFormation";
 
 // Engines — subcooling
 export { calculateDripTrayCoil } from "./engines/subcooling/dripTrayCoil";
