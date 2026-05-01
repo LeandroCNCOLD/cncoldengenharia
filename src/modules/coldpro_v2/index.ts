@@ -179,6 +179,16 @@ export type {
   MultiCircuitControlResult,
 } from "./domain/types";
 
+// Registry
+export { createProductTechnicalRegistry } from "./database/productTechnicalRegistry";
+export type {
+  ProductComparisonItem,
+  ProductRegistryAddResult,
+  ProductRegistryFilter,
+  ProductRegistryStats,
+  ProductTechnicalRegistryHandle,
+} from "./domain/types";
+
 // Adapters
 export { normalizeOperationalOutput } from "./adapters/unifiedOperationalOutputAdapter";
 

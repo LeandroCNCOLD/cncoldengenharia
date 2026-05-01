@@ -1179,6 +1179,63 @@ export interface MultiCircuitControlResult {
   warnings: string[];
 }
 
+export interface ProductRegistryAddResult {
+  status: "added" | "duplicate" | "error";
+  id: string;
+  model: string;
+  warnings: string[];
+}
+
+export interface ProductRegistryFilter {
+  family?: string;
+  line?: string;
+  refrigerant?: string;
+  application?: string;
+  final_status?: "approved" | "warning" | "rejected";
+}
+
+export interface ProductComparisonItem {
+  id: string;
+  model: string;
+  family: string;
+  line: string;
+  refrigerant: string;
+  final_status: "approved" | "warning" | "rejected";
+  min_capacity_w: number;
+  max_capacity_w: number;
+  min_cop: number;
+  max_cop: number;
+  min_evap_temp_c: number;
+  max_evap_temp_c: number;
+  min_cond_temp_c: number;
+  max_cond_temp_c: number;
+}
+
+export interface ProductRegistryStats {
+  total: number;
+  approved: number;
+  warning: number;
+  rejected: number;
+  by_family: Record<string, number>;
+  by_line: Record<string, number>;
+  by_refrigerant: Record<string, number>;
+  by_application: Record<string, number>;
+}
+
+export interface ProductTechnicalRegistryHandle {
+  add(record: ProductTechnicalRecord): ProductRegistryAddResult;
+  addMany(records: ProductTechnicalRecord[]): ProductRegistryAddResult[];
+  getById(id: string): ProductTechnicalRecord | undefined;
+  getByModel(model: string): ProductTechnicalRecord | undefined;
+  filter(filter: ProductRegistryFilter): ProductTechnicalRecord[];
+  listApproved(): ProductTechnicalRecord[];
+  listWarnings(): ProductTechnicalRecord[];
+  listRejected(): ProductTechnicalRecord[];
+  compare(ids?: string[]): ProductComparisonItem[];
+  stats(): ProductRegistryStats;
+  all(): ProductTechnicalRecord[];
+}
+
 export type DefrostMethod = "hot_gas_reversal" | "hot_gas_bypass" | "electric";
 
 export interface DefrostCycleInput {
