@@ -136,4 +136,19 @@ describe("Operating Map Engine", () => {
     expect(result.max_cop_point).toBeNull();
     expect(result.warnings.length).toBeGreaterThanOrEqual(1);
   });
+
+  it("falls back to default isoline counts when options are invalid", () => {
+    const result = generateOperatingMap({
+      system: VALIDATED_SYSTEM,
+      grid: STANDARD_GRID,
+      options: {
+        capacity_isoline_count: 1,
+        cop_isoline_count: 0,
+      },
+    });
+
+    expect(result.capacity_isolines.length).toBeGreaterThanOrEqual(1);
+    expect(result.cop_isolines.length).toBeGreaterThanOrEqual(1);
+    expect(result.warnings.some((warning) => warning.includes("invalid"))).toBe(true);
+  });
 });

@@ -165,9 +165,35 @@ function computeStats(
   };
 }
 
+function resolveIsolineCount(
+  value: number | undefined,
+  optionName: "capacity_isoline_count" | "cop_isoline_count",
+  warnings: string[],
+): number {
+  if (value === undefined) return 5;
+
+  if (value < 2) {
+    warnings.push(`${optionName}=${value} is invalid (minimum 2). Using default of 5.`);
+    return 5;
+  }
+
+  return value;
+}
+
 export function generateOperatingMap(input: OperatingMapInput): OperatingMapResult {
   const validationWarnings = validateInput(input);
   if (validationWarnings.length > 0) return buildEmptyResult(validationWarnings);
+  const optionWarnings: string[] = [];
+  const capacityIsolineCount = resolveIsolineCount(
+    input.options?.capacity_isoline_count,
+    "capacity_isoline_count",
+    optionWarnings,
+  );
+  const copIsolineCount = resolveIsolineCount(
+    input.options?.cop_isoline_count,
+    "cop_isoline_count",
+    optionWarnings,
+  );
 
   const operatingPoints = buildOperatingPoints(input);
   const curve = generateProductPerformanceCurve({
@@ -196,13 +222,13 @@ export function generateOperatingMap(input: OperatingMapInput): OperatingMapResu
     map_points: mapPoints,
     capacity_isolines: buildIsolines(
       feasiblePoints,
-      input.options?.capacity_isoline_count ?? 5,
+      capacityIsolineCount,
       (point) => point.capacity_w,
       (value) => `${Math.round(value)} W`,
     ),
     cop_isolines: buildIsolines(
       feasiblePoints,
-      input.options?.cop_isoline_count ?? 5,
+      copIsolineCount,
       (point) => point.cop,
       (value) => `COP ${value.toFixed(2)}`,
     ),
@@ -210,6 +236,8 @@ export function generateOperatingMap(input: OperatingMapInput): OperatingMapResu
     max_capacity_point: findPeakPoint(feasiblePoints, (point) => point.capacity_w),
     max_cop_point: findPeakPoint(feasiblePoints, (point) => point.cop),
     stats: computeStats(mapPoints, feasiblePoints),
-    warnings: Array.from(new Set([...validationWarnings, ...(curve.warnings ?? [])])),
+    warnings: Array.from(
+      new Set([...validationWarnings, ...optionWarnings, ...(curve.warnings ?? [])]),
+    ),
   };
 }
