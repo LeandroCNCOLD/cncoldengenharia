@@ -545,6 +545,51 @@ export interface ReheatCoilSizingResult {
   status: "ok" | "warning" | "error";
 }
 
+export type DefrostMethod = "hot_gas_reversal" | "hot_gas_bypass" | "electric";
+
+export interface DefrostCycleInput {
+  method: DefrostMethod;
+  frost_mass_kg: number;
+  frost_temperature_c: number;
+  compressor_capacity_w: number;
+  T_condensing_c: number;
+  T_evaporating_c: number;
+  refrigerant?: string;
+  bypass_fraction?: number;
+  evaporator_external_area_m2?: number;
+  max_defrost_time_min?: number;
+  P_atm?: number;
+}
+
+export interface DefrostComponentRecommendation {
+  component: string;
+  specification: string;
+  critical: boolean;
+  notes: string;
+}
+
+export interface DefrostCycleResult {
+  method: DefrostMethod;
+  Q_sensible_kj: number;
+  Q_latent_kj: number;
+  Q_total_required_kj: number;
+  Q_defrost_available_w: number;
+  Q_defrost_available_kw: number;
+  defrost_time_min: number;
+  defrost_time_feasible: boolean;
+  reversal_q_fraction?: number;
+  bypass_mass_flow_kg_s?: number;
+  bypass_line_diameter_mm?: number;
+  accumulator_volume_l?: number;
+  electric_power_w?: number;
+  electric_power_density_w_m2?: number;
+  components: DefrostComponentRecommendation[];
+  liquid_return_risk: "low" | "medium" | "high";
+  risk_notes: string[];
+  warnings: string[];
+  status: "ok" | "warning" | "error";
+}
+
 export type AgroCycleMode = "cooling_only" | "dehumidification" | "invalid";
 
 export interface AgroCycleInput {

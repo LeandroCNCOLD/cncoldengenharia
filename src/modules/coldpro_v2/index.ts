@@ -84,6 +84,9 @@ export { aggregateCircuitResults } from "./engines/circuit/circuitAggregator";
 export { calculateAgroCycle } from "./engines/agro/agroCycle";
 export { calculateReheatCoilSizing } from "./engines/agro/reheatCoilSizing";
 
+// Engines — defrost
+export { calculateDefrostCycle } from "./engines/defrost/defrostCycle";
+
 // Engines — subcooling
 export { calculateDripTrayCoil } from "./engines/subcooling/dripTrayCoil";
 
