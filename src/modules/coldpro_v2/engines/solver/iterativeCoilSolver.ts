@@ -26,6 +26,9 @@ import { calculateCircuitPerformance } from "../circuit/circuitPerformance";
 import { aggregateCircuitResults } from "../circuit/circuitAggregator";
 import { calculateTwoPhaseProperties } from "../fluidSide/twoPhaseProperties";
 import { calculateTwoPhaseHTC } from "../fluidSide/twoPhaseHeatTransfer";
+import { calculateAirGeometry } from "../airSide/airGeometry";
+import { calculateAirSideHTC } from "../airSide/airHeatTransfer";
+import { calculateAirPressureDrop as calculateAirSidePressureDrop } from "../airSide/airPressureDrop";
 
 const KCALH_PER_KW = 859.845;
 const KCALH_PER_TR = 3024;
@@ -163,6 +166,14 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
   if (twoPhaseMode === "auto" && !phaseType) {
     warnings.push("two_phase_mode=auto mas phase_type não definido. Usando cálculo monofásico.");
   }
+
+  const pitchT = input.tube_pitch_transverse_m;
+  const pitchL = input.tube_pitch_longitudinal_m;
+  const airFaceArea = input.air_face_area_m2 ?? faceArea;
+  const hasAirGeometry = pitchT !== undefined && input.fin_spacing_mm > 0;
+
+  let lastJFactor: number | null = null;
+  let lastAirTotalArea: number | null = null;
 
   if (m_f <= 0 || cp_f <= 0 || airflow <= 0 || exchange_area_m2 <= 0) {
     return buildErrorResult(warnings, iteration_history);
@@ -348,34 +359,83 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
 
     // ── Air side ───────────────────────────────────────────────
     const faceVelocity = airflow > 0 ? airflow / 3600 / faceArea : 0;
-
-    lastReAir = calculateReynolds({
-      density_kg_m3: airProps.density_kg_m3,
-      velocity_m_s: faceVelocity,
-      hydraulicDiameter_m: tubeDiamM,
-      viscosity_pa_s: airProps.viscosity_pa_s,
-    });
     lastPrAir = airProps.prandtl;
 
-    const f_air = calculateDarcyFrictionFactor({
-      reynolds: lastReAir,
-      roughness_m: roughness,
-      hydraulicDiameter_m: tubeDiamM,
-    });
+    if (hasAirGeometry) {
+      const geom = calculateAirGeometry({
+        face_area_m2: airFaceArea,
+        tube_outer_diameter_m: tubeOuterDiamM,
+        tube_pitch_transverse_m: pitchT!,
+        tube_pitch_longitudinal_m: pitchL ?? 0.022,
+        fin_spacing_mm: input.fin_spacing_mm,
+        fin_thickness_mm: input.fin_thickness_mm,
+        rows,
+      });
+      if (i === 0) warnings.push(...geom.warnings);
+      lastAirTotalArea = geom.air_total_area_m2;
 
-    const nuResult = calculateNusseltGnielinski({
-      reynolds: lastReAir,
-      prandtl: lastPrAir,
-      frictionFactor: f_air,
-    });
-    if (i === 0) warnings.push(...nuResult.warnings);
-    lastNuAir = nuResult.nusselt;
+      const airVel = input.air_velocity_ms ?? faceVelocity;
+      const airHtcResult = calculateAirSideHTC({
+        air_velocity_ms: airVel,
+        air_properties: airProps,
+        geometry: geom,
+      });
+      if (i === 0) warnings.push(...airHtcResult.warnings);
 
-    lastHAir = calculateConvectiveCoefficient({
-      nusselt: lastNuAir,
-      conductivity_w_m_k: airProps.conductivity_w_m_k,
-      hydraulicDiameter_m: tubeDiamM,
-    });
+      lastHAir = airHtcResult.h_air_w_m2k;
+      lastReAir = airHtcResult.reynolds_air;
+      lastJFactor = airHtcResult.j_factor;
+
+      const airDpResult = calculateAirSidePressureDrop({
+        air_velocity_ms: airVel,
+        air_density: airProps.density_kg_m3,
+        geometry: geom,
+        rows,
+        tube_pitch_longitudinal_m: pitchL,
+      });
+      if (i === 0) warnings.push(...airDpResult.warnings);
+      lastAirPressureDrop = airDpResult.pressure_drop_pa;
+    } else {
+      if (i === 0) {
+        warnings.push("Air-side simplificado usado por falta de dados de geometria.");
+      }
+
+      lastReAir = calculateReynolds({
+        density_kg_m3: airProps.density_kg_m3,
+        velocity_m_s: faceVelocity,
+        hydraulicDiameter_m: tubeDiamM,
+        viscosity_pa_s: airProps.viscosity_pa_s,
+      });
+
+      const f_air = calculateDarcyFrictionFactor({
+        reynolds: lastReAir,
+        roughness_m: roughness,
+        hydraulicDiameter_m: tubeDiamM,
+      });
+
+      const nuResult = calculateNusseltGnielinski({
+        reynolds: lastReAir,
+        prandtl: lastPrAir,
+        frictionFactor: f_air,
+      });
+      if (i === 0) warnings.push(...nuResult.warnings);
+      lastNuAir = nuResult.nusselt;
+
+      lastHAir = calculateConvectiveCoefficient({
+        nusselt: lastNuAir,
+        conductivity_w_m_k: airProps.conductivity_w_m_k,
+        hydraulicDiameter_m: tubeDiamM,
+      });
+
+      const airRowDepth = rows * tubeDiamM * 2;
+      lastAirPressureDrop = calculateDarcyWeisbachPressureDrop({
+        frictionFactor: f_air,
+        length_m: airRowDepth,
+        hydraulicDiameter_m: tubeDiamM,
+        density_kg_m3: airProps.density_kg_m3,
+        velocity_m_s: faceVelocity,
+      });
+    }
 
     const finResult = calculateFinEfficiencySimplified({
       h_air_w_m2k: lastHAir,
@@ -407,15 +467,6 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
     lastError = error;
     lastQ = Q_calc;
 
-    const airRowDepth = rows * tubeDiamM * 2;
-    lastAirPressureDrop = calculateDarcyWeisbachPressureDrop({
-      frictionFactor: f_air,
-      length_m: airRowDepth,
-      hydraulicDiameter_m: tubeDiamM,
-      density_kg_m3: airProps.density_kg_m3,
-      velocity_m_s: faceVelocity,
-    });
-
     iteration_history.push({
       iteration: i + 1,
       fluid_outlet_temperature_c: T_f_out,
@@ -440,6 +491,7 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
       max_fluid_pressure_drop_kpa: lastCircuitAgg?.max_pressure_drop_kpa ?? null,
       quality_x: lastQualityX,
       h_two_phase_w_m2k: lastHTwoPhase,
+      air_h_w_m2k: lastHAir,
     });
 
     if (Math.abs(error) < tolerance) {
@@ -527,6 +579,8 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
     fluid_velocity_ms: lastFluidVelocity,
     fluid_flow_regime: lastFluidFlowRegime,
     wall_resistance_m2k_w: wallResistanceVal,
+    air_j_factor: lastJFactor,
+    air_total_area_m2: lastAirTotalArea,
     fluid_phase: lastFluidPhase,
     quality_x: lastQualityX,
     h_two_phase_w_m2k: lastHTwoPhase,
@@ -570,6 +624,8 @@ function buildErrorResult(
     fluid_velocity_ms: 0,
     fluid_flow_regime: "unknown",
     wall_resistance_m2k_w: 0,
+    air_j_factor: null,
+    air_total_area_m2: null,
     fluid_phase: "single",
     quality_x: null,
     h_two_phase_w_m2k: null,

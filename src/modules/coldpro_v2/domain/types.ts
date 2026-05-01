@@ -162,6 +162,11 @@ export interface CoilAdvancedInput {
   two_phase_mode?: "disabled" | "auto" | "forced";
   phase_type?: "evaporator" | "condenser";
   quality_override?: number;
+  air_face_area_m2?: number;
+  air_velocity_ms?: number;
+  tube_pitch_transverse_m?: number;
+  tube_pitch_longitudinal_m?: number;
+  fin_thickness_mm?: number;
 }
 
 export interface CoilAdvancedResult {
@@ -228,6 +233,7 @@ export interface IterationRecord {
   max_fluid_pressure_drop_kpa: number | null;
   quality_x: number | null;
   h_two_phase_w_m2k: number | null;
+  air_h_w_m2k: number;
 }
 
 export interface CoilIterativeResult {
@@ -255,6 +261,8 @@ export interface CoilIterativeResult {
   fluid_velocity_ms: number;
   fluid_flow_regime: string;
   wall_resistance_m2k_w: number;
+  air_j_factor: number | null;
+  air_total_area_m2: number | null;
   fluid_phase: "single" | "two_phase";
   quality_x: number | null;
   h_two_phase_w_m2k: number | null;

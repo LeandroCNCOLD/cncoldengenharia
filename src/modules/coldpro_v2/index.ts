@@ -50,6 +50,9 @@ export { calculateTubeWallResistance } from "./engines/core/wallResistance";
 
 // Engines — air side
 export { calculateAirProperties } from "./engines/airSide/airProperties";
+export { calculateAirGeometry } from "./engines/airSide/airGeometry";
+export { calculateAirSideHTC } from "./engines/airSide/airHeatTransfer";
+export { calculateAirPressureDrop } from "./engines/airSide/airPressureDrop";
 
 // Engines — fluid side
 export { calculateFluidProperties } from "./engines/fluidSide/fluidProperties";
