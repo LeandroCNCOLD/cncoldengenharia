@@ -1,0 +1,142 @@
+export type HeatExchangerType =
+  | "evaporator_dx"
+  | "condenser"
+  | "reheat"
+  | "cooling_water"
+  | "heating_water"
+  | "steam"
+  | "pump_evaporator"
+  | "multiphase_condenser";
+
+export type HeatExchangerRole =
+  | "main_evaporator"
+  | "main_condenser"
+  | "humidity_reheat"
+  | "auxiliary_condenser"
+  | "secondary_evaporator"
+  | "process_cooling"
+  | "process_heating"
+  | "subcooling_coil";
+
+export type HeatExchangerPosition =
+  | "main"
+  | "front_of_evaporator"
+  | "after_evaporator"
+  | "external"
+  | "internal"
+  | "air_inlet"
+  | "air_outlet";
+
+export interface HeatExchanger {
+  id: string;
+  type: HeatExchangerType;
+  role: HeatExchangerRole;
+  position: HeatExchangerPosition;
+  sequence_order: number;
+  enabled: boolean;
+
+  rows: number;
+  tubes_per_row: number;
+  circuits: number;
+  fin_spacing_mm: number;
+  length_mm: number;
+
+  tube_diameter_mm: number | null;
+  tube_thickness_mm: number | null;
+
+  airflow_m3h: number | null;
+  internal_volume_l: number | null;
+  exchange_area_m2: number | null;
+}
+
+export interface Compressor {
+  model: string;
+  brand: string | null;
+  type: string | null;
+  capacity_w: number | null;
+  power_w: number | null;
+  quantity: number;
+}
+
+export interface Fan {
+  model: string | null;
+  type: string | null;
+  airflow_m3h: number | null;
+  power_w: number | null;
+  quantity: number;
+}
+
+export interface ExpansionValve {
+  model: string | null;
+  type: string | null;
+  capacity_w: number | null;
+}
+
+export interface Refrigerant {
+  name: string;
+  gwp: number | null;
+  charge_kg: number | null;
+}
+
+export interface PerformancePoint {
+  evap_temp_c: number;
+  cond_temp_c: number;
+  capacity_w: number;
+  power_w: number;
+  cop: number;
+  ambient_temp_c: number | null;
+  airflow_m3h: number | null;
+}
+
+export interface CoilInput {
+  rows: number;
+  tubes_per_row: number;
+  circuits: number;
+  fin_spacing_mm: number;
+  length_mm: number;
+  tube_diameter_mm: number | null;
+  tube_thickness_mm: number | null;
+  airflow_m3h: number | null;
+}
+
+export interface CoilResult {
+  capacity_w: number;
+  sensible_capacity_w: number | null;
+  latent_capacity_w: number | null;
+  pressure_drop_kpa: number | null;
+  air_pressure_drop_pa: number | null;
+  leaving_air_temp_c: number | null;
+  leaving_air_rh: number | null;
+}
+
+export interface Equipment {
+  id: string;
+  model_code: string;
+  model_name: string;
+  line: string | null;
+
+  voltage: number | null;
+  phases: number | null;
+  frequency: number | null;
+
+  refrigerant: Refrigerant | null;
+  compressor: Compressor | null;
+  fans: Fan[];
+  expansion_valve: ExpansionValve | null;
+
+  heat_exchangers: HeatExchanger[];
+
+  performance_points: PerformancePoint[];
+  metadata: Record<string, unknown>;
+}
+
+export interface SimulationAssembly {
+  equipment: Equipment;
+  operating_conditions: {
+    ambient_temp_c: number;
+    room_temp_c: number;
+    room_rh: number;
+    altitude_m: number;
+  };
+  results: CoilResult[];
+}
