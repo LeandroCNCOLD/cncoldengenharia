@@ -19,6 +19,9 @@ export type { ReadNumberWithUnitResult } from "./utils/readNumberWithUnit";
 // Engines — main
 export { calculateCoil, calculateCoilAdvanced } from "./engines/coilCalculationEngine";
 
+// Engines — solver
+export { solveCoilIterative } from "./engines/solver/iterativeCoilSolver";
+
 // Engines — core
 export {
   calculateSensibleHeatW,

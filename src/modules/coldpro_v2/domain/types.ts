@@ -175,6 +175,60 @@ export interface CoilAdvancedResult {
   status: "ok" | "warning" | "error";
 }
 
+export type CoilSolverMode = "evaporator" | "condenser";
+
+export interface CoilIterativeInput extends CoilAdvancedInput {
+  mode: CoilSolverMode;
+  air_inlet_temperature_c: number;
+  air_outlet_temperature_guess_c: number | null;
+  fluid_inlet_temperature_c: number;
+  fluid_outlet_temperature_guess_c: number | null;
+  fluid_mass_flow_kgs: number;
+  fluid_cp_j_kg_k: number;
+  correction_factor: number | null;
+  max_iterations: number | null;
+  tolerance_w: number | null;
+  relaxation_factor: number | null;
+}
+
+export interface IterationRecord {
+  iteration: number;
+  fluid_outlet_temperature_c: number;
+  air_outlet_temperature_c: number;
+  air_mean_temperature_c: number;
+  q_fluid_w: number;
+  q_calc_w: number;
+  error_w: number;
+  u_w_m2k: number;
+  lmtd_k: number | null;
+  reynolds_air: number;
+  nusselt_air: number;
+}
+
+export interface CoilIterativeResult {
+  converged: boolean;
+  iterations: number;
+  capacity_w: number;
+  capacity_kw: number;
+  capacity_kcalh: number;
+  capacity_btuh: number;
+  capacity_tr: number;
+  air_outlet_temperature_c: number;
+  fluid_outlet_temperature_c: number;
+  lmtd_k: number | null;
+  u_w_m2k: number;
+  air_h_w_m2k: number;
+  fluid_h_w_m2k: number;
+  reynolds_air: number;
+  prandtl_air: number;
+  nusselt_air: number;
+  air_pressure_drop_pa: number;
+  error_w: number;
+  iteration_history: IterationRecord[];
+  warnings: string[];
+  status: "ok" | "warning" | "error";
+}
+
 export type EquipmentType =
   | "condensing_unit"
   | "evaporator_unit"
