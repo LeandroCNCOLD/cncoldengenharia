@@ -127,6 +127,54 @@ export interface CoilEngineResult {
   status: "ok" | "warning" | "error";
 }
 
+export interface CoilAdvancedInput {
+  rows: number;
+  tubes_per_row: number;
+  circuits: number;
+  fin_spacing_mm: number;
+  length_mm: number;
+  tube_diameter_mm: number | null;
+  tube_thickness_mm: number | null;
+  airflow_m3h: number | null;
+  delta_t_k: number | null;
+  mass_flow_kgs: number | null;
+  air_inlet_temp_c: number | null;
+  air_outlet_temp_c: number | null;
+  fluid_inlet_temp_c: number | null;
+  fluid_outlet_temp_c: number | null;
+  fluid_h_w_m2k: number | null;
+  fin_conductivity_w_mk: number | null;
+  fin_thickness_m: number | null;
+  wall_resistance_m2k_w: number | null;
+  fouling_air_m2k_w: number | null;
+  fouling_fluid_m2k_w: number | null;
+  tube_roughness_m: number | null;
+}
+
+export interface CoilAdvancedResult {
+  capacity_w: number;
+  capacity_kw: number;
+  capacity_kcalh: number;
+  capacity_btuh: number;
+  capacity_tr: number;
+  sensible_capacity_w: number | null;
+  latent_capacity_w: number | null;
+  lmtd_k: number | null;
+  u_w_m2k: number;
+  air_h_w_m2k: number;
+  fluid_h_w_m2k: number;
+  reynolds_air: number;
+  prandtl_air: number;
+  nusselt_air: number;
+  exchange_area_m2: number;
+  air_pressure_drop_pa: number;
+  fluid_pressure_drop_kpa: number;
+  fluid_velocity_ms: number;
+  fin_efficiency: number;
+  warnings: string[];
+  status: "ok" | "warning" | "error";
+}
+
 export type EquipmentType =
   | "condensing_unit"
   | "evaporator_unit"

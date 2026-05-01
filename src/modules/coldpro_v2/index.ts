@@ -16,8 +16,34 @@ export { toWatts, fromWatts, formatCapacity, detectUnitFromFieldName } from "./u
 export { readNumberWithUnit } from "./utils/readNumberWithUnit";
 export type { ReadNumberWithUnitResult } from "./utils/readNumberWithUnit";
 
-// Engines
-export { calculateCoil } from "./engines/coilCalculationEngine";
+// Engines — main
+export { calculateCoil, calculateCoilAdvanced } from "./engines/coilCalculationEngine";
+
+// Engines — core
+export {
+  calculateSensibleHeatW,
+  calculateMassFlowAirKgS,
+  calculateHeatCapacityRateW_K,
+} from "./engines/core/heatBalance";
+export { calculateLMTD, calculateHeatTransferByLMTD } from "./engines/core/lmtd";
+export {
+  calculateNTU,
+  calculateEffectivenessCrossflowUnmixed,
+  calculateHeatTransferByNTU,
+} from "./engines/core/ntu";
+export {
+  calculateReynolds,
+  calculatePrandtl,
+  calculateNusseltGnielinski,
+  calculateConvectiveCoefficient,
+} from "./engines/core/dimensionless";
+export { calculateDarcyFrictionFactor } from "./engines/core/friction";
+export { calculateDarcyWeisbachPressureDrop } from "./engines/core/pressureDrop";
+export { calculateOverallU } from "./engines/core/overallHeatTransfer";
+export { calculateFinEfficiencySimplified } from "./engines/core/finEfficiency";
+
+// Engines — air side
+export { calculateAirProperties } from "./engines/airSide/airProperties";
 
 // Services
 export {
