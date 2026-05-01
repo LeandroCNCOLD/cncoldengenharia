@@ -684,6 +684,49 @@ export interface OperationalOrchestratorResult {
   status: "ok" | "warning" | "error";
 }
 
+export type OperationalMode = "standard" | "progressive";
+
+export interface UnifiedFrostStatus {
+  frost_detected: boolean;
+  recommended_defrost: boolean;
+  critical_frost_thickness_mm?: number;
+  critical_roll_index?: number;
+  capacity_loss_pct: number;
+}
+
+export interface UnifiedDefrostStatus {
+  defrost_required: boolean;
+  defrost_time_min: number;
+  defrost_feasible: boolean;
+}
+
+export interface UnifiedProgressiveInfo {
+  roll_count: number;
+  total_pressure_drop_pa: number;
+  energy_balance_error_pct: number;
+  critical_roll_index: number;
+  critical_frost_thickness_mm: number;
+  roll_capacity_w: number[];
+  roll_frost_thickness_mm: number[];
+}
+
+export interface UnifiedOperationalOutput {
+  mode: OperationalMode;
+  initial_capacity_w: number;
+  effective_capacity_w: number;
+  capacity_loss_pct: number;
+  operational_availability_pct: number;
+  useful_operation_time_h: number;
+  operation_time_h: number;
+  frost: UnifiedFrostStatus;
+  defrost: UnifiedDefrostStatus;
+  estimated_time_to_defrost_h: number | null;
+  progressive?: UnifiedProgressiveInfo;
+  cycle_status: "normal" | "defrost_recommended" | "defrost_required" | "error";
+  warnings: string[];
+  status: "ok" | "warning" | "error";
+}
+
 export type DefrostMethod = "hot_gas_reversal" | "hot_gas_bypass" | "electric";
 
 export interface DefrostCycleInput {

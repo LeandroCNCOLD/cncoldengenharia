@@ -97,6 +97,9 @@ export { calculateFrostFormation } from "./engines/defrost/frostFormation";
 // Engines — subcooling
 export { calculateDripTrayCoil } from "./engines/subcooling/dripTrayCoil";
 
+// Adapters
+export { normalizeOperationalOutput } from "./adapters/unifiedOperationalOutputAdapter";
+
 // Services
 export {
   createEquipment,
