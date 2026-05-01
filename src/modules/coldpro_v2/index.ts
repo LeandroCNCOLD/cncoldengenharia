@@ -156,6 +156,19 @@ export type {
   VariableControlResult,
 } from "./domain/types";
 
+// Engines — architecture
+export { evaluateSystemArchitecture } from "./engines/architecture/systemArchitectureEngine";
+export type {
+  CircuitSummary,
+  CompressorType,
+  CompressorUnit,
+  CondenserUnit,
+  EvaporatorUnit,
+  RefrigerationCircuit,
+  SystemArchitectureInput,
+  SystemArchitectureResult,
+} from "./domain/types";
+
 // Adapters
 export { normalizeOperationalOutput } from "./adapters/unifiedOperationalOutputAdapter";
 

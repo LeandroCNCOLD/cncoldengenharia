@@ -1068,6 +1068,69 @@ export interface VariableControlResult {
   warnings: string[];
 }
 
+export type CompressorType = "fixed" | "inverter" | "staged";
+
+export interface CompressorUnit {
+  id: string;
+  type: CompressorType;
+  nominal_capacity_w: number;
+  power_w: number;
+  available?: boolean;
+  min_capacity_pct?: number;
+}
+
+export interface EvaporatorUnit {
+  id: string;
+  progressive_input: ProgressiveCoilInput;
+}
+
+export interface CondenserUnit {
+  id: string;
+  heat_rejection_capacity_w: number;
+  max_cond_temp_c: number;
+}
+
+export interface RefrigerationCircuit {
+  id: string;
+  compressors: CompressorUnit[];
+  evaporators: EvaporatorUnit[];
+  condenser_id: string;
+  expansion_valve?: {
+    nominal_capacity_w: number;
+  };
+}
+
+export interface SystemArchitectureInput {
+  circuits: RefrigerationCircuit[];
+  condensers: CondenserUnit[];
+  options?: {
+    allow_shared_condenser?: boolean;
+    redundancy_mode?: "none" | "N+1";
+  };
+}
+
+export interface CircuitSummary {
+  id: string;
+  total_compressor_capacity_w: number;
+  available_compressor_capacity_w: number;
+  total_evaporator_capacity_w: number;
+  circuit_capacity_w: number;
+  compressor_count: number;
+  available_compressor_count: number;
+  evaporator_count: number;
+  status: "ok" | "warning" | "error";
+  warnings: string[];
+}
+
+export interface SystemArchitectureResult {
+  status: "ok" | "warning" | "error";
+  total_installed_capacity_w: number;
+  total_available_capacity_w: number;
+  circuits: CircuitSummary[];
+  shared_condenser_loads: Record<string, number>;
+  warnings: string[];
+}
+
 export type DefrostMethod = "hot_gas_reversal" | "hot_gas_bypass" | "electric";
 
 export interface DefrostCycleInput {
