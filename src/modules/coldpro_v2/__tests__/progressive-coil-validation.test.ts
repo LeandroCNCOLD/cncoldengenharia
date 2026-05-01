@@ -120,3 +120,29 @@ describe("Teste 5: Encadeamento térmico com 3 rolls", () => {
     expect(Math.abs(result.total_capacity_w - sumCap)).toBeLessThan(0.1);
   });
 });
+
+describe("Teste 6: Violação física — rolls com fin_spacing zero", () => {
+  it("deve retornar error para condição fisicamente impossível", () => {
+    const result = calculateProgressiveCoil({
+      ...BASE,
+      rolls: [
+        { fin_spacing_mm: 0, rows_in_roll: 2 },
+        { fin_spacing_mm: 6, rows_in_roll: 2 },
+      ],
+    });
+
+    expect(result.status).toBe("error");
+    expect(result.total_capacity_w).toBe(0);
+    expect(result.rolls).toHaveLength(0);
+  });
+});
+
+describe("Teste 7: Conservação de energia — Q_coil ≈ m*(h_in - h_out)", () => {
+  it("deve ter erro de balanço de energia < 5%", () => {
+    const result = calculateProgressiveCoil(BASE);
+
+    expect(result.status).not.toBe("error");
+    expect(result.total_capacity_w).toBeGreaterThan(0);
+    expect(result.energy_balance_error_pct).toBeLessThan(5);
+  });
+});

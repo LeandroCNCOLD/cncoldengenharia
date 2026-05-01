@@ -163,6 +163,12 @@ export function calculateProgressiveCoil(input: ProgressiveCoilInput): Progressi
 
     const h_out = CP_AIR * T_out + W_out * (2501000 + 1860 * T_out);
 
+    if (condensRate > 0) {
+      const h_in_roll = CP_AIR * T_air + W_air * (2501000 + 1860 * T_air);
+      Q = input.air_mass_flow_kg_s * (h_in_roll - h_out);
+      Q = Math.max(0, Q);
+    }
+
     const G_max = rho_air * V_max;
     const Re_f = (G_max * D_o) / MU_AIR;
     const f = Re_f > 0 ? 0.508 * Math.pow(Re_f, -0.521) * Math.pow(s_i / D_o, -0.0935) : 0;
