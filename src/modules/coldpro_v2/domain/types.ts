@@ -1131,6 +1131,54 @@ export interface SystemArchitectureResult {
   warnings: string[];
 }
 
+export type CompressorDispatchState = "off" | "on" | "modulating" | "unavailable";
+
+export interface CompressorDispatchResult {
+  compressor_id: string;
+  type: CompressorType;
+  state: CompressorDispatchState;
+  capacity_w: number;
+  power_w: number;
+  speed_pct?: number;
+}
+
+export interface CircuitControlResult {
+  circuit_id: string;
+  required_capacity_w: number;
+  delivered_capacity_w: number;
+  capacity_error_pct: number;
+  compressor_dispatch: CompressorDispatchResult[];
+  status: "stable" | "cycling" | "unreachable" | "error";
+  warnings: string[];
+}
+
+export interface MultiCircuitControlInput {
+  architecture: SystemArchitectureInput;
+  loads: {
+    circuit_id: string;
+    required_capacity_w: number;
+  }[];
+  options?: {
+    tolerance_pct?: number;
+    max_iterations?: number;
+    prefer_inverter_trim?: boolean;
+    allow_cycling?: boolean;
+  };
+}
+
+export interface MultiCircuitControlResult {
+  status: "stable" | "warning" | "unreachable" | "error";
+  circuits: CircuitControlResult[];
+  total_required_capacity_w: number;
+  total_delivered_capacity_w: number;
+  total_capacity_error_pct: number;
+  estimated_total_power_w: number;
+  estimated_cop: number;
+  condenser_loads: Record<string, number>;
+  condenser_warnings: string[];
+  warnings: string[];
+}
+
 export type DefrostMethod = "hot_gas_reversal" | "hot_gas_bypass" | "electric";
 
 export interface DefrostCycleInput {

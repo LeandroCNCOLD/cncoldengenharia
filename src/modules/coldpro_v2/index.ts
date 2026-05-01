@@ -169,6 +169,16 @@ export type {
   SystemArchitectureResult,
 } from "./domain/types";
 
+// Engines — multi-circuit control
+export { solveMultiCircuitVariableControl } from "./engines/control/multiCircuitVariableControlSolver";
+export type {
+  CircuitControlResult,
+  CompressorDispatchResult,
+  CompressorDispatchState,
+  MultiCircuitControlInput,
+  MultiCircuitControlResult,
+} from "./domain/types";
+
 // Adapters
 export { normalizeOperationalOutput } from "./adapters/unifiedOperationalOutputAdapter";
 
