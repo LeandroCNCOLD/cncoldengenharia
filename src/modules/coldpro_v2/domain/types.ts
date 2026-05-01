@@ -496,6 +496,55 @@ export interface DripTrayCoilResult {
   status: "ok" | "warning" | "error";
 }
 
+export interface ReheatCoilSizingInput {
+  Q_reheat_target_w: number;
+  T_air_in_c: number;
+  T_air_out_c: number;
+  air_mass_flow_kg_s: number;
+  T_condensing_c: number;
+  T_hot_gas_in_c: number;
+  refrigerant?: string;
+  tube_outer_diameter_m: number;
+  tube_thickness_m: number;
+  tube_material?: "copper" | "aluminum" | "steel" | "stainless_steel";
+  fin_spacing_m: number;
+  fin_thickness_m: number;
+  fin_material?: "aluminum" | "copper";
+  tube_pitch_transversal_m: number;
+  tube_pitch_longitudinal_m: number;
+  coil_length_m: number;
+  circuits: number;
+  max_rows?: number;
+  evaporator_air_pressure_drop_pa?: number;
+  fan_static_pressure_pa?: number;
+}
+
+export interface ReheatCoilSizingResult {
+  rows_required: number;
+  total_tube_length_m: number;
+  external_area_m2: number;
+  internal_area_m2: number;
+  h_air_w_m2k: number;
+  h_refrigerant_w_m2k: number;
+  u_w_m2k: number;
+  lmtd_k: number;
+  Q_available_w: number;
+  Q_available_kcalh: number;
+  Q_target_w: number;
+  Q_target_kcalh: number;
+  capacity_ratio: number;
+  reheat_air_pressure_drop_pa: number;
+  total_air_pressure_drop_pa: number;
+  fan_feasible: boolean;
+  T_air_in_c: number;
+  T_air_out_c: number;
+  T_condensing_c: number;
+  sizing_feasible: boolean;
+  converged: boolean;
+  warnings: string[];
+  status: "ok" | "warning" | "error";
+}
+
 export type AgroCycleMode = "cooling_only" | "dehumidification" | "invalid";
 
 export interface AgroCycleInput {
