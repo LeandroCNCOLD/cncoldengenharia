@@ -80,6 +80,9 @@ export { calculateCircuitFlowDistribution } from "./engines/circuit/flowDistribu
 export { calculateCircuitPerformance } from "./engines/circuit/circuitPerformance";
 export { aggregateCircuitResults } from "./engines/circuit/circuitAggregator";
 
+// Engines — agro
+export { calculateAgroCycle } from "./engines/agro/agroCycle";
+
 // Engines — subcooling
 export { calculateDripTrayCoil } from "./engines/subcooling/dripTrayCoil";
 

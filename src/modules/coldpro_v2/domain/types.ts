@@ -496,6 +496,48 @@ export interface DripTrayCoilResult {
   status: "ok" | "warning" | "error";
 }
 
+export type AgroCycleMode = "cooling_only" | "dehumidification" | "invalid";
+
+export interface AgroCycleInput {
+  T_room_c: number;
+  RH_room: number;
+  T_setpoint_c: number;
+  RH_setpoint: number;
+  air_mass_flow_kg_s: number;
+  P_atm?: number;
+  max_iterations?: number;
+  tolerance_w?: number;
+}
+
+export interface AgroCycleResult {
+  mode: AgroCycleMode;
+  T_room_c: number;
+  RH_room: number;
+  W_in: number;
+  h_in_kj_kg: number;
+  T_setpoint_c: number;
+  RH_setpoint: number;
+  W_setpoint: number;
+  h_reheat_out_kj_kg: number;
+  T_evap_out_required_c: number;
+  RH_evap_out: number;
+  h_evap_out_kj_kg: number;
+  Q_evap_w: number;
+  Q_evap_kcalh: number;
+  Q_reheat_w: number;
+  Q_reheat_kcalh: number;
+  Q_total_cycle_w: number;
+  Q_total_cycle_kcalh: number;
+  water_removed_kg_s: number;
+  water_removed_kg_h: number;
+  final_RH_check: number;
+  final_RH_error: number;
+  converged: boolean;
+  iterations: number;
+  warnings: string[];
+  status: "ok" | "warning" | "error";
+}
+
 export type EquipmentType =
   | "condensing_unit"
   | "evaporator_unit"
