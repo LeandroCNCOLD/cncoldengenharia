@@ -84,6 +84,9 @@ export { aggregateCircuitResults } from "./engines/circuit/circuitAggregator";
 export { calculateAgroCycle } from "./engines/agro/agroCycle";
 export { calculateReheatCoilSizing } from "./engines/agro/reheatCoilSizing";
 
+// Engines — progressive
+export { calculateProgressiveCoil } from "./engines/progressive/progressiveCoilSolver";
+
 // Engines — operation
 export { calculateOperationalCycle } from "./engines/operation/operationalOrchestrator";
 

@@ -580,6 +580,73 @@ export interface FrostFormationResult {
   status: "ok" | "warning" | "error";
 }
 
+export interface RollGeometry {
+  fin_spacing_mm: number;
+  rows_in_roll: number;
+}
+
+export interface ProgressiveCoilInput {
+  tube_outer_diameter_mm: number;
+  tube_inner_diameter_mm: number;
+  tube_pitch_transverse_mm: number;
+  tube_pitch_longitudinal_mm: number;
+  fin_height_mm: number;
+  fin_thickness_mm: number;
+  coil_width_m: number;
+  coil_height_m: number;
+  tube_material: "copper" | "aluminum" | "steel";
+  fin_material: "copper" | "aluminum" | "steel";
+  rolls: RollGeometry[];
+  air_temperature_in_c: number;
+  air_relative_humidity_in: number;
+  air_mass_flow_kg_s: number;
+  P_atm?: number;
+  T_evaporating_c: number;
+  refrigerant?: string;
+  frost_thickness_mm_per_roll?: number[];
+  frost_density_kg_m3?: number;
+  frost_thermal_conductivity_w_mk?: number;
+}
+
+export interface RollResult {
+  roll_index: number;
+  fin_spacing_mm: number;
+  rows_in_roll: number;
+  free_flow_area_m2: number;
+  total_external_area_m2: number;
+  frost_thickness_mm: number;
+  frost_resistance_m2k_w: number;
+  V_max_m_s: number;
+  Re: number;
+  air_pressure_drop_pa: number;
+  h_o_w_m2k: number;
+  h_i_w_m2k: number;
+  U_w_m2k: number;
+  NTU: number;
+  effectiveness: number;
+  capacity_w: number;
+  condensation_rate_kg_s: number;
+  air_temperature_out_c: number;
+  air_relative_humidity_out: number;
+  W_out_kg_kg: number;
+  enthalpy_out_j_kg: number;
+}
+
+export interface ProgressiveCoilResult {
+  status: "ok" | "warning" | "error";
+  warnings: string[];
+  rolls: RollResult[];
+  total_capacity_w: number;
+  total_air_pressure_drop_pa: number;
+  total_condensation_rate_kg_s: number;
+  air_temperature_out_c: number;
+  air_relative_humidity_out: number;
+  W_out_kg_kg: number;
+  enthalpy_out_j_kg: number;
+  estimated_time_to_defrost_h: number | null;
+  energy_balance_error_pct: number;
+}
+
 export interface OperationalOrchestratorInput {
   operation_time_h: number;
   coupled_input: CoilAdvancedInput;
