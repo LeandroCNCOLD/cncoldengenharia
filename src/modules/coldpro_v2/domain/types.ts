@@ -801,6 +801,8 @@ export interface OperatingPoint {
   cond_temp_c: number;
 }
 
+export type PerformanceOperatingPoint = OperatingPoint;
+
 export interface ProductPerformancePoint {
   evap_temp_c: number;
   cond_temp_c: number;
@@ -888,6 +890,60 @@ export interface PolynomialGenerationResult {
   used_points: number;
   filtered_points: number;
   warnings: string[];
+}
+
+export interface ProductIdentity {
+  id: string;
+  model: string;
+  family: string;
+  line: string;
+  refrigerant: string;
+  application?: string;
+}
+
+export interface ProductOperatingLimits {
+  min_evap_temp_c: number;
+  max_evap_temp_c: number;
+  min_cond_temp_c: number;
+  max_cond_temp_c: number;
+  min_capacity_w: number;
+  max_capacity_w: number;
+  min_cop: number;
+  max_cop: number;
+}
+
+export interface ProductValidationSummary {
+  equilibrium_status: "approved" | "warning" | "rejected";
+  curve_status: "ok" | "warning" | "error";
+  polynomial_status: "ok" | "warning" | "error";
+  final_status: "approved" | "warning" | "rejected";
+}
+
+export interface ProductTechnicalRecord {
+  identity: ProductIdentity;
+  components: SystemComponentsInput;
+  equilibrium: SystemEquilibriumResult;
+  performance_curve: ProductPerformanceCurveResult;
+  polynomial_coefficients: PolynomialGenerationResult;
+  operating_limits: ProductOperatingLimits;
+  validation: ProductValidationSummary;
+  warnings: string[];
+  traceability: {
+    generated_at: string;
+    engine_version: string;
+    source: "calculated" | "imported" | "hybrid";
+  };
+}
+
+export interface ProductTechnicalRecordInput {
+  identity: ProductIdentity;
+  system: SystemComponentsInput;
+  operating_points: PerformanceOperatingPoint[];
+  options?: {
+    engine_version?: string;
+    source?: "calculated" | "imported" | "hybrid";
+    stop_on_rejection?: boolean;
+  };
 }
 
 export type DefrostMethod = "hot_gas_reversal" | "hot_gas_bypass" | "electric";

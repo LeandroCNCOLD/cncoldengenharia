@@ -104,6 +104,7 @@ export { evaluateSystemEquilibrium } from "./engines/equilibrium/systemEquilibri
 export { generateProductPerformanceCurve } from "./engines/performance/productPerformanceCurveEngine";
 export type {
   OperatingPoint,
+  PerformanceOperatingPoint,
   PerformanceEnvelope,
   PerformanceSummary,
   ProductPerformanceCurveInput,
@@ -121,6 +122,16 @@ export type {
   PolynomialGenerationOptions,
   PolynomialGenerationResult,
   PolynomialTarget,
+} from "./domain/types";
+
+// Database
+export { buildProductTechnicalRecord } from "./database/productTechnicalRecordBuilder";
+export type {
+  ProductIdentity,
+  ProductOperatingLimits,
+  ProductTechnicalRecord,
+  ProductTechnicalRecordInput,
+  ProductValidationSummary,
 } from "./domain/types";
 
 // Adapters
