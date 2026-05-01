@@ -727,6 +727,75 @@ export interface UnifiedOperationalOutput {
   status: "ok" | "warning" | "error";
 }
 
+export interface CompressorSpec {
+  cooling_capacity_w: number;
+  power_w: number;
+  refrigerant: string;
+  evap_temp_c: number;
+  cond_temp_c: number;
+}
+
+export interface CondenserSpec {
+  heat_rejection_capacity_w: number;
+  max_cond_temp_c: number;
+}
+
+export interface FanSpec {
+  airflow_m3_h: number;
+  available_static_pressure_pa: number;
+}
+
+export interface ExpansionValveSpec {
+  nominal_capacity_w: number;
+}
+
+export interface FourWayValveSpec {
+  max_capacity_w: number;
+}
+
+export interface SystemComponentsInput {
+  compressor: CompressorSpec;
+  evaporator: { progressive_input: ProgressiveCoilInput };
+  condenser: CondenserSpec;
+  evaporator_fan?: FanSpec;
+  condenser_fan?: FanSpec;
+  expansion_valve?: ExpansionValveSpec;
+  four_way_valve?: FourWayValveSpec;
+  system_conditions: {
+    ambient_temp_c: number;
+    required_airflow_m3_h: number;
+  };
+}
+
+export interface ThermalBalance {
+  q_evap_w: number;
+  q_cond_required_w: number;
+  q_cond_available_w: number;
+  compressor_power_w: number;
+  balance_error_pct: number;
+}
+
+export interface ComponentUtilization {
+  compressor_pct: number;
+  evaporator_pct: number;
+  condenser_pct: number;
+  expansion_valve_pct?: number;
+  evaporator_fan_pct?: number;
+  condenser_fan_pct?: number;
+  four_way_valve_pct?: number;
+}
+
+export interface SystemEquilibriumResult {
+  status: "approved" | "warning" | "rejected";
+  thermal_balance: ThermalBalance;
+  utilization: ComponentUtilization;
+  bottleneck_codes: string[];
+  bottlenecks: string[];
+  warnings: string[];
+  recommendations: string[];
+  evaporator_result: ProgressiveCoilResult;
+}
+
 export type DefrostMethod = "hot_gas_reversal" | "hot_gas_bypass" | "electric";
 
 export interface DefrostCycleInput {
