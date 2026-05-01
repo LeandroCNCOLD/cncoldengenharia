@@ -24,6 +24,8 @@ import { calculateInternalFluidPressureDrop } from "../fluidSide/fluidPressureDr
 import { calculateCircuitFlowDistribution } from "../circuit/flowDistribution";
 import { calculateCircuitPerformance } from "../circuit/circuitPerformance";
 import { aggregateCircuitResults } from "../circuit/circuitAggregator";
+import { calculateTwoPhaseProperties } from "../fluidSide/twoPhaseProperties";
+import { calculateTwoPhaseHTC } from "../fluidSide/twoPhaseHeatTransfer";
 
 const KCALH_PER_KW = 859.845;
 const KCALH_PER_TR = 3024;
@@ -145,6 +147,23 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
   let lastCircuitResults: CircuitPerformanceResult[] | null = null;
   let lastCircuitAgg: CircuitAggregationResult | null = null;
 
+  let lastFluidPhase: "single" | "two_phase" = "single";
+  let lastQualityX: number | null = null;
+  let lastHTwoPhase: number | null = null;
+  let lastHLiquidBase: number | null = null;
+
+  const twoPhaseMode = input.two_phase_mode ?? "disabled";
+  const phaseType = input.phase_type;
+  const qualityOverride = input.quality_override;
+
+  const useTwoPhase =
+    (twoPhaseMode === "forced" && !!fluidName && !!phaseType) ||
+    (twoPhaseMode === "auto" && !!phaseType);
+
+  if (twoPhaseMode === "auto" && !phaseType) {
+    warnings.push("two_phase_mode=auto mas phase_type não definido. Usando cálculo monofásico.");
+  }
+
   if (m_f <= 0 || cp_f <= 0 || airflow <= 0 || exchange_area_m2 <= 0) {
     return buildErrorResult(warnings, iteration_history);
   }
@@ -173,7 +192,42 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
     const T_f_mean = (T_f_in + T_f_out) / 2;
 
     // ── Fluid side ─────────────────────────────────────────────
-    if (useCircuitPath) {
+    if (useTwoPhase) {
+      const tpProps = calculateTwoPhaseProperties({
+        fluid: fluidName ?? "refrigerant_default",
+        temperature_c: T_f_mean,
+      });
+      if (i === 0) warnings.push(...tpProps.warnings);
+
+      let qx = qualityOverride ?? 0.5;
+      if (qualityOverride === undefined && i === 0) {
+        warnings.push(
+          "Qualidade (x) estimada como 0.5 (valor padrão). Forneça quality_override para maior precisão.",
+        );
+      }
+      qx = Math.max(0, Math.min(0.95, qx));
+
+      const tpHTC = calculateTwoPhaseHTC({
+        mass_flow_kgs: m_f,
+        tube_inner_diameter_m: tubeInnerDiamM,
+        quality_x: qx,
+        two_phase_properties: tpProps,
+        flow_regime_hint: phaseType === "condenser" ? "condensation" : "evaporation",
+      });
+      if (i === 0) warnings.push(...tpHTC.warnings);
+      if (i === 0) warnings.push("Usando modelo bifásico simplificado (Shah-like).");
+
+      lastHFluid = tpHTC.h_two_phase_w_m2k;
+      lastFluidRe = tpHTC.reynolds_liquid;
+      lastFluidPr = tpHTC.prandtl_liquid;
+      lastFluidNu = 0;
+      lastFluidVelocity = 0;
+      lastFluidFlowRegime = "two_phase";
+      lastFluidPhase = "two_phase";
+      lastQualityX = tpHTC.quality_x;
+      lastHTwoPhase = tpHTC.h_two_phase_w_m2k;
+      lastHLiquidBase = tpHTC.h_liquid_base;
+    } else if (useCircuitPath) {
       const fluidProps = calculateFluidProperties({
         fluid: fluidName!,
         temperature_c: T_f_mean,
@@ -384,6 +438,8 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
       min_fluid_h_w_m2k: lastCircuitAgg?.min_h_w_m2k ?? null,
       max_fluid_h_w_m2k: lastCircuitAgg?.max_h_w_m2k ?? null,
       max_fluid_pressure_drop_kpa: lastCircuitAgg?.max_pressure_drop_kpa ?? null,
+      quality_x: lastQualityX,
+      h_two_phase_w_m2k: lastHTwoPhase,
     });
 
     if (Math.abs(error) < tolerance) {
@@ -471,6 +527,10 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
     fluid_velocity_ms: lastFluidVelocity,
     fluid_flow_regime: lastFluidFlowRegime,
     wall_resistance_m2k_w: wallResistanceVal,
+    fluid_phase: lastFluidPhase,
+    quality_x: lastQualityX,
+    h_two_phase_w_m2k: lastHTwoPhase,
+    h_liquid_base: lastHLiquidBase,
     circuit_results: lastCircuitResults,
     circuit_aggregation: lastCircuitAgg,
     error_w: lastError,
@@ -510,6 +570,10 @@ function buildErrorResult(
     fluid_velocity_ms: 0,
     fluid_flow_regime: "unknown",
     wall_resistance_m2k_w: 0,
+    fluid_phase: "single",
+    quality_x: null,
+    h_two_phase_w_m2k: null,
+    h_liquid_base: null,
     circuit_results: null,
     circuit_aggregation: null,
     error_w: 0,

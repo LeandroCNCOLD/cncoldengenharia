@@ -159,6 +159,9 @@ export interface CoilAdvancedInput {
   tube_material?: string;
   circuit_distribution_mode?: "uniform" | "estimated_imbalance";
   circuit_imbalance_factor?: number;
+  two_phase_mode?: "disabled" | "auto" | "forced";
+  phase_type?: "evaporator" | "condenser";
+  quality_override?: number;
 }
 
 export interface CoilAdvancedResult {
@@ -223,6 +226,8 @@ export interface IterationRecord {
   min_fluid_h_w_m2k: number | null;
   max_fluid_h_w_m2k: number | null;
   max_fluid_pressure_drop_kpa: number | null;
+  quality_x: number | null;
+  h_two_phase_w_m2k: number | null;
 }
 
 export interface CoilIterativeResult {
@@ -250,6 +255,10 @@ export interface CoilIterativeResult {
   fluid_velocity_ms: number;
   fluid_flow_regime: string;
   wall_resistance_m2k_w: number;
+  fluid_phase: "single" | "two_phase";
+  quality_x: number | null;
+  h_two_phase_w_m2k: number | null;
+  h_liquid_base: number | null;
   circuit_results: CircuitPerformanceResult[] | null;
   circuit_aggregation: CircuitAggregationResult | null;
   error_w: number;

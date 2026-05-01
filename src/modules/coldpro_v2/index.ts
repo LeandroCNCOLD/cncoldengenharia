@@ -56,6 +56,10 @@ export { calculateFluidProperties } from "./engines/fluidSide/fluidProperties";
 export { calculateInternalFluidHTC } from "./engines/fluidSide/fluidHeatTransfer";
 export { calculateInternalFluidPressureDrop } from "./engines/fluidSide/fluidPressureDrop";
 
+// Engines — fluid side (two-phase)
+export { calculateTwoPhaseProperties } from "./engines/fluidSide/twoPhaseProperties";
+export { calculateTwoPhaseHTC } from "./engines/fluidSide/twoPhaseHeatTransfer";
+
 // Engines — circuit
 export { calculateCircuitFlowDistribution } from "./engines/circuit/flowDistribution";
 export { calculateCircuitPerformance } from "./engines/circuit/circuitPerformance";
