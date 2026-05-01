@@ -846,6 +846,49 @@ export interface ProductPerformanceCurveResult {
   warnings: string[];
 }
 
+export type PolynomialTarget = "capacity_w" | "compressor_power_w" | "cop" | "q_cond_w";
+
+export interface PolynomialCoefficients {
+  a0: number;
+  a1: number;
+  a2: number;
+  a3: number;
+  a4: number;
+  a5: number;
+}
+
+export interface FitQuality {
+  rmse: number;
+  max_error_pct: number;
+  r2: number;
+}
+
+export interface PolynomialCoefficientSet {
+  target: PolynomialTarget;
+  coefficients: PolynomialCoefficients;
+  fit_quality: FitQuality;
+}
+
+export interface PolynomialGenerationOptions {
+  min_points?: number;
+  include_warning_points?: boolean;
+  include_rejected_points?: boolean;
+}
+
+export interface PolynomialGenerationInput {
+  points: ProductPerformancePoint[];
+  targets?: PolynomialTarget[];
+  options?: PolynomialGenerationOptions;
+}
+
+export interface PolynomialGenerationResult {
+  status: "ok" | "warning" | "error";
+  coefficients: PolynomialCoefficientSet[];
+  used_points: number;
+  filtered_points: number;
+  warnings: string[];
+}
+
 export type DefrostMethod = "hot_gas_reversal" | "hot_gas_bypass" | "electric";
 
 export interface DefrostCycleInput {

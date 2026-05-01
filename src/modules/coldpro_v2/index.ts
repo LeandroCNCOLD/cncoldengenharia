@@ -111,6 +111,18 @@ export type {
   ProductPerformancePoint,
 } from "./domain/types";
 
+// Engines — polynomial
+export { generatePolynomialCoefficients } from "./engines/polynomial/polynomialCoefficientGenerator";
+export type {
+  FitQuality,
+  PolynomialCoefficientSet,
+  PolynomialCoefficients,
+  PolynomialGenerationInput,
+  PolynomialGenerationOptions,
+  PolynomialGenerationResult,
+  PolynomialTarget,
+} from "./domain/types";
+
 // Adapters
 export { normalizeOperationalOutput } from "./adapters/unifiedOperationalOutputAdapter";
 
