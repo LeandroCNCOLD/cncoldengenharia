@@ -21,6 +21,7 @@ export { calculateCoil, calculateCoilAdvanced } from "./engines/coilCalculationE
 
 // Engines — solver
 export { solveCoilIterative } from "./engines/solver/iterativeCoilSolver";
+export { solveCoupledCoil, calculateCoupledCoil } from "./engines/solver/coupledCoilSolver";
 
 // Engines — core
 export {

@@ -171,6 +171,12 @@ export interface CoilAdvancedInput {
   air_mass_flow_kg_s?: number;
   enable_psychrometrics?: boolean;
   reheat_capacity_w?: number;
+  enable_coupled_solver?: boolean;
+  coupled_deadband_c?: number;
+  relative_tolerance?: number;
+  coupled_air_outlet_guess_c?: number;
+  coupled_max_iterations?: number;
+  coupled_tolerance_w?: number;
 }
 
 export interface CoilAdvancedResult {
@@ -366,6 +372,80 @@ export interface ReheatResult {
   RH_out: number;
   W_out: number;
   warnings: string[];
+}
+
+export interface CoilSurfaceModeResult {
+  mode: "dry" | "wet" | "transition";
+  warnings: string[];
+}
+
+export interface WetAirCorrectionResult {
+  corrected_air_h_w_m2k: number;
+  correction_factor: number;
+  warnings: string[];
+}
+
+export interface MoistAirCoolingLoadResult {
+  W_in: number;
+  W_out: number;
+  h_in_kj_kg: number;
+  h_out_kj_kg: number;
+  delta_h_kj_kg: number;
+  T_dp: number;
+  water_removed_kg_s: number;
+  water_removed_kg_h: number;
+  latent_load_w: number;
+  sensible_load_w: number;
+  total_load_w: number;
+  warnings: string[];
+}
+
+export interface CoupledIterationRecord {
+  iteration: number;
+  T_air_out: number;
+  coil_surface_mode: "dry" | "wet" | "transition";
+  dew_point_c: number;
+  W_in: number;
+  W_out: number;
+  Q_psychrometric_w: number;
+  Q_thermal_w: number;
+  error_w: number;
+  relative_error: number;
+  u_w_m2k: number;
+  air_h_corrected_w_m2k: number;
+  wet_air_correction_factor: number;
+  lmtd_k: number;
+}
+
+export interface CoupledCoilResult {
+  solver_type: "coupled";
+  converged: boolean;
+  iterations: number;
+  capacity_w: number;
+  capacity_kcalh: number;
+  capacity_kw: number;
+  air_inlet_temperature_c: number;
+  air_outlet_temperature_c: number;
+  surface_temperature_c: number;
+  coil_surface_mode: "dry" | "wet" | "transition";
+  dew_point_c: number;
+  W_in: number;
+  W_out: number;
+  water_removed_kg_h: number;
+  latent_load_w: number;
+  sensible_load_w: number;
+  total_load_w: number;
+  u_w_m2k: number;
+  air_h_dry_w_m2k: number;
+  air_h_corrected_w_m2k: number;
+  wet_air_correction_factor: number;
+  fluid_h_w_m2k: number;
+  lmtd_k: number;
+  error_w: number;
+  relative_error: number;
+  iteration_history: CoupledIterationRecord[];
+  warnings: string[];
+  status: string;
 }
 
 export type EquipmentType =
