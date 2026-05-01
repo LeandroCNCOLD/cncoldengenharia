@@ -1015,6 +1015,59 @@ export interface OperatingMapInput {
   };
 }
 
+export type CompressorControlMode = "fixed" | "inverter" | "staged";
+export type FanControlMode = "fixed" | "variable";
+export type ExpansionControlMode = "mechanical" | "electronic";
+
+export interface VariableControlInput {
+  base_system: SystemComponentsInput;
+  required_capacity_w: number;
+  control: {
+    compressor: {
+      mode: CompressorControlMode;
+      min_capacity_pct?: number;
+      stages?: number[];
+    };
+    condenser_fan: {
+      mode: FanControlMode;
+      base_airflow_m3_h?: number;
+    };
+    evaporator_fan: {
+      mode: FanControlMode;
+      base_airflow_m3_h?: number;
+    };
+    expansion_valve: {
+      mode: ExpansionControlMode;
+    };
+  };
+  targets: {
+    room_temp_c: number;
+    evap_approach_k: number;
+    cond_approach_k: number;
+    superheat_k: number;
+  };
+  limits?: {
+    max_iterations?: number;
+    tolerance_pct?: number;
+  };
+}
+
+export interface VariableControlResult {
+  status: "stable" | "cycling" | "unreachable" | "error";
+  iterations: number;
+  compressor_speed_pct: number;
+  condenser_fan_speed_pct: number;
+  evaporator_fan_speed_pct: number;
+  evap_temp_c: number;
+  cond_temp_c: number;
+  delivered_capacity_w: number;
+  compressor_power_w: number;
+  fan_power_w: number;
+  cop_system: number;
+  capacity_error_pct: number;
+  warnings: string[];
+}
+
 export type DefrostMethod = "hot_gas_reversal" | "hot_gas_bypass" | "electric";
 
 export interface DefrostCycleInput {

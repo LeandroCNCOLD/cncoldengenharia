@@ -146,6 +146,16 @@ export type {
   OperatingMapStats,
 } from "./domain/types";
 
+// Engines — control
+export { simulateVariableSystemControl } from "./engines/control/variableSystemControlEngine";
+export type {
+  CompressorControlMode,
+  ExpansionControlMode,
+  FanControlMode,
+  VariableControlInput,
+  VariableControlResult,
+} from "./domain/types";
+
 // Adapters
 export { normalizeOperationalOutput } from "./adapters/unifiedOperationalOutputAdapter";
 
