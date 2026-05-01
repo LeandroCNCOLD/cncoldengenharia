@@ -580,6 +580,43 @@ export interface FrostFormationResult {
   status: "ok" | "warning" | "error";
 }
 
+export interface OperationalOrchestratorInput {
+  operation_time_h: number;
+  coupled_input: CoilAdvancedInput;
+  frost: {
+    evaporator_external_area_m2: number;
+    defrost_threshold_frost_mass_kg?: number;
+    defrost_threshold_frost_thickness_mm?: number;
+    frost_density_kg_m3?: number;
+  };
+  defrost: {
+    method: DefrostMethod;
+    compressor_capacity_w: number;
+    T_condensing_c: number;
+    T_evaporating_c: number;
+    bypass_fraction?: number;
+    evaporator_external_area_m2?: number;
+    max_defrost_time_min?: number;
+  };
+}
+
+export interface OperationalOrchestratorResult {
+  operation_time_h: number;
+  coupled_result: CoupledCoilResult;
+  frost_result: FrostFormationResult;
+  defrost_result: DefrostCycleResult | null;
+  recommended_defrost: boolean;
+  effective_capacity_w: number;
+  capacity_loss_pct: number;
+  airflow_reduction_factor: number;
+  defrost_time_min: number;
+  useful_operation_time_h: number;
+  operational_availability_pct: number;
+  cycle_status: "normal" | "defrost_recommended" | "defrost_required" | "error";
+  warnings: string[];
+  status: "ok" | "warning" | "error";
+}
+
 export type DefrostMethod = "hot_gas_reversal" | "hot_gas_bypass" | "electric";
 
 export interface DefrostCycleInput {
