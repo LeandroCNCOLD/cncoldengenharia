@@ -97,6 +97,8 @@ export interface CoilInput {
   tube_diameter_mm: number | null;
   tube_thickness_mm: number | null;
   airflow_m3h: number | null;
+  delta_t_k: number | null;
+  mass_flow_kgs: number | null;
 }
 
 export interface CoilResult {
@@ -107,6 +109,22 @@ export interface CoilResult {
   air_pressure_drop_pa: number | null;
   leaving_air_temp_c: number | null;
   leaving_air_rh: number | null;
+}
+
+export interface CoilEngineResult {
+  capacity_w: number;
+  capacity_kw: number;
+  capacity_kcalh: number;
+  capacity_btuh: number;
+  capacity_tr: number;
+  sensible_capacity_w: number | null;
+  latent_capacity_w: number | null;
+  exchange_area_m2: number;
+  air_pressure_drop_pa: number;
+  fluid_pressure_drop_kpa: number;
+  fluid_velocity_ms: number;
+  warnings: string[];
+  status: "ok" | "warning" | "error";
 }
 
 export interface Equipment {
