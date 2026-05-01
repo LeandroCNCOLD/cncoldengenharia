@@ -127,11 +127,34 @@ export interface CoilEngineResult {
   status: "ok" | "warning" | "error";
 }
 
+export type EquipmentType =
+  | "condensing_unit"
+  | "evaporator_unit"
+  | "complete_system"
+  | "plugin_humidity"
+  | "custom";
+
+export interface EquipmentConfigurationResult {
+  status: "valid" | "invalid";
+  errors: string[];
+  warnings: string[];
+}
+
+export interface EquipmentSimulationResult {
+  total_capacity_kcalh: number;
+  evaporator_capacity_kcalh: number;
+  condenser_capacity_kcalh: number;
+  reheat_capacity_kcalh: number;
+  bottleneck: string;
+  warnings: string[];
+}
+
 export interface Equipment {
   id: string;
   model_code: string;
   model_name: string;
   line: string | null;
+  equipment_type: EquipmentType;
 
   voltage: number | null;
   phases: number | null;

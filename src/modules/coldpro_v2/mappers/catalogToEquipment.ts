@@ -116,6 +116,7 @@ export function mapCatalogRowToEquipment(row: Record<string, unknown>): Equipmen
     model_code: resolveStr(row, "modelo_unico"),
     model_name: resolveStr(row, "modelo"),
     line: resolveStr(row, "linha") || null,
+    equipment_type: "complete_system",
 
     voltage: resolveNum(row, "tensao_v"),
     phases: resolveNum(row, "numero_fases"),

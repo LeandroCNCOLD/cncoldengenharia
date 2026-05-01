@@ -18,3 +18,14 @@ export type { ReadNumberWithUnitResult } from "./utils/readNumberWithUnit";
 
 // Engines
 export { calculateCoil } from "./engines/coilCalculationEngine";
+
+// Services
+export {
+  createEquipment,
+  addHeatExchanger,
+  removeHeatExchanger,
+  toggleHeatExchanger,
+  sortHeatExchangersBySequence,
+  validateEquipmentConfiguration,
+  simulateEquipment,
+} from "./services/equipmentBuilder";
