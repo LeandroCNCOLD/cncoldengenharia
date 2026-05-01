@@ -157,6 +157,8 @@ export interface CoilAdvancedInput {
   tube_outer_diameter_m?: number;
   tube_length_m?: number;
   tube_material?: string;
+  circuit_distribution_mode?: "uniform" | "estimated_imbalance";
+  circuit_imbalance_factor?: number;
 }
 
 export interface CoilAdvancedResult {
@@ -216,6 +218,11 @@ export interface IterationRecord {
   fluid_nusselt: number;
   fluid_h_w_m2k: number;
   fluid_velocity_ms: number;
+  limiting_circuit_index: number | null;
+  average_fluid_h_w_m2k: number | null;
+  min_fluid_h_w_m2k: number | null;
+  max_fluid_h_w_m2k: number | null;
+  max_fluid_pressure_drop_kpa: number | null;
 }
 
 export interface CoilIterativeResult {
@@ -243,10 +250,58 @@ export interface CoilIterativeResult {
   fluid_velocity_ms: number;
   fluid_flow_regime: string;
   wall_resistance_m2k_w: number;
+  circuit_results: CircuitPerformanceResult[] | null;
+  circuit_aggregation: CircuitAggregationResult | null;
   error_w: number;
   iteration_history: IterationRecord[];
   warnings: string[];
   status: "ok" | "warning" | "error";
+}
+
+export interface CircuitFlowItem {
+  circuit_index: number;
+  mass_flow_kgs: number;
+  flow_fraction: number;
+}
+
+export interface CircuitFlowDistributionResult {
+  circuit_flows: CircuitFlowItem[];
+  total_mass_flow_kgs: number;
+  circuits: number;
+  distribution_mode: string;
+  imbalance_factor: number;
+  warnings: string[];
+}
+
+export interface CircuitPerformanceResult {
+  circuit_index: number;
+  mass_flow_kgs: number;
+  velocity_m_s: number;
+  reynolds: number;
+  prandtl: number;
+  nusselt: number;
+  h_w_m2k: number;
+  friction_factor: number;
+  flow_regime: string;
+  pressure_drop_pa: number;
+  pressure_drop_kpa: number;
+  warnings: string[];
+}
+
+export interface CircuitAggregationResult {
+  average_h_w_m2k: number;
+  min_h_w_m2k: number;
+  max_h_w_m2k: number;
+  average_reynolds: number;
+  min_reynolds: number;
+  max_reynolds: number;
+  average_velocity_m_s: number;
+  min_velocity_m_s: number;
+  max_velocity_m_s: number;
+  max_pressure_drop_kpa: number;
+  average_pressure_drop_kpa: number;
+  limiting_circuit_index: number;
+  warnings: string[];
 }
 
 export type EquipmentType =

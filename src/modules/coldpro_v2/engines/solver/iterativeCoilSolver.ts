@@ -1,4 +1,10 @@
-import type { CoilIterativeInput, CoilIterativeResult, IterationRecord } from "../../domain/types";
+import type {
+  CoilIterativeInput,
+  CoilIterativeResult,
+  IterationRecord,
+  CircuitPerformanceResult,
+  CircuitAggregationResult,
+} from "../../domain/types";
 import { calculateAirProperties } from "../airSide/airProperties";
 import { calculateMassFlowAirKgS } from "../core/heatBalance";
 import { calculateLMTD, calculateHeatTransferByLMTD } from "../core/lmtd";
@@ -15,6 +21,9 @@ import { calculateTubeWallResistance } from "../core/wallResistance";
 import { calculateFluidProperties } from "../fluidSide/fluidProperties";
 import { calculateInternalFluidHTC } from "../fluidSide/fluidHeatTransfer";
 import { calculateInternalFluidPressureDrop } from "../fluidSide/fluidPressureDrop";
+import { calculateCircuitFlowDistribution } from "../circuit/flowDistribution";
+import { calculateCircuitPerformance } from "../circuit/circuitPerformance";
+import { aggregateCircuitResults } from "../circuit/circuitAggregator";
 
 const KCALH_PER_KW = 859.845;
 const KCALH_PER_TR = 3024;
@@ -25,7 +34,6 @@ const SMALL = 1e-6;
 export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResult {
   const warnings: string[] = [];
 
-  // ── Validate required inputs ─────────────────────────────────
   if (!input.rows) warnings.push("rows ausente");
   if (!input.tubes_per_row) warnings.push("tubes_per_row ausente");
   if (!input.circuits) warnings.push("circuits ausente");
@@ -56,7 +64,6 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
   const correctionFactor = input.correction_factor ?? 1;
   const relaxation = input.relaxation_factor ?? 0.1;
 
-  // ── Geometry ─────────────────────────────────────────────────
   const lengthM = lengthMm / 1000;
   const tubeDiamM = tubeDiamMm / 1000;
   const tubeThickM = tubeThickMm / 1000;
@@ -64,9 +71,7 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
   const tubeOuterDiamM = input.tube_outer_diameter_m ?? tubeDiamM;
   const exchange_area_m2 = rows * tubesPerRow * lengthM * Math.PI * tubeDiamM;
 
-  if (exchange_area_m2 <= 0) {
-    warnings.push("área de troca zero ou ausente");
-  }
+  if (exchange_area_m2 <= 0) warnings.push("área de troca zero ou ausente");
 
   const faceArea = Math.max(tubesPerRow * lengthM * 0.025, 0.01);
   const finCond = input.fin_conductivity_w_mk ?? 200;
@@ -74,14 +79,19 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
   const foulingAir = input.fouling_air_m2k_w ?? 0;
   const foulingFluid = input.fouling_fluid_m2k_w ?? 0;
 
-  // ── Determine if physical fluid calc is possible ─────────────
   const fluidName = input.fluid;
   const hasFluidCalcData = !!fluidName && m_f > 0 && tubeInnerDiamM > 0;
+  const explicitTubeLength = input.tube_length_m;
+  const useCircuitPath = hasFluidCalcData && explicitTubeLength !== undefined && circuits > 0;
 
-  if (!hasFluidCalcData) {
-    if (input.fluid_h_w_m2k === null) {
-      warnings.push("Usando h_fluido default = 1000 W/m²K por dados insuficientes.");
-    }
+  if (!hasFluidCalcData && input.fluid_h_w_m2k === null) {
+    warnings.push("Usando h_fluido default = 1000 W/m²K por dados insuficientes.");
+  }
+
+  if (hasFluidCalcData && !useCircuitPath) {
+    warnings.push(
+      "tube_length_m não fornecido. Usando cálculo simplificado sem distribuição por circuito.",
+    );
   }
 
   // ── Wall resistance ──────────────────────────────────────────
@@ -101,11 +111,9 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
     warnings.push("Resistência de parede não calculada por dados insuficientes.");
   }
 
-  // ── 1. Initial air properties ────────────────────────────────
   let airProps = calculateAirProperties(T_air_in);
   let m_air = calculateMassFlowAirKgS(airflow, airProps.density_kg_m3);
 
-  // ── 2. Initial guess for T_f_out ─────────────────────────────
   let T_f_out: number;
   if (input.fluid_outlet_temperature_guess_c !== null) {
     T_f_out = input.fluid_outlet_temperature_guess_c;
@@ -113,7 +121,6 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
     T_f_out = isEvaporator ? T_f_in + 5 : T_f_in - 5;
   }
 
-  // ── Iteration state ──────────────────────────────────────────
   const iteration_history: IterationRecord[] = [];
   let converged = false;
   let lastError = 0;
@@ -135,50 +142,105 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
   let lastFluidFlowRegime = "unknown";
   let lastFluidPressureDropKpa = 0;
 
-  // ── Pre-check: can we even iterate? ──────────────────────────
+  let lastCircuitResults: CircuitPerformanceResult[] | null = null;
+  let lastCircuitAgg: CircuitAggregationResult | null = null;
+
   if (m_f <= 0 || cp_f <= 0 || airflow <= 0 || exchange_area_m2 <= 0) {
     return buildErrorResult(warnings, iteration_history);
   }
 
-  // ── Tube length for fluid-side pressure drop ─────────────────
   const tubeLengthForFluid =
-    input.tube_length_m ?? (rows * tubesPerRow * lengthM) / Math.max(circuits, 1);
+    explicitTubeLength ?? (rows * tubesPerRow * lengthM) / Math.max(circuits, 1);
 
-  // ── 3. Iteration loop ────────────────────────────────────────
+  const distMode = input.circuit_distribution_mode ?? "uniform";
+  const distImbalance = input.circuit_imbalance_factor ?? 0.1;
+
   for (let i = 0; i < maxIter; i++) {
-    // a) Q by fluid energy balance
     const Q_f = m_f * cp_f * Math.abs(T_f_out - T_f_in);
 
-    // b) T_air_out by air energy balance
     const C_air = m_air * airProps.cp_j_kg_k;
     if (C_air <= SMALL) {
       warnings.push("Capacidade térmica do ar zero");
       break;
     }
 
-    if (isEvaporator) {
-      T_air_out = T_air_in - Q_f / C_air;
-    } else {
-      T_air_out = T_air_in + Q_f / C_air;
-    }
+    T_air_out = isEvaporator ? T_air_in - Q_f / C_air : T_air_in + Q_f / C_air;
 
-    // c) Recalculate air properties at mean temperature
     const T_air_mean = (T_air_in + T_air_out) / 2;
     airProps = calculateAirProperties(T_air_mean);
     m_air = calculateMassFlowAirKgS(airflow, airProps.density_kg_m3);
 
-    // ── Fluid side recalculation ─────────────────────────────
     const T_f_mean = (T_f_in + T_f_out) / 2;
 
-    if (hasFluidCalcData) {
+    // ── Fluid side ─────────────────────────────────────────────
+    if (useCircuitPath) {
       const fluidProps = calculateFluidProperties({
         fluid: fluidName!,
         temperature_c: T_f_mean,
         pressure_kpa: input.fluid_pressure_kpa,
       });
-      if (i === 0) {
-        warnings.push(...fluidProps.warnings);
+      if (i === 0) warnings.push(...fluidProps.warnings);
+
+      const flowDist = calculateCircuitFlowDistribution({
+        total_mass_flow_kgs: m_f,
+        circuits,
+        distribution_mode: distMode,
+        imbalance_factor: distImbalance,
+      });
+      if (i === 0) warnings.push(...flowDist.warnings);
+
+      const circResults: CircuitPerformanceResult[] = [];
+      for (const cf of flowDist.circuit_flows) {
+        const cr = calculateCircuitPerformance({
+          circuit_index: cf.circuit_index,
+          mass_flow_kgs: cf.mass_flow_kgs,
+          tube_inner_diameter_m: tubeInnerDiamM,
+          tube_length_m: explicitTubeLength!,
+          fluid_properties: fluidProps,
+          roughness_m: roughness,
+        });
+        if (i === 0) warnings.push(...cr.warnings);
+        circResults.push(cr);
       }
+
+      const agg = aggregateCircuitResults(circResults);
+      if (i === 0) warnings.push(...agg.warnings);
+
+      lastCircuitResults = circResults;
+      lastCircuitAgg = agg;
+
+      if (distMode === "estimated_imbalance") {
+        lastHFluid = agg.min_h_w_m2k;
+        if (i === 0) {
+          warnings.push(
+            "Modo desbalanceado: usando h_fluido do circuito limitante (min_h) para cálculo conservador de U.",
+          );
+        }
+      } else {
+        lastHFluid = agg.average_h_w_m2k;
+      }
+
+      lastFluidRe = agg.average_reynolds;
+      lastFluidVelocity = agg.average_velocity_m_s;
+      lastFluidPressureDropKpa = agg.max_pressure_drop_kpa;
+      lastFluidFlowRegime =
+        agg.min_reynolds < 2300
+          ? "laminar"
+          : agg.min_reynolds < 4000
+            ? "transitional"
+            : "turbulent";
+
+      if (circResults.length > 0) {
+        lastFluidPr = circResults[0]!.prandtl;
+        lastFluidNu = agg.average_h_w_m2k > 0 ? circResults[0]!.nusselt : 0;
+      }
+    } else if (hasFluidCalcData) {
+      const fluidProps = calculateFluidProperties({
+        fluid: fluidName!,
+        temperature_c: T_f_mean,
+        pressure_kpa: input.fluid_pressure_kpa,
+      });
+      if (i === 0) warnings.push(...fluidProps.warnings);
 
       const fluidHTC = calculateInternalFluidHTC({
         mass_flow_kgs: m_f,
@@ -188,9 +250,7 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
         tube_length_m: tubeLengthForFluid,
         roughness_m: roughness,
       });
-      if (i === 0) {
-        warnings.push(...fluidHTC.warnings);
-      }
+      if (i === 0) warnings.push(...fluidHTC.warnings);
 
       lastHFluid = fluidHTC.h_w_m2k;
       lastFluidRe = fluidHTC.reynolds;
@@ -209,7 +269,7 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
       lastFluidPressureDropKpa = fluidDP.pressure_drop_kpa;
     }
 
-    // d) LMTD
+    // ── LMTD ───────────────────────────────────────────────────
     let hotIn: number, hotOut: number, coldIn: number, coldOut: number;
     if (isEvaporator) {
       hotIn = T_air_in;
@@ -229,12 +289,10 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
       coldIn_c: coldIn,
       coldOut_c: coldOut,
     });
-    if (i === 0) {
-      warnings.push(...lmtdResult.warnings);
-    }
+    if (i === 0) warnings.push(...lmtdResult.warnings);
     lastLMTD = lmtdResult.lmtd_k;
 
-    // e) Recalculate Re, Pr, Nu, h_air
+    // ── Air side ───────────────────────────────────────────────
     const faceVelocity = airflow > 0 ? airflow / 3600 / faceArea : 0;
 
     lastReAir = calculateReynolds({
@@ -243,7 +301,6 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
       hydraulicDiameter_m: tubeDiamM,
       viscosity_pa_s: airProps.viscosity_pa_s,
     });
-
     lastPrAir = airProps.prandtl;
 
     const f_air = calculateDarcyFrictionFactor({
@@ -257,9 +314,7 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
       prandtl: lastPrAir,
       frictionFactor: f_air,
     });
-    if (i === 0) {
-      warnings.push(...nuResult.warnings);
-    }
+    if (i === 0) warnings.push(...nuResult.warnings);
     lastNuAir = nuResult.nusselt;
 
     lastHAir = calculateConvectiveCoefficient({
@@ -268,17 +323,13 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
       hydraulicDiameter_m: tubeDiamM,
     });
 
-    // g) Fin efficiency
     const finResult = calculateFinEfficiencySimplified({
       h_air_w_m2k: lastHAir,
       finConductivity_w_mk: finCond,
       finThickness_m: finThick,
     });
-    if (i === 0) {
-      warnings.push(...finResult.warnings);
-    }
+    if (i === 0) warnings.push(...finResult.warnings);
 
-    // h) U
     lastU = calculateOverallU({
       airSideH_w_m2k: lastHAir,
       fluidSideH_w_m2k: lastHFluid,
@@ -288,7 +339,6 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
       finEfficiency: finResult.finEfficiency,
     });
 
-    // i) Q_calc = U * A * LMTD * F
     let Q_calc = 0;
     if (lastLMTD !== null && lastLMTD > 0) {
       Q_calc = calculateHeatTransferByLMTD({
@@ -299,12 +349,10 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
       });
     }
 
-    // j) Error
     const error = Q_calc - Q_f;
     lastError = error;
     lastQ = Q_calc;
 
-    // Air pressure drop
     const airRowDepth = rows * tubeDiamM * 2;
     lastAirPressureDrop = calculateDarcyWeisbachPressureDrop({
       frictionFactor: f_air,
@@ -314,7 +362,6 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
       velocity_m_s: faceVelocity,
     });
 
-    // Record iteration
     iteration_history.push({
       iteration: i + 1,
       fluid_outlet_temperature_c: T_f_out,
@@ -332,32 +379,32 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
       fluid_nusselt: lastFluidNu,
       fluid_h_w_m2k: lastHFluid,
       fluid_velocity_ms: lastFluidVelocity,
+      limiting_circuit_index: lastCircuitAgg?.limiting_circuit_index ?? null,
+      average_fluid_h_w_m2k: lastCircuitAgg?.average_h_w_m2k ?? null,
+      min_fluid_h_w_m2k: lastCircuitAgg?.min_h_w_m2k ?? null,
+      max_fluid_h_w_m2k: lastCircuitAgg?.max_h_w_m2k ?? null,
+      max_fluid_pressure_drop_kpa: lastCircuitAgg?.max_pressure_drop_kpa ?? null,
     });
 
-    // k) Convergence check
     if (Math.abs(error) < tolerance) {
       converged = true;
       break;
     }
 
-    // l) Adjust T_f_out
     const C_f = Math.max(m_f * cp_f, SMALL);
     T_f_out = T_f_out + (relaxation * error) / C_f;
 
-    // ── 5. Physical clamp ──────────────────────────────────────
     if (isEvaporator && T_f_out < T_f_in) {
       T_f_out = T_f_in;
       warnings.push(
         "Clamp físico ativado: T_f_out forçado para T_f_in. LMTD pode ser zero ou inválido.",
       );
-
       const clampLmtd = calculateLMTD({
         hotIn_c: T_air_in,
         hotOut_c: T_air_out,
         coldIn_c: T_f_in,
         coldOut_c: T_f_out,
       });
-
       if (clampLmtd.lmtd_k === null || clampLmtd.lmtd_k < 0.01) {
         warnings.push("LMTD < 0.01 K após clamp. Interrompendo iteração.");
         converged = false;
@@ -370,14 +417,12 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
       warnings.push(
         "Clamp físico ativado: T_f_out forçado para T_f_in. LMTD pode ser zero ou inválido.",
       );
-
       const clampLmtd = calculateLMTD({
         hotIn_c: T_f_in,
         hotOut_c: T_f_out,
         coldIn_c: T_air_in,
         coldOut_c: T_air_out,
       });
-
       if (clampLmtd.lmtd_k === null || clampLmtd.lmtd_k < 0.01) {
         warnings.push("LMTD < 0.01 K após clamp. Interrompendo iteração.");
         converged = false;
@@ -386,13 +431,11 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
     }
   }
 
-  // ── Degenerate solution check ────────────────────────────────
   if (converged && lastQ < 1) {
     converged = false;
     warnings.push("Capacidade calculada abaixo de 1 W. Resultado fisicamente inválido.");
   }
 
-  // ── Build result ─────────────────────────────────────────────
   const capacity_w = lastQ;
   const capacity_kw = capacity_w / 1000;
   const capacity_kcalh = capacity_kw * KCALH_PER_KW;
@@ -428,6 +471,8 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
     fluid_velocity_ms: lastFluidVelocity,
     fluid_flow_regime: lastFluidFlowRegime,
     wall_resistance_m2k_w: wallResistanceVal,
+    circuit_results: lastCircuitResults,
+    circuit_aggregation: lastCircuitAgg,
     error_w: lastError,
     iteration_history,
     warnings,
@@ -465,6 +510,8 @@ function buildErrorResult(
     fluid_velocity_ms: 0,
     fluid_flow_regime: "unknown",
     wall_resistance_m2k_w: 0,
+    circuit_results: null,
+    circuit_aggregation: null,
     error_w: 0,
     iteration_history,
     warnings,

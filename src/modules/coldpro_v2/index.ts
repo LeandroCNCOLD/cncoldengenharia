@@ -56,6 +56,11 @@ export { calculateFluidProperties } from "./engines/fluidSide/fluidProperties";
 export { calculateInternalFluidHTC } from "./engines/fluidSide/fluidHeatTransfer";
 export { calculateInternalFluidPressureDrop } from "./engines/fluidSide/fluidPressureDrop";
 
+// Engines — circuit
+export { calculateCircuitFlowDistribution } from "./engines/circuit/flowDistribution";
+export { calculateCircuitPerformance } from "./engines/circuit/circuitPerformance";
+export { aggregateCircuitResults } from "./engines/circuit/circuitAggregator";
+
 // Services
 export {
   createEquipment,
