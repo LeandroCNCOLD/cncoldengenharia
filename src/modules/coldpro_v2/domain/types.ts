@@ -149,6 +149,14 @@ export interface CoilAdvancedInput {
   fouling_air_m2k_w: number | null;
   fouling_fluid_m2k_w: number | null;
   tube_roughness_m: number | null;
+  fluid?: string;
+  fluid_temperature_c?: number;
+  fluid_pressure_kpa?: number;
+  fluid_mass_flow_kgs?: number;
+  tube_inner_diameter_m?: number;
+  tube_outer_diameter_m?: number;
+  tube_length_m?: number;
+  tube_material?: string;
 }
 
 export interface CoilAdvancedResult {
@@ -203,6 +211,11 @@ export interface IterationRecord {
   lmtd_k: number | null;
   reynolds_air: number;
   nusselt_air: number;
+  fluid_mean_temperature_c: number;
+  fluid_reynolds: number;
+  fluid_nusselt: number;
+  fluid_h_w_m2k: number;
+  fluid_velocity_ms: number;
 }
 
 export interface CoilIterativeResult {
@@ -223,6 +236,13 @@ export interface CoilIterativeResult {
   prandtl_air: number;
   nusselt_air: number;
   air_pressure_drop_pa: number;
+  fluid_pressure_drop_kpa: number;
+  fluid_reynolds: number;
+  fluid_prandtl: number;
+  fluid_nusselt: number;
+  fluid_velocity_ms: number;
+  fluid_flow_regime: string;
+  wall_resistance_m2k_w: number;
   error_w: number;
   iteration_history: IterationRecord[];
   warnings: string[];

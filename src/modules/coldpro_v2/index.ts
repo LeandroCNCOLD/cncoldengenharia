@@ -45,8 +45,16 @@ export { calculateDarcyWeisbachPressureDrop } from "./engines/core/pressureDrop"
 export { calculateOverallU } from "./engines/core/overallHeatTransfer";
 export { calculateFinEfficiencySimplified } from "./engines/core/finEfficiency";
 
+// Engines — core (wall)
+export { calculateTubeWallResistance } from "./engines/core/wallResistance";
+
 // Engines — air side
 export { calculateAirProperties } from "./engines/airSide/airProperties";
+
+// Engines — fluid side
+export { calculateFluidProperties } from "./engines/fluidSide/fluidProperties";
+export { calculateInternalFluidHTC } from "./engines/fluidSide/fluidHeatTransfer";
+export { calculateInternalFluidPressureDrop } from "./engines/fluidSide/fluidPressureDrop";
 
 // Services
 export {

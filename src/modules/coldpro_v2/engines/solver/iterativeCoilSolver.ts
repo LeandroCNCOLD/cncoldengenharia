@@ -11,6 +11,10 @@ import { calculateDarcyFrictionFactor } from "../core/friction";
 import { calculateDarcyWeisbachPressureDrop } from "../core/pressureDrop";
 import { calculateOverallU } from "../core/overallHeatTransfer";
 import { calculateFinEfficiencySimplified } from "../core/finEfficiency";
+import { calculateTubeWallResistance } from "../core/wallResistance";
+import { calculateFluidProperties } from "../fluidSide/fluidProperties";
+import { calculateInternalFluidHTC } from "../fluidSide/fluidHeatTransfer";
+import { calculateInternalFluidPressureDrop } from "../fluidSide/fluidPressureDrop";
 
 const KCALH_PER_KW = 859.845;
 const KCALH_PER_TR = 3024;
@@ -31,6 +35,7 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
   const airflow = input.airflow_m3h ?? 0;
   const rows = input.rows ?? 0;
   const tubesPerRow = input.tubes_per_row ?? 0;
+  const circuits = input.circuits ?? 0;
   const lengthMm = input.length_mm ?? 0;
   const tubeDiamMm = input.tube_diameter_mm ?? 9.52;
   const tubeThickMm = input.tube_thickness_mm ?? 0.35;
@@ -55,6 +60,8 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
   const lengthM = lengthMm / 1000;
   const tubeDiamM = tubeDiamMm / 1000;
   const tubeThickM = tubeThickMm / 1000;
+  const tubeInnerDiamM = input.tube_inner_diameter_m ?? Math.max(tubeDiamM - 2 * tubeThickM, 0.001);
+  const tubeOuterDiamM = input.tube_outer_diameter_m ?? tubeDiamM;
   const exchange_area_m2 = rows * tubesPerRow * lengthM * Math.PI * tubeDiamM;
 
   if (exchange_area_m2 <= 0) {
@@ -62,14 +69,37 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
   }
 
   const faceArea = Math.max(tubesPerRow * lengthM * 0.025, 0.01);
-  const h_fluid = input.fluid_h_w_m2k ?? DEFAULT_FLUID_H;
   const finCond = input.fin_conductivity_w_mk ?? 200;
   const finThick = input.fin_thickness_m ?? 0.0001;
-  const wallConductivity = 385;
-  const wallResistance =
-    input.wall_resistance_m2k_w ?? (tubeThickM > 0 ? tubeThickM / wallConductivity : 0);
   const foulingAir = input.fouling_air_m2k_w ?? 0;
   const foulingFluid = input.fouling_fluid_m2k_w ?? 0;
+
+  // ── Determine if physical fluid calc is possible ─────────────
+  const fluidName = input.fluid;
+  const hasFluidCalcData = !!fluidName && m_f > 0 && tubeInnerDiamM > 0;
+
+  if (!hasFluidCalcData) {
+    if (input.fluid_h_w_m2k === null) {
+      warnings.push("Usando h_fluido default = 1000 W/m²K por dados insuficientes.");
+    }
+  }
+
+  // ── Wall resistance ──────────────────────────────────────────
+  let wallResistanceVal: number;
+  if (input.wall_resistance_m2k_w !== null) {
+    wallResistanceVal = input.wall_resistance_m2k_w;
+  } else if (tubeOuterDiamM > 0 && tubeInnerDiamM > 0 && tubeInnerDiamM < tubeOuterDiamM) {
+    const wallResult = calculateTubeWallResistance({
+      tube_outer_diameter_m: tubeOuterDiamM,
+      tube_inner_diameter_m: tubeInnerDiamM,
+      tube_material: input.tube_material,
+    });
+    warnings.push(...wallResult.warnings);
+    wallResistanceVal = wallResult.wall_resistance_m2k_w;
+  } else {
+    wallResistanceVal = 0;
+    warnings.push("Resistência de parede não calculada por dados insuficientes.");
+  }
 
   // ── 1. Initial air properties ────────────────────────────────
   let airProps = calculateAirProperties(T_air_in);
@@ -96,12 +126,23 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
   let lastNuAir = 0;
   let lastHAir = 0;
   let lastAirPressureDrop = 0;
-  let lastFinEff = 0.85;
+
+  let lastHFluid = input.fluid_h_w_m2k ?? DEFAULT_FLUID_H;
+  let lastFluidRe = 0;
+  let lastFluidPr = 0;
+  let lastFluidNu = 0;
+  let lastFluidVelocity = 0;
+  let lastFluidFlowRegime = "unknown";
+  let lastFluidPressureDropKpa = 0;
 
   // ── Pre-check: can we even iterate? ──────────────────────────
   if (m_f <= 0 || cp_f <= 0 || airflow <= 0 || exchange_area_m2 <= 0) {
     return buildErrorResult(warnings, iteration_history);
   }
+
+  // ── Tube length for fluid-side pressure drop ─────────────────
+  const tubeLengthForFluid =
+    input.tube_length_m ?? (rows * tubesPerRow * lengthM) / Math.max(circuits, 1);
 
   // ── 3. Iteration loop ────────────────────────────────────────
   for (let i = 0; i < maxIter; i++) {
@@ -125,6 +166,48 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
     const T_air_mean = (T_air_in + T_air_out) / 2;
     airProps = calculateAirProperties(T_air_mean);
     m_air = calculateMassFlowAirKgS(airflow, airProps.density_kg_m3);
+
+    // ── Fluid side recalculation ─────────────────────────────
+    const T_f_mean = (T_f_in + T_f_out) / 2;
+
+    if (hasFluidCalcData) {
+      const fluidProps = calculateFluidProperties({
+        fluid: fluidName!,
+        temperature_c: T_f_mean,
+        pressure_kpa: input.fluid_pressure_kpa,
+      });
+      if (i === 0) {
+        warnings.push(...fluidProps.warnings);
+      }
+
+      const fluidHTC = calculateInternalFluidHTC({
+        mass_flow_kgs: m_f,
+        circuits,
+        tube_inner_diameter_m: tubeInnerDiamM,
+        fluid_properties: fluidProps,
+        tube_length_m: tubeLengthForFluid,
+        roughness_m: roughness,
+      });
+      if (i === 0) {
+        warnings.push(...fluidHTC.warnings);
+      }
+
+      lastHFluid = fluidHTC.h_w_m2k;
+      lastFluidRe = fluidHTC.reynolds;
+      lastFluidPr = fluidHTC.prandtl;
+      lastFluidNu = fluidHTC.nusselt;
+      lastFluidVelocity = fluidHTC.velocity_m_s;
+      lastFluidFlowRegime = fluidHTC.flow_regime;
+
+      const fluidDP = calculateInternalFluidPressureDrop({
+        friction_factor: fluidHTC.friction_factor,
+        tube_length_m: tubeLengthForFluid,
+        tube_inner_diameter_m: tubeInnerDiamM,
+        density_kg_m3: fluidProps.density_kg_m3,
+        velocity_m_s: fluidHTC.velocity_m_s,
+      });
+      lastFluidPressureDropKpa = fluidDP.pressure_drop_kpa;
+    }
 
     // d) LMTD
     let hotIn: number, hotOut: number, coldIn: number, coldOut: number;
@@ -194,16 +277,15 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
     if (i === 0) {
       warnings.push(...finResult.warnings);
     }
-    lastFinEff = finResult.finEfficiency;
 
     // h) U
     lastU = calculateOverallU({
       airSideH_w_m2k: lastHAir,
-      fluidSideH_w_m2k: h_fluid,
-      wallResistance_m2k_w: wallResistance,
+      fluidSideH_w_m2k: lastHFluid,
+      wallResistance_m2k_w: wallResistanceVal,
       foulingAir_m2k_w: foulingAir,
       foulingFluid_m2k_w: foulingFluid,
-      finEfficiency: lastFinEff,
+      finEfficiency: finResult.finEfficiency,
     });
 
     // i) Q_calc = U * A * LMTD * F
@@ -222,7 +304,7 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
     lastError = error;
     lastQ = Q_calc;
 
-    // Air pressure drop (update each iteration since air props change)
+    // Air pressure drop
     const airRowDepth = rows * tubeDiamM * 2;
     lastAirPressureDrop = calculateDarcyWeisbachPressureDrop({
       frictionFactor: f_air,
@@ -245,6 +327,11 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
       lmtd_k: lastLMTD,
       reynolds_air: lastReAir,
       nusselt_air: lastNuAir,
+      fluid_mean_temperature_c: T_f_mean,
+      fluid_reynolds: lastFluidRe,
+      fluid_nusselt: lastFluidNu,
+      fluid_h_w_m2k: lastHFluid,
+      fluid_velocity_ms: lastFluidVelocity,
     });
 
     // k) Convergence check
@@ -329,11 +416,18 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
     lmtd_k: lastLMTD,
     u_w_m2k: lastU,
     air_h_w_m2k: lastHAir,
-    fluid_h_w_m2k: h_fluid,
+    fluid_h_w_m2k: lastHFluid,
     reynolds_air: lastReAir,
     prandtl_air: lastPrAir,
     nusselt_air: lastNuAir,
     air_pressure_drop_pa: lastAirPressureDrop,
+    fluid_pressure_drop_kpa: lastFluidPressureDropKpa,
+    fluid_reynolds: lastFluidRe,
+    fluid_prandtl: lastFluidPr,
+    fluid_nusselt: lastFluidNu,
+    fluid_velocity_ms: lastFluidVelocity,
+    fluid_flow_regime: lastFluidFlowRegime,
+    wall_resistance_m2k_w: wallResistanceVal,
     error_w: lastError,
     iteration_history,
     warnings,
@@ -364,6 +458,13 @@ function buildErrorResult(
     prandtl_air: 0,
     nusselt_air: 0,
     air_pressure_drop_pa: 0,
+    fluid_pressure_drop_kpa: 0,
+    fluid_reynolds: 0,
+    fluid_prandtl: 0,
+    fluid_nusselt: 0,
+    fluid_velocity_ms: 0,
+    fluid_flow_regime: "unknown",
+    wall_resistance_m2k_w: 0,
     error_w: 0,
     iteration_history,
     warnings,
