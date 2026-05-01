@@ -871,6 +871,7 @@ export interface PolynomialCoefficientSet {
 
 export interface PolynomialGenerationOptions {
   min_points?: number;
+  recommended_min_points?: number;
   include_warning_points?: boolean;
   include_rejected_points?: boolean;
 }

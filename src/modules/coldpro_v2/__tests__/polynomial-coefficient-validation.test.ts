@@ -60,11 +60,38 @@ const NINE_POINT_GRID = [
   { evap_temp_c: -2, cond_temp_c: 40 },
 ];
 
-function generateNinePointCurve() {
+const SIXTEEN_POINT_GRID = [
+  { evap_temp_c: -15, cond_temp_c: 30 },
+  { evap_temp_c: -15, cond_temp_c: 35 },
+  { evap_temp_c: -15, cond_temp_c: 40 },
+  { evap_temp_c: -15, cond_temp_c: 45 },
+  { evap_temp_c: -10, cond_temp_c: 30 },
+  { evap_temp_c: -10, cond_temp_c: 35 },
+  { evap_temp_c: -10, cond_temp_c: 40 },
+  { evap_temp_c: -10, cond_temp_c: 45 },
+  { evap_temp_c: -5, cond_temp_c: 30 },
+  { evap_temp_c: -5, cond_temp_c: 35 },
+  { evap_temp_c: -5, cond_temp_c: 40 },
+  { evap_temp_c: -5, cond_temp_c: 45 },
+  { evap_temp_c: 0, cond_temp_c: 30 },
+  { evap_temp_c: 0, cond_temp_c: 35 },
+  { evap_temp_c: 0, cond_temp_c: 40 },
+  { evap_temp_c: 0, cond_temp_c: 45 },
+];
+
+function generateCurve(operatingPoints: typeof NINE_POINT_GRID) {
   return generateProductPerformanceCurve({
     system: BASE_SYSTEM,
-    operating_points: NINE_POINT_GRID,
+    operating_points: operatingPoints,
   });
+}
+
+function generateNinePointCurve() {
+  return generateCurve(NINE_POINT_GRID);
+}
+
+function generateSixteenPointCurve() {
+  return generateCurve(SIXTEEN_POINT_GRID);
 }
 
 function evaluateCapacity(
@@ -89,8 +116,8 @@ function evaluateCapacity(
 }
 
 describe("Polynomial Coefficient Generator", () => {
-  it("generates coefficients with nine operating points", () => {
-    const curve = generateNinePointCurve();
+  it("generates coefficients with sixteen operating points", () => {
+    const curve = generateSixteenPointCurve();
     const result = generatePolynomialCoefficients({
       points: curve.points,
       options: { include_rejected_points: true },
@@ -103,6 +130,9 @@ describe("Polynomial Coefficient Generator", () => {
       expect(Number.isFinite(set.fit_quality.r2)).toBe(true);
       expect(set.fit_quality.rmse).toBeGreaterThanOrEqual(0);
     });
+    expect(
+      result.warnings.some((warning) => warning.includes("AHRI") || warning.includes("EN 12900")),
+    ).toBe(false);
   });
 
   it("fails with fewer than six points", () => {
@@ -156,7 +186,7 @@ describe("Polynomial Coefficient Generator", () => {
   });
 
   it("approximates a real training point with the capacity polynomial", () => {
-    const curve = generateNinePointCurve();
+    const curve = generateSixteenPointCurve();
     const result = generatePolynomialCoefficients({
       points: curve.points,
       targets: ["capacity_w"],
@@ -288,7 +318,7 @@ describe("Polynomial Coefficient Generator", () => {
   });
 
   it("returns valid fit quality metrics for all targets", () => {
-    const curve = generateNinePointCurve();
+    const curve = generateSixteenPointCurve();
     const result = generatePolynomialCoefficients({
       points: curve.points,
       options: { include_rejected_points: true },
@@ -302,5 +332,21 @@ describe("Polynomial Coefficient Generator", () => {
       expect(Number.isNaN(set.coefficients.a0)).toBe(false);
       expect(set.coefficients.a0).not.toBeUndefined();
     });
+  });
+
+  it("emits AHRI/EN 12900 warning when fewer than nine points are used", () => {
+    const curve = generateNinePointCurve();
+    const sevenPoints = curve.points.slice(0, 7);
+
+    const result = generatePolynomialCoefficients({
+      points: sevenPoints,
+      options: { include_rejected_points: true },
+    });
+
+    expect(["ok", "warning"]).toContain(result.status);
+    expect(result.used_points).toBe(7);
+    expect(
+      result.warnings.some((warning) => warning.includes("AHRI") || warning.includes("EN 12900")),
+    ).toBe(true);
   });
 });

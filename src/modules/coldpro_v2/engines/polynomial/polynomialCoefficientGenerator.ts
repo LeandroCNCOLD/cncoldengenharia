@@ -206,6 +206,7 @@ export function generatePolynomialCoefficients(
   }
 
   const minPoints = input.options?.min_points ?? 6;
+  const recommendedMinPoints = input.options?.recommended_min_points ?? 9;
   const includeWarningPoints = input.options?.include_warning_points ?? true;
   const includeRejectedPoints = input.options?.include_rejected_points ?? false;
   const validPoints = filterValidPoints(input.points, includeWarningPoints, includeRejectedPoints);
@@ -226,6 +227,15 @@ export function generatePolynomialCoefficients(
   const warnings: string[] = [];
   const coefficientSets: PolynomialCoefficientSet[] = [];
 
+  if (validPoints.length >= minPoints && validPoints.length < recommendedMinPoints) {
+    warnings.push(
+      `generatePolynomialCoefficients: only ${validPoints.length} points available. ` +
+        `AHRI 540 / EN 12900 recommend at least ${recommendedMinPoints} points ` +
+        `(3×3 grid) for reliable polynomial fit. ` +
+        `Consider using a 4×4 grid (16 points) for industrial use.`,
+    );
+  }
+
   for (const target of targets) {
     const fitPoints = validPoints.map((point) => ({
       evap_temp_c: point.evap_temp_c,
@@ -245,12 +255,15 @@ export function generatePolynomialCoefficients(
 
     if (fitQuality.r2 < 0.95) {
       warnings.push(
-        `Target "${target}": R² = ${fitQuality.r2.toFixed(3)} (< 0.95). Polynomial fit may be inaccurate.`,
+        `Target "${target}": R² = ${fitQuality.r2.toFixed(3)} (< 0.95). ` +
+          `Polynomial fit may be inaccurate. ` +
+          `AHRI 540 requires R² ≥ 0.995 for compressor performance curves.`,
       );
     }
     if (fitQuality.max_error_pct > 10) {
       warnings.push(
-        `Target "${target}": max error = ${fitQuality.max_error_pct.toFixed(1)}% (> 10%). Consider adding more operating points.`,
+        `Target "${target}": max error = ${fitQuality.max_error_pct.toFixed(1)}% (> 10%). ` +
+          `Consider using a 4×4 grid (16 points) per EN 12900 recommendation.`,
       );
     }
 
