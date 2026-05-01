@@ -448,6 +448,54 @@ export interface CoupledCoilResult {
   status: string;
 }
 
+export type DripTrayCondition = "water" | "melting_ice" | "dry_air";
+
+export interface DripTrayCoilInput {
+  refrigerant?: string;
+  tube_outer_diameter_m: number;
+  tube_thickness_m: number;
+  tube_material?: "copper" | "aluminum" | "steel" | "stainless_steel";
+  tray_length_m: number;
+  number_of_bends: number;
+  pitch_m?: number;
+  liquid_mass_flow_kgs: number;
+  T_liquid_in_c: number;
+  tray_condition: DripTrayCondition;
+  T_tray_c: number;
+  max_iterations?: number;
+  tolerance_c?: number;
+}
+
+export interface DripTrayCoilResult {
+  number_of_passes: number;
+  bend_diameter_m: number;
+  straight_length_m: number;
+  bend_length_m: number;
+  total_length_m: number;
+  external_area_m2: number;
+  tube_inner_diameter_m: number;
+  h_internal_w_m2k: number;
+  h_external_w_m2k: number;
+  wall_resistance_m2k_w: number;
+  u_w_m2k: number;
+  reynolds_internal: number;
+  prandtl_internal: number;
+  nusselt_internal: number;
+  internal_velocity_ms: number;
+  T_liquid_in_c: number;
+  T_liquid_out_c: number;
+  liquid_subcooling_k: number;
+  T_tray_c: number;
+  tray_condition: DripTrayCondition;
+  lmtd_k: number;
+  q_tray_w: number;
+  q_tray_kcalh: number;
+  converged: boolean;
+  iterations: number;
+  warnings: string[];
+  status: "ok" | "warning" | "error";
+}
+
 export type EquipmentType =
   | "condensing_unit"
   | "evaporator_unit"
