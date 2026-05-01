@@ -946,6 +946,75 @@ export interface ProductTechnicalRecordInput {
   };
 }
 
+export interface OperatingMapGridConfig {
+  evap_temps_c: number[];
+  cond_temps_c: number[];
+}
+
+export interface OperatingMapPoint {
+  evap_temp_c: number;
+  cond_temp_c: number;
+  capacity_w: number;
+  cop: number;
+  compressor_power_w: number;
+  status: "approved" | "warning" | "rejected";
+  warnings: string[];
+}
+
+export interface OperatingIsoline {
+  label: string;
+  value: number;
+  points: Array<{
+    evap_temp_c: number;
+    cond_temp_c: number;
+  }>;
+}
+
+export interface OperatingEnvelope {
+  feasible_points: Array<{
+    evap_temp_c: number;
+    cond_temp_c: number;
+  }>;
+  rejected_points: Array<{
+    evap_temp_c: number;
+    cond_temp_c: number;
+  }>;
+}
+
+export interface OperatingMapStats {
+  total_points: number;
+  approved_points: number;
+  warning_points: number;
+  rejected_points: number;
+  min_capacity_w: number;
+  max_capacity_w: number;
+  min_cop: number;
+  max_cop: number;
+  min_compressor_power_w: number;
+  max_compressor_power_w: number;
+}
+
+export interface OperatingMapResult {
+  map_points: OperatingMapPoint[];
+  capacity_isolines: OperatingIsoline[];
+  cop_isolines: OperatingIsoline[];
+  envelope: OperatingEnvelope;
+  max_capacity_point: OperatingMapPoint | null;
+  max_cop_point: OperatingMapPoint | null;
+  stats: OperatingMapStats;
+  warnings: string[];
+}
+
+export interface OperatingMapInput {
+  system: SystemComponentsInput;
+  grid: OperatingMapGridConfig;
+  options?: {
+    capacity_isoline_count?: number;
+    cop_isoline_count?: number;
+    stop_on_rejection?: boolean;
+  };
+}
+
 export type DefrostMethod = "hot_gas_reversal" | "hot_gas_bypass" | "electric";
 
 export interface DefrostCycleInput {

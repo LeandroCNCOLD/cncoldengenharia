@@ -134,6 +134,18 @@ export type {
   ProductValidationSummary,
 } from "./domain/types";
 
+// Engines — map
+export { generateOperatingMap } from "./engines/map/operatingMapEngine";
+export type {
+  OperatingEnvelope,
+  OperatingIsoline,
+  OperatingMapGridConfig,
+  OperatingMapInput,
+  OperatingMapPoint,
+  OperatingMapResult,
+  OperatingMapStats,
+} from "./domain/types";
+
 // Adapters
 export { normalizeOperationalOutput } from "./adapters/unifiedOperationalOutputAdapter";
 
