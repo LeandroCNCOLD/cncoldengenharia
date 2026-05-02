@@ -198,7 +198,7 @@ export function UnilabWorkspacePage() {
         - lg (>=1024) e xl (<1280): sidebar fina + 1 coluna larga (centro e direita empilhados)
         - 2xl (>=1536): 3 colunas completas lado a lado
       */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[200px_minmax(0,1fr)] 2xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[190px_minmax(0,1fr)_minmax(0,1fr)] 2xl:grid-cols-[210px_minmax(0,1fr)_minmax(0,1fr)]">
         {/* COLUNA ESQUERDA — sidebar de navegação */}
         <WorkspaceSidebar
           componentType={componentType}
@@ -213,9 +213,9 @@ export function UnilabWorkspacePage() {
 
         {/* Em <2xl, centro+direita empilham dentro de uma única coluna ao lado da sidebar.
             Em 2xl, `display:contents` os promove para colunas irmãs do grid. */}
-        <div className="min-w-0 space-y-3 2xl:contents">
+        <div className="min-w-0 space-y-2 xl:contents">
           {/* COLUNA CENTRAL — Lado Ventilação + Geometria conforme seção ativa */}
-          <div className="min-w-0 space-y-3">
+          <div className="min-w-0 space-y-2">
             {activeSection === "geometry" ? (
               catalogs.loading ? (
                 <SkeletonCard />
@@ -238,7 +238,7 @@ export function UnilabWorkspacePage() {
           </div>
 
           {/* COLUNA DIREITA — Lado Fluido + status + resultado */}
-          <div className="min-w-0 space-y-3">
+          <div className="min-w-0 space-y-2">
             <FluidSidePanel
               componentType={componentType}
               refrigerants={catalogs.refrigerants}
