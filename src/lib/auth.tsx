@@ -16,11 +16,22 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+const DEV_AUTH_BYPASS = import.meta.env.DEV;
+
+const DEV_USER = {
+  id: "dev-user",
+  email: "dev@local",
+  app_metadata: {},
+  user_metadata: {},
+  aud: "authenticated",
+  created_at: new Date().toISOString(),
+} as unknown as User;
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(DEV_AUTH_BYPASS ? DEV_USER : null);
   const [session, setSession] = useState<Session | null>(null);
-  const [roles, setRoles] = useState<AppRole[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [roles, setRoles] = useState<AppRole[]>(DEV_AUTH_BYPASS ? ["admin", "engenheiro"] : []);
+  const [loading, setLoading] = useState(!DEV_AUTH_BYPASS);
 
   const loadRoles = async (userId: string) => {
     const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
