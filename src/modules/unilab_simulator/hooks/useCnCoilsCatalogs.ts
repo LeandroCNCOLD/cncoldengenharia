@@ -108,6 +108,10 @@ const EMPTY: CnCoilsCatalogsData = {
     sheets: [], nipples: [], nodes: [], fins: [], capillaries: [],
     plugs: [], soldering: [], groups: [], elements: [], frame: [],
   },
+  warnings: [],
+  uiLabels: [],
+  distributorKappa: {},
+  distributorHoleSizes: [],
 };
 
 async function fetchJsonArray<T>(file: string): Promise<T[]> {
