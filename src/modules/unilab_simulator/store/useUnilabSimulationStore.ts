@@ -39,6 +39,10 @@ interface UnilabSimulationStore {
   calcMode: CalcMode;
   setCalcMode: (mode: CalcMode) => void;
 
+  // Versão do motor termodinâmico ("v1" Etapa 5 | "v2" Etapa 6 ASHRAE)
+  engineVersion: "v1" | "v2";
+  setEngineVersion: (v: "v1" | "v2") => void;
+
   // Lado Ar / Ventilação (Etapa 3)
   airFlow_m3h: number;
   tempInDB_C: number;
