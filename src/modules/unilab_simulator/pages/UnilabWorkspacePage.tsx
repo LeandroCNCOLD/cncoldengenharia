@@ -8,6 +8,7 @@ import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
 import { GeometryForm } from "../components/GeometryForm";
 import { ThermoForm } from "../components/ThermoForm";
 import { ResultPanel } from "../components/ResultPanel";
+import { AirSidePanel } from "../components/AirSidePanel";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { useUnilabSimulation } from "../hooks/useUnilabSimulation";
 import {
@@ -195,7 +196,7 @@ export function UnilabWorkspacePage() {
         </div>
       }
     >
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
         <Column title={ptBR.workspace.columns.geometry}>
           {catalogs.loading ? (
             <SkeletonCard />
@@ -212,6 +213,9 @@ export function UnilabWorkspacePage() {
               disabled={!catalogs.ready}
             />
           )}
+        </Column>
+        <Column title="Lado Ar / Ventilação">
+          <AirSidePanel />
         </Column>
         <Column title={ptBR.workspace.columns.thermo}>
           {catalogs.loading ? (
