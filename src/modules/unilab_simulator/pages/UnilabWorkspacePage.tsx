@@ -58,6 +58,9 @@ export function UnilabWorkspacePage() {
   const reset = useUnilabSimulationStore((s) => s.reset);
   const setWarnings = useUnilabSimulationStore((s) => s.setWarnings);
 
+  // Espelha campos das Etapas 3/4 → thermoInputs/physicalInputs (motor)
+  useUnilabInputBridge(componentType);
+
   const [activeSection, setActiveSection] = useState<WorkspaceSection>("geometry");
 
   const [enrichedGeometries, setEnrichedGeometries] = useState<CoilGeometryItem[]>([]);
