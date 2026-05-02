@@ -161,12 +161,20 @@ export function FluidSidePanel({
     : isEvaporator
       ? "Temp. Evaporação"
       : "Temp. Operação";
+  const pairedTempLabel = isCondenser ? "Temp. Evaporação" : "Temp. Condensação";
   const thermalInputsDisabled = false;
+  const hasCompressor = !!selectedCompressorId;
+  const pairedRequired = hasCompressor;
+  const pairedMissing = pairedRequired && (pairedTempC == null || !Number.isFinite(pairedTempC));
+  // Quando há compressor, a temperatura "principal" e a vazão são resolvidas
+  // pelo ponto de equilíbrio.
+  const opTempReadOnly = hasCompressor;
+  const massFlowReadOnly = hasCompressor;
 
   // Validações (Etapa 4)
   const errors: string[] = [];
   if (!fluid) errors.push("Selecione um fluido refrigerante.");
-  if (!isMassFlowLocked && !(fluidMassFlow_kg_h > 0)) {
+  if (!isMassFlowLocked && !massFlowReadOnly && !(fluidMassFlow_kg_h > 0)) {
     errors.push("Vazão deve ser maior que zero quando desbloqueada.");
   }
   if (fluidOperatingTemp_C < -50 || fluidOperatingTemp_C > 90) {
@@ -177,6 +185,11 @@ export function FluidSidePanel({
   }
   if (isCondenser && subcooling_K < 0) {
     errors.push("Subresfriamento não pode ser negativo.");
+  }
+  if (pairedMissing) {
+    errors.push(
+      `${pairedTempLabel} é obrigatória quando há compressor selecionado.`,
+    );
   }
 
   return (
