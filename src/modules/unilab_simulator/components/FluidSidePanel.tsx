@@ -1,176 +1,108 @@
+import { useEffect, useState } from "react";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
-import type { RefrigerantItem, UnilabComponentType } from "../types/unilab.types";
+import type { UnilabComponentType } from "../types/unilab.types";
+import { getApplicationConfig } from "../config/applicationConfig";
 import {
-  getApplicationConfig,
-  type FluidFieldDef,
-} from "../config/applicationConfig";
+  loadRefrigerants,
+  type RefrigerantOption,
+} from "../services/refrigerantCatalogService";
+import {
+  validateFluidSideInputs,
+  type FluidSideValidationResult,
+} from "../services/fluidSideValidation";
 
 interface FluidSidePanelProps {
   componentType: UnilabComponentType;
-  refrigerants: RefrigerantItem[];
+  /** mantido por compatibilidade com a página; o painel usa loadRefrigerants() diretamente */
+  refrigerants?: unknown;
   disabled?: boolean;
 }
 
 /**
- * FluidSidePanel — replica o bloco "LADO FLUIDO" do Unilab Coils 9.0.
+ * FluidSidePanel — Etapa 4 (Lado Fluido / Refrigerante).
  *
- * Os campos exibidos vêm de `applicationConfig.ts` e variam conforme o tipo
- * de equipamento (evaporador DX, condensador a ar, bateria hidrônica, etc.).
+ * Replica o bloco "LADO FLUIDO" do Unilab Coils 9.0:
+ *  - Inputs editáveis à esquerda
+ *  - Coluna "Obt." à direita (read-only "---" — calculada na Etapa 5)
  *
- * Etapa 3: somente UI. Sem cálculo. Outputs são placeholders ("---").
+ * Sem cálculo termodinâmico nesta etapa.
  */
-export function FluidSidePanel({
-  componentType,
-  refrigerants,
-  disabled,
-}: FluidSidePanelProps) {
+export function FluidSidePanel({ componentType, disabled }: FluidSidePanelProps) {
   const cfg = getApplicationConfig(componentType);
-  const thermo = useUnilabSimulationStore((s) => s.thermoInputs);
-  const setThermo = useUnilabSimulationStore((s) => s.setThermoInputs);
-  const fluidExtras = useUnilabSimulationStore((s) => s.fluidExtras);
-  const setFluidExtras = useUnilabSimulationStore((s) => s.setFluidExtras);
 
-  const usesRefrigerant = cfg.fluidKind === "refrigerant";
+  const fluid = useUnilabSimulationStore((s) => s.fluid);
+  const fluidMassFlow_kg_h = useUnilabSimulationStore((s) => s.fluidMassFlow_kg_h);
+  const fluidOperatingTemp_C = useUnilabSimulationStore((s) => s.fluidOperatingTemp_C);
+  const fluidTempReference = useUnilabSimulationStore((s) => s.fluidTempReference);
+  const superheat_K = useUnilabSimulationStore((s) => s.superheat_K);
+  const subcooling_K = useUnilabSimulationStore((s) => s.subcooling_K);
+  const foulingFactorFluid = useUnilabSimulationStore((s) => s.foulingFactorFluid);
+  const setFluid = useUnilabSimulationStore((s) => s.setFluid);
+  const setFluidMassFlow = useUnilabSimulationStore((s) => s.setFluidMassFlow);
+  const setFluidOperatingTemp = useUnilabSimulationStore((s) => s.setFluidOperatingTemp);
+  const setFluidTempReference = useUnilabSimulationStore((s) => s.setFluidTempReference);
+  const setSuperheat = useUnilabSimulationStore((s) => s.setSuperheat);
+  const setSubcooling = useUnilabSimulationStore((s) => s.setSubcooling);
+  const setFoulingFactorFluid = useUnilabSimulationStore(
+    (s) => s.setFoulingFactorFluid,
+  );
 
-  const renderField = (field: FluidFieldDef) => {
-    const obtained = "---";
-    switch (field.key) {
-      case "evaporatingTemp":
-        return (
-          <Row
-            key={field.key}
-            label={field.label}
-            unit={field.unit}
-            input={
-              <NumberCell
-                value={thermo.evaporatingTempC}
-                onChange={(v) => setThermo({ evaporatingTempC: v })}
-                disabled={disabled}
-              />
-            }
-            obtained={obtained}
-          />
-        );
-      case "condensingTemp":
-        return (
-          <Row
-            key={field.key}
-            label={field.label}
-            unit={field.unit}
-            input={
-              <NumberCell
-                value={thermo.condensingTempC}
-                onChange={(v) => setThermo({ condensingTempC: v })}
-                disabled={disabled}
-              />
-            }
-            obtained={obtained}
-          />
-        );
-      case "superheat":
-        return (
-          <Row
-            key={field.key}
-            label={field.label}
-            unit={field.unit}
-            input={
-              <NumberCell
-                value={thermo.superheatK}
-                onChange={(v) => setThermo({ superheatK: v })}
-                disabled={disabled}
-              />
-            }
-            obtained={obtained}
-          />
-        );
-      case "subcooling":
-        return (
-          <Row
-            key={field.key}
-            label={field.label}
-            unit={field.unit}
-            input={
-              <NumberCell
-                value={thermo.subcoolingK}
-                onChange={(v) => setThermo({ subcoolingK: v })}
-                disabled={disabled}
-              />
-            }
-            obtained={obtained}
-          />
-        );
-      case "fluidInletTemp":
-        return (
-          <Row
-            key={field.key}
-            label={field.label}
-            unit={field.unit}
-            input={
-              <NumberCell
-                value={fluidExtras.fluidInletTempC}
-                onChange={(v) => setFluidExtras({ fluidInletTempC: v })}
-                disabled={disabled}
-              />
-            }
-            obtained={obtained}
-          />
-        );
-      case "fluidOutletTemp":
-        return (
-          <Row
-            key={field.key}
-            label={field.label}
-            unit={field.unit}
-            input={
-              <NumberCell
-                value={fluidExtras.fluidOutletTempC}
-                onChange={(v) => setFluidExtras({ fluidOutletTempC: v })}
-                disabled={disabled}
-              />
-            }
-            obtained={obtained}
-          />
-        );
-      case "fluidFlowMass":
-        return (
-          <Row
-            key={field.key}
-            label={field.label}
-            unit={field.unit}
-            input={
-              <NumberCell
-                value={fluidExtras.fluidFlowMassKgH}
-                onChange={(v) => setFluidExtras({ fluidFlowMassKgH: v })}
-                disabled={disabled}
-              />
-            }
-            obtained={obtained}
-          />
-        );
-      case "steamPressure":
-        return (
-          <Row
-            key={field.key}
-            label={field.label}
-            unit={field.unit}
-            input={
-              <NumberCell
-                value={fluidExtras.steamPressureKpa}
-                onChange={(v) => setFluidExtras({ steamPressureKpa: v })}
-                disabled={disabled}
-              />
-            }
-            obtained={obtained}
-          />
-        );
+  const [refrigerants, setRefrigerants] = useState<RefrigerantOption[]>([]);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    loadRefrigerants()
+      .then((list) => {
+        if (!cancelled) setRefrigerants(list);
+      })
+      .catch(() => {
+        if (!cancelled) setRefrigerants([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filteredRefrigerants =
+    search.trim().length === 0
+      ? refrigerants
+      : refrigerants.filter((r) => {
+          const q = search.toLowerCase();
+          return (
+            r.id.toLowerCase().includes(q) ||
+            (r.name?.toLowerCase().includes(q) ?? false)
+          );
+        });
+
+  const validation: FluidSideValidationResult = validateFluidSideInputs({
+    fluid,
+    fluidMassFlow_kg_h,
+    fluidOperatingTemp_C,
+    superheat_K,
+    subcooling_K,
+    foulingFactorFluid,
+  });
+
+  // Label dinâmico da temperatura de operação, conforme tipo de serpentina
+  const operatingTempLabel = (() => {
+    switch (cfg.type) {
+      case "condenser_air":
+      case "condenser_shell_tube":
+        return "Temperatura de Condensação";
+      case "evaporator_dx":
+      case "evaporator_pumped":
+        return "Temperatura de Evaporação";
+      default:
+        return "Temperatura de Operação do Fluido";
     }
-  };
+  })();
 
   return (
     <div className="rounded border border-slate-300 bg-slate-50 shadow-sm">
       <div className="grid grid-cols-[1fr_88px] border-b border-slate-300 bg-[#1E6FD9] text-white">
         <div className="px-3 py-1.5 text-center text-xs font-bold uppercase tracking-wider">
-          {cfg.fluidPanelTitle}
+          Lado Fluido / Refrigerante
         </div>
         <div className="border-l border-white/30 px-2 py-1.5 text-center text-xs font-bold">
           Obt.
@@ -178,91 +110,187 @@ export function FluidSidePanel({
       </div>
 
       <div className="space-y-1.5 p-2">
-        {/* Seleção de fluido */}
-        <Row
-          label={usesRefrigerant ? "Fluido (Refrigerante)" : "Fluido"}
-          unit=""
-          input={
-            usesRefrigerant ? (
-              <select
-                value={thermo.refrigerantId ?? ""}
-                onChange={(e) => setThermo({ refrigerantId: e.target.value || undefined })}
-                disabled={disabled}
-                className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100"
-              >
-                <option value="">Selecione…</option>
-                {refrigerants.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.name} ({r.kind === "pure" ? "puro" : "mistura"})
-                  </option>
-                ))}
-              </select>
+        {/* 1) Fluido — dropdown pesquisável + fallback manual */}
+        <div className="grid grid-cols-[160px_60px_1fr_88px] items-center gap-1.5">
+          <label className="truncate text-[11px] font-medium text-slate-700">
+            Fluido
+          </label>
+          <div className="rounded border border-slate-300 bg-white px-1.5 py-1 text-center text-[11px] text-slate-600">
+            —
+          </div>
+          <div className="space-y-1">
+            {refrigerants.length > 0 ? (
+              <>
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Pesquisar refrigerante…"
+                  disabled={disabled}
+                  className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100"
+                />
+                <select
+                  value={fluid}
+                  onChange={(e) => setFluid(e.target.value)}
+                  disabled={disabled}
+                  size={Math.min(5, Math.max(2, filteredRefrigerants.length))}
+                  className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100"
+                >
+                  {filteredRefrigerants.length === 0 && (
+                    <option value="" disabled>
+                      Nenhum resultado
+                    </option>
+                  )}
+                  {filteredRefrigerants.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name ?? r.id}
+                      {r.type ? ` (${r.type === "pure" ? "puro" : r.type === "mixture" ? "mistura" : r.type})` : ""}
+                    </option>
+                  ))}
+                </select>
+              </>
             ) : (
               <input
                 type="text"
-                value={cfg.fluidKind === "steam" ? "Vapor d'água" : "Água/Glicol"}
-                disabled
-                className="w-full cursor-not-allowed rounded border border-slate-200 bg-slate-100 px-2 py-1 text-xs"
+                value={fluid}
+                onChange={(e) => setFluid(e.target.value)}
+                placeholder="Ex.: R404A"
+                disabled={disabled}
+                className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100"
               />
-            )
+            )}
+          </div>
+          <div className="rounded border border-slate-300 bg-slate-200 px-2 py-1 text-right font-mono text-[11px] text-slate-700">
+            {fluid || "---"}
+          </div>
+        </div>
+
+        {/* 2) Vazão Mássica — editável */}
+        <Row
+          label="Vazão Mássica"
+          unit="kg/h"
+          input={
+            <NumberCell
+              value={fluidMassFlow_kg_h}
+              onChange={setFluidMassFlow}
+              min={0}
+              disabled={disabled}
+            />
           }
-          obtained="—"
-          obtainedTone="gray"
+          obtained="---"
         />
 
-        {/* Vazão (kg/h ou similar) — output, motor calcula */}
-        {usesRefrigerant && (
-          <Row
-            label="Vazão"
-            unit="kg/h"
-            input={<DisabledInput />}
-            obtained="---"
-            obtainedTone="gray"
-          />
-        )}
-
-        {/* Campos específicos da aplicação */}
-        {cfg.fluidFields.map(renderField)}
-
-        {/* Queda de pressão do fluido */}
-        {cfg.showFluidPressureDrop && (
-          <Row
-            label="Queda de Pressão"
-            unit="kPa"
-            input={<DisabledInput />}
-            obtained="---"
-            obtainedTone="gray"
-          />
-        )}
-
-        {/* Fator de erro do lado fluido */}
+        {/* 3) Temperatura de Operação (label dinâmico) */}
         <Row
-          label="Fator de Erro"
+          label={operatingTempLabel}
+          unit="°C"
+          input={
+            <NumberCell
+              value={fluidOperatingTemp_C}
+              onChange={setFluidOperatingTemp}
+              disabled={disabled}
+            />
+          }
+          obtained="---"
+        />
+
+        {/* 4) Referência da Temperatura */}
+        <Row
+          label="Referência da Temperatura"
+          unit="—"
+          input={
+            <select
+              value={fluidTempReference}
+              onChange={(e) =>
+                setFluidTempReference(e.target.value as "inlet" | "middle" | "outlet")
+              }
+              disabled={disabled}
+              className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100"
+            >
+              <option value="inlet">Entrada</option>
+              <option value="middle">Meio</option>
+              <option value="outlet">Saída</option>
+            </select>
+          }
+          obtained="—"
+        />
+
+        {/* 5) Sobreaquecimento */}
+        <Row
+          label="Sobreaquecimento"
+          unit="K"
+          input={
+            <NumberCell
+              value={superheat_K}
+              onChange={setSuperheat}
+              min={0}
+              disabled={disabled}
+            />
+          }
+          obtained="---"
+        />
+
+        {/* 6) Subresfriamento */}
+        <Row
+          label="Subresfriamento"
+          unit="K"
+          input={
+            <NumberCell
+              value={subcooling_K}
+              onChange={setSubcooling}
+              min={0}
+              disabled={disabled}
+            />
+          }
+          obtained="---"
+        />
+
+        {/* 7) Fator de Erro do Fluido */}
+        <Row
+          label="Fator de Erro do Fluido"
           unit="(m²·K)/W"
           input={
             <NumberCell
-              value={fluidExtras.fluidFoulingFactor ?? 0}
-              onChange={(v) => setFluidExtras({ fluidFoulingFactor: v })}
+              value={foulingFactorFluid}
+              onChange={setFoulingFactorFluid}
               min={0}
               step={0.0001}
               disabled={disabled}
             />
           }
           obtained="---"
-          obtainedTone="gray"
         />
+      </div>
 
-        {/* Velocidade do fluido (fase gás) — output */}
-        {cfg.showFluidVelocity && (
+      {/* Outputs read-only */}
+      <div className="border-t border-slate-300 bg-white p-2">
+        <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+          Resultados do Lado Fluido
+        </div>
+        <div className="space-y-1.5">
+          <Row label="Queda de Pressão" unit="kPa" input={<DisabledInput />} obtained="---" />
           <Row
-            label="Velocidade do Fluido (Fase Gás)"
+            label="Velocidade do Fluido"
             unit="m/s"
             input={<DisabledInput />}
             obtained="---"
-            obtainedTone="gray"
           />
-        )}
+          <Row
+            label="Fase do Fluido"
+            unit="—"
+            input={<DisabledInput />}
+            obtained="Aguardando cálculo"
+          />
+        </div>
       </div>
+
+      {!validation.valid && (
+        <ul className="mx-2 mb-2 space-y-0.5 rounded border border-amber-300 bg-amber-50 p-2 text-[11px] text-amber-800">
+          {validation.errors.map((e) => (
+            <li key={e}>• {e}</li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -272,27 +300,22 @@ function Row({
   unit,
   input,
   obtained,
-  obtainedTone = "gray",
 }: {
   label: string;
   unit: string;
   input: React.ReactNode;
   obtained: string;
-  obtainedTone?: "gray" | "green";
 }) {
-  const obtBg = obtainedTone === "green" ? "bg-emerald-100" : "bg-slate-200";
   return (
     <div className="grid grid-cols-[160px_60px_1fr_88px] items-center gap-1.5">
       <label className="truncate text-[11px] font-medium text-slate-700" title={label}>
         {label}
       </label>
       <div className="rounded border border-slate-300 bg-white px-1.5 py-1 text-center text-[11px] text-slate-600">
-        {unit || "—"}
+        {unit}
       </div>
       <div>{input}</div>
-      <div
-        className={`rounded border border-slate-300 ${obtBg} px-2 py-1 text-right font-mono text-[11px] text-slate-700`}
-      >
+      <div className="rounded border border-slate-300 bg-slate-200 px-2 py-1 text-right font-mono text-[11px] text-slate-700">
         {obtained}
       </div>
     </div>
@@ -307,8 +330,8 @@ function NumberCell({
   step,
   disabled,
 }: {
-  value: number | undefined;
-  onChange: (v: number | undefined) => void;
+  value: number;
+  onChange: (v: number) => void;
   min?: number;
   max?: number;
   step?: number;
@@ -317,19 +340,14 @@ function NumberCell({
   return (
     <input
       type="number"
-      value={value === undefined || Number.isNaN(value) ? "" : value}
+      value={Number.isFinite(value) ? value : 0}
       min={min}
       max={max}
       step={step ?? "any"}
       disabled={disabled}
       onChange={(e) => {
-        const raw = e.target.value;
-        if (raw === "") {
-          onChange(undefined);
-          return;
-        }
-        const n = parseFloat(raw);
-        onChange(Number.isFinite(n) ? n : undefined);
+        const n = parseFloat(e.target.value);
+        onChange(Number.isFinite(n) ? n : 0);
       }}
       className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-right text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
     />
