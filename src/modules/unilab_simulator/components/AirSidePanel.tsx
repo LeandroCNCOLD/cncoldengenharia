@@ -189,10 +189,10 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
           obtained={obtCapLat}
         />
 
-        {/* VENTILADOR */}
+        {/* VENTILADOR (catálogo opcional) */}
         <Row
           label="Ventilador"
-          unitNode={<UnitSelect value={uAirFlow} onChange={setUAirFlow} options={AIRFLOW_UNITS} />}
+          unitNode={<UnitText text="—" />}
           input={
             <select
               value={selectedFanId ?? ""}
@@ -201,7 +201,7 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
               className="w-full rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] text-slate-900 focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
               title={
                 fans.length === 0
-                  ? "Catálogo de ventiladores não disponível"
+                  ? "Catálogo de ventiladores não disponível — preencha a vazão manualmente abaixo"
                   : "Selecione um ventilador"
               }
             >
@@ -216,10 +216,24 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
               ))}
             </select>
           }
+          obtained="---"
+        />
+
+        {/* VAZÃO DE AR — sempre editável */}
+        <Row
+          label="Vazão de Ar"
+          unitNode={<UnitSelect value={uAirFlow} onChange={setUAirFlow} options={AIRFLOW_UNITS} />}
+          input={
+            <NumberCell
+              value={airFlowConv.fromCanonical(airFlow_m3h, uAirFlow)}
+              onChange={(v) => setAirFlow(airFlowConv.toCanonical(v, uAirFlow))}
+              min={0}
+            />
+          }
           obtained={obtAirFlow}
         />
 
-        {/* VELOCIDADE FRONTAL */}
+        {/* VELOCIDADE FRONTAL — exibida (calculada pelo motor a partir da vazão) */}
         <Row
           label="Velocidade Frontal"
           unitNode={<UnitSelect value={uVel} onChange={setUVel} options={VELOCITY_UNITS} />}

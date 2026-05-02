@@ -72,6 +72,12 @@ export interface UnilabPhysicalInputs {
   geometryId: string;
   finnedHeightMm: number;
   finnedLengthMm: number;
+  /** Nº de tubos por fila — entrada direta do usuário (CN COILS). */
+  tubesPerRow?: number;
+  /** Nº de tubos não utilizados (CN COILS). */
+  unusedTubes?: number;
+  /** Nº de divisores (CN COILS). */
+  dividers?: number;
   rows: number;
   circuits: number;
   tubeMaterialId: string;
