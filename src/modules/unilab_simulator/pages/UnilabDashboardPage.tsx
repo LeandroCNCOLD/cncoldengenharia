@@ -1,4 +1,4 @@
-import { Snowflake, Flame, Wind, Droplets, Zap } from "lucide-react";
+import { Snowflake, Flame, Wind, Droplets, Zap, RefreshCw, Cylinder, Server } from "lucide-react";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
 import { ptBR } from "../i18n/messages.ptBR";
 import { useUnilabCatalogs } from "../hooks/useUnilabCatalogs";
@@ -44,6 +44,24 @@ const CARDS: CardConfig[] = [
     description: ptBR.dashboard.cards.defrost.description,
     Icon: Zap,
   },
+  {
+    type: "recuperator",
+    title: ptBR.dashboard.cards.recuperator.title,
+    description: ptBR.dashboard.cards.recuperator.description,
+    Icon: RefreshCw,
+  },
+  {
+    type: "shell_tube",
+    title: ptBR.dashboard.cards.shellTube.title,
+    description: ptBR.dashboard.cards.shellTube.description,
+    Icon: Cylinder,
+  },
+  {
+    type: "chiller_unit",
+    title: ptBR.dashboard.cards.chiller.title,
+    description: ptBR.dashboard.cards.chiller.description,
+    Icon: Server,
+  },
 ];
 
 export function UnilabDashboardPage() {
@@ -62,7 +80,7 @@ export function UnilabDashboardPage() {
 
         <p className="text-sm text-slate-600">{ptBR.dashboard.intro}</p>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {CARDS.map((card) => (
             <UnilabDashboardCard
               key={card.type}

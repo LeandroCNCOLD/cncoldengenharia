@@ -13,6 +13,9 @@ const searchSchema = z.object({
       "heating_coil",
       "cooling_coil",
       "defrost_steam_coil",
+      "recuperator",
+      "shell_tube",
+      "chiller_unit",
     ])
     .optional(),
 });
