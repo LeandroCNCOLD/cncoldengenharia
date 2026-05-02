@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppColdproRouteImport } from './routes/_app/coldpro'
 import { Route as AppColdproIndexRouteImport } from './routes/_app/coldpro.index'
+import { Route as AppColdproUnilabRouteImport } from './routes/_app/coldpro.unilab'
 import { Route as AppColdproSimulationRouteImport } from './routes/_app/coldpro.simulation'
 import { Route as AppColdproRegistryRouteImport } from './routes/_app/coldpro.registry'
 import { Route as AppColdproRecordRouteImport } from './routes/_app/coldpro.record'
@@ -25,6 +26,7 @@ import { Route as AppColdproComponentsRouteImport } from './routes/_app/coldpro.
 import { Route as AppColdproCatalogRouteImport } from './routes/_app/coldpro.catalog'
 import { Route as AppColdproAuditRouteImport } from './routes/_app/coldpro.audit'
 import { Route as AppColdproAssemblyRouteImport } from './routes/_app/coldpro.assembly'
+import { Route as AppColdproUnilabWorkspaceRouteImport } from './routes/_app/coldpro.unilab.workspace'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -53,6 +55,11 @@ const AppColdproRoute = AppColdproRouteImport.update({
 const AppColdproIndexRoute = AppColdproIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppColdproRoute,
+} as any)
+const AppColdproUnilabRoute = AppColdproUnilabRouteImport.update({
+  id: '/unilab',
+  path: '/unilab',
   getParentRoute: () => AppColdproRoute,
 } as any)
 const AppColdproSimulationRoute = AppColdproSimulationRouteImport.update({
@@ -105,6 +112,12 @@ const AppColdproAssemblyRoute = AppColdproAssemblyRouteImport.update({
   path: '/assembly',
   getParentRoute: () => AppColdproRoute,
 } as any)
+const AppColdproUnilabWorkspaceRoute =
+  AppColdproUnilabWorkspaceRouteImport.update({
+    id: '/workspace',
+    path: '/workspace',
+    getParentRoute: () => AppColdproUnilabRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -121,7 +134,9 @@ export interface FileRoutesByFullPath {
   '/coldpro/record': typeof AppColdproRecordRoute
   '/coldpro/registry': typeof AppColdproRegistryRoute
   '/coldpro/simulation': typeof AppColdproSimulationRoute
+  '/coldpro/unilab': typeof AppColdproUnilabRouteWithChildren
   '/coldpro/': typeof AppColdproIndexRoute
+  '/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -137,7 +152,9 @@ export interface FileRoutesByTo {
   '/coldpro/record': typeof AppColdproRecordRoute
   '/coldpro/registry': typeof AppColdproRegistryRoute
   '/coldpro/simulation': typeof AppColdproSimulationRoute
+  '/coldpro/unilab': typeof AppColdproUnilabRouteWithChildren
   '/coldpro': typeof AppColdproIndexRoute
+  '/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -156,7 +173,9 @@ export interface FileRoutesById {
   '/_app/coldpro/record': typeof AppColdproRecordRoute
   '/_app/coldpro/registry': typeof AppColdproRegistryRoute
   '/_app/coldpro/simulation': typeof AppColdproSimulationRoute
+  '/_app/coldpro/unilab': typeof AppColdproUnilabRouteWithChildren
   '/_app/coldpro/': typeof AppColdproIndexRoute
+  '/_app/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -175,7 +194,9 @@ export interface FileRouteTypes {
     | '/coldpro/record'
     | '/coldpro/registry'
     | '/coldpro/simulation'
+    | '/coldpro/unilab'
     | '/coldpro/'
+    | '/coldpro/unilab/workspace'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -191,7 +212,9 @@ export interface FileRouteTypes {
     | '/coldpro/record'
     | '/coldpro/registry'
     | '/coldpro/simulation'
+    | '/coldpro/unilab'
     | '/coldpro'
+    | '/coldpro/unilab/workspace'
   id:
     | '__root__'
     | '/'
@@ -209,7 +232,9 @@ export interface FileRouteTypes {
     | '/_app/coldpro/record'
     | '/_app/coldpro/registry'
     | '/_app/coldpro/simulation'
+    | '/_app/coldpro/unilab'
     | '/_app/coldpro/'
+    | '/_app/coldpro/unilab/workspace'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -260,6 +285,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/coldpro/'
       preLoaderRoute: typeof AppColdproIndexRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
+    '/_app/coldpro/unilab': {
+      id: '/_app/coldpro/unilab'
+      path: '/unilab'
+      fullPath: '/coldpro/unilab'
+      preLoaderRoute: typeof AppColdproUnilabRouteImport
       parentRoute: typeof AppColdproRoute
     }
     '/_app/coldpro/simulation': {
@@ -332,8 +364,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproAssemblyRouteImport
       parentRoute: typeof AppColdproRoute
     }
+    '/_app/coldpro/unilab/workspace': {
+      id: '/_app/coldpro/unilab/workspace'
+      path: '/workspace'
+      fullPath: '/coldpro/unilab/workspace'
+      preLoaderRoute: typeof AppColdproUnilabWorkspaceRouteImport
+      parentRoute: typeof AppColdproUnilabRoute
+    }
   }
 }
+
+interface AppColdproUnilabRouteChildren {
+  AppColdproUnilabWorkspaceRoute: typeof AppColdproUnilabWorkspaceRoute
+}
+
+const AppColdproUnilabRouteChildren: AppColdproUnilabRouteChildren = {
+  AppColdproUnilabWorkspaceRoute: AppColdproUnilabWorkspaceRoute,
+}
+
+const AppColdproUnilabRouteWithChildren =
+  AppColdproUnilabRoute._addFileChildren(AppColdproUnilabRouteChildren)
 
 interface AppColdproRouteChildren {
   AppColdproAssemblyRoute: typeof AppColdproAssemblyRoute
@@ -346,6 +396,7 @@ interface AppColdproRouteChildren {
   AppColdproRecordRoute: typeof AppColdproRecordRoute
   AppColdproRegistryRoute: typeof AppColdproRegistryRoute
   AppColdproSimulationRoute: typeof AppColdproSimulationRoute
+  AppColdproUnilabRoute: typeof AppColdproUnilabRouteWithChildren
   AppColdproIndexRoute: typeof AppColdproIndexRoute
 }
 
@@ -360,6 +411,7 @@ const AppColdproRouteChildren: AppColdproRouteChildren = {
   AppColdproRecordRoute: AppColdproRecordRoute,
   AppColdproRegistryRoute: AppColdproRegistryRoute,
   AppColdproSimulationRoute: AppColdproSimulationRoute,
+  AppColdproUnilabRoute: AppColdproUnilabRouteWithChildren,
   AppColdproIndexRoute: AppColdproIndexRoute,
 }
 
