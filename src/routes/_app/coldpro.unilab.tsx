@@ -8,7 +8,9 @@ export const Route = createFileRoute("/_app/coldpro/unilab")({
 function UnilabLayout() {
   const matches = useMatches();
   const hasChild = matches.some(
-    (m) => m.routeId === "/_app/coldpro/unilab/workspace",
+    (m) =>
+      m.routeId !== "/_app/coldpro/unilab" &&
+      m.routeId.startsWith("/_app/coldpro/unilab"),
   );
   return hasChild ? <Outlet /> : <UnilabDashboardPage />;
 }
