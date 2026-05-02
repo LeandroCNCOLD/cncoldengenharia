@@ -47,7 +47,7 @@ interface SavedItem {
   id: string;
   name: string;
   createdAt: string;
-  spec: Record<string, unknown>;
+  spec: object;
 }
 
 const TABS: {
