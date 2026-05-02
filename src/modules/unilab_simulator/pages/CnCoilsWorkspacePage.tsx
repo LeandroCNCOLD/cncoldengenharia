@@ -9,7 +9,7 @@ import { GeometryForm } from "../components/GeometryForm";
 import { ThermoForm } from "../components/ThermoForm";
 import { ResultPanel } from "../components/ResultPanel";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
-import { useUnilabSimulation } from "../hooks/useUnilabSimulation";
+import { useCnCoilsSimulation } from "../hooks/useCnCoilsSimulation";
 import {
   validatePhysicalInputs,
   validateThermoInputs,
@@ -44,8 +44,8 @@ function isCondenser(t: UnilabComponentType) {
   return t === "condenser_air" || t === "condenser_shell_tube";
 }
 
-export function UnilabWorkspacePage() {
-  const search = useSearch({ from: "/_app/coldpro/unilab/workspace" }) as {
+export function CnCoilsWorkspacePage() {
+  const search = useSearch({ from: "/_app/coldpro/cn-coils/workspace" }) as {
     type?: UnilabComponentType;
   };
   const componentType = search.type ?? "evaporator_dx";
@@ -62,7 +62,7 @@ export function UnilabWorkspacePage() {
   const setWarnings = useUnilabSimulationStore((s) => s.setWarnings);
 
   // Catálogo enriquecido de geometrias (com tipo_serpentina, campos pt-BR etc.).
-  // Carregado via service dedicado; o `useUnilabCatalogs` continua provendo a
+  // Carregado via service dedicado; o catálogo base continua provendo a
   // versão base usada pelo motor termodinâmico (não alteramos coldpro_v2).
   const [enrichedGeometries, setEnrichedGeometries] = useState<CoilGeometryItem[]>([]);
   useEffect(() => {
@@ -96,7 +96,7 @@ export function UnilabWorkspacePage() {
     ],
   );
 
-  const { run } = useUnilabSimulation(simulationDeps);
+  const { run } = useCnCoilsSimulation(simulationDeps);
   const [sending, setSending] = useState(false);
 
   const inputsValid =
@@ -126,7 +126,7 @@ export function UnilabWorkspacePage() {
       const phys = physical as UnilabPhysicalInputs;
       const therm = thermo as UnilabThermoInputs;
       const ctx = { tubeMaterials: catalogs.tubeMaterials };
-      const baseName = `UNILAB ${componentLabel} ${new Date().toLocaleString("pt-BR")}`;
+      const baseName = `CN COILS ${componentLabel} ${new Date().toLocaleString("pt-BR")}`;
 
       if (isCondenser(componentType)) {
         const spec = toCondenserInput(therm, result!);
@@ -153,7 +153,7 @@ export function UnilabWorkspacePage() {
       actions={
         <div className="flex flex-wrap items-center gap-2">
           <Link
-            to="/coldpro/unilab"
+            to="/coldpro/cn-coils"
             className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
           >
             <ArrowLeft className="h-4 w-4" />

@@ -23,10 +23,12 @@ import { Route as AppColdproMapRouteImport } from './routes/_app/coldpro.map'
 import { Route as AppColdproExportRouteImport } from './routes/_app/coldpro.export'
 import { Route as AppColdproCurveRouteImport } from './routes/_app/coldpro.curve'
 import { Route as AppColdproComponentsRouteImport } from './routes/_app/coldpro.components'
+import { Route as AppColdproCnCoilsRouteImport } from './routes/_app/coldpro.cn-coils'
 import { Route as AppColdproCatalogRouteImport } from './routes/_app/coldpro.catalog'
 import { Route as AppColdproAuditRouteImport } from './routes/_app/coldpro.audit'
 import { Route as AppColdproAssemblyRouteImport } from './routes/_app/coldpro.assembly'
 import { Route as AppColdproUnilabWorkspaceRouteImport } from './routes/_app/coldpro.unilab.workspace'
+import { Route as AppColdproCnCoilsWorkspaceRouteImport } from './routes/_app/coldpro.cn-coils.workspace'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -97,6 +99,11 @@ const AppColdproComponentsRoute = AppColdproComponentsRouteImport.update({
   path: '/components',
   getParentRoute: () => AppColdproRoute,
 } as any)
+const AppColdproCnCoilsRoute = AppColdproCnCoilsRouteImport.update({
+  id: '/cn-coils',
+  path: '/cn-coils',
+  getParentRoute: () => AppColdproRoute,
+} as any)
 const AppColdproCatalogRoute = AppColdproCatalogRouteImport.update({
   id: '/catalog',
   path: '/catalog',
@@ -118,6 +125,12 @@ const AppColdproUnilabWorkspaceRoute =
     path: '/workspace',
     getParentRoute: () => AppColdproUnilabRoute,
   } as any)
+const AppColdproCnCoilsWorkspaceRoute =
+  AppColdproCnCoilsWorkspaceRouteImport.update({
+    id: '/workspace',
+    path: '/workspace',
+    getParentRoute: () => AppColdproCnCoilsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -127,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/coldpro/audit': typeof AppColdproAuditRoute
   '/coldpro/catalog': typeof AppColdproCatalogRoute
+  '/coldpro/cn-coils': typeof AppColdproCnCoilsRouteWithChildren
   '/coldpro/components': typeof AppColdproComponentsRoute
   '/coldpro/curve': typeof AppColdproCurveRoute
   '/coldpro/export': typeof AppColdproExportRoute
@@ -136,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/coldpro/simulation': typeof AppColdproSimulationRoute
   '/coldpro/unilab': typeof AppColdproUnilabRouteWithChildren
   '/coldpro/': typeof AppColdproIndexRoute
+  '/coldpro/cn-coils/workspace': typeof AppColdproCnCoilsWorkspaceRoute
   '/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
 }
 export interface FileRoutesByTo {
@@ -145,6 +160,7 @@ export interface FileRoutesByTo {
   '/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/coldpro/audit': typeof AppColdproAuditRoute
   '/coldpro/catalog': typeof AppColdproCatalogRoute
+  '/coldpro/cn-coils': typeof AppColdproCnCoilsRouteWithChildren
   '/coldpro/components': typeof AppColdproComponentsRoute
   '/coldpro/curve': typeof AppColdproCurveRoute
   '/coldpro/export': typeof AppColdproExportRoute
@@ -154,6 +170,7 @@ export interface FileRoutesByTo {
   '/coldpro/simulation': typeof AppColdproSimulationRoute
   '/coldpro/unilab': typeof AppColdproUnilabRouteWithChildren
   '/coldpro': typeof AppColdproIndexRoute
+  '/coldpro/cn-coils/workspace': typeof AppColdproCnCoilsWorkspaceRoute
   '/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
 }
 export interface FileRoutesById {
@@ -166,6 +183,7 @@ export interface FileRoutesById {
   '/_app/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/_app/coldpro/audit': typeof AppColdproAuditRoute
   '/_app/coldpro/catalog': typeof AppColdproCatalogRoute
+  '/_app/coldpro/cn-coils': typeof AppColdproCnCoilsRouteWithChildren
   '/_app/coldpro/components': typeof AppColdproComponentsRoute
   '/_app/coldpro/curve': typeof AppColdproCurveRoute
   '/_app/coldpro/export': typeof AppColdproExportRoute
@@ -175,6 +193,7 @@ export interface FileRoutesById {
   '/_app/coldpro/simulation': typeof AppColdproSimulationRoute
   '/_app/coldpro/unilab': typeof AppColdproUnilabRouteWithChildren
   '/_app/coldpro/': typeof AppColdproIndexRoute
+  '/_app/coldpro/cn-coils/workspace': typeof AppColdproCnCoilsWorkspaceRoute
   '/_app/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
 }
 export interface FileRouteTypes {
@@ -187,6 +206,7 @@ export interface FileRouteTypes {
     | '/coldpro/assembly'
     | '/coldpro/audit'
     | '/coldpro/catalog'
+    | '/coldpro/cn-coils'
     | '/coldpro/components'
     | '/coldpro/curve'
     | '/coldpro/export'
@@ -196,6 +216,7 @@ export interface FileRouteTypes {
     | '/coldpro/simulation'
     | '/coldpro/unilab'
     | '/coldpro/'
+    | '/coldpro/cn-coils/workspace'
     | '/coldpro/unilab/workspace'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -205,6 +226,7 @@ export interface FileRouteTypes {
     | '/coldpro/assembly'
     | '/coldpro/audit'
     | '/coldpro/catalog'
+    | '/coldpro/cn-coils'
     | '/coldpro/components'
     | '/coldpro/curve'
     | '/coldpro/export'
@@ -214,6 +236,7 @@ export interface FileRouteTypes {
     | '/coldpro/simulation'
     | '/coldpro/unilab'
     | '/coldpro'
+    | '/coldpro/cn-coils/workspace'
     | '/coldpro/unilab/workspace'
   id:
     | '__root__'
@@ -225,6 +248,7 @@ export interface FileRouteTypes {
     | '/_app/coldpro/assembly'
     | '/_app/coldpro/audit'
     | '/_app/coldpro/catalog'
+    | '/_app/coldpro/cn-coils'
     | '/_app/coldpro/components'
     | '/_app/coldpro/curve'
     | '/_app/coldpro/export'
@@ -234,6 +258,7 @@ export interface FileRouteTypes {
     | '/_app/coldpro/simulation'
     | '/_app/coldpro/unilab'
     | '/_app/coldpro/'
+    | '/_app/coldpro/cn-coils/workspace'
     | '/_app/coldpro/unilab/workspace'
   fileRoutesById: FileRoutesById
 }
@@ -343,6 +368,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproComponentsRouteImport
       parentRoute: typeof AppColdproRoute
     }
+    '/_app/coldpro/cn-coils': {
+      id: '/_app/coldpro/cn-coils'
+      path: '/cn-coils'
+      fullPath: '/coldpro/cn-coils'
+      preLoaderRoute: typeof AppColdproCnCoilsRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
     '/_app/coldpro/catalog': {
       id: '/_app/coldpro/catalog'
       path: '/catalog'
@@ -371,8 +403,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproUnilabWorkspaceRouteImport
       parentRoute: typeof AppColdproUnilabRoute
     }
+    '/_app/coldpro/cn-coils/workspace': {
+      id: '/_app/coldpro/cn-coils/workspace'
+      path: '/workspace'
+      fullPath: '/coldpro/cn-coils/workspace'
+      preLoaderRoute: typeof AppColdproCnCoilsWorkspaceRouteImport
+      parentRoute: typeof AppColdproCnCoilsRoute
+    }
   }
 }
+
+interface AppColdproCnCoilsRouteChildren {
+  AppColdproCnCoilsWorkspaceRoute: typeof AppColdproCnCoilsWorkspaceRoute
+}
+
+const AppColdproCnCoilsRouteChildren: AppColdproCnCoilsRouteChildren = {
+  AppColdproCnCoilsWorkspaceRoute: AppColdproCnCoilsWorkspaceRoute,
+}
+
+const AppColdproCnCoilsRouteWithChildren =
+  AppColdproCnCoilsRoute._addFileChildren(AppColdproCnCoilsRouteChildren)
 
 interface AppColdproUnilabRouteChildren {
   AppColdproUnilabWorkspaceRoute: typeof AppColdproUnilabWorkspaceRoute
@@ -389,6 +439,7 @@ interface AppColdproRouteChildren {
   AppColdproAssemblyRoute: typeof AppColdproAssemblyRoute
   AppColdproAuditRoute: typeof AppColdproAuditRoute
   AppColdproCatalogRoute: typeof AppColdproCatalogRoute
+  AppColdproCnCoilsRoute: typeof AppColdproCnCoilsRouteWithChildren
   AppColdproComponentsRoute: typeof AppColdproComponentsRoute
   AppColdproCurveRoute: typeof AppColdproCurveRoute
   AppColdproExportRoute: typeof AppColdproExportRoute
@@ -404,6 +455,7 @@ const AppColdproRouteChildren: AppColdproRouteChildren = {
   AppColdproAssemblyRoute: AppColdproAssemblyRoute,
   AppColdproAuditRoute: AppColdproAuditRoute,
   AppColdproCatalogRoute: AppColdproCatalogRoute,
+  AppColdproCnCoilsRoute: AppColdproCnCoilsRouteWithChildren,
   AppColdproComponentsRoute: AppColdproComponentsRoute,
   AppColdproCurveRoute: AppColdproCurveRoute,
   AppColdproExportRoute: AppColdproExportRoute,
@@ -439,3 +491,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

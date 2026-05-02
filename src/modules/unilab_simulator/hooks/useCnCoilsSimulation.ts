@@ -12,7 +12,7 @@ import type {
   CoilGeometryCatalogItem,
 } from "../types/unilab.types";
 
-export interface UseUnilabSimulationParams {
+export interface UseCnCoilsSimulationParams {
   geometries: CoilGeometryCatalogItem[];
   tubeMaterials: TubeMaterialItem[];
   correctionCoefficients: AirVelocityCorrectionItem[];
@@ -42,7 +42,7 @@ function readString(raw: Record<string, unknown> | undefined, ...keys: string[])
   return undefined;
 }
 
-export function useUnilabSimulation(catalogs: UseUnilabSimulationParams) {
+export function useCnCoilsSimulation(catalogs: UseCnCoilsSimulationParams) {
   const setResult = useUnilabSimulationStore((s) => s.setResult);
   const setWarnings = useUnilabSimulationStore((s) => s.setWarnings);
   const setIsSimulating = useUnilabSimulationStore((s) => s.setIsSimulating);

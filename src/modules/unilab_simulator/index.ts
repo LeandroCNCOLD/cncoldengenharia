@@ -1,8 +1,8 @@
-// Barrel público do módulo UNILAB Simulator.
+// Barrel público do módulo CN COILS.
 export { UnilabDashboardPage } from "./pages/UnilabDashboardPage";
-export { UnilabWorkspacePage } from "./pages/UnilabWorkspacePage";
+export { CnCoilsWorkspacePage } from "./pages/CnCoilsWorkspacePage";
 export { useUnilabCatalogs, REQUIRED_CATALOG_FILES } from "./hooks/useUnilabCatalogs";
-export { useUnilabSimulation } from "./hooks/useUnilabSimulation";
+export { useCnCoilsSimulation } from "./hooks/useCnCoilsSimulation";
 export { useUnilabSimulationStore } from "./store/useUnilabSimulationStore";
 export { runSimulation, SimulationError } from "./engine/simulatorCore";
 export {

@@ -1,14 +1,7 @@
-import { createFileRoute, Outlet, useMatches } from "@tanstack/react-router";
-import { UnilabDashboardPage } from "@/modules/unilab_simulator/pages/UnilabDashboardPage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_app/coldpro/unilab")({
-  component: UnilabLayout,
+  beforeLoad: () => {
+    throw redirect({ to: "/coldpro/cn-coils" });
+  },
 });
-
-function UnilabLayout() {
-  const matches = useMatches();
-  const hasChild = matches.some(
-    (m) => m.routeId === "/_app/coldpro/unilab/workspace",
-  );
-  return hasChild ? <Outlet /> : <UnilabDashboardPage />;
-}

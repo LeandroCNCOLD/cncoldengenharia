@@ -12,8 +12,13 @@ function fmt(n: number | undefined, digits = 2): string {
   return n.toFixed(digits);
 }
 
+function displayWarning(warning: string): string {
+  return warning.replaceAll("UNILAB", "CN COILS").replaceAll("Unilab", "CN COILS");
+}
+
 export function ResultPanel({ result, warnings }: ResultPanelProps) {
   const r = ptBR.workspace.result;
+  const displayWarnings = warnings.map(formatVisibleWarning);
 
   if (!result) {
     return (
@@ -21,7 +26,7 @@ export function ResultPanel({ result, warnings }: ResultPanelProps) {
         <div className="rounded-lg border-2 border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
           {r.empty}
         </div>
-        {warnings.length > 0 && <WarningsList warnings={warnings} />}
+        {displayWarnings.length > 0 && <WarningsList warnings={displayWarnings} />}
       </div>
     );
   }
@@ -58,10 +63,14 @@ export function ResultPanel({ result, warnings }: ResultPanelProps) {
           {ptBR.module.disclaimer}
         </p>
       </div>
-      <UnilabCorrectionCard result={result} warnings={warnings} />
-      {warnings.length > 0 && <WarningsList warnings={warnings} />}
+      <UnilabCorrectionCard result={result} warnings={displayWarnings} />
+      {displayWarnings.length > 0 && <WarningsList warnings={displayWarnings} />}
     </div>
   );
+}
+
+function formatVisibleWarning(warning: string): string {
+  return warning.replaceAll("UNILAB", "CN COILS").replaceAll("Unilab", "CN COILS");
 }
 
 function UnilabCorrectionCard({
@@ -74,16 +83,18 @@ function UnilabCorrectionCard({
   const correction = result.unilabCorrection;
   const correctionWarnings = warnings.filter((warning) =>
     warning.toLowerCase().includes("coeficiente unilab") ||
+    warning.toLowerCase().includes("coeficiente cn coils") ||
     warning.toLowerCase().includes("correção unilab") ||
+    warning.toLowerCase().includes("correção cn coils") ||
     warning.toLowerCase().includes("velocidade frontal fora da faixa"),
   );
 
   return (
     <div className="rounded-lg border border-blue-100 bg-blue-50/50 p-4">
-      <h4 className="text-sm font-semibold text-blue-950">Correção UNILAB</h4>
+      <h4 className="text-sm font-semibold text-blue-950">Correção CN COILS</h4>
       {!correction || correction.idCorr === undefined ? (
         <p className="mt-2 text-sm text-blue-900">
-          Correção UNILAB não encontrada. Foi usado fator 1.
+          Correção CN COILS não encontrada. Foi usado fator 1.
         </p>
       ) : (
         <dl className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -108,7 +119,7 @@ function UnilabCorrectionCard({
           <p className="text-xs font-semibold text-amber-900">Avisos</p>
           <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs text-amber-800">
             {correctionWarnings.map((warning, index) => (
-              <li key={index}>{warning}</li>
+              <li key={index}>{displayWarning(warning)}</li>
             ))}
           </ul>
         </div>
@@ -135,7 +146,7 @@ function WarningsList({ warnings }: { warnings: string[] }) {
       </div>
       <ul className="list-disc space-y-0.5 pl-5 text-xs text-amber-800">
         {warnings.map((w, i) => (
-          <li key={i}>{w}</li>
+          <li key={i}>{displayWarning(w)}</li>
         ))}
       </ul>
     </div>

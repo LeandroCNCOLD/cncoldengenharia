@@ -68,7 +68,7 @@ export function UnilabDashboardPage() {
               key={card.type}
               title={card.title}
               description={card.description}
-              href="/coldpro/unilab/workspace"
+              href="/coldpro/cn-coils/workspace"
               searchParams={{ type: card.type }}
               Icon={card.Icon}
               disabled={blocked}

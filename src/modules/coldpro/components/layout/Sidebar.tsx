@@ -34,7 +34,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/coldpro/assembly", label: "navigation.assembly", Icon: Wrench },
   { to: "/coldpro/simulation", label: "navigation.systemEquilibrium", Icon: Activity },
   { to: "/coldpro/curve", label: "navigation.performanceCurve", Icon: TrendingUp },
-  { to: "/coldpro/unilab", label: "navigation.unilabSimulator", Icon: Gauge },
+  { to: "/coldpro/cn-coils", label: "navigation.unilabSimulator", Icon: Gauge },
   { to: "/coldpro/map", label: "navigation.operatingMap", Icon: Map },
   { to: "/coldpro/record", label: "navigation.productRecord", Icon: FileText },
   { to: "/coldpro/registry", label: "navigation.productRegistry", Icon: Database },

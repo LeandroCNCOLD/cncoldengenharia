@@ -72,7 +72,7 @@ export const ptBR = {
     assembly: "Montagem",
     systemEquilibrium: "Equilíbrio do Sistema",
     performanceCurve: "Curva de Desempenho",
-    unilabSimulator: "Simulador Cn Coils",
+    unilabSimulator: "CN COILS",
     operatingMap: "Mapa Operacional",
     productRecord: "Ficha Técnica",
     productRegistry: "Registro de Produtos",
