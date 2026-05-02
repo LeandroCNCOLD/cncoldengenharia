@@ -1,0 +1,19 @@
+{
+  "manufacturers": ["copeland", "bitzer", "danfoss", "dorin"],
+  "files": {
+    "copeland": [
+      "copeland/simulation_ready.json",
+      "copeland/coefficient_only.json"
+    ],
+    "bitzer": [
+      "bitzer/simulation_ready.json",
+      "bitzer/coefficient_only.json"
+    ],
+    "danfoss": [
+      "danfoss/coefficient_only.json"
+    ],
+    "dorin": [
+      "dorin/simulation_ready.json"
+    ]
+  }
+}
