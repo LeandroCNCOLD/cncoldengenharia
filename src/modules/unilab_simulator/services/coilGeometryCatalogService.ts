@@ -171,6 +171,7 @@ function enrich(entry: RawGeometryEntry): CoilGeometryItem {
 
   return {
     ...entry,
+    uBaseWm2K,
     tubePitchTransverseMm,
     tubePitchLongitudinalMm,
     tubeOuterDiameterMm,
