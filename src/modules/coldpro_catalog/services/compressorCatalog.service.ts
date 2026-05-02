@@ -18,9 +18,7 @@ export async function loadCompressorIndex(): Promise<CompressorIndex> {
   return res.json() as Promise<CompressorIndex>;
 }
 
-export async function loadManufacturerData(
-  manufacturer: string,
-): Promise<CompressorCatalogRow[]> {
+export async function loadManufacturerData(manufacturer: string): Promise<CompressorCatalogRow[]> {
   if (cache[manufacturer]) return cache[manufacturer];
 
   const index = await loadCompressorIndex();
