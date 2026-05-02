@@ -122,7 +122,7 @@ export function useUnilabCatalogs(): UseUnilabCatalogsReturn {
       for (const [key, file, parse] of tasks) {
         try {
           const raw = await fetchJson<unknown>(file);
-          (next as Record<string, unknown>)[key] = parse(raw);
+          (next as unknown as Record<string, unknown>)[key] = parse(raw);
         } catch (err) {
           errors[file] = err instanceof Error ? err.message : String(err);
           missing.push(file);
