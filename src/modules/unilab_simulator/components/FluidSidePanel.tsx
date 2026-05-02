@@ -525,6 +525,11 @@ export function FluidSidePanel({
         </ul>
       )}
     </div>
+    <CompressorPickerModal
+      open={compressorModalOpen}
+      onClose={() => setCompressorModalOpen(false)}
+    />
+    </>
   );
 }
 
