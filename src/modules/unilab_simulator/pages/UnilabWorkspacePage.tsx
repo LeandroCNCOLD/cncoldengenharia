@@ -201,7 +201,11 @@ export function UnilabWorkspacePage() {
             <SkeletonCard />
           ) : (
             <GeometryForm
-              geometries={catalogs.geometries}
+              geometries={
+                enrichedGeometries.length > 0
+                  ? enrichedGeometries
+                  : catalogs.geometries
+              }
               tubeMaterials={catalogs.tubeMaterials}
               finPitches={catalogs.finPitches}
               finThicknesses={catalogs.finThicknesses}
