@@ -33,14 +33,21 @@ function fmt(n: number | undefined, digits = 1): string {
   return n.toFixed(digits);
 }
 
+import {
+  loadUnilabCoefficients,
+  listUsableAxialFans,
+  evaluateFanCurve,
+  type AxialFanRecord,
+} from "../services/unilabCoefficientsService";
+
 interface FanCatalogItem {
   id: string;
   manufacturer?: string;
   model?: string;
   airflow_m3h?: number;
+  /** Reference to the original axial record (used for curve evaluation). */
+  axial?: AxialFanRecord;
 }
-
-const FANS_CATALOG_URL = "/data/catalogs/fans_clean.json";
 
 export function AirSidePanel({ result }: AirSidePanelProps = {}) {
   const airFlow_m3h = useUnilabSimulationStore((s) => s.airFlow_m3h);
@@ -71,15 +78,31 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
 
   useEffect(() => {
     let cancelled = false;
-    fetch(FANS_CATALOG_URL)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((data) => {
+    loadUnilabCoefficients()
+      .then((bundle) => {
         if (cancelled) return;
-        const list: FanCatalogItem[] = Array.isArray(data) ? data : [];
-        setFans(list.filter((f) => typeof f?.airflow_m3h === "number" && f.airflow_m3h! > 0));
+        const usable = listUsableAxialFans(bundle);
+        // representative airflow for the dropdown = midpoint of [Xmin, Xmax]
+        const list: FanCatalogItem[] = usable.map((fan) => {
+          const mid =
+            fan.xMin > 0 && fan.xMax > fan.xMin
+              ? (fan.xMin + fan.xMax) / 2
+              : fan.xMax > 0
+                ? fan.xMax
+                : fan.xMin;
+          return {
+            id: `axial-${fan.fanType}-${fan.idFanModel}-${fan.source}`,
+            manufacturer: fan.fanType === 0 ? "Axial T0" : "Axial T1",
+            model: fan.model,
+            airflow_m3h: Number.isFinite(mid) && mid > 0 ? mid : undefined,
+            axial: fan,
+          };
+        });
+        setFans(
+          list.filter(
+            (f) => typeof f.airflow_m3h === "number" && (f.airflow_m3h as number) > 0,
+          ),
+        );
       })
       .catch(() => {
         if (!cancelled) setFans([]);
@@ -102,6 +125,13 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
       setAirFlow(fan.airflow_m3h);
     }
   };
+
+  // Static pressure at current airflow for the selected axial fan (Pa)
+  const selectedFan = fans.find((f) => f.id === selectedFanId);
+  const fanStaticPressurePa = useMemo(() => {
+    if (!selectedFan?.axial || !(airFlow_m3h > 0)) return null;
+    return evaluateFanCurve(selectedFan.axial, airFlow_m3h);
+  }, [selectedFan, airFlow_m3h]);
 
   // ---- valores convertidos para a unidade exibida ----
   const totalCapW = result?.totalCapacityKw !== undefined ? result.totalCapacityKw * 1000 : undefined;
@@ -242,10 +272,14 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
         />
 
         <Row
-          label="Fan working @"
-          unitNode={<UnitText text="%" />}
+          label="Pressão estática (ventilador)"
+          unitNode={<UnitText text="Pa" />}
           input={<DisabledInput />}
-          obtained="---"
+          obtained={
+            fanStaticPressurePa === null || fanStaticPressurePa === undefined
+              ? "---"
+              : fanStaticPressurePa.toFixed(0)
+          }
         />
 
         {/* TEMP / RH ENTRADA */}

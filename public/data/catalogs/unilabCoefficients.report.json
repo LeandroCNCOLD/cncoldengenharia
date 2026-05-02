@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-05-02T20:43:48.637095Z",
+  "source": "COEFF_COMPLETO_UNILAB_VAPCYC.zip",
+  "totals": {
+    "coilCorrections": 114,
+    "subcoolingCorrections": 39,
+    "fans": {
+      "axial": 1328,
+      "centrifugal": 115
+    },
+    "correlations": {
+      "coilDesigner": 321,
+      "heatExchanger": 3285
+    }
+  },
+  "fanAudit": {
+    "axial": {
+      "total": 1328,
+      "withCurve": 598,
+      "withCurveUsable": 580,
+      "withPolynomial": 730,
+      "withPolynomialUsable": 149,
+      "unusablePolynomial": 581
+    },
+    "centrifugal": {
+      "total": 115,
+      "withValidRange": 115
+    }
+  },
+  "placeholdersRemoved": {
+    "coilCorrections": 1
+  },
+  "notes": [
+    "Removed coilCorrections placeholder (IdCorr=0 / Serie=Nessuna / all coeffs zero).",
+    "Subcooling kept as-is (39 entries, including IdCoeffSotto=0 baseline).",
+    "Centrifugal validation in this stage is range-only; full curve evaluation deferred."
+  ]
+}
