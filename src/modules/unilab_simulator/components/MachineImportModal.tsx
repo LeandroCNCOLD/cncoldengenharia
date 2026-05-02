@@ -40,7 +40,7 @@ const MOCK_MACHINES: MachineDefinition[] = [
       numberOfCircuits: 12,
     },
     thermo: {
-      fluid: "REFMIX_R404A",
+      fluid: "REF_R404A",
       airFlowM3H: 13077,
     },
     compressorModel: "ZR22K3E-TFD",
@@ -57,7 +57,7 @@ const MOCK_MACHINES: MachineDefinition[] = [
       numberOfCircuits: 8,
     },
     thermo: {
-      fluid: "REFMIX_R404A",
+      fluid: "REF_R404A",
       airFlowM3H: 8500,
     },
   },
@@ -73,7 +73,7 @@ const MOCK_MACHINES: MachineDefinition[] = [
       numberOfCircuits: 14,
     },
     thermo: {
-      fluid: "REFMIX_R404A",
+      fluid: "REF_R404A",
       airFlowM3H: 22000,
     },
   },
