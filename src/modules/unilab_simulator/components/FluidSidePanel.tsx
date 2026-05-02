@@ -205,6 +205,7 @@ export function FluidSidePanel({
   }
 
   return (
+    <>
     <div className="rounded border border-slate-300 bg-slate-50 shadow-sm">
       <div className="border-b border-slate-300 bg-[#1E6FD9] px-3 py-1.5 text-center text-xs font-bold uppercase tracking-wider text-white">
         Lado Fluido
