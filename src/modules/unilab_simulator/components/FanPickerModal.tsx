@@ -104,16 +104,30 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Busca */}
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <Input
-              autoFocus
-              placeholder="Buscar por fabricante ou modelo…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="pl-8"
-            />
+          {/* Busca + Filtro por marca */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="relative col-span-2">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Input
+                autoFocus
+                placeholder="Buscar por modelo…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+            <select
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+              className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none"
+            >
+              <option value="">Todas as marcas</option>
+              {brands.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Lista */}
