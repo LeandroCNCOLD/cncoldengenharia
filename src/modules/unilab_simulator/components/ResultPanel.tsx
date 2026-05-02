@@ -1,5 +1,12 @@
 import { AlertTriangle } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { UnilabSimulationResult } from "../types/unilab.types";
+import { ptBR } from "../i18n/messages.ptBR";
+import {
+  loadUnilabCoefficients,
+  buildFanAudit,
+  type FanAuditSummary,
+} from "../services/unilabCoefficientsService";
 import { ptBR } from "../i18n/messages.ptBR";
 
 interface ResultPanelProps {
@@ -14,6 +21,7 @@ function fmt(n: number | undefined, digits = 2): string {
 
 export function ResultPanel({ result, warnings }: ResultPanelProps) {
   const r = ptBR.workspace.result;
+  const fanAudit = useFanAudit();
 
   if (!result) {
     return (
