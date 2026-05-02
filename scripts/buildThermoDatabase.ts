@@ -137,7 +137,7 @@ const REQUIRED_PROPERTIES: FluidProperty[] = [
 ];
 
 const report: Report = {
-  generatedAt: new Date().toISOString(),
+  generatedAt: "1970-01-01T00:00:00.000Z",
   inputs: [],
   totals: {
     processedRows: 0,
@@ -639,6 +639,8 @@ async function writeDatabase(data: {
   await mkdir(path.join(OUTPUT_DIR, "materials"), { recursive: true });
   await mkdir(path.join(OUTPUT_DIR, "tubes"), { recursive: true });
   await mkdir(path.join(OUTPUT_DIR, "correlations"), { recursive: true });
+  await writeFile(path.join(OUTPUT_DIR, "fluids", "pure", ".gitkeep"), "");
+  await writeFile(path.join(OUTPUT_DIR, "fluids", "mixtures", ".gitkeep"), "");
 
   await Promise.all(
     data.pureFluids.map((fluid) =>
