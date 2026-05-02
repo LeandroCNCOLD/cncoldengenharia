@@ -66,7 +66,11 @@ export interface CatalogPartialEnvelope {
 }
 
 export interface CatalogMotorComponents {
+  /** Spec completo (apto a alimentar o motor diretamente). */
   compressor?: CompressorSpec;
+  /** Pré-preenchimento parcial dos campos do compressor presentes no catálogo,
+   *  mesmo quando algum campo obrigatório falta. Usado pela UI para popular o form. */
+  compressor_partial?: Partial<CompressorSpec>;
   condenser?: CondenserSpec;
   evaporator?: { progressive_input: ProgressiveCoilInput };
   reheat_coil?: ReheatCoilSizingInput;
@@ -84,6 +88,12 @@ export function buildMotorComponentsFromCatalog(
 
   if (selected.compressor) {
     const status = computeBlockCompleteness(selected.compressor);
+    // Sempre construir o pré-preenchimento parcial (campos disponíveis),
+    // independentemente do bloco estar 100% completo. UI usa para popular o form.
+    const partialSpec = buildPartialCompressorSpec(selected.compressor);
+    if (Object.keys(partialSpec).length > 0) {
+      result.compressor_partial = partialSpec;
+    }
     if (status.compressorCompleto) {
       try {
         result.compressor = catalogToCompressorSpec(selected.compressor);
@@ -95,7 +105,7 @@ export function buildMotorComponentsFromCatalog(
       }
     } else {
       result.warnings.push(
-        `Compressor incompleto — não usado automaticamente. Faltam: ${status.byBlock.compressor.missing.join(", ")}.`,
+        `Compressor: campos do catálogo pré-preenchidos. Falta(m) preencher manualmente: ${status.byBlock.compressor.missing.join(", ")}.`,
       );
     }
   }
@@ -148,19 +158,32 @@ export function buildMotorComponentsFromCatalog(
   }
 
   if (selected.reheat_coil) {
-    const status = computeBlockCompleteness(selected.reheat_coil);
-    if (status.reheatCompleto) {
-      const rh = catalogToReheatCoilInput(selected.reheat_coil);
-      if (rh.input) {
-        result.reheat_coil = rh.input;
-      }
-      result.warnings.push(...rh.warnings);
+    // Equipamentos sem aletado físico de reaquecimento (linhas MT/LT/BF/COMPACTice)
+    // não devem gerar warning — a ausência é esperada, não é um problema.
+    if (!hasReheatCoilHardware(selected.reheat_coil)) {
+      // Silencioso: equipamento simplesmente não tem reheat coil.
     } else {
-      result.warnings.push(
-        `Reaquecimento (aletado) incompleto — não usado. Faltam: ${status.byBlock.reheat.missing.join(", ")}.`,
-      );
+      const status = computeBlockCompleteness(selected.reheat_coil);
+      if (status.reheatCompleto) {
+        const rh = catalogToReheatCoilInput(selected.reheat_coil);
+        if (rh.input) {
+          result.reheat_coil = rh.input;
+        }
+        result.warnings.push(...rh.warnings);
+      } else {
+        // Tem aletado físico mas faltam condições operacionais
+        // (Q_target, T_air_in/out, vazão, T_cond, T_hot_gas) — esses
+        // dependem da operação e não estão na planilha. Avisa de forma
+        // mais clara que são parâmetros operacionais, não geometria.
+        result.warnings.push(
+          `Reaquecimento: geometria do aletado disponível, mas faltam condições operacionais (definidas durante simulação): ${status.byBlock.reheat.missing.join(", ")}.`,
+        );
+      }
     }
   }
+
+  return result;
+}
 
   return result;
 }
