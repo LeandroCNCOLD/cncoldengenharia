@@ -39,6 +39,8 @@ import {
   evaluateFanCurve,
   type AxialFanRecord,
 } from "../services/unilabCoefficientsService";
+import { FanPickerModal } from "./FanPickerModal";
+import { ChevronDown } from "lucide-react";
 
 interface FanCatalogItem {
   id: string;
