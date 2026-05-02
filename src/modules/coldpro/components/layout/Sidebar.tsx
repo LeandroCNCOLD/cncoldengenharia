@@ -9,6 +9,8 @@ import {
   Download,
   ShieldCheck,
   LogOut,
+  Boxes,
+  Wrench,
 } from "lucide-react";
 import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
@@ -24,6 +26,8 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { to: "/coldpro", label: "Dashboard", Icon: LayoutDashboard, exact: true },
+  { to: "/coldpro/components", label: "Componentes", Icon: Boxes },
+  { to: "/coldpro/assembly", label: "Montagem", Icon: Wrench },
   { to: "/coldpro/simulation", label: "Equilíbrio do Sistema", Icon: Activity },
   { to: "/coldpro/curve", label: "Curva de Desempenho", Icon: TrendingUp },
   { to: "/coldpro/map", label: "Mapa Operacional", Icon: Map },

@@ -21,7 +21,9 @@ import { Route as AppColdproRecordRouteImport } from './routes/_app/coldpro.reco
 import { Route as AppColdproMapRouteImport } from './routes/_app/coldpro.map'
 import { Route as AppColdproExportRouteImport } from './routes/_app/coldpro.export'
 import { Route as AppColdproCurveRouteImport } from './routes/_app/coldpro.curve'
+import { Route as AppColdproComponentsRouteImport } from './routes/_app/coldpro.components'
 import { Route as AppColdproAuditRouteImport } from './routes/_app/coldpro.audit'
+import { Route as AppColdproAssemblyRouteImport } from './routes/_app/coldpro.assembly'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -82,9 +84,19 @@ const AppColdproCurveRoute = AppColdproCurveRouteImport.update({
   path: '/curve',
   getParentRoute: () => AppColdproRoute,
 } as any)
+const AppColdproComponentsRoute = AppColdproComponentsRouteImport.update({
+  id: '/components',
+  path: '/components',
+  getParentRoute: () => AppColdproRoute,
+} as any)
 const AppColdproAuditRoute = AppColdproAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
+  getParentRoute: () => AppColdproRoute,
+} as any)
+const AppColdproAssemblyRoute = AppColdproAssemblyRouteImport.update({
+  id: '/assembly',
+  path: '/assembly',
   getParentRoute: () => AppColdproRoute,
 } as any)
 
@@ -93,7 +105,9 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/coldpro': typeof AppColdproRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
+  '/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/coldpro/audit': typeof AppColdproAuditRoute
+  '/coldpro/components': typeof AppColdproComponentsRoute
   '/coldpro/curve': typeof AppColdproCurveRoute
   '/coldpro/export': typeof AppColdproExportRoute
   '/coldpro/map': typeof AppColdproMapRoute
@@ -106,7 +120,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AppDashboardRoute
+  '/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/coldpro/audit': typeof AppColdproAuditRoute
+  '/coldpro/components': typeof AppColdproComponentsRoute
   '/coldpro/curve': typeof AppColdproCurveRoute
   '/coldpro/export': typeof AppColdproExportRoute
   '/coldpro/map': typeof AppColdproMapRoute
@@ -122,7 +138,9 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_app/coldpro': typeof AppColdproRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/_app/coldpro/audit': typeof AppColdproAuditRoute
+  '/_app/coldpro/components': typeof AppColdproComponentsRoute
   '/_app/coldpro/curve': typeof AppColdproCurveRoute
   '/_app/coldpro/export': typeof AppColdproExportRoute
   '/_app/coldpro/map': typeof AppColdproMapRoute
@@ -138,7 +156,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/coldpro'
     | '/dashboard'
+    | '/coldpro/assembly'
     | '/coldpro/audit'
+    | '/coldpro/components'
     | '/coldpro/curve'
     | '/coldpro/export'
     | '/coldpro/map'
@@ -151,7 +171,9 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/coldpro/assembly'
     | '/coldpro/audit'
+    | '/coldpro/components'
     | '/coldpro/curve'
     | '/coldpro/export'
     | '/coldpro/map'
@@ -166,7 +188,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_app/coldpro'
     | '/_app/dashboard'
+    | '/_app/coldpro/assembly'
     | '/_app/coldpro/audit'
+    | '/_app/coldpro/components'
     | '/_app/coldpro/curve'
     | '/_app/coldpro/export'
     | '/_app/coldpro/map'
@@ -268,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproCurveRouteImport
       parentRoute: typeof AppColdproRoute
     }
+    '/_app/coldpro/components': {
+      id: '/_app/coldpro/components'
+      path: '/components'
+      fullPath: '/coldpro/components'
+      preLoaderRoute: typeof AppColdproComponentsRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
     '/_app/coldpro/audit': {
       id: '/_app/coldpro/audit'
       path: '/audit'
@@ -275,11 +306,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproAuditRouteImport
       parentRoute: typeof AppColdproRoute
     }
+    '/_app/coldpro/assembly': {
+      id: '/_app/coldpro/assembly'
+      path: '/assembly'
+      fullPath: '/coldpro/assembly'
+      preLoaderRoute: typeof AppColdproAssemblyRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
   }
 }
 
 interface AppColdproRouteChildren {
+  AppColdproAssemblyRoute: typeof AppColdproAssemblyRoute
   AppColdproAuditRoute: typeof AppColdproAuditRoute
+  AppColdproComponentsRoute: typeof AppColdproComponentsRoute
   AppColdproCurveRoute: typeof AppColdproCurveRoute
   AppColdproExportRoute: typeof AppColdproExportRoute
   AppColdproMapRoute: typeof AppColdproMapRoute
@@ -290,7 +330,9 @@ interface AppColdproRouteChildren {
 }
 
 const AppColdproRouteChildren: AppColdproRouteChildren = {
+  AppColdproAssemblyRoute: AppColdproAssemblyRoute,
   AppColdproAuditRoute: AppColdproAuditRoute,
+  AppColdproComponentsRoute: AppColdproComponentsRoute,
   AppColdproCurveRoute: AppColdproCurveRoute,
   AppColdproExportRoute: AppColdproExportRoute,
   AppColdproMapRoute: AppColdproMapRoute,
