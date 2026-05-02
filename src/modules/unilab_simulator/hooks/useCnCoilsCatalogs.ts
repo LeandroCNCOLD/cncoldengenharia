@@ -71,6 +71,10 @@ export interface CnCoilsCatalogsData {
   powerSupplies: PowerSupply[];
   /** Lista de Materiais (BOM) — 15 grupos consolidados do UNILAB. */
   bom: BomCatalog;
+  warnings: WarningEntry[];
+  uiLabels: UiLabelEntry[];
+  distributorKappa: DistributorKappaMap;
+  distributorHoleSizes: DistributorHoleSize[];
 }
 
 export interface CnCoilsCatalogsState extends CnCoilsCatalogsData {
