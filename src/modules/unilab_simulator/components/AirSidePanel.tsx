@@ -81,6 +81,8 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
   const setTempInDB = useUnilabSimulationStore((s) => s.setTempInDB);
   const setRhIn = useUnilabSimulationStore((s) => s.setRhIn);
   const setFoulingFactorAir = useUnilabSimulationStore((s) => s.setFoulingFactorAir);
+  const errorFactorPercent = useUnilabSimulationStore((s) => s.errorFactorPercent);
+  const setErrorFactorPercent = useUnilabSimulationStore((s) => s.setErrorFactorPercent);
   const setTargetCapacityW = useUnilabSimulationStore((s) => s.setTargetCapacityW);
   const setSelectedFan = useUnilabSimulationStore((s) => s.setSelectedFan);
   const [fanModalOpen, setFanModalOpen] = useState(false);
@@ -357,13 +359,12 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
 
         <Row
           label="Fator de Erro"
-          unitNode={<UnitText text="(m²·K)/W" />}
+          unitNode={<UnitText text="%" />}
           input={
             <NumberCell
-              value={foulingFactorAir}
-              onChange={setFoulingFactorAir}
-              min={0}
-              step={0.0001}
+              value={errorFactorPercent}
+              onChange={setErrorFactorPercent}
+              step={0.1}
             />
           }
           obtained="---"

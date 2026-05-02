@@ -42,6 +42,15 @@ interface UnilabSimulationStore {
   warnings: string[];
   isSimulating: boolean;
 
+  /**
+   * Fator de Erro / margem de segurança (%). Auto-preenchido a partir do
+   * SecurityFactor da geometria selecionada: errorFactor = (SF - 1) * 100.
+   * Aplicado como multiplicador no resultado final: q' = q * (1 + ef/100).
+   * Editável pelo usuário.
+   */
+  errorFactorPercent: number;
+  setErrorFactorPercent: (val: number) => void;
+
   // Modo de cálculo (Verificar / Desenho) — UI apenas
   calcMode: CalcMode;
   setCalcMode: (mode: CalcMode) => void;
@@ -154,6 +163,9 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   result: undefined,
   warnings: [],
   isSimulating: false,
+  errorFactorPercent: 0,
+  setErrorFactorPercent: (val) =>
+    set({ errorFactorPercent: Number.isFinite(val) ? val : 0 }),
 
   calcMode: "verify",
   setCalcMode: (mode) => set({ calcMode: mode }),
@@ -341,6 +353,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       result: undefined,
       warnings: [],
       isSimulating: false,
+      errorFactorPercent: 0,
       calcMode: "verify",
       targetCapacityW: 0,
       airFlow_m3h: 5000,

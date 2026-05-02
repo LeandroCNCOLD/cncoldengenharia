@@ -89,6 +89,10 @@ export function FluidSidePanel({
   const setFoulingFactorFluid = useUnilabSimulationStore(
     (s) => s.setFoulingFactorFluid,
   );
+  const errorFactorPercent = useUnilabSimulationStore((s) => s.errorFactorPercent);
+  const setErrorFactorPercent = useUnilabSimulationStore(
+    (s) => s.setErrorFactorPercent,
+  );
   const setPairedTempC = useUnilabSimulationStore((s) => s.setPairedTempC);
   const setDischargeSuperheatK = useUnilabSimulationStore((s) => s.setDischargeSuperheatK);
   const setSelectedCompressor = useUnilabSimulationStore((s) => s.setSelectedCompressor);
@@ -483,13 +487,12 @@ export function FluidSidePanel({
           />
         </FieldRow>
 
-        {/* 7) Fator de Erro */}
-        <FieldRow label="Fator de Erro" unit={<UnitText text="(m²·K)/W" />}>
+        {/* 7) Fator de Erro — auto-preenchido pelo SecurityFactor da geometria */}
+        <FieldRow label="Fator de Erro" unit={<UnitText text="%" />}>
           <NumInput
-            value={foulingFactorFluid}
-            onChange={setFoulingFactorFluid}
-            min={0}
-            step={0.0001}
+            value={errorFactorPercent}
+            onChange={setErrorFactorPercent}
+            step={0.1}
             disabled={disabled}
           />
         </FieldRow>
