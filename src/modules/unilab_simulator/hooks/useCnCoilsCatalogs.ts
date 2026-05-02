@@ -8,6 +8,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type {
+  BomCatalog,
   CoilShape,
   Compressor,
   CompressorStandard,
