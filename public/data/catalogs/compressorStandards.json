@@ -1,0 +1,50 @@
+[
+  {
+    "id": 0,
+    "name": "EN12900 LT",
+    "tevapC": -35.0,
+    "tcondC": 40.0,
+    "superheatK": 10.0,
+    "subcoolingK": 0.0
+  },
+  {
+    "id": 1,
+    "name": "EN12900 MT",
+    "tevapC": -10.0,
+    "tcondC": 45.0,
+    "superheatK": 10.0,
+    "subcoolingK": 0.0
+  },
+  {
+    "id": 2,
+    "name": "EN12900 HT",
+    "tevapC": 5.0,
+    "tcondC": 50.0,
+    "superheatK": 10.0,
+    "subcoolingK": 0.0
+  },
+  {
+    "id": 3,
+    "name": "ARI 540 LT",
+    "tevapC": -31.7,
+    "tcondC": 40.6,
+    "superheatK": 10.0,
+    "subcoolingK": 0.0
+  },
+  {
+    "id": 4,
+    "name": "ARI 540 MT",
+    "tevapC": -6.7,
+    "tcondC": 48.9,
+    "superheatK": 11.1,
+    "subcoolingK": 0.0
+  },
+  {
+    "id": 5,
+    "name": "ARI 540 HT",
+    "tevapC": 7.2,
+    "tcondC": 54.4,
+    "superheatK": 11.1,
+    "subcoolingK": 8.3
+  }
+]

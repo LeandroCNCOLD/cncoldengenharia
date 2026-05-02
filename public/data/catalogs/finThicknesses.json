@@ -1,72 +1,58 @@
 [
   {
-    "id": "FT_1",
-    "thicknessMm": 0.1,
-    "label": "0.1 mm"
+    "SpessoreAlettaID": 1,
+    "SpessoreAletta": 0.1
   },
   {
-    "id": "FT_2",
-    "thicknessMm": 0.12,
-    "label": "0.12 mm"
+    "SpessoreAlettaID": 2,
+    "SpessoreAletta": 0.12
   },
   {
-    "id": "FT_3",
-    "thicknessMm": 0.15,
-    "label": "0.15 mm"
+    "SpessoreAlettaID": 3,
+    "SpessoreAletta": 0.15
   },
   {
-    "id": "FT_4",
-    "thicknessMm": 0.16,
-    "label": "0.16 mm"
+    "SpessoreAlettaID": 4,
+    "SpessoreAletta": 0.16
   },
   {
-    "id": "FT_5",
-    "thicknessMm": 0.18,
-    "label": "0.18 mm"
+    "SpessoreAlettaID": 5,
+    "SpessoreAletta": 0.18
   },
   {
-    "id": "FT_6",
-    "thicknessMm": 0.2,
-    "label": "0.2 mm"
+    "SpessoreAlettaID": 6,
+    "SpessoreAletta": 0.2
   },
   {
-    "id": "FT_7",
-    "thicknessMm": 0.25,
-    "label": "0.25 mm"
+    "SpessoreAlettaID": 7,
+    "SpessoreAletta": 0.25
   },
   {
-    "id": "FT_8",
-    "thicknessMm": 0.42,
-    "label": "0.42 mm"
+    "SpessoreAlettaID": 8,
+    "SpessoreAletta": 0.42
   },
   {
-    "id": "FT_9",
-    "thicknessMm": 0.3,
-    "label": "0.3 mm"
+    "SpessoreAlettaID": 9,
+    "SpessoreAletta": 0.3
   },
   {
-    "id": "FT_10",
-    "thicknessMm": 0.145,
-    "label": "0.145 mm"
+    "SpessoreAlettaID": 10,
+    "SpessoreAletta": 0.145
   },
   {
-    "id": "FT_11",
-    "thicknessMm": 0.27,
-    "label": "0.27 mm"
+    "SpessoreAlettaID": 11,
+    "SpessoreAletta": 0.27
   },
   {
-    "id": "FT_12",
-    "thicknessMm": 0.65,
-    "label": "0.65 mm"
+    "SpessoreAlettaID": 12,
+    "SpessoreAletta": 0.65
   },
   {
-    "id": "FT_13",
-    "thicknessMm": 0.5,
-    "label": "0.5 mm"
+    "SpessoreAlettaID": 13,
+    "SpessoreAletta": 0.5
   },
   {
-    "id": "FT_14",
-    "thicknessMm": 0.22,
-    "label": "0.22 mm"
+    "SpessoreAlettaID": 14,
+    "SpessoreAletta": 0.22
   }
 ]

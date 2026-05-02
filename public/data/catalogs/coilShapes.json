@@ -1,0 +1,44 @@
+[
+  {
+    "IdCoilShape": 0,
+    "Name": "Ortogonale                                                                                                                                                                                                                                                     ",
+    "filePicture": "Default.jpg                                                                                                                                                                                                                                                    ",
+    "Factor_Security": 1.0,
+    "IdTraduzione": 2624
+  },
+  {
+    "IdCoilShape": 1,
+    "Name": "1 Curva                                                                                                                                                                                                                                                        ",
+    "filePicture": "1Bend.jpg                                                                                                                                                                                                                                                      ",
+    "Factor_Security": 0.95,
+    "IdTraduzione": 2626
+  },
+  {
+    "IdCoilShape": 2,
+    "Name": "2 Curve                                                                                                                                                                                                                                                        ",
+    "filePicture": "2Bend.jpg                                                                                                                                                                                                                                                      ",
+    "Factor_Security": 0.9,
+    "IdTraduzione": 2628
+  },
+  {
+    "IdCoilShape": 3,
+    "Name": "90° air flux                                                                                                                                                                                                                                                   ",
+    "filePicture": "Fan90Gradi.jpg                                                                                                                                                                                                                                                 ",
+    "Factor_Security": 0.9,
+    "IdTraduzione": 2630
+  },
+  {
+    "IdCoilShape": 4,
+    "Name": "60° air flux                                                                                                                                                                                                                                                   ",
+    "filePicture": "Fan60Gradi.jpg                                                                                                                                                                                                                                                 ",
+    "Factor_Security": 0.7,
+    "IdTraduzione": 2632
+  },
+  {
+    "IdCoilShape": 5,
+    "Name": "45° air flux                                                                                                                                                                                                                                                   ",
+    "filePicture": "Fan45Gradi.jpg                                                                                                                                                                                                                                                 ",
+    "Factor_Security": 0.85,
+    "IdTraduzione": 2634
+  }
+]
