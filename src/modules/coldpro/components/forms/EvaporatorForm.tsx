@@ -123,6 +123,7 @@ export function EvaporatorForm({ value, onChange }: EvaporatorFormProps) {
             unit: "Milímetros [mm]",
             typicalRange: "7 a 16 mm",
             example: "9.525",
+          impact: "Parâmetro geométrico — afeta área de troca e perda de carga.",
           }}
         />
         <TechnicalField
@@ -136,6 +137,7 @@ export function EvaporatorForm({ value, onChange }: EvaporatorFormProps) {
             unit: "Milímetros [mm]",
             typicalRange: "6 a 15 mm",
             example: "8.925",
+          impact: "Parâmetro geométrico — afeta área de troca e perda de carga.",
           }}
         />
         <TechnicalField
@@ -149,6 +151,7 @@ export function EvaporatorForm({ value, onChange }: EvaporatorFormProps) {
             unit: "Milímetros [mm]",
             typicalRange: "20 a 35 mm",
             example: "27",
+          impact: "Parâmetro geométrico — afeta área de troca e perda de carga.",
           }}
         />
         <TechnicalField
@@ -162,6 +165,7 @@ export function EvaporatorForm({ value, onChange }: EvaporatorFormProps) {
             unit: "Milímetros [mm]",
             typicalRange: "20 a 35 mm",
             example: "31.5",
+          impact: "Parâmetro geométrico — afeta área de troca e perda de carga.",
           }}
         />
         <TechnicalField
@@ -175,6 +179,7 @@ export function EvaporatorForm({ value, onChange }: EvaporatorFormProps) {
             unit: "Milímetros [mm]",
             typicalRange: "3 a 10 mm",
             example: "5",
+          impact: "Parâmetro geométrico — afeta área de troca e perda de carga.",
           }}
         />
         <TechnicalField
@@ -188,6 +193,7 @@ export function EvaporatorForm({ value, onChange }: EvaporatorFormProps) {
             unit: "Adimensional",
             typicalRange: "2 a 8",
             example: "3",
+          impact: "Parâmetro geométrico — afeta área de troca e perda de carga.",
           }}
         />
         <TechnicalField
@@ -201,6 +207,7 @@ export function EvaporatorForm({ value, onChange }: EvaporatorFormProps) {
             unit: "Milímetros [mm]",
             typicalRange: "0,10 a 0,20 mm",
             example: "0.12",
+          impact: "Parâmetro geométrico — afeta área de troca e perda de carga.",
           }}
         />
         <TechnicalField
@@ -214,6 +221,7 @@ export function EvaporatorForm({ value, onChange }: EvaporatorFormProps) {
             unit: "Milímetros [mm]",
             typicalRange: "200 a 600 mm",
             example: "300",
+          impact: "Parâmetro geométrico — afeta área de troca e perda de carga.",
           }}
         />
         <TechnicalField
@@ -227,6 +235,7 @@ export function EvaporatorForm({ value, onChange }: EvaporatorFormProps) {
             unit: "Metros [m]",
             typicalRange: "0,3 a 2,0 m",
             example: "0.6",
+          impact: "Parâmetro geométrico — afeta área de troca e perda de carga.",
           }}
         />
         <TechnicalField
@@ -240,6 +249,7 @@ export function EvaporatorForm({ value, onChange }: EvaporatorFormProps) {
             unit: "Metros [m]",
             typicalRange: "0,2 a 1,5 m",
             example: "0.3",
+          impact: "Parâmetro geométrico — afeta área de troca e perda de carga.",
           }}
         />
 
