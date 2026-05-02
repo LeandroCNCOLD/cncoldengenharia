@@ -305,7 +305,7 @@ export function UnilabWorkspacePage() {
               missing={catalogs.missing}
               compact
             />
-            <ResultPanel result={result} warnings={warnings} />
+            <ResultPanel result={result} warnings={warnings} onGoalSeek={handleGoalSeek} />
           </div>
         </div>
       </div>
