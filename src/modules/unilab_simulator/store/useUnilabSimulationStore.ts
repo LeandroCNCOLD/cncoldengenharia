@@ -51,9 +51,25 @@ interface UnilabSimulationStore {
   setFoulingFactorAir: (val: number) => void;
   setSelectedFan: (id: string | undefined) => void;
 
-  // Lado Fluido (campos extras por aplicação)
+  // Lado Fluido (campos extras por aplicação — hidrônico/vapor)
   fluidExtras: FluidSideExtras;
   setFluidExtras: (patch: FluidSideExtras) => void;
+
+  // Lado Fluido / Refrigerante (Etapa 4)
+  fluid: string;
+  fluidMassFlow_kg_h: number;
+  fluidOperatingTemp_C: number;
+  fluidTempReference: "inlet" | "middle" | "outlet";
+  superheat_K: number;
+  subcooling_K: number;
+  foulingFactorFluid: number;
+  setFluid: (val: string) => void;
+  setFluidMassFlow: (val: number) => void;
+  setFluidOperatingTemp: (val: number) => void;
+  setFluidTempReference: (val: "inlet" | "middle" | "outlet") => void;
+  setSuperheat: (val: number) => void;
+  setSubcooling: (val: number) => void;
+  setFoulingFactorFluid: (val: number) => void;
 
   setPhysicalInputs: (patch: Partial<UnilabPhysicalInputs>) => void;
   setThermoInputs: (patch: Partial<UnilabThermoInputs>) => void;
