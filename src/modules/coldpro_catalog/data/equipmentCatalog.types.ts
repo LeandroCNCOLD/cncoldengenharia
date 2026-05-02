@@ -90,6 +90,7 @@ export interface CatalogEquipmentRow {
   condensadorFinSpacingMm?: number;
   condensadorLengthMm?: number;
   condensadorTuboDiametroMm?: number;
+  condensadorTuboDiametroIn?: string;
   condensadorTuboDiametroInternoMm?: number;
   condensadorTuboEspessuraMm?: number;
   condensadorTubePitchTransverseMm?: number;
@@ -103,20 +104,27 @@ export interface CatalogEquipmentRow {
   condensadorAreaFaceM2?: number;
   condensadorAreaTrocaM2?: number;
   condensadorVolumeInternoL?: number;
+  condensadorGeometria?: string;
+  ventiladorCondensador?: string;
 
   // --- Evaporador (geometria básica + estendida) ---
+  modeloEvaporador?: string;
   evaporadorRows?: number;
   evaporadorTubesPorRow?: number;
   evaporadorCircuitos?: number;
   evaporadorFinSpacingMm?: number;
   evaporadorLengthMm?: number;
   evaporadorTuboDiametroMm?: number;
+  evaporadorTuboDiametroIn?: string;
   evaporadorVolumeInternoL?: number;
   evaporadorAreaSuperficieM2?: number;
   evaporadorAreaFaceM2?: number;
   evaporadorAreaTrocaM2?: number;
   evaporadorTuboEspessuraMm?: number;
   evaporadorCoilDepthM?: number;
+  evaporadorGeometria?: string;
+  evaporadorQuantidade?: number;
+  ventiladorEvaporador?: string;
 
   // --- Geometria detalhada do evaporador (para ProgressiveCoilInput) ---
   evaporadorTubeInnerDiameterMm?: number;
