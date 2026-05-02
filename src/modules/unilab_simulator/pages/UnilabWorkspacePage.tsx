@@ -231,27 +231,3 @@ export function UnilabWorkspacePage() {
   );
 }
 
-function SkeletonCard() {
-  return (
-    <div className="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
-      <div className="h-4 w-1/2 animate-pulse rounded bg-slate-100" />
-      <div className="h-8 w-full animate-pulse rounded bg-slate-100" />
-      <div className="h-8 w-full animate-pulse rounded bg-slate-100" />
-      <div className="h-8 w-2/3 animate-pulse rounded bg-slate-100" />
-    </div>
-  );
-}
-
-function PlaceholderPanel({ title }: { title: string }) {
-  return (
-    <div className="rounded border border-slate-300 bg-slate-50 shadow-sm">
-      <div className="border-b border-slate-300 bg-[#1E6FD9] px-3 py-1.5 text-center text-xs font-bold uppercase tracking-wider text-white">
-        {title}
-      </div>
-      <div className="p-6 text-center text-xs text-slate-500">
-        Esta seção será detalhada em uma próxima etapa. Os parâmetros atuais já
-        estão acessíveis na barra inferior de Geometria e na tela de Geometria.
-      </div>
-    </div>
-  );
-}
