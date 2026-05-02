@@ -32,6 +32,8 @@ export interface CatalogEquipmentRow {
   modelo: string;
   modeloUnico: string;
   modeloBaseReferencia?: string;
+  modeloCatalogoOriginal?: string;
+  statusCompressor?: string;
 
   family: EquipmentFamily;
   application: TemperatureApplication;
@@ -45,6 +47,7 @@ export interface CatalogEquipmentRow {
   refrigerante: Refrigerant;
 
   tensaoV?: number;
+  tensaoComercial?: string;
   numeroFases?: number;
   frequenciaHz?: number;
   configuracaoEletrica?: string;
@@ -65,7 +68,9 @@ export interface CatalogEquipmentRow {
   correntePartidaA?: number;
 
   cop?: number;
+  copCarnot?: number;
   gwp?: number;
+  odp?: number;
 
   tempEvaporacaoC?: number;
   tempCondensacaoC?: number;
