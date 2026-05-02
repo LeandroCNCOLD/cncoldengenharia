@@ -14,6 +14,16 @@ interface UnilabSimulationStore {
   warnings: string[];
   isSimulating: boolean;
 
+  // Lado Ar / Ventilação (Etapa 3)
+  airFlow_m3h: number;
+  tempInDB_C: number;
+  rhIn_pct: number;
+  foulingFactorAir: number;
+  setAirFlow: (val: number) => void;
+  setTempInDB: (val: number) => void;
+  setRhIn: (val: number) => void;
+  setFoulingFactorAir: (val: number) => void;
+
   setPhysicalInputs: (patch: Partial<UnilabPhysicalInputs>) => void;
   setThermoInputs: (patch: Partial<UnilabThermoInputs>) => void;
   setSelectedGeometry: (geometry: CoilGeometryCatalogItem | undefined) => void;
@@ -31,6 +41,15 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   result: undefined,
   warnings: [],
   isSimulating: false,
+
+  airFlow_m3h: 0,
+  tempInDB_C: 25,
+  rhIn_pct: 60,
+  foulingFactorAir: 0,
+  setAirFlow: (val) => set({ airFlow_m3h: val }),
+  setTempInDB: (val) => set({ tempInDB_C: val }),
+  setRhIn: (val) => set({ rhIn_pct: val }),
+  setFoulingFactorAir: (val) => set({ foulingFactorAir: val }),
 
   setPhysicalInputs: (patch) =>
     set((s) => ({ physicalInputs: { ...s.physicalInputs, ...patch } })),
@@ -65,5 +84,9 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       result: undefined,
       warnings: [],
       isSimulating: false,
+      airFlow_m3h: 0,
+      tempInDB_C: 25,
+      rhIn_pct: 60,
+      foulingFactorAir: 0,
     }),
 }));
