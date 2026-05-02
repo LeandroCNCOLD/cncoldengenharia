@@ -253,7 +253,7 @@ export function SimulationPage() {
                 </span>
                 <button
                   type="button"
-                  onClick={clearSelection}
+                  onClick={handleClearAll}
                   className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-700"
                 >
                   <X className="h-3 w-3" /> Limpar
