@@ -1,8 +1,9 @@
-import { Calculator, Printer, RotateCcw, Settings2 } from "lucide-react";
+import { Calculator, Printer, RotateCcw, Save, Settings2 } from "lucide-react";
 import { useState } from "react";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { getApplicationConfig } from "../config/applicationConfig";
 import { formatBRL } from "../engine/costCalculator";
+import { generateReportPdf, type ReportSnapshot } from "../engine/reportGenerator";
 import { MaterialCostConfigModal } from "./MaterialCostConfigModal";
 import { GeometryPickerModal } from "./GeometryPickerModal";
 import {
