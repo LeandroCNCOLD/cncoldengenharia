@@ -210,16 +210,30 @@ export function getCoilGeometryById(
 
 /**
  * Filtra geometrias por texto livre (id/descrição/código) e por tipo de serpentina.
- * Passe `tipo === undefined` para não filtrar por tipo.
+ *
+ * Suporta duas assinaturas:
+ *   filterCoilGeometries(items, "busca", "Condensação")
+ *   filterCoilGeometries(items, { search: "...", tipo: "..." })
  */
 export function filterCoilGeometries(
   items: CoilGeometryItem[],
-  search: string,
+  searchOrOptions: string | { search?: string; tipo?: TipoSerpentina | "" },
   tipo_serpentina?: TipoSerpentina,
 ): CoilGeometryItem[] {
+  let search = "";
+  let tipo: TipoSerpentina | undefined;
+  if (typeof searchOrOptions === "string") {
+    search = searchOrOptions;
+    tipo = tipo_serpentina;
+  } else {
+    search = searchOrOptions.search ?? "";
+    tipo = searchOrOptions.tipo
+      ? (searchOrOptions.tipo as TipoSerpentina)
+      : undefined;
+  }
   const q = search.trim().toLowerCase();
   return items.filter((g) => {
-    if (tipo_serpentina && g.tipo_serpentina !== tipo_serpentina) return false;
+    if (tipo && g.tipo_serpentina !== tipo) return false;
     if (!q) return true;
     return (
       g.id.toLowerCase().includes(q) ||
@@ -228,6 +242,75 @@ export function filterCoilGeometries(
       g.name.toLowerCase().includes(q)
     );
   });
+}
+
+/**
+ * Normaliza valores `null` em defaults seguros para os fatores adimensionais.
+ * NÃO transforma unidades. NÃO sobrescreve valores existentes.
+ * Mantém demais campos intactos.
+ */
+export function normalizeGeometry(g: CoilGeometryItem): CoilGeometryItem {
+  return {
+    ...g,
+    espessura_aleta_mm: g.espessura_aleta_mm ?? 0,
+    fator_correcao_aleta: g.fator_correcao_aleta ?? 1,
+    fator_atrito_ar: g.fator_atrito_ar ?? 1,
+    razao_superficies_internas: g.razao_superficies_internas ?? 1,
+  };
+}
+
+/** Mapeia chave técnica do campo → mensagem amigável (pt-BR) para o card. */
+const FIELD_LABEL_PTBR: Record<string, string> = {
+  passo_fileiras_mm: "Passo de fileiras ausente",
+  passo_tubos_mm: "Passo de tubos ausente",
+  diametro_externo_tubo_mm: "Diâmetro externo do tubo ausente",
+  diametro_interno_tubo_mm: "Diâmetro interno do tubo ausente",
+  espessura_tubo_mm: "Espessura do tubo ausente",
+  espessura_aleta_mm: "Espessura de aleta ausente",
+  forma_aleta: "Forma da aleta não definida",
+  tipo_bateria: "Tipo de bateria não definido",
+  fator_correcao_aleta: "Fator de correção da aleta não definido",
+  fator_atrito_ar: "Fator de atrito (ar) não definido",
+  razao_superficies_internas: "Razão de superfícies internas não definida",
+  tubo_liso: "Indicação de tubo liso ausente",
+  certificacao_ahri: "Certificação AHRI não informada",
+  certificacao_eurovent: "Certificação Eurovent não informada",
+};
+
+/** Campos considerados críticos para diagnóstico OK/INCOMPLETA. */
+const CRITICAL_FIELDS: Array<keyof CoilGeometryItem> = [
+  "passo_fileiras_mm",
+  "passo_tubos_mm",
+  "diametro_externo_tubo_mm",
+  "diametro_interno_tubo_mm",
+  "espessura_tubo_mm",
+  "espessura_aleta_mm",
+  "fator_atrito_ar",
+];
+
+export interface GeometryDiagnostic {
+  status: "OK" | "INCOMPLETA";
+  missingCritical: string[];
+  missingOptional: string[];
+  warnings: string[];
+}
+
+/** Retorna diagnóstico completo (status + avisos legíveis) para a geometria. */
+export function diagnoseGeometry(g: CoilGeometryItem): GeometryDiagnostic {
+  const missing = listMissingPhysicalFields(g);
+  const missingCritical = missing.filter((k) =>
+    CRITICAL_FIELDS.includes(k as keyof CoilGeometryItem),
+  );
+  const missingOptional = missing.filter(
+    (k) => !CRITICAL_FIELDS.includes(k as keyof CoilGeometryItem),
+  );
+  const warnings = missing.map((k) => FIELD_LABEL_PTBR[k] ?? k);
+  return {
+    status: missingCritical.length === 0 ? "OK" : "INCOMPLETA",
+    missingCritical,
+    missingOptional,
+    warnings,
+  };
 }
 
 /** Lista os campos físicos que estão `null` na geometria (para diagnóstico). */

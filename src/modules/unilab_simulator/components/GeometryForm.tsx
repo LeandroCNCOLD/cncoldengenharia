@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import type {
   CoilGeometryCatalogItem,
@@ -7,16 +7,14 @@ import type {
   TubeMaterialItem,
 } from "../types/unilab.types";
 import {
-  TIPO_SERPENTINA_VALUES,
-  filterCoilGeometries,
+  diagnoseGeometry,
   getCoilGeometryById,
-  listMissingPhysicalFields,
   type CoilGeometryItem,
-  type TipoSerpentina,
 } from "../services/coilGeometryCatalogService";
 import { ptBR } from "../i18n/messages.ptBR";
 import { NumberField } from "./NumberField";
 import { SelectField } from "./SelectField";
+import { GeometryCombobox } from "./GeometryCombobox";
 
 interface GeometryFormProps {
   geometries: CoilGeometryCatalogItem[];
@@ -32,7 +30,6 @@ interface GeometryFormProps {
  * e o card de diagnóstico avisa.
  */
 function asGeometryItem(g: CoilGeometryCatalogItem): CoilGeometryItem {
-  // Se já vem enriquecido, mantém. Senão, completa com nulls.
   const maybe = g as Partial<CoilGeometryItem> & CoilGeometryCatalogItem;
   if (maybe.tipo_serpentina !== undefined) return maybe as CoilGeometryItem;
   return {
@@ -71,118 +68,109 @@ export function GeometryForm({
 
   const enriched = useMemo(() => geometries.map(asGeometryItem), [geometries]);
 
-  const [search, setSearch] = useState("");
-  const [tipo, setTipo] = useState<TipoSerpentina | "">("");
-
-  const filtered = useMemo(
-    () => filterCoilGeometries(enriched, search, tipo === "" ? undefined : tipo),
-    [enriched, search, tipo],
-  );
-
   const selected = getCoilGeometryById(enriched, physical.geometryId);
-  const missing = selected ? listMissingPhysicalFields(selected) : [];
+  const diagnostic = selected ? diagnoseGeometry(selected) : null;
 
-  const handleGeometryChange = (id: string | undefined) => {
-    const geo = id ? getCoilGeometryById(enriched, id) : undefined;
-    setSelectedGeometry(geo);
+  const handleGeometryChange = (g: CoilGeometryItem | undefined) => {
+    setSelectedGeometry(g);
   };
 
   const fromGeometryDisabled = disabled || !!selected;
 
   return (
     <div className="space-y-4 rounded-lg border border-slate-200 bg-white p-4">
-      {/* Filtro por tipo de serpentina */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-slate-700">
-            Tipo de serpentina
-          </label>
-          <select
-            value={tipo}
-            disabled={disabled}
-            onChange={(e) => setTipo(e.target.value as TipoSerpentina | "")}
-            className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 shadow-sm focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-50"
-          >
-            <option value="">Todos os tipos</option>
-            {TIPO_SERPENTINA_VALUES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-slate-700">
-            Buscar geometria
-          </label>
-          <input
-            type="text"
-            value={search}
-            disabled={disabled}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="ID, descrição ou código…"
-            className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 shadow-sm focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-50"
-          />
-        </div>
-      </div>
-
-      <SelectField
-        label={`${f.geometry} (${filtered.length} de ${enriched.length})`}
-        value={physical.geometryId}
-        options={filtered.slice(0, 500).map((g) => ({
-          value: g.id,
-          label: `${g.descricao}${g.tipo_serpentina ? ` · ${g.tipo_serpentina}` : ""}`,
-        }))}
+      <GeometryCombobox
+        geometries={enriched}
+        selectedId={physical.geometryId}
         onChange={handleGeometryChange}
         disabled={disabled}
-        placeholder={
-          filtered.length === 0
-            ? "Nenhuma geometria com esses filtros"
-            : "Selecione uma geometria…"
-        }
       />
-      {filtered.length > 500 && (
-        <p className="text-[11px] text-slate-500">
-          Exibindo as primeiras 500 geometrias. Refine a busca para ver outras.
-        </p>
-      )}
 
-      {/* Card de diagnóstico */}
-      {selected && (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50/60 p-3 text-xs">
+      {/* Card de diagnóstico OK / INCOMPLETA */}
+      {selected && diagnostic && (
+        <div
+          className={`rounded-md border p-3 text-xs ${
+            diagnostic.status === "OK"
+              ? "border-emerald-200 bg-emerald-50/60"
+              : "border-amber-300 bg-amber-50"
+          }`}
+        >
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="font-semibold text-emerald-900">
-                Geometria carregada
+              <p
+                className={`font-semibold ${
+                  diagnostic.status === "OK" ? "text-emerald-900" : "text-amber-900"
+                }`}
+              >
+                Status:{" "}
+                <span className="rounded bg-white/70 px-1.5 py-0.5 font-mono text-[11px]">
+                  {diagnostic.status}
+                </span>
               </p>
-              <p className="mt-0.5 text-emerald-800">
-                <span className="font-medium">ID:</span> {selected.id}
+              <p className="mt-1 text-slate-700">
+                <span className="font-medium">ID:</span>{" "}
+                <span className="font-mono text-[11px]">{selected.id}</span>
               </p>
-              <p className="text-emerald-800">
+              <p className="text-slate-700">
                 <span className="font-medium">Descrição:</span> {selected.descricao}
               </p>
-              <p className="text-emerald-800">
-                <span className="font-medium">Tipo de serpentina:</span>{" "}
+              <p className="text-slate-700">
+                <span className="font-medium">Tipo:</span>{" "}
                 {selected.tipo_serpentina ?? "—"}
               </p>
             </div>
             <button
               type="button"
               onClick={() => handleGeometryChange(undefined)}
-              className="text-[11px] text-emerald-900 underline hover:text-emerald-700"
+              className="text-[11px] text-slate-700 underline hover:text-slate-900"
               disabled={disabled}
             >
               Limpar
             </button>
           </div>
-          {missing.length > 0 && (
-            <div className="mt-2 rounded border border-amber-200 bg-amber-50 p-2 text-[11px] text-amber-900">
-              <p className="font-semibold">Campos ausentes na geometria:</p>
-              <p className="mt-0.5">{missing.join(", ")}</p>
+          {diagnostic.warnings.length > 0 && (
+            <div className="mt-2 border-t border-current/10 pt-2">
+              <p className="font-semibold text-amber-900">Avisos:</p>
+              <ul className="mt-1 list-disc space-y-0.5 pl-4 text-amber-900">
+                {diagnostic.warnings.slice(0, 6).map((w, i) => (
+                  <li key={i}>{w}</li>
+                ))}
+                {diagnostic.warnings.length > 6 && (
+                  <li className="text-amber-700">
+                    +{diagnostic.warnings.length - 6} aviso(s)…
+                  </li>
+                )}
+              </ul>
             </div>
           )}
         </div>
       )}
+
+      {/* Campos físicos vindos da geometria (read-only) */}
+      {selected && (
+        <fieldset className="space-y-2 rounded-md border border-slate-200 bg-slate-50 p-3">
+          <legend className="px-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            Campos da geometria (somente leitura)
+          </legend>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+            <ReadOnlyRow label="Passo de fileiras" value={selected.passo_fileiras_mm} unit="mm" />
+            <ReadOnlyRow label="Passo de tubos" value={selected.passo_tubos_mm} unit="mm" />
+            <ReadOnlyRow label="Ø externo do tubo" value={selected.diametro_externo_tubo_mm} unit="mm" />
+            <ReadOnlyRow label="Ø interno do tubo" value={selected.diametro_interno_tubo_mm} unit="mm" />
+            <ReadOnlyRow label="Espessura do tubo" value={selected.espessura_tubo_mm} unit="mm" />
+            <ReadOnlyRow label="Espessura da aleta" value={selected.espessura_aleta_mm} unit="mm" />
+            <ReadOnlyRow label="Forma da aleta" value={selected.forma_aleta} />
+            <ReadOnlyRow label="Tipo de bateria" value={selected.tipo_bateria} />
+            <ReadOnlyRow label="Fator de correção (aleta)" value={selected.fator_correcao_aleta} />
+            <ReadOnlyRow label="Fator de atrito (ar)" value={selected.fator_atrito_ar} />
+            <ReadOnlyRow label="Razão sup. internas" value={selected.razao_superficies_internas} />
+            <ReadOnlyRow label="Tubo liso" value={fmtBool(selected.tubo_liso)} />
+            <ReadOnlyRow label="Certificação AHRI" value={fmtBool(selected.certificacao_ahri)} />
+            <ReadOnlyRow label="Certificação Eurovent" value={fmtBool(selected.certificacao_eurovent)} />
+          </div>
+        </fieldset>
+      )}
+
 
       {/* Campos físicos vindos da geometria (read-only) */}
       {selected && (
