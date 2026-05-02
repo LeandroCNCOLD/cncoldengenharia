@@ -89,6 +89,10 @@ export interface UnilabPhysicalInputs {
   tubeInnerDiameterMm: number;
   /** Posição do distribuidor / coletor (CN COILS — Etapa de circuitagem). */
   headerPosition?: HeaderPosition;
+  /** Quando true, cada fila tem seu próprio passo de aleta (ver rowFinPitchesMm). */
+  isVariableFinPitch?: boolean;
+  /** Passos por fila — tamanho deve casar com `rows` quando isVariableFinPitch=true. */
+  rowFinPitchesMm?: number[];
 }
 
 export interface UnilabThermoInputs {
