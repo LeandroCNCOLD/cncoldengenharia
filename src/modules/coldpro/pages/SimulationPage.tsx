@@ -5,7 +5,11 @@ import { PageContainer } from "../components/layout/PageContainer";
 import { CompressorForm } from "../components/forms/CompressorForm";
 import { CondenserForm } from "../components/forms/CondenserForm";
 import { SystemConditionsForm, type SystemConditions } from "../components/forms/SystemConditionsForm";
-import { buildMinimalEvaporatorInput } from "../components/forms/EvaporatorForm";
+import {
+  EvaporatorForm,
+  buildEvaporatorInputFromForm,
+  type EvaporatorFormValue,
+} from "../components/forms/EvaporatorForm";
 import { UtilizationChart } from "../components/charts/UtilizationChart";
 import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import { ModeGate } from "../components/mode/ModeGate";
@@ -40,6 +44,7 @@ export function SimulationPage() {
   const { result, isCalculating, calculate } = useEquilibrium();
   const [compressor, setCompressor] = useState<Partial<CompressorSpec>>({ refrigerant: "R404A" });
   const [condenser, setCondenser] = useState<Partial<CondenserSpec>>({});
+  const [evaporator, setEvaporator] = useState<EvaporatorFormValue>({});
   const [conditions, setConditions] = useState<Partial<SystemConditions>>({});
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -108,6 +113,38 @@ export function SimulationPage() {
           evap_temp_c: selectedEvaporator.tempEvaporacaoC,
         }));
       }
+      // Pré-preenche o form do Evaporador com TODOS os campos disponíveis
+      // do catálogo. Campos faltantes ficam vazios para o usuário preencher.
+      const ev = selectedEvaporator;
+      setEvaporator((prev) => ({
+        ...prev,
+        T_evaporating_c: ev.tempEvaporacaoC ?? prev.T_evaporating_c,
+        airflow_m3_h: ev.vazaoArEvaporadorM3H ?? prev.airflow_m3_h,
+        air_temperature_in_c: ev.evaporadorAirTemperatureInC ?? prev.air_temperature_in_c,
+        air_relative_humidity_in:
+          ev.evaporadorAirRelativeHumidityIn ?? prev.air_relative_humidity_in,
+        tube_outer_diameter_mm: ev.evaporadorTuboDiametroMm ?? prev.tube_outer_diameter_mm,
+        tube_inner_diameter_mm: ev.evaporadorTubeInnerDiameterMm ?? prev.tube_inner_diameter_mm,
+        tube_pitch_transverse_mm:
+          ev.evaporadorTubePitchTransverseMm ?? prev.tube_pitch_transverse_mm,
+        tube_pitch_longitudinal_mm:
+          ev.evaporadorTubePitchLongitudinalMm ?? prev.tube_pitch_longitudinal_mm,
+        fin_spacing_mm: ev.evaporadorFinSpacingMm ?? prev.fin_spacing_mm,
+        rows_total:
+          ev.evaporadorRows !== undefined && ev.evaporadorTubesPorRow !== undefined
+            ? ev.evaporadorRows
+            : prev.rows_total,
+        fin_thickness_mm: ev.evaporadorFinThicknessMm ?? prev.fin_thickness_mm,
+        fin_height_mm: ev.evaporadorFinHeightMm ?? prev.fin_height_mm,
+        coil_width_m: ev.evaporadorCoilWidthM ?? prev.coil_width_m,
+        coil_height_m: ev.evaporadorCoilHeightM ?? prev.coil_height_m,
+        tube_material:
+          (ev.evaporadorTubeMaterial as EvaporatorFormValue["tube_material"]) ??
+          prev.tube_material,
+        fin_material:
+          (ev.evaporadorFinMaterial as EvaporatorFormValue["fin_material"]) ??
+          prev.fin_material,
+      }));
     }
     if (!selectedEvaporator) {
       lastAppliedEvaporatorId.current = undefined;
@@ -126,11 +163,12 @@ export function SimulationPage() {
 
   const handleCalculate = () => {
     if (!canCalculate) return;
-    // Catálogo tem prioridade no input do evaporador SOMENTE se conseguiu gerar
-    // ProgressiveCoilInput completo. Caso contrário, fallback no input manual.
+    // Catálogo tem prioridade SOMENTE se conseguiu gerar ProgressiveCoilInput
+    // completo. Caso contrário, usa o que estiver no form de Evaporador,
+    // recorrendo a defaults para campos não preenchidos.
     const evaporatorInput =
       catalogEvaporatorInput ?? {
-        progressive_input: buildMinimalEvaporatorInput(compressor, conditions),
+        progressive_input: buildEvaporatorInputFromForm(evaporator, compressor, conditions),
       };
     calculate({
       compressor: compressor as CompressorSpec,
@@ -223,6 +261,7 @@ export function SimulationPage() {
           )}
           <CompressorForm value={compressor} onChange={setCompressor} />
           <CondenserForm value={condenser} onChange={setCondenser} />
+          <EvaporatorForm value={evaporator} onChange={setEvaporator} />
           <SystemConditionsForm value={conditions} onChange={setConditions} />
           <ModeGate minMode="professional">
             <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
