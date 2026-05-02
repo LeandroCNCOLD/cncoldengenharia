@@ -202,6 +202,16 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
             espessura_aleta_mm?: number | null;
           })
         | undefined;
+      // Lê fin_pitch_mm do raw (se existir); caso contrário deixa o usuário
+      // preencher manualmente (default sugerido = 2.5 mm — comum em câmaras).
+      const rawFinPitch =
+        geometry?.raw && typeof geometry.raw === "object"
+          ? (geometry.raw as Record<string, unknown>)["fin_pitch_mm"]
+          : undefined;
+      const finPitchFromCatalog =
+        typeof rawFinPitch === "number" && Number.isFinite(rawFinPitch)
+          ? rawFinPitch
+          : undefined;
       const physicalInputs = geometry
         ? {
             ...s.physicalInputs,
@@ -213,8 +223,26 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
               geometry.tubeInnerDiameterMm ?? s.physicalInputs.tubeInnerDiameterMm,
             finThicknessMm:
               enriched?.espessura_aleta_mm ?? s.physicalInputs.finThicknessMm,
-            rows: geometry.defaultRows ?? s.physicalInputs.rows,
-            circuits: geometry.defaultCircuits ?? s.physicalInputs.circuits,
+            // Defaults preenchidos ao escolher geometria — só sobrescrevem
+            // valores ausentes para não destruir entrada do usuário.
+            finPitchMm:
+              s.physicalInputs.finPitchMm ?? finPitchFromCatalog ?? 2.5,
+            finnedLengthMm: s.physicalInputs.finnedLengthMm ?? 1000,
+            finnedHeightMm: s.physicalInputs.finnedHeightMm ?? 600,
+            rows: s.physicalInputs.rows ?? geometry.defaultRows ?? 4,
+            circuits:
+              s.physicalInputs.circuits ?? geometry.defaultCircuits ?? 12,
+            tubesPerRow:
+              s.physicalInputs.tubesPerRow ??
+              (geometry.tubePitchTransverseMm > 0
+                ? Math.max(
+                    1,
+                    Math.round(
+                      (s.physicalInputs.finnedHeightMm ?? 600) /
+                        geometry.tubePitchTransverseMm,
+                    ),
+                  )
+                : undefined),
           }
         : s.physicalInputs;
       return {
