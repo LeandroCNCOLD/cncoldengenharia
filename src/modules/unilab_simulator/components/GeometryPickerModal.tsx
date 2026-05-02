@@ -81,7 +81,19 @@ export function GeometryPickerModal({ open, onClose, componentType }: Props) {
               forcedTipo={forcedTipo}
               onChange={(g) => {
                 setSelectedGeometry(g);
-                if (g) onClose();
+                if (g) {
+                  // Auto-preenche o Fator de Erro a partir do SecurityFactor
+                  // do catálogo legado geometries.json (junção pelo código).
+                  loadSecurityFactorMap().then((map) => {
+                    const sf = map.get(g.codigo) ?? map.get(g.id);
+                    if (sf !== undefined && Number.isFinite(sf)) {
+                      setErrorFactorPercent((sf - 1) * 100);
+                    } else {
+                      setErrorFactorPercent(0);
+                    }
+                  });
+                  onClose();
+                }
               }}
             />
             <p className="text-[11px] text-slate-500">
