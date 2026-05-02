@@ -1,11 +1,16 @@
-import { useState } from "react";
-import { Play, BarChart2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { Play, BarChart2, Database, X } from "lucide-react";
 import { PageContainer } from "../components/layout/PageContainer";
 import { CompressorForm } from "../components/forms/CompressorForm";
 import { CondenserForm } from "../components/forms/CondenserForm";
 import { SystemConditionsForm, type SystemConditions } from "../components/forms/SystemConditionsForm";
 import { OperatingGridForm, generateGrid, type GridConfig } from "../components/forms/OperatingGridForm";
-import { buildMinimalEvaporatorInput } from "../components/forms/EvaporatorForm";
+import {
+  EvaporatorForm,
+  buildEvaporatorInputFromForm,
+  type EvaporatorFormValue,
+} from "../components/forms/EvaporatorForm";
 import { PerformanceCurveChart, type PerformanceMetric } from "../components/charts/PerformanceCurveChart";
 import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import { StatusBadge } from "../components/ui/StatusBadge";
@@ -13,6 +18,8 @@ import { WarningBanner } from "../components/ui/WarningBanner";
 import { usePerformanceCurve } from "../hooks/usePerformanceCurve";
 import { formatCapacity, formatCOP } from "../utils/formatting";
 import type { CompressorSpec, CondenserSpec } from "@/modules/coldpro_v2";
+import { useCatalogSessionStore } from "@/modules/coldpro_catalog/store/useCatalogSessionStore";
+import { buildMotorComponentsFromCatalog } from "@/modules/coldpro_catalog/adapters/sessionToMotorInputAdapter";
 
 const METRIC_OPTIONS: { value: PerformanceMetric; label: string }[] = [
   { value: "capacity_w", label: "Capacidade" },
@@ -24,12 +31,112 @@ export function PerformanceCurvePage() {
   const { result, isCalculating, calculate } = usePerformanceCurve();
   const [compressor, setCompressor] = useState<Partial<CompressorSpec>>({ refrigerant: "R404A" });
   const [condenser, setCondenser] = useState<Partial<CondenserSpec>>({});
+  const [evaporator, setEvaporator] = useState<EvaporatorFormValue>({});
   const [conditions, setConditions] = useState<Partial<SystemConditions>>({});
   const [gridConfig, setGridConfig] = useState<GridConfig>({
     evap_temps: [-15, -10, -5, 0],
     cond_temps: [30, 35, 40, 45],
   });
   const [selectedMetric, setSelectedMetric] = useState<PerformanceMetric>("capacity_w");
+
+  const {
+    selectedCompressor,
+    selectedCondenser,
+    selectedEvaporator,
+    selectedReheatCoil,
+    clearSelection,
+  } = useCatalogSessionStore();
+  const lastAppliedCompressorId = useRef<string | undefined>(undefined);
+  const lastAppliedCondenserId = useRef<string | undefined>(undefined);
+  const lastAppliedEvaporatorId = useRef<string | undefined>(undefined);
+  const [catalogWarnings, setCatalogWarnings] = useState<string[]>([]);
+  const [catalogEvaporatorInput, setCatalogEvaporatorInput] = useState<
+    ReturnType<typeof buildMotorComponentsFromCatalog>["evaporator"] | undefined
+  >(undefined);
+
+  // Mesmo fluxo de pré-preenchimento usado em SimulationPage. Cada bloco do
+  // catálogo é aplicado uma única vez (no instante em que o ID muda) — não
+  // sobrescreve edições manuais subsequentes.
+  useEffect(() => {
+    const motor = buildMotorComponentsFromCatalog({
+      compressor: selectedCompressor,
+      condenser: selectedCondenser,
+      evaporator: selectedEvaporator,
+      reheat_coil: selectedReheatCoil,
+    });
+
+    setCatalogWarnings(motor.warnings);
+    setCatalogEvaporatorInput(motor.evaporator);
+
+    if (selectedCompressor && selectedCompressor.id !== lastAppliedCompressorId.current) {
+      lastAppliedCompressorId.current = selectedCompressor.id;
+      const compressorPatch = motor.compressor ?? motor.compressor_partial;
+      if (compressorPatch) {
+        setCompressor((prev) => ({ ...prev, ...compressorPatch }));
+      }
+      // Sugere uma grade ao redor das condições nominais do catálogo
+      const evapNom = selectedCompressor.tempEvaporacaoC;
+      const condNom = selectedCompressor.tempCondensacaoC;
+      if (evapNom !== undefined || condNom !== undefined) {
+        setGridConfig((prev) => ({
+          evap_temps:
+            evapNom !== undefined
+              ? [evapNom - 10, evapNom - 5, evapNom, evapNom + 5].map((t) => Math.round(t))
+              : prev.evap_temps,
+          cond_temps:
+            condNom !== undefined
+              ? [condNom - 10, condNom - 5, condNom, condNom + 5].map((t) => Math.round(t))
+              : prev.cond_temps,
+        }));
+      }
+    }
+    if (!selectedCompressor) lastAppliedCompressorId.current = undefined;
+
+    if (selectedCondenser && selectedCondenser.id !== lastAppliedCondenserId.current) {
+      lastAppliedCondenserId.current = selectedCondenser.id;
+      if (motor.condenser) {
+        setCondenser((prev) => ({ ...prev, ...motor.condenser }));
+      }
+    }
+    if (!selectedCondenser) lastAppliedCondenserId.current = undefined;
+
+    if (selectedEvaporator && selectedEvaporator.id !== lastAppliedEvaporatorId.current) {
+      lastAppliedEvaporatorId.current = selectedEvaporator.id;
+      const ev = selectedEvaporator;
+      setEvaporator((prev) => ({
+        ...prev,
+        T_evaporating_c: ev.tempEvaporacaoC ?? prev.T_evaporating_c,
+        airflow_m3_h: ev.vazaoArEvaporadorM3H ?? prev.airflow_m3_h,
+        air_temperature_in_c: ev.evaporadorAirTemperatureInC ?? prev.air_temperature_in_c,
+        air_relative_humidity_in:
+          ev.evaporadorAirRelativeHumidityIn ?? prev.air_relative_humidity_in,
+        tube_outer_diameter_mm: ev.evaporadorTuboDiametroMm ?? prev.tube_outer_diameter_mm,
+        tube_inner_diameter_mm: ev.evaporadorTubeInnerDiameterMm ?? prev.tube_inner_diameter_mm,
+        tube_pitch_transverse_mm:
+          ev.evaporadorTubePitchTransverseMm ?? prev.tube_pitch_transverse_mm,
+        tube_pitch_longitudinal_mm:
+          ev.evaporadorTubePitchLongitudinalMm ?? prev.tube_pitch_longitudinal_mm,
+        fin_spacing_mm: ev.evaporadorFinSpacingMm ?? prev.fin_spacing_mm,
+        rows_total:
+          ev.evaporadorRows !== undefined ? ev.evaporadorRows : prev.rows_total,
+        fin_thickness_mm: ev.evaporadorFinThicknessMm ?? prev.fin_thickness_mm,
+        fin_height_mm: ev.evaporadorFinHeightMm ?? prev.fin_height_mm,
+        coil_width_m: ev.evaporadorCoilWidthM ?? prev.coil_width_m,
+        coil_height_m: ev.evaporadorCoilHeightM ?? prev.coil_height_m,
+        tube_material:
+          (ev.evaporadorTubeMaterial as EvaporatorFormValue["tube_material"]) ??
+          prev.tube_material,
+        fin_material:
+          (ev.evaporadorFinMaterial as EvaporatorFormValue["fin_material"]) ??
+          prev.fin_material,
+      }));
+    }
+    if (!selectedEvaporator) lastAppliedEvaporatorId.current = undefined;
+  }, [selectedCompressor, selectedCondenser, selectedEvaporator, selectedReheatCoil]);
+
+  const hasCatalogSelection = !!(
+    selectedCompressor || selectedCondenser || selectedEvaporator || selectedReheatCoil
+  );
 
   const canCalculate = Boolean(
     compressor.cooling_capacity_w &&
@@ -47,10 +154,14 @@ export function PerformanceCurvePage() {
 
   const handleCalculate = () => {
     if (!canCalculate) return;
+    const evaporatorInput =
+      catalogEvaporatorInput ?? {
+        progressive_input: buildEvaporatorInputFromForm(evaporator, compressor, conditions),
+      };
     calculate({
       system: {
         compressor: compressor as CompressorSpec,
-        evaporator: { progressive_input: buildMinimalEvaporatorInput(compressor, conditions) },
+        evaporator: evaporatorInput,
         condenser: condenser as CondenserSpec,
         system_conditions: {
           ambient_temp_c: conditions.ambient_temp_c!,
@@ -79,8 +190,56 @@ export function PerformanceCurvePage() {
     >
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <div className="space-y-4 lg:col-span-2">
+          {hasCatalogSelection ? (
+            <div className="rounded-lg border border-[#1E6FD9]/30 bg-[#1E6FD9]/5 p-3 text-xs">
+              <div className="mb-1 flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 font-medium text-[#1E6FD9]">
+                  <Database className="h-3.5 w-3.5" />
+                  Dados pré-carregados do catálogo CN COLD
+                </span>
+                <button
+                  type="button"
+                  onClick={clearSelection}
+                  className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-700"
+                >
+                  <X className="h-3 w-3" /> Limpar
+                </button>
+              </div>
+              <p className="text-slate-600">
+                {selectedCompressor && (
+                  <>Compressor: <strong>{selectedCompressor.modeloBaseReferencia ?? selectedCompressor.modelo}</strong>. </>
+                )}
+                {selectedCondenser && selectedCondenser.id !== selectedCompressor?.id && (
+                  <>Condensador: <strong>{selectedCondenser.modeloBaseReferencia ?? selectedCondenser.modelo}</strong>. </>
+                )}
+                {selectedEvaporator && (
+                  <>Evaporador: <strong>{selectedEvaporator.modeloBaseReferencia ?? selectedEvaporator.modelo}</strong>. </>
+                )}
+                {selectedReheatCoil && (
+                  <>Reaquecimento: <strong>{selectedReheatCoil.modeloBaseReferencia ?? selectedReheatCoil.modelo}</strong>. </>
+                )}
+                Os campos abaixo continuam editáveis. A grade foi sugerida ao redor das condições nominais.
+              </p>
+              {catalogWarnings.length > 0 && (
+                <ul className="mt-2 list-disc space-y-0.5 pl-5 text-[11px] text-amber-700">
+                  {catalogWarnings.map((w, i) => (
+                    <li key={i}>{w}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+              Dica: você pode pré-carregar os componentes a partir do{" "}
+              <Link to="/coldpro/catalog" className="font-medium text-[#1E6FD9] hover:underline">
+                Catálogo CN COLD
+              </Link>{" "}
+              ou preencher manualmente.
+            </div>
+          )}
           <CompressorForm value={compressor} onChange={setCompressor} />
           <CondenserForm value={condenser} onChange={setCondenser} />
+          <EvaporatorForm value={evaporator} onChange={setEvaporator} />
           <SystemConditionsForm value={conditions} onChange={setConditions} />
           <OperatingGridForm value={gridConfig} onChange={setGridConfig} />
         </div>
