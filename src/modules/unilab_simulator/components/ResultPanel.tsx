@@ -66,6 +66,47 @@ export function ResultPanel({ result, warnings }: ResultPanelProps) {
         </p>
       </div>
       {warnings.length > 0 && <WarningsList warnings={warnings} />}
+      {fanAudit && <FanLibraryStatus audit={fanAudit} />}
+    </div>
+  );
+}
+
+function useFanAudit(): FanAuditSummary | null {
+  const [audit, setAudit] = useState<FanAuditSummary | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    loadUnilabCoefficients()
+      .then((b) => {
+        if (!cancelled) setAudit(buildFanAudit(b));
+      })
+      .catch(() => {
+        if (!cancelled) setAudit(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return audit;
+}
+
+function FanLibraryStatus({ audit }: { audit: FanAuditSummary }) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-3 text-[11px] text-slate-600">
+      <div className="mb-1 font-semibold text-slate-700">
+        Biblioteca de ventiladores UNILAB
+      </div>
+      <ul className="space-y-0.5">
+        <li>
+          Axiais: {audit.axial.total} no total — {audit.axial.withCurveUsable}{" "}
+          com curva utilizável, {audit.axial.withPolynomialUsable} com polinômio
+          utilizável (
+          {audit.axial.unusablePolynomial} polinômios zerados ignorados).
+        </li>
+        <li>
+          Centrífugos: {audit.centrifugal.withValidRange} /{" "}
+          {audit.centrifugal.total} com range operacional válido.
+        </li>
+      </ul>
     </div>
   );
 }
