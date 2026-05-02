@@ -190,8 +190,56 @@ export function PerformanceCurvePage() {
     >
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <div className="space-y-4 lg:col-span-2">
+          {hasCatalogSelection ? (
+            <div className="rounded-lg border border-[#1E6FD9]/30 bg-[#1E6FD9]/5 p-3 text-xs">
+              <div className="mb-1 flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 font-medium text-[#1E6FD9]">
+                  <Database className="h-3.5 w-3.5" />
+                  Dados pré-carregados do catálogo CN COLD
+                </span>
+                <button
+                  type="button"
+                  onClick={clearSelection}
+                  className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-700"
+                >
+                  <X className="h-3 w-3" /> Limpar
+                </button>
+              </div>
+              <p className="text-slate-600">
+                {selectedCompressor && (
+                  <>Compressor: <strong>{selectedCompressor.modeloBaseReferencia ?? selectedCompressor.modelo}</strong>. </>
+                )}
+                {selectedCondenser && selectedCondenser.id !== selectedCompressor?.id && (
+                  <>Condensador: <strong>{selectedCondenser.modeloBaseReferencia ?? selectedCondenser.modelo}</strong>. </>
+                )}
+                {selectedEvaporator && (
+                  <>Evaporador: <strong>{selectedEvaporator.modeloBaseReferencia ?? selectedEvaporator.modelo}</strong>. </>
+                )}
+                {selectedReheatCoil && (
+                  <>Reaquecimento: <strong>{selectedReheatCoil.modeloBaseReferencia ?? selectedReheatCoil.modelo}</strong>. </>
+                )}
+                Os campos abaixo continuam editáveis. A grade foi sugerida ao redor das condições nominais.
+              </p>
+              {catalogWarnings.length > 0 && (
+                <ul className="mt-2 list-disc space-y-0.5 pl-5 text-[11px] text-amber-700">
+                  {catalogWarnings.map((w, i) => (
+                    <li key={i}>{w}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+              Dica: você pode pré-carregar os componentes a partir do{" "}
+              <Link to="/coldpro/catalog" className="font-medium text-[#1E6FD9] hover:underline">
+                Catálogo CN COLD
+              </Link>{" "}
+              ou preencher manualmente.
+            </div>
+          )}
           <CompressorForm value={compressor} onChange={setCompressor} />
           <CondenserForm value={condenser} onChange={setCondenser} />
+          <EvaporatorForm value={evaporator} onChange={setEvaporator} />
           <SystemConditionsForm value={conditions} onChange={setConditions} />
           <OperatingGridForm value={gridConfig} onChange={setGridConfig} />
         </div>
