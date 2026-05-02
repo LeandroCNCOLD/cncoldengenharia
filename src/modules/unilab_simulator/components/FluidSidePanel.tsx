@@ -277,7 +277,12 @@ export function FluidSidePanel({ componentType, disabled, result }: FluidSidePan
           Resultados do Lado Fluido
         </div>
         <div className="space-y-1.5">
-          <Row label="Queda de Pressão" unit="kPa" input={<DisabledInput />} obtained="---" />
+          <Row
+            label="Queda de Pressão"
+            unit="kPa"
+            input={<DisabledInput />}
+            obtained={fmt(result?.fluidPressureDropKpa, 2)}
+          />
           <Row
             label="Velocidade do Fluido"
             unit="m/s"
@@ -288,7 +293,13 @@ export function FluidSidePanel({ componentType, disabled, result }: FluidSidePan
             label="Fase do Fluido"
             unit="—"
             input={<DisabledInput />}
-            obtained="Aguardando cálculo"
+            obtained={
+              result?.regime === "WET"
+                ? "Mudança de fase (úmido)"
+                : result?.regime === "DRY"
+                  ? "Monofásico (seco)"
+                  : "Aguardando cálculo"
+            }
           />
         </div>
       </div>
