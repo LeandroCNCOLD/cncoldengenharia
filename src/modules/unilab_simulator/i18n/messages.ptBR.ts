@@ -2,11 +2,11 @@
 
 export const ptBR = {
   module: {
-    title: "Cn Coils Simulator",
+    title: "CN Coils Simulator",
     subtitle:
-      "Simulação termodinâmica de trocadores de calor com correções polinomiais UNILAB.",
+      "Simulação termodinâmica de trocadores de calor com correções polinomiais CN Coils.",
     disclaimer:
-      "Capacidade estimada por modelo termodinâmico com correções polinomiais. Os resultados não substituem a validação experimental ou o cálculo pelo software UNILAB original.",
+      "Capacidade estimada por modelo termodinâmico com correções polinomiais. Os resultados não substituem a validação experimental ou o cálculo pelo software CN Coils Simulator.",
   },
   dashboard: {
     intro: "Selecione um tipo de componente para iniciar a simulação.",
@@ -47,7 +47,7 @@ export const ptBR = {
     },
   },
   workspace: {
-    title: "Workspace UNILAB",
+    title: "Workspace CN Coils Simulator",
     columns: {
       geometry: "Geometria",
       thermo: "Termodinâmica",
@@ -94,21 +94,21 @@ export const ptBR = {
       airOutletTemp: "Temp. saída do ar",
       airOutletRh: "UR saída do ar",
       faceVelocity: "Velocidade de face",
-      correctionFactor: "Fator UNILAB aplicado",
+      correctionFactor: "Fator CN Coils aplicado",
     },
   },
   datasets: {
-    title: "Status dos catálogos UNILAB",
+    title: "Status dos catálogos CN Coils",
     loading: "Carregando catálogos…",
     ready: "Todos os catálogos carregados.",
-    missingTitle: "Catálogos UNILAB ausentes",
+    missingTitle: "Catálogos CN Coils ausentes",
     missingHint:
       "A simulação fica bloqueada até que todos os catálogos obrigatórios sejam disponibilizados em /data/catalogs/.",
-    fileMissing: (file: string) => `Catálogo UNILAB não carregado: ${file}`,
+    fileMissing: (file: string) => `Catálogo CN Coils não carregado: ${file}`,
     fileLoaded: (file: string) => `Catálogo carregado: ${file}`,
   },
   validation: {
-    blockedNoDatasets: "Dados UNILAB não disponíveis para esta geometria.",
+    blockedNoDatasets: "Dados CN Coils não disponíveis para esta geometria.",
     geometryIncomplete: "Geometria incompleta para integração com ColdPro.",
     requiredField: (field: string) => `Campo obrigatório: ${field}`,
     invalidNumber: (field: string) => `Valor inválido em: ${field}`,

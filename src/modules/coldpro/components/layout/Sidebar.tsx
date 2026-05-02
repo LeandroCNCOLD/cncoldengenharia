@@ -33,7 +33,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/coldpro/assembly", label: "Montagem", Icon: Wrench },
   { to: "/coldpro/simulation", label: "Equilíbrio do Sistema", Icon: Activity },
   { to: "/coldpro/curve", label: "Curva de Desempenho", Icon: TrendingUp },
-  { to: "/coldpro/unilab", label: "Cn Coils Simulator", Icon: Gauge },
+  { to: "/coldpro/unilab", label: "CN Coils Simulator", Icon: Gauge },
   { to: "/coldpro/map", label: "Mapa Operacional", Icon: Map },
   { to: "/coldpro/record", label: "Ficha Técnica", Icon: FileText },
   { to: "/coldpro/registry", label: "Registry de Produtos", Icon: Database },
