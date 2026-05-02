@@ -271,7 +271,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       foulingFactorAir: 0,
       selectedFanId: undefined,
       fluidExtras: {},
-      fluid: "R404A",
+      fluid: "REFMIX_R404A",
       fluidMassFlow_kg_h: 0,
       isMassFlowLocked: true,
       fluidOperatingTemp_C: 45,
