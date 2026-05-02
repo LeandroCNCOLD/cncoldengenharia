@@ -77,13 +77,28 @@ export interface CatalogEquipmentRow {
 
   tipoDegelo?: string;
 
+  // --- Condensador (geometria básica + estendida) ---
   condensadorRows?: number;
   condensadorTubesPorRow?: number;
   condensadorCircuitos?: number;
   condensadorFinSpacingMm?: number;
   condensadorLengthMm?: number;
   condensadorTuboDiametroMm?: number;
+  condensadorTuboDiametroInternoMm?: number;
+  condensadorTuboEspessuraMm?: number;
+  condensadorTubePitchTransverseMm?: number;
+  condensadorTubePitchLongitudinalMm?: number;
+  condensadorFinThicknessMm?: number;
+  condensadorCoilWidthM?: number;
+  condensadorCoilHeightM?: number;
+  condensadorCoilDepthM?: number;
+  condensadorTubeMaterial?: "copper" | "aluminum" | "steel";
+  condensadorFinMaterial?: "copper" | "aluminum" | "steel";
+  condensadorAreaFaceM2?: number;
+  condensadorAreaTrocaM2?: number;
+  condensadorVolumeInternoL?: number;
 
+  // --- Evaporador (geometria básica + estendida) ---
   evaporadorRows?: number;
   evaporadorTubesPorRow?: number;
   evaporadorCircuitos?: number;
@@ -92,6 +107,10 @@ export interface CatalogEquipmentRow {
   evaporadorTuboDiametroMm?: number;
   evaporadorVolumeInternoL?: number;
   evaporadorAreaSuperficieM2?: number;
+  evaporadorAreaFaceM2?: number;
+  evaporadorAreaTrocaM2?: number;
+  evaporadorTuboEspessuraMm?: number;
+  evaporadorCoilDepthM?: number;
 
   // --- Geometria detalhada do evaporador (para ProgressiveCoilInput) ---
   evaporadorTubeInnerDiameterMm?: number;
