@@ -1,41 +1,40 @@
 import type { CatalogEquipmentRow } from "../data/equipmentCatalog.types";
-import type { ProgressiveCoilInput } from "@/modules/coldpro_v2";
+import type { ProgressiveCoilInput, RollGeometry } from "@/modules/coldpro_v2";
 
 export interface EvaporatorAdapterResult {
   input: ProgressiveCoilInput | null;
   warnings: string[];
 }
 
+const REQUIRED_FIELDS = [
+  "evaporadorRows",
+  "evaporadorFinSpacingMm",
+  "evaporadorTuboDiametroMm",
+  "evaporadorTubeInnerDiameterMm",
+  "evaporadorTubePitchTransverseMm",
+  "evaporadorTubePitchLongitudinalMm",
+  "evaporadorFinHeightMm",
+  "evaporadorFinThicknessMm",
+  "evaporadorCoilWidthM",
+  "evaporadorCoilHeightM",
+  "evaporadorAirTemperatureInC",
+  "evaporadorAirRelativeHumidityIn",
+  "evaporadorAirMassFlowKgS",
+  "tempEvaporacaoC",
+] as const;
+
 /**
- * Converte dados do catálogo CN COLD em ProgressiveCoilInput.
- * Só converte se houver geometria suficiente. Não inventa parâmetros.
- *
- * O motor exige:
- *  - diâmetro interno do tubo
- *  - pitches transversal e longitudinal
- *  - altura/espessura de aleta
- *  - largura/altura da serpentina
- *  - vazão mássica de ar (calculável a partir de m³/h)
- *
- * Caso falte qualquer um desses dados no catálogo, retorna `input: null`
- * e adiciona um aviso. A UI deve cair no fluxo manual.
+ * Converte CatalogEquipmentRow em ProgressiveCoilInput.
+ * Só converte quando TODOS os campos obrigatórios estão presentes.
+ * Não inventa valores.
  */
 export function catalogToEvaporatorInput(row: CatalogEquipmentRow): EvaporatorAdapterResult {
   const warnings: string[] = [];
 
-  const requiredCatalogFields = {
-    evaporadorRows: row.evaporadorRows,
-    evaporadorTubesPorRow: row.evaporadorTubesPorRow,
-    evaporadorFinSpacingMm: row.evaporadorFinSpacingMm,
-    evaporadorLengthMm: row.evaporadorLengthMm,
-    evaporadorTuboDiametroMm: row.evaporadorTuboDiametroMm,
-    vazaoArEvaporadorM3H: row.vazaoArEvaporadorM3H,
-    tempEvaporacaoC: row.tempEvaporacaoC,
-  };
-
-  const missing = Object.entries(requiredCatalogFields)
-    .filter(([, v]) => v === undefined || v === null)
-    .map(([k]) => k);
+  const missing = REQUIRED_FIELDS.filter((k) => {
+    const v = row[k as keyof CatalogEquipmentRow];
+    return v === undefined || v === null;
+  });
 
   if (missing.length > 0) {
     warnings.push(
@@ -44,16 +43,32 @@ export function catalogToEvaporatorInput(row: CatalogEquipmentRow): EvaporatorAd
     return { input: null, warnings };
   }
 
-  // Campos obrigatórios do motor que NÃO existem no catálogo:
-  //   tube_inner_diameter_mm, tube_pitch_transverse_mm, tube_pitch_longitudinal_mm,
-  //   fin_height_mm, fin_thickness_mm, coil_width_m, coil_height_m,
-  //   tube_material, fin_material, air_temperature_in_c, air_relative_humidity_in.
-  //
-  // Sem esses dados, não montamos o ProgressiveCoilInput — o usuário pediu
-  // explicitamente para NÃO inventar serpentina.
-  warnings.push(
-    "Evaporador sem dados detalhados de geometria interna (diâmetro interno, pitches, altura/espessura de aleta, largura/altura da serpentina). Use a tela de Componentes para complementar.",
-  );
+  const rows = row.evaporadorRows!;
+  const finSpacingMm = row.evaporadorFinSpacingMm!;
 
-  return { input: null, warnings };
+  // Sem distribuição por roll no catálogo: assume um único roll com todas as fileiras.
+  const rolls: RollGeometry[] = [
+    { fin_spacing_mm: finSpacingMm, rows_in_roll: rows },
+  ];
+
+  const input: ProgressiveCoilInput = {
+    tube_outer_diameter_mm: row.evaporadorTuboDiametroMm!,
+    tube_inner_diameter_mm: row.evaporadorTubeInnerDiameterMm!,
+    tube_pitch_transverse_mm: row.evaporadorTubePitchTransverseMm!,
+    tube_pitch_longitudinal_mm: row.evaporadorTubePitchLongitudinalMm!,
+    fin_height_mm: row.evaporadorFinHeightMm!,
+    fin_thickness_mm: row.evaporadorFinThicknessMm!,
+    coil_width_m: row.evaporadorCoilWidthM!,
+    coil_height_m: row.evaporadorCoilHeightM!,
+    tube_material: row.evaporadorTubeMaterial ?? "copper",
+    fin_material: row.evaporadorFinMaterial ?? "aluminum",
+    rolls,
+    air_temperature_in_c: row.evaporadorAirTemperatureInC!,
+    air_relative_humidity_in: row.evaporadorAirRelativeHumidityIn!,
+    air_mass_flow_kg_s: row.evaporadorAirMassFlowKgS!,
+    T_evaporating_c: row.tempEvaporacaoC!,
+    refrigerant: row.refrigerante === "unknown" ? undefined : row.refrigerante,
+  };
+
+  return { input, warnings };
 }
