@@ -64,8 +64,16 @@ export const Route = createRootRoute({
         content:
           "Coldbase Hub gerencia dados técnicos de componentes frigoríficos e cria a base para futuras ferramentas de engenharia.",
       },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0d3c5c2f-b7b9-4a8e-a349-8e62618bdd74/id-preview-d4ba03b9--df3997bc-561a-4a74-bd68-343e76b9168d.lovable.app-1777406799331.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0d3c5c2f-b7b9-4a8e-a349-8e62618bdd74/id-preview-d4ba03b9--df3997bc-561a-4a74-bd68-343e76b9168d.lovable.app-1777406799331.png" },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0d3c5c2f-b7b9-4a8e-a349-8e62618bdd74/id-preview-d4ba03b9--df3997bc-561a-4a74-bd68-343e76b9168d.lovable.app-1777406799331.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0d3c5c2f-b7b9-4a8e-a349-8e62618bdd74/id-preview-d4ba03b9--df3997bc-561a-4a74-bd68-343e76b9168d.lovable.app-1777406799331.png",
+      },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [

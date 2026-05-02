@@ -6,9 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const NAV_ITEMS = [
-  { label: "Painel", to: "/dashboard", icon: LayoutDashboard },
-];
+const NAV_ITEMS = [{ label: "Painel", to: "/dashboard", icon: LayoutDashboard }];
 
 export function AppSidebar() {
   const { user, isAdmin, signOut } = useAuth();
@@ -30,8 +28,7 @@ export function AppSidebar() {
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-4">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
-          const active =
-            pathname === item.to || pathname.startsWith(item.to + "/");
+          const active = pathname === item.to || pathname.startsWith(item.to + "/");
           return (
             <Link
               key={item.to}
