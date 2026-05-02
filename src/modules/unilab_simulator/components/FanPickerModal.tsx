@@ -12,11 +12,48 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 
+export type FanPickerFamily =
+  | "axial"
+  | "centrifugal_forward"
+  | "centrifugal_backward"
+  | "centrifugal_radial"
+  | "mixed_flow"
+  | "tangential"
+  | "ec_plug"
+  | "unknown";
+
+const FAMILY_LABELS: Record<FanPickerFamily, string> = {
+  axial: "Axial",
+  centrifugal_forward: "Centrífugo (frente)",
+  centrifugal_backward: "Centrífugo (trás)",
+  centrifugal_radial: "Centrífugo (radial)",
+  mixed_flow: "Fluxo misto",
+  tangential: "Tangencial",
+  ec_plug: "Plug EC",
+  unknown: "Não classificado",
+};
+
 export interface FanPickerItem {
   id: string;
   manufacturer?: string;
   model?: string;
   airflow_m3h?: number;
+  /** Família construtiva (axial, centrífugo, etc.). */
+  family?: FanPickerFamily;
+  /** Série/linha do fabricante (ex.: TLI, FN, RDH). */
+  series?: string;
+  /** Diâmetro do rotor (mm). */
+  diameter_mm?: number;
+  /** Rotação (rpm). */
+  rpm?: number;
+  /** Potência absorvida (W). */
+  motor_power_w?: number;
+  /** Corrente nominal (A). */
+  motor_current_a?: number;
+  /** Frequência (Hz). */
+  frequency_hz?: number;
+  /** Tensão (V). */
+  voltage_v?: number;
 }
 
 interface Props {
