@@ -256,11 +256,41 @@ export function useCnCoilsCatalogs(): CnCoilsCatalogsState {
           ["fanElectricalData", "fanElectricalData.json"],
           ["pumpData", "pumpData.json"],
           ["compressorOutletTemperature", "compressorOutletTemperature.json"],
+          // LOTE FINAL — arrays
+          ["compressorCapacityPolynomials", "compressorCapacityPolynomials.json"],
+          ["compressorPowerPolynomials", "compressorPowerPolynomials.json"],
+          ["compressorCurrentPolynomials", "compressorCurrentPolynomials.json"],
+          ["tubesCatalog", "tubesCatalog.json"],
+          ["fansComplete", "fansComplete.json"],
+          ["refrigerantsLimits", "refrigerantsLimits.json"],
+          ["secondaryFluidsComplete", "secondaryFluidsComplete.json"],
+          ["liquidMixtures", "liquidMixtures.json"],
+          ["distributorKappaFull", "distributorKappaFull.json"],
+          ["pumpCurves", "pumpCurves.json"],
+          ["shellTubeCondenser", "shellTubeCondenser.json"],
+          ["collectionErrors", "collectionErrors.json"],
         ] as const).map(([key, file]) =>
           (async () => {
             try {
               const arr = await fetchJsonArray<unknown>(file);
               (next as unknown as Record<string, unknown>)[key] = arr;
+            } catch (err) {
+              errs[file] = err instanceof Error ? err.message : String(err);
+            }
+          })(),
+        ),
+        // LOTE FINAL — objetos compostos
+        ...([
+          ["compressorBackupPolynomials", "compressorBackupPolynomials.json"],
+          ["geometriesComplete", "geometriesComplete.json"],
+          ["fluidsThermoPhysical", "fluidsThermoPhysical.json"],
+          ["distributorComplete", "distributorComplete.json"],
+          ["pumpComplete", "pumpComplete.json"],
+        ] as const).map(([key, file]) =>
+          (async () => {
+            try {
+              const obj = await fetchJsonObject<unknown>(file);
+              (next as unknown as Record<string, unknown>)[key] = obj;
             } catch (err) {
               errs[file] = err instanceof Error ? err.message : String(err);
             }
