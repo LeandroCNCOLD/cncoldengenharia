@@ -126,6 +126,13 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
     }
   };
 
+  // Static pressure at current airflow for the selected axial fan (Pa)
+  const selectedFan = fans.find((f) => f.id === selectedFanId);
+  const fanStaticPressurePa = useMemo(() => {
+    if (!selectedFan?.axial || !(airFlow_m3h > 0)) return null;
+    return evaluateFanCurve(selectedFan.axial, airFlow_m3h);
+  }, [selectedFan, airFlow_m3h]);
+
   // ---- valores convertidos para a unidade exibida ----
   const totalCapW = result?.totalCapacityKw !== undefined ? result.totalCapacityKw * 1000 : undefined;
   const sensCapW = result?.sensibleCapacityKw !== undefined ? result.sensibleCapacityKw * 1000 : undefined;
