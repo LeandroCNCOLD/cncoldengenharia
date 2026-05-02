@@ -250,24 +250,21 @@ def detect_application(linha: str | None) -> str:
         return "unknown"
     u = linha.upper()
     if "AGRO" in u:
-        return "agro"
+        return "AGRO"
     if "HT" in u or "HIGH" in u:
-        return "ht"
+        return "HT"
     if "MT" in u or "MEDIUM" in u:
-        return "mt"
+        return "MT"
     if "LT" in u or "LOW" in u:
-        return "lt"
+        return "LT"
     if "CLIMATIZ" in u:
-        return "ht"
+        return "HT"
     return "unknown"
 
 
 def detect_family(modelo: str | None) -> str:
     if not modelo:
         return "unknown"
-    u = modelo.upper()
-    if "AGRO" in u:
-        return "agro"
     return "plugin"
 
 
