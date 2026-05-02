@@ -170,33 +170,6 @@ export function GeometryForm({
           </div>
         </fieldset>
       )}
-
-
-      {/* Campos físicos vindos da geometria (read-only) */}
-      {selected && (
-        <fieldset className="space-y-2 rounded-md border border-slate-200 bg-slate-50 p-3">
-          <legend className="px-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-            Campos da geometria (somente leitura)
-          </legend>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-            <ReadOnlyRow label="Passo de fileiras" value={selected.passo_fileiras_mm} unit="mm" />
-            <ReadOnlyRow label="Passo de tubos" value={selected.passo_tubos_mm} unit="mm" />
-            <ReadOnlyRow label="Ø externo do tubo" value={selected.diametro_externo_tubo_mm} unit="mm" />
-            <ReadOnlyRow label="Ø interno do tubo" value={selected.diametro_interno_tubo_mm} unit="mm" />
-            <ReadOnlyRow label="Espessura do tubo" value={selected.espessura_tubo_mm} unit="mm" />
-            <ReadOnlyRow label="Espessura da aleta" value={selected.espessura_aleta_mm} unit="mm" />
-            <ReadOnlyRow label="Forma da aleta" value={selected.forma_aleta} />
-            <ReadOnlyRow label="Tipo de bateria" value={selected.tipo_bateria} />
-            <ReadOnlyRow label="Fator de correção (aleta)" value={selected.fator_correcao_aleta} />
-            <ReadOnlyRow label="Fator de atrito (ar)" value={selected.fator_atrito_ar} />
-            <ReadOnlyRow label="Razão sup. internas" value={selected.razao_superficies_internas} />
-            <ReadOnlyRow label="Tubo liso" value={fmtBool(selected.tubo_liso)} />
-            <ReadOnlyRow label="Certificação AHRI" value={fmtBool(selected.certificacao_ahri)} />
-            <ReadOnlyRow label="Certificação Eurovent" value={fmtBool(selected.certificacao_eurovent)} />
-          </div>
-        </fieldset>
-      )}
-
       {/* Campos complementares manuais */}
       <div className="grid grid-cols-2 gap-3">
         <NumberField
