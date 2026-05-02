@@ -28,6 +28,8 @@ import { AgroConfigForm } from "../components/components/AgroConfigForm";
 import { ReheatCoilForm } from "../components/components/ReheatCoilForm";
 import { FrostConfigForm } from "../components/components/FrostConfigForm";
 import { ComponentCard } from "../components/components/ComponentCard";
+import { CompressorLibraryBrowser } from "../components/components/CompressorLibraryBrowser";
+import { FanLibraryBrowser } from "../components/components/FanLibraryBrowser";
 import { useComponentStore } from "../stores/useComponentStore";
 
 type ComponentTab =
@@ -289,6 +291,9 @@ export function ComponentsPage() {
             </div>
           ) : (
             <div className="space-y-4">
+              {activeTab === "compressor" && <CompressorLibraryBrowser />}
+              {activeTab === "fan" && <FanLibraryBrowser />}
+
               <div className="flex items-center justify-between">
                 <p className="text-sm text-slate-500">
                   {list.length}{" "}
