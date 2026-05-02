@@ -245,10 +245,47 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       fluidExtras: {},
       fluid: "R404A",
       fluidMassFlow_kg_h: 0,
-      fluidOperatingTemp_C: 0,
+      isMassFlowLocked: true,
+      fluidOperatingTemp_C: 45,
       fluidTempReference: "middle",
-      superheat_K: 0,
-      subcooling_K: 0,
+      superheat_K: 5,
+      subcooling_K: 3,
       foulingFactorFluid: 0,
+      materialPrices: { ...DEFAULT_MATERIAL_PRICES },
+      calculatedCost: 0,
+      tubeMaterialKey: "copper_kg",
+      finMaterialKey: "aluminum_kg",
     }),
 }));
+
+/**
+ * Calcula o custo a partir de um snapshot do estado.
+ * Defensivo: retorna 0 quando faltam dados (evita NaN/Infinity).
+ */
+function computeCostFromState(s: {
+  physicalInputs: Partial<UnilabPhysicalInputs>;
+  materialPrices: MaterialPrices;
+  tubeMaterialKey: MaterialKey;
+  finMaterialKey: MaterialKey;
+}): number {
+  const p = s.physicalInputs;
+  const tubesPerRow =
+    p.finnedHeightMm && p.tubePitchTransverseMm && p.tubePitchTransverseMm > 0
+      ? Math.max(1, Math.round(p.finnedHeightMm / p.tubePitchTransverseMm))
+      : 0;
+  const result = calculateBatteryCost({
+    tubesPerRow,
+    rows: p.rows ?? 0,
+    finnedLengthMm: p.finnedLengthMm ?? 0,
+    finnedHeightMm: p.finnedHeightMm ?? 0,
+    finPitchMm: p.finPitchMm ?? 0,
+    tubeOuterDiameterMm: p.tubeOuterDiameterMm ?? 0,
+    tubeInnerDiameterMm: p.tubeInnerDiameterMm ?? 0,
+    finThicknessMm: p.finThicknessMm ?? 0,
+    tubePitchTransverseMm: p.tubePitchTransverseMm ?? 0,
+    tubeMaterial: s.tubeMaterialKey,
+    finMaterial: s.finMaterialKey,
+    prices: s.materialPrices,
+  });
+  return result.totalCost;
+}
