@@ -19,10 +19,12 @@ export function AirSidePanel() {
   const tempInDB_C = useUnilabSimulationStore((s) => s.tempInDB_C);
   const rhIn_pct = useUnilabSimulationStore((s) => s.rhIn_pct);
   const foulingFactorAir = useUnilabSimulationStore((s) => s.foulingFactorAir);
+  const selectedFanId = useUnilabSimulationStore((s) => s.selectedFanId);
   const setAirFlow = useUnilabSimulationStore((s) => s.setAirFlow);
   const setTempInDB = useUnilabSimulationStore((s) => s.setTempInDB);
   const setRhIn = useUnilabSimulationStore((s) => s.setRhIn);
   const setFoulingFactorAir = useUnilabSimulationStore((s) => s.setFoulingFactorAir);
+  const setSelectedFan = useUnilabSimulationStore((s) => s.setSelectedFan);
 
   const [fans, setFans] = useState<FanCatalogItem[]>([]);
   const [selectedFanId, setSelectedFanId] = useState<string>("");
