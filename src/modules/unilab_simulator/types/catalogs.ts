@@ -210,6 +210,37 @@ export interface DistributorHoleSize {
   [extra: string]: unknown;
 }
 
+export interface EngineErrorTranslation {
+  message: string | null;
+  technical: string | null;
+  note: string | null;
+}
+
+export interface EngineErrorMessage {
+  id: number | null;
+  phase: string | null;
+  exchangerType: string | null;
+  enabled: boolean;
+  stopCalculation: boolean;
+  askToContinue: boolean;
+  /** "1" = info, "2" = aviso, "3" = erro */
+  level: string | null;
+  condition: string | null;
+  translations: Record<string, EngineErrorTranslation>;
+}
+
+/** Resolve o texto localizado de uma mensagem do motor pelo seu id. */
+export function getEngineWarningText(
+  engineErrors: EngineErrorMessage[],
+  warningId: number,
+  lang = "pt",
+): string {
+  const entry = engineErrors.find((e) => e.id === warningId);
+  if (!entry) return `Aviso #${warningId}`;
+  const t = entry.translations[lang] ?? entry.translations.en;
+  return t?.message ?? `Aviso #${warningId}`;
+}
+
 /**
  * Resolve o Kappa do distribuidor para um fluido e Tevap (°C),
  * usando o ponto de temperatura mais próximo disponível na tabela.
