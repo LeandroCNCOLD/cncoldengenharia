@@ -15,6 +15,7 @@ import {
 } from "../components/WorkspaceSidebar";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { useUnilabSimulation } from "../hooks/useUnilabSimulation";
+import { useUnilabInputBridge } from "../hooks/useUnilabInputBridge";
 import {
   validatePhysicalInputs,
   validateThermoInputs,
