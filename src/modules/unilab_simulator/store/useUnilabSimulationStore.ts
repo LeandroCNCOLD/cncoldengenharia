@@ -83,6 +83,17 @@ interface UnilabSimulationStore {
   superheat_K: number;
   subcooling_K: number;
   foulingFactorFluid: number;
+  /**
+   * Temperatura emparelhada (lado oposto):
+   *  - Evaporadores: Temperatura de Condensação (Tc)
+   *  - Condensadores: Temperatura de Evaporação (Te)
+   * Necessária para o ponto de equilíbrio com compressor.
+   */
+  pairedTempC: number | null;
+  /** Sobreaquecimento de descarga (gás quente entrando no condensador). */
+  dischargeSuperheatK: number | null;
+  /** Compressor selecionado (acopla o cálculo ao polinômio ASHRAE). */
+  selectedCompressorId?: string;
   setFluid: (val: string) => void;
   setFluidMassFlow: (val: number) => void;
   toggleMassFlowLock: () => void;
@@ -91,6 +102,9 @@ interface UnilabSimulationStore {
   setSuperheat: (val: number) => void;
   setSubcooling: (val: number) => void;
   setFoulingFactorFluid: (val: number) => void;
+  setPairedTempC: (val: number | null) => void;
+  setDischargeSuperheatK: (val: number | null) => void;
+  setSelectedCompressor: (id: string | undefined) => void;
 
   // Etapa 3.6 — Custo da bateria
   materialPrices: MaterialPrices;
@@ -165,6 +179,12 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   setSuperheat: (val) => set({ superheat_K: val }),
   setSubcooling: (val) => set({ subcooling_K: val }),
   setFoulingFactorFluid: (val) => set({ foulingFactorFluid: val }),
+  pairedTempC: null,
+  dischargeSuperheatK: null,
+  selectedCompressorId: undefined,
+  setPairedTempC: (val) => set({ pairedTempC: val }),
+  setDischargeSuperheatK: (val) => set({ dischargeSuperheatK: val }),
+  setSelectedCompressor: (id) => set({ selectedCompressorId: id }),
 
   // Etapa 3.6 — Custo da bateria
   materialPrices: { ...DEFAULT_MATERIAL_PRICES },
@@ -316,6 +336,9 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       superheat_K: 5,
       subcooling_K: 3,
       foulingFactorFluid: 0,
+      pairedTempC: null,
+      dischargeSuperheatK: null,
+      selectedCompressorId: undefined,
       materialPrices: { ...DEFAULT_MATERIAL_PRICES },
       calculatedCost: 0,
       tubeMaterialKey: "copper_kg",
