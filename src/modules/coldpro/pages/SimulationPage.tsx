@@ -261,6 +261,7 @@ export function SimulationPage() {
           )}
           <CompressorForm value={compressor} onChange={setCompressor} />
           <CondenserForm value={condenser} onChange={setCondenser} />
+          <EvaporatorForm value={evaporator} onChange={setEvaporator} />
           <SystemConditionsForm value={conditions} onChange={setConditions} />
           <ModeGate minMode="professional">
             <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
