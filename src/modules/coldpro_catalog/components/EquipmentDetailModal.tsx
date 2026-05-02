@@ -37,6 +37,10 @@ function fmt(value: unknown, suffix = "", decimals = 2): string {
   return `${String(value)}${suffix ? " " + suffix : ""}`;
 }
 
+function metersToMm(value?: number): number | undefined {
+  return value === undefined ? undefined : value * 1000;
+}
+
 const VALIDATION_LABEL: Record<ValidationStatus, string> = {
   pending: "Pendente",
   analyzed: "Analisado",
@@ -322,13 +326,15 @@ export function EquipmentDetailModal({ equipment, onClose }: Props) {
                 <Field label="Vazão mássica ar" value={fmt(equipment.reheatAirMassFlowKgS, "kg/s", 3)} fieldKey="reheatAirMassFlowKgS" missingSet={missingByBlock.get("reheat")} />
                 <Field label="T condensação" value={fmt(equipment.reheatTCondensingC, "°C", 1)} fieldKey="reheatTCondensingC" missingSet={missingByBlock.get("reheat")} />
                 <Field label="T gás quente" value={fmt(equipment.reheatTHotGasInC, "°C", 1)} fieldKey="reheatTHotGasInC" missingSet={missingByBlock.get("reheat")} />
-                <Field label="Ø tubo externo" value={fmt(equipment.reheatTubeOuterDiameterM, "m", 4)} fieldKey="reheatTubeOuterDiameterM" missingSet={missingByBlock.get("reheat")} />
-                <Field label="Espessura tubo" value={fmt(equipment.reheatTubeThicknessM, "m", 4)} fieldKey="reheatTubeThicknessM" missingSet={missingByBlock.get("reheat")} />
-                <Field label="Passo aleta" value={fmt(equipment.reheatFinSpacingM, "m", 4)} fieldKey="reheatFinSpacingM" missingSet={missingByBlock.get("reheat")} />
-                <Field label="Espessura aleta" value={fmt(equipment.reheatFinThicknessM, "m", 4)} fieldKey="reheatFinThicknessM" missingSet={missingByBlock.get("reheat")} />
-                <Field label="Pitch transversal" value={fmt(equipment.reheatTubePitchTransversalM, "m", 4)} fieldKey="reheatTubePitchTransversalM" missingSet={missingByBlock.get("reheat")} />
-                <Field label="Pitch longitudinal" value={fmt(equipment.reheatTubePitchLongitudinalM, "m", 4)} fieldKey="reheatTubePitchLongitudinalM" missingSet={missingByBlock.get("reheat")} />
-                <Field label="Comprimento" value={fmt(equipment.reheatCoilLengthM, "m")} fieldKey="reheatCoilLengthM" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Rows" value={fmt(equipment.reheatRows, "", 0)} />
+                <Field label="Tubos/row" value={fmt(equipment.reheatTubesPerRow, "", 0)} />
+                <Field label="Ø tubo externo" value={fmt(metersToMm(equipment.reheatTubeOuterDiameterM), "mm")} fieldKey="reheatTubeOuterDiameterM" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Espessura tubo" value={fmt(metersToMm(equipment.reheatTubeThicknessM), "mm", 3)} fieldKey="reheatTubeThicknessM" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Passo aleta" value={fmt(equipment.reheatFinSpacingMm ?? metersToMm(equipment.reheatFinSpacingM), "mm")} fieldKey="reheatFinSpacingM" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Espessura aleta" value={fmt(metersToMm(equipment.reheatFinThicknessM), "mm", 3)} fieldKey="reheatFinThicknessM" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Pitch transversal" value={fmt(metersToMm(equipment.reheatTubePitchTransversalM), "mm")} fieldKey="reheatTubePitchTransversalM" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Pitch longitudinal" value={fmt(metersToMm(equipment.reheatTubePitchLongitudinalM), "mm")} fieldKey="reheatTubePitchLongitudinalM" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Comprimento" value={fmt(equipment.reheatCoilLengthMm ?? metersToMm(equipment.reheatCoilLengthM), "mm", 0)} fieldKey="reheatCoilLengthM" missingSet={missingByBlock.get("reheat")} />
                 <Field label="Circuitos" value={fmt(equipment.reheatCircuits, "", 0)} fieldKey="reheatCircuits" missingSet={missingByBlock.get("reheat")} />
                 <Field label="Material tubo" value={equipment.reheatTubeMaterial} fieldKey="reheatTubeMaterial" missingSet={missingByBlock.get("reheat")} />
                 <Field label="Material aleta" value={equipment.reheatFinMaterial} fieldKey="reheatFinMaterial" missingSet={missingByBlock.get("reheat")} />
