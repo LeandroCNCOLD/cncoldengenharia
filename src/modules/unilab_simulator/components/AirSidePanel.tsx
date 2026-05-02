@@ -1,10 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import {
   validateAirSideInputs,
   type PsychrometricValidationResult,
 } from "../services/psychrometrics";
 import type { UnilabSimulationResult } from "../types/unilab.types";
+import { UnitSelect } from "./UnitSelect";
+import {
+  AIRFLOW_UNITS,
+  CAPACITY_UNITS,
+  PRESSURE_UNITS,
+  TEMP_UNITS,
+  VELOCITY_UNITS,
+  airFlowConv,
+  capacityConv,
+  pressureConv,
+  tempConv,
+  velocityConv,
+  type AirFlowUnit,
+  type CapacityUnit,
+  type PressureUnit,
+  type TempUnit,
+  type VelocityUnit,
+} from "../utils/unitConversions";
 
 interface AirSidePanelProps {
   result?: UnilabSimulationResult;
@@ -14,20 +32,6 @@ function fmt(n: number | undefined, digits = 1): string {
   if (n === undefined || !Number.isFinite(n)) return "---";
   return n.toFixed(digits);
 }
-
-/**
- * AirSidePanel — replica o bloco "LADO VENTILAÇÃO" do Unilab Coils 9.0.
- *
- * Layout:
- *   Linha por linha: [Label] [Unidade] [Input editável]  | [Obt.]
- *   Inputs editáveis ficam à esquerda; coluna "Obt." (Obtido) à direita
- *   mostra resultados read-only (--- por enquanto, calculados na Etapa 5).
- *
- * Regras Etapa 3 (intencionais):
- *   - Sem cálculo termodinâmico
- *   - Ventilador apenas preenche vazão (não simula curva)
- *   - Outputs read-only com "---"
- */
 
 interface FanCatalogItem {
   id: string;
@@ -44,13 +48,26 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
   const rhIn_pct = useUnilabSimulationStore((s) => s.rhIn_pct);
   const foulingFactorAir = useUnilabSimulationStore((s) => s.foulingFactorAir);
   const selectedFanId = useUnilabSimulationStore((s) => s.selectedFanId);
+  const calcMode = useUnilabSimulationStore((s) => s.calcMode);
+  const targetCapacityW = useUnilabSimulationStore((s) => s.targetCapacityW);
   const setAirFlow = useUnilabSimulationStore((s) => s.setAirFlow);
   const setTempInDB = useUnilabSimulationStore((s) => s.setTempInDB);
   const setRhIn = useUnilabSimulationStore((s) => s.setRhIn);
   const setFoulingFactorAir = useUnilabSimulationStore((s) => s.setFoulingFactorAir);
   const setSelectedFan = useUnilabSimulationStore((s) => s.setSelectedFan);
+  const setTargetCapacityW = useUnilabSimulationStore((s) => s.setTargetCapacityW);
 
   const [fans, setFans] = useState<FanCatalogItem[]>([]);
+
+  // Unidades selecionadas por linha (estado local — não afeta o motor)
+  const [uCapTotal, setUCapTotal] = useState<CapacityUnit>("W");
+  const [uCapSens, setUCapSens] = useState<CapacityUnit>("W");
+  const [uCapLat, setUCapLat] = useState<CapacityUnit>("W");
+  const [uAirFlow, setUAirFlow] = useState<AirFlowUnit>("m3_h");
+  const [uVel, setUVel] = useState<VelocityUnit>("m_s");
+  const [uTempIn, setUTempIn] = useState<TempUnit>("C");
+  const [uTempOut, setUTempOut] = useState<TempUnit>("C");
+  const [uPdrop, setUPdrop] = useState<PressureUnit>("Pa");
 
   useEffect(() => {
     let cancelled = false;
@@ -86,12 +103,55 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
     }
   };
 
+  // ---- valores convertidos para a unidade exibida ----
+  const totalCapW = result?.totalCapacityKw !== undefined ? result.totalCapacityKw * 1000 : undefined;
+  const sensCapW = result?.sensibleCapacityKw !== undefined ? result.sensibleCapacityKw * 1000 : undefined;
+  const latCapW = result?.latentCapacityKw !== undefined ? result.latentCapacityKw * 1000 : undefined;
+
+  const obtCapTotal = useMemo(
+    () => (totalCapW === undefined ? "---" : capacityConv.fromCanonical(totalCapW, uCapTotal).toFixed(uCapTotal === "TR" || uCapTotal === "kW" ? 3 : 1)),
+    [totalCapW, uCapTotal],
+  );
+  const obtCapSens = useMemo(
+    () => (sensCapW === undefined ? "---" : capacityConv.fromCanonical(sensCapW, uCapSens).toFixed(uCapSens === "TR" || uCapSens === "kW" ? 3 : 1)),
+    [sensCapW, uCapSens],
+  );
+  const obtCapLat = useMemo(
+    () => (latCapW === undefined ? "---" : capacityConv.fromCanonical(latCapW, uCapLat).toFixed(uCapLat === "TR" || uCapLat === "kW" ? 3 : 1)),
+    [latCapW, uCapLat],
+  );
+  const obtAirFlow =
+    airFlow_m3h > 0 ? airFlowConv.fromCanonical(airFlow_m3h, uAirFlow).toFixed(1) : "---";
+  const obtVel =
+    result?.faceVelocityMs !== undefined
+      ? velocityConv.fromCanonical(result.faceVelocityMs, uVel).toFixed(2)
+      : "---";
+  const obtTempIn = tempConv.fromCanonical(tempInDB_C, uTempIn).toFixed(1);
+  const obtTempOut =
+    result?.airOutletTempC !== undefined
+      ? tempConv.fromCanonical(result.airOutletTempC, uTempOut).toFixed(1)
+      : "---";
+  const obtPdrop =
+    result?.airPressureDropPa !== undefined
+      ? pressureConv.fromCanonical(result.airPressureDropPa, uPdrop).toFixed(uPdrop === "Pa" ? 0 : 3)
+      : "---";
+
+  // Capacidade alvo (modo Desenho) — input editável na unidade selecionada
+  const targetCapInUnit = useMemo(
+    () =>
+      targetCapacityW > 0
+        ? capacityConv.fromCanonical(targetCapacityW, uCapTotal)
+        : 0,
+    [targetCapacityW, uCapTotal],
+  );
+
+  const isDesign = calcMode === "design";
+
   return (
     <div className="rounded border border-slate-300 bg-slate-50 shadow-sm">
-      {/* Header estilo UNILAB: título azul + coluna "Obt." */}
       <div className="grid grid-cols-[1fr_88px] border-b border-slate-300 bg-[#1E6FD9] text-white">
         <div className="px-3 py-1.5 text-center text-xs font-bold uppercase tracking-wider">
-          Lado Ventilação
+          Lado Ventilação {isDesign && <span className="ml-2 rounded bg-amber-400 px-1.5 py-0.5 text-[9px] text-amber-900">DESENHO</span>}
         </div>
         <div className="border-l border-white/30 px-2 py-1.5 text-center text-xs font-bold">
           Obt.
@@ -99,44 +159,40 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
       </div>
 
       <div className="space-y-1.5 p-2">
-        {/* 1. CAPACIDADE TOTAL — output (W) */}
+        {/* CAPACIDADE TOTAL — input em modo Desenho, output em Verificar */}
         <Row
           label="Capacidade Total"
-          unit="W"
-          input={<DisabledInput />}
-          obtained={
-            result?.totalCapacityKw !== undefined
-              ? (result.totalCapacityKw * 1000).toFixed(0)
-              : "---"
+          unitNode={<UnitSelect value={uCapTotal} onChange={setUCapTotal} options={CAPACITY_UNITS} />}
+          input={
+            isDesign ? (
+              <NumberCell
+                value={targetCapInUnit}
+                onChange={(v) => setTargetCapacityW(capacityConv.toCanonical(v, uCapTotal))}
+                min={0}
+              />
+            ) : (
+              <DisabledInput />
+            )
           }
+          obtained={obtCapTotal}
         />
-        {/* 1b. CAPACIDADE SENSÍVEL (V2) */}
         <Row
           label="Capacidade Sensível"
-          unit="W"
+          unitNode={<UnitSelect value={uCapSens} onChange={setUCapSens} options={CAPACITY_UNITS} />}
           input={<DisabledInput />}
-          obtained={
-            result?.sensibleCapacityKw !== undefined
-              ? (result.sensibleCapacityKw * 1000).toFixed(0)
-              : "---"
-          }
+          obtained={obtCapSens}
         />
-        {/* 1c. CAPACIDADE LATENTE (V2) */}
         <Row
           label="Capacidade Latente"
-          unit="W"
+          unitNode={<UnitSelect value={uCapLat} onChange={setUCapLat} options={CAPACITY_UNITS} />}
           input={<DisabledInput />}
-          obtained={
-            result?.latentCapacityKw !== undefined
-              ? (result.latentCapacityKw * 1000).toFixed(0)
-              : "---"
-          }
+          obtained={obtCapLat}
         />
 
-        {/* 2. VENTILADOR — dropdown que preenche vazão */}
+        {/* VENTILADOR */}
         <Row
           label="Ventilador"
-          unit="m³/h"
+          unitNode={<UnitSelect value={uAirFlow} onChange={setUAirFlow} options={AIRFLOW_UNITS} />}
           input={
             <select
               value={selectedFanId ?? ""}
@@ -160,59 +216,60 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
               ))}
             </select>
           }
-          obtained={airFlow_m3h > 0 ? airFlow_m3h.toFixed(1) : "---"}
+          obtained={obtAirFlow}
         />
 
-        {/* 3. VELOCIDADE FRONTAL — calculada pelo motor */}
+        {/* VELOCIDADE FRONTAL */}
         <Row
           label="Velocidade Frontal"
-          unit="m/s"
+          unitNode={<UnitSelect value={uVel} onChange={setUVel} options={VELOCITY_UNITS} />}
           input={<DisabledInput />}
-          obtained={fmt(result?.faceVelocityMs, 2)}
+          obtained={obtVel}
         />
 
-        {/* 4. FAN WORKING @ % — info do ventilador (futuro) */}
         <Row
           label="Fan working @"
-          unit="%"
+          unitNode={<UnitText text="%" />}
           input={<DisabledInput />}
           obtained="---"
         />
 
-        {/* 5. TEMP. ENTRADA DB + UR ENTRADA (par) */}
+        {/* TEMP / RH ENTRADA */}
         <Row
           label="Temperatura de Entrada DB"
-          unit="°C"
-          input={<NumberCell value={tempInDB_C} onChange={setTempInDB} />}
-          obtained={fmt(tempInDB_C, 1)}
+          unitNode={<UnitSelect value={uTempIn} onChange={setUTempIn} options={TEMP_UNITS} />}
+          input={
+            <NumberCell
+              value={tempConv.fromCanonical(tempInDB_C, uTempIn)}
+              onChange={(v) => setTempInDB(tempConv.toCanonical(v, uTempIn))}
+            />
+          }
+          obtained={obtTempIn}
         />
         <Row
           label="Umidade Relativa de Entrada"
-          unit="%"
-          input={
-            <NumberCell value={rhIn_pct} onChange={setRhIn} min={0} max={100} />
-          }
+          unitNode={<UnitText text="%" />}
+          input={<NumberCell value={rhIn_pct} onChange={setRhIn} min={0} max={100} />}
           obtained={fmt(rhIn_pct, 1)}
         />
 
-        {/* 6. TEMP. SAÍDA DB + UR SAÍDA (par — outputs do motor) */}
+        {/* TEMP / RH SAÍDA */}
         <Row
           label="Temperatura de Saída DB"
-          unit="°C"
+          unitNode={<UnitSelect value={uTempOut} onChange={setUTempOut} options={TEMP_UNITS} />}
           input={<DisabledInput />}
-          obtained={fmt(result?.airOutletTempC, 1)}
+          obtained={obtTempOut}
         />
         <Row
           label="Umidade Relativa de Saída"
-          unit="%"
+          unitNode={<UnitText text="%" />}
           input={<DisabledInput />}
           obtained={fmt(result?.airOutletRhPercent, 1)}
         />
 
-        {/* 7. FATOR DE ERRO (FOULING) */}
         <Row
           label="Fator de Erro"
-          unit="(m²·K)/W"
+          unitNode={<UnitText text="(m²·K)/W" />}
           input={
             <NumberCell
               value={foulingFactorAir}
@@ -224,12 +281,11 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
           obtained="---"
         />
 
-        {/* 8. QUEDA DE PRESSÃO — output do motor */}
         <Row
           label="Queda de Pressão"
-          unit="Pa"
+          unitNode={<UnitSelect value={uPdrop} onChange={setUPdrop} options={PRESSURE_UNITS} />}
           input={<DisabledInput />}
-          obtained={fmt(result?.airPressureDropPa, 0)}
+          obtained={obtPdrop}
         />
       </div>
 
@@ -246,24 +302,22 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
 
 function Row({
   label,
-  unit,
+  unitNode,
   input,
   obtained,
 }: {
   label: string;
-  unit: string;
+  unitNode: React.ReactNode;
   input: React.ReactNode;
   obtained: string;
 }) {
   const isEmpty = obtained === "---" || obtained === "";
   return (
-    <div className="grid grid-cols-[160px_60px_1fr_88px] items-center gap-1.5">
+    <div className="grid grid-cols-[160px_84px_1fr_88px] items-center gap-1.5">
       <label className="truncate text-[11px] font-medium text-slate-700" title={label}>
         {label}
       </label>
-      <div className="rounded border border-slate-300 bg-white px-1.5 py-1 text-center text-[11px] text-slate-600">
-        {unit}
-      </div>
+      <div>{unitNode}</div>
       <div>{input}</div>
       <div
         className={`rounded border border-emerald-300 bg-emerald-100 px-2 py-1 text-right font-mono text-[11px] ${
@@ -272,6 +326,14 @@ function Row({
       >
         {obtained}
       </div>
+    </div>
+  );
+}
+
+function UnitText({ text }: { text: string }) {
+  return (
+    <div className="rounded border border-slate-300 bg-white px-1.5 py-1 text-center text-[11px] text-slate-600">
+      {text}
     </div>
   );
 }
