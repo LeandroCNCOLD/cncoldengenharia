@@ -192,10 +192,21 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
 
   setPhysicalInputs: (patch) =>
     set((s) => {
-      const physicalInputs = { ...s.physicalInputs, ...patch };
+      const merged = { ...s.physicalInputs, ...patch };
+      // Sincroniza rowFinPitchesMm com rows quando passo variável estiver ativo.
+      if (merged.isVariableFinPitch) {
+        const rows = Math.max(1, Math.floor(merged.rows ?? 1));
+        const current = merged.rowFinPitchesMm ?? [];
+        const fallback = snapFinPitchToTool(merged.finPitchMm ?? 2.5);
+        const next: number[] = [];
+        for (let i = 0; i < rows; i++) {
+          next.push(current[i] ?? current[current.length - 1] ?? fallback);
+        }
+        merged.rowFinPitchesMm = next;
+      }
       return {
-        physicalInputs,
-        calculatedCost: computeCostFromState({ ...s, physicalInputs }),
+        physicalInputs: merged,
+        calculatedCost: computeCostFromState({ ...s, physicalInputs: merged }),
       };
     }),
   setThermoInputs: (patch) =>
