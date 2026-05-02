@@ -9,25 +9,20 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ColdproRouteImport } from './routes/coldpro'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ColdproIndexRouteImport } from './routes/coldpro.index'
-import { Route as ColdproSimulationRouteImport } from './routes/coldpro.simulation'
-import { Route as ColdproRegistryRouteImport } from './routes/coldpro.registry'
-import { Route as ColdproRecordRouteImport } from './routes/coldpro.record'
-import { Route as ColdproMapRouteImport } from './routes/coldpro.map'
-import { Route as ColdproExportRouteImport } from './routes/coldpro.export'
-import { Route as ColdproCurveRouteImport } from './routes/coldpro.curve'
-import { Route as ColdproAuditRouteImport } from './routes/coldpro.audit'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppColdproRouteImport } from './routes/_app/coldpro'
+import { Route as AppColdproIndexRouteImport } from './routes/_app/coldpro.index'
+import { Route as AppColdproSimulationRouteImport } from './routes/_app/coldpro.simulation'
+import { Route as AppColdproRegistryRouteImport } from './routes/_app/coldpro.registry'
+import { Route as AppColdproRecordRouteImport } from './routes/_app/coldpro.record'
+import { Route as AppColdproMapRouteImport } from './routes/_app/coldpro.map'
+import { Route as AppColdproExportRouteImport } from './routes/_app/coldpro.export'
+import { Route as AppColdproCurveRouteImport } from './routes/_app/coldpro.curve'
+import { Route as AppColdproAuditRouteImport } from './routes/_app/coldpro.audit'
 
-const ColdproRoute = ColdproRouteImport.update({
-  id: '/coldpro',
-  path: '/coldpro',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -42,94 +37,99 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ColdproIndexRoute = ColdproIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ColdproRoute,
-} as any)
-const ColdproSimulationRoute = ColdproSimulationRouteImport.update({
-  id: '/simulation',
-  path: '/simulation',
-  getParentRoute: () => ColdproRoute,
-} as any)
-const ColdproRegistryRoute = ColdproRegistryRouteImport.update({
-  id: '/registry',
-  path: '/registry',
-  getParentRoute: () => ColdproRoute,
-} as any)
-const ColdproRecordRoute = ColdproRecordRouteImport.update({
-  id: '/record',
-  path: '/record',
-  getParentRoute: () => ColdproRoute,
-} as any)
-const ColdproMapRoute = ColdproMapRouteImport.update({
-  id: '/map',
-  path: '/map',
-  getParentRoute: () => ColdproRoute,
-} as any)
-const ColdproExportRoute = ColdproExportRouteImport.update({
-  id: '/export',
-  path: '/export',
-  getParentRoute: () => ColdproRoute,
-} as any)
-const ColdproCurveRoute = ColdproCurveRouteImport.update({
-  id: '/curve',
-  path: '/curve',
-  getParentRoute: () => ColdproRoute,
-} as any)
-const ColdproAuditRoute = ColdproAuditRouteImport.update({
-  id: '/audit',
-  path: '/audit',
-  getParentRoute: () => ColdproRoute,
-} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppColdproRoute = AppColdproRouteImport.update({
+  id: '/coldpro',
+  path: '/coldpro',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppColdproIndexRoute = AppColdproIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppColdproRoute,
+} as any)
+const AppColdproSimulationRoute = AppColdproSimulationRouteImport.update({
+  id: '/simulation',
+  path: '/simulation',
+  getParentRoute: () => AppColdproRoute,
+} as any)
+const AppColdproRegistryRoute = AppColdproRegistryRouteImport.update({
+  id: '/registry',
+  path: '/registry',
+  getParentRoute: () => AppColdproRoute,
+} as any)
+const AppColdproRecordRoute = AppColdproRecordRouteImport.update({
+  id: '/record',
+  path: '/record',
+  getParentRoute: () => AppColdproRoute,
+} as any)
+const AppColdproMapRoute = AppColdproMapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => AppColdproRoute,
+} as any)
+const AppColdproExportRoute = AppColdproExportRouteImport.update({
+  id: '/export',
+  path: '/export',
+  getParentRoute: () => AppColdproRoute,
+} as any)
+const AppColdproCurveRoute = AppColdproCurveRouteImport.update({
+  id: '/curve',
+  path: '/curve',
+  getParentRoute: () => AppColdproRoute,
+} as any)
+const AppColdproAuditRoute = AppColdproAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AppColdproRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/coldpro': typeof ColdproRouteWithChildren
+  '/coldpro': typeof AppColdproRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
-  '/coldpro/audit': typeof ColdproAuditRoute
-  '/coldpro/curve': typeof ColdproCurveRoute
-  '/coldpro/export': typeof ColdproExportRoute
-  '/coldpro/map': typeof ColdproMapRoute
-  '/coldpro/record': typeof ColdproRecordRoute
-  '/coldpro/registry': typeof ColdproRegistryRoute
-  '/coldpro/simulation': typeof ColdproSimulationRoute
-  '/coldpro/': typeof ColdproIndexRoute
+  '/coldpro/audit': typeof AppColdproAuditRoute
+  '/coldpro/curve': typeof AppColdproCurveRoute
+  '/coldpro/export': typeof AppColdproExportRoute
+  '/coldpro/map': typeof AppColdproMapRoute
+  '/coldpro/record': typeof AppColdproRecordRoute
+  '/coldpro/registry': typeof AppColdproRegistryRoute
+  '/coldpro/simulation': typeof AppColdproSimulationRoute
+  '/coldpro/': typeof AppColdproIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AppDashboardRoute
-  '/coldpro/audit': typeof ColdproAuditRoute
-  '/coldpro/curve': typeof ColdproCurveRoute
-  '/coldpro/export': typeof ColdproExportRoute
-  '/coldpro/map': typeof ColdproMapRoute
-  '/coldpro/record': typeof ColdproRecordRoute
-  '/coldpro/registry': typeof ColdproRegistryRoute
-  '/coldpro/simulation': typeof ColdproSimulationRoute
-  '/coldpro': typeof ColdproIndexRoute
+  '/coldpro/audit': typeof AppColdproAuditRoute
+  '/coldpro/curve': typeof AppColdproCurveRoute
+  '/coldpro/export': typeof AppColdproExportRoute
+  '/coldpro/map': typeof AppColdproMapRoute
+  '/coldpro/record': typeof AppColdproRecordRoute
+  '/coldpro/registry': typeof AppColdproRegistryRoute
+  '/coldpro/simulation': typeof AppColdproSimulationRoute
+  '/coldpro': typeof AppColdproIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
-  '/coldpro': typeof ColdproRouteWithChildren
+  '/_app/coldpro': typeof AppColdproRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
-  '/coldpro/audit': typeof ColdproAuditRoute
-  '/coldpro/curve': typeof ColdproCurveRoute
-  '/coldpro/export': typeof ColdproExportRoute
-  '/coldpro/map': typeof ColdproMapRoute
-  '/coldpro/record': typeof ColdproRecordRoute
-  '/coldpro/registry': typeof ColdproRegistryRoute
-  '/coldpro/simulation': typeof ColdproSimulationRoute
-  '/coldpro/': typeof ColdproIndexRoute
+  '/_app/coldpro/audit': typeof AppColdproAuditRoute
+  '/_app/coldpro/curve': typeof AppColdproCurveRoute
+  '/_app/coldpro/export': typeof AppColdproExportRoute
+  '/_app/coldpro/map': typeof AppColdproMapRoute
+  '/_app/coldpro/record': typeof AppColdproRecordRoute
+  '/_app/coldpro/registry': typeof AppColdproRegistryRoute
+  '/_app/coldpro/simulation': typeof AppColdproSimulationRoute
+  '/_app/coldpro/': typeof AppColdproIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -164,34 +164,26 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/auth'
-    | '/coldpro'
+    | '/_app/coldpro'
     | '/_app/dashboard'
-    | '/coldpro/audit'
-    | '/coldpro/curve'
-    | '/coldpro/export'
-    | '/coldpro/map'
-    | '/coldpro/record'
-    | '/coldpro/registry'
-    | '/coldpro/simulation'
-    | '/coldpro/'
+    | '/_app/coldpro/audit'
+    | '/_app/coldpro/curve'
+    | '/_app/coldpro/export'
+    | '/_app/coldpro/map'
+    | '/_app/coldpro/record'
+    | '/_app/coldpro/registry'
+    | '/_app/coldpro/simulation'
+    | '/_app/coldpro/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
-  ColdproRoute: typeof ColdproRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/coldpro': {
-      id: '/coldpro'
-      path: '/coldpro'
-      fullPath: '/coldpro'
-      preLoaderRoute: typeof ColdproRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -213,62 +205,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/coldpro/': {
-      id: '/coldpro/'
-      path: '/'
-      fullPath: '/coldpro/'
-      preLoaderRoute: typeof ColdproIndexRouteImport
-      parentRoute: typeof ColdproRoute
-    }
-    '/coldpro/simulation': {
-      id: '/coldpro/simulation'
-      path: '/simulation'
-      fullPath: '/coldpro/simulation'
-      preLoaderRoute: typeof ColdproSimulationRouteImport
-      parentRoute: typeof ColdproRoute
-    }
-    '/coldpro/registry': {
-      id: '/coldpro/registry'
-      path: '/registry'
-      fullPath: '/coldpro/registry'
-      preLoaderRoute: typeof ColdproRegistryRouteImport
-      parentRoute: typeof ColdproRoute
-    }
-    '/coldpro/record': {
-      id: '/coldpro/record'
-      path: '/record'
-      fullPath: '/coldpro/record'
-      preLoaderRoute: typeof ColdproRecordRouteImport
-      parentRoute: typeof ColdproRoute
-    }
-    '/coldpro/map': {
-      id: '/coldpro/map'
-      path: '/map'
-      fullPath: '/coldpro/map'
-      preLoaderRoute: typeof ColdproMapRouteImport
-      parentRoute: typeof ColdproRoute
-    }
-    '/coldpro/export': {
-      id: '/coldpro/export'
-      path: '/export'
-      fullPath: '/coldpro/export'
-      preLoaderRoute: typeof ColdproExportRouteImport
-      parentRoute: typeof ColdproRoute
-    }
-    '/coldpro/curve': {
-      id: '/coldpro/curve'
-      path: '/curve'
-      fullPath: '/coldpro/curve'
-      preLoaderRoute: typeof ColdproCurveRouteImport
-      parentRoute: typeof ColdproRoute
-    }
-    '/coldpro/audit': {
-      id: '/coldpro/audit'
-      path: '/audit'
-      fullPath: '/coldpro/audit'
-      preLoaderRoute: typeof ColdproAuditRouteImport
-      parentRoute: typeof ColdproRoute
-    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
@@ -276,49 +212,114 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/coldpro': {
+      id: '/_app/coldpro'
+      path: '/coldpro'
+      fullPath: '/coldpro'
+      preLoaderRoute: typeof AppColdproRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/coldpro/': {
+      id: '/_app/coldpro/'
+      path: '/'
+      fullPath: '/coldpro/'
+      preLoaderRoute: typeof AppColdproIndexRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
+    '/_app/coldpro/simulation': {
+      id: '/_app/coldpro/simulation'
+      path: '/simulation'
+      fullPath: '/coldpro/simulation'
+      preLoaderRoute: typeof AppColdproSimulationRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
+    '/_app/coldpro/registry': {
+      id: '/_app/coldpro/registry'
+      path: '/registry'
+      fullPath: '/coldpro/registry'
+      preLoaderRoute: typeof AppColdproRegistryRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
+    '/_app/coldpro/record': {
+      id: '/_app/coldpro/record'
+      path: '/record'
+      fullPath: '/coldpro/record'
+      preLoaderRoute: typeof AppColdproRecordRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
+    '/_app/coldpro/map': {
+      id: '/_app/coldpro/map'
+      path: '/map'
+      fullPath: '/coldpro/map'
+      preLoaderRoute: typeof AppColdproMapRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
+    '/_app/coldpro/export': {
+      id: '/_app/coldpro/export'
+      path: '/export'
+      fullPath: '/coldpro/export'
+      preLoaderRoute: typeof AppColdproExportRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
+    '/_app/coldpro/curve': {
+      id: '/_app/coldpro/curve'
+      path: '/curve'
+      fullPath: '/coldpro/curve'
+      preLoaderRoute: typeof AppColdproCurveRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
+    '/_app/coldpro/audit': {
+      id: '/_app/coldpro/audit'
+      path: '/audit'
+      fullPath: '/coldpro/audit'
+      preLoaderRoute: typeof AppColdproAuditRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
   }
 }
 
+interface AppColdproRouteChildren {
+  AppColdproAuditRoute: typeof AppColdproAuditRoute
+  AppColdproCurveRoute: typeof AppColdproCurveRoute
+  AppColdproExportRoute: typeof AppColdproExportRoute
+  AppColdproMapRoute: typeof AppColdproMapRoute
+  AppColdproRecordRoute: typeof AppColdproRecordRoute
+  AppColdproRegistryRoute: typeof AppColdproRegistryRoute
+  AppColdproSimulationRoute: typeof AppColdproSimulationRoute
+  AppColdproIndexRoute: typeof AppColdproIndexRoute
+}
+
+const AppColdproRouteChildren: AppColdproRouteChildren = {
+  AppColdproAuditRoute: AppColdproAuditRoute,
+  AppColdproCurveRoute: AppColdproCurveRoute,
+  AppColdproExportRoute: AppColdproExportRoute,
+  AppColdproMapRoute: AppColdproMapRoute,
+  AppColdproRecordRoute: AppColdproRecordRoute,
+  AppColdproRegistryRoute: AppColdproRegistryRoute,
+  AppColdproSimulationRoute: AppColdproSimulationRoute,
+  AppColdproIndexRoute: AppColdproIndexRoute,
+}
+
+const AppColdproRouteWithChildren = AppColdproRoute._addFileChildren(
+  AppColdproRouteChildren,
+)
+
 interface AppRouteChildren {
+  AppColdproRoute: typeof AppColdproRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppColdproRoute: AppColdproRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
-interface ColdproRouteChildren {
-  ColdproAuditRoute: typeof ColdproAuditRoute
-  ColdproCurveRoute: typeof ColdproCurveRoute
-  ColdproExportRoute: typeof ColdproExportRoute
-  ColdproMapRoute: typeof ColdproMapRoute
-  ColdproRecordRoute: typeof ColdproRecordRoute
-  ColdproRegistryRoute: typeof ColdproRegistryRoute
-  ColdproSimulationRoute: typeof ColdproSimulationRoute
-  ColdproIndexRoute: typeof ColdproIndexRoute
-}
-
-const ColdproRouteChildren: ColdproRouteChildren = {
-  ColdproAuditRoute: ColdproAuditRoute,
-  ColdproCurveRoute: ColdproCurveRoute,
-  ColdproExportRoute: ColdproExportRoute,
-  ColdproMapRoute: ColdproMapRoute,
-  ColdproRecordRoute: ColdproRecordRoute,
-  ColdproRegistryRoute: ColdproRegistryRoute,
-  ColdproSimulationRoute: ColdproSimulationRoute,
-  ColdproIndexRoute: ColdproIndexRoute,
-}
-
-const ColdproRouteWithChildren =
-  ColdproRoute._addFileChildren(ColdproRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
-  ColdproRoute: ColdproRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
