@@ -170,19 +170,19 @@ export function PerformanceCurvePage() {
     selectedCompressor || selectedCondenser || selectedEvaporator || selectedReheatCoil
   );
 
-  const canCalculate = Boolean(
-    compressor.cooling_capacity_w &&
-      compressor.power_w &&
-      compressor.evap_temp_c !== undefined &&
-      compressor.cond_temp_c !== undefined &&
-      compressor.refrigerant &&
-      condenser.heat_rejection_capacity_w &&
-      condenser.max_cond_temp_c !== undefined &&
-      conditions.ambient_temp_c !== undefined &&
-      conditions.required_airflow_m3_h &&
-      gridConfig.evap_temps.length > 0 &&
-      gridConfig.cond_temps.length > 0,
-  );
+  const missingFields: string[] = [];
+  if (!compressor.cooling_capacity_w) missingFields.push("Compressor: capacidade de refrigeração");
+  if (!compressor.power_w) missingFields.push("Compressor: potência");
+  if (compressor.evap_temp_c === undefined) missingFields.push("Compressor: T evap nominal");
+  if (compressor.cond_temp_c === undefined) missingFields.push("Compressor: T cond nominal");
+  if (!compressor.refrigerant) missingFields.push("Compressor: refrigerante");
+  if (!condenser.heat_rejection_capacity_w) missingFields.push("Condensador: capacidade de rejeição");
+  if (condenser.max_cond_temp_c === undefined) missingFields.push("Condensador: T cond máxima");
+  if (conditions.ambient_temp_c === undefined) missingFields.push("Condições: T ambiente");
+  if (!conditions.required_airflow_m3_h) missingFields.push("Condições: vazão de ar requerida");
+  if (gridConfig.evap_temps.length === 0) missingFields.push("Grade: temperaturas de evaporação");
+  if (gridConfig.cond_temps.length === 0) missingFields.push("Grade: temperaturas de condensação");
+  const canCalculate = missingFields.length === 0;
 
   const handleCalculate = () => {
     if (!canCalculate) return;
@@ -213,7 +213,12 @@ export function PerformanceCurvePage() {
           type="button"
           onClick={handleCalculate}
           disabled={!canCalculate || isCalculating}
-          className="inline-flex items-center gap-2 rounded-md bg-[#1E6FD9] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#1759b3] disabled:cursor-not-allowed disabled:bg-slate-300"
+          title={
+            !canCalculate
+              ? `Preencha para habilitar:\n• ${missingFields.join("\n• ")}`
+              : "Gerar curva de desempenho"
+          }
+          className="inline-flex items-center gap-2 rounded-md bg-[#1E6FD9] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#1759b3] disabled:cursor-not-allowed disabled:bg-slate-400 disabled:text-white/90"
         >
           <Play className="h-4 w-4" />
           {isCalculating ? "Calculando..." : "Gerar Curva"}
