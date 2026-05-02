@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Package } from "lucide-react";
 import { toast } from "sonner";
 import { runSimulation, SimulationError } from "../engine/simulatorCore";
+import { MachineImportModal } from "../components/MachineImportModal";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
 import { ptBR } from "../i18n/messages.ptBR";
 import { useUnilabCatalogs } from "../hooks/useUnilabCatalogs";
@@ -108,6 +109,7 @@ export function UnilabWorkspacePage() {
   });
   const [sending, setSending] = useState(false);
   const [schematicOpen, setSchematicOpen] = useState(false);
+  const [machineImportOpen, setMachineImportOpen] = useState(false);
 
   const inputsValid =
     validatePhysicalInputs(physical).isValid &&
@@ -256,6 +258,14 @@ export function UnilabWorkspacePage() {
           </Link>
           <button
             type="button"
+            onClick={() => setMachineImportOpen(true)}
+            className="inline-flex items-center gap-2 rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-amber-600"
+          >
+            <Package className="h-4 w-4" />
+            📥 Importar do Catálogo CN Cold
+          </button>
+          <button
+            type="button"
             disabled={!result || sending}
             onClick={handleSendToAssembly}
             className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-400"
@@ -319,6 +329,12 @@ export function UnilabWorkspacePage() {
       <CoilSchematicModal
         open={schematicOpen}
         onClose={() => setSchematicOpen(false)}
+      />
+
+      <MachineImportModal
+        open={machineImportOpen}
+        onClose={() => setMachineImportOpen(false)}
+        componentType={componentType}
       />
     </PageContainer>
   );

@@ -13,6 +13,8 @@ interface GeometryComboboxProps {
   selectedId?: string;
   onChange: (geometry: CoilGeometryItem | undefined) => void;
   disabled?: boolean;
+  /** Quando definido, força o filtro de tipo (lock) e oculta a UI de troca. */
+  forcedTipo?: TipoSerpentina;
 }
 
 /**
@@ -27,11 +29,13 @@ export function GeometryCombobox({
   selectedId,
   onChange,
   disabled,
+  forcedTipo,
 }: GeometryComboboxProps) {
   const [open, setOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [tipo, setTipo] = useState<TipoSerpentina | "">("");
+  const [tipoState, setTipo] = useState<TipoSerpentina | "">("");
+  const tipo: TipoSerpentina | "" = forcedTipo ?? tipoState;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -87,19 +91,28 @@ export function GeometryCombobox({
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="space-y-1">
           <label className="text-xs font-medium text-slate-700">Tipo de serpentina</label>
-          <select
-            value={tipo}
-            disabled={disabled}
-            onChange={(e) => setTipo(e.target.value as TipoSerpentina | "")}
-            className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 shadow-sm focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-50"
-          >
-            <option value="">Todos os tipos</option>
-            {TIPO_SERPENTINA_VALUES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
+          {forcedTipo ? (
+            <div className="flex items-center justify-between rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-sm text-emerald-800">
+              <span>{forcedTipo}</span>
+              <span className="rounded bg-emerald-200 px-1.5 py-0.5 text-[9px] font-bold uppercase text-emerald-900">
+                travado
+              </span>
+            </div>
+          ) : (
+            <select
+              value={tipo}
+              disabled={disabled}
+              onChange={(e) => setTipo(e.target.value as TipoSerpentina | "")}
+              className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 shadow-sm focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-50"
+            >
+              <option value="">Todos os tipos</option>
+              {TIPO_SERPENTINA_VALUES.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-slate-700">

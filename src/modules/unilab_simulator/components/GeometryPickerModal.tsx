@@ -6,25 +6,16 @@ import {
   loadCoilGeometries,
   type CoilGeometryItem,
 } from "../services/coilGeometryCatalogService";
+import { tipoSerpentinaForComponent } from "../config/coilTypeFilter";
+import type { UnilabComponentType } from "../types/unilab.types";
 
 interface Props {
   open: boolean;
   onClose: () => void;
+  componentType?: UnilabComponentType;
 }
 
-/**
- * Modal de seleção de Geometria.
- *
- * Ao confirmar uma geometria, o store já faz o auto-fill de:
- *  - dimensões de tubo (Ø externo/interno, espessura)
- *  - passos transversal/longitudinal
- *  - espessura/forma de aleta
- *  - rows / circuits default
- *
- * Esses campos ficam então em modo read-only nos outros modais (Tubo / Aleta /
- * Distribuidor), refletindo exatamente a geometria escolhida.
- */
-export function GeometryPickerModal({ open, onClose }: Props) {
+export function GeometryPickerModal({ open, onClose, componentType }: Props) {
   const selectedId = useUnilabSimulationStore(
     (s) => s.selectedGeometry?.id ?? s.physicalInputs.geometryId,
   );
@@ -35,6 +26,8 @@ export function GeometryPickerModal({ open, onClose }: Props) {
   const [geometries, setGeometries] = useState<CoilGeometryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const forcedTipo = componentType ? tipoSerpentinaForComponent(componentType) : undefined;
 
   useEffect(() => {
     if (!open) return;
@@ -63,6 +56,11 @@ export function GeometryPickerModal({ open, onClose }: Props) {
         <DialogHeader>
           <DialogTitle>Selecionar Geometria</DialogTitle>
         </DialogHeader>
+        {forcedTipo && (
+          <div className="rounded border border-blue-200 bg-blue-50 px-3 py-2 text-[11px] text-blue-800">
+            Mostrando apenas geometrias para <b>{forcedTipo}</b>.
+          </div>
+        )}
         {error ? (
           <div className="rounded border border-red-200 bg-red-50 p-3 text-xs text-red-700">
             {error}
@@ -76,6 +74,7 @@ export function GeometryPickerModal({ open, onClose }: Props) {
             <GeometryCombobox
               geometries={geometries}
               selectedId={selectedId}
+              forcedTipo={forcedTipo}
               onChange={(g) => {
                 setSelectedGeometry(g);
                 if (g) onClose();
