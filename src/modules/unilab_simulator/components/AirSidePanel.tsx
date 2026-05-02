@@ -5,6 +5,20 @@ import {
   type PsychrometricValidationResult,
 } from "../services/psychrometrics";
 
+/**
+ * AirSidePanel — replica o bloco "LADO VENTILAÇÃO" do Unilab Coils 9.0.
+ *
+ * Layout:
+ *   Linha por linha: [Label] [Unidade] [Input editável]  | [Obt.]
+ *   Inputs editáveis ficam à esquerda; coluna "Obt." (Obtido) à direita
+ *   mostra resultados read-only (--- por enquanto, calculados na Etapa 5).
+ *
+ * Regras Etapa 3 (intencionais):
+ *   - Sem cálculo termodinâmico
+ *   - Ventilador apenas preenche vazão (não simula curva)
+ *   - Outputs read-only com "---"
+ */
+
 interface FanCatalogItem {
   id: string;
   manufacturer?: string;
@@ -28,8 +42,6 @@ export function AirSidePanel() {
 
   const [fans, setFans] = useState<FanCatalogItem[]>([]);
 
-  // Carregamento opcional do catálogo de ventiladores. Se o arquivo não
-  // existir, simplesmente escondemos o dropdown — sem mocks.
   useEffect(() => {
     let cancelled = false;
     fetch(FANS_CATALOG_URL)
@@ -43,7 +55,6 @@ export function AirSidePanel() {
         setFans(list.filter((f) => typeof f?.airflow_m3h === "number" && f.airflow_m3h! > 0));
       })
       .catch(() => {
-        // arquivo ausente ou inválido — ignorar silenciosamente
         if (!cancelled) setFans([]);
       });
     return () => {
@@ -66,137 +77,219 @@ export function AirSidePanel() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-        <h4 className="mb-3 text-sm font-semibold text-slate-900">
-          Lado Ar / Ventilação
-        </h4>
-
-        <div className="space-y-3">
-          {fans.length > 0 && (
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-700">
-                Ventilador (opcional)
-              </label>
-              <select
-                value={selectedFanId ?? ""}
-                onChange={(e) => handleFanChange(e.target.value)}
-                className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 shadow-sm focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9]"
-              >
-                <option value="">Selecione um ventilador…</option>
-                {fans.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {[f.manufacturer, f.model].filter(Boolean).join(" ") || f.id}
-                    {" — "}
-                    {f.airflow_m3h} m³/h
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          <NumberInput
-            label="Vazão de Ar (m³/h)"
-            value={airFlow_m3h}
-            onChange={setAirFlow}
-            min={0}
-          />
-          <NumberInput
-            label="Temperatura de Entrada DB (°C)"
-            value={tempInDB_C}
-            onChange={setTempInDB}
-          />
-          <NumberInput
-            label="Umidade Relativa de Entrada (%)"
-            value={rhIn_pct}
-            onChange={setRhIn}
-          />
-          <NumberInput
-            label="Fator de Erro (Fouling) (m²·K/W)"
-            value={foulingFactorAir}
-            onChange={setFoulingFactorAir}
-            min={0}
-            step={0.0001}
-          />
-
-          {!validation.valid && (
-            <ul className="mt-2 space-y-1 rounded-md border border-amber-300 bg-amber-50 p-2 text-xs text-amber-800">
-              {validation.errors.map((e) => (
-                <li key={e}>• {e}</li>
-              ))}
-            </ul>
-          )}
+    <div className="rounded border border-slate-300 bg-slate-50 shadow-sm">
+      {/* Header estilo UNILAB: título azul + coluna "Obt." */}
+      <div className="grid grid-cols-[1fr_88px] border-b border-slate-300 bg-[#1E6FD9] text-white">
+        <div className="px-3 py-1.5 text-center text-xs font-bold uppercase tracking-wider">
+          Lado Ventilação
+        </div>
+        <div className="border-l border-white/30 px-2 py-1.5 text-center text-xs font-bold">
+          Obt.
         </div>
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-        <h4 className="mb-3 text-sm font-semibold text-slate-900">
-          Resultados do Lado Ar
-        </h4>
-        <div className="space-y-2">
-          <ReadOnlyOutput label="Capacidade (W)" tone="gray" />
-          <ReadOnlyOutput label="Velocidade Frontal (m/s)" tone="gray" />
-          <ReadOnlyOutput label="Temperatura de Saída DB (°C)" tone="green" />
-          <ReadOnlyOutput label="Umidade Relativa de Saída (%)" tone="green" />
-          <ReadOnlyOutput label="Queda de Pressão (Pa)" tone="gray" />
-        </div>
-        <p className="mt-3 text-[11px] italic text-slate-500">
-          Resultados calculados na Etapa 5 (motor de simulação).
-        </p>
+      <div className="space-y-1.5 p-2">
+        {/* CAPACIDADE — só output */}
+        <Row
+          label="Capacidade"
+          unit="W"
+          input={<DisabledInput />}
+          obtained="---"
+          obtainedTone="gray"
+        />
+
+        {/* VENTILADOR — dropdown que preenche vazão */}
+        <Row
+          label="Ventilador"
+          unit="m³/h"
+          input={
+            <select
+              value={selectedFanId ?? ""}
+              onChange={(e) => handleFanChange(e.target.value)}
+              disabled={fans.length === 0}
+              className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
+              title={
+                fans.length === 0
+                  ? "Catálogo de ventiladores não disponível"
+                  : "Selecione um ventilador"
+              }
+            >
+              <option value="">
+                {fans.length === 0 ? "— sem catálogo —" : "Selecione…"}
+              </option>
+              {fans.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {[f.manufacturer, f.model].filter(Boolean).join(" ") || f.id} —{" "}
+                  {f.airflow_m3h} m³/h
+                </option>
+              ))}
+            </select>
+          }
+          obtained={airFlow_m3h > 0 ? airFlow_m3h.toFixed(1) : "---"}
+          obtainedTone="gray"
+        />
+
+        {/* VAZÃO DE AR (manual, sempre editável) */}
+        <Row
+          label="Vazão de Ar"
+          unit="m³/h"
+          input={<NumberCell value={airFlow_m3h} onChange={setAirFlow} min={0} />}
+          obtained="---"
+          obtainedTone="gray"
+        />
+
+        {/* VELOCIDADE FRONTAL — calculada depois */}
+        <Row
+          label="Velocidade Frontal"
+          unit="m/s"
+          input={<DisabledInput />}
+          obtained="---"
+          obtainedTone="gray"
+        />
+
+        {/* TEMP. ENTRADA DB */}
+        <Row
+          label="Temperatura de Entrada DB"
+          unit="°C"
+          input={<NumberCell value={tempInDB_C} onChange={setTempInDB} />}
+          obtained="---"
+          obtainedTone="gray"
+        />
+
+        {/* UR ENTRADA */}
+        <Row
+          label="Umidade Relativa de Entrada"
+          unit="%"
+          input={
+            <NumberCell value={rhIn_pct} onChange={setRhIn} min={0} max={100} />
+          }
+          obtained="---"
+          obtainedTone="gray"
+        />
+
+        {/* TEMP. SAÍDA DB — output (verde claro) */}
+        <Row
+          label="Temperatura de Saída DB"
+          unit="°C"
+          input={<DisabledInput />}
+          obtained="---"
+          obtainedTone="green"
+        />
+
+        {/* UR SAÍDA — output (verde claro) */}
+        <Row
+          label="Umidade Relativa de Saída"
+          unit="%"
+          input={<DisabledInput />}
+          obtained="---"
+          obtainedTone="green"
+        />
+
+        {/* FATOR DE ERRO (FOULING) */}
+        <Row
+          label="Fator de Erro (Fouling)"
+          unit="(m²·K)/W"
+          input={
+            <NumberCell
+              value={foulingFactorAir}
+              onChange={setFoulingFactorAir}
+              min={0}
+              step={0.0001}
+            />
+          }
+          obtained="---"
+          obtainedTone="gray"
+        />
+
+        {/* QUEDA DE PRESSÃO — output */}
+        <Row
+          label="Queda de Pressão"
+          unit="Pa"
+          input={<DisabledInput />}
+          obtained="---"
+          obtainedTone="gray"
+        />
+      </div>
+
+      {!validation.valid && (
+        <ul className="mx-2 mb-2 space-y-0.5 rounded border border-amber-300 bg-amber-50 p-2 text-[11px] text-amber-800">
+          {validation.errors.map((e) => (
+            <li key={e}>• {e}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function Row({
+  label,
+  unit,
+  input,
+  obtained,
+  obtainedTone,
+}: {
+  label: string;
+  unit: string;
+  input: React.ReactNode;
+  obtained: string;
+  obtainedTone: "gray" | "green";
+}) {
+  const obtBg = obtainedTone === "green" ? "bg-emerald-100" : "bg-slate-200";
+  return (
+    <div className="grid grid-cols-[160px_60px_1fr_88px] items-center gap-1.5">
+      <label className="truncate text-[11px] font-medium text-slate-700" title={label}>
+        {label}
+      </label>
+      <div className="rounded border border-slate-300 bg-white px-1.5 py-1 text-center text-[11px] text-slate-600">
+        {unit}
+      </div>
+      <div>{input}</div>
+      <div
+        className={`rounded border border-slate-300 ${obtBg} px-2 py-1 text-right font-mono text-[11px] text-slate-700`}
+      >
+        {obtained}
       </div>
     </div>
   );
 }
 
-function NumberInput({
-  label,
+function NumberCell({
   value,
   onChange,
   min,
+  max,
   step,
 }: {
-  label: string;
   value: number;
   onChange: (v: number) => void;
   min?: number;
+  max?: number;
   step?: number;
 }) {
   return (
-    <div className="space-y-1">
-      <label className="text-xs font-medium text-slate-700">{label}</label>
-      <input
-        type="number"
-        value={Number.isFinite(value) ? value : 0}
-        min={min}
-        step={step ?? "any"}
-        onChange={(e) => {
-          const n = parseFloat(e.target.value);
-          onChange(Number.isFinite(n) ? n : 0);
-        }}
-        className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 shadow-sm focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9]"
-      />
-    </div>
+    <input
+      type="number"
+      value={Number.isFinite(value) ? value : 0}
+      min={min}
+      max={max}
+      step={step ?? "any"}
+      onChange={(e) => {
+        const n = parseFloat(e.target.value);
+        onChange(Number.isFinite(n) ? n : 0);
+      }}
+      className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-right text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9]"
+    />
   );
 }
 
-function ReadOnlyOutput({
-  label,
-  tone,
-}: {
-  label: string;
-  tone: "gray" | "green";
-}) {
-  const bg = tone === "green" ? "bg-emerald-50" : "bg-slate-100";
+function DisabledInput() {
   return (
-    <div className="space-y-1">
-      <label className="text-xs font-medium text-slate-700">{label}</label>
-      <input
-        type="text"
-        value="---"
-        readOnly
-        disabled
-        className={`w-full cursor-not-allowed rounded-md border border-slate-200 ${bg} px-2.5 py-1.5 text-sm text-slate-500`}
-      />
-    </div>
+    <input
+      type="text"
+      value=""
+      disabled
+      className="w-full cursor-not-allowed rounded border border-slate-200 bg-slate-100 px-2 py-1 text-xs"
+    />
   );
 }
