@@ -41,7 +41,7 @@ export function UtilizationChart({ utilization }: UtilizationChartProps) {
         <XAxis dataKey="name" tick={{ fontSize: 11 }} />
         <YAxis unit="%" tick={{ fontSize: 11 }} domain={[0, 120]} />
         <Tooltip
-          formatter={(value: number) => [`${value.toFixed(1)}%`, "Utilização"]}
+          formatter={(value) => [`${Number(value).toFixed(1)}%`, "Utilização"]}
           contentStyle={{ fontSize: 12 }}
         />
         <ReferenceLine
