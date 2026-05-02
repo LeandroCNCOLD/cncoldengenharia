@@ -99,14 +99,36 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
       </div>
 
       <div className="space-y-1.5 p-2">
-        {/* 1. CAPACIDADE — output do motor (W = kW × 1000) */}
+        {/* 1. CAPACIDADE TOTAL — output (W) */}
         <Row
-          label="Capacidade"
+          label="Capacidade Total"
           unit="W"
           input={<DisabledInput />}
           obtained={
             result?.totalCapacityKw !== undefined
               ? (result.totalCapacityKw * 1000).toFixed(0)
+              : "---"
+          }
+        />
+        {/* 1b. CAPACIDADE SENSÍVEL (V2) */}
+        <Row
+          label="Capacidade Sensível"
+          unit="W"
+          input={<DisabledInput />}
+          obtained={
+            result?.sensibleCapacityKw !== undefined
+              ? (result.sensibleCapacityKw * 1000).toFixed(0)
+              : "---"
+          }
+        />
+        {/* 1c. CAPACIDADE LATENTE (V2) */}
+        <Row
+          label="Capacidade Latente"
+          unit="W"
+          input={<DisabledInput />}
+          obtained={
+            result?.latentCapacityKw !== undefined
+              ? (result.latentCapacityKw * 1000).toFixed(0)
               : "---"
           }
         />

@@ -15,7 +15,10 @@ import {
 } from "../components/WorkspaceSidebar";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { useUnilabSimulation } from "../hooks/useUnilabSimulation";
+import { useUnilabSimulationV2 } from "../hooks/useUnilabSimulationV2";
 import { useUnilabInputBridge } from "../hooks/useUnilabInputBridge";
+import { loadUnilabHeatTransferCatalog } from "../services/unilabHeatTransferCatalog";
+import type { UnilabHeatTransferCatalog } from "../engine_v2/heatTransfer";
 import {
   validatePhysicalInputs,
   validateThermoInputs,
@@ -96,6 +99,23 @@ export function UnilabWorkspacePage() {
   );
 
   const { run } = useUnilabSimulation(simulationDeps);
+
+  // Catálogo de coeficientes UNILAB para o motor V2
+  const [htCatalog, setHtCatalog] = useState<UnilabHeatTransferCatalog>({
+    entries: [],
+  });
+  useEffect(() => {
+    loadUnilabHeatTransferCatalog().then(setHtCatalog).catch(() => {
+      setHtCatalog({ entries: [] });
+    });
+  }, []);
+
+  const engineVersion = useUnilabSimulationStore((s) => s.engineVersion);
+  const { run: runV2 } = useUnilabSimulationV2({
+    tubeMaterials: catalogs.tubeMaterials,
+    htCatalog,
+    componentType,
+  });
   const [sending, setSending] = useState(false);
 
   const inputsValid =
@@ -111,7 +131,11 @@ export function UnilabWorkspacePage() {
       setWarnings(errors);
       return;
     }
-    run();
+    if (engineVersion === "v2") {
+      runV2();
+    } else {
+      run();
+    }
   };
 
   const handleSendToAssembly = () => {

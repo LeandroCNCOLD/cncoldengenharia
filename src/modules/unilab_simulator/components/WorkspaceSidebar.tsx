@@ -47,6 +47,8 @@ export function WorkspaceSidebar({
   const cfg = getApplicationConfig(componentType);
   const calcMode = useUnilabSimulationStore((s) => s.calcMode);
   const setCalcMode = useUnilabSimulationStore((s) => s.setCalcMode);
+  const engineVersion = useUnilabSimulationStore((s) => s.engineVersion);
+  const setEngineVersion = useUnilabSimulationStore((s) => s.setEngineVersion);
 
   return (
     <aside className="flex h-full w-full flex-col gap-2 rounded border border-slate-300 bg-slate-50 p-2 text-xs shadow-sm">
@@ -80,6 +82,35 @@ export function WorkspaceSidebar({
               className="accent-[#1E6FD9]"
             />
             Desenho
+          </label>
+        </div>
+      </div>
+
+      {/* Motor termodinâmico (V1 Etapa 5 / V2 Etapa 6 ASHRAE) */}
+      <div className="rounded border border-slate-300 bg-white">
+        <div className="border-b border-slate-200 bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700">
+          Motor Termodinâmico
+        </div>
+        <div className="space-y-1 p-2">
+          <label className="flex items-center gap-2 text-[11px] text-slate-700">
+            <input
+              type="radio"
+              name="engineVersion"
+              checked={engineVersion === "v1"}
+              onChange={() => setEngineVersion("v1")}
+              className="accent-[#1E6FD9]"
+            />
+            V1 — NTU-ε UNILAB
+          </label>
+          <label className="flex items-center gap-2 text-[11px] text-slate-700">
+            <input
+              type="radio"
+              name="engineVersion"
+              checked={engineVersion === "v2"}
+              onChange={() => setEngineVersion("v2")}
+              className="accent-[#1E6FD9]"
+            />
+            V2 — ASHRAE Sens/Lat
           </label>
         </div>
       </div>
