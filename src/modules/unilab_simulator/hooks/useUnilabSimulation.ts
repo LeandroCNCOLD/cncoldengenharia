@@ -25,7 +25,8 @@ export function useUnilabSimulation(catalogs: UseUnilabSimulationParams) {
   const clearResult = useUnilabSimulationStore((s) => s.clearResult);
 
   const run = useCallback(() => {
-    const { physicalInputs, thermoInputs } = useUnilabSimulationStore.getState();
+    const { physicalInputs, thermoInputs, errorFactorPercent } =
+      useUnilabSimulationStore.getState();
 
     setIsSimulating(true);
     try {
@@ -42,7 +43,7 @@ export function useUnilabSimulation(catalogs: UseUnilabSimulationParams) {
       }
 
       const geometry = catalogs.geometries.find((g) => g.id === physical.geometryId);
-      const result = runSimulation({
+      const rawResult = runSimulation({
         physical,
         thermo,
         catalogs: {
@@ -52,6 +53,14 @@ export function useUnilabSimulation(catalogs: UseUnilabSimulationParams) {
         tubeMaterialConductivity: tubeMat.conductivityWmK,
         uBaseWm2K: geometry?.uBaseWm2K,
       });
+
+      const k = 1 + (Number.isFinite(errorFactorPercent) ? errorFactorPercent : 0) / 100;
+      const result = {
+        ...rawResult,
+        totalCapacityKw: rawResult.totalCapacityKw * k,
+        sensibleCapacityKw: rawResult.sensibleCapacityKw * k,
+        latentCapacityKw: rawResult.latentCapacityKw * k,
+      };
 
       setResult(result);
       setWarnings(result.warnings);
