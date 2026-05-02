@@ -51,9 +51,25 @@ interface UnilabSimulationStore {
   setFoulingFactorAir: (val: number) => void;
   setSelectedFan: (id: string | undefined) => void;
 
-  // Lado Fluido (campos extras por aplicação)
+  // Lado Fluido (campos extras por aplicação — hidrônico/vapor)
   fluidExtras: FluidSideExtras;
   setFluidExtras: (patch: FluidSideExtras) => void;
+
+  // Lado Fluido / Refrigerante (Etapa 4)
+  fluid: string;
+  fluidMassFlow_kg_h: number;
+  fluidOperatingTemp_C: number;
+  fluidTempReference: "inlet" | "middle" | "outlet";
+  superheat_K: number;
+  subcooling_K: number;
+  foulingFactorFluid: number;
+  setFluid: (val: string) => void;
+  setFluidMassFlow: (val: number) => void;
+  setFluidOperatingTemp: (val: number) => void;
+  setFluidTempReference: (val: "inlet" | "middle" | "outlet") => void;
+  setSuperheat: (val: number) => void;
+  setSubcooling: (val: number) => void;
+  setFoulingFactorFluid: (val: number) => void;
 
   setPhysicalInputs: (patch: Partial<UnilabPhysicalInputs>) => void;
   setThermoInputs: (patch: Partial<UnilabThermoInputs>) => void;
@@ -90,6 +106,21 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   fluidExtras: {},
   setFluidExtras: (patch) =>
     set((s) => ({ fluidExtras: { ...s.fluidExtras, ...patch } })),
+
+  fluid: "R404A",
+  fluidMassFlow_kg_h: 0,
+  fluidOperatingTemp_C: 0,
+  fluidTempReference: "middle",
+  superheat_K: 0,
+  subcooling_K: 0,
+  foulingFactorFluid: 0,
+  setFluid: (val) => set({ fluid: val }),
+  setFluidMassFlow: (val) => set({ fluidMassFlow_kg_h: val }),
+  setFluidOperatingTemp: (val) => set({ fluidOperatingTemp_C: val }),
+  setFluidTempReference: (val) => set({ fluidTempReference: val }),
+  setSuperheat: (val) => set({ superheat_K: val }),
+  setSubcooling: (val) => set({ subcooling_K: val }),
+  setFoulingFactorFluid: (val) => set({ foulingFactorFluid: val }),
 
   setPhysicalInputs: (patch) =>
     set((s) => ({ physicalInputs: { ...s.physicalInputs, ...patch } })),
@@ -131,5 +162,12 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       foulingFactorAir: 0,
       selectedFanId: undefined,
       fluidExtras: {},
+      fluid: "R404A",
+      fluidMassFlow_kg_h: 0,
+      fluidOperatingTemp_C: 0,
+      fluidTempReference: "middle",
+      superheat_K: 0,
+      subcooling_K: 0,
+      foulingFactorFluid: 0,
     }),
 }));
