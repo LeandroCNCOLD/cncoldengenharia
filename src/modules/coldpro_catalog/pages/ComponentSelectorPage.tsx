@@ -8,12 +8,21 @@ import { useComponentSelection } from "../hooks/useComponentSelection";
 export default function ComponentSelectorPage() {
   const navigate = useNavigate();
   const { rows, filter, setFilter, total, filteredTotal } = useEquipmentCatalog();
-  const { selectedCompressor, selectedCondenser, selectEquipment, clearSelection } =
-    useComponentSelection();
+  const {
+    selectedCompressor,
+    selectedCondenser,
+    selectedEvaporator,
+    selectedReheatCoil,
+    selectEquipment,
+    clearSelection,
+  } = useComponentSelection();
 
-  const selectedIds = [selectedCompressor?.id, selectedCondenser?.id].filter(
-    Boolean,
-  ) as string[];
+  const selectedIds = [
+    selectedCompressor?.id,
+    selectedCondenser?.id,
+    selectedEvaporator?.id,
+    selectedReheatCoil?.id,
+  ].filter(Boolean) as string[];
 
   function handleProceed() {
     navigate({ to: "/coldpro/simulation" });
@@ -43,6 +52,8 @@ export default function ComponentSelectorPage() {
         <SelectedComponentsPanel
           selectedCompressor={selectedCompressor}
           selectedCondenser={selectedCondenser}
+          selectedEvaporator={selectedEvaporator}
+          selectedReheatCoil={selectedReheatCoil}
           onClear={clearSelection}
           onProceed={handleProceed}
         />
