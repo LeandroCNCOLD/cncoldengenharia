@@ -1,4 +1,18 @@
-import { Snowflake, Flame, Wind, Droplets, Zap, RefreshCw, Cylinder, Server } from "lucide-react";
+import {
+  Snowflake,
+  Flame,
+  Wind,
+  Droplets,
+  Zap,
+  RefreshCw,
+  Cylinder,
+  Server,
+  Waves,
+  Combine,
+  Box,
+  Thermometer,
+  type LucideIcon,
+} from "lucide-react";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
 import { ptBR } from "../i18n/messages.ptBR";
 import { useUnilabCatalogs } from "../hooks/useUnilabCatalogs";
@@ -10,7 +24,16 @@ interface CardConfig {
   type: UnilabComponentType;
   title: string;
   description: string;
-  Icon: typeof Snowflake;
+  Icon: LucideIcon;
+}
+
+interface SystemCardConfig {
+  id: string;
+  title: string;
+  description: string;
+  href: string;
+  Icon: LucideIcon;
+  comingSoon?: boolean;
 }
 
 const CARDS: CardConfig[] = [
