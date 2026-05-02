@@ -22,6 +22,7 @@ import { Route as AppColdproMapRouteImport } from './routes/_app/coldpro.map'
 import { Route as AppColdproExportRouteImport } from './routes/_app/coldpro.export'
 import { Route as AppColdproCurveRouteImport } from './routes/_app/coldpro.curve'
 import { Route as AppColdproComponentsRouteImport } from './routes/_app/coldpro.components'
+import { Route as AppColdproCatalogRouteImport } from './routes/_app/coldpro.catalog'
 import { Route as AppColdproAuditRouteImport } from './routes/_app/coldpro.audit'
 import { Route as AppColdproAssemblyRouteImport } from './routes/_app/coldpro.assembly'
 
@@ -89,6 +90,11 @@ const AppColdproComponentsRoute = AppColdproComponentsRouteImport.update({
   path: '/components',
   getParentRoute: () => AppColdproRoute,
 } as any)
+const AppColdproCatalogRoute = AppColdproCatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
+  getParentRoute: () => AppColdproRoute,
+} as any)
 const AppColdproAuditRoute = AppColdproAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/coldpro/audit': typeof AppColdproAuditRoute
+  '/coldpro/catalog': typeof AppColdproCatalogRoute
   '/coldpro/components': typeof AppColdproComponentsRoute
   '/coldpro/curve': typeof AppColdproCurveRoute
   '/coldpro/export': typeof AppColdproExportRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/coldpro/audit': typeof AppColdproAuditRoute
+  '/coldpro/catalog': typeof AppColdproCatalogRoute
   '/coldpro/components': typeof AppColdproComponentsRoute
   '/coldpro/curve': typeof AppColdproCurveRoute
   '/coldpro/export': typeof AppColdproExportRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/_app/coldpro/audit': typeof AppColdproAuditRoute
+  '/_app/coldpro/catalog': typeof AppColdproCatalogRoute
   '/_app/coldpro/components': typeof AppColdproComponentsRoute
   '/_app/coldpro/curve': typeof AppColdproCurveRoute
   '/_app/coldpro/export': typeof AppColdproExportRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/coldpro/assembly'
     | '/coldpro/audit'
+    | '/coldpro/catalog'
     | '/coldpro/components'
     | '/coldpro/curve'
     | '/coldpro/export'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/coldpro/assembly'
     | '/coldpro/audit'
+    | '/coldpro/catalog'
     | '/coldpro/components'
     | '/coldpro/curve'
     | '/coldpro/export'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/coldpro/assembly'
     | '/_app/coldpro/audit'
+    | '/_app/coldpro/catalog'
     | '/_app/coldpro/components'
     | '/_app/coldpro/curve'
     | '/_app/coldpro/export'
@@ -299,6 +311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproComponentsRouteImport
       parentRoute: typeof AppColdproRoute
     }
+    '/_app/coldpro/catalog': {
+      id: '/_app/coldpro/catalog'
+      path: '/catalog'
+      fullPath: '/coldpro/catalog'
+      preLoaderRoute: typeof AppColdproCatalogRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
     '/_app/coldpro/audit': {
       id: '/_app/coldpro/audit'
       path: '/audit'
@@ -319,6 +338,7 @@ declare module '@tanstack/react-router' {
 interface AppColdproRouteChildren {
   AppColdproAssemblyRoute: typeof AppColdproAssemblyRoute
   AppColdproAuditRoute: typeof AppColdproAuditRoute
+  AppColdproCatalogRoute: typeof AppColdproCatalogRoute
   AppColdproComponentsRoute: typeof AppColdproComponentsRoute
   AppColdproCurveRoute: typeof AppColdproCurveRoute
   AppColdproExportRoute: typeof AppColdproExportRoute
@@ -332,6 +352,7 @@ interface AppColdproRouteChildren {
 const AppColdproRouteChildren: AppColdproRouteChildren = {
   AppColdproAssemblyRoute: AppColdproAssemblyRoute,
   AppColdproAuditRoute: AppColdproAuditRoute,
+  AppColdproCatalogRoute: AppColdproCatalogRoute,
   AppColdproComponentsRoute: AppColdproComponentsRoute,
   AppColdproCurveRoute: AppColdproCurveRoute,
   AppColdproExportRoute: AppColdproExportRoute,

@@ -11,6 +11,7 @@ import {
   LogOut,
   Boxes,
   Wrench,
+  Database as DatabaseIcon,
 } from "lucide-react";
 import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { to: "/coldpro", label: "Dashboard", Icon: LayoutDashboard, exact: true },
+  { to: "/coldpro/catalog", label: "Catálogo CN COLD", Icon: DatabaseIcon },
   { to: "/coldpro/components", label: "Componentes", Icon: Boxes },
   { to: "/coldpro/assembly", label: "Montagem", Icon: Wrench },
   { to: "/coldpro/simulation", label: "Equilíbrio do Sistema", Icon: Activity },
