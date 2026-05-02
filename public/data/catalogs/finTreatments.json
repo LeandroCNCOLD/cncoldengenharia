@@ -1,0 +1,9 @@
+[
+  {
+    "IdTrattamento": 1,
+    "Descrizione": "Idrofilico                                                                                                                                                                                                                                                     ",
+    "IdDescrizione": 1440,
+    "FattoreRiduzioneCondTermica": 0.9,
+    "FattoreRiduzioneFattoreAttritoAria": 0.8
+  }
+]

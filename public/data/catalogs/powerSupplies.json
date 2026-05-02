@@ -1,0 +1,58 @@
+[
+  {
+    "IdAlim": 1,
+    "Alimentazione": "400 V/3 ph/50 Hz",
+    "Tensione": 400,
+    "Fasi": 3,
+    "Frequnza": 50
+  },
+  {
+    "IdAlim": 2,
+    "Alimentazione": "230 V/3 ph/60 Hz",
+    "Tensione": 230,
+    "Fasi": 3,
+    "Frequnza": 60
+  },
+  {
+    "IdAlim": 3,
+    "Alimentazione": "380 V/3 ph/60 Hz",
+    "Tensione": 380,
+    "Fasi": 3,
+    "Frequnza": 60
+  },
+  {
+    "IdAlim": 4,
+    "Alimentazione": "460 V/3 ph/60 Hz",
+    "Tensione": 460,
+    "Fasi": 3,
+    "Frequnza": 60
+  },
+  {
+    "IdAlim": 5,
+    "Alimentazione": "230 V/3 ph/50 Hz",
+    "Tensione": 230,
+    "Fasi": 3,
+    "Frequnza": 50
+  },
+  {
+    "IdAlim": 6,
+    "Alimentazione": "230 V/1 ph/60 Hz",
+    "Tensione": 230,
+    "Fasi": 1,
+    "Frequnza": 60
+  },
+  {
+    "IdAlim": 7,
+    "Alimentazione": "230 V/1 ph/50 Hz",
+    "Tensione": 230,
+    "Fasi": 1,
+    "Frequnza": 50
+  },
+  {
+    "IdAlim": 8,
+    "Alimentazione": "208 V/3 ph/60 Hz",
+    "Tensione": 208,
+    "Fasi": 3,
+    "Frequnza": 60
+  }
+]

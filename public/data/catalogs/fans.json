@@ -1,0 +1,3215 @@
+[
+  {
+    "id": 15,
+    "model": "TLI 7-7",
+    "series": "TLI",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 16,
+    "model": "TLI 9-7",
+    "series": "TLI",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 17,
+    "model": "TLI 9-9",
+    "series": "TLI",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 18,
+    "model": "TLI 10-8",
+    "series": "TLI",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 19,
+    "model": "TLI 10-10",
+    "series": "TLI",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 20,
+    "model": "TLI 12-9",
+    "series": "TLI",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 21,
+    "model": "TLI 12-12",
+    "series": "TLI",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 22,
+    "model": "TLI 15-11",
+    "series": "TLI",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 23,
+    "model": "TLI 15-15",
+    "series": "TLI",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 24,
+    "model": "TLI 18-13",
+    "series": "TLI",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 25,
+    "model": "TLI 18-18",
+    "series": "TLI",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 26,
+    "model": "THLZ 180",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 27,
+    "model": "THLZ 200",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 28,
+    "model": "THLZ 225",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 29,
+    "model": "THLZ 250",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 30,
+    "model": "THLZ 280",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 31,
+    "model": "THLZ 315",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 32,
+    "model": "THLZ 355",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 33,
+    "model": "THLZ 400",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 34,
+    "model": "THLZ 450",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 35,
+    "model": "THLZ 500",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 36,
+    "model": "THLZ 560",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 37,
+    "model": "THLZ 630",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 38,
+    "model": "THLZ 710",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 39,
+    "model": "THLZ 800",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 40,
+    "model": "THLZ 900",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 41,
+    "model": "THLZ 1000",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 42,
+    "model": "THLZ 1120",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 43,
+    "model": "THLZ 1250",
+    "series": "THLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 44,
+    "model": "TLZ 160",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 45,
+    "model": "TLZ 180",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 46,
+    "model": "TLZ 200",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 47,
+    "model": "TLZ 225",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 48,
+    "model": "TLZ 250",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 49,
+    "model": "TLZ 280",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 50,
+    "model": "TLZ 315",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 51,
+    "model": "TLZ 355",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 52,
+    "model": "TLZ 400",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 53,
+    "model": "TLZ 450",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 54,
+    "model": "TLZ 500",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 55,
+    "model": "TLZ 560",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 56,
+    "model": "TLZ 630",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 57,
+    "model": "TLZ 710",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 58,
+    "model": "TLZ 800",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 59,
+    "model": "TLZ 900",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 60,
+    "model": "TLZ 1000",
+    "series": "TLZ",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 61,
+    "model": "TZAF 355",
+    "series": "TZAF",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 62,
+    "model": "TZAF 400",
+    "series": "TZAF",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 63,
+    "model": "TZAF 450",
+    "series": "TZAF",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 64,
+    "model": "TZAF 500",
+    "series": "TZAF",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 65,
+    "model": "TZAF 560",
+    "series": "TZAF",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 66,
+    "model": "TZAF 630",
+    "series": "TZAF",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 67,
+    "model": "TZAF 710",
+    "series": "TZAF",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 68,
+    "model": "TZAF 800",
+    "series": "TZAF",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 69,
+    "model": "TZAF 900",
+    "series": "TZAF",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 70,
+    "model": "TZAF 1000",
+    "series": "TZAF",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 71,
+    "model": "TZAF 1120",
+    "series": "TZAF",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 72,
+    "model": "TZAF 1250",
+    "series": "TZAF",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 73,
+    "model": "AT 7-7",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 74,
+    "model": "AT 9-7",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 75,
+    "model": "AT 9-9",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 76,
+    "model": "AT 10-8",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 77,
+    "model": "AT 10-10",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 78,
+    "model": "AT 12-9",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 79,
+    "model": "AT 12-12",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 80,
+    "model": "AT 15-11",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 81,
+    "model": "AT 15-15",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 82,
+    "model": "AT 18-13",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 83,
+    "model": "AT 18-18",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 84,
+    "model": "AT 20-15",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 85,
+    "model": "AT 20-20",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 86,
+    "model": "AT 22-15",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 87,
+    "model": "AT 22-22",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 88,
+    "model": "AT 25-20",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 89,
+    "model": "AT 25-25",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 90,
+    "model": "AT 28-20",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 91,
+    "model": "AT 28-28",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 92,
+    "model": "AT 30-20",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 93,
+    "model": "AT 30-28",
+    "series": "AT",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 94,
+    "model": "ADH 400",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 95,
+    "model": "ADH 160",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 96,
+    "model": "ADH 180",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 97,
+    "model": "ADH 200",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 98,
+    "model": "ADH 250",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 99,
+    "model": "ADH 225",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 100,
+    "model": "ADH 280",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 101,
+    "model": "ADH 355",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 102,
+    "model": "ADH 450",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 103,
+    "model": "ADH 500",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 104,
+    "model": "ADH 560",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 105,
+    "model": "ADH 630",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 106,
+    "model": "ADH 315",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 107,
+    "model": "ADH 900",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 108,
+    "model": "ADH 800",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 109,
+    "model": "ADH 710",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 110,
+    "model": "ADH 1000",
+    "series": "ADH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 111,
+    "model": "RDH 400",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 112,
+    "model": "RDH 355",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 113,
+    "model": "RDH 315",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 114,
+    "model": "RDH 280",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 115,
+    "model": "RDH 500",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 116,
+    "model": "RDH 560",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 117,
+    "model": "RDH 630",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 118,
+    "model": "RDH 710",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 119,
+    "model": "RDH 180",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 120,
+    "model": "RDH 900",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 121,
+    "model": "RDH 450",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 122,
+    "model": "RDH 250",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 123,
+    "model": "RDH 225",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 124,
+    "model": "RDH 200",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 125,
+    "model": "RDH 800",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 126,
+    "model": "RDH 1000",
+    "series": "RDH",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 127,
+    "model": "VKA 250",
+    "series": "VKA",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 128,
+    "model": "VKA 500",
+    "series": "VKA",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 132,
+    "model": "PFN 250",
+    "series": "PF",
+    "type": "",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 135,
+    "model": "FB035-4E_.2C._P",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 136,
+    "model": "FB035-4E_.2C._S",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 137,
+    "model": "FB035-6E_.2C._S",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 138,
+    "model": "FB040-4E_.2F._P",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 139,
+    "model": "FB040-4E_.2F._S",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 140,
+    "model": "FB040-6E_.2C._P",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 141,
+    "model": "FB040-6E_.2C._S",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 142,
+    "model": "FB050-4E_.4F._L",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 143,
+    "model": "FB050-4E_.4I._P",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 144,
+    "model": "FB050-6E_.4C._L",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 145,
+    "model": "FB050-6E_.4F._P",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 146,
+    "model": "FB050-6E_.4F._S",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 147,
+    "model": "FB050-8E_.4C._P",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 148,
+    "model": "FB056-6E_.4F._L",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 149,
+    "model": "FB056-6E_.4I._P",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 150,
+    "model": "FB056-8E_.4F._P",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 151,
+    "model": "FB063-4D_.4M._L",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 152,
+    "model": "FB063-6E_.4I._L",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 153,
+    "model": "FB063-6E_.4I._P",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 154,
+    "model": "FB063-8E_.4F._L",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 155,
+    "model": "FB063-8E_.4I._P",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 156,
+    "model": "FB063-8E_.4I._S",
+    "series": "Series FB",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 157,
+    "model": "FC031-2E_.3F._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 158,
+    "model": "FC035-2D_.6C._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 159,
+    "model": "FC035-4D_.2C._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 160,
+    "model": "FC035-4E_.2C._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 161,
+    "model": "FC040-2D_.6K._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 162,
+    "model": "FC040-4D_.2F._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 163,
+    "model": "FC040-4E_.2F._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 164,
+    "model": "FC040-6D_.2F._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 165,
+    "model": "FC040-6E_.2F._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 166,
+    "model": "FC045-4D_.4C._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 167,
+    "model": "FC045-4E_.4C._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 168,
+    "model": "FC045-6D_.4C._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 169,
+    "model": "FC045-6E_.4C._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 170,
+    "model": "FC050-4D_.4F._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 171,
+    "model": "FC050-4E_.4F._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 172,
+    "model": "FC050-6D_.4C._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 173,
+    "model": "FC050-6E_.4F._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 174,
+    "model": "FC056-4D_.4I._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 175,
+    "model": "FC056-4D_.6F._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 176,
+    "model": "FC056-6D_.4F._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 177,
+    "model": "FC056-6E_.4F._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 178,
+    "model": "FC063-4D_.6K._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 179,
+    "model": "FC063-6D_.4I._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 180,
+    "model": "FC063-6E_.4I._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 181,
+    "model": "FC071-4D_.7M._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 182,
+    "model": "FC071-6D_.6K._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 183,
+    "model": "FC071-6E_.6K._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 184,
+    "model": "FC071-8D_.6F._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 185,
+    "model": "FC080-6D_.6K._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 186,
+    "model": "FC080-8D_.6K._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 187,
+    "model": "FC090-6D_.7Q._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 188,
+    "model": "FC090-8D_.7M._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 189,
+    "model": "FC100-8D_.7Q._",
+    "series": "Series FC",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 190,
+    "model": "FE031-4D_.0C._",
+    "series": "Series FE",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 191,
+    "model": "FE031-4E_.0C._",
+    "series": "Series FE",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 192,
+    "model": "FE035-4D_.0C._",
+    "series": "Series FE",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 193,
+    "model": "FE035-4E_.0F._",
+    "series": "Series FE",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 194,
+    "model": "FE040-4E_.2F._",
+    "series": "Series FE",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 195,
+    "model": "FE042-4E_.2F._",
+    "series": "Series FE",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 196,
+    "model": "FE045-4E_.4I._",
+    "series": "Series FE",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 197,
+    "model": "FE045-6E_.4F._",
+    "series": "Series FE",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 198,
+    "model": "FE050-4E_.4I._",
+    "series": "Series FE",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 199,
+    "model": "FE050-6E_.4F._",
+    "series": "Series FE",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 200,
+    "model": "FE056-6E_.4I._",
+    "series": "Series FE",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 201,
+    "model": "FE063-6E_.4I._",
+    "series": "Series FE",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 202,
+    "model": "FE063-6E_.4M._",
+    "series": "Series FE",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 203,
+    "model": "FE063-8E_.4I._",
+    "series": "Series FE",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 204,
+    "model": "FH056-6E_.4F._",
+    "series": "Series FH",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 205,
+    "model": "FH065-6E_.6K._",
+    "series": "Series FH",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 206,
+    "model": "FL050-4E_.4F._L",
+    "series": "Series FL",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 207,
+    "model": "FL050-4E_.4I._P",
+    "series": "Series FL",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 208,
+    "model": "FL050-6E_.4C._L",
+    "series": "Series FL",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 209,
+    "model": "FL050-6E_.4F._P",
+    "series": "Series FL",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 210,
+    "model": "FL050-6E_.4F._S",
+    "series": "Series FL",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 211,
+    "model": "FL050-8E_.4C._P",
+    "series": "Series FL",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 212,
+    "model": "FL056-8E_.4F._P",
+    "series": "Series FL",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 213,
+    "model": "FL063-6E_.4I._L",
+    "series": "Series FL",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 214,
+    "model": "FL063-6E_.4I._P",
+    "series": "Series FL",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 215,
+    "model": "FL063-8E_.4F._L",
+    "series": "Series FL",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 216,
+    "model": "FL063-8E_.4I._P",
+    "series": "Series FL",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 217,
+    "model": "FL063-8E_.4I._S",
+    "series": "Series FL",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 218,
+    "model": "FL065-6E_.4I._L",
+    "series": "Series FL",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 219,
+    "model": "FL065-6E_.4I._P",
+    "series": "Series FL",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 220,
+    "model": "FL065-8E_.4I._L",
+    "series": "Series FL",
+    "type": "Assiale Monofase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 221,
+    "model": "FB035-SD_.2C._P",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 222,
+    "model": "FB035-SD_.2C._S",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 223,
+    "model": "FB035-VD_.2C._P",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 224,
+    "model": "FB035-VD_.2C._S",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 225,
+    "model": "FB040-SD_.2C._P",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 226,
+    "model": "FB040-SD_.2C._S",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 227,
+    "model": "FB040-VD_.2C._L",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 228,
+    "model": "FB040-VD_.2C._P",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 229,
+    "model": "FB040-VD_.2F._S",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 230,
+    "model": "FB050-AD_.4C._P",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 231,
+    "model": "FB050-SD_.4C._L",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 232,
+    "model": "FB050-SD_.4C._P",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 233,
+    "model": "FB050-SD_.4F._S",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 234,
+    "model": "FB050-VD_.4F._L",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 235,
+    "model": "FB050-VD_.4I._P",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 236,
+    "model": "FB050-VD_.4I._S",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 237,
+    "model": "FB056-AD_.4F._P",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 238,
+    "model": "FB056-SD_.4F._L",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 239,
+    "model": "FB056-SD_.4F._P",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 240,
+    "model": "FB056-SD_.4I._S",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 241,
+    "model": "FB056-VD_.4I._L",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 242,
+    "model": "FB063-AD_.4F._L",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 243,
+    "model": "FB063-AD_.4F._P",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 244,
+    "model": "FB063-AD_.4I._S",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 245,
+    "model": "FB063-SD_.4I._L",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 246,
+    "model": "FB063-SD_.4I._P",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 247,
+    "model": "FB063-SD_.4I._S",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 248,
+    "model": "FB063-VD_.4M._L",
+    "series": "Series FB",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 249,
+    "model": "FC031-2D_.3B._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 250,
+    "model": "FC056-SD_.4F._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 251,
+    "model": "FC056-VD_.4I._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 252,
+    "model": "FC056-VD_.6K._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 253,
+    "model": "FC063-SD_.4I._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 254,
+    "model": "FC063-VD_.6K._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 255,
+    "model": "FC071-AD_.6F._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 256,
+    "model": "FC071-SD_.6K._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 257,
+    "model": "FC071-VD_.6N._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 258,
+    "model": "FC071-VD_.7M._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 259,
+    "model": "FC080-AD_.6K._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 260,
+    "model": "FC080-ND_.6K._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 261,
+    "model": "FC080-SD_.6K._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 262,
+    "model": "FC080-VD_.7Q._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 263,
+    "model": "FC091-AD_.7M._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 264,
+    "model": "FC091-SD_.7Q._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 265,
+    "model": "FC100-6D_.8P._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 266,
+    "model": "FC100-AD_.7Q._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 267,
+    "model": "FC100-MD_.7M._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 268,
+    "model": "FC112-AD_.7Q._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 269,
+    "model": "FC112-MD_.7M._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 270,
+    "model": "FC112-ND_.7M._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 271,
+    "model": "FC125-AD_.8S._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 272,
+    "model": "FC125-MD_.7Q._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 273,
+    "model": "FC125-ND_.7M._",
+    "series": "Series FC",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 274,
+    "model": "FE040-VD_.2C._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 275,
+    "model": "FE042-VD_.2F._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 276,
+    "model": "FE045-SD_.4F._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 277,
+    "model": "FE045-VD_.4F._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 278,
+    "model": "FE050-SD_.4F._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 279,
+    "model": "FE050-VD_.4I._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 280,
+    "model": "FE056-AD_.4F._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 281,
+    "model": "FE056-SD_.4F._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 282,
+    "model": "FE056-VD_.4M._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 283,
+    "model": "FE063-AD_.4I._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 284,
+    "model": "FE063-SD_.4I._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 285,
+    "model": "FE063-VD_.6N._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 286,
+    "model": "FE071-AD_.6F._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 287,
+    "model": "FE071-ND_.6F._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 288,
+    "model": "FE071-SD_.6F._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 289,
+    "model": "FE080-AD_.6K._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 290,
+    "model": "FE080-AD_.6N._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 291,
+    "model": "FE080-ND_.6K._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 292,
+    "model": "FE080-SD_.6N._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 293,
+    "model": "FE091-AD_.6K._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 294,
+    "model": "FE091-ND_.6F._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 295,
+    "model": "FE091-ND_.6N._A",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 296,
+    "model": "FE091-SD_.6N._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 297,
+    "model": "FE100-ND_.6N._",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 298,
+    "model": "FE100-ND_.6N._(S)",
+    "series": "Series FE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 299,
+    "model": "FH035-GD_.4A._",
+    "series": "Series FH",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 300,
+    "model": "FH042-GD_.4C._",
+    "series": "Series FH",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 301,
+    "model": "FH056-HD_.4F._",
+    "series": "Series FH",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 302,
+    "model": "FH056-SD_.4F._",
+    "series": "Series FH",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 303,
+    "model": "FH065-HD_.6K._",
+    "series": "Series FH",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 304,
+    "model": "FH065-SD_.4I._",
+    "series": "Series FH",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 305,
+    "model": "FL050-AD_.4C._P",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 306,
+    "model": "FL050-SD_.4C._L",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 307,
+    "model": "FL050-SD_.4C._P",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 308,
+    "model": "FL050-SD_.4F._S",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 309,
+    "model": "FL050-VD_.4F._L",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 310,
+    "model": "FL050-VD_.4I._P",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 311,
+    "model": "FL050-VD_.4I._S",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 312,
+    "model": "FL056-AD_.4F._P",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 313,
+    "model": "FL056-SD_.4F._L",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 314,
+    "model": "FL056-SD_.4F._P",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 315,
+    "model": "FL056-SD_.4I._S",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 316,
+    "model": "FL056-VD_.4I._L",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 317,
+    "model": "FL063-ND_.4F._L",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 318,
+    "model": "FL063-ND_.4F._P",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 319,
+    "model": "FL063-ND_.4I._S",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 320,
+    "model": "FL063-SD_.4I._L",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 321,
+    "model": "FL063-SD_.4I._P",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 322,
+    "model": "FL063-SD_.4I._S",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 323,
+    "model": "FL065-AD_.4F._L",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 324,
+    "model": "FL065-AD_.4F._P",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 325,
+    "model": "FL065-AD_.4F._S",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 326,
+    "model": "FL065-ND_.4I._L",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 327,
+    "model": "FL065-ND_.4I._P",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 328,
+    "model": "FL065-ND_.4I._S",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 329,
+    "model": "FL065-SD_.4I._L",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 330,
+    "model": "FL065-SD_.4I._P",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 331,
+    "model": "FL065-SD_.4I._S",
+    "series": "Series FL",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 332,
+    "model": "AZD910AM0301-01A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 333,
+    "model": "A8D910AJ0301-04A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 334,
+    "model": "A6D910AP0101-01A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 335,
+    "model": "A8D800AJ0101-02A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 336,
+    "model": "A6D800AJ0101-114A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 337,
+    "model": "A6D710AN0101-04E",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 338,
+    "model": "A4D710AL0101-03A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 339,
+    "model": "A4D630AN0101-42A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 340,
+    "model": "A4D630AJ0101-41A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 341,
+    "model": "A6D500AG0301",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 342,
+    "model": "A6D800AK0101-03C",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 343,
+    "model": "AZD800AM0301-10A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 344,
+    "model": "AZD800AM0301-10C",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 345,
+    "model": "A8D800AJ0101-02D",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 346,
+    "model": "A4D630AO0305-01C",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 347,
+    "model": "A4D560AE03",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 348,
+    "model": "A8D500AJ03-02A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 349,
+    "model": "A8D500AJ03-02C",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 350,
+    "model": "A4E500AM03-02C",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 351,
+    "model": "A6E500AJ0301-01A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 352,
+    "model": "A6E500AJ0301-01C",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 353,
+    "model": "A8E500AJ0301-01A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 354,
+    "model": "A8E500AJ0301-01C",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 355,
+    "model": "A4D500AJ0301-01A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 356,
+    "model": "A4D500AM0305-01A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 357,
+    "model": "A4D500AM0305-01B",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 358,
+    "model": "A6D500AJ0301-01A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 359,
+    "model": "A6D500AJ0301-01C",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 360,
+    "model": "A6D630AM01-13A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 361,
+    "model": "A6D630AN01-12A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 362,
+    "model": "A6D630AN01-12C",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 363,
+    "model": "A8D630AN01-01A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 364,
+    "model": "A8D630AN01-01C",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 365,
+    "model": "A8D630AN07-01A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 366,
+    "model": "A8D630AN07-01C",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 367,
+    "model": "A6E630AN01-05A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 368,
+    "model": "A6E630AO01-02A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 369,
+    "model": "A8E630AN01-01A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 370,
+    "model": "A8E630AN01-01C",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 371,
+    "model": "A6D560AK03-01A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 372,
+    "model": "A6D560AK03-01C",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 373,
+    "model": "A6E560AK0101-01A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 374,
+    "model": "A8E560AK01XA-01A",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 375,
+    "model": "A8E560AK01XA-01C",
+    "series": "Series Cliente",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 376,
+    "model": "AZD910AM0301 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 377,
+    "model": "A8D910AJ0301 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 378,
+    "model": "A6D910AP0101 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 379,
+    "model": "A8D800AJ0101 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 380,
+    "model": "A6D800AJ0101 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 381,
+    "model": "A6D710AN0101 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 382,
+    "model": "A4D710AL0101 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 383,
+    "model": "A4D630AN0101 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 384,
+    "model": "A4D630AJ0101 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 385,
+    "model": "A6D500AG0301 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 386,
+    "model": "A6D800AK0101 480V 60Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 387,
+    "model": "AZD800AM0301 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 388,
+    "model": "AZD800AM0301 480V 60Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 389,
+    "model": "A8D800AJ0101 480V 60Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 390,
+    "model": "A4D630AO0305 Y480V 60Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 391,
+    "model": "A4D560AE03 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 392,
+    "model": "A8D500AJ03 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 393,
+    "model": "A8D500AJ03 480V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 394,
+    "model": "A4E500AM03 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 395,
+    "model": "A6E500AJ03 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 396,
+    "model": "A6E500AJ03 230V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 397,
+    "model": "A8E500AJ03 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 398,
+    "model": "A8E500AJ03 230V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 399,
+    "model": "A4D500AJ03 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 400,
+    "model": "A4D500AM0305 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 401,
+    "model": "A4D500AM0305 480V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 402,
+    "model": "A6D500AJ0301 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 403,
+    "model": "A6D500AJ0301 480V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 404,
+    "model": "A6D630AM01 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 405,
+    "model": "A6D630AN01 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 406,
+    "model": "A6D630AN01 480V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 407,
+    "model": "A8D630AN01 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 408,
+    "model": "A8D630AN01 480V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 409,
+    "model": "A8D630AN07 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 410,
+    "model": "A8D630AN07 480V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 411,
+    "model": "A6E630AN01 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 412,
+    "model": "A6E630AO01 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 413,
+    "model": "A8E630AN01 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 414,
+    "model": "A8E630AN01 230V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 415,
+    "model": "A6D560AK03 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 416,
+    "model": "A6D560AK03 480V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 417,
+    "model": "A6E560AK01 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 418,
+    "model": "A8E560AK01 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 419,
+    "model": "A8E560AK01 230V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 420,
+    "model": "AZD910AM0301 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 421,
+    "model": "A8D910AJ0301 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 422,
+    "model": "A6D910AP0101 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 423,
+    "model": "A8D800AJ0101 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 424,
+    "model": "A6D800AJ0101 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 425,
+    "model": "A6D710AN0101 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 426,
+    "model": "A4D710AL0101 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 427,
+    "model": "A4D630AN0101 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 428,
+    "model": "A4D630AJ0101 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 429,
+    "model": "A6D500AG0301 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 430,
+    "model": "A6D800AK0101 480V 60Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 431,
+    "model": "AZD800AM0301 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 432,
+    "model": "AZD800AM0301 480V 60Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 433,
+    "model": "A8D800AJ0101 480V 60Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 434,
+    "model": "A4D630AO0305 Y480V 60Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 435,
+    "model": "A4D560AE03 400V 50Hz",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 436,
+    "model": "A8D500AJ03 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 437,
+    "model": "A8D500AJ03 480V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 438,
+    "model": "A4E500AM03 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 439,
+    "model": "A6E500AJ03 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 440,
+    "model": "A6E500AJ03 230V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 441,
+    "model": "A8E500AJ03 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 442,
+    "model": "A8E500AJ03 230V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 443,
+    "model": "A4D500AJ03 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 444,
+    "model": "A4D500AM0305 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 445,
+    "model": "A4D500AM0305 480V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 446,
+    "model": "A6D500AJ0301 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 447,
+    "model": "A6D500AJ0301 480V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 448,
+    "model": "A6D630AM01 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 449,
+    "model": "A6D630AN01 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 450,
+    "model": "A6D630AN01 480V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 451,
+    "model": "A8D630AN01 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 452,
+    "model": "A8D630AN01 480V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 453,
+    "model": "A8D630AN07 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 454,
+    "model": "A8D630AN07 480V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 455,
+    "model": "A6E630AN01 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 456,
+    "model": "A6E630AO01 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 457,
+    "model": "A8E630AN01 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 458,
+    "model": "A8E630AN01 230V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 459,
+    "model": "A6D560AK03 400V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 460,
+    "model": "A6D560AK03 480V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 461,
+    "model": "A6E560AK01 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 462,
+    "model": "A8E560AK01 230V 50Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 463,
+    "model": "A8E560AK01 230V 60Hz Hyblade",
+    "series": "EbmSeries",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 470,
+    "model": "S4D630-AF03-03",
+    "series": "HYBLADE",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 471,
+    "model": "FN040-4DK.OF.V7P1",
+    "series": "FN50hz",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 472,
+    "model": "FN040-4DK.0F0.V7P1",
+    "series": "FN60hz",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 474,
+    "model": "FN045-4DK.4I.V7P1",
+    "series": "FN60hz",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 475,
+    "model": "FN045-4DK.4I0.V7P1",
+    "series": "FN50hz",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 476,
+    "model": "FN050-4DK.4I.V7P1",
+    "series": "FN50hz",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 477,
+    "model": "FN050-4DK.4I0.V7P1",
+    "series": "FN60hz",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 478,
+    "model": "FN035-4DK.OF.V7P2",
+    "series": "FN50hz",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 479,
+    "model": "FN035-4DK.OF0.V7P2",
+    "series": "FN60hz",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 480,
+    "model": "FN056-4DK.4M.V7P2",
+    "series": "FN50hz",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 481,
+    "model": "FN056-4DK.4M0.V7P2",
+    "series": "FN60hz",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 482,
+    "model": "FN063-4DK.6N.V7P6",
+    "series": "FN50hz",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 483,
+    "model": "FN063-4DK.6N0.V7P6",
+    "series": "FN60hz",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 484,
+    "model": "RT-250",
+    "series": "60 Hz",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  },
+  {
+    "id": 485,
+    "model": "RT-300",
+    "series": "60 Hz",
+    "type": "Assiale Trifase",
+    "builder": "Ziehl-Abegg"
+  }
+]
