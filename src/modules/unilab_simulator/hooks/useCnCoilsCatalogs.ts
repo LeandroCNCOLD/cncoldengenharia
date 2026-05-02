@@ -82,6 +82,11 @@ export interface CnCoilsCatalogsData {
   distributorKappa: DistributorKappaMap;
   distributorHoleSizes: DistributorHoleSize[];
   engineErrors: EngineErrorMessage[];
+  thermoPhysicalProperties: ThermoPhysicalProperty[];
+  correctionPolynomials: CorrectionPolynomial[];
+  fanElectricalData: FanElectricalData[];
+  pumpData: PumpData[];
+  compressorOutletTemperature: CompressorOutletTemperature[];
 }
 
 export interface CnCoilsCatalogsState extends CnCoilsCatalogsData {
