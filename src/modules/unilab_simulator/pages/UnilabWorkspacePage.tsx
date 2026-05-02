@@ -192,8 +192,13 @@ export function UnilabWorkspacePage() {
         </div>
       }
     >
-      {/* Layout 3 colunas estilo UNILAB Coils 9.0 */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[220px_1fr_1fr]">
+      {/*
+        Layout responsivo estilo UNILAB Coils 9.0:
+        - mobile/tablet (<lg): tudo empilhado em 1 coluna
+        - lg (>=1024) e xl (<1280): sidebar fina + 1 coluna larga (centro e direita empilhados)
+        - 2xl (>=1536): 3 colunas completas lado a lado
+      */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[200px_minmax(0,1fr)] 2xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)]">
         {/* COLUNA ESQUERDA — sidebar de navegação */}
         <WorkspaceSidebar
           componentType={componentType}
@@ -206,45 +211,49 @@ export function UnilabWorkspacePage() {
           faceAreaM2={result?.faceAreaM2}
         />
 
-        {/* COLUNA CENTRAL — Lado Ventilação + Geometria conforme seção ativa */}
-        <div className="space-y-3">
-          {activeSection === "geometry" ? (
-            catalogs.loading ? (
-              <SkeletonCard />
+        {/* Em <2xl, centro+direita empilham dentro de uma única coluna ao lado da sidebar.
+            Em 2xl, `display:contents` os promove para colunas irmãs do grid. */}
+        <div className="min-w-0 space-y-3 2xl:contents">
+          {/* COLUNA CENTRAL — Lado Ventilação + Geometria conforme seção ativa */}
+          <div className="min-w-0 space-y-3">
+            {activeSection === "geometry" ? (
+              catalogs.loading ? (
+                <SkeletonCard />
+              ) : (
+                <GeometryForm
+                  geometries={
+                    enrichedGeometries.length > 0
+                      ? enrichedGeometries
+                      : catalogs.geometries
+                  }
+                  tubeMaterials={catalogs.tubeMaterials}
+                  finPitches={catalogs.finPitches}
+                  finThicknesses={catalogs.finThicknesses}
+                  disabled={!catalogs.ready}
+                />
+              )
             ) : (
-              <GeometryForm
-                geometries={
-                  enrichedGeometries.length > 0
-                    ? enrichedGeometries
-                    : catalogs.geometries
-                }
-                tubeMaterials={catalogs.tubeMaterials}
-                finPitches={catalogs.finPitches}
-                finThicknesses={catalogs.finThicknesses}
-                disabled={!catalogs.ready}
-              />
-            )
-          ) : (
-            <AirSidePanel result={result} />
-          )}
-        </div>
+              <AirSidePanel result={result} />
+            )}
+          </div>
 
-        {/* COLUNA DIREITA — Lado Fluido + status + resultado */}
-        <div className="space-y-3">
-          <FluidSidePanel
-            componentType={componentType}
-            refrigerants={catalogs.refrigerants}
-            disabled={!catalogs.ready}
-            result={result}
-          />
-          <DatasetStatusPanel
-            loading={catalogs.loading}
-            ready={catalogs.ready}
-            errors={catalogs.errors}
-            missing={catalogs.missing}
-            compact
-          />
-          <ResultPanel result={result} warnings={warnings} />
+          {/* COLUNA DIREITA — Lado Fluido + status + resultado */}
+          <div className="min-w-0 space-y-3">
+            <FluidSidePanel
+              componentType={componentType}
+              refrigerants={catalogs.refrigerants}
+              disabled={!catalogs.ready}
+              result={result}
+            />
+            <DatasetStatusPanel
+              loading={catalogs.loading}
+              ready={catalogs.ready}
+              errors={catalogs.errors}
+              missing={catalogs.missing}
+              compact
+            />
+            <ResultPanel result={result} warnings={warnings} />
+          </div>
         </div>
       </div>
     </PageContainer>
