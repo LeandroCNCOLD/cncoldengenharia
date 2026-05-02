@@ -53,6 +53,19 @@ export interface CentrifugalFanCoefficient {
   rawCurve: Record<string, unknown> | Array<Record<string, unknown>>;
 }
 
+export type FanCoefficient = AxialFanCoefficient | CentrifugalFanCoefficient;
+
+export type FanEvaluationMethod = "curve" | "polynomial" | "range_only" | "unavailable";
+
+export interface FanCurveEvaluation {
+  pressure_Pa: number | null;
+  power_W?: number;
+  current_A?: number;
+  rpm?: number;
+  warning?: string;
+  method: FanEvaluationMethod;
+}
+
 export interface UnilabCorrelationReference {
   tag: string;
   name: string;

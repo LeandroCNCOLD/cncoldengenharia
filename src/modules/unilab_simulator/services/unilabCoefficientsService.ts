@@ -2,6 +2,8 @@ import type {
   AxialFanCoefficient,
   CentrifugalFanCoefficient,
   CoilCorrectionCoefficient,
+  FanCoefficient,
+  FanCurveEvaluation,
   SubcoolingCorrectionCoefficient,
   UnilabCorrelationReference,
   UnilabCoefficientsDatabase,
@@ -12,6 +14,12 @@ const LOAD_ERROR_MESSAGE = "Não foi possível carregar os coeficientes UNILAB."
 const NO_COEFFICIENT_MESSAGE = "Nenhum coeficiente UNILAB encontrado para esta tipologia.";
 const CLAMP_WARNING =
   "Velocidade frontal fora da faixa do coeficiente. Valor limitado à faixa válida.";
+const FAN_CURVE_UNUSABLE_WARNING = "Ventilador sem curva utilizável para cálculo.";
+const FAN_FLOW_CLAMP_WARNING =
+  "Vazão fora da faixa da curva do ventilador. Valor limitado à faixa válida.";
+const CENTRIFUGAL_NOT_PARSED_WARNING = "Curva centrífuga ainda não interpretada nesta etapa.";
+const RANGE_ONLY_WARNING = "Ventilador possui apenas faixa de operação, sem curva calculável.";
+const FAN_UNAVAILABLE_WARNING = "Ventilador sem dados suficientes para avaliação.";
 
 let cachedDatabase: UnilabCoefficientsDatabase | null = null;
 let inflightDatabase: Promise<UnilabCoefficientsDatabase> | null = null;
@@ -290,6 +298,62 @@ function evaluatePolynomial(coefficients: number[], velocity: number): number {
   );
 }
 
+function hasUsableRange(range: { min: number; max: number }): boolean {
+  return Number.isFinite(range.min) && Number.isFinite(range.max) && range.max > range.min;
+}
+
+function isAllZero(values: number[]): boolean {
+  return values.every((value) => value === 0);
+}
+
+function hasValidCurve(fan: AxialFanCoefficient): boolean {
+  const { x, y } = fan.curve;
+  return (
+    x.length > 1 &&
+    x.length === y.length &&
+    !isAllZero(x) &&
+    !isAllZero(y)
+  );
+}
+
+function hasValidPolynomial(fan: AxialFanCoefficient): boolean {
+  return fan.polynomial.coefficients.some((coefficient) => coefficient !== 0);
+}
+
+function clampToRange(value: number, min: number, max: number): { value: number; warning?: string } {
+  if (value < min) return { value: min, warning: FAN_FLOW_CLAMP_WARNING };
+  if (value > max) return { value: max, warning: FAN_FLOW_CLAMP_WARNING };
+  return { value };
+}
+
+export function interpolateLinear(xs: number[], ys: number[], targetX: number): number {
+  const pairs = xs
+    .map((x, index) => ({ x, y: ys[index] }))
+    .filter((pair) => Number.isFinite(pair.x) && Number.isFinite(pair.y))
+    .sort((a, b) => a.x - b.x);
+
+  if (pairs.length === 0) return NaN;
+  if (targetX <= pairs[0].x) return pairs[0].y;
+  if (targetX >= pairs[pairs.length - 1].x) return pairs[pairs.length - 1].y;
+
+  for (let index = 0; index < pairs.length - 1; index += 1) {
+    const current = pairs[index];
+    const next = pairs[index + 1];
+    if (targetX >= current.x && targetX <= next.x) {
+      const ratio = (targetX - current.x) / (next.x - current.x);
+      return current.y + ratio * (next.y - current.y);
+    }
+  }
+
+  return pairs[pairs.length - 1].y;
+}
+
+function evaluateFanPolynomial(coefficients: number[], airflowM3H: number): number {
+  return coefficients
+    .slice(0, 5)
+    .reduce((pressure, coefficient, index) => pressure + coefficient * airflowM3H ** index, 0);
+}
+
 export async function evaluateCoilCorrection(params: {
   idTipologia: number;
   airVelocity_m_s: number;
@@ -329,4 +393,94 @@ export async function getAxialFans(): Promise<AxialFanCoefficient[]> {
 export async function getCentrifugalFans(): Promise<CentrifugalFanCoefficient[]> {
   const database = await loadUnilabCoefficients();
   return database.fans.centrifugal;
+}
+
+export async function getFanById(id: string): Promise<FanCoefficient | null> {
+  const database = await loadUnilabCoefficients();
+  return (
+    database.fans.axial.find((fan) => fan.id === id) ??
+    database.fans.centrifugal.find((fan) => fan.id === id) ??
+    null
+  );
+}
+
+export async function evaluateFanCurve(params: {
+  fanId: string;
+  airflow_m3h: number;
+}): Promise<FanCurveEvaluation> {
+  const fan = await getFanById(params.fanId);
+  if (!fan) {
+    return {
+      pressure_Pa: null,
+      warning: FAN_UNAVAILABLE_WARNING,
+      method: "unavailable",
+    };
+  }
+
+  if ("curve" in fan) {
+    if (hasValidCurve(fan)) {
+      const min = Math.min(...fan.curve.x);
+      const max = Math.max(...fan.curve.x);
+      const clamped = clampToRange(params.airflow_m3h, min, max);
+      const pressure = interpolateLinear(fan.curve.x, fan.curve.y, clamped.value);
+      return {
+        pressure_Pa: Number.isFinite(pressure) ? pressure : null,
+        power_W: fan.power_W,
+        current_A: fan.current_A,
+        rpm: fan.rpm,
+        warning: clamped.warning,
+        method: "curve",
+      };
+    }
+
+    if (hasValidPolynomial(fan)) {
+      const range = fan.airflowRange_m3h;
+      const clamped = hasUsableRange(range)
+        ? clampToRange(params.airflow_m3h, range.min, range.max)
+        : { value: params.airflow_m3h };
+      const pressure = evaluateFanPolynomial(fan.polynomial.coefficients, clamped.value);
+      return {
+        pressure_Pa: Number.isFinite(pressure) ? pressure : null,
+        power_W: fan.power_W,
+        current_A: fan.current_A,
+        rpm: fan.rpm,
+        warning: clamped.warning,
+        method: "polynomial",
+      };
+    }
+
+    if (hasUsableRange(fan.airflowRange_m3h)) {
+      return {
+        pressure_Pa: null,
+        power_W: fan.power_W,
+        current_A: fan.current_A,
+        rpm: fan.rpm,
+        warning: RANGE_ONLY_WARNING,
+        method: "range_only",
+      };
+    }
+
+    return {
+      pressure_Pa: null,
+      power_W: fan.power_W,
+      current_A: fan.current_A,
+      rpm: fan.rpm,
+      warning: FAN_CURVE_UNUSABLE_WARNING,
+      method: "unavailable",
+    };
+  }
+
+  if (hasUsableRange(fan.capacityRange_m3h) && fan.pressureRange_Pa.max > 0) {
+    return {
+      pressure_Pa: null,
+      warning: CENTRIFUGAL_NOT_PARSED_WARNING,
+      method: "range_only",
+    };
+  }
+
+  return {
+    pressure_Pa: null,
+    warning: FAN_UNAVAILABLE_WARNING,
+    method: "unavailable",
+  };
 }

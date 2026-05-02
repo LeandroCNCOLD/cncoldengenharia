@@ -10,6 +10,7 @@ interface UnilabSimulationStore {
   physicalInputs: Partial<UnilabPhysicalInputs>;
   thermoInputs: Partial<UnilabThermoInputs>;
   selectedGeometry?: CoilGeometryCatalogItem;
+  selectedFanId?: string;
   result?: UnilabSimulationResult;
   warnings: string[];
   isSimulating: boolean;
@@ -17,6 +18,7 @@ interface UnilabSimulationStore {
   setPhysicalInputs: (patch: Partial<UnilabPhysicalInputs>) => void;
   setThermoInputs: (patch: Partial<UnilabThermoInputs>) => void;
   setSelectedGeometry: (geometry: CoilGeometryCatalogItem | undefined) => void;
+  setSelectedFanId: (fanId: string | undefined) => void;
   setResult: (result: UnilabSimulationResult | undefined) => void;
   setWarnings: (warnings: string[]) => void;
   setIsSimulating: (value: boolean) => void;
@@ -28,6 +30,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   physicalInputs: {},
   thermoInputs: {},
   selectedGeometry: undefined,
+  selectedFanId: undefined,
   result: undefined,
   warnings: [],
   isSimulating: false,
@@ -53,6 +56,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
           }
         : s.physicalInputs,
     })),
+  setSelectedFanId: (fanId) => set({ selectedFanId: fanId }),
   setResult: (result) => set({ result }),
   setWarnings: (warnings) => set({ warnings }),
   setIsSimulating: (value) => set({ isSimulating: value }),
@@ -62,6 +66,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       physicalInputs: {},
       thermoInputs: {},
       selectedGeometry: undefined,
+      selectedFanId: undefined,
       result: undefined,
       warnings: [],
       isSimulating: false,

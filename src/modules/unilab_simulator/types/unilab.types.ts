@@ -81,6 +81,7 @@ export interface UnilabPhysicalInputs {
 export interface UnilabThermoInputs {
   refrigerantId: string;
   airFlowM3H: number;
+  selectedFanId?: string;
   airInletTempC: number;
   airInletRhPercent: number;
   altitudeM: number;
@@ -88,6 +89,19 @@ export interface UnilabThermoInputs {
   condensingTempC?: number;
   superheatK?: number;
   subcoolingK?: number;
+}
+
+export interface FanEvaluationResult {
+  fanId?: string;
+  model?: string;
+  type?: "axial" | "centrifugal";
+  method: "curve" | "polynomial" | "range_only" | "unavailable";
+  airflow_m3h: number;
+  pressure_Pa: number | null;
+  power_W?: number;
+  current_A?: number;
+  rpm?: number;
+  warning?: string;
 }
 
 export interface UnilabSimulationResult {
@@ -107,6 +121,7 @@ export interface UnilabSimulationResult {
   ntu?: number;
   effectiveness?: number;
   correctionFactor: number;
+  fanEvaluation?: FanEvaluationResult;
   unilabCorrection?: {
     factor: number;
     idCorr?: number;

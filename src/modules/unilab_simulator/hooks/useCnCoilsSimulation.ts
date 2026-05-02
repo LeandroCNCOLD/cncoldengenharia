@@ -5,6 +5,7 @@ import { useCallback } from "react";
 import { SimulationError } from "../engine/simulatorCore";
 import { runSimulationV2Async } from "../engine_v2/simulatorCoreV2";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { evaluateFanCurve, getFanById } from "../services/unilabCoefficientsService";
 import type {
   AirVelocityCorrectionItem,
   PressureDropFanItem,
@@ -80,6 +81,32 @@ export function useCnCoilsSimulation(catalogs: UseCnCoilsSimulationParams) {
           serie: readString(geometry?.raw, "Serie", "serie", "code", "description"),
         },
       });
+      const selectedFanId = thermo.selectedFanId;
+      if (selectedFanId) {
+        const [fan, fanEvaluation] = await Promise.all([
+          getFanById(selectedFanId),
+          evaluateFanCurve({
+            fanId: selectedFanId,
+            airflow_m3h: thermo.airFlowM3H,
+          }),
+        ]);
+
+        result.fanEvaluation = {
+          fanId: selectedFanId,
+          model: fan?.model,
+          type: fan && "sourceType" in fan ? "axial" : fan ? "centrifugal" : undefined,
+          airflow_m3h: thermo.airFlowM3H,
+          pressure_Pa: fanEvaluation.pressure_Pa,
+          power_W: fanEvaluation.power_W,
+          current_A: fanEvaluation.current_A,
+          rpm: fanEvaluation.rpm,
+          warning: fanEvaluation.warning,
+          method: fanEvaluation.method,
+        };
+        if (fanEvaluation.warning) {
+          result.warnings = [...result.warnings, fanEvaluation.warning];
+        }
+      }
 
       setResult(result);
       setWarnings(result.warnings);

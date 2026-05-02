@@ -1,5 +1,5 @@
 import { AlertTriangle } from "lucide-react";
-import type { UnilabSimulationResult } from "../types/unilab.types";
+import type { FanEvaluationResult, UnilabSimulationResult } from "../types/unilab.types";
 import { ptBR } from "../i18n/messages.ptBR";
 
 interface ResultPanelProps {
@@ -64,6 +64,7 @@ export function ResultPanel({ result, warnings }: ResultPanelProps) {
         </p>
       </div>
       <UnilabCorrectionCard result={result} warnings={displayWarnings} />
+      <FanResultCard fan={result.fanEvaluation} />
       {displayWarnings.length > 0 && <WarningsList warnings={displayWarnings} />}
     </div>
   );
@@ -133,6 +134,59 @@ function CorrectionItem({ label, value }: { label: string; value: string }) {
     <div className="flex items-center justify-between rounded border border-blue-100 bg-white/70 px-3 py-2">
       <dt className="text-xs text-blue-900">{label}</dt>
       <dd className="text-sm font-semibold text-blue-950">{value}</dd>
+    </div>
+  );
+}
+
+function methodLabel(method: FanEvaluationResult["method"]): string {
+  const labels: Record<FanEvaluationResult["method"], string> = {
+    curve: "Curva X/Y",
+    polynomial: "Polinômio",
+    range_only: "Somente faixa",
+    unavailable: "Indisponível",
+  };
+  return labels[method];
+}
+
+function fanTypeLabel(type: FanEvaluationResult["type"] | undefined): string {
+  if (type === "axial") return "Axial";
+  if (type === "centrifugal") return "Centrífugo";
+  return "—";
+}
+
+function FanResultCard({ fan }: { fan?: FanEvaluationResult }) {
+  if (!fan) {
+    return (
+      <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <h4 className="text-sm font-semibold text-slate-900">Ventilador</h4>
+        <p className="mt-2 text-sm text-slate-600">
+          Nenhum ventilador selecionado. Vazão informada manualmente.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-4">
+      <h4 className="text-sm font-semibold text-slate-900">Ventilador</h4>
+      <dl className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <CorrectionItem label="Modelo" value={fan.model ?? "—"} />
+        <CorrectionItem label="Tipo" value={fanTypeLabel(fan.type)} />
+        <CorrectionItem label="Método de avaliação" value={methodLabel(fan.method)} />
+        <CorrectionItem label="Vazão usada (m³/h)" value={fmt(fan.airflow_m3h)} />
+        <CorrectionItem
+          label="Pressão na curva (Pa)"
+          value={fan.pressure_Pa === null ? "—" : fmt(fan.pressure_Pa, 1)}
+        />
+        <CorrectionItem label="Potência (W)" value={fmt(fan.power_W, 1)} />
+        <CorrectionItem label="Corrente (A)" value={fmt(fan.current_A, 2)} />
+        <CorrectionItem label="Rotação (rpm)" value={fmt(fan.rpm, 0)} />
+      </dl>
+      {fan.warning && (
+        <div className="mt-3 rounded border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">
+          <span className="font-semibold">Avisos:</span> {fan.warning}
+        </div>
+      )}
     </div>
   );
 }
