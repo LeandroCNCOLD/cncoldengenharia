@@ -124,10 +124,37 @@ function readStr(raw: Record<string, unknown>, key: string): string | null {
   return String(v);
 }
 
+/**
+ * U base de referência (W/m²K, área externa) por tipo de serpentina UNILAB.
+ * Valores típicos para baterias aletadas tubo–aleta @ V_face ≈ 2.5 m/s.
+ * Usado SOMENTE quando o JSON do catálogo não fornece `uBaseWm2K`/`u_base_w_m2k`.
+ * Mantém o motor de cálculo operacional sem inventar comportamento físico:
+ * a correção por velocidade, parede e fator de erro continuam aplicadas.
+ */
+const DEFAULT_U_BASE_BY_COIL_TYPE: Record<string, number> = {
+  condensation: 40,
+  direct_expansion: 35,
+  flooded_evaporator: 40,
+  cooling: 35,
+  heating: 30,
+  vapor: 50,
+};
+const DEFAULT_U_BASE_FALLBACK = 35;
+
 function enrich(entry: RawGeometryEntry): CoilGeometryItem {
   const raw = entry.raw ?? {};
   const coilType = readStr(raw, "coil_type") ?? "";
   const tipo = COIL_TYPE_TO_TIPO_SERPENTINA[coilType] ?? null;
+
+  // U base: prefere valor explícito do entry/raw; caso contrário, usa default
+  // por tipo de serpentina para que o motor não bloqueie a simulação.
+  const uBaseFromCatalog =
+    entry.uBaseWm2K ??
+    readNum(raw, "u_base_w_m2k") ??
+    readNum(raw, "uBaseWm2K") ??
+    null;
+  const uBaseWm2K =
+    uBaseFromCatalog ?? DEFAULT_U_BASE_BY_COIL_TYPE[coilType] ?? DEFAULT_U_BASE_FALLBACK;
   const finType = readNum(raw, "fin_type");
   const tubeType = readNum(raw, "tube_type");
 
