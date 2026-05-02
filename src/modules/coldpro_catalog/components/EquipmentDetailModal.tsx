@@ -91,6 +91,20 @@ export function EquipmentDetailModal({ equipment, onClose }: Props) {
   const lastReviewedBy = validationOverride?.reviewedBy ?? equipment?.lastReviewedBy;
   const validationNotes = validationOverride?.notes ?? equipment?.validationNotes;
 
+  const completeness: CatalogCompleteness | null = useMemo(
+    () => (equipment ? computeBlockCompleteness(equipment) : null),
+    [equipment],
+  );
+
+  const missingByBlock = useMemo(() => {
+    const map = new Map<BlockKey, Set<string>>();
+    if (!completeness) return map;
+    (Object.keys(completeness.byBlock) as BlockKey[]).forEach((k) => {
+      map.set(k, new Set(completeness.byBlock[k].missing));
+    });
+    return map;
+  }, [completeness]);
+
   const hasReheat = useMemo(() => {
     if (!equipment) return false;
     return (
@@ -100,7 +114,7 @@ export function EquipmentDetailModal({ equipment, onClose }: Props) {
     );
   }, [equipment]);
 
-  if (!equipment) return null;
+  if (!equipment || !completeness) return null;
   const ValidationIcon = VALIDATION_ICON[effectiveValidation];
 
   const handleMarkAnalyzed = () => {
