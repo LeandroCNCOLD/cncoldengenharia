@@ -13,6 +13,24 @@ import {
   validateFluidSideInputs,
   type FluidSideValidationResult,
 } from "../services/fluidSideValidation";
+import { UnitSelect } from "./UnitSelect";
+import {
+  DELTA_T_UNITS,
+  MASS_FLOW_UNITS,
+  PRESSURE_UNITS,
+  TEMP_UNITS,
+  VELOCITY_UNITS,
+  deltaTConv,
+  massFlowConv,
+  pressureConv,
+  tempConv,
+  velocityConv,
+  type DeltaTUnit,
+  type MassFlowUnit,
+  type PressureUnit,
+  type TempUnit,
+  type VelocityUnit,
+} from "../utils/unitConversions";
 
 interface FluidSidePanelProps {
   componentType: UnilabComponentType;
