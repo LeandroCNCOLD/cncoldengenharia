@@ -185,6 +185,3 @@ export function buildMotorComponentsFromCatalog(
   return result;
 }
 
-  return result;
-}
-
