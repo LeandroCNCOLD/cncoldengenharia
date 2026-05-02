@@ -65,6 +65,8 @@ export interface CnCoilsCatalogsData {
   coilShapes: CoilShape[];
   finTreatments: FinTreatment[];
   powerSupplies: PowerSupply[];
+  /** Lista de Materiais (BOM) — 15 grupos consolidados do UNILAB. */
+  bom: BomCatalog;
 }
 
 export interface CnCoilsCatalogsState extends CnCoilsCatalogsData {
