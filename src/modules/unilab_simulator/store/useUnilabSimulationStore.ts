@@ -141,18 +141,45 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
 
   fluid: "R404A",
   fluidMassFlow_kg_h: 0,
-  fluidOperatingTemp_C: 0,
+  isMassFlowLocked: true,
+  fluidOperatingTemp_C: 45,
   fluidTempReference: "middle",
-  superheat_K: 0,
-  subcooling_K: 0,
+  superheat_K: 5,
+  subcooling_K: 3,
   foulingFactorFluid: 0,
   setFluid: (val) => set({ fluid: val }),
   setFluidMassFlow: (val) => set({ fluidMassFlow_kg_h: val }),
+  toggleMassFlowLock: () =>
+    set((s) => ({ isMassFlowLocked: !s.isMassFlowLocked })),
   setFluidOperatingTemp: (val) => set({ fluidOperatingTemp_C: val }),
   setFluidTempReference: (val) => set({ fluidTempReference: val }),
   setSuperheat: (val) => set({ superheat_K: val }),
   setSubcooling: (val) => set({ subcooling_K: val }),
   setFoulingFactorFluid: (val) => set({ foulingFactorFluid: val }),
+
+  // Etapa 3.6 — Custo da bateria
+  materialPrices: { ...DEFAULT_MATERIAL_PRICES },
+  calculatedCost: 0,
+  tubeMaterialKey: "copper_kg",
+  finMaterialKey: "aluminum_kg",
+  setMaterialPrice: (material, price) =>
+    set((s) => {
+      const materialPrices = { ...s.materialPrices, [material]: price };
+      const cost = computeCostFromState({ ...s, materialPrices });
+      return { materialPrices, calculatedCost: cost };
+    }),
+  setTubeMaterialKey: (key) =>
+    set((s) => {
+      const cost = computeCostFromState({ ...s, tubeMaterialKey: key });
+      return { tubeMaterialKey: key, calculatedCost: cost };
+    }),
+  setFinMaterialKey: (key) =>
+    set((s) => {
+      const cost = computeCostFromState({ ...s, finMaterialKey: key });
+      return { finMaterialKey: key, calculatedCost: cost };
+    }),
+  recalculateCost: () =>
+    set((s) => ({ calculatedCost: computeCostFromState(s) })),
 
   setPhysicalInputs: (patch) =>
     set((s) => ({ physicalInputs: { ...s.physicalInputs, ...patch } })),
