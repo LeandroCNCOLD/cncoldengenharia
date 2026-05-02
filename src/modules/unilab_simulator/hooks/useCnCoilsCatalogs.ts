@@ -12,6 +12,8 @@ import type {
   CoilShape,
   Compressor,
   CompressorStandard,
+  DistributorHoleSize,
+  DistributorKappaMap,
   Fan,
   FinHeight,
   FinPitch,
@@ -23,6 +25,8 @@ import type {
   Refrigerant,
   SecondaryFluid,
   TubeThickness,
+  UiLabelEntry,
+  WarningEntry,
 } from "../types/catalogs";
 
 const CATALOG_BASE = "/data/catalogs";
