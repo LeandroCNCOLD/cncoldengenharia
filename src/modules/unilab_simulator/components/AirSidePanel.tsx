@@ -40,7 +40,7 @@ import {
   type AxialFanRecord,
 } from "../services/unilabCoefficientsService";
 import { FanPickerModal } from "./FanPickerModal";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 
 interface FanCatalogItem {
   id: string;
