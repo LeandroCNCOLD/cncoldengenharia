@@ -134,11 +134,20 @@ export function FluidSidePanel({
     loadRefrigerants()
       .then((list) => {
         if (cancelled) return;
-        const sorted = [...list].sort((a, b) =>
-          (a.shortName ?? a.name ?? a.id).localeCompare(
-            b.shortName ?? b.name ?? b.id,
-          ),
-        );
+        // Ordena: primeiro refrigerantes comerciais (R + dígito, ex: R404A,
+        // R32, R134a, R410A), depois os demais em ordem alfabética.
+        const isCommercial = (r: RefrigerantOption) => {
+          const s = r.shortName ?? r.name ?? r.id;
+          return /^R-?\d/i.test(s);
+        };
+        const sorted = [...list].sort((a, b) => {
+          const ca = isCommercial(a);
+          const cb = isCommercial(b);
+          if (ca !== cb) return ca ? -1 : 1;
+          const la = a.shortName ?? a.name ?? a.id;
+          const lb = b.shortName ?? b.name ?? b.id;
+          return la.localeCompare(lb, undefined, { numeric: true });
+        });
         setRefrigerants(sorted);
         // Só preenche o fluido padrão se o usuário ainda não tiver um
         // selecionado (evita sobrescrever uma escolha válida ao recarregar
