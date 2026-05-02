@@ -83,6 +83,17 @@ interface UnilabSimulationStore {
   superheat_K: number;
   subcooling_K: number;
   foulingFactorFluid: number;
+  /**
+   * Temperatura emparelhada (lado oposto):
+   *  - Evaporadores: Temperatura de Condensação (Tc)
+   *  - Condensadores: Temperatura de Evaporação (Te)
+   * Necessária para o ponto de equilíbrio com compressor.
+   */
+  pairedTempC: number | null;
+  /** Sobreaquecimento de descarga (gás quente entrando no condensador). */
+  dischargeSuperheatK: number | null;
+  /** Compressor selecionado (acopla o cálculo ao polinômio ASHRAE). */
+  selectedCompressorId?: string;
   setFluid: (val: string) => void;
   setFluidMassFlow: (val: number) => void;
   toggleMassFlowLock: () => void;
@@ -91,6 +102,9 @@ interface UnilabSimulationStore {
   setSuperheat: (val: number) => void;
   setSubcooling: (val: number) => void;
   setFoulingFactorFluid: (val: number) => void;
+  setPairedTempC: (val: number | null) => void;
+  setDischargeSuperheatK: (val: number | null) => void;
+  setSelectedCompressor: (id: string | undefined) => void;
 
   // Etapa 3.6 — Custo da bateria
   materialPrices: MaterialPrices;
