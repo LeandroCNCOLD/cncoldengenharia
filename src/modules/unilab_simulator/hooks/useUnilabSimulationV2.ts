@@ -54,7 +54,7 @@ export function useUnilabSimulationV2(params: UseUnilabSimulationV2Params) {
 
       const fluidMassFlowKgS = (state.fluidMassFlow_kg_h || 0) / 3600;
 
-      const result = runSimulationV2({
+      const rawResult = runSimulationV2({
         physical,
         thermo,
         componentType: params.componentType,
@@ -67,6 +67,16 @@ export function useUnilabSimulationV2(params: UseUnilabSimulationV2Params) {
         superheatK: state.superheat_K,
         subcoolingK: state.subcooling_K,
       });
+      const k =
+        1 +
+        (Number.isFinite(state.errorFactorPercent) ? state.errorFactorPercent : 0) /
+          100;
+      const result = {
+        ...rawResult,
+        totalCapacityKw: rawResult.totalCapacityKw * k,
+        sensibleCapacityKw: rawResult.sensibleCapacityKw * k,
+        latentCapacityKw: rawResult.latentCapacityKw * k,
+      };
       setResult(result);
       setWarnings(result.warnings);
       return { success: true as const, result };
