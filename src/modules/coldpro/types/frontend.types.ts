@@ -1,134 +1,80 @@
-// Tipos exclusivos do frontend ColdPro.
-// REGRA: nunca duplicar tipos do motor — re-exporte de @/modules/coldpro_v2.
+// ============================================================
+// TIPOS EXCLUSIVOS DO FRONTEND — não duplicar tipos do motor
+// Importar tipos do motor sempre de '@/modules/coldpro_v2'
+// ============================================================
 
 import type {
-  Equipment,
-  EquipmentType,
-  ProductTechnicalRecord,
+  SystemComponentsInput,
+  SystemEquilibriumResult,
   ProductPerformanceCurveResult,
   PolynomialGenerationResult,
   OperatingMapResult,
-  SystemEquilibriumResult,
+  ProductTechnicalRecord,
 } from "@/modules/coldpro_v2";
 
-// ---------------------------------------------------------------------------
-// Modos de operação da UI
-// ---------------------------------------------------------------------------
+// Modo de operação do usuário
+export type UserMode = "basic" | "intermediate" | "professional";
 
-export type UserMode = "engineer" | "operator" | "viewer";
-
-export type ScreenSection =
-  | "dashboard"
-  | "catalog"
-  | "performance"
-  | "polynomial"
-  | "operating-map"
-  | "equilibrium"
-  | "technical-record"
-  | "ai-assistant";
-
-// ---------------------------------------------------------------------------
-// Sessão técnica do usuário (Zustand)
-// ---------------------------------------------------------------------------
-
-export interface ActiveProductSnapshot {
-  readonly id: string;
-  readonly brand: string | null;
-  readonly model: string | null;
-  readonly type: EquipmentType | null;
-  readonly equipment: Equipment | null;
-  readonly record: ProductTechnicalRecord | null;
+// Sessão de cálculo — agrupa todos os resultados de uma sessão de trabalho
+export interface CalculationSession {
+  id: string;
+  name: string;
+  createdAt: string;
+  mode: UserMode;
+  systemInput: Partial<SystemComponentsInput>;
+  lastEquilibriumResult?: SystemEquilibriumResult;
+  lastCurveResult?: ProductPerformanceCurveResult;
+  lastPolynomialResult?: PolynomialGenerationResult;
+  lastMapResult?: OperatingMapResult;
+  lastRecord?: ProductTechnicalRecord;
 }
 
-export interface SessionResultsCache {
-  readonly performance: ProductPerformanceCurveResult | null;
-  readonly polynomial: PolynomialGenerationResult | null;
-  readonly operatingMap: OperatingMapResult | null;
-  readonly equilibrium: SystemEquilibriumResult | null;
+// Status de validação de um campo individual
+export type FieldValidationStatus = "idle" | "valid" | "warning" | "error";
+
+export interface FieldValidation {
+  status: FieldValidationStatus;
+  message?: string;
 }
 
-// ---------------------------------------------------------------------------
-// Catálogo (frontend view)
-// ---------------------------------------------------------------------------
-
-export interface CatalogEntry {
-  readonly id: string;
-  readonly brand: string;
-  readonly model: string;
-  readonly type: EquipmentType;
-  readonly nominalCapacityW: number | null;
-  readonly raw: Record<string, unknown>;
-  readonly createdAt: string;
-  readonly updatedAt: string;
-}
-
-export interface CatalogFilter {
-  readonly brand?: string;
-  readonly type?: EquipmentType;
-  readonly search?: string;
-  readonly limit?: number;
-  readonly offset?: number;
-}
-
-export interface CatalogPage {
-  readonly items: readonly CatalogEntry[];
-  readonly total: number;
-  readonly hasMore: boolean;
-}
-
-// ---------------------------------------------------------------------------
-// AI Assistant
-// ---------------------------------------------------------------------------
-
-export type AIAssistantRole = "user" | "assistant" | "system";
-
+// Mensagem do assistente de IA
 export interface AIAssistantMessage {
-  readonly id: string;
-  readonly role: AIAssistantRole;
-  readonly content: string;
-  readonly createdAt: number;
+  id: string;
+  role: "assistant" | "user";
+  content: string;
+  context?: string;
+  timestamp: string;
 }
 
-export interface AIAssistantContext {
-  readonly userMode: UserMode;
-  readonly activeProductId: string | null;
-  readonly section: ScreenSection | null;
+// Status de auditoria de um produto do catálogo
+export type AuditStatus = "approved" | "needs_review" | "critical";
+
+// Resultado da auditoria de um produto individual
+export interface CatalogAuditItem {
+  productId: string;
+  model: string;
+  family: string;
+  declaredCapacity_w: number;
+  simulatedCapacity_w: number | null;
+  deviation_pct: number | null;
+  auditStatus: AuditStatus;
+  bottlenecks: string[];
+  suggestions: string[];
+  technicalOpinion: string;
+  simulationWarnings: string[];
 }
 
-export interface AIAssistantRequest {
-  readonly prompt: string;
-  readonly context: AIAssistantContext;
-  readonly history?: readonly AIAssistantMessage[];
-}
-
-export interface AIAssistantResponse {
-  readonly message: AIAssistantMessage;
-  readonly tokensUsed: number | null;
-}
-
-// ---------------------------------------------------------------------------
-// Erros estruturados do service layer
-// ---------------------------------------------------------------------------
-
-export type ServiceErrorCode =
-  | "NOT_IMPLEMENTED"
-  | "NOT_FOUND"
-  | "VALIDATION_ERROR"
-  | "UNAUTHORIZED"
-  | "INTERNAL_ERROR";
-
-export class ServiceError extends Error {
-  public readonly code: ServiceErrorCode;
-  public readonly details: Record<string, unknown> | null;
-
-  constructor(
-    code: ServiceErrorCode,
-    message: string,
-    details: Record<string, unknown> | null = null,
-  ) {
-    super(message);
-    this.name = "ServiceError";
-    this.code = code;
-    this.details = details;
-  }
+// Produto do catálogo CN COLD (para auditoria)
+// Sem mock — será preenchido via importação CSV ou entrada manual
+export interface CatalogProduct {
+  id: string;
+  model: string;
+  family: string;
+  line: string;
+  refrigerant: string;
+  declared_capacity_w: number;
+  declared_cop: number;
+  nominal_evap_temp_c: number;
+  nominal_cond_temp_c: number;
+  system: SystemComponentsInput;
 }
