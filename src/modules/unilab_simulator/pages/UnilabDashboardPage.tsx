@@ -1,4 +1,18 @@
-import { Snowflake, Flame, Wind, Droplets, Zap, RefreshCw, Cylinder, Server } from "lucide-react";
+import {
+  Snowflake,
+  Flame,
+  Wind,
+  Droplets,
+  Zap,
+  RefreshCw,
+  Cylinder,
+  Server,
+  Waves,
+  Combine,
+  Box,
+  Thermometer,
+  type LucideIcon,
+} from "lucide-react";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
 import { ptBR } from "../i18n/messages.ptBR";
 import { useUnilabCatalogs } from "../hooks/useUnilabCatalogs";
@@ -10,7 +24,16 @@ interface CardConfig {
   type: UnilabComponentType;
   title: string;
   description: string;
-  Icon: typeof Snowflake;
+  Icon: LucideIcon;
+}
+
+interface SystemCardConfig {
+  id: string;
+  title: string;
+  description: string;
+  href: string;
+  Icon: LucideIcon;
+  comingSoon?: boolean;
 }
 
 const CARDS: CardConfig[] = [
@@ -64,13 +87,47 @@ const CARDS: CardConfig[] = [
   },
 ];
 
+const SYSTEM_CARDS: SystemCardConfig[] = [
+  {
+    id: "dehumidification",
+    title: "Desumidificação",
+    description: "Evaporador (resfria/desumidifica) + Bateria de Reaquecimento sensível.",
+    href: "/coldpro/unilab/systems/dehumidification",
+    Icon: Waves,
+  },
+  {
+    id: "dx-complete",
+    title: "Sistema DX Completo",
+    description: "Evaporador DX + Condensador a Ar acoplados.",
+    href: "/coldpro/unilab/systems/dx-complete",
+    Icon: Combine,
+    comingSoon: true,
+  },
+  {
+    id: "cold-room",
+    title: "Câmara Fria",
+    description: "Evaporador + Condensador + Carga Térmica da câmara.",
+    href: "/coldpro/unilab/systems/cold-room",
+    Icon: Box,
+    comingSoon: true,
+  },
+  {
+    id: "heat-pump",
+    title: "Bomba de Calor",
+    description: "Unidade Interna + Unidade Externa em ciclo reverso.",
+    href: "/coldpro/unilab/systems/heat-pump",
+    Icon: Thermometer,
+    comingSoon: true,
+  },
+];
+
 export function UnilabDashboardPage() {
   const catalogs = useUnilabCatalogs();
   const blocked = !catalogs.loading && !catalogs.ready;
 
   return (
     <PageContainer title={ptBR.module.title} subtitle={ptBR.module.subtitle}>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <DatasetStatusPanel
           loading={catalogs.loading}
           ready={catalogs.ready}
@@ -80,20 +137,62 @@ export function UnilabDashboardPage() {
 
         <p className="text-sm text-slate-600">{ptBR.dashboard.intro}</p>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {CARDS.map((card) => (
-            <UnilabDashboardCard
-              key={card.type}
-              title={card.title}
-              description={card.description}
-              href="/coldpro/unilab/workspace"
-              searchParams={{ type: card.type }}
-              Icon={card.Icon}
-              disabled={blocked}
-              disabledHint={blocked ? ptBR.validation.blockedNoDatasets : undefined}
-            />
-          ))}
-        </div>
+        {/* GRUPO A — Componentes Isolados (Mundo 1) */}
+        <section className="space-y-3">
+          <div className="flex items-baseline justify-between border-b border-slate-200 pb-2">
+            <h2 className="text-lg font-semibold text-slate-900">
+              Componentes Isolados
+            </h2>
+            <span className="text-xs uppercase tracking-wide text-slate-500">
+              Mundo 1
+            </span>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {CARDS.map((card) => (
+              <UnilabDashboardCard
+                key={card.type}
+                title={card.title}
+                description={card.description}
+                href="/coldpro/unilab/workspace"
+                searchParams={{ type: card.type }}
+                Icon={card.Icon}
+                disabled={blocked}
+                disabledHint={blocked ? ptBR.validation.blockedNoDatasets : undefined}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* GRUPO B — Sistemas Completos (Mundo 2) */}
+        <section className="space-y-3">
+          <div className="flex items-baseline justify-between border-b border-slate-200 pb-2">
+            <h2 className="text-lg font-semibold text-slate-900">
+              Sistemas Completos
+            </h2>
+            <span className="text-xs uppercase tracking-wide text-slate-500">
+              Mundo 2
+            </span>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {SYSTEM_CARDS.map((card) => (
+              <UnilabDashboardCard
+                key={card.id}
+                title={card.title}
+                description={card.description}
+                href={card.href}
+                Icon={card.Icon}
+                disabled={blocked || card.comingSoon}
+                disabledHint={
+                  blocked
+                    ? ptBR.validation.blockedNoDatasets
+                    : card.comingSoon
+                      ? "Em breve"
+                      : undefined
+                }
+              />
+            ))}
+          </div>
+        </section>
 
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs text-slate-600">
           <strong className="text-slate-800">Aviso técnico:</strong> {ptBR.module.disclaimer}

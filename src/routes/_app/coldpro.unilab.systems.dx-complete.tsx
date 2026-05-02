@@ -1,0 +1,13 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { ComingSoonSystemPage } from "@/modules/unilab_simulator/pages/systems/ComingSoonSystemPage";
+
+export const Route = createFileRoute(
+  "/_app/coldpro/unilab/systems/dx-complete",
+)({
+  component: () => (
+    <ComingSoonSystemPage
+      title="Sistema DX Completo"
+      description="Evaporador DX + Condensador a Ar acoplados em ciclo refrigerante."
+    />
+  ),
+});

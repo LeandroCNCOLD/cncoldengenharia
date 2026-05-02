@@ -27,6 +27,10 @@ import { Route as AppColdproCatalogRouteImport } from './routes/_app/coldpro.cat
 import { Route as AppColdproAuditRouteImport } from './routes/_app/coldpro.audit'
 import { Route as AppColdproAssemblyRouteImport } from './routes/_app/coldpro.assembly'
 import { Route as AppColdproUnilabWorkspaceRouteImport } from './routes/_app/coldpro.unilab.workspace'
+import { Route as AppColdproUnilabSystemsHeatPumpRouteImport } from './routes/_app/coldpro.unilab.systems.heat-pump'
+import { Route as AppColdproUnilabSystemsDxCompleteRouteImport } from './routes/_app/coldpro.unilab.systems.dx-complete'
+import { Route as AppColdproUnilabSystemsDehumidificationRouteImport } from './routes/_app/coldpro.unilab.systems.dehumidification'
+import { Route as AppColdproUnilabSystemsColdRoomRouteImport } from './routes/_app/coldpro.unilab.systems.cold-room'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -118,6 +122,30 @@ const AppColdproUnilabWorkspaceRoute =
     path: '/workspace',
     getParentRoute: () => AppColdproUnilabRoute,
   } as any)
+const AppColdproUnilabSystemsHeatPumpRoute =
+  AppColdproUnilabSystemsHeatPumpRouteImport.update({
+    id: '/systems/heat-pump',
+    path: '/systems/heat-pump',
+    getParentRoute: () => AppColdproUnilabRoute,
+  } as any)
+const AppColdproUnilabSystemsDxCompleteRoute =
+  AppColdproUnilabSystemsDxCompleteRouteImport.update({
+    id: '/systems/dx-complete',
+    path: '/systems/dx-complete',
+    getParentRoute: () => AppColdproUnilabRoute,
+  } as any)
+const AppColdproUnilabSystemsDehumidificationRoute =
+  AppColdproUnilabSystemsDehumidificationRouteImport.update({
+    id: '/systems/dehumidification',
+    path: '/systems/dehumidification',
+    getParentRoute: () => AppColdproUnilabRoute,
+  } as any)
+const AppColdproUnilabSystemsColdRoomRoute =
+  AppColdproUnilabSystemsColdRoomRouteImport.update({
+    id: '/systems/cold-room',
+    path: '/systems/cold-room',
+    getParentRoute: () => AppColdproUnilabRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -137,6 +165,10 @@ export interface FileRoutesByFullPath {
   '/coldpro/unilab': typeof AppColdproUnilabRouteWithChildren
   '/coldpro/': typeof AppColdproIndexRoute
   '/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
+  '/coldpro/unilab/systems/cold-room': typeof AppColdproUnilabSystemsColdRoomRoute
+  '/coldpro/unilab/systems/dehumidification': typeof AppColdproUnilabSystemsDehumidificationRoute
+  '/coldpro/unilab/systems/dx-complete': typeof AppColdproUnilabSystemsDxCompleteRoute
+  '/coldpro/unilab/systems/heat-pump': typeof AppColdproUnilabSystemsHeatPumpRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -155,6 +187,10 @@ export interface FileRoutesByTo {
   '/coldpro/unilab': typeof AppColdproUnilabRouteWithChildren
   '/coldpro': typeof AppColdproIndexRoute
   '/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
+  '/coldpro/unilab/systems/cold-room': typeof AppColdproUnilabSystemsColdRoomRoute
+  '/coldpro/unilab/systems/dehumidification': typeof AppColdproUnilabSystemsDehumidificationRoute
+  '/coldpro/unilab/systems/dx-complete': typeof AppColdproUnilabSystemsDxCompleteRoute
+  '/coldpro/unilab/systems/heat-pump': typeof AppColdproUnilabSystemsHeatPumpRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -176,6 +212,10 @@ export interface FileRoutesById {
   '/_app/coldpro/unilab': typeof AppColdproUnilabRouteWithChildren
   '/_app/coldpro/': typeof AppColdproIndexRoute
   '/_app/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
+  '/_app/coldpro/unilab/systems/cold-room': typeof AppColdproUnilabSystemsColdRoomRoute
+  '/_app/coldpro/unilab/systems/dehumidification': typeof AppColdproUnilabSystemsDehumidificationRoute
+  '/_app/coldpro/unilab/systems/dx-complete': typeof AppColdproUnilabSystemsDxCompleteRoute
+  '/_app/coldpro/unilab/systems/heat-pump': typeof AppColdproUnilabSystemsHeatPumpRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -197,6 +237,10 @@ export interface FileRouteTypes {
     | '/coldpro/unilab'
     | '/coldpro/'
     | '/coldpro/unilab/workspace'
+    | '/coldpro/unilab/systems/cold-room'
+    | '/coldpro/unilab/systems/dehumidification'
+    | '/coldpro/unilab/systems/dx-complete'
+    | '/coldpro/unilab/systems/heat-pump'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -215,6 +259,10 @@ export interface FileRouteTypes {
     | '/coldpro/unilab'
     | '/coldpro'
     | '/coldpro/unilab/workspace'
+    | '/coldpro/unilab/systems/cold-room'
+    | '/coldpro/unilab/systems/dehumidification'
+    | '/coldpro/unilab/systems/dx-complete'
+    | '/coldpro/unilab/systems/heat-pump'
   id:
     | '__root__'
     | '/'
@@ -235,6 +283,10 @@ export interface FileRouteTypes {
     | '/_app/coldpro/unilab'
     | '/_app/coldpro/'
     | '/_app/coldpro/unilab/workspace'
+    | '/_app/coldpro/unilab/systems/cold-room'
+    | '/_app/coldpro/unilab/systems/dehumidification'
+    | '/_app/coldpro/unilab/systems/dx-complete'
+    | '/_app/coldpro/unilab/systems/heat-pump'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -371,15 +423,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproUnilabWorkspaceRouteImport
       parentRoute: typeof AppColdproUnilabRoute
     }
+    '/_app/coldpro/unilab/systems/heat-pump': {
+      id: '/_app/coldpro/unilab/systems/heat-pump'
+      path: '/systems/heat-pump'
+      fullPath: '/coldpro/unilab/systems/heat-pump'
+      preLoaderRoute: typeof AppColdproUnilabSystemsHeatPumpRouteImport
+      parentRoute: typeof AppColdproUnilabRoute
+    }
+    '/_app/coldpro/unilab/systems/dx-complete': {
+      id: '/_app/coldpro/unilab/systems/dx-complete'
+      path: '/systems/dx-complete'
+      fullPath: '/coldpro/unilab/systems/dx-complete'
+      preLoaderRoute: typeof AppColdproUnilabSystemsDxCompleteRouteImport
+      parentRoute: typeof AppColdproUnilabRoute
+    }
+    '/_app/coldpro/unilab/systems/dehumidification': {
+      id: '/_app/coldpro/unilab/systems/dehumidification'
+      path: '/systems/dehumidification'
+      fullPath: '/coldpro/unilab/systems/dehumidification'
+      preLoaderRoute: typeof AppColdproUnilabSystemsDehumidificationRouteImport
+      parentRoute: typeof AppColdproUnilabRoute
+    }
+    '/_app/coldpro/unilab/systems/cold-room': {
+      id: '/_app/coldpro/unilab/systems/cold-room'
+      path: '/systems/cold-room'
+      fullPath: '/coldpro/unilab/systems/cold-room'
+      preLoaderRoute: typeof AppColdproUnilabSystemsColdRoomRouteImport
+      parentRoute: typeof AppColdproUnilabRoute
+    }
   }
 }
 
 interface AppColdproUnilabRouteChildren {
   AppColdproUnilabWorkspaceRoute: typeof AppColdproUnilabWorkspaceRoute
+  AppColdproUnilabSystemsColdRoomRoute: typeof AppColdproUnilabSystemsColdRoomRoute
+  AppColdproUnilabSystemsDehumidificationRoute: typeof AppColdproUnilabSystemsDehumidificationRoute
+  AppColdproUnilabSystemsDxCompleteRoute: typeof AppColdproUnilabSystemsDxCompleteRoute
+  AppColdproUnilabSystemsHeatPumpRoute: typeof AppColdproUnilabSystemsHeatPumpRoute
 }
 
 const AppColdproUnilabRouteChildren: AppColdproUnilabRouteChildren = {
   AppColdproUnilabWorkspaceRoute: AppColdproUnilabWorkspaceRoute,
+  AppColdproUnilabSystemsColdRoomRoute: AppColdproUnilabSystemsColdRoomRoute,
+  AppColdproUnilabSystemsDehumidificationRoute:
+    AppColdproUnilabSystemsDehumidificationRoute,
+  AppColdproUnilabSystemsDxCompleteRoute:
+    AppColdproUnilabSystemsDxCompleteRoute,
+  AppColdproUnilabSystemsHeatPumpRoute: AppColdproUnilabSystemsHeatPumpRoute,
 }
 
 const AppColdproUnilabRouteWithChildren =
