@@ -6,6 +6,27 @@ import type {
   UnilabThermoInputs,
 } from "../types/unilab.types";
 
+/**
+ * Modo de cálculo do UNILAB:
+ *  - "verify"  → Verificar (entrada de geometria conhecida, calcula performance)
+ *  - "design"  → Desenho (entrada de demanda, dimensiona geometria)
+ */
+export type CalcMode = "verify" | "design";
+
+/**
+ * Inputs adicionais do Lado Fluido específicos por aplicação. Mantidos
+ * separados de `UnilabThermoInputs` (consumido pelo motor existente) para
+ * não alterar tipos do engine. O motor continua lendo o subset que conhece.
+ */
+export interface FluidSideExtras {
+  fluidInletTempC?: number;
+  fluidOutletTempC?: number;
+  fluidFlowMassKgH?: number;
+  fluidPressureDropKpa?: number;
+  fluidFoulingFactor?: number;
+  steamPressureKpa?: number;
+}
+
 interface UnilabSimulationStore {
   physicalInputs: Partial<UnilabPhysicalInputs>;
   thermoInputs: Partial<UnilabThermoInputs>;
@@ -13,6 +34,10 @@ interface UnilabSimulationStore {
   result?: UnilabSimulationResult;
   warnings: string[];
   isSimulating: boolean;
+
+  // Modo de cálculo (Verificar / Desenho) — UI apenas
+  calcMode: CalcMode;
+  setCalcMode: (mode: CalcMode) => void;
 
   // Lado Ar / Ventilação (Etapa 3)
   airFlow_m3h: number;
@@ -25,6 +50,10 @@ interface UnilabSimulationStore {
   setRhIn: (val: number) => void;
   setFoulingFactorAir: (val: number) => void;
   setSelectedFan: (id: string | undefined) => void;
+
+  // Lado Fluido (campos extras por aplicação)
+  fluidExtras: FluidSideExtras;
+  setFluidExtras: (patch: FluidSideExtras) => void;
 
   setPhysicalInputs: (patch: Partial<UnilabPhysicalInputs>) => void;
   setThermoInputs: (patch: Partial<UnilabThermoInputs>) => void;
@@ -44,6 +73,9 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   warnings: [],
   isSimulating: false,
 
+  calcMode: "verify",
+  setCalcMode: (mode) => set({ calcMode: mode }),
+
   airFlow_m3h: 0,
   tempInDB_C: 25,
   rhIn_pct: 60,
@@ -54,6 +86,10 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   setRhIn: (val) => set({ rhIn_pct: val }),
   setFoulingFactorAir: (val) => set({ foulingFactorAir: val }),
   setSelectedFan: (id) => set({ selectedFanId: id }),
+
+  fluidExtras: {},
+  setFluidExtras: (patch) =>
+    set((s) => ({ fluidExtras: { ...s.fluidExtras, ...patch } })),
 
   setPhysicalInputs: (patch) =>
     set((s) => ({ physicalInputs: { ...s.physicalInputs, ...patch } })),
@@ -88,10 +124,12 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       result: undefined,
       warnings: [],
       isSimulating: false,
+      calcMode: "verify",
       airFlow_m3h: 0,
       tempInDB_C: 25,
       rhIn_pct: 60,
       foulingFactorAir: 0,
       selectedFanId: undefined,
+      fluidExtras: {},
     }),
 }));
