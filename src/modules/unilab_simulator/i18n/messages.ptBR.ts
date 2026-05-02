@@ -94,7 +94,7 @@ export const ptBR = {
       airOutletTemp: "Temp. saída do ar",
       airOutletRh: "UR saída do ar",
       faceVelocity: "Velocidade de face",
-      correctionFactor: "Fator UNILAB aplicado",
+      correctionFactor: "Fator CN Coils aplicado",
     },
   },
   datasets: {
