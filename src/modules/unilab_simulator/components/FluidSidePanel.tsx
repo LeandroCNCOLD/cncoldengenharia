@@ -248,7 +248,7 @@ export function FluidSidePanel({
             onChange={(v) =>
               setFluidOperatingTemp(tempConv.toCanonical(v, uOpTemp))
             }
-            disabled={disabled}
+            disabled={thermalInputsDisabled}
           />
         </FieldRow>
 
@@ -261,7 +261,7 @@ export function FluidSidePanel({
                 value={uSH}
                 onChange={setUSH}
                 options={DELTA_T_UNITS}
-                disabled={disabled}
+                disabled={thermalInputsDisabled}
               />
             }
           >
@@ -269,7 +269,7 @@ export function FluidSidePanel({
               value={deltaTConv.fromCanonical(superheat_K, uSH)}
               onChange={(v) => setSuperheat(deltaTConv.toCanonical(v, uSH))}
               min={0}
-              disabled={disabled}
+              disabled={thermalInputsDisabled}
             />
           </FieldRow>
         )}
@@ -283,7 +283,7 @@ export function FluidSidePanel({
                 value={uSC}
                 onChange={setUSC}
                 options={DELTA_T_UNITS}
-                disabled={disabled}
+                disabled={thermalInputsDisabled}
               />
             }
           >
@@ -291,7 +291,7 @@ export function FluidSidePanel({
               value={deltaTConv.fromCanonical(subcooling_K, uSC)}
               onChange={(v) => setSubcooling(deltaTConv.toCanonical(v, uSC))}
               min={0}
-              disabled={disabled}
+              disabled={thermalInputsDisabled}
             />
           </FieldRow>
         )}
