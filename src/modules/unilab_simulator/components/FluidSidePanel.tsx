@@ -99,11 +99,14 @@ export function FluidSidePanel({
     loadRefrigerants()
       .then((list) => {
         if (cancelled) return;
-        setRefrigerants(list);
-        // Sincroniza store: se o fluido atual não existe no catálogo,
-        // adota o primeiro disponível para evitar que o motor receba um id inválido.
-        if (list.length > 0 && !list.some((r) => r.id === fluid)) {
-          setFluid(list[0].id);
+        const sorted = [...list].sort((a, b) =>
+          (a.shortName ?? a.name ?? a.id).localeCompare(
+            b.shortName ?? b.name ?? b.id,
+          ),
+        );
+        setRefrigerants(sorted);
+        if (sorted.length > 0 && !sorted.some((r) => r.id === fluid)) {
+          setFluid(sorted[0].id);
         }
       })
       .catch(() => {
@@ -153,11 +156,19 @@ export function FluidSidePanel({
             className="w-full min-w-0 rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100"
           >
             {refrigerants.length === 0 && <option value={fluid}>{fluid}</option>}
-            {refrigerants.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name ?? r.id}
-              </option>
-            ))}
+            {refrigerants.map((r) => {
+              const label = r.shortName ?? r.name ?? r.id;
+              const suffix =
+                r.commercialName && r.commercialName !== label
+                  ? ` (${r.commercialName})`
+                  : "";
+              return (
+                <option key={r.id} value={r.id}>
+                  {label}
+                  {suffix}
+                </option>
+              );
+            })}
           </select>
         </FieldRow>
 
