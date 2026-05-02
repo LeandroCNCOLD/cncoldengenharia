@@ -40,7 +40,7 @@ import {
   type AxialFanRecord,
 } from "../services/unilabCoefficientsService";
 import { FanPickerModal } from "./FanPickerModal";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 
 interface FanCatalogItem {
   id: string;
@@ -66,6 +66,7 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
   const setRhIn = useUnilabSimulationStore((s) => s.setRhIn);
   const setFoulingFactorAir = useUnilabSimulationStore((s) => s.setFoulingFactorAir);
   const setTargetCapacityW = useUnilabSimulationStore((s) => s.setTargetCapacityW);
+  const setSelectedFan = useUnilabSimulationStore((s) => s.setSelectedFan);
   const [fanModalOpen, setFanModalOpen] = useState(false);
 
   const [fans, setFans] = useState<FanCatalogItem[]>([]);
@@ -222,26 +223,40 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
           label="Ventilador"
           unitNode={<UnitText text={fanCount > 0 ? `×${fanCount}` : "—"} />}
           input={
-            <button
-              type="button"
-              onClick={() => setFanModalOpen(true)}
-              disabled={fans.length === 0}
-              className="flex w-full items-center justify-between rounded border border-slate-300 bg-white px-1.5 py-0.5 text-left text-[10px] text-slate-900 hover:border-[#1E6FD9] focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
-              title={
-                fans.length === 0
-                  ? "Catálogo de ventiladores não disponível — preencha a vazão manualmente abaixo"
-                  : "Clique para selecionar um ventilador"
-              }
-            >
-              <span className="truncate">
-                {fans.length === 0
-                  ? "— sem catálogo —"
-                  : selectedFan
-                    ? `${[selectedFan.manufacturer, selectedFan.model].filter(Boolean).join(" ")} (${fanRole === "blower" ? "soprador" : "exaustor"})`
-                    : "Selecionar…"}
-              </span>
-              <ChevronDown className="h-3 w-3 flex-shrink-0 text-slate-400" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setFanModalOpen(true)}
+                disabled={fans.length === 0}
+                className="flex flex-1 items-center justify-between rounded border border-slate-300 bg-white px-1.5 py-0.5 text-left text-[10px] text-slate-900 hover:border-[#1E6FD9] focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
+                title={
+                  fans.length === 0
+                    ? "Catálogo de ventiladores não disponível — preencha a vazão manualmente abaixo"
+                    : selectedFan
+                      ? "Trocar ventilador"
+                      : "Selecionar ventilador (ou preencha a vazão manualmente abaixo)"
+                }
+              >
+                <span className="truncate">
+                  {fans.length === 0
+                    ? "— sem catálogo —"
+                    : selectedFan
+                      ? `${[selectedFan.manufacturer, selectedFan.model].filter(Boolean).join(" ")} (${fanRole === "blower" ? "soprador" : "exaustor"})`
+                      : "Manual / Selecionar…"}
+                </span>
+                <ChevronDown className="h-3 w-3 flex-shrink-0 text-slate-400" />
+              </button>
+              {selectedFan && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedFan(undefined)}
+                  className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border border-slate-300 bg-white text-slate-500 hover:border-red-400 hover:text-red-600"
+                  title="Remover ventilador (voltar a entrada manual)"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
           }
           obtained={
             selectedFan?.airflow_m3h
