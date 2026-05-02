@@ -262,10 +262,6 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
 
 function computeRHpct(T_C: number, W: number, pAtm_Pa: number): number {
   if (!(W > 0)) return 0;
-  // psat reimportada via require dinâmico evita ciclo de tipos
-  // Mais simples: importar diretamente
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { saturationPressure } = require("./psychrometrics") as typeof import("./psychrometrics");
   const psat = saturationPressure(T_C);
   if (!(psat > 0)) return 0;
   const pw = (W * pAtm_Pa) / (0.621945 + W);
