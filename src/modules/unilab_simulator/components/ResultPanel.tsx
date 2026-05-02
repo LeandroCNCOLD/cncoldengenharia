@@ -1,4 +1,4 @@
-import { AlertTriangle } from "lucide-react";
+import { AlertCircle, AlertTriangle, Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { UnilabSimulationResult } from "../types/unilab.types";
 import { ptBR } from "../i18n/messages.ptBR";
