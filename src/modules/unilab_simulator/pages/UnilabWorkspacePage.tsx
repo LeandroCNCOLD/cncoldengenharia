@@ -99,6 +99,23 @@ export function UnilabWorkspacePage() {
   );
 
   const { run } = useUnilabSimulation(simulationDeps);
+
+  // Catálogo de coeficientes UNILAB para o motor V2
+  const [htCatalog, setHtCatalog] = useState<UnilabHeatTransferCatalog>({
+    entries: [],
+  });
+  useEffect(() => {
+    loadUnilabHeatTransferCatalog().then(setHtCatalog).catch(() => {
+      setHtCatalog({ entries: [] });
+    });
+  }, []);
+
+  const engineVersion = useUnilabSimulationStore((s) => s.engineVersion);
+  const { run: runV2 } = useUnilabSimulationV2({
+    tubeMaterials: catalogs.tubeMaterials,
+    htCatalog,
+    componentType,
+  });
   const [sending, setSending] = useState(false);
 
   const inputsValid =
