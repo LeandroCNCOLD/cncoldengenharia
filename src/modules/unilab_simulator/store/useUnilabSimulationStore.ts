@@ -182,13 +182,27 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
     set((s) => ({ calculatedCost: computeCostFromState(s) })),
 
   setPhysicalInputs: (patch) =>
-    set((s) => ({ physicalInputs: { ...s.physicalInputs, ...patch } })),
+    set((s) => {
+      const physicalInputs = { ...s.physicalInputs, ...patch };
+      return {
+        physicalInputs,
+        calculatedCost: computeCostFromState({ ...s, physicalInputs }),
+      };
+    }),
   setThermoInputs: (patch) =>
     set((s) => ({ thermoInputs: { ...s.thermoInputs, ...patch } })),
   setSelectedGeometry: (geometry) =>
-    set((s) => ({
-      selectedGeometry: geometry,
-      physicalInputs: geometry
+    set((s) => {
+      // Etapa 3.5 — auto-fill ao selecionar geometria do catálogo.
+      // O CoilGeometryItem (enriquecido) traz espessuras em pt-BR; o catálogo
+      // base não. Em ambos os casos preservamos valores anteriores do usuário.
+      const enriched = geometry as
+        | (CoilGeometryCatalogItem & {
+            espessura_tubo_mm?: number | null;
+            espessura_aleta_mm?: number | null;
+          })
+        | undefined;
+      const physicalInputs = geometry
         ? {
             ...s.physicalInputs,
             geometryId: geometry.id,
@@ -197,11 +211,18 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
             tubeOuterDiameterMm: geometry.tubeOuterDiameterMm,
             tubeInnerDiameterMm:
               geometry.tubeInnerDiameterMm ?? s.physicalInputs.tubeInnerDiameterMm,
+            finThicknessMm:
+              enriched?.espessura_aleta_mm ?? s.physicalInputs.finThicknessMm,
             rows: geometry.defaultRows ?? s.physicalInputs.rows,
             circuits: geometry.defaultCircuits ?? s.physicalInputs.circuits,
           }
-        : s.physicalInputs,
-    })),
+        : s.physicalInputs;
+      return {
+        selectedGeometry: geometry,
+        physicalInputs,
+        calculatedCost: computeCostFromState({ ...s, physicalInputs }),
+      };
+    }),
   setResult: (result) => set({ result }),
   setWarnings: (warnings) => set({ warnings }),
   setIsSimulating: (value) => set({ isSimulating: value }),
