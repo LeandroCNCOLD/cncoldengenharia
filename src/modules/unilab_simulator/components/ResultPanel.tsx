@@ -111,17 +111,51 @@ function FanLibraryStatus({ audit }: { audit: FanAuditSummary }) {
   );
 }
 
-function WarningsList({ warnings }: { warnings: string[] }) {
+interface LeveledWarning {
+  text: string;
+  level?: "1" | "2" | "3" | string | null;
+}
+
+function normalize(w: string | LeveledWarning): LeveledWarning {
+  return typeof w === "string" ? { text: w, level: "2" } : w;
+}
+
+function WarningsList({ warnings }: { warnings: Array<string | LeveledWarning> }) {
+  const items = warnings.map(normalize);
+  const hasError = items.some((w) => w.level === "3");
   return (
-    <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
-      <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-amber-800">
+    <div
+      className={`rounded-lg border p-3 ${
+        hasError
+          ? "border-red-200 bg-red-50"
+          : "border-amber-200 bg-amber-50"
+      }`}
+    >
+      <div
+        className={`mb-1 flex items-center gap-2 text-xs font-semibold ${
+          hasError ? "text-red-800" : "text-amber-800"
+        }`}
+      >
         <AlertTriangle className="h-3.5 w-3.5" />
         Avisos
       </div>
-      <ul className="list-disc space-y-0.5 pl-5 text-xs text-amber-800">
-        {warnings.map((w, i) => (
-          <li key={i}>{w}</li>
-        ))}
+      <ul className="space-y-1 text-xs">
+        {items.map((w, i) => {
+          const lvl = w.level ?? "2";
+          const Icon = lvl === "3" ? AlertCircle : lvl === "1" ? Info : AlertTriangle;
+          const cls =
+            lvl === "3"
+              ? "text-red-700"
+              : lvl === "1"
+                ? "text-slate-600"
+                : "text-amber-800";
+          return (
+            <li key={i} className={`flex items-start gap-1.5 ${cls}`}>
+              <Icon className="mt-0.5 h-3 w-3 flex-shrink-0" />
+              <span>{w.text}</span>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
