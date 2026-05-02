@@ -146,6 +146,7 @@ export function SimulationPage() {
               ou preencher manualmente.
             </div>
           )}
+          <CompressorForm value={compressor} onChange={setCompressor} />
           <CondenserForm value={condenser} onChange={setCondenser} />
           <SystemConditionsForm value={conditions} onChange={setConditions} />
           <ModeGate minMode="professional">
