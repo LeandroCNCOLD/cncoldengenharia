@@ -530,6 +530,10 @@ export function FluidSidePanel({
       open={compressorModalOpen}
       onClose={() => setCompressorModalOpen(false)}
     />
+    <RefrigerantPickerModal
+      open={refrigerantModalOpen}
+      onClose={() => setRefrigerantModalOpen(false)}
+    />
     </>
   );
 }
