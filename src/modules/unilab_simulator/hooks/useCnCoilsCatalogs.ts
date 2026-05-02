@@ -14,6 +14,7 @@ import type {
   CompressorStandard,
   DistributorHoleSize,
   DistributorKappaMap,
+  EngineErrorMessage,
   Fan,
   FinHeight,
   FinPitch,
@@ -75,6 +76,7 @@ export interface CnCoilsCatalogsData {
   uiLabels: UiLabelEntry[];
   distributorKappa: DistributorKappaMap;
   distributorHoleSizes: DistributorHoleSize[];
+  engineErrors: EngineErrorMessage[];
 }
 
 export interface CnCoilsCatalogsState extends CnCoilsCatalogsData {
@@ -112,6 +114,7 @@ const EMPTY: CnCoilsCatalogsData = {
   uiLabels: [],
   distributorKappa: {},
   distributorHoleSizes: [],
+  engineErrors: [],
 };
 
 async function fetchJsonArray<T>(file: string): Promise<T[]> {
@@ -168,6 +171,7 @@ export function useCnCoilsCatalogs(): CnCoilsCatalogsState {
           ["warnings", "warnings.json"],
           ["uiLabels", "uiLabels.json"],
           ["distributorHoleSizes", "distributorHoleSizes.json"],
+          ["engineErrors", "engineErrorMessages.json"],
         ] as const).map(([key, file]) =>
           (async () => {
             try {
