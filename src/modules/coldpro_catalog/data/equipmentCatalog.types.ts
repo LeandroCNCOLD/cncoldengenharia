@@ -163,18 +163,44 @@ export interface CatalogEquipmentRow {
   reheatAreaFaceM2?: number;
   reheatAreaTrocaM2?: number;
   reheatVolumeInternoL?: number;
+  // Geometria do aletado de reaquecimento (em mm — direto da planilha)
+  reheatRows?: number;
+  reheatTubesPerRow?: number;
+  reheatFinSpacingMm?: number;
+  reheatCoilLengthMm?: number;
+  reheatGeometria?: string;
 
   linhaSucao?: string;
   linhaDescarga?: string;
   linhaLiquido?: string;
+  velocidadeDescargaMs?: number;
+  velocidadeLiquidoMs?: number;
+  velocidadeSucaoMs?: number;
 
   superaquecimentoTotalK?: number;
   superaquecimentoUtilK?: number;
   subresfriamentoK?: number;
+  subresfriamentoAdicionalK?: number;
   altitudeM?: number;
+
+  vazaoMassaKgH?: number;
+  vazaoMassaKgS?: number;
+  deltaEntalpiaKjKg?: number;
+  cargaFluidoKg?: number;
+  umidadeExternaPercent?: number;
+
+  // Correntes individuais
+  correnteCompressorA?: number;
+  correnteVentiladoresA?: number;
+
+  // Circuito secundário (quando existir)
+  modeloCondensadorSecundario?: string;
+  ventiladorCondensadorSecundario?: string;
+  vazaoArCondensadorSecundarioM3H?: number;
 
   quantidadeAguaLH?: number;
   diametroDreno?: string;
+  quantidadeDrenos?: number;
 
   // --- Status de validação e controle de revisão ---
   validationStatus?: "pending" | "analyzed" | "validated" | "rejected";
