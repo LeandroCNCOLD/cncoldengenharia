@@ -1,5 +1,127 @@
 // Domain types
-export * from "./domain/types";
+export type {
+  AgroCycleInput,
+  AgroCycleMode,
+  AgroCycleResult,
+  CircuitAggregationResult,
+  CircuitControlResult,
+  CircuitFlowDistributionResult,
+  CircuitFlowItem,
+  CircuitPerformanceResult,
+  CircuitSummary,
+  CoilAdvancedInput,
+  CoilAdvancedResult,
+  CoilEngineResult,
+  CoilInput,
+  CoilIterativeInput,
+  CoilIterativeResult,
+  CoilResult,
+  CoilSolverMode,
+  CoilSurfaceModeResult,
+  ComponentUtilization,
+  Compressor,
+  CompressorControlMode,
+  CompressorDispatchResult,
+  CompressorDispatchState,
+  CompressorSpec,
+  CompressorType,
+  CompressorUnit,
+  CondenserSpec,
+  CondenserUnit,
+  CoupledCoilResult,
+  CoupledIterationRecord,
+  DefrostComponentRecommendation,
+  DefrostCycleInput,
+  DefrostCycleResult,
+  DefrostMethod,
+  DripTrayCoilInput,
+  DripTrayCoilResult,
+  DripTrayCondition,
+  Equipment,
+  EquipmentConfigurationResult,
+  EquipmentSimulationResult,
+  EquipmentType,
+  EvaporatorUnit,
+  ExpansionControlMode,
+  ExpansionValve,
+  ExpansionValveSpec,
+  Fan,
+  FanControlMode,
+  FanSpec,
+  FitQuality,
+  FourWayValveSpec,
+  FrostFormationInput,
+  FrostFormationResult,
+  HeatExchanger,
+  HeatExchangerPosition,
+  HeatExchangerRole,
+  HeatExchangerType,
+  IterationRecord,
+  MoistAirCoolingLoadResult,
+  MultiCircuitControlInput,
+  MultiCircuitControlResult,
+  OperatingEnvelope,
+  OperatingIsoline,
+  OperatingMapGridConfig,
+  OperatingMapInput,
+  OperatingMapPoint,
+  OperatingMapResult,
+  OperatingMapStats,
+  OperatingPoint,
+  OperationalMode,
+  OperationalOrchestratorInput,
+  OperationalOrchestratorResult,
+  PerformanceEnvelope,
+  PerformanceOperatingPoint,
+  PerformancePoint,
+  PerformanceSummary,
+  PolynomialCoefficientSet,
+  PolynomialCoefficients,
+  PolynomialGenerationInput,
+  PolynomialGenerationOptions,
+  PolynomialGenerationResult,
+  PolynomialTarget,
+  ProductComparisonItem,
+  ProductIdentity,
+  ProductOperatingLimits,
+  ProductPerformanceCurveInput,
+  ProductPerformanceCurveResult,
+  ProductPerformancePoint,
+  ProductRegistryAddResult,
+  ProductRegistryFilter,
+  ProductRegistryStats,
+  ProductTechnicalExportInput,
+  ProductTechnicalExportPayload,
+  ProductTechnicalRecord,
+  ProductTechnicalRecordInput,
+  ProductTechnicalRegistryHandle,
+  ProductValidationSummary,
+  ProgressiveCoilInput,
+  ProgressiveCoilResult,
+  Refrigerant,
+  RefrigerationCircuit,
+  ReheatCoilSizingInput,
+  ReheatCoilSizingResult,
+  ReheatInput,
+  ReheatResult,
+  RollGeometry,
+  RollResult,
+  SimulationAssembly,
+  SystemArchitectureInput,
+  SystemArchitectureResult,
+  SystemComponentsInput,
+  SystemEquilibriumResult,
+  ThermalBalance,
+  UnifiedDefrostStatus,
+  UnifiedFrostStatus,
+  UnifiedOperationalOutput,
+  UnifiedProgressiveInfo,
+  VariableControlInput,
+  VariableControlResult,
+  WetAirCorrectionResult,
+  WetCoilInput,
+  WetCoilResult,
+} from "./domain/types";
 
 // Mapper
 export { mapCatalogRowToEquipment } from "./mappers/catalogToEquipment";
@@ -102,97 +224,31 @@ export { evaluateSystemEquilibrium } from "./engines/equilibrium/systemEquilibri
 
 // Engines — performance
 export { generateProductPerformanceCurve } from "./engines/performance/productPerformanceCurveEngine";
-export type {
-  OperatingPoint,
-  PerformanceOperatingPoint,
-  PerformanceEnvelope,
-  PerformanceSummary,
-  ProductPerformanceCurveInput,
-  ProductPerformanceCurveResult,
-  ProductPerformancePoint,
-} from "./domain/types";
 
 // Engines — polynomial
 export { generatePolynomialCoefficients } from "./engines/polynomial/polynomialCoefficientGenerator";
-export type {
-  FitQuality,
-  PolynomialCoefficientSet,
-  PolynomialCoefficients,
-  PolynomialGenerationInput,
-  PolynomialGenerationOptions,
-  PolynomialGenerationResult,
-  PolynomialTarget,
-} from "./domain/types";
 
 // Database
 export { buildProductTechnicalRecord } from "./database/productTechnicalRecordBuilder";
-export type {
-  ProductIdentity,
-  ProductOperatingLimits,
-  ProductTechnicalRecord,
-  ProductTechnicalRecordInput,
-  ProductValidationSummary,
-} from "./domain/types";
 
 // Engines — map
 export { generateOperatingMap } from "./engines/map/operatingMapEngine";
-export type {
-  OperatingEnvelope,
-  OperatingIsoline,
-  OperatingMapGridConfig,
-  OperatingMapInput,
-  OperatingMapPoint,
-  OperatingMapResult,
-  OperatingMapStats,
-} from "./domain/types";
 
 // Engines — control
 export { simulateVariableSystemControl } from "./engines/control/variableSystemControlEngine";
-export type {
-  CompressorControlMode,
-  ExpansionControlMode,
-  FanControlMode,
-  VariableControlInput,
-  VariableControlResult,
-} from "./domain/types";
 
 // Engines — architecture
 export { evaluateSystemArchitecture } from "./engines/architecture/systemArchitectureEngine";
-export type {
-  CircuitSummary,
-  CompressorType,
-  CompressorUnit,
-  CondenserUnit,
-  EvaporatorUnit,
-  RefrigerationCircuit,
-  SystemArchitectureInput,
-  SystemArchitectureResult,
-} from "./domain/types";
 
 // Engines — multi-circuit control
 export { solveMultiCircuitVariableControl } from "./engines/control/multiCircuitVariableControlSolver";
-export type {
-  CircuitControlResult,
-  CompressorDispatchResult,
-  CompressorDispatchState,
-  MultiCircuitControlInput,
-  MultiCircuitControlResult,
-} from "./domain/types";
 
 // Registry
 export { createProductTechnicalRegistry } from "./database/productTechnicalRegistry";
-export type {
-  ProductComparisonItem,
-  ProductRegistryAddResult,
-  ProductRegistryFilter,
-  ProductRegistryStats,
-  ProductTechnicalRegistryHandle,
-} from "./domain/types";
 
 // Adapters
 export { normalizeOperationalOutput } from "./adapters/unifiedOperationalOutputAdapter";
 export { exportProductTechnicalData } from "./adapters/productTechnicalExportAdapter";
-export type { ProductTechnicalExportInput, ProductTechnicalExportPayload } from "./domain/types";
 
 // Services
 export {
