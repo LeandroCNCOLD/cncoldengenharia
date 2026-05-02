@@ -89,16 +89,15 @@ export function AirSidePanel() {
       </div>
 
       <div className="space-y-1.5 p-2">
-        {/* CAPACIDADE — só output */}
+        {/* 1. CAPACIDADE — output (calculado depois) */}
         <Row
           label="Capacidade"
           unit="W"
           input={<DisabledInput />}
           obtained="---"
-          obtainedTone="gray"
         />
 
-        {/* VENTILADOR — dropdown que preenche vazão */}
+        {/* 2. VENTILADOR — dropdown que preenche vazão */}
         <Row
           label="Ventilador"
           unit="m³/h"
@@ -126,37 +125,31 @@ export function AirSidePanel() {
             </select>
           }
           obtained={airFlow_m3h > 0 ? airFlow_m3h.toFixed(1) : "---"}
-          obtainedTone="gray"
         />
 
-        {/* VAZÃO DE AR (manual, sempre editável) */}
-        <Row
-          label="Vazão de Ar"
-          unit="m³/h"
-          input={<NumberCell value={airFlow_m3h} onChange={setAirFlow} min={0} />}
-          obtained="---"
-          obtainedTone="gray"
-        />
-
-        {/* VELOCIDADE FRONTAL — calculada depois */}
+        {/* 3. VELOCIDADE FRONTAL — calculada depois */}
         <Row
           label="Velocidade Frontal"
           unit="m/s"
           input={<DisabledInput />}
           obtained="---"
-          obtainedTone="gray"
         />
 
-        {/* TEMP. ENTRADA DB */}
+        {/* 4. FAN WORKING @ % — info do ventilador */}
+        <Row
+          label="Fan working @"
+          unit="%"
+          input={<DisabledInput />}
+          obtained="---"
+        />
+
+        {/* 5. TEMP. ENTRADA DB + UR ENTRADA (par) */}
         <Row
           label="Temperatura de Entrada DB"
           unit="°C"
           input={<NumberCell value={tempInDB_C} onChange={setTempInDB} />}
           obtained="---"
-          obtainedTone="gray"
         />
-
-        {/* UR ENTRADA */}
         <Row
           label="Umidade Relativa de Entrada"
           unit="%"
@@ -164,30 +157,25 @@ export function AirSidePanel() {
             <NumberCell value={rhIn_pct} onChange={setRhIn} min={0} max={100} />
           }
           obtained="---"
-          obtainedTone="gray"
         />
 
-        {/* TEMP. SAÍDA DB — output (verde claro) */}
+        {/* 6. TEMP. SAÍDA DB + UR SAÍDA (par — outputs) */}
         <Row
           label="Temperatura de Saída DB"
           unit="°C"
           input={<DisabledInput />}
           obtained="---"
-          obtainedTone="green"
         />
-
-        {/* UR SAÍDA — output (verde claro) */}
         <Row
           label="Umidade Relativa de Saída"
           unit="%"
           input={<DisabledInput />}
           obtained="---"
-          obtainedTone="green"
         />
 
-        {/* FATOR DE ERRO (FOULING) */}
+        {/* 7. FATOR DE ERRO (FOULING) */}
         <Row
-          label="Fator de Erro (Fouling)"
+          label="Fator de Erro"
           unit="(m²·K)/W"
           input={
             <NumberCell
@@ -198,16 +186,14 @@ export function AirSidePanel() {
             />
           }
           obtained="---"
-          obtainedTone="gray"
         />
 
-        {/* QUEDA DE PRESSÃO — output */}
+        {/* 8. QUEDA DE PRESSÃO — output */}
         <Row
           label="Queda de Pressão"
           unit="Pa"
           input={<DisabledInput />}
           obtained="---"
-          obtainedTone="gray"
         />
       </div>
 
