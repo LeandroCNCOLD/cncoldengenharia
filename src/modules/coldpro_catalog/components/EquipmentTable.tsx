@@ -1,4 +1,6 @@
+import { useState } from "react";
 import type { CatalogEquipmentRow, TemperatureApplication } from "../data/equipmentCatalog.types";
+import { EquipmentDetailModal } from "./EquipmentDetailModal";
 
 interface Props {
   rows: CatalogEquipmentRow[];
@@ -30,6 +32,7 @@ const APPLICATION_COLOR: Record<TemperatureApplication, string> = {
 };
 
 export function EquipmentTable({ rows, onSelect, selectedIds = [] }: Props) {
+  const [detailRow, setDetailRow] = useState<CatalogEquipmentRow | null>(null);
   return (
     <div className="overflow-auto rounded-lg border border-gray-200 bg-white">
       <table className="w-full text-sm">
@@ -59,10 +62,17 @@ export function EquipmentTable({ rows, onSelect, selectedIds = [] }: Props) {
                 }`}
               >
                 <td className="px-3 py-2">
-                  <p className="font-medium text-gray-900">
-                    {row.modeloBaseReferencia ?? row.modelo}
-                  </p>
-                  <p className="text-xs text-gray-500">{row.compressorModelo ?? "—"}</p>
+                  <button
+                    type="button"
+                    onClick={() => setDetailRow(row)}
+                    className="text-left hover:underline focus:outline-none focus:ring-2 focus:ring-[#1E6FD9]/40"
+                    title="Ver detalhes técnicos"
+                  >
+                    <p className="font-medium text-[#1E6FD9]">
+                      {row.modeloBaseReferencia ?? row.modelo}
+                    </p>
+                    <p className="text-xs text-gray-500">{row.compressorModelo ?? "—"}</p>
+                  </button>
                 </td>
                 <td className="px-3 py-2">
                   <span
@@ -108,6 +118,7 @@ export function EquipmentTable({ rows, onSelect, selectedIds = [] }: Props) {
           )}
         </tbody>
       </table>
+      <EquipmentDetailModal equipment={detailRow} onClose={() => setDetailRow(null)} />
     </div>
   );
 }
