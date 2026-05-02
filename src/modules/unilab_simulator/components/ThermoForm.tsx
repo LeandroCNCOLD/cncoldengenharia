@@ -38,7 +38,7 @@ export function ThermoForm({ refrigerants, componentType, disabled }: ThermoForm
         disabled={disabled}
       />
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <NumberField
           label={f.airFlow}
           unit="m³/h"
@@ -71,7 +71,7 @@ export function ThermoForm({ refrigerants, componentType, disabled }: ThermoForm
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {isEvaporator(componentType) && (
           <>
             <NumberField

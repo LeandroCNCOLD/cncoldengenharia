@@ -25,13 +25,13 @@ export function NumberField({
 }: NumberFieldProps) {
   const id = useId();
   return (
-    <div className="space-y-1">
+    <div className="min-w-0 space-y-0.5">
       <label
         htmlFor={id}
-        className="flex items-center justify-between text-xs font-medium text-slate-700"
+        className="flex items-center justify-between gap-1 text-[11px] font-medium text-slate-700"
       >
-        <span>{label}</span>
-        {unit && <span className="text-[10px] text-slate-400">{unit}</span>}
+        <span className="truncate" title={label}>{label}</span>
+        {unit && <span className="shrink-0 text-[10px] text-slate-400">{unit}</span>}
       </label>
       <input
         id={id}
@@ -52,7 +52,7 @@ export function NumberField({
           const n = Number(raw);
           onChange(Number.isFinite(n) ? n : undefined);
         }}
-        className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 shadow-sm focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+        className="w-full min-w-0 rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 shadow-sm focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
       />
     </div>
   );

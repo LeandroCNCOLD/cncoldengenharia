@@ -48,21 +48,21 @@ export function TechnicalField({
           : "border-slate-300 focus:border-[#1E6FD9] focus:ring-blue-200";
 
   return (
-    <div className="space-y-1">
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-slate-700">
+    <div className="min-w-0 space-y-0.5">
+      <div className="flex items-center justify-between gap-1">
+        <label className="truncate text-[11px] font-medium text-slate-700" title={label}>
           {label}
           {required && <span className="ml-0.5 text-red-500">*</span>}
-          {unit && <span className="ml-1 text-xs text-slate-400">({unit})</span>}
+          {unit && <span className="ml-1 text-[10px] text-slate-400">({unit})</span>}
         </label>
         {help && (
           <button
             type="button"
             onClick={() => setShowHelp((v) => !v)}
-            className="text-slate-400 hover:text-[#1E6FD9]"
+            className="shrink-0 text-slate-400 hover:text-[#1E6FD9]"
             aria-label="Ajuda do campo"
           >
-            <HelpCircle className="h-4 w-4" />
+            <HelpCircle className="h-3.5 w-3.5" />
           </button>
         )}
       </div>
@@ -75,10 +75,10 @@ export function TechnicalField({
           placeholder={placeholder}
           disabled={disabled}
           step={step}
-          className={`w-full rounded-md border bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:ring-2 disabled:bg-slate-100 disabled:text-slate-500 ${borderClass}`}
+          className={`w-full min-w-0 rounded border bg-white px-2 py-1 text-xs text-slate-900 outline-none transition focus:ring-1 disabled:bg-slate-100 disabled:text-slate-500 ${unit ? "pr-7" : ""} ${borderClass}`}
         />
         {unit && (
-          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
+          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400">
             {unit}
           </span>
         )}
