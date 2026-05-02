@@ -44,6 +44,7 @@ export function SimulationPage() {
   const { result, isCalculating, calculate } = useEquilibrium();
   const [compressor, setCompressor] = useState<Partial<CompressorSpec>>({ refrigerant: "R404A" });
   const [condenser, setCondenser] = useState<Partial<CondenserSpec>>({});
+  const [evaporator, setEvaporator] = useState<EvaporatorFormValue>({});
   const [conditions, setConditions] = useState<Partial<SystemConditions>>({});
   const [showAdvanced, setShowAdvanced] = useState(false);
 
