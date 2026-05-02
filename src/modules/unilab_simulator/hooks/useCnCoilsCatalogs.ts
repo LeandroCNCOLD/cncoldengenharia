@@ -125,6 +125,11 @@ const EMPTY: CnCoilsCatalogsData = {
   distributorKappa: {},
   distributorHoleSizes: [],
   engineErrors: [],
+  thermoPhysicalProperties: [],
+  correctionPolynomials: [],
+  fanElectricalData: [],
+  pumpData: [],
+  compressorOutletTemperature: [],
 };
 
 async function fetchJsonArray<T>(file: string): Promise<T[]> {
