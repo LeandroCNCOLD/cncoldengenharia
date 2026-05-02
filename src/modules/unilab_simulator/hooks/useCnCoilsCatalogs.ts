@@ -171,6 +171,7 @@ export function useCnCoilsCatalogs(): CnCoilsCatalogsState {
           ["warnings", "warnings.json"],
           ["uiLabels", "uiLabels.json"],
           ["distributorHoleSizes", "distributorHoleSizes.json"],
+          ["engineErrors", "engineErrorMessages.json"],
         ] as const).map(([key, file]) =>
           (async () => {
             try {
