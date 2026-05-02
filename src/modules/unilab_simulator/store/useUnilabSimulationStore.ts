@@ -164,7 +164,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   targetCapacityW: 0,
   setTargetCapacityW: (val) => set({ targetCapacityW: val }),
 
-  airFlow_m3h: 0,
+  airFlow_m3h: 5000,
   tempInDB_C: 25,
   rhIn_pct: 60,
   foulingFactorAir: 0,
