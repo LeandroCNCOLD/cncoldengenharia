@@ -58,21 +58,14 @@ export function UnilabWorkspacePage() {
 
   useUnilabInputBridge(componentType);
 
-  const [activeSection, setActiveSection] =
-    useState<WorkspaceSection>("ventilacao");
-
-  const [enrichedGeometries, setEnrichedGeometries] = useState<CoilGeometryItem[]>([]);
+  // Pré-aquece o cache do catálogo de geometrias (modal carrega sob demanda)
   useEffect(() => {
     let cancelled = false;
-    loadCoilGeometries()
-      .then((items) => {
-        if (!cancelled) setEnrichedGeometries(items);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        const msg = err instanceof Error ? err.message : String(err);
-        setWarnings([`Falha ao carregar coilGeometries.json: ${msg}`]);
-      });
+    loadCoilGeometries().catch((err) => {
+      if (cancelled) return;
+      const msg = err instanceof Error ? err.message : String(err);
+      setWarnings([`Falha ao carregar coilGeometries.json: ${msg}`]);
+    });
     return () => {
       cancelled = true;
     };
