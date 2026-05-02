@@ -33,6 +33,7 @@ interface WorkspaceSidebarProps {
   isSimulating: boolean;
   faceAreaM2?: number;
   onOpenSchematic?: () => void;
+  disabledReason?: string;
 }
 
 export function WorkspaceSidebar({
@@ -43,6 +44,7 @@ export function WorkspaceSidebar({
   isSimulating,
   faceAreaM2,
   onOpenSchematic,
+  disabledReason,
 }: WorkspaceSidebarProps) {
   const cfg = getApplicationConfig(componentType);
   const calcMode = useUnilabSimulationStore((s) => s.calcMode);
