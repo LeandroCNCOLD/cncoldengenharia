@@ -7,6 +7,40 @@ import type {
   ReheatCoilSizingInput,
 } from "@/modules/coldpro_v2";
 import { catalogToCompressorSpec } from "./compressorAdapter";
+
+const KCALH_TO_W = 1.163;
+
+/**
+ * Pré-preenchimento parcial do compressor: usa todos os campos disponíveis
+ * no catálogo, deixando como undefined apenas os que realmente faltam.
+ * O usuário verá os campos preenchidos e digitará apenas o que faltar.
+ */
+function buildPartialCompressorSpec(row: CatalogEquipmentRow): Partial<CompressorSpec> {
+  const partial: Partial<CompressorSpec> = {};
+  const capacityKcalH = row.capacidadeCompressorKcalH ?? row.capacidadeFrigorificaKcalH;
+  if (capacityKcalH !== undefined) {
+    partial.cooling_capacity_w = capacityKcalH * KCALH_TO_W;
+  }
+  const powerKw = row.potenciaCompressorKw ?? row.potenciaEletricaKw;
+  if (powerKw !== undefined) {
+    partial.power_w = powerKw * 1000;
+  }
+  if (row.refrigerante && row.refrigerante !== "unknown") {
+    partial.refrigerant = row.refrigerante;
+  }
+  if (row.tempEvaporacaoC !== undefined) {
+    partial.evap_temp_c = row.tempEvaporacaoC;
+  }
+  if (row.tempCondensacaoC !== undefined) {
+    partial.cond_temp_c = row.tempCondensacaoC;
+  }
+  return partial;
+}
+
+/** Verifica se o equipamento possui aletado de reaquecimento físico (geometria). */
+function hasReheatCoilHardware(row: CatalogEquipmentRow): boolean {
+  return !!(row.reheatRows && row.reheatRows > 0);
+}
 import { catalogToCondenserSpec } from "./condenserAdapter";
 import { catalogToEvaporatorFanSpec, catalogToCondenserFanSpec } from "./fanAdapter";
 import { catalogToEvaporatorInput } from "./evaporatorAdapter";
