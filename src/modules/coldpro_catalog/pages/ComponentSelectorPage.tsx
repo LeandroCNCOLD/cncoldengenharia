@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { CatalogFilters } from "../components/CatalogFilters";
 import { EquipmentTable } from "../components/EquipmentTable";
 import { SelectedComponentsPanel } from "../components/SelectedComponentsPanel";
+import { CompressorCatalogBrowser } from "../components/CompressorCatalogBrowser";
 import { useEquipmentCatalog } from "../hooks/useEquipmentCatalog";
 import { useComponentSelection } from "../hooks/useComponentSelection";
 
@@ -40,6 +41,11 @@ export default function ComponentSelectorPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-4">
+          <CompressorCatalogBrowser
+            onSelect={selectEquipment}
+            selectedId={selectedCompressor?.id}
+          />
+
           <CatalogFilters
             filter={filter}
             onChange={setFilter}
