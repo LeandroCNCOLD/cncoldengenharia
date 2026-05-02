@@ -14,6 +14,7 @@ import type {
   CompressorStandard,
   DistributorHoleSize,
   DistributorKappaMap,
+  EngineErrorMessage,
   Fan,
   FinHeight,
   FinPitch,
