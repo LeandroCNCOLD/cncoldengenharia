@@ -5,7 +5,11 @@ import { PageContainer } from "../components/layout/PageContainer";
 import { CompressorForm } from "../components/forms/CompressorForm";
 import { CondenserForm } from "../components/forms/CondenserForm";
 import { SystemConditionsForm, type SystemConditions } from "../components/forms/SystemConditionsForm";
-import { buildMinimalEvaporatorInput } from "../components/forms/EvaporatorForm";
+import {
+  EvaporatorForm,
+  buildEvaporatorInputFromForm,
+  type EvaporatorFormValue,
+} from "../components/forms/EvaporatorForm";
 import { UtilizationChart } from "../components/charts/UtilizationChart";
 import { LoadingSpinner } from "../components/ui/LoadingSpinner";
 import { ModeGate } from "../components/mode/ModeGate";
