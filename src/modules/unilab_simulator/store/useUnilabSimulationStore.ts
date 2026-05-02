@@ -129,8 +129,26 @@ interface UnilabSimulationStore {
   reset: () => void;
 }
 
+// Defaults sensatos para que o usuário possa simular sem necessariamente
+// abrir o modal de geometria. Todos os campos podem ser sobrescritos pela
+// UI (GeometryBottomBar, GeometryForm, picker do catálogo, importação).
+const DEFAULT_PHYSICAL_INPUTS: Partial<UnilabPhysicalInputs> = {
+  finnedHeightMm: 600,
+  finnedLengthMm: 1200,
+  rows: 4,
+  tubesPerRow: 16,
+  circuits: 4,
+  tubeMaterialId: "MAT_2", // Copper
+  finPitchMm: 2.5,
+  finThicknessMm: 0.12,
+  tubePitchTransverseMm: 25,
+  tubePitchLongitudinalMm: 21.65,
+  tubeOuterDiameterMm: 9.52,
+  tubeInnerDiameterMm: 8.92,
+};
+
 export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => ({
-  physicalInputs: {},
+  physicalInputs: { ...DEFAULT_PHYSICAL_INPUTS },
   thermoInputs: {},
   selectedGeometry: undefined,
   result: undefined,
@@ -146,7 +164,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   targetCapacityW: 0,
   setTargetCapacityW: (val) => set({ targetCapacityW: val }),
 
-  airFlow_m3h: 0,
+  airFlow_m3h: 5000,
   tempInDB_C: 25,
   rhIn_pct: 60,
   foulingFactorAir: 0,
@@ -317,7 +335,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   clearResult: () => set({ result: undefined, warnings: [] }),
   reset: () =>
     set({
-      physicalInputs: {},
+      physicalInputs: { ...DEFAULT_PHYSICAL_INPUTS },
       thermoInputs: {},
       selectedGeometry: undefined,
       result: undefined,
@@ -325,7 +343,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       isSimulating: false,
       calcMode: "verify",
       targetCapacityW: 0,
-      airFlow_m3h: 0,
+      airFlow_m3h: 5000,
       tempInDB_C: 25,
       rhIn_pct: 60,
       foulingFactorAir: 0,

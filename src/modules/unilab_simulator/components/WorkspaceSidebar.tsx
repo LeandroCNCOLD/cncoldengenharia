@@ -33,6 +33,7 @@ interface WorkspaceSidebarProps {
   isSimulating: boolean;
   faceAreaM2?: number;
   onOpenSchematic?: () => void;
+  disabledReason?: string;
 }
 
 export function WorkspaceSidebar({
@@ -43,6 +44,7 @@ export function WorkspaceSidebar({
   isSimulating,
   faceAreaM2,
   onOpenSchematic,
+  disabledReason,
 }: WorkspaceSidebarProps) {
   const cfg = getApplicationConfig(componentType);
   const calcMode = useUnilabSimulationStore((s) => s.calcMode);
@@ -283,6 +285,7 @@ export function WorkspaceSidebar({
           type="button"
           onClick={onSimulate}
           disabled={!canSimulate}
+          title={!canSimulate && disabledReason ? disabledReason : undefined}
           className="inline-flex items-center justify-center gap-1 rounded bg-[#1E6FD9] px-2 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-[#1759b3] disabled:cursor-not-allowed disabled:bg-slate-400"
         >
           <Calculator className="h-3 w-3" />
