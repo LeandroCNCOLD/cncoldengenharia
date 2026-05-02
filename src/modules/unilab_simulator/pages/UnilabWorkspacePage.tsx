@@ -211,45 +211,48 @@ export function UnilabWorkspacePage() {
           faceAreaM2={result?.faceAreaM2}
         />
 
-        {/* COLUNA CENTRAL — Lado Ventilação + Geometria conforme seção ativa */}
-        <div className="space-y-3">
-          {activeSection === "geometry" ? (
-            catalogs.loading ? (
-              <SkeletonCard />
+        {/* Wrapper das colunas centro+direita: empilha em <2xl, lado a lado em 2xl */}
+        <div className="contents 2xl:contents">
+          {/* COLUNA CENTRAL — Lado Ventilação + Geometria conforme seção ativa */}
+          <div className="min-w-0 space-y-3">
+            {activeSection === "geometry" ? (
+              catalogs.loading ? (
+                <SkeletonCard />
+              ) : (
+                <GeometryForm
+                  geometries={
+                    enrichedGeometries.length > 0
+                      ? enrichedGeometries
+                      : catalogs.geometries
+                  }
+                  tubeMaterials={catalogs.tubeMaterials}
+                  finPitches={catalogs.finPitches}
+                  finThicknesses={catalogs.finThicknesses}
+                  disabled={!catalogs.ready}
+                />
+              )
             ) : (
-              <GeometryForm
-                geometries={
-                  enrichedGeometries.length > 0
-                    ? enrichedGeometries
-                    : catalogs.geometries
-                }
-                tubeMaterials={catalogs.tubeMaterials}
-                finPitches={catalogs.finPitches}
-                finThicknesses={catalogs.finThicknesses}
-                disabled={!catalogs.ready}
-              />
-            )
-          ) : (
-            <AirSidePanel result={result} />
-          )}
-        </div>
+              <AirSidePanel result={result} />
+            )}
+          </div>
 
-        {/* COLUNA DIREITA — Lado Fluido + status + resultado */}
-        <div className="space-y-3">
-          <FluidSidePanel
-            componentType={componentType}
-            refrigerants={catalogs.refrigerants}
-            disabled={!catalogs.ready}
-            result={result}
-          />
-          <DatasetStatusPanel
-            loading={catalogs.loading}
-            ready={catalogs.ready}
-            errors={catalogs.errors}
-            missing={catalogs.missing}
-            compact
-          />
-          <ResultPanel result={result} warnings={warnings} />
+          {/* COLUNA DIREITA — Lado Fluido + status + resultado */}
+          <div className="min-w-0 space-y-3">
+            <FluidSidePanel
+              componentType={componentType}
+              refrigerants={catalogs.refrigerants}
+              disabled={!catalogs.ready}
+              result={result}
+            />
+            <DatasetStatusPanel
+              loading={catalogs.loading}
+              ready={catalogs.ready}
+              errors={catalogs.errors}
+              missing={catalogs.missing}
+              compact
+            />
+            <ResultPanel result={result} warnings={warnings} />
+          </div>
         </div>
       </div>
     </PageContainer>
