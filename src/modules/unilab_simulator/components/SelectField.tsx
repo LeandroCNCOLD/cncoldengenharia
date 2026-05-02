@@ -24,8 +24,8 @@ export function SelectField({
 }: SelectFieldProps) {
   const id = useId();
   return (
-    <div className="space-y-1">
-      <label htmlFor={id} className="text-xs font-medium text-slate-700">
+    <div className="min-w-0 space-y-0.5">
+      <label htmlFor={id} className="block truncate text-[11px] font-medium text-slate-700" title={label}>
         {label}
       </label>
       <select
@@ -33,7 +33,7 @@ export function SelectField({
         value={value ?? ""}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value === "" ? undefined : e.target.value)}
-        className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 shadow-sm focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+        className="w-full min-w-0 rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 shadow-sm focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
       >
         <option value="">{placeholder}</option>
         {options.map((o) => (
