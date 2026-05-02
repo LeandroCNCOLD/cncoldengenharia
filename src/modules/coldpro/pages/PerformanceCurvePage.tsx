@@ -154,13 +154,9 @@ export function PerformanceCurvePage() {
     if (!selectedEvaporator) lastAppliedEvaporatorId.current = undefined;
   }, [selectedCompressor, selectedCondenser, selectedEvaporator, selectedReheatCoil]);
 
-  // Limpa seleção ao sair da página, evitando vazamento entre visitas.
-  useEffect(() => {
-    return () => {
-      clearSelection();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // NOTA: a seleção do catálogo persiste entre navegações para permitir
+  // alternar entre Equilíbrio e Curva sem perder os dados. Limpeza só via
+  // botão "Limpar" ou ao salvar/excluir cálculo.
 
   const handleClearAll = () => {
     clearSelection();

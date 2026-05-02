@@ -166,14 +166,10 @@ export function SimulationPage() {
     }
   }, [selectedCompressor, selectedCondenser, selectedEvaporator, selectedReheatCoil]);
 
-  // Limpa tudo ao SAIR da página (desmontagem) — evita que dados de outro
-  // equipamento "vazem" para uma próxima visita à tela.
-  useEffect(() => {
-    return () => {
-      clearSelection();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // NOTA: a seleção do catálogo NÃO é limpa ao desmontar a página.
+  // Ela persiste para que o usuário possa navegar entre Equilíbrio e Curva
+  // sem perder os dados. A limpeza ocorre apenas via botão "Limpar" ou
+  // ao salvar/excluir um cálculo.
 
   const handleClearAll = () => {
     clearSelection();
