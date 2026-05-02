@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { ArrowRight, ArrowRightLeft, ArrowDownUp, Info, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
@@ -8,7 +9,7 @@ const POSITIONS: Array<{
   id: HeaderPosition;
   label: string;
   desc: string;
-  icon: JSX.Element;
+  icon: ReactNode;
 }> = [
   {
     id: "LL",
