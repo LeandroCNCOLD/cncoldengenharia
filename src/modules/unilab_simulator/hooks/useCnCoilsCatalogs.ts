@@ -103,6 +103,24 @@ export interface CnCoilsCatalogsData {
   fanElectricalData: FanElectricalData[];
   pumpData: PumpData[];
   compressorOutletTemperature: CompressorOutletTemperature[];
+  // ── LOTE FINAL ──
+  compressorCapacityPolynomials: CompressorCapacityPolynomial[];
+  compressorPowerPolynomials: CompressorPowerPolynomial[];
+  compressorCurrentPolynomials: CompressorCurrentPolynomial[];
+  compressorBackupPolynomials: CompressorBackupPolynomials;
+  geometriesComplete: GeometriesComplete;
+  tubesCatalog: TubeCatalogEntry[];
+  fansComplete: FanCompleteCurve[];
+  fluidsThermoPhysical: FluidsThermoPhysical;
+  refrigerantsLimits: RefrigerantLimit[];
+  secondaryFluidsComplete: SecondaryFluidComplete[];
+  liquidMixtures: LiquidMixtureEntry[];
+  distributorComplete: DistributorComplete;
+  distributorKappaFull: DistributorKappaRow[];
+  pumpComplete: PumpComplete;
+  pumpCurves: import("../types/catalogs").PumpCurveEntry[];
+  shellTubeCondenser: ShellTubeCondenserEntry[];
+  collectionErrors: CollectionErrorEntry[];
 }
 
 export interface CnCoilsCatalogsState extends CnCoilsCatalogsData {
