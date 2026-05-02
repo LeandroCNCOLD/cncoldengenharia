@@ -116,6 +116,7 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
             manufacturer: fan.fanType === 0 ? "Axial T0" : "Axial T1",
             model: fan.model,
             airflow_m3h: Number.isFinite(mid) && mid > 0 ? mid : undefined,
+            family: "axial",
             axial: fan,
           };
         });
