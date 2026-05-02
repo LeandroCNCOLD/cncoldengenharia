@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, Fan as FanIcon } from "lucide-react";
+import { Search, Fan as FanIcon, Plus } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +43,7 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
   const setAirFlow = useUnilabSimulationStore((s) => s.setAirFlow);
 
   const [query, setQuery] = useState("");
+  const [brand, setBrand] = useState<string>("");
   const [draftId, setDraftId] = useState<string | undefined>(selectedFanId);
   const [draftCount, setDraftCount] = useState<number>(fanCount);
   const [draftRole, setDraftRole] = useState<"blower" | "exhaust">(fanRole);
@@ -49,21 +51,31 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
   useEffect(() => {
     if (open) {
       setQuery("");
+      setBrand("");
       setDraftId(selectedFanId);
       setDraftCount(fanCount);
       setDraftRole(fanRole);
     }
   }, [open, selectedFanId, fanCount, fanRole]);
 
+  const brands = useMemo(() => {
+    const set = new Set<string>();
+    for (const f of fans) {
+      if (f.manufacturer) set.add(f.manufacturer);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [fans]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return fans;
-    return fans.filter((f) =>
-      [f.manufacturer, f.model, f.id]
+    return fans.filter((f) => {
+      if (brand && f.manufacturer !== brand) return false;
+      if (!q) return true;
+      return [f.manufacturer, f.model, f.id]
         .filter(Boolean)
-        .some((v) => String(v).toLowerCase().includes(q)),
-    );
-  }, [fans, query]);
+        .some((v) => String(v).toLowerCase().includes(q));
+    });
+  }, [fans, query, brand]);
 
   const draft = fans.find((f) => f.id === draftId);
   const totalAirflow =
@@ -92,16 +104,30 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Busca */}
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <Input
-              autoFocus
-              placeholder="Buscar por fabricante ou modelo…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="pl-8"
-            />
+          {/* Busca + Filtro por marca */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="relative col-span-2">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Input
+                autoFocus
+                placeholder="Buscar por modelo…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+            <select
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+              className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none"
+            >
+              <option value="">Todas as marcas</option>
+              {brands.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Lista */}
@@ -213,13 +239,24 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
           )}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancelar
+        <DialogFooter className="sm:justify-between">
+          <Button variant="ghost" size="sm" asChild onClick={onClose}>
+            <Link
+              to="/coldpro/components"
+              className="inline-flex items-center gap-1 text-xs text-[#1E6FD9]"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Cadastrar novo ventilador
+            </Link>
           </Button>
-          <Button onClick={handleConfirm} disabled={!draft}>
-            Aplicar
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirm} disabled={!draft}>
+              Aplicar
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
