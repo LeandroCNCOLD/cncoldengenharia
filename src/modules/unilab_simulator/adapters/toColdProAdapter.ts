@@ -127,3 +127,50 @@ export function toCondenserInput(
     max_cond_temp_c: thermo.condensingTempC,
   };
 }
+
+/**
+ * Adapta uma bateria de reaquecimento (hidrônica/vapor) para
+ * ProgressiveCoilInput. Usamos a T média do fluido como proxy de T interna —
+ * o ColdPro V2 registra essa coil com role="reheat" e usa esses dados para
+ * dimensionamento físico e perda de carga, não para psicrometria DX.
+ */
+export function toReheatCoilInput(
+  physical: UnilabPhysicalInputs,
+  thermo: UnilabThermoInputs,
+  result: UnilabSimulationResult,
+  ctx: ToColdProContext,
+  fluidMeanTempC: number,
+): ProgressiveCoilInput {
+  const material = mapMaterial(physical.tubeMaterialId, ctx.tubeMaterials);
+  if (!material) {
+    throw new Error(
+      `Material do tubo "${physical.tubeMaterialId}" não tem equivalente em ColdPro V2 (copper/aluminum/steel).`,
+    );
+  }
+
+  const rolls: RollGeometry[] = [
+    {
+      fin_spacing_mm: physical.finPitchMm,
+      rows_in_roll: physical.rows,
+    },
+  ];
+
+  return {
+    tube_outer_diameter_mm: physical.tubeOuterDiameterMm,
+    tube_inner_diameter_mm: physical.tubeInnerDiameterMm,
+    tube_pitch_transverse_mm: physical.tubePitchTransverseMm,
+    tube_pitch_longitudinal_mm: physical.tubePitchLongitudinalMm,
+    fin_height_mm: physical.finPitchMm,
+    fin_thickness_mm: physical.finThicknessMm,
+    coil_width_m: mmToM(physical.finnedLengthMm),
+    coil_height_m: mmToM(physical.finnedHeightMm),
+    tube_material: material,
+    fin_material: material,
+    rolls,
+    air_temperature_in_c: thermo.airInletTempC,
+    air_relative_humidity_in: thermo.airInletRhPercent / 100,
+    air_mass_flow_kg_s: result.airMassFlowKgS,
+    T_evaporating_c: fluidMeanTempC,
+    refrigerant: thermo.refrigerantId || "water",
+  };
+}
