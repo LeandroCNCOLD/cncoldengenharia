@@ -81,6 +81,7 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
 
   const [query, setQuery] = useState("");
   const [brand, setBrand] = useState<string>("");
+  const [familyFilter, setFamilyFilter] = useState<string>("");
   const [draftId, setDraftId] = useState<string | undefined>(selectedFanId);
   const [draftCount, setDraftCount] = useState<number>(fanCount);
   const [draftRole, setDraftRole] = useState<"blower" | "exhaust">(fanRole);
@@ -89,6 +90,7 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
     if (open) {
       setQuery("");
       setBrand("");
+      setFamilyFilter("");
       setDraftId(selectedFanId);
       setDraftCount(fanCount);
       setDraftRole(fanRole);
@@ -103,16 +105,27 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [fans]);
 
+  const families = useMemo(() => {
+    const set = new Set<FanPickerFamily>();
+    for (const f of fans) {
+      if (f.family) set.add(f.family);
+    }
+    return Array.from(set).sort((a, b) =>
+      FAMILY_LABELS[a].localeCompare(FAMILY_LABELS[b]),
+    );
+  }, [fans]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return fans.filter((f) => {
       if (brand && f.manufacturer !== brand) return false;
+      if (familyFilter && f.family !== familyFilter) return false;
       if (!q) return true;
-      return [f.manufacturer, f.model, f.id]
+      return [f.manufacturer, f.model, f.id, f.series]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(q));
     });
-  }, [fans, query, brand]);
+  }, [fans, query, brand, familyFilter]);
 
   const draft = fans.find((f) => f.id === draftId);
   const totalAirflow =
