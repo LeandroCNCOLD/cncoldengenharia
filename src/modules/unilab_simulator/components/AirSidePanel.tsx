@@ -220,32 +220,41 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
         {/* VENTILADOR (catálogo opcional) */}
         <Row
           label="Ventilador"
-          unitNode={<UnitText text="—" />}
+          unitNode={<UnitText text={fanCount > 0 ? `×${fanCount}` : "—"} />}
           input={
-            <select
-              value={selectedFanId ?? ""}
-              onChange={(e) => handleFanChange(e.target.value)}
+            <button
+              type="button"
+              onClick={() => setFanModalOpen(true)}
               disabled={fans.length === 0}
-              className="w-full rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] text-slate-900 focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
+              className="flex w-full items-center justify-between rounded border border-slate-300 bg-white px-1.5 py-0.5 text-left text-[10px] text-slate-900 hover:border-[#1E6FD9] focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
               title={
                 fans.length === 0
                   ? "Catálogo de ventiladores não disponível — preencha a vazão manualmente abaixo"
-                  : "Selecione um ventilador"
+                  : "Clique para selecionar um ventilador"
               }
             >
-              <option value="">
-                {fans.length === 0 ? "— sem catálogo —" : "Selecione…"}
-              </option>
-              {fans.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {[f.manufacturer, f.model].filter(Boolean).join(" ") || f.id} —{" "}
-                  {f.airflow_m3h} m³/h
-                </option>
-              ))}
-            </select>
+              <span className="truncate">
+                {fans.length === 0
+                  ? "— sem catálogo —"
+                  : selectedFan
+                    ? `${[selectedFan.manufacturer, selectedFan.model].filter(Boolean).join(" ")} (${fanRole === "blower" ? "soprador" : "exaustor"})`
+                    : "Selecionar…"}
+              </span>
+              <ChevronDown className="h-3 w-3 flex-shrink-0 text-slate-400" />
+            </button>
           }
-          obtained="---"
+          obtained={
+            selectedFan?.airflow_m3h
+              ? `${(selectedFan.airflow_m3h * fanCount).toFixed(0)} m³/h`
+              : "---"
+          }
         />
+        <FanPickerModal
+          open={fanModalOpen}
+          onClose={() => setFanModalOpen(false)}
+          fans={fans}
+        />
+
 
         {/* VAZÃO DE AR — sempre editável */}
         <Row
