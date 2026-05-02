@@ -258,6 +258,14 @@ export function UnilabWorkspacePage() {
           </Link>
           <button
             type="button"
+            onClick={() => setMachineImportOpen(true)}
+            className="inline-flex items-center gap-2 rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-amber-600"
+          >
+            <Package className="h-4 w-4" />
+            📥 Importar do Catálogo CN Cold
+          </button>
+          <button
+            type="button"
             disabled={!result || sending}
             onClick={handleSendToAssembly}
             className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-400"
