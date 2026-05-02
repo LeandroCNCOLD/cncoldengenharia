@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Activity,
@@ -8,8 +8,11 @@ import {
   Database,
   Download,
   ShieldCheck,
-  Snowflake,
+  LogOut,
 } from "lucide-react";
+import { CnLogo } from "@/components/cn-logo";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
 import { UserModeSwitcher } from "../mode/UserModeSwitcher";
 
 type NavItem = {
