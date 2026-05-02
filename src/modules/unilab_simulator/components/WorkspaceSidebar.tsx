@@ -1,8 +1,9 @@
-import { Calculator, Printer, RotateCcw, Settings2 } from "lucide-react";
+import { Calculator, Printer, RotateCcw, Save, Settings2 } from "lucide-react";
 import { useState } from "react";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { getApplicationConfig } from "../config/applicationConfig";
 import { formatBRL } from "../engine/costCalculator";
+import { generateReportPdf, type ReportSnapshot } from "../engine/reportGenerator";
 import { MaterialCostConfigModal } from "./MaterialCostConfigModal";
 import { GeometryPickerModal } from "./GeometryPickerModal";
 import {
@@ -49,9 +50,94 @@ export function WorkspaceSidebar({
   const engineVersion = useUnilabSimulationStore((s) => s.engineVersion);
   const setEngineVersion = useUnilabSimulationStore((s) => s.setEngineVersion);
   const calculatedCost = useUnilabSimulationStore((s) => s.calculatedCost);
+  const result = useUnilabSimulationStore((s) => s.result);
+  const warnings = useUnilabSimulationStore((s) => s.warnings);
+  const physicalInputs = useUnilabSimulationStore((s) => s.physicalInputs);
+  const selectedGeometry = useUnilabSimulationStore((s) => s.selectedGeometry);
+  const airFlow_m3h = useUnilabSimulationStore((s) => s.airFlow_m3h);
+  const tempInDB_C = useUnilabSimulationStore((s) => s.tempInDB_C);
+  const rhIn_pct = useUnilabSimulationStore((s) => s.rhIn_pct);
+  const foulingFactorAir = useUnilabSimulationStore((s) => s.foulingFactorAir);
+  const fanCount = useUnilabSimulationStore((s) => s.fanCount);
+  const fanRole = useUnilabSimulationStore((s) => s.fanRole);
+  const fluid = useUnilabSimulationStore((s) => s.fluid);
+  const fluidMassFlow_kg_h = useUnilabSimulationStore((s) => s.fluidMassFlow_kg_h);
+  const fluidOperatingTemp_C = useUnilabSimulationStore((s) => s.fluidOperatingTemp_C);
+  const superheat_K = useUnilabSimulationStore((s) => s.superheat_K);
+  const subcooling_K = useUnilabSimulationStore((s) => s.subcooling_K);
+  const foulingFactorFluid = useUnilabSimulationStore((s) => s.foulingFactorFluid);
+  const pairedTempC = useUnilabSimulationStore((s) => s.pairedTempC);
+  const dischargeSuperheatK = useUnilabSimulationStore((s) => s.dischargeSuperheatK);
+  const compressorCount = useUnilabSimulationStore((s) => s.compressorCount);
+  const selectedCompressorId = useUnilabSimulationStore((s) => s.selectedCompressorId);
 
   const [costModalOpen, setCostModalOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalKey>(null);
+
+  const buildSnapshot = (): ReportSnapshot => ({
+    componentLabel: cfg.shortLabel,
+    geometryName: selectedGeometry?.name,
+    physical: physicalInputs,
+    air: {
+      flowM3h: airFlow_m3h,
+      tempInC: tempInDB_C,
+      rhInPct: rhIn_pct,
+      foulingFactor: foulingFactorAir,
+      fanCount,
+      fanRole,
+    },
+    fluid: {
+      refrigerant: fluid,
+      massFlowKgH: fluidMassFlow_kg_h,
+      operatingTempC: fluidOperatingTemp_C,
+      superheatK: superheat_K,
+      subcoolingK: subcooling_K,
+      foulingFactor: foulingFactorFluid,
+      pairedTempC,
+      dischargeSuperheatK,
+      compressorCount,
+      compressorId: selectedCompressorId,
+    },
+    cost: calculatedCost,
+    result,
+    warnings,
+    meta: {
+      project: "-",
+      client: "",
+      contact: "",
+      code: "",
+      description: `BATERIA ${cfg.shortLabel} — ${selectedGeometry?.name ?? ""}`,
+      date: new Date().toLocaleDateString("pt-BR"),
+    },
+  });
+
+  const handlePrint = () => {
+    if (!result) {
+      alert("Calcule a simulação antes de imprimir.");
+      return;
+    }
+    const doc = generateReportPdf(buildSnapshot());
+    const filename = `relatorio_cncold_${(selectedGeometry?.id ?? "bateria").replace(/[^a-z0-9_-]/gi, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(filename);
+  };
+
+  const handleSave = () => {
+    const name = window.prompt("Nome para salvar este projeto:", `Projeto ${new Date().toLocaleDateString("pt-BR")}`);
+    if (!name) return;
+    try {
+      const key = "unilab.savedProjects";
+      const raw = localStorage.getItem(key);
+      const list: Array<{ name: string; savedAt: string; snapshot: ReportSnapshot }> =
+        raw ? JSON.parse(raw) : [];
+      list.push({ name, savedAt: new Date().toISOString(), snapshot: buildSnapshot() });
+      localStorage.setItem(key, JSON.stringify(list));
+      alert(`Projeto "${name}" salvo com sucesso (${list.length} no histórico).`);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao salvar o projeto. Veja o console.");
+    }
+  };
+
 
   return (
     <aside className="flex h-full w-full flex-col gap-1.5 rounded border border-slate-300 bg-slate-50 p-1.5 text-[10px] shadow-sm">
@@ -202,14 +288,24 @@ export function WorkspaceSidebar({
           <Calculator className="h-3 w-3" />
           {isSimulating ? "Calculando…" : "Calcular"}
         </button>
-        <div className="grid grid-cols-2 gap-1">
+        <div className="grid grid-cols-3 gap-1">
           <button
             type="button"
-            disabled
-            className="inline-flex items-center justify-center gap-1 rounded border border-slate-300 bg-white px-1 py-1 text-[10px] text-slate-500 shadow-sm disabled:cursor-not-allowed"
+            onClick={handlePrint}
+            disabled={!result}
+            title={result ? "Gerar relatório PDF" : "Calcule primeiro"}
+            className="inline-flex items-center justify-center gap-1 rounded border border-slate-300 bg-white px-1 py-1 text-[10px] text-slate-700 shadow-sm hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-400"
           >
             <Printer className="h-3 w-3" />
             Imprimir
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            className="inline-flex items-center justify-center gap-1 rounded border border-emerald-300 bg-emerald-50 px-1 py-1 text-[10px] text-emerald-800 shadow-sm hover:bg-emerald-100"
+          >
+            <Save className="h-3 w-3" />
+            Salvar
           </button>
           <button
             type="button"
