@@ -163,11 +163,12 @@ export function SimulationPage() {
 
   const handleCalculate = () => {
     if (!canCalculate) return;
-    // Catálogo tem prioridade no input do evaporador SOMENTE se conseguiu gerar
-    // ProgressiveCoilInput completo. Caso contrário, fallback no input manual.
+    // Catálogo tem prioridade SOMENTE se conseguiu gerar ProgressiveCoilInput
+    // completo. Caso contrário, usa o que estiver no form de Evaporador,
+    // recorrendo a defaults para campos não preenchidos.
     const evaporatorInput =
       catalogEvaporatorInput ?? {
-        progressive_input: buildMinimalEvaporatorInput(compressor, conditions),
+        progressive_input: buildEvaporatorInputFromForm(evaporator, compressor, conditions),
       };
     calculate({
       compressor: compressor as CompressorSpec,
