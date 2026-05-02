@@ -27,7 +27,6 @@ export function AirSidePanel() {
   const setSelectedFan = useUnilabSimulationStore((s) => s.setSelectedFan);
 
   const [fans, setFans] = useState<FanCatalogItem[]>([]);
-  const [selectedFanId, setSelectedFanId] = useState<string>("");
 
   // Carregamento opcional do catálogo de ventiladores. Se o arquivo não
   // existir, simplesmente escondemos o dropdown — sem mocks.
@@ -59,7 +58,7 @@ export function AirSidePanel() {
   });
 
   const handleFanChange = (id: string) => {
-    setSelectedFanId(id);
+    setSelectedFan(id || undefined);
     const fan = fans.find((f) => f.id === id);
     if (fan?.airflow_m3h && fan.airflow_m3h > 0) {
       setAirFlow(fan.airflow_m3h);
@@ -80,7 +79,7 @@ export function AirSidePanel() {
                 Ventilador (opcional)
               </label>
               <select
-                value={selectedFanId}
+                value={selectedFanId ?? ""}
                 onChange={(e) => handleFanChange(e.target.value)}
                 className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 shadow-sm focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9]"
               >
@@ -113,7 +112,7 @@ export function AirSidePanel() {
             onChange={setRhIn}
           />
           <NumberInput
-            label="Fator de Erro / Fouling (m²·K/W)"
+            label="Fator de Erro (Fouling) (m²·K/W)"
             value={foulingFactorAir}
             onChange={setFoulingFactorAir}
             min={0}
