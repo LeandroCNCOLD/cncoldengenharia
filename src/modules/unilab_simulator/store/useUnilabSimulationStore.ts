@@ -107,6 +107,21 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   setFluidExtras: (patch) =>
     set((s) => ({ fluidExtras: { ...s.fluidExtras, ...patch } })),
 
+  fluid: "R404A",
+  fluidMassFlow_kg_h: 0,
+  fluidOperatingTemp_C: 0,
+  fluidTempReference: "middle",
+  superheat_K: 0,
+  subcooling_K: 0,
+  foulingFactorFluid: 0,
+  setFluid: (val) => set({ fluid: val }),
+  setFluidMassFlow: (val) => set({ fluidMassFlow_kg_h: val }),
+  setFluidOperatingTemp: (val) => set({ fluidOperatingTemp_C: val }),
+  setFluidTempReference: (val) => set({ fluidTempReference: val }),
+  setSuperheat: (val) => set({ superheat_K: val }),
+  setSubcooling: (val) => set({ subcooling_K: val }),
+  setFoulingFactorFluid: (val) => set({ foulingFactorFluid: val }),
+
   setPhysicalInputs: (patch) =>
     set((s) => ({ physicalInputs: { ...s.physicalInputs, ...patch } })),
   setThermoInputs: (patch) =>
@@ -147,5 +162,12 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       foulingFactorAir: 0,
       selectedFanId: undefined,
       fluidExtras: {},
+      fluid: "R404A",
+      fluidMassFlow_kg_h: 0,
+      fluidOperatingTemp_C: 0,
+      fluidTempReference: "middle",
+      superheat_K: 0,
+      subcooling_K: 0,
+      foulingFactorFluid: 0,
     }),
 }));
