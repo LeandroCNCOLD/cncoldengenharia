@@ -111,10 +111,15 @@ export function UnilabWorkspacePage() {
   const [schematicOpen, setSchematicOpen] = useState(false);
   const [machineImportOpen, setMachineImportOpen] = useState(false);
 
-  const inputsValid =
-    validatePhysicalInputs(physical).isValid &&
-    validateThermoInputs(thermo).isValid;
+  const physCheck = validatePhysicalInputs(physical);
+  const thermoCheck = validateThermoInputs(thermo);
+  const inputsValid = physCheck.isValid && thermoCheck.isValid;
   const canSimulate = catalogs.ready && inputsValid && !isSimulating;
+  const disabledReason = !catalogs.ready
+    ? "Carregando catálogos…"
+    : !inputsValid
+      ? `Preencha: ${[...physCheck.errors, ...thermoCheck.errors].join(" • ")}`
+      : undefined;
 
   const handleSimulate = () => {
     const physCheck = validatePhysicalInputs(physical);
