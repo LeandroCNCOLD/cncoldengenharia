@@ -163,6 +163,9 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   result: undefined,
   warnings: [],
   isSimulating: false,
+  errorFactorPercent: 0,
+  setErrorFactorPercent: (val) =>
+    set({ errorFactorPercent: Number.isFinite(val) ? val : 0 }),
 
   calcMode: "verify",
   setCalcMode: (mode) => set({ calcMode: mode }),
