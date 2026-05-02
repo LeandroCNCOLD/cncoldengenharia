@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ArrowLeft, Play, Send, RotateCcw } from "lucide-react";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
@@ -20,6 +20,10 @@ import {
   toCondenserInput,
 } from "../adapters/toColdProAdapter";
 import { useComponentStore } from "@/modules/coldpro/stores/useComponentStore";
+import {
+  loadCoilGeometries,
+  type CoilGeometryItem,
+} from "../services/coilGeometryCatalogService";
 import type {
   UnilabComponentType,
   UnilabPhysicalInputs,
@@ -56,6 +60,26 @@ export function UnilabWorkspacePage() {
   const isSimulating = useUnilabSimulationStore((s) => s.isSimulating);
   const reset = useUnilabSimulationStore((s) => s.reset);
   const setWarnings = useUnilabSimulationStore((s) => s.setWarnings);
+
+  // Catálogo enriquecido de geometrias (com tipo_serpentina, campos pt-BR etc.).
+  // Carregado via service dedicado; o `useUnilabCatalogs` continua provendo a
+  // versão base usada pelo motor termodinâmico (não alteramos coldpro_v2).
+  const [enrichedGeometries, setEnrichedGeometries] = useState<CoilGeometryItem[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    loadCoilGeometries()
+      .then((items) => {
+        if (!cancelled) setEnrichedGeometries(items);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        const msg = err instanceof Error ? err.message : String(err);
+        setWarnings([`Falha ao carregar coilGeometries.json: ${msg}`]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [setWarnings]);
 
   const simulationDeps = useMemo(
     () => ({
@@ -177,7 +201,11 @@ export function UnilabWorkspacePage() {
             <SkeletonCard />
           ) : (
             <GeometryForm
-              geometries={catalogs.geometries}
+              geometries={
+                enrichedGeometries.length > 0
+                  ? enrichedGeometries
+                  : catalogs.geometries
+              }
               tubeMaterials={catalogs.tubeMaterials}
               finPitches={catalogs.finPitches}
               finThicknesses={catalogs.finThicknesses}
