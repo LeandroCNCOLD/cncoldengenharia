@@ -1,72 +1,72 @@
 [
   {
-    "id": "FIN_T_0_1",
+    "id": "FT_1",
     "thicknessMm": 0.1,
-    "label": "0.1 mm — Alumínio"
+    "label": "0.1 mm"
   },
   {
-    "id": "FIN_T_0_12",
+    "id": "FT_2",
     "thicknessMm": 0.12,
-    "label": "0.12 mm — Alumínio"
+    "label": "0.12 mm"
   },
   {
-    "id": "FIN_T_0_15",
+    "id": "FT_3",
     "thicknessMm": 0.15,
-    "label": "0.15 mm — Alumínio"
+    "label": "0.15 mm"
   },
   {
-    "id": "FIN_T_0_16",
+    "id": "FT_4",
     "thicknessMm": 0.16,
-    "label": "0.16 mm — Alumínio / Cobre"
+    "label": "0.16 mm"
   },
   {
-    "id": "FIN_T_0_18",
+    "id": "FT_5",
     "thicknessMm": 0.18,
-    "label": "0.18 mm — Alumínio / Cobre"
+    "label": "0.18 mm"
   },
   {
-    "id": "FIN_T_0_2",
+    "id": "FT_6",
     "thicknessMm": 0.2,
-    "label": "0.2 mm — Alumínio / Cobre"
+    "label": "0.2 mm"
   },
   {
-    "id": "FIN_T_0_25",
+    "id": "FT_7",
     "thicknessMm": 0.25,
-    "label": "0.25 mm — Alumínio / Cobre"
+    "label": "0.25 mm"
   },
   {
-    "id": "FIN_T_0_42",
+    "id": "FT_8",
     "thicknessMm": 0.42,
-    "label": "0.42 mm — Alumínio / Cobre"
+    "label": "0.42 mm"
   },
   {
-    "id": "FIN_T_0_3",
+    "id": "FT_9",
     "thicknessMm": 0.3,
-    "label": "0.3 mm — Alumínio / Cobre"
+    "label": "0.3 mm"
   },
   {
-    "id": "FIN_T_0_145",
+    "id": "FT_10",
     "thicknessMm": 0.145,
-    "label": "0.145 mm — Alumínio"
+    "label": "0.145 mm"
   },
   {
-    "id": "FIN_T_0_27",
+    "id": "FT_11",
     "thicknessMm": 0.27,
-    "label": "0.27 mm — Alumínio / Cobre"
+    "label": "0.27 mm"
   },
   {
-    "id": "FIN_T_0_65",
+    "id": "FT_12",
     "thicknessMm": 0.65,
-    "label": "0.65 mm — Alumínio / Cobre"
+    "label": "0.65 mm"
   },
   {
-    "id": "FIN_T_0_5",
+    "id": "FT_13",
     "thicknessMm": 0.5,
-    "label": "0.5 mm — Alumínio / Cobre"
+    "label": "0.5 mm"
   },
   {
-    "id": "FIN_T_0_22",
+    "id": "FT_14",
     "thicknessMm": 0.22,
-    "label": "0.22 mm — Alumínio / Cobre"
+    "label": "0.22 mm"
   }
 ]

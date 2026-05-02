@@ -1,0 +1,730 @@
+[
+  {
+    "id": "1",
+    "description": "6 (mm)",
+    "tube_od_mm": 6.0,
+    "tube_wall_mm": 0.60000002,
+    "tube_id_mm": 4.8,
+    "material_id": "1"
+  },
+  {
+    "id": "2",
+    "description": "6 (mm)",
+    "tube_od_mm": 6.0,
+    "tube_wall_mm": 0.80000001,
+    "tube_id_mm": 4.4,
+    "material_id": "1"
+  },
+  {
+    "id": "3",
+    "description": "6 (mm)",
+    "tube_od_mm": 6.0,
+    "tube_wall_mm": 1.0,
+    "tube_id_mm": 4.0,
+    "material_id": "1"
+  },
+  {
+    "id": "4",
+    "description": "8 (mm)",
+    "tube_od_mm": 8.0,
+    "tube_wall_mm": 0.60000002,
+    "tube_id_mm": 6.8,
+    "material_id": "1"
+  },
+  {
+    "id": "5",
+    "description": "8 (mm)",
+    "tube_od_mm": 8.0,
+    "tube_wall_mm": 0.80000001,
+    "tube_id_mm": 6.4,
+    "material_id": "1"
+  },
+  {
+    "id": "6",
+    "description": "8 (mm)",
+    "tube_od_mm": 8.0,
+    "tube_wall_mm": 1.0,
+    "tube_id_mm": 6.0,
+    "material_id": "1"
+  },
+  {
+    "id": "7",
+    "description": "10 (mm)",
+    "tube_od_mm": 10.0,
+    "tube_wall_mm": 0.60000002,
+    "tube_id_mm": 8.8,
+    "material_id": "1"
+  },
+  {
+    "id": "8",
+    "description": "10 (mm)",
+    "tube_od_mm": 10.0,
+    "tube_wall_mm": 0.69999999,
+    "tube_id_mm": 8.6,
+    "material_id": "1"
+  },
+  {
+    "id": "9",
+    "description": "10 (mm)",
+    "tube_od_mm": 10.0,
+    "tube_wall_mm": 0.80000001,
+    "tube_id_mm": 8.4,
+    "material_id": "1"
+  },
+  {
+    "id": "10",
+    "description": "10 (mm)",
+    "tube_od_mm": 10.0,
+    "tube_wall_mm": 1.0,
+    "tube_id_mm": 8.0,
+    "material_id": "1"
+  },
+  {
+    "id": "11",
+    "description": "12 (mm)",
+    "tube_od_mm": 12.0,
+    "tube_wall_mm": 0.60000002,
+    "tube_id_mm": 10.8,
+    "material_id": "1"
+  },
+  {
+    "id": "12",
+    "description": "12 (mm)",
+    "tube_od_mm": 12.0,
+    "tube_wall_mm": 0.80000001,
+    "tube_id_mm": 10.4,
+    "material_id": "1"
+  },
+  {
+    "id": "13",
+    "description": "12 (mm)",
+    "tube_od_mm": 12.0,
+    "tube_wall_mm": 1.0,
+    "tube_id_mm": 10.0,
+    "material_id": "1"
+  },
+  {
+    "id": "14",
+    "description": "15 (mm)",
+    "tube_od_mm": 15.0,
+    "tube_wall_mm": 0.69999999,
+    "tube_id_mm": 13.6,
+    "material_id": "1"
+  },
+  {
+    "id": "15",
+    "description": "15 (mm)",
+    "tube_od_mm": 15.0,
+    "tube_wall_mm": 0.80000001,
+    "tube_id_mm": 13.4,
+    "material_id": "1"
+  },
+  {
+    "id": "16",
+    "description": "15 (mm)",
+    "tube_od_mm": 15.0,
+    "tube_wall_mm": 1.0,
+    "tube_id_mm": 13.0,
+    "material_id": "1"
+  },
+  {
+    "id": "17",
+    "description": "18 (mm)",
+    "tube_od_mm": 18.0,
+    "tube_wall_mm": 0.80000001,
+    "tube_id_mm": 16.4,
+    "material_id": "1"
+  },
+  {
+    "id": "18",
+    "description": "18 (mm)",
+    "tube_od_mm": 18.0,
+    "tube_wall_mm": 1.0,
+    "tube_id_mm": 16.0,
+    "material_id": "1"
+  },
+  {
+    "id": "19",
+    "description": "22 (mm)",
+    "tube_od_mm": 22.0,
+    "tube_wall_mm": 1.0,
+    "tube_id_mm": 20.0,
+    "material_id": "1"
+  },
+  {
+    "id": "20",
+    "description": "22 (mm)",
+    "tube_od_mm": 22.0,
+    "tube_wall_mm": 1.2,
+    "tube_id_mm": 19.6,
+    "material_id": "1"
+  },
+  {
+    "id": "21",
+    "description": "22 (mm)",
+    "tube_od_mm": 22.0,
+    "tube_wall_mm": 1.5,
+    "tube_id_mm": 19.0,
+    "material_id": "1"
+  },
+  {
+    "id": "22",
+    "description": "28 (mm)",
+    "tube_od_mm": 28.0,
+    "tube_wall_mm": 0.89999998,
+    "tube_id_mm": 26.2,
+    "material_id": "1"
+  },
+  {
+    "id": "23",
+    "description": "28 (mm)",
+    "tube_od_mm": 28.0,
+    "tube_wall_mm": 1.0,
+    "tube_id_mm": 26.0,
+    "material_id": "1"
+  },
+  {
+    "id": "24",
+    "description": "28 (mm)",
+    "tube_od_mm": 28.0,
+    "tube_wall_mm": 1.2,
+    "tube_id_mm": 25.6,
+    "material_id": "1"
+  },
+  {
+    "id": "25",
+    "description": "28 (mm)",
+    "tube_od_mm": 28.0,
+    "tube_wall_mm": 1.5,
+    "tube_id_mm": 25.0,
+    "material_id": "1"
+  },
+  {
+    "id": "26",
+    "description": "35 (mm)",
+    "tube_od_mm": 35.0,
+    "tube_wall_mm": 1.2,
+    "tube_id_mm": 32.6,
+    "material_id": "1"
+  },
+  {
+    "id": "27",
+    "description": "35 (mm)",
+    "tube_od_mm": 35.0,
+    "tube_wall_mm": 1.5,
+    "tube_id_mm": 32.0,
+    "material_id": "1"
+  },
+  {
+    "id": "28",
+    "description": "42 (mm)",
+    "tube_od_mm": 42.0,
+    "tube_wall_mm": 1.2,
+    "tube_id_mm": 39.6,
+    "material_id": "1"
+  },
+  {
+    "id": "29",
+    "description": "42 (mm)",
+    "tube_od_mm": 42.0,
+    "tube_wall_mm": 1.5,
+    "tube_id_mm": 39.0,
+    "material_id": "1"
+  },
+  {
+    "id": "30",
+    "description": "54 (mm)",
+    "tube_od_mm": 54.0,
+    "tube_wall_mm": 1.2,
+    "tube_id_mm": 51.6,
+    "material_id": "1"
+  },
+  {
+    "id": "31",
+    "description": "54 (mm)",
+    "tube_od_mm": 54.0,
+    "tube_wall_mm": 1.5,
+    "tube_id_mm": 51.0,
+    "material_id": "1"
+  },
+  {
+    "id": "32",
+    "description": "54 (mm)",
+    "tube_od_mm": 54.0,
+    "tube_wall_mm": 2.0,
+    "tube_id_mm": 50.0,
+    "material_id": "1"
+  },
+  {
+    "id": "33",
+    "description": "64 (mm)",
+    "tube_od_mm": 64.0,
+    "tube_wall_mm": 2.0,
+    "tube_id_mm": 60.0,
+    "material_id": "1"
+  },
+  {
+    "id": "34",
+    "description": "66,7 (mm)",
+    "tube_od_mm": 66.699997,
+    "tube_wall_mm": 1.2,
+    "tube_id_mm": 64.3,
+    "material_id": "1"
+  },
+  {
+    "id": "35",
+    "description": "76,1 (mm)",
+    "tube_od_mm": 76.099998,
+    "tube_wall_mm": 1.5,
+    "tube_id_mm": 73.1,
+    "material_id": "1"
+  },
+  {
+    "id": "36",
+    "description": "76,1 (mm)",
+    "tube_od_mm": 76.099998,
+    "tube_wall_mm": 2.0,
+    "tube_id_mm": 72.1,
+    "material_id": "1"
+  },
+  {
+    "id": "37",
+    "description": "88,9 (mm)",
+    "tube_od_mm": 88.900002,
+    "tube_wall_mm": 2.0,
+    "tube_id_mm": 84.9,
+    "material_id": "1"
+  },
+  {
+    "id": "38",
+    "description": "108 (mm)",
+    "tube_od_mm": 108.0,
+    "tube_wall_mm": 1.5,
+    "tube_id_mm": 105.0,
+    "material_id": "1"
+  },
+  {
+    "id": "39",
+    "description": "108 (mm)",
+    "tube_od_mm": 108.0,
+    "tube_wall_mm": 2.5,
+    "tube_id_mm": 103.0,
+    "material_id": "1"
+  },
+  {
+    "id": "40",
+    "description": "133 (mm)",
+    "tube_od_mm": 133.0,
+    "tube_wall_mm": 1.2,
+    "tube_id_mm": 130.6,
+    "material_id": "1"
+  },
+  {
+    "id": "41",
+    "description": "133 (mm)",
+    "tube_od_mm": 133.0,
+    "tube_wall_mm": 3.0,
+    "tube_id_mm": 127.0,
+    "material_id": "1"
+  },
+  {
+    "id": "42",
+    "description": "159 (mm)",
+    "tube_od_mm": 159.0,
+    "tube_wall_mm": 2.0,
+    "tube_id_mm": 155.0,
+    "material_id": "1"
+  },
+  {
+    "id": "43",
+    "description": "159 (mm)",
+    "tube_od_mm": 159.0,
+    "tube_wall_mm": 3.0,
+    "tube_id_mm": 153.0,
+    "material_id": "1"
+  },
+  {
+    "id": "44",
+    "description": "219 (mm)",
+    "tube_od_mm": 219.0,
+    "tube_wall_mm": 3.0,
+    "tube_id_mm": 213.0,
+    "material_id": "1"
+  },
+  {
+    "id": "45",
+    "description": "267 (mm)",
+    "tube_od_mm": 267.0,
+    "tube_wall_mm": 3.0,
+    "tube_id_mm": 261.0,
+    "material_id": "1"
+  },
+  {
+    "id": "46",
+    "description": "1/8 (in)",
+    "tube_od_mm": 0.41,
+    "tube_wall_mm": 0.07,
+    "tube_id_mm": 0.27,
+    "material_id": "2"
+  },
+  {
+    "id": "47",
+    "description": "1/4 (in)",
+    "tube_od_mm": 0.54000002,
+    "tube_wall_mm": 0.090000004,
+    "tube_id_mm": 0.36,
+    "material_id": "2"
+  },
+  {
+    "id": "48",
+    "description": "3/8 (in)",
+    "tube_od_mm": 0.68000001,
+    "tube_wall_mm": 0.090000004,
+    "tube_id_mm": 0.5,
+    "material_id": "2"
+  },
+  {
+    "id": "49",
+    "description": "1/2 (in)",
+    "tube_od_mm": 0.83999997,
+    "tube_wall_mm": 0.11,
+    "tube_id_mm": 0.62,
+    "material_id": "2"
+  },
+  {
+    "id": "50",
+    "description": "3/4 (in)",
+    "tube_od_mm": 1.05,
+    "tube_wall_mm": 0.11,
+    "tube_id_mm": 0.83,
+    "material_id": "2"
+  },
+  {
+    "id": "51",
+    "description": "1 (in)",
+    "tube_od_mm": 1.3200001,
+    "tube_wall_mm": 0.13,
+    "tube_id_mm": 1.06,
+    "material_id": "2"
+  },
+  {
+    "id": "52",
+    "description": "1 1/4 (in)",
+    "tube_od_mm": 1.66,
+    "tube_wall_mm": 0.14,
+    "tube_id_mm": 1.38,
+    "material_id": "2"
+  },
+  {
+    "id": "53",
+    "description": "1 1/2 (in)",
+    "tube_od_mm": 1.9,
+    "tube_wall_mm": 0.15000001,
+    "tube_id_mm": 1.6,
+    "material_id": "2"
+  },
+  {
+    "id": "54",
+    "description": "2 (in)",
+    "tube_od_mm": 2.3800001,
+    "tube_wall_mm": 0.15000001,
+    "tube_id_mm": 2.08,
+    "material_id": "2"
+  },
+  {
+    "id": "55",
+    "description": "2 1/2 (in)",
+    "tube_od_mm": 2.8800001,
+    "tube_wall_mm": 0.2,
+    "tube_id_mm": 2.48,
+    "material_id": "2"
+  },
+  {
+    "id": "56",
+    "description": "3 (in)",
+    "tube_od_mm": 3.5,
+    "tube_wall_mm": 0.22,
+    "tube_id_mm": 3.06,
+    "material_id": "2"
+  },
+  {
+    "id": "57",
+    "description": "3 1/2 (in)",
+    "tube_od_mm": 4.0,
+    "tube_wall_mm": 0.23,
+    "tube_id_mm": 3.54,
+    "material_id": "2"
+  },
+  {
+    "id": "58",
+    "description": "4 (in)",
+    "tube_od_mm": 4.5,
+    "tube_wall_mm": 0.23999999,
+    "tube_id_mm": 4.02,
+    "material_id": "2"
+  },
+  {
+    "id": "59",
+    "description": "5 (in)",
+    "tube_od_mm": 5.5599999,
+    "tube_wall_mm": 0.25999999,
+    "tube_id_mm": 5.04,
+    "material_id": "2"
+  },
+  {
+    "id": "60",
+    "description": "6 (in)",
+    "tube_od_mm": 6.6300001,
+    "tube_wall_mm": 0.28,
+    "tube_id_mm": 6.07,
+    "material_id": "2"
+  },
+  {
+    "id": "61",
+    "description": "8 (in)",
+    "tube_od_mm": 8.6300001,
+    "tube_wall_mm": 0.31999999,
+    "tube_id_mm": 7.99,
+    "material_id": "2"
+  },
+  {
+    "id": "62",
+    "description": "10 (in)",
+    "tube_od_mm": 10.75,
+    "tube_wall_mm": 0.37,
+    "tube_id_mm": 10.01,
+    "material_id": "2"
+  },
+  {
+    "id": "63",
+    "description": "12 (in)",
+    "tube_od_mm": 12.75,
+    "tube_wall_mm": 0.41,
+    "tube_id_mm": 11.93,
+    "material_id": "2"
+  },
+  {
+    "id": "64",
+    "description": "14 (in)",
+    "tube_od_mm": 14.0,
+    "tube_wall_mm": 0.44,
+    "tube_id_mm": 13.12,
+    "material_id": "2"
+  },
+  {
+    "id": "65",
+    "description": "16 (in)",
+    "tube_od_mm": 16.0,
+    "tube_wall_mm": 0.5,
+    "tube_id_mm": 15.0,
+    "material_id": "2"
+  },
+  {
+    "id": "66",
+    "description": "18 (in)",
+    "tube_od_mm": 18.0,
+    "tube_wall_mm": 0.56,
+    "tube_id_mm": 16.88,
+    "material_id": "2"
+  },
+  {
+    "id": "67",
+    "description": "20 (in)",
+    "tube_od_mm": 20.0,
+    "tube_wall_mm": 0.58999997,
+    "tube_id_mm": 18.82,
+    "material_id": "2"
+  },
+  {
+    "id": "68",
+    "description": "24 (in)",
+    "tube_od_mm": 24.0,
+    "tube_wall_mm": 0.69,
+    "tube_id_mm": 22.62,
+    "material_id": "2"
+  },
+  {
+    "id": "69",
+    "description": "1/8 (in)",
+    "tube_od_mm": 0.41,
+    "tube_wall_mm": 0.1,
+    "tube_id_mm": 0.21,
+    "material_id": "2"
+  },
+  {
+    "id": "70",
+    "description": "1/4 (in)",
+    "tube_od_mm": 0.54000002,
+    "tube_wall_mm": 0.12,
+    "tube_id_mm": 0.3,
+    "material_id": "2"
+  },
+  {
+    "id": "71",
+    "description": "3/8 (in)",
+    "tube_od_mm": 0.68000001,
+    "tube_wall_mm": 0.13,
+    "tube_id_mm": 0.42,
+    "material_id": "2"
+  },
+  {
+    "id": "72",
+    "description": "1/2 (in)",
+    "tube_od_mm": 0.83999997,
+    "tube_wall_mm": 0.15000001,
+    "tube_id_mm": 0.54,
+    "material_id": "2"
+  },
+  {
+    "id": "73",
+    "description": "3/4 (in)",
+    "tube_od_mm": 1.05,
+    "tube_wall_mm": 0.15000001,
+    "tube_id_mm": 0.75,
+    "material_id": "2"
+  },
+  {
+    "id": "74",
+    "description": "1 (in)",
+    "tube_od_mm": 1.3200001,
+    "tube_wall_mm": 0.18000001,
+    "tube_id_mm": 0.96,
+    "material_id": "2"
+  },
+  {
+    "id": "75",
+    "description": "1 1/4 (in)",
+    "tube_od_mm": 1.66,
+    "tube_wall_mm": 0.19,
+    "tube_id_mm": 1.28,
+    "material_id": "2"
+  },
+  {
+    "id": "76",
+    "description": "1 1/2 (in)",
+    "tube_od_mm": 1.9,
+    "tube_wall_mm": 0.2,
+    "tube_id_mm": 1.5,
+    "material_id": "2"
+  },
+  {
+    "id": "77",
+    "description": "2 (in)",
+    "tube_od_mm": 2.3800001,
+    "tube_wall_mm": 0.22,
+    "tube_id_mm": 1.94,
+    "material_id": "2"
+  },
+  {
+    "id": "78",
+    "description": "2 1/2 (in)",
+    "tube_od_mm": 2.8800001,
+    "tube_wall_mm": 0.28,
+    "tube_id_mm": 2.32,
+    "material_id": "2"
+  },
+  {
+    "id": "79",
+    "description": "3 (in)",
+    "tube_od_mm": 3.5,
+    "tube_wall_mm": 0.30000001,
+    "tube_id_mm": 2.9,
+    "material_id": "2"
+  },
+  {
+    "id": "80",
+    "description": "3 1/2 (in)",
+    "tube_od_mm": 4.0,
+    "tube_wall_mm": 0.31999999,
+    "tube_id_mm": 3.36,
+    "material_id": "2"
+  },
+  {
+    "id": "81",
+    "description": "4 (in)",
+    "tube_od_mm": 4.5,
+    "tube_wall_mm": 0.34,
+    "tube_id_mm": 3.82,
+    "material_id": "2"
+  },
+  {
+    "id": "82",
+    "description": "5 (in)",
+    "tube_od_mm": 5.5599999,
+    "tube_wall_mm": 0.38,
+    "tube_id_mm": 4.8,
+    "material_id": "2"
+  },
+  {
+    "id": "83",
+    "description": "6 (in)",
+    "tube_od_mm": 6.6300001,
+    "tube_wall_mm": 0.43000001,
+    "tube_id_mm": 5.77,
+    "material_id": "2"
+  },
+  {
+    "id": "84",
+    "description": "8 (in)",
+    "tube_od_mm": 8.6300001,
+    "tube_wall_mm": 0.5,
+    "tube_id_mm": 7.63,
+    "material_id": "2"
+  },
+  {
+    "id": "85",
+    "description": "10 (in)",
+    "tube_od_mm": 10.75,
+    "tube_wall_mm": 0.58999997,
+    "tube_id_mm": 9.57,
+    "material_id": "2"
+  },
+  {
+    "id": "86",
+    "description": "12 (in)",
+    "tube_od_mm": 12.75,
+    "tube_wall_mm": 0.69,
+    "tube_id_mm": 11.37,
+    "material_id": "2"
+  },
+  {
+    "id": "87",
+    "description": "14 (in)",
+    "tube_od_mm": 14.0,
+    "tube_wall_mm": 0.75,
+    "tube_id_mm": 12.5,
+    "material_id": "2"
+  },
+  {
+    "id": "88",
+    "description": "16 (in)",
+    "tube_od_mm": 16.0,
+    "tube_wall_mm": 0.83999997,
+    "tube_id_mm": 14.32,
+    "material_id": "2"
+  },
+  {
+    "id": "89",
+    "description": "18 (in)",
+    "tube_od_mm": 18.0,
+    "tube_wall_mm": 0.94,
+    "tube_id_mm": 16.12,
+    "material_id": "2"
+  },
+  {
+    "id": "90",
+    "description": "20 (in)",
+    "tube_od_mm": 20.0,
+    "tube_wall_mm": 1.03,
+    "tube_id_mm": 17.94,
+    "material_id": "2"
+  },
+  {
+    "id": "91",
+    "description": "24 (in)",
+    "tube_od_mm": 24.0,
+    "tube_wall_mm": 1.22,
+    "tube_id_mm": 21.56,
+    "material_id": "2"
+  }
+]
