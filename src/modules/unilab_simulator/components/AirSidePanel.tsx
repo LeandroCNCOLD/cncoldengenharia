@@ -38,7 +38,7 @@ interface FanCatalogItem {
 
 const FANS_CATALOG_URL = "/data/catalogs/fans_clean.json";
 
-export function AirSidePanel() {
+export function AirSidePanel({ result }: AirSidePanelProps = {}) {
   const airFlow_m3h = useUnilabSimulationStore((s) => s.airFlow_m3h);
   const tempInDB_C = useUnilabSimulationStore((s) => s.tempInDB_C);
   const rhIn_pct = useUnilabSimulationStore((s) => s.rhIn_pct);
