@@ -16,6 +16,7 @@ import { formatCapacity, formatCOP, formatPercent } from "../utils/formatting";
 import type { CompressorSpec, CondenserSpec } from "@/modules/coldpro_v2";
 import { useCatalogSessionStore } from "@/modules/coldpro_catalog/store/useCatalogSessionStore";
 import { buildMotorComponentsFromCatalog } from "@/modules/coldpro_catalog/adapters/sessionToMotorInputAdapter";
+import { useCatalogRevisionStore } from "@/modules/coldpro_catalog/store/useCatalogRevisionStore";
 
 function isComplete(
   c: Partial<CompressorSpec>,
@@ -117,6 +118,8 @@ export function SimulationPage() {
   );
   const canCalculate = isComplete(compressor, condenser, conditions);
 
+  const addRevision = useCatalogRevisionStore((s) => s.addRevision);
+
   const handleCalculate = () => {
     if (!canCalculate) return;
     // Catálogo tem prioridade no input do evaporador SOMENTE se conseguiu gerar
@@ -134,6 +137,19 @@ export function SimulationPage() {
         required_airflow_m3_h: conditions.required_airflow_m3_h!,
       },
     });
+    // Gera revisão automática para cada equipamento do catálogo usado na simulação
+    const seen = new Set<string>();
+    for (const eq of [
+      selectedCompressor,
+      selectedCondenser,
+      selectedEvaporator,
+      selectedReheatCoil,
+    ]) {
+      if (eq && !seen.has(eq.id)) {
+        seen.add(eq.id);
+        addRevision(eq, "simulation", "Snapshot gerado durante simulação de equilíbrio");
+      }
+    }
   };
 
   return (

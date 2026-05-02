@@ -135,8 +135,23 @@ export interface CatalogEquipmentRow {
   quantidadeAguaLH?: number;
   diametroDreno?: string;
 
+  // --- Status de validação e controle de revisão ---
+  validationStatus?: "pending" | "analyzed" | "validated" | "rejected";
+  revisionStatus?: "draft" | "active" | "superseded";
+  revisionNumber?: number;
+  lastReviewedAt?: string;
+  lastReviewedBy?: string;
+  validationNotes?: string[];
+
   raw: Record<string, unknown>;
 }
+
+export type ValidationStatus = NonNullable<CatalogEquipmentRow["validationStatus"]>;
+export type RevisionStatus = NonNullable<CatalogEquipmentRow["revisionStatus"]>;
+
+export const DEFAULT_VALIDATION_STATUS: ValidationStatus = "pending";
+export const DEFAULT_REVISION_STATUS: RevisionStatus = "draft";
+export const DEFAULT_REVISION_NUMBER = 0;
 
 export interface CatalogFilter {
   search?: string;
