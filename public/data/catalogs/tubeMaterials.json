@@ -1,32 +1,58 @@
 [
   {
-    "id": "MAT_CU",
-    "name": "Cobre",
-    "conductivityWmK": 401.0
+    "id": "MAT_1",
+    "name": "Aluminium",
+    "conductivityWmK": 204.0,
+    "densityKgM3": 2700.0,
+    "roughnessMm": 0.0
   },
   {
-    "id": "MAT_AL",
-    "name": "Alumínio",
-    "conductivityWmK": 237.0
+    "id": "MAT_2",
+    "name": "Copper",
+    "conductivityWmK": 381.0,
+    "densityKgM3": 8900.0,
+    "roughnessMm": 1.5e-06
   },
   {
-    "id": "MAT_CUNI_9010",
-    "name": "Cuproníquel 90/10",
-    "conductivityWmK": 50.0
+    "id": "MAT_3",
+    "name": "Iron",
+    "conductivityWmK": 62.0,
+    "densityKgM3": 7870.0,
+    "roughnessMm": 0.0
   },
   {
-    "id": "MAT_SS_304",
-    "name": "Aço Inox 304",
-    "conductivityWmK": 16.2
+    "id": "MAT_4",
+    "name": "Stainless Steel",
+    "conductivityWmK": 15.0,
+    "densityKgM3": 7800.0,
+    "roughnessMm": 4.6e-06
   },
   {
-    "id": "MAT_SS_316",
-    "name": "Aço Inox 316",
-    "conductivityWmK": 13.4
+    "id": "MAT_6",
+    "name": "Galvanized Carbon Steel",
+    "conductivityWmK": 80.0,
+    "densityKgM3": 7800.0,
+    "roughnessMm": 0.0
   },
   {
-    "id": "MAT_CARBON",
-    "name": "Aço Carbono",
-    "conductivityWmK": 54.0
+    "id": "MAT_7",
+    "name": "Coated",
+    "conductivityWmK": 173.0,
+    "densityKgM3": 2700.0,
+    "roughnessMm": 0.0
+  },
+  {
+    "id": "MAT_8",
+    "name": "Epoxy Coated Aluminium",
+    "conductivityWmK": 204.0,
+    "densityKgM3": 2700.0,
+    "roughnessMm": 0.0
+  },
+  {
+    "id": "MAT_9",
+    "name": "Epoxy Coated Copper",
+    "conductivityWmK": 381.0,
+    "densityKgM3": 8900.0,
+    "roughnessMm": 1.5e-06
   }
 ]

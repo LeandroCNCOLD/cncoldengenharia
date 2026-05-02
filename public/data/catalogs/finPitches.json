@@ -1,57 +1,162 @@
 [
   {
-    "id": "FP_4FPI",
-    "pitchMm": 6.35,
-    "label": "4 FPI (6.35 mm)"
+    "id": "FP_1",
+    "pitchMm": 11.0,
+    "label": "11.0 mm (2.3 FPI)"
   },
   {
-    "id": "FP_5FPI",
-    "pitchMm": 5.08,
-    "label": "5 FPI (5.08 mm)"
+    "id": "FP_2",
+    "pitchMm": 12.0,
+    "label": "12.0 mm (2.1 FPI)"
   },
   {
-    "id": "FP_6FPI",
-    "pitchMm": 4.23,
-    "label": "6 FPI (4.23 mm)"
+    "id": "FP_3",
+    "pitchMm": 12.5,
+    "label": "12.5 mm (2.0 FPI)"
   },
   {
-    "id": "FP_7FPI",
-    "pitchMm": 3.63,
-    "label": "7 FPI (3.63 mm)"
+    "id": "FP_4",
+    "pitchMm": 16.0,
+    "label": "16.0 mm (1.6 FPI)"
   },
   {
-    "id": "FP_8FPI",
-    "pitchMm": 3.18,
-    "label": "8 FPI (3.18 mm)"
+    "id": "FP_5",
+    "pitchMm": 17.0,
+    "label": "17.0 mm (1.5 FPI)"
   },
   {
-    "id": "FP_9FPI",
-    "pitchMm": 2.82,
-    "label": "9 FPI (2.82 mm)"
+    "id": "FP_6",
+    "pitchMm": 19.0,
+    "label": "19.0 mm (1.3 FPI)"
   },
   {
-    "id": "FP_10FPI",
-    "pitchMm": 2.54,
-    "label": "10 FPI (2.54 mm)"
+    "id": "FP_7",
+    "pitchMm": 21.65,
+    "label": "21.65 mm (1.2 FPI)"
   },
   {
-    "id": "FP_11FPI",
-    "pitchMm": 2.31,
-    "label": "11 FPI (2.31 mm)"
+    "id": "FP_8",
+    "pitchMm": 22.0,
+    "label": "22.0 mm (1.2 FPI)"
   },
   {
-    "id": "FP_12FPI",
-    "pitchMm": 2.12,
-    "label": "12 FPI (2.12 mm)"
+    "id": "FP_9",
+    "pitchMm": 25.0,
+    "label": "25.0 mm (1.0 FPI)"
   },
   {
-    "id": "FP_13FPI",
-    "pitchMm": 1.95,
-    "label": "13 FPI (1.95 mm)"
+    "id": "FP_10",
+    "pitchMm": 25.98,
+    "label": "25.98 mm (1.0 FPI)"
   },
   {
-    "id": "FP_14FPI",
-    "pitchMm": 1.81,
-    "label": "14 FPI (1.81 mm)"
+    "id": "FP_11",
+    "pitchMm": 26.0,
+    "label": "26.0 mm (1.0 FPI)"
+  },
+  {
+    "id": "FP_12",
+    "pitchMm": 27.0,
+    "label": "27.0 mm (0.9 FPI)"
+  },
+  {
+    "id": "FP_13",
+    "pitchMm": 27.43,
+    "label": "27.43 mm (0.9 FPI)"
+  },
+  {
+    "id": "FP_14",
+    "pitchMm": 27.5,
+    "label": "27.5 mm (0.9 FPI)"
+  },
+  {
+    "id": "FP_15",
+    "pitchMm": 28.0,
+    "label": "28.0 mm (0.9 FPI)"
+  },
+  {
+    "id": "FP_16",
+    "pitchMm": 30.0,
+    "label": "30.0 mm (0.8 FPI)"
+  },
+  {
+    "id": "FP_17",
+    "pitchMm": 32.0,
+    "label": "32.0 mm (0.8 FPI)"
+  },
+  {
+    "id": "FP_18",
+    "pitchMm": 32.48,
+    "label": "32.48 mm (0.8 FPI)"
+  },
+  {
+    "id": "FP_19",
+    "pitchMm": 33.0,
+    "label": "33.0 mm (0.8 FPI)"
+  },
+  {
+    "id": "FP_20",
+    "pitchMm": 34.0,
+    "label": "34.0 mm (0.7 FPI)"
+  },
+  {
+    "id": "FP_21",
+    "pitchMm": 34.64,
+    "label": "34.64 mm (0.7 FPI)"
+  },
+  {
+    "id": "FP_22",
+    "pitchMm": 35.0,
+    "label": "35.0 mm (0.7 FPI)"
+  },
+  {
+    "id": "FP_23",
+    "pitchMm": 36.4,
+    "label": "36.4 mm (0.7 FPI)"
+  },
+  {
+    "id": "FP_24",
+    "pitchMm": 38.0,
+    "label": "38.0 mm (0.7 FPI)"
+  },
+  {
+    "id": "FP_25",
+    "pitchMm": 40.0,
+    "label": "40.0 mm (0.6 FPI)"
+  },
+  {
+    "id": "FP_26",
+    "pitchMm": 43.3,
+    "label": "43.3 mm (0.6 FPI)"
+  },
+  {
+    "id": "FP_27",
+    "pitchMm": 48.9,
+    "label": "48.9 mm (0.5 FPI)"
+  },
+  {
+    "id": "FP_28",
+    "pitchMm": 50.0,
+    "label": "50.0 mm (0.5 FPI)"
+  },
+  {
+    "id": "FP_29",
+    "pitchMm": 58.0,
+    "label": "58.0 mm (0.4 FPI)"
+  },
+  {
+    "id": "FP_30",
+    "pitchMm": 60.0,
+    "label": "60.0 mm (0.4 FPI)"
+  },
+  {
+    "id": "FP_31",
+    "pitchMm": 65.0,
+    "label": "65.0 mm (0.4 FPI)"
+  },
+  {
+    "id": "FP_32",
+    "pitchMm": 66.0,
+    "label": "66.0 mm (0.4 FPI)"
   }
 ]
