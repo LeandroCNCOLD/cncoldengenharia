@@ -43,6 +43,10 @@ interface UnilabSimulationStore {
   engineVersion: "v1" | "v2";
   setEngineVersion: (v: "v1" | "v2") => void;
 
+  // Capacidade alvo (modo Desenho) — em Watts (canonical)
+  targetCapacityW: number;
+  setTargetCapacityW: (val: number) => void;
+
   // Lado Ar / Ventilação (Etapa 3)
   airFlow_m3h: number;
   tempInDB_C: number;
@@ -98,6 +102,9 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
 
   engineVersion: "v1",
   setEngineVersion: (v) => set({ engineVersion: v }),
+
+  targetCapacityW: 0,
+  setTargetCapacityW: (val) => set({ targetCapacityW: val }),
 
   airFlow_m3h: 0,
   tempInDB_C: 25,
@@ -163,6 +170,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       warnings: [],
       isSimulating: false,
       calcMode: "verify",
+      targetCapacityW: 0,
       airFlow_m3h: 0,
       tempInDB_C: 25,
       rhIn_pct: 60,
