@@ -160,17 +160,30 @@ export function CompressorPickerModal({ open, onClose }: Props) {
 
         <div className="space-y-3">
           {/* Busca + filtros */}
-          <div className="grid grid-cols-4 gap-2">
-            <div className="relative col-span-2">
+          <div className="grid grid-cols-6 gap-2">
+            <div className="relative col-span-3">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 autoFocus
-                placeholder="Buscar por modelo, série, tipo…"
+                placeholder="Buscar por modelo, marca, série…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="pl-8"
               />
             </div>
+            <select
+              value={brandFilter}
+              onChange={(e) => {
+                setBrandFilter(e.target.value);
+                setSeriesFilter("");
+              }}
+              className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
+            >
+              <option value="">Todas as marcas</option>
+              {brands.map((b) => (
+                <option key={b} value={b}>{b}</option>
+              ))}
+            </select>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
