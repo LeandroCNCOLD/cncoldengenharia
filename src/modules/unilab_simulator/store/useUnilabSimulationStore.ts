@@ -353,6 +353,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       result: undefined,
       warnings: [],
       isSimulating: false,
+      errorFactorPercent: 0,
       calcMode: "verify",
       targetCapacityW: 0,
       airFlow_m3h: 5000,
