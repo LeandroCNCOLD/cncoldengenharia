@@ -88,9 +88,10 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
   const [fans, setFans] = useState<FanCatalogItem[]>([]);
 
   // Unidades selecionadas por linha (estado local — não afeta o motor)
-  const [uCapTotal, setUCapTotal] = useState<CapacityUnit>("W");
-  const [uCapSens, setUCapSens] = useState<CapacityUnit>("W");
-  const [uCapLat, setUCapLat] = useState<CapacityUnit>("W");
+  // Unidades selecionadas por linha (estado local — não afeta o motor)
+  const [uCapTotal, setUCapTotal] = useState<CapacityUnit>("kcal_h");
+  const [uCapSens, setUCapSens] = useState<CapacityUnit>("kcal_h");
+  const [uCapLat, setUCapLat] = useState<CapacityUnit>("kcal_h");
   const [uAirFlow, setUAirFlow] = useState<AirFlowUnit>("m3_h");
   const [uVel, setUVel] = useState<VelocityUnit>("m_s");
   const [uTempIn, setUTempIn] = useState<TempUnit>("C");
