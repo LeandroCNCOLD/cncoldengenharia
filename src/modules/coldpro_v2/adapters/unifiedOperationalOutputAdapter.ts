@@ -1,5 +1,7 @@
 import type { UnifiedOperationalOutput } from "../domain/types";
 
+type UnknownRecord = Record<string, unknown>;
+
 function safeNumber(value: unknown, field: string, warnings: string[]): number {
   if (value === undefined || value === null) {
     warnings.push(`normalizeOperationalOutput: field "${field}" is missing, defaulting to 0.`);
@@ -13,21 +15,46 @@ function safeNumber(value: unknown, field: string, warnings: string[]): number {
   return n;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isStandardMode(input: any): boolean {
-  return input && typeof input.coupled_result === "object" && input.coupled_result !== null;
+function asRecord(value: unknown): UnknownRecord | null {
+  return value && typeof value === "object" ? (value as UnknownRecord) : null;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isProgressiveMode(input: any): boolean {
-  return input && Array.isArray(input.rolls);
+function getStringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalizeStandard(input: any): UnifiedOperationalOutput {
+function getOutputStatus(value: unknown): UnifiedOperationalOutput["status"] {
+  return value === "ok" || value === "warning" || value === "error" ? value : "error";
+}
+
+function getCycleStatus(value: unknown): UnifiedOperationalOutput["cycle_status"] {
+  return value === "normal" ||
+    value === "defrost_recommended" ||
+    value === "defrost_required" ||
+    value === "error"
+    ? value
+    : "error";
+}
+
+function isStandardMode(input: unknown): input is UnknownRecord {
+  const record = asRecord(input);
+  return !!record && asRecord(record.coupled_result) !== null;
+}
+
+function isProgressiveMode(input: unknown): input is UnknownRecord {
+  const record = asRecord(input);
+  return !!record && Array.isArray(record.rolls);
+}
+
+function normalizeStandard(input: UnknownRecord): UnifiedOperationalOutput {
   const w: string[] = [];
+  const coupledResult = asRecord(input.coupled_result);
+  const frostResult = asRecord(input.frost_result);
+  const defrostResult = asRecord(input.defrost_result);
 
-  const initial = safeNumber(input.coupled_result?.capacity_w, "coupled_result.capacity_w", w);
+  const initial = safeNumber(coupledResult?.capacity_w, "coupled_result.capacity_w", w);
   const effective = safeNumber(input.effective_capacity_w, "effective_capacity_w", w);
   const lossP = safeNumber(input.capacity_loss_pct, "capacity_loss_pct", w);
   const avail = safeNumber(input.operational_availability_pct, "operational_availability_pct", w);
@@ -40,7 +67,10 @@ function normalizeStandard(input: any): UnifiedOperationalOutput {
   if (effective <= 0) adapterWarnings.push("Capacidade efetiva zero ou negativa.");
   if (avail < 90) adapterWarnings.push("Disponibilidade operacional abaixo de 90%.");
 
-  const warnings = Array.from(new Set([...(input.warnings ?? []), ...w, ...adapterWarnings]));
+  const warnings = Array.from(
+    new Set([...getStringArray(input.warnings), ...w, ...adapterWarnings]),
+  );
+  const cycleStatus = getCycleStatus(input.cycle_status);
 
   return {
     mode: "standard",
@@ -51,28 +81,28 @@ function normalizeStandard(input: any): UnifiedOperationalOutput {
     useful_operation_time_h: useful,
     operation_time_h: opTime,
     frost: {
-      frost_detected: (input.frost_result?.frost_mass_kg ?? 0) > 0,
-      recommended_defrost: input.recommended_defrost ?? false,
+      frost_detected:
+        safeNumber(frostResult?.frost_mass_kg ?? 0, "frost_result.frost_mass_kg", w) > 0,
+      recommended_defrost: input.recommended_defrost === true,
       capacity_loss_pct: lossP,
     },
     defrost: {
-      defrost_required: input.cycle_status === "defrost_required",
+      defrost_required: cycleStatus === "defrost_required",
       defrost_time_min: defrostMin,
-      defrost_feasible: input.defrost_result?.defrost_time_feasible ?? true,
+      defrost_feasible: defrostResult?.defrost_time_feasible !== false,
     },
     estimated_time_to_defrost_h: null,
     progressive: undefined,
-    cycle_status: input.cycle_status ?? "error",
+    cycle_status: cycleStatus,
     warnings,
-    status: input.status ?? "error",
+    status: getOutputStatus(input.status),
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalizeProgressive(input: any): UnifiedOperationalOutput {
+function normalizeProgressive(input: UnknownRecord): UnifiedOperationalOutput {
   const w: string[] = [];
 
-  const rolls = Array.isArray(input.rolls) ? input.rolls : [];
+  const rolls = Array.isArray(input.rolls) ? input.rolls.map((roll) => asRecord(roll) ?? {}) : [];
   const initial = safeNumber(input.total_capacity_w, "total_capacity_w", w);
   const lossP = 0;
   const effective = initial;
@@ -83,8 +113,7 @@ function normalizeProgressive(input: any): UnifiedOperationalOutput {
   const totalDP = safeNumber(input.total_air_pressure_drop_pa, "total_air_pressure_drop_pa", w);
   const energyErr = safeNumber(input.energy_balance_error_pct, "energy_balance_error_pct", w);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rollFrost = rolls.map((r: any) =>
+  const rollFrost = rolls.map((r) =>
     safeNumber(r.frost_thickness_mm, "roll.frost_thickness_mm", w),
   );
   const maxFrostIdx = rollFrost.reduce(
@@ -110,9 +139,11 @@ function normalizeProgressive(input: any): UnifiedOperationalOutput {
     adapterWarnings.push("Erro de balanço energético acima de 5%. Verificar condições de entrada.");
   if (effective <= 0) adapterWarnings.push("Capacidade efetiva zero ou negativa.");
 
-  const warnings = Array.from(new Set([...(input.warnings ?? []), ...w, ...adapterWarnings]));
+  const warnings = Array.from(
+    new Set([...getStringArray(input.warnings), ...w, ...adapterWarnings]),
+  );
 
-  const inputStatus = input.status ?? "error";
+  const inputStatus = getOutputStatus(input.status);
   const status = warnings.length > 0 && inputStatus === "ok" ? "warning" : inputStatus;
 
   return {
@@ -142,8 +173,7 @@ function normalizeProgressive(input: any): UnifiedOperationalOutput {
       energy_balance_error_pct: energyErr,
       critical_roll_index: maxFrostIdx,
       critical_frost_thickness_mm: maxFrostMm,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      roll_capacity_w: rolls.map((r: any) => safeNumber(r.capacity_w, "roll.capacity_w", w)),
+      roll_capacity_w: rolls.map((r) => safeNumber(r.capacity_w, "roll.capacity_w", w)),
       roll_frost_thickness_mm: rollFrost,
     },
     cycle_status: inputStatus === "error" ? "error" : "normal",
@@ -152,8 +182,7 @@ function normalizeProgressive(input: any): UnifiedOperationalOutput {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function normalizeOperationalOutput(input: any): UnifiedOperationalOutput {
+export function normalizeOperationalOutput(input: unknown): UnifiedOperationalOutput {
   if (isStandardMode(input)) {
     return normalizeStandard(input);
   }
