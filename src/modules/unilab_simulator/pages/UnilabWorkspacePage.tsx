@@ -15,7 +15,10 @@ import {
 } from "../components/WorkspaceSidebar";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { useUnilabSimulation } from "../hooks/useUnilabSimulation";
+import { useUnilabSimulationV2 } from "../hooks/useUnilabSimulationV2";
 import { useUnilabInputBridge } from "../hooks/useUnilabInputBridge";
+import { loadUnilabHeatTransferCatalog } from "../services/unilabHeatTransferCatalog";
+import type { UnilabHeatTransferCatalog } from "../engine_v2/heatTransfer";
 import {
   validatePhysicalInputs,
   validateThermoInputs,
