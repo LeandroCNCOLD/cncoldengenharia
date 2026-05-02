@@ -1,7 +1,7 @@
-import { createFileRoute, Outlet, Navigate, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppShell } from "@/modules/coldpro/components/layout/AppShell";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/_app")({
@@ -10,7 +10,6 @@ export const Route = createFileRoute("/_app")({
 
 function AppLayout() {
   const { user, loading } = useAuth();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   if (loading) {
     return (
@@ -24,21 +23,6 @@ function AppLayout() {
     return <Navigate to="/auth" />;
   }
 
-  // ColdPro module renders its own full-screen shell (sidebar + topbar).
-  // Skip the global app chrome to avoid duplicated sidebars.
-  const isColdPro = pathname === "/coldpro" || pathname.startsWith("/coldpro/");
-  if (isColdPro) {
-    return <Outlet />;
-  }
-
-  return (
-    <div className="flex min-h-screen w-full bg-background">
-      <AppSidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="mx-auto max-w-7xl p-6 lg:p-8">
-          <Outlet />
-        </div>
-      </main>
-    </div>
-  );
+  // Single unified shell (ColdPro sidebar + topbar) for all authenticated routes.
+  return <AppShell />;
 }

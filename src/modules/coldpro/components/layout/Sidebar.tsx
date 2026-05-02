@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Activity,
@@ -8,8 +8,11 @@ import {
   Database,
   Download,
   ShieldCheck,
-  Snowflake,
+  LogOut,
 } from "lucide-react";
+import { CnLogo } from "@/components/cn-logo";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
 import { UserModeSwitcher } from "../mode/UserModeSwitcher";
 
 type NavItem = {
@@ -31,13 +34,14 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export function Sidebar() {
+  const { user, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <aside className="flex h-full w-64 shrink-0 flex-col bg-[#0F2744] text-slate-100">
-      <div className="flex items-center gap-2 border-b border-white/10 px-5 py-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#1E6FD9]">
-          <Snowflake className="h-5 w-5 text-white" />
-        </div>
-        <div>
+      <div className="flex items-center gap-3 border-b border-white/10 px-5 py-4">
+        <CnLogo variant="dark" />
+        <div className="min-w-0">
           <p className="text-sm font-semibold leading-tight">ColdPro V2</p>
           <p className="text-[10px] uppercase tracking-wider text-slate-400">CN COLD</p>
         </div>
@@ -73,8 +77,32 @@ export function Sidebar() {
       <div className="space-y-2 border-t border-white/10 px-4 py-3">
         <p className="text-[10px] uppercase tracking-wider text-slate-400">Modo do usuário</p>
         <UserModeSwitcher />
+
+        <div className="pt-2">
+          <p className="truncate text-xs font-medium text-slate-100">
+            {user?.user_metadata?.full_name || user?.email}
+          </p>
+          <p className="truncate text-[10px] text-slate-400">
+            {isAdmin ? "Administrador" : "Engenheiro"}
+          </p>
+        </div>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start gap-2 text-slate-300 hover:bg-white/10 hover:text-white"
+          onClick={async () => {
+            await signOut();
+            navigate({ to: "/auth" });
+          }}
+        >
+          <LogOut className="h-4 w-4" />
+          Sair
+        </Button>
+
         <p className="pt-1 text-[10px] text-slate-500">Motor V2 — CN COLD</p>
       </div>
     </aside>
   );
 }
+
