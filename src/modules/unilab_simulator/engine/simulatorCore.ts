@@ -44,6 +44,7 @@ import {
   calculateNTU,
 } from "./heatTransfer";
 import { calculateOverallU } from "./overallU";
+import { calculateWangChiChang } from "./wangChiChang";
 import { applyAirVelocityCorrection } from "./unilabCorrections";
 import {
   calculateAirPressureDrop,
@@ -153,19 +154,52 @@ export function runSimulation(params: RunSimulationParams): UnilabSimulationResu
   const isCooling = thermo.evaporatingTempC !== undefined;
   const regime: "DRY" | "WET" = isCooling && surfaceTempC < dewPoint ? "WET" : "DRY";
 
-  // 6. U base + velocidade + parede
-  const overall = calculateOverallU({
-    airVelocityMs: faceVelocityMs,
-    tubeOuterDiameterMm: physical.tubeOuterDiameterMm,
-    tubeInnerDiameterMm: physical.tubeInnerDiameterMm,
-    tubeMaterialConductivity: params.tubeMaterialConductivity,
+  // 6. U dinâmico via Wang-Chi-Chang (2000) — padrão de indústria para
+  //    aletas planas. Resposta dinâmica ao passo de aleta, nº filas e vazão.
+  const wcc = calculateWangChiChang({
+    tubeOdMm: physical.tubeOuterDiameterMm,
+    finThicknessMm: physical.finThicknessMm,
     finPitchMm: physical.finPitchMm,
-    uBaseWm2K: params.uBaseWm2K,
+    rowPitchMm: physical.tubePitchLongitudinalMm,
+    tubePitchMm: physical.tubePitchTransverseMm,
+    numberOfRows: physical.rows,
+    airFaceVelocityMs: faceVelocityMs,
   });
-  warnings.push(...overall.warnings);
-  if (overall.uWm2K <= 0) {
-    throw new SimulationError("Coeficiente U não pôde ser calculado.", overall.warnings);
+  warnings.push(...wcc.warnings);
+
+  let uGlobalWm2K = wcc.uGlobalWm2K;
+
+  // Fallback / consistência: se Wang-Chi-Chang falhou, recai no método antigo
+  // (uBase + correção por velocidade + parede do tubo).
+  if (!Number.isFinite(uGlobalWm2K) || uGlobalWm2K <= 0) {
+    const overall = calculateOverallU({
+      airVelocityMs: faceVelocityMs,
+      tubeOuterDiameterMm: physical.tubeOuterDiameterMm,
+      tubeInnerDiameterMm: physical.tubeInnerDiameterMm,
+      tubeMaterialConductivity: params.tubeMaterialConductivity,
+      finPitchMm: physical.finPitchMm,
+      uBaseWm2K: params.uBaseWm2K,
+    });
+    warnings.push(...overall.warnings);
+    uGlobalWm2K = overall.uWm2K;
+  } else {
+    // Subtrai resistência da parede do tubo escolhido pelo usuário.
+    const dExtM = physical.tubeOuterDiameterMm / 1000;
+    const dIntM = physical.tubeInnerDiameterMm / 1000;
+    if (
+      params.tubeMaterialConductivity > 0 &&
+      dExtM > dIntM &&
+      dIntM > 0
+    ) {
+      const rWall = (dExtM - dIntM) / (2 * params.tubeMaterialConductivity);
+      uGlobalWm2K = 1 / (1 / uGlobalWm2K + rWall);
+    }
   }
+
+  if (uGlobalWm2K <= 0) {
+    throw new SimulationError("Coeficiente U não pôde ser calculado.", warnings);
+  }
+  const overall = { uWm2K: uGlobalWm2K };
 
   // 7. Área efetiva de troca
   const areaEffM2 = estimateEffectiveAreaM2(physical, faceAreaM2);
