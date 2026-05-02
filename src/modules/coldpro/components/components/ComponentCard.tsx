@@ -3,7 +3,7 @@ import { Trash2, Edit2, Clock } from "lucide-react";
 interface ComponentCardProps {
   name: string;
   type: string;
-  spec: Record<string, unknown>;
+  spec: object;
   createdAt: string;
   onDelete: () => void;
   onEdit?: () => void;
@@ -17,7 +17,7 @@ export function ComponentCard({
   onDelete,
   onEdit,
 }: ComponentCardProps) {
-  const previewFields = Object.entries(spec)
+  const previewFields = Object.entries(spec as Record<string, unknown>)
     .filter(([, v]) => typeof v === "number" || typeof v === "string")
     .slice(0, 4);
 
