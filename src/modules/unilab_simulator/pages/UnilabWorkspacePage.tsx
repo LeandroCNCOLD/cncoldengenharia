@@ -234,6 +234,11 @@ export function UnilabWorkspacePage() {
       <div className="mt-2">
         <GeometryBottomBar />
       </div>
+
+      <CoilSchematicModal
+        open={schematicOpen}
+        onClose={() => setSchematicOpen(false)}
+      />
     </PageContainer>
   );
 }
