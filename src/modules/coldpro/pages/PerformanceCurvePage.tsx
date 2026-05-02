@@ -274,6 +274,17 @@ export function PerformanceCurvePage() {
               ou preencher manualmente.
             </div>
           )}
+          {!canCalculate && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+              <div className="mb-1 font-semibold">Para gerar a curva, ainda falta preencher:</div>
+              <ul className="list-disc space-y-0.5 pl-5">
+                {missingFields.slice(0, 6).map((f, i) => (
+                  <li key={i}>{f}</li>
+                ))}
+                {missingFields.length > 6 && <li>+{missingFields.length - 6} campo(s)…</li>}
+              </ul>
+            </div>
+          )}
           <CompressorForm value={compressor} onChange={setCompressor} />
           <CondenserForm value={condenser} onChange={setCondenser} />
           <EvaporatorForm value={evaporator} onChange={setEvaporator} />
