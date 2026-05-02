@@ -202,16 +202,17 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   setSelectedGeometry: (geometry) =>
     set((s) => {
       // Etapa 3.5 — auto-fill ao selecionar geometria do catálogo.
-      // O CoilGeometryItem (enriquecido) traz espessuras em pt-BR; o catálogo
-      // base não. Em ambos os casos preservamos valores anteriores do usuário.
+      // Quando uma geometria NOVA é escolhida (id diferente da anterior),
+      // sobrescrevemos os parâmetros derivados da geometria (tubos, passos,
+      // espessuras, default de filas/circuitos/comprimento) para refletir
+      // exatamente o item escolhido. Quando o usuário reabre o modal e
+      // confirma a MESMA geometria, preservamos seus ajustes manuais.
       const enriched = geometry as
         | (CoilGeometryCatalogItem & {
             espessura_tubo_mm?: number | null;
             espessura_aleta_mm?: number | null;
           })
         | undefined;
-      // Lê fin_pitch_mm do raw (se existir); caso contrário deixa o usuário
-      // preencher manualmente (default sugerido = 2.5 mm — comum em câmaras).
       const rawFinPitch =
         geometry?.raw && typeof geometry.raw === "object"
           ? (geometry.raw as Record<string, unknown>)["fin_pitch_mm"]
@@ -220,6 +221,21 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
         typeof rawFinPitch === "number" && Number.isFinite(rawFinPitch)
           ? rawFinPitch
           : undefined;
+
+      const previousId = s.physicalInputs.geometryId;
+      const isNewGeometry = !!geometry && geometry.id !== previousId;
+      const pick = <T,>(fresh: T | undefined, current: T | undefined): T | undefined =>
+        isNewGeometry ? (fresh ?? current) : (current ?? fresh);
+
+      const finnedHeightMm = pick(600, s.physicalInputs.finnedHeightMm);
+      const tubesPerRowFromHeight =
+        geometry && geometry.tubePitchTransverseMm > 0 && finnedHeightMm
+          ? Math.max(
+              1,
+              Math.round(finnedHeightMm / geometry.tubePitchTransverseMm),
+            )
+          : undefined;
+
       const physicalInputs = geometry
         ? {
             ...s.physicalInputs,
@@ -227,30 +243,29 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
             tubePitchTransverseMm: geometry.tubePitchTransverseMm,
             tubePitchLongitudinalMm: geometry.tubePitchLongitudinalMm,
             tubeOuterDiameterMm: geometry.tubeOuterDiameterMm,
-            tubeInnerDiameterMm:
-              geometry.tubeInnerDiameterMm ?? s.physicalInputs.tubeInnerDiameterMm,
-            finThicknessMm:
-              enriched?.espessura_aleta_mm ?? s.physicalInputs.finThicknessMm,
-            // Defaults preenchidos ao escolher geometria — só sobrescrevem
-            // valores ausentes para não destruir entrada do usuário.
-            finPitchMm:
-              s.physicalInputs.finPitchMm ?? finPitchFromCatalog ?? 2.5,
-            finnedLengthMm: s.physicalInputs.finnedLengthMm ?? 1000,
-            finnedHeightMm: s.physicalInputs.finnedHeightMm ?? 600,
-            rows: s.physicalInputs.rows ?? geometry.defaultRows ?? 4,
-            circuits:
-              s.physicalInputs.circuits ?? geometry.defaultCircuits ?? 12,
-            tubesPerRow:
-              s.physicalInputs.tubesPerRow ??
-              (geometry.tubePitchTransverseMm > 0
-                ? Math.max(
-                    1,
-                    Math.round(
-                      (s.physicalInputs.finnedHeightMm ?? 600) /
-                        geometry.tubePitchTransverseMm,
-                    ),
-                  )
-                : undefined),
+            tubeInnerDiameterMm: pick(
+              geometry.tubeInnerDiameterMm ?? undefined,
+              s.physicalInputs.tubeInnerDiameterMm,
+            ),
+            finThicknessMm: pick(
+              enriched?.espessura_aleta_mm ?? undefined,
+              s.physicalInputs.finThicknessMm,
+            ),
+            finPitchMm: pick(
+              finPitchFromCatalog ?? 2.5,
+              s.physicalInputs.finPitchMm,
+            ),
+            finnedLengthMm: pick(1000, s.physicalInputs.finnedLengthMm),
+            finnedHeightMm,
+            rows: pick(geometry.defaultRows ?? 4, s.physicalInputs.rows),
+            circuits: pick(
+              geometry.defaultCircuits ?? 12,
+              s.physicalInputs.circuits,
+            ),
+            tubesPerRow: pick(
+              tubesPerRowFromHeight,
+              s.physicalInputs.tubesPerRow,
+            ),
           }
         : s.physicalInputs;
       return {
