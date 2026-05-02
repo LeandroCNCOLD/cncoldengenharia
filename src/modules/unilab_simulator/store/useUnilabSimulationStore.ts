@@ -96,6 +96,9 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   calcMode: "verify",
   setCalcMode: (mode) => set({ calcMode: mode }),
 
+  engineVersion: "v1",
+  setEngineVersion: (v) => set({ engineVersion: v }),
+
   airFlow_m3h: 0,
   tempInDB_C: 25,
   rhIn_pct: 60,
