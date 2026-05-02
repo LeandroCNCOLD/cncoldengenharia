@@ -288,14 +288,24 @@ export function WorkspaceSidebar({
           <Calculator className="h-3 w-3" />
           {isSimulating ? "Calculando…" : "Calcular"}
         </button>
-        <div className="grid grid-cols-2 gap-1">
+        <div className="grid grid-cols-3 gap-1">
           <button
             type="button"
-            disabled
-            className="inline-flex items-center justify-center gap-1 rounded border border-slate-300 bg-white px-1 py-1 text-[10px] text-slate-500 shadow-sm disabled:cursor-not-allowed"
+            onClick={handlePrint}
+            disabled={!result}
+            title={result ? "Gerar relatório PDF" : "Calcule primeiro"}
+            className="inline-flex items-center justify-center gap-1 rounded border border-slate-300 bg-white px-1 py-1 text-[10px] text-slate-700 shadow-sm hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-400"
           >
             <Printer className="h-3 w-3" />
             Imprimir
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            className="inline-flex items-center justify-center gap-1 rounded border border-emerald-300 bg-emerald-50 px-1 py-1 text-[10px] text-emerald-800 shadow-sm hover:bg-emerald-100"
+          >
+            <Save className="h-3 w-3" />
+            Salvar
           </button>
           <button
             type="button"
