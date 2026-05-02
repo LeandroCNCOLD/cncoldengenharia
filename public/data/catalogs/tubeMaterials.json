@@ -1,0 +1,32 @@
+[
+  {
+    "id": "MAT_CU",
+    "name": "Cobre",
+    "conductivityWmK": 401.0
+  },
+  {
+    "id": "MAT_AL",
+    "name": "Alumínio",
+    "conductivityWmK": 237.0
+  },
+  {
+    "id": "MAT_CUNI_9010",
+    "name": "Cuproníquel 90/10",
+    "conductivityWmK": 50.0
+  },
+  {
+    "id": "MAT_SS_304",
+    "name": "Aço Inox 304",
+    "conductivityWmK": 16.2
+  },
+  {
+    "id": "MAT_SS_316",
+    "name": "Aço Inox 316",
+    "conductivityWmK": 13.4
+  },
+  {
+    "id": "MAT_CARBON",
+    "name": "Aço Carbono",
+    "conductivityWmK": 54.0
+  }
+]

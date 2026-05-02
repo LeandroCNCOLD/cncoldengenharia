@@ -1,0 +1,513 @@
+[
+  {
+    "id": "REFMIX_ISO-PENTHANE",
+    "name": "ISO-PENTHANE",
+    "refMixId": 1,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_PENTHANE",
+    "name": "PENTHANE",
+    "refMixId": 2,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R11",
+    "name": "R11",
+    "refMixId": 3,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R113",
+    "name": "R113",
+    "refMixId": 4,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R114",
+    "name": "R114",
+    "refMixId": 5,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R115",
+    "name": "R115",
+    "refMixId": 6,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R116",
+    "name": "R116",
+    "refMixId": 7,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R12",
+    "name": "R12",
+    "refMixId": 8,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R123",
+    "name": "R123",
+    "refMixId": 9,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R123a",
+    "name": "R123a",
+    "refMixId": 10,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R124",
+    "name": "R124",
+    "refMixId": 11,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R125",
+    "name": "R125",
+    "refMixId": 12,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R1270",
+    "name": "R1270",
+    "refMixId": 13,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R13",
+    "name": "R13",
+    "refMixId": 14,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R134",
+    "name": "R134",
+    "refMixId": 15,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R134a",
+    "name": "R134a",
+    "refMixId": 16,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R13B1",
+    "name": "R13B1",
+    "refMixId": 17,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R14",
+    "name": "R14",
+    "refMixId": 18,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R141b",
+    "name": "R141b",
+    "refMixId": 19,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R142b",
+    "name": "R142b",
+    "refMixId": 20,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R143",
+    "name": "R143",
+    "refMixId": 21,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R143a",
+    "name": "R143a",
+    "refMixId": 22,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R152a",
+    "name": "R152a",
+    "refMixId": 23,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R21",
+    "name": "R21",
+    "refMixId": 24,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R218",
+    "name": "R218",
+    "refMixId": 25,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R22",
+    "name": "R22",
+    "refMixId": 26,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R227ea",
+    "name": "R227ea",
+    "refMixId": 27,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R23",
+    "name": "R23",
+    "refMixId": 28,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R236ea",
+    "name": "R236ea",
+    "refMixId": 29,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R236fa",
+    "name": "R236fa",
+    "refMixId": 30,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R245ca",
+    "name": "R245ca",
+    "refMixId": 31,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R245cb",
+    "name": "R245cb",
+    "refMixId": 32,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R290",
+    "name": "R290",
+    "refMixId": 33,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R32",
+    "name": "R32",
+    "refMixId": 34,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R401A",
+    "name": "R401A",
+    "refMixId": 35,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R401B",
+    "name": "R401B",
+    "refMixId": 36,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R401C",
+    "name": "R401C",
+    "refMixId": 37,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R402A",
+    "name": "R402A",
+    "refMixId": 38,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R402B",
+    "name": "R402B",
+    "refMixId": 39,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R404A",
+    "name": "R404A",
+    "refMixId": 40,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R405A",
+    "name": "R405A",
+    "refMixId": 41,
+    "ncomponents": 4,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R406A",
+    "name": "R406A",
+    "refMixId": 42,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R407A",
+    "name": "R407A",
+    "refMixId": 43,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R407B",
+    "name": "R407B",
+    "refMixId": 44,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R407C",
+    "name": "R407C",
+    "refMixId": 45,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R407D",
+    "name": "R407D",
+    "refMixId": 46,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R407E",
+    "name": "R407E",
+    "refMixId": 47,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R408A",
+    "name": "R408A",
+    "refMixId": 48,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R409A",
+    "name": "R409A",
+    "refMixId": 49,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R409B",
+    "name": "R409B",
+    "refMixId": 50,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R410A",
+    "name": "R410A",
+    "refMixId": 51,
+    "ncomponents": 2,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R410B",
+    "name": "R410B",
+    "refMixId": 52,
+    "ncomponents": 2,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R411A",
+    "name": "R411A",
+    "refMixId": 53,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R411B",
+    "name": "R411B",
+    "refMixId": 54,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R414B",
+    "name": "R414B",
+    "refMixId": 55,
+    "ncomponents": 4,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R500",
+    "name": "R500",
+    "refMixId": 56,
+    "ncomponents": 2,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R501",
+    "name": "R501",
+    "refMixId": 57,
+    "ncomponents": 2,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R502",
+    "name": "R502",
+    "refMixId": 58,
+    "ncomponents": 2,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R503",
+    "name": "R503",
+    "refMixId": 59,
+    "ncomponents": 2,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R504",
+    "name": "R504",
+    "refMixId": 60,
+    "ncomponents": 2,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R507A",
+    "name": "R507A",
+    "refMixId": 61,
+    "ncomponents": 2,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R508A",
+    "name": "R508A",
+    "refMixId": 62,
+    "ncomponents": 2,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R508B",
+    "name": "R508B",
+    "refMixId": 63,
+    "ncomponents": 2,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R600",
+    "name": "R600",
+    "refMixId": 64,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R600a",
+    "name": "R600a",
+    "refMixId": 65,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R717 (AMMONIA)",
+    "name": "R717 (AMMONIA)",
+    "refMixId": 66,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R744 (CO2)",
+    "name": "R744 (CO2)",
+    "refMixId": 67,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_RC270",
+    "name": "RC270",
+    "refMixId": 68,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_RC318",
+    "name": "RC318",
+    "refMixId": 69,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_RE134",
+    "name": "RE134",
+    "refMixId": 70,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_RE170",
+    "name": "RE170",
+    "refMixId": 71,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_RE245",
+    "name": "RE245",
+    "refMixId": 72,
+    "ncomponents": 1,
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REFMIX_R417a",
+    "name": "R417a",
+    "refMixId": 73,
+    "ncomponents": 3,
+    "maxVelocityMs": 2.3
+  }
+]

@@ -1,0 +1,362 @@
+[
+  {
+    "id": "REF_R11",
+    "name": "R11",
+    "freonId": 1,
+    "cas": "75-69-4",
+    "chemicalName": "trichlorofluoromethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R12",
+    "name": "R12",
+    "freonId": 2,
+    "cas": "75-71-8",
+    "chemicalName": "dichlorodifluoromethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R13",
+    "name": "R13",
+    "freonId": 3,
+    "cas": "75-72-9",
+    "chemicalName": "chlorotrifluoromethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R13B1",
+    "name": "R13B1",
+    "freonId": 4,
+    "cas": "75-63-8",
+    "chemicalName": "bromotrifluoromethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R14",
+    "name": "R14",
+    "freonId": 5,
+    "cas": "75-73-0",
+    "chemicalName": "tetrafluoromethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R21",
+    "name": "R21",
+    "freonId": 6,
+    "cas": "75-43-4",
+    "chemicalName": "dichlorofluoromethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R22",
+    "name": "R22",
+    "freonId": 7,
+    "cas": "75-45-6",
+    "chemicalName": "chlorodifluoromethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R23",
+    "name": "R23",
+    "freonId": 8,
+    "cas": "75-46-7",
+    "chemicalName": "trifluoromethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R32",
+    "name": "R32",
+    "freonId": 9,
+    "cas": "75-10-5",
+    "chemicalName": "difluoromethane (methylene fluoride)",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R113",
+    "name": "R113",
+    "freonId": 10,
+    "cas": "76-13-1",
+    "chemicalName": "1,1,2-trichloro-1,2,2-trifluoroethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R114",
+    "name": "R114",
+    "freonId": 11,
+    "cas": "76-14-2",
+    "chemicalName": "1,2-dichloro-1,1,2,2-tetrafluoroethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R115",
+    "name": "R115",
+    "freonId": 12,
+    "cas": "76-15-3",
+    "chemicalName": "chloropentafluoroethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R123",
+    "name": "R123",
+    "freonId": 13,
+    "cas": "306-83-2",
+    "chemicalName": "1,1-dichloro-2,2,2-trifluoroethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R123a",
+    "name": "R123a",
+    "freonId": 14,
+    "cas": "354-23-4",
+    "chemicalName": "1,2-dichloro-1,1,2-trifluoroethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R124",
+    "name": "R124",
+    "freonId": 15,
+    "cas": "354-25-6",
+    "chemicalName": "1-chloro-1,2,2,2-tetrafluoroethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R125",
+    "name": "R125",
+    "freonId": 16,
+    "cas": "354-33-6",
+    "chemicalName": "pentafluoroethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R134",
+    "name": "R134",
+    "freonId": 17,
+    "cas": "359-35-3",
+    "chemicalName": "1,1,2,2-tetrafluoroethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R134a",
+    "name": "R134a",
+    "freonId": 18,
+    "cas": "811-97-2",
+    "chemicalName": "1,1,1,2-tetrafluoroethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R141b",
+    "name": "R141b",
+    "freonId": 19,
+    "cas": "1717-00-6",
+    "chemicalName": "1,1-dichloro-1-fluoroethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R142b",
+    "name": "R142b",
+    "freonId": 20,
+    "cas": "75-68-3",
+    "chemicalName": "1-chloro-1,2,2,2-tetrafluoroethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R143",
+    "name": "R143",
+    "freonId": 21,
+    "cas": "430-66-0",
+    "chemicalName": "1,1,2-trifluoroethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R143a",
+    "name": "R143a",
+    "freonId": 22,
+    "cas": "420-46-2",
+    "chemicalName": "1,1,1-trifluorethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R152a",
+    "name": "R152a",
+    "freonId": 23,
+    "cas": "75-37-6",
+    "chemicalName": "1,1-difluoroethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R218",
+    "name": "R218",
+    "freonId": 24,
+    "cas": "76-19-7",
+    "chemicalName": "octafluoropropane (perfluoropropane)",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R290",
+    "name": "R290",
+    "freonId": 25,
+    "cas": "74-98-6",
+    "chemicalName": "propane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_RC270",
+    "name": "RC270",
+    "freonId": 26,
+    "cas": "75-19-4",
+    "chemicalName": "cyclopropane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_RC318",
+    "name": "RC318",
+    "freonId": 27,
+    "cas": "115-25-3",
+    "chemicalName": "octafluorocyclobutane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R227ea",
+    "name": "R227ea",
+    "freonId": 28,
+    "cas": "431-89-0",
+    "chemicalName": "1,1,1,2,3,3,3-heptafluoropropane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R236ea",
+    "name": "R236ea",
+    "freonId": 29,
+    "cas": "431-63-0",
+    "chemicalName": "1,1,1,2,3,3-hexafluoropropane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R245cb",
+    "name": "R245cb",
+    "freonId": 30,
+    "cas": "1814-88-6",
+    "chemicalName": "1,1,1,2,2-pentafluoropropane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R600",
+    "name": "R600",
+    "freonId": 31,
+    "cas": "106-97-8",
+    "chemicalName": "butane (n-butane)",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R600a",
+    "name": "R600a",
+    "freonId": 32,
+    "cas": "75-28-5",
+    "chemicalName": "2-methylpropane (iso-butane)",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_PENTHANE",
+    "name": "PENTHANE",
+    "freonId": 33,
+    "cas": "109-66-0",
+    "chemicalName": "pentane (n-pentane)",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_ISO-PENTHANE",
+    "name": "ISO-PENTHANE",
+    "freonId": 34,
+    "cas": "78-78-4",
+    "chemicalName": "2-methylbutane (iso-pentane)",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R744 (CO2)",
+    "name": "R744 (CO2)",
+    "freonId": 35,
+    "cas": "124-38-9",
+    "chemicalName": "carbon dioxide",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_RE134",
+    "name": "RE134",
+    "freonId": 36,
+    "cas": "1691-17-4",
+    "chemicalName": "bis(difluoromethyl)ether",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_RE245",
+    "name": "RE245",
+    "freonId": 37,
+    "cas": "1885-48-9",
+    "chemicalName": "2-(difluoromethoxy)-1,1,1-trifluoroethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R717",
+    "name": "R717",
+    "freonId": 38,
+    "cas": "7664-41-7",
+    "chemicalName": "ammonia",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R245ca",
+    "name": "R245ca",
+    "freonId": 39,
+    "cas": "679-86-7",
+    "chemicalName": "1,1,2,2,3-pentafluoropropane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R236fa",
+    "name": "R236fa",
+    "freonId": 40,
+    "cas": "690-39-1",
+    "chemicalName": "1,1,1,3,3,3-hexafluoropropane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R1270",
+    "name": "R1270",
+    "freonId": 41,
+    "cas": "115-07-1",
+    "chemicalName": "propylene (propene)",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_R116",
+    "name": "R116",
+    "freonId": 42,
+    "cas": "76-16-4",
+    "chemicalName": "hexafluoroethane",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_RE170",
+    "name": "RE170",
+    "freonId": 43,
+    "cas": "115-10-6",
+    "chemicalName": "dimethyl ether",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_pentane(n-pentane)",
+    "name": "pentane(n-pentane)",
+    "freonId": 44,
+    "cas": "109-66-0",
+    "chemicalName": "pentane (n-pentane)",
+    "maxVelocityMs": 2.3
+  },
+  {
+    "id": "REF_iso-pentane",
+    "name": "iso-pentane",
+    "freonId": 45,
+    "cas": "78-78-4",
+    "chemicalName": "2-methylbutane (iso-pentane)",
+    "maxVelocityMs": 2.3
+  }
+]
