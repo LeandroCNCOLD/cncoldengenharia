@@ -126,6 +126,7 @@ export function FluidSidePanel({
     : isEvaporator
       ? "Temp. Evaporação"
       : "Temp. Operação";
+  const thermalInputsDisabled = false;
 
   // Validações (Etapa 4)
   const errors: string[] = [];
