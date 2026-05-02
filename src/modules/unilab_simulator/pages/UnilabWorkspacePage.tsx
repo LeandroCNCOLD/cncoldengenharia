@@ -176,7 +176,7 @@ export function UnilabWorkspacePage() {
           pressureDropFan: catalogs.pressureDropFan,
         },
         tubeMaterialConductivity: tubeMat.conductivityWmK,
-        uBaseWm2K: geometry?.uBaseWm2K,
+        uBaseWm2K: geometry?.uBaseWm2K ?? 35,
       });
 
     try {
