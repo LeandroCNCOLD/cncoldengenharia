@@ -1,0 +1,1845 @@
+{
+  "collectors": [
+    {
+      "Id": 1,
+      "Descrizione": "LEGA SALDANTE CU/PH",
+      "id_testo": 412,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "AEB000F2-2092-458C-BBD22B113ABD2B5E"
+    },
+    {
+      "Id": 2,
+      "Descrizione": "LEGA SALDANTE AG 2%",
+      "id_testo": 414,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "435CD98E-0158-4672-A193F4627191881B"
+    },
+    {
+      "Id": 3,
+      "Descrizione": "LEGA SALDANTE AG 5%",
+      "id_testo": 416,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "9E64A4C5-9FCB-42A6-919F833C6BAE17B2"
+    },
+    {
+      "Id": 4,
+      "Descrizione": "LEGA SALDANTE AG",
+      "id_testo": 418,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "93C288CB-CB89-4582-8A8A87E22E0F3B6D"
+    }
+  ],
+  "tubes": [
+    {
+      "Id": 1,
+      "Descrizione": "LAMIERA ZINCATA 10/10",
+      "id_testo": 322,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.0,
+      "GUID": "C962592F-6D09-431D-B5BD7989B3D5046A"
+    },
+    {
+      "Id": 2,
+      "Descrizione": "LAMIERA ZINCATA 12/10",
+      "id_testo": 324,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.2,
+      "GUID": "465B9F05-9975-456D-BEB9FA40885D8826"
+    },
+    {
+      "Id": 3,
+      "Descrizione": "LAMIERA ZINCATA 15/10",
+      "id_testo": 326,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.5,
+      "GUID": "EB58E8B3-0A79-42A1-B8445542A2A28887"
+    },
+    {
+      "Id": 4,
+      "Descrizione": "LAMIERA ZINCATA 20/10",
+      "id_testo": 328,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 2.0,
+      "GUID": "74AADA2B-E20D-426C-A4AED4D99744F798"
+    },
+    {
+      "Id": 5,
+      "Descrizione": "LAMIERA NERA FERRO  20/10",
+      "id_testo": 330,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 2.0,
+      "GUID": "80F90249-7FB7-46EE-BE9EB703785D442C"
+    },
+    {
+      "Id": 6,
+      "Descrizione": "LAMIERA NERA FERRO  30/10",
+      "id_testo": 332,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 3.0,
+      "GUID": "5D04DC0D-C168-4040-B7A80FBDE1439C17"
+    },
+    {
+      "Id": 7,
+      "Descrizione": "FOGLI ALLUMINIO 12/10",
+      "id_testo": 334,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.2,
+      "GUID": "FE597A90-688B-4E2D-95451D2337DC77F0"
+    },
+    {
+      "Id": 8,
+      "Descrizione": "FOGLI ALLUMINIO 15/10",
+      "id_testo": 336,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.5,
+      "GUID": "C8E1C3D1-BFCD-44BB-8993D06139022A2A"
+    },
+    {
+      "Id": 9,
+      "Descrizione": "FOGLI ALLUMINIO 20/10",
+      "id_testo": 338,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 2.0,
+      "GUID": "2D77CFC7-F009-427E-BC3055BECB178858"
+    },
+    {
+      "Id": 10,
+      "Descrizione": "FOGLI OTTONE SP 12/10",
+      "id_testo": 340,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.2,
+      "GUID": "C5ADE0CF-BEBB-4190-A4C85F70F673F335"
+    },
+    {
+      "Id": 11,
+      "Descrizione": "FOGLI OTTONE SP 15/10",
+      "id_testo": 342,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.5,
+      "GUID": "9E3768A5-AAE9-4CC0-A92B2E628D67D0EE"
+    }
+  ],
+  "bends": [
+    {
+      "Id": 1,
+      "Descrizione": "LEGA 2%",
+      "id_testo": 420,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "A7B8E6C9-A4E4-475B-9D7C5CCC2E83995D"
+    },
+    {
+      "Id": 2,
+      "Descrizione": "LEGA 5%",
+      "id_testo": 422,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "8503483A-B54E-4127-95AD8C3ADFF57A4F"
+    },
+    {
+      "Id": 3,
+      "Descrizione": "LEGA 10%",
+      "id_testo": 424,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "465C0637-ABEE-421D-A253981F50233293"
+    },
+    {
+      "Id": 4,
+      "Descrizione": "LEGA 15%",
+      "id_testo": 426,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "752193FF-7713-44E1-BA50D4D895CA734C"
+    },
+    {
+      "Id": 5,
+      "Descrizione": "LEGA RIV. 15%",
+      "id_testo": 428,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "0B1F5B15-8750-46F6-ABE39EED1CF3E963"
+    },
+    {
+      "Id": 6,
+      "Descrizione": "LEGA RIV. 22%",
+      "id_testo": 430,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "A09405B9-5B8B-4E96-972C02178D1C69B9"
+    },
+    {
+      "Id": 7,
+      "Descrizione": "LEGA RIV. 30%",
+      "id_testo": 432,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "6E6F08F6-B9A9-43BF-9EF68554C8DF597F"
+    }
+  ],
+  "distributors": [
+    {
+      "Id": 1,
+      "Descrizione": "ATTACCHI IN RAME DA 12X0.5",
+      "id_testo": 434,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1,
+      "GUID": "142839D9-9A10-46C7-ADDFEB3B6E859ADE",
+      "IdMateriale": 2,
+      "Diametro": 0.5
+    },
+    {
+      "Id": 2,
+      "Descrizione": "ATTACCHI IN RAME DA 12X1",
+      "id_testo": 436,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1,
+      "GUID": "E68E3DC3-C130-44FF-AFE7CB963B9A6394",
+      "IdMateriale": 2,
+      "Diametro": 1.0
+    },
+    {
+      "Id": 3,
+      "Descrizione": "ATTACCHI IN RAME DA 16X1",
+      "id_testo": 438,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1,
+      "GUID": "B1A0E084-0D27-461C-9C51F53172B4F173",
+      "IdMateriale": 2,
+      "Diametro": 1.0
+    },
+    {
+      "Id": 4,
+      "Descrizione": "ATTACCHI IN RAME DA 18X1",
+      "id_testo": 440,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1,
+      "GUID": "0EDC5A41-5CF2-4A7F-9CCC843E86156412",
+      "IdMateriale": 2,
+      "Diametro": 1.0
+    },
+    {
+      "Id": 5,
+      "Descrizione": "ATTACCHI IN RAME DA 20X1",
+      "id_testo": 442,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1,
+      "GUID": "84DED53A-FBAA-4112-AE15E91F7A6E080B",
+      "IdMateriale": 2,
+      "Diametro": 1.0
+    },
+    {
+      "Id": 6,
+      "Descrizione": "ATTACCHI IN RAME DA 22X1",
+      "id_testo": 444,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1,
+      "GUID": "ADF154F4-D31D-406D-9E4C8E59FA367CDE",
+      "IdMateriale": 2,
+      "Diametro": 1.0
+    },
+    {
+      "Id": 7,
+      "Descrizione": "ATTACCHI IN RAME DA 28X1",
+      "id_testo": 446,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1,
+      "GUID": "63CEDBAA-4733-4798-9AE0CC0C6FDC2B2B",
+      "IdMateriale": 2,
+      "Diametro": 1.0
+    },
+    {
+      "Id": 8,
+      "Descrizione": "ATTACCHI IN RAME DA 30X1",
+      "id_testo": 448,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1,
+      "GUID": "8F540DBE-A6AD-42A0-A3D59CF68D90D6B0",
+      "IdMateriale": 2,
+      "Diametro": 1.0
+    },
+    {
+      "Id": 9,
+      "Descrizione": "ATTACCHI IN RAME DA 35X1",
+      "id_testo": 450,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1,
+      "GUID": "2E427D18-BC65-4926-843ACA2AD8A35A60",
+      "IdMateriale": 2,
+      "Diametro": 1.0
+    },
+    {
+      "Id": 10,
+      "Descrizione": "ATTACCHI IN RAME DA 40X1",
+      "id_testo": 452,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1,
+      "GUID": "CA1A4309-9EC0-476B-BC2F184B6B182D71",
+      "IdMateriale": 2,
+      "Diametro": 1.0
+    },
+    {
+      "Id": 11,
+      "Descrizione": "ATTACCHI IN RAME DA 50X1",
+      "id_testo": 454,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1,
+      "GUID": "8B37F649-182C-447A-A77F0F4CBEB1F1BE",
+      "IdMateriale": 2,
+      "Diametro": 1.0
+    },
+    {
+      "Id": 12,
+      "Descrizione": "ATTACCHI OTTONE",
+      "id_testo": 456,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "D8912654-1C79-4A05-93CD53510541B26D",
+      "IdMateriale": -1,
+      "Diametro": 0.0
+    }
+  ],
+  "endCaps": [
+    {
+      "ID": 1,
+      "Descrizione": "NONE",
+      "id_testo": 760,
+      "Peso": 0,
+      "Costo": 0,
+      "Spessore": 0.0,
+      "GUID": "E322C14A-58DA-4EE0-BB733ABB447E287B",
+      "IdMateriale": 0,
+      "Diametro": 0.0,
+      "Default": 1
+    },
+    {
+      "ID": 2,
+      "Descrizione": "TUBO RAME IN VERGHE DA 10X1",
+      "id_testo": 462,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.0,
+      "GUID": "58112ECB-8674-43D7-8EAFA7B020A77C15",
+      "IdMateriale": 2,
+      "Diametro": 10.0,
+      "Default": 0
+    },
+    {
+      "ID": 3,
+      "Descrizione": "TUBO RAME IN VERGHE DA 12X1",
+      "id_testo": 464,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.0,
+      "GUID": "1738A73C-8EF1-4E94-ACEE753FB3197764",
+      "IdMateriale": 2,
+      "Diametro": 12.0,
+      "Default": 0
+    },
+    {
+      "ID": 4,
+      "Descrizione": "TUBO RAME IN VERGHE DA 14X1",
+      "id_testo": 466,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.0,
+      "GUID": "7E72A4CA-FA23-4632-850EB5F335D19254",
+      "IdMateriale": 2,
+      "Diametro": 14.0,
+      "Default": 0
+    },
+    {
+      "ID": 5,
+      "Descrizione": "TUBO RAME IN VERGHE DA 16X1",
+      "id_testo": 468,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.0,
+      "GUID": "16B478B1-02B1-49F4-82E315628245AFDB",
+      "IdMateriale": 2,
+      "Diametro": 16.0,
+      "Default": 0
+    },
+    {
+      "ID": 6,
+      "Descrizione": "TUBO RAME IN VERGHE DA 18X1",
+      "id_testo": 470,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.0,
+      "GUID": "C1CB70FA-56E3-4F04-A647A0A7FCCF1952",
+      "IdMateriale": 2,
+      "Diametro": 18.0,
+      "Default": 0
+    },
+    {
+      "ID": 7,
+      "Descrizione": "TUBO RAME IN VERGHE DA 20X1",
+      "id_testo": 472,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.0,
+      "GUID": "97E5413C-68B5-4F2C-9DAFE7E57338B017",
+      "IdMateriale": 2,
+      "Diametro": 20.0,
+      "Default": 0
+    },
+    {
+      "ID": 8,
+      "Descrizione": "TUBO RAME IN VERGHE DA 22X1",
+      "id_testo": 474,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.0,
+      "GUID": "E9881A32-14D1-4318-9FEECE4043FA294E",
+      "IdMateriale": 2,
+      "Diametro": 22.0,
+      "Default": 0
+    },
+    {
+      "ID": 9,
+      "Descrizione": "TUBO RAME IN VERGHE DA 24X1",
+      "id_testo": 476,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.0,
+      "GUID": "0361B4FF-A73A-4952-896CCDDAD0E39ACE",
+      "IdMateriale": 2,
+      "Diametro": 24.0,
+      "Default": 0
+    },
+    {
+      "ID": 10,
+      "Descrizione": "TUBO RAME IN VERGHE DA 26X1",
+      "id_testo": 478,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.0,
+      "GUID": "C780F7E6-7CB5-494C-962480643B07B326",
+      "IdMateriale": 2,
+      "Diametro": 26.0,
+      "Default": 0
+    },
+    {
+      "ID": 11,
+      "Descrizione": "TUBO RAME IN VERGHE DA 28X1",
+      "id_testo": 480,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.0,
+      "GUID": "8B2C5C96-480B-4866-ACA69D5254B4512B",
+      "IdMateriale": 2,
+      "Diametro": 28.0,
+      "Default": 0
+    },
+    {
+      "ID": 12,
+      "Descrizione": "TUBO RAME IN VERGHE DA 30X1",
+      "id_testo": 482,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.0,
+      "GUID": "D305F034-D355-4CEF-9B7A75E050FA0647",
+      "IdMateriale": 2,
+      "Diametro": 30.0,
+      "Default": 0
+    },
+    {
+      "ID": 13,
+      "Descrizione": "TUBO RAME IN VERGHE DA 32X1",
+      "id_testo": 484,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.0,
+      "GUID": "B87DB9D4-9D26-49D4-9F36EC02B97C85F7",
+      "IdMateriale": 2,
+      "Diametro": 32.0,
+      "Default": 0
+    },
+    {
+      "ID": 14,
+      "Descrizione": "TUBO RAME IN VERGHE DA 35X1",
+      "id_testo": 486,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.0,
+      "GUID": "C3214A92-4466-4E64-99EC2BDEE7285922",
+      "IdMateriale": 2,
+      "Diametro": 35.0,
+      "Default": 0
+    },
+    {
+      "ID": 15,
+      "Descrizione": "TUBO RAME IN VERGHE DA 42X1",
+      "id_testo": 488,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.0,
+      "GUID": "3B117068-D856-46CE-B72CFB9FAC8C74CC",
+      "IdMateriale": 2,
+      "Diametro": 42.0,
+      "Default": 0
+    },
+    {
+      "ID": 16,
+      "Descrizione": "TUBO RAME IN VERGHE DA 54X1",
+      "id_testo": 490,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 1.5,
+      "GUID": "E2D27D9C-90D3-4496-90289A4C4DD267FD",
+      "IdMateriale": 2,
+      "Diametro": 54.0,
+      "Default": 0
+    },
+    {
+      "ID": 17,
+      "Descrizione": "TUBO ACCIAIO IN VERGHE DA 1/2\"",
+      "id_testo": 492,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 2.35,
+      "GUID": "10E90AFA-0B0D-4882-8981ADA16EC101E3",
+      "IdMateriale": 4,
+      "Diametro": 12.7,
+      "Default": 0
+    },
+    {
+      "ID": 18,
+      "Descrizione": "TUBO ACCIAIO IN VERGHE DA 3/4\"",
+      "id_testo": 494,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 2.0,
+      "GUID": "40790DFB-D11D-4BAD-A074470BEF9156FE",
+      "IdMateriale": 6,
+      "Diametro": 19.05,
+      "Default": 0
+    },
+    {
+      "ID": 19,
+      "Descrizione": "TUBO ACCIAIO IN VERGHE DA 1\"",
+      "id_testo": 496,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 2.3,
+      "GUID": "4F6DC1AB-F8BF-432B-AA8CCE8512FF159A",
+      "IdMateriale": 6,
+      "Diametro": 25.4,
+      "Default": 0
+    },
+    {
+      "ID": 20,
+      "Descrizione": "TUBO INOX IN VERGHE DA 1\" 1/4",
+      "id_testo": 498,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 2.6,
+      "GUID": "ADE16D62-F1FB-4470-BEED3EC949F725EC",
+      "IdMateriale": 6,
+      "Diametro": 31.75,
+      "Default": 0
+    },
+    {
+      "ID": 21,
+      "Descrizione": "TUBO INOX IN VERGHE DA 2\"",
+      "id_testo": 500,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 2.9,
+      "GUID": "1B2083AC-8D29-4BA9-81C8FEFBB60A865D",
+      "IdMateriale": 4,
+      "Diametro": 50.8,
+      "Default": 0
+    },
+    {
+      "ID": 22,
+      "Descrizione": "TUBO INOX IN VERGHE DA 2\" 1/2",
+      "id_testo": 502,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 2.9,
+      "GUID": "35CB2D07-C644-4918-9C0393A9794BFD75",
+      "IdMateriale": 4,
+      "Diametro": 63.5,
+      "Default": 0
+    },
+    {
+      "ID": 23,
+      "Descrizione": "TUBO INOX IN VERGHE DA 3\"",
+      "id_testo": 504,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 3.2,
+      "GUID": "8F696B20-2B9A-41C5-BF65D16D7B449796",
+      "IdMateriale": 4,
+      "Diametro": 76.2,
+      "Default": 0
+    },
+    {
+      "ID": 24,
+      "Descrizione": "TUBO INOX IN VERGHE DA 3\" 1/2",
+      "id_testo": 506,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 3.6,
+      "GUID": "6B530F68-3505-46CC-9D9E49A0B995B047",
+      "IdMateriale": 4,
+      "Diametro": 88.9,
+      "Default": 0
+    },
+    {
+      "ID": 25,
+      "Descrizione": "TUBO INOX IN VERGHE DA 4\"",
+      "id_testo": 508,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 3.6,
+      "GUID": "E322C14A-58DA-4EE0-BB733ABB447E28A8",
+      "IdMateriale": 4,
+      "Diametro": 101.6,
+      "Default": 0
+    },
+    {
+      "ID": 26,
+      "Descrizione": null,
+      "id_testo": 816,
+      "Peso": 2,
+      "Costo": 200,
+      "Spessore": 3.6,
+      "GUID": "457658E0-95FA-48D2-8A4950CA5768CFE2",
+      "IdMateriale": 2,
+      "Diametro": 80.0,
+      "Default": 0
+    }
+  ],
+  "sheets": [
+    {
+      "Id": 1,
+      "Descrizione": "CURVETTA 3/8\" P25 X 0.41",
+      "id_testo": 344,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0.41,
+      "GUID": "9550C83F-9971-4A2D-A4A493BC7376EF3D",
+      "Diametro": 9.52,
+      "Default": 0
+    },
+    {
+      "Id": 2,
+      "Descrizione": "CURVETTA P25 X 0.50",
+      "id_testo": 346,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0.5,
+      "GUID": "3584D9A6-7E13-4F33-940D48219FE16AB7",
+      "Diametro": 9.52,
+      "Default": 0
+    },
+    {
+      "Id": 3,
+      "Descrizione": "CURVETTA 16X75",
+      "id_testo": 348,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0.5,
+      "GUID": "FFECFEB7-4597-4A1A-88274E52F46FE60D",
+      "Diametro": 9.52,
+      "Default": 0
+    }
+  ],
+  "nipples": [
+    {
+      "Id": 1,
+      "Descrizione": "DISTRIBUTORE DA 12 PER 2 FORI",
+      "id_testo": 350,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "4EE0314B-9197-42DB-95366DBB5561F780",
+      "Diametro": 12
+    },
+    {
+      "Id": 2,
+      "Descrizione": "DISTRIBUTORE DA 12 PER 3 FORI",
+      "id_testo": 352,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "2EF43577-0B6F-4AB9-8355258BAD8CC4E7",
+      "Diametro": 12
+    },
+    {
+      "Id": 3,
+      "Descrizione": "DISTRIBUTORE DA 12 PER 4 FORI",
+      "id_testo": 354,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "5242D9E0-F1C0-407B-BF09E5C9E0BAE8DE",
+      "Diametro": 12
+    },
+    {
+      "Id": 4,
+      "Descrizione": "DISTRIBUTORE DA 12 PER 5 FORI",
+      "id_testo": 356,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "78DD9389-5373-4B00-BF05FC4E95683D6E",
+      "Diametro": 12
+    },
+    {
+      "Id": 5,
+      "Descrizione": "DISTRIBUTORE DA 12 PER 6 FORI",
+      "id_testo": 358,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "2881A521-F131-4A18-A6D599D8673A5344",
+      "Diametro": 12
+    },
+    {
+      "Id": 6,
+      "Descrizione": "DISTRIBUTORE DA 16 PER 4 FORI",
+      "id_testo": 360,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "9D73590F-FFF6-44EE-A29DA5912C876E2B",
+      "Diametro": 16
+    },
+    {
+      "Id": 7,
+      "Descrizione": "DISTRIBUTORE DA 16 PER 5 FORI",
+      "id_testo": 362,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "74ED5CE2-BC23-4B0F-BC02F3544EAE9B49",
+      "Diametro": 16
+    },
+    {
+      "Id": 8,
+      "Descrizione": "DISTRIBUTORE DA 16 PER 6 FORI",
+      "id_testo": 364,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "E3E44024-8829-47ED-B5C657134FF18CE5",
+      "Diametro": 16
+    },
+    {
+      "Id": 9,
+      "Descrizione": "DISTRIBUTORE DA 16 PER 7 FORI",
+      "id_testo": 366,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "6FE4B2BE-956C-42B1-B36583376FAB98A3",
+      "Diametro": 16
+    },
+    {
+      "Id": 10,
+      "Descrizione": "DISTRIBUTORE DA 16 PER 8 FORI",
+      "id_testo": 368,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "1761C24A-15F4-47FC-B0B20082AD8A1B68",
+      "Diametro": 16
+    },
+    {
+      "Id": 11,
+      "Descrizione": "DISTRIBUTORE DA 16 PER 9 FORI",
+      "id_testo": 370,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "A0195F54-E75A-41AB-ADB292D5FDD51B64",
+      "Diametro": 16
+    },
+    {
+      "Id": 12,
+      "Descrizione": "DISTRIBUTORE DA 16 PER 10 FORI",
+      "id_testo": 372,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "4A9CCA22-5335-4E01-84BB8F2CFFB72660",
+      "Diametro": 16
+    },
+    {
+      "Id": 13,
+      "Descrizione": "DISTRIBUTORE DA 16 PER 11 FORI",
+      "id_testo": 374,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "54AA2C24-8BD1-42C6-9F2F20427582D279",
+      "Diametro": 16
+    },
+    {
+      "Id": 14,
+      "Descrizione": "DISTRIBUTORE DA 16 PER 12 FORI",
+      "id_testo": 376,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "644B6D37-C601-4AAB-9FF3B314A3DDB95E",
+      "Diametro": 16
+    },
+    {
+      "Id": 15,
+      "Descrizione": "DISTRIBUTORE DA 22 PER 10 FORI",
+      "id_testo": 378,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "B65B71AA-D5D6-4A44-9874A657DED10634",
+      "Diametro": 22
+    },
+    {
+      "Id": 16,
+      "Descrizione": "DISTRIBUTORE DA 22 PER 11 FORI",
+      "id_testo": 380,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "0BC16D6D-6845-47E7-BE90CEBACBCFAEC0",
+      "Diametro": 22
+    },
+    {
+      "Id": 17,
+      "Descrizione": "DISTRIBUTORE DA 22 PER 12 FORI",
+      "id_testo": 382,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "C52A59E7-A43B-4A0F-A8F451DCC18DB05D",
+      "Diametro": 22
+    },
+    {
+      "Id": 18,
+      "Descrizione": "DISTRIBUTORE DA 22 PER 13 FORI",
+      "id_testo": 384,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "E904D8C9-BAC4-4C76-81053E11FB9DA5C5",
+      "Diametro": 22
+    },
+    {
+      "Id": 19,
+      "Descrizione": "DISTRIBUTORE DA 22 PER 14 FORI",
+      "id_testo": 386,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "890CBCBE-0B31-4C7F-8F3D1A2162B9E5FE",
+      "Diametro": 22
+    },
+    {
+      "Id": 20,
+      "Descrizione": "DISTRIBUTORE DA 22 PER 15 FORI",
+      "id_testo": 388,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "82211D07-38CA-4E28-B85E09B67C207F62",
+      "Diametro": 22
+    },
+    {
+      "Id": 21,
+      "Descrizione": "DISTRIBUTORE DA 22 PER 16 FORI",
+      "id_testo": 390,
+      "Peso": 1,
+      "Campo2": 1,
+      "GUID": "F9F7BA34-DAF4-4394-BD47306779B6B680",
+      "Diametro": 22
+    }
+  ],
+  "nodes": [
+    {
+      "Id": 1,
+      "Descrizione": "FONDELLI IN RAME DA 12X0.5",
+      "id_testo": 510,
+      "Peso": 1,
+      "Costo": 1,
+      "GUID": "49AE6758-82DC-4488-9DB680A22F46E2AB",
+      "IdMateriale": 2,
+      "Diametro": 12,
+      "Spessore": 0.5
+    },
+    {
+      "Id": 2,
+      "Descrizione": "FONDELLI IN RAME DA 12X1",
+      "id_testo": 512,
+      "Peso": 1,
+      "Costo": 1,
+      "GUID": "CE4FE7B4-74B1-4403-A2D02B4C6F773D85",
+      "IdMateriale": 2,
+      "Diametro": 12,
+      "Spessore": 1.0
+    },
+    {
+      "Id": 3,
+      "Descrizione": "FONDELLI IN RAME DA 16X1",
+      "id_testo": 514,
+      "Peso": 1,
+      "Costo": 1,
+      "GUID": "9625810D-51E2-41F1-A25233B5709F6A62",
+      "IdMateriale": 2,
+      "Diametro": 16,
+      "Spessore": 1.0
+    },
+    {
+      "Id": 4,
+      "Descrizione": "FONDELLI IN RAME DA 18X1",
+      "id_testo": 516,
+      "Peso": 1,
+      "Costo": 1,
+      "GUID": "BE00A283-B47A-4B8A-BB48DF366BD8D603",
+      "IdMateriale": 2,
+      "Diametro": 18,
+      "Spessore": 1.0
+    },
+    {
+      "Id": 5,
+      "Descrizione": "FONDELLI IN RAME DA 20X1",
+      "id_testo": 518,
+      "Peso": 1,
+      "Costo": 1,
+      "GUID": "7FF3AA54-9A37-4772-A08A6F06F11B2801",
+      "IdMateriale": 2,
+      "Diametro": 20,
+      "Spessore": 1.0
+    },
+    {
+      "Id": 6,
+      "Descrizione": "FONDELLI IN RAME DA 22X1",
+      "id_testo": 520,
+      "Peso": 1,
+      "Costo": 1,
+      "GUID": "DE327716-FFCC-4407-95B2FCD9A9313D60",
+      "IdMateriale": 2,
+      "Diametro": 22,
+      "Spessore": 1.0
+    },
+    {
+      "Id": 7,
+      "Descrizione": "FONDELLI IN RAME DA 28X1",
+      "id_testo": 522,
+      "Peso": 1,
+      "Costo": 1,
+      "GUID": "4C6F8B54-9F18-4FF1-BBD4B3C8E0226C4E",
+      "IdMateriale": 2,
+      "Diametro": 28,
+      "Spessore": 1.0
+    },
+    {
+      "Id": 8,
+      "Descrizione": "FONDELLI IN RAME DA 30X1",
+      "id_testo": 524,
+      "Peso": 1,
+      "Costo": 1,
+      "GUID": "89591D28-7D81-4BDC-96AE42F816C88B8D",
+      "IdMateriale": 2,
+      "Diametro": 30,
+      "Spessore": 1.0
+    },
+    {
+      "Id": 9,
+      "Descrizione": "FONDELLI IN RAME DA 35X1",
+      "id_testo": 526,
+      "Peso": 1,
+      "Costo": 1,
+      "GUID": "824498EC-35BC-4CA1-8C2BFE7D1A01AD7F",
+      "IdMateriale": 2,
+      "Diametro": 35,
+      "Spessore": 1.0
+    },
+    {
+      "Id": 10,
+      "Descrizione": "FONDELLI IN RAME DA 40X1",
+      "id_testo": 528,
+      "Peso": 1,
+      "Costo": 1,
+      "GUID": "1D6F880B-FF72-4D6D-A364FEC8772364A0",
+      "IdMateriale": 2,
+      "Diametro": 40,
+      "Spessore": 1.0
+    },
+    {
+      "Id": 11,
+      "Descrizione": "FONDELLI IN RAME DA 50X1",
+      "id_testo": 530,
+      "Peso": 1,
+      "Costo": 1,
+      "GUID": "A5DE0012-1EFA-4E6D-82862203B48B6650",
+      "IdMateriale": 2,
+      "Diametro": 50,
+      "Spessore": 1.0
+    }
+  ],
+  "fins": [
+    {
+      "idgruppo": 1,
+      "order": 1,
+      "descrizione": "Tipo di funzionamento",
+      "id_testo": 140,
+      "GUID": "C5B33C0C-897A-45BB-90B6AED501F5675D",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 2,
+      "order": 2,
+      "descrizione": "Tipologia costruttiva",
+      "id_testo": 142,
+      "GUID": "CED8F32D-F863-4D53-96F507BED4EAF4C1",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 3,
+      "order": 3,
+      "descrizione": "Ci sono i distributori?",
+      "id_testo": 144,
+      "GUID": "0294B829-3622-41FE-A36FE1A8A2AB2F6C",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 4,
+      "order": 4,
+      "descrizione": "Ci sono i collettori?",
+      "id_testo": 146,
+      "GUID": "48488E99-4F46-4F68-9B846E9EA86B09F6",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 5,
+      "order": 5,
+      "descrizione": "I collettori vanno:",
+      "id_testo": 148,
+      "GUID": "38C15A92-DC7B-4D63-A2049D3AA69EE440",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 6,
+      "order": 6,
+      "descrizione": "I collettori sono posti in:",
+      "id_testo": 152,
+      "GUID": "968AA5A4-473E-49C8-B982DD837C49EF6E",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 7,
+      "order": 7,
+      "descrizione": "Ci sono i capillari?",
+      "id_testo": 154,
+      "GUID": "14901B8D-E53F-455E-BC2A54F177F807C1",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 8,
+      "order": 8,
+      "descrizione": "Ci sono gli attacchi?",
+      "id_testo": 156,
+      "GUID": "2827282A-05A7-4396-8CDFFA029959C8C6",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 9,
+      "order": 9,
+      "descrizione": "Ci sono i fondelli?",
+      "id_testo": 158,
+      "GUID": "AB201ED4-08CA-4963-938C8A098D184DD2",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 10,
+      "order": 10,
+      "descrizione": "Ci sono i nippli?",
+      "id_testo": 160,
+      "GUID": "58C0526E-BC7D-49EA-B42E0277E1EA96A5",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 11,
+      "order": 11,
+      "descrizione": "Lega saldante collettore?",
+      "id_testo": 162,
+      "GUID": "B214AFEA-7D32-4D92-9D020FE3C9543EA4",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 12,
+      "order": 12,
+      "descrizione": "Lega saldante batteria?",
+      "id_testo": 164,
+      "GUID": "C9D5EB9C-0DD5-469E-9ADE384B840AA3EB",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 13,
+      "order": 13,
+      "descrizione": "Ci sono i tappi?",
+      "id_testo": 166,
+      "GUID": "830CD318-BF53-42C6-AA7761EFDDEF49D0",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 14,
+      "order": 14,
+      "descrizione": "Materiali accessori?",
+      "id_testo": 168,
+      "GUID": "74BBC242-52D0-4C63-988752916604725D",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 15,
+      "order": 15,
+      "descrizione": "Il telaio va:",
+      "id_testo": 170,
+      "GUID": "78315C29-600A-4C50-80B7771C27678764",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 16,
+      "order": 16,
+      "descrizione": "Ci sono i tegoli?",
+      "id_testo": 172,
+      "GUID": "3BA81B74-CDB7-41F1-BF779485F489E260",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 17,
+      "order": 17,
+      "descrizione": "I tegoli sono:",
+      "id_testo": 174,
+      "GUID": "1607E65D-F424-4298-A0C36164FAE93F03",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 18,
+      "order": 18,
+      "descrizione": "Convogliatore?",
+      "id_testo": 176,
+      "GUID": "143E40EB-2D1D-4595-B758EA8B428D9E61",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 19,
+      "order": 19,
+      "descrizione": "Calcolo della tempistica?",
+      "id_testo": 178,
+      "GUID": "2C6AD99F-16FE-458A-BA53C29921B5201B",
+      "codicegruppo": null
+    },
+    {
+      "idgruppo": 20,
+      "order": 20,
+      "descrizione": "Stagnatura",
+      "id_testo": 180,
+      "GUID": "27549AE3-4ECC-40A1-B61AC2F5C8833EFB",
+      "codicegruppo": null
+    }
+  ],
+  "capillaries": [
+    {
+      "Id": 13,
+      "Descrizione": "STAGNATURA",
+      "id_testo": 536,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0.5,
+      "GUID": "7BDDD5AF-ECB5-4FEC-8F7858D3AA3D02B5"
+    }
+  ],
+  "plugs": [
+    {
+      "Id": 8,
+      "Descrizione": "TRANCIATURA ALETTE",
+      "id_testo": 576,
+      "Costo": 1,
+      "Peso": 1,
+      "Spessore": 0,
+      "GUID": "3E4AEF31-80FD-45AD-8C0B44BD42D15089"
+    },
+    {
+      "Id": 9,
+      "Descrizione": "TRANCIATURA TUBO",
+      "id_testo": 578,
+      "Costo": 1,
+      "Peso": 1,
+      "Spessore": 0,
+      "GUID": "8991E03C-499E-48FB-AA065E15FE0A216E"
+    },
+    {
+      "Id": 10,
+      "Descrizione": "MONTAGGIO TUBI",
+      "id_testo": 580,
+      "Costo": 1,
+      "Peso": 1,
+      "Spessore": 0,
+      "GUID": "A9C33D08-B634-40DB-9C3C698B94F6B5B1"
+    },
+    {
+      "Id": 11,
+      "Descrizione": "MANDRINATURA",
+      "id_testo": 582,
+      "Costo": 1,
+      "Peso": 1,
+      "Spessore": 0,
+      "GUID": "00E1FC08-BBB1-4DAD-81547B2C86DD4387"
+    },
+    {
+      "Id": 12,
+      "Descrizione": "MONTAGGIO TELAIO",
+      "id_testo": 584,
+      "Costo": 1,
+      "Peso": 1,
+      "Spessore": 0,
+      "GUID": "5323A24D-4157-46FD-867232E1A5647E15"
+    },
+    {
+      "Id": 13,
+      "Descrizione": "SALDATURA CURVETTE",
+      "id_testo": 586,
+      "Costo": 1,
+      "Peso": 1,
+      "Spessore": 0,
+      "GUID": "F425E3B4-59F8-4CFB-8A53799246C60A98"
+    },
+    {
+      "Id": 14,
+      "Descrizione": "SALDATURA COLLETTORE",
+      "id_testo": 588,
+      "Costo": 1,
+      "Peso": 1,
+      "Spessore": 0,
+      "GUID": "6E6C554B-1B69-4975-823BE04717435085"
+    },
+    {
+      "Id": 15,
+      "Descrizione": "SALDATURA FONDELLI",
+      "id_testo": 590,
+      "Costo": 1,
+      "Peso": 1,
+      "Spessore": 0,
+      "GUID": "94F0F10F-90B9-48B2-91F08FCBD2C3252E"
+    },
+    {
+      "Id": 16,
+      "Descrizione": "SALDATURA ATTACHI",
+      "id_testo": 592,
+      "Costo": 1,
+      "Peso": 1,
+      "Spessore": 0,
+      "GUID": "59632E3D-4C69-4071-982E44F1B7C0B586"
+    },
+    {
+      "Id": 17,
+      "Descrizione": "PRESSATURA",
+      "id_testo": 594,
+      "Costo": 1,
+      "Peso": 1,
+      "Spessore": 0,
+      "GUID": "9D549BFD-B754-4AE5-BB1FF5866DDA1208"
+    },
+    {
+      "Id": 18,
+      "Descrizione": "PREPARAZIONE TELAIO",
+      "id_testo": 596,
+      "Costo": 1,
+      "Peso": 1,
+      "Spessore": 0,
+      "GUID": "A7D0CF5B-8BB3-4A1F-B84B31505DA8B4BE"
+    },
+    {
+      "Id": 19,
+      "Descrizione": "FRESATURA TUBI",
+      "id_testo": 598,
+      "Costo": 1,
+      "Peso": 1,
+      "Spessore": 0,
+      "GUID": "25480FE6-E12C-4023-B01DB3AD7D57E2E1"
+    },
+    {
+      "Id": 20,
+      "Descrizione": "PREPARAZIONE BICCH.",
+      "id_testo": 600,
+      "Costo": 1,
+      "Peso": 1,
+      "Spessore": 0,
+      "GUID": "78B5D2E3-98AD-4BA7-BED13FDA8C42D204"
+    }
+  ],
+  "soldering": [
+    {
+      "Id": 1,
+      "id_testo": 760,
+      "Descrizione": "NONE",
+      "Peso": 0.0,
+      "Costo": 0.0,
+      "Spessore": 0.0,
+      "GUID": "50E116BD-5944-43F0-B3CCE447AF3C260B",
+      "IdMateriale": 0,
+      "Diametro": 0.0,
+      "Default": 1
+    },
+    {
+      "Id": 2,
+      "id_testo": 276,
+      "Descrizione": "TUBO RAME RIC. DA 9.54 SP 0.30",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.3,
+      "GUID": "D86E144B-6BE1-484A-B8D36B9E8E5D777F",
+      "IdMateriale": 2,
+      "Diametro": 9.54,
+      "Default": 0
+    },
+    {
+      "Id": 3,
+      "id_testo": 278,
+      "Descrizione": "TUBO RAME RIC. DA 9.54 SP 0.35",
+      "Peso": 0.089866,
+      "Costo": 6.5,
+      "Spessore": 0.35,
+      "GUID": "837C17C3-C20A-4099-A7000D1DCF27870D",
+      "IdMateriale": 2,
+      "Diametro": 9.54,
+      "Default": 0
+    },
+    {
+      "Id": 4,
+      "id_testo": 280,
+      "Descrizione": "TUBO RAME RIC. DA 9.54 SP 0.50",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.5,
+      "GUID": "315F6004-3F0E-4579-B739538F771C8154",
+      "IdMateriale": 2,
+      "Diametro": 9.54,
+      "Default": 0
+    },
+    {
+      "Id": 5,
+      "id_testo": 282,
+      "Descrizione": "TUBO RAME RIC. DA 9.54 SP 0.75",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.74,
+      "GUID": "258DCB7E-CD54-4225-9F37028FA7FBABE7",
+      "IdMateriale": 2,
+      "Diametro": 9.54,
+      "Default": 0
+    },
+    {
+      "Id": 6,
+      "id_testo": 284,
+      "Descrizione": "TUBO RAME RIC. DA 9.54 SP 1.00",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 1.0,
+      "GUID": "33400DA7-0270-47F1-925A5655F13FC7DD",
+      "IdMateriale": 2,
+      "Diametro": 9.54,
+      "Default": 0
+    },
+    {
+      "Id": 7,
+      "id_testo": 286,
+      "Descrizione": "TUBO RAME RIC. DA 12   SP 0.35",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.35,
+      "GUID": "BD2BCB5F-27B4-4156-AACC7B13C07FEEE4",
+      "IdMateriale": 2,
+      "Diametro": 12.0,
+      "Default": 0
+    },
+    {
+      "Id": 8,
+      "id_testo": 288,
+      "Descrizione": "TUBO RAME RIC. DA 12   SP 0.38",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.38,
+      "GUID": "4BD0D48B-2058-4DC3-B67190FFA6DF6D67",
+      "IdMateriale": 2,
+      "Diametro": 12.0,
+      "Default": 0
+    },
+    {
+      "Id": 9,
+      "id_testo": 290,
+      "Descrizione": "TUBO RAME RIC. DA  1\"   SP 0.41",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.41,
+      "GUID": "F50718B0-0D0C-4AB7-B874AA653232F6C6",
+      "IdMateriale": 2,
+      "Diametro": 25.4,
+      "Default": 0
+    },
+    {
+      "Id": 10,
+      "id_testo": 292,
+      "Descrizione": "TUBO RAME RIC. DA  1\"   SP 0.50",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.5,
+      "GUID": "E95DB5D3-B87E-4116-B9B128AE5627816F",
+      "IdMateriale": 2,
+      "Diametro": 25.4,
+      "Default": 0
+    },
+    {
+      "Id": 11,
+      "id_testo": 294,
+      "Descrizione": "TUBO RAME RIC. DA 1 \"   SP 0.75",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.75,
+      "GUID": "69061845-869D-42DC-8DB3498F0769CFA2",
+      "IdMateriale": 2,
+      "Diametro": 25.4,
+      "Default": 0
+    },
+    {
+      "Id": 12,
+      "id_testo": 296,
+      "Descrizione": "TUBO RAME RIC. DA 12   SP 1.00",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 1.0,
+      "GUID": "4BF37070-D4E0-4BF2-869211AB7E126DFF",
+      "IdMateriale": 2,
+      "Diametro": 25.4,
+      "Default": 0
+    },
+    {
+      "Id": 13,
+      "id_testo": 298,
+      "Descrizione": "TUBO IN ACCIAIO 3/4",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.15,
+      "GUID": "45F702A1-F48C-4B77-98334823080561FD",
+      "IdMateriale": 4,
+      "Diametro": 19.05,
+      "Default": 0
+    }
+  ],
+  "groups": [
+    {
+      "IdCalc": 1,
+      "Name": "sdsdfdsf",
+      "NTUBI": 20,
+      "NRAN": 2,
+      "LUNGA": 1200,
+      "PASSO": 2.0999999046,
+      "ALIM": 20,
+      "PARA": 22.0,
+      "PATU": 25.0,
+      "NTS": 0,
+      "LUNGP": 0,
+      "PERCR": 0,
+      "SVCO": 0,
+      "SVCA": 0,
+      "SVNI": 0,
+      "SVAT": 0,
+      "SPBA1": 0,
+      "SPBA2": 0,
+      "SVTE": 0,
+      "PERM": 0,
+      "AMIN": 0,
+      "ALIR": 0,
+      "file_sequenza": "Condensing_Default",
+      "nome_spalla": null,
+      "nome_tegolo": null,
+      "nome_convogliatore": null
+    },
+    {
+      "IdCalc": 2,
+      "Name": "test1",
+      "NTUBI": 36,
+      "NRAN": 10,
+      "LUNGA": 1604,
+      "PASSO": 2.5399999619,
+      "ALIM": 60,
+      "PARA": 27.3999996185,
+      "PATU": 31.75,
+      "NTS": 0,
+      "LUNGP": 20,
+      "PERCR": 4,
+      "SVCO": 0,
+      "SVCA": 0,
+      "SVNI": 0,
+      "SVAT": 0,
+      "SPBA1": 0,
+      "SPBA2": 0,
+      "SVTE": 0,
+      "PERM": 0,
+      "AMIN": 0,
+      "ALIR": 0,
+      "file_sequenza": "Condensing_Default",
+      "nome_spalla": null,
+      "nome_tegolo": null,
+      "nome_convogliatore": null
+    },
+    {
+      "IdCalc": 3,
+      "Name": "Lambda",
+      "NTUBI": 28,
+      "NRAN": 6,
+      "LUNGA": 2134,
+      "PASSO": 2.0,
+      "ALIM": 28,
+      "PARA": 27.3999996185,
+      "PATU": 31.75,
+      "NTS": 0,
+      "LUNGP": 20,
+      "PERCR": 4,
+      "SVCO": 0,
+      "SVCA": 0,
+      "SVNI": 0,
+      "SVAT": 0,
+      "SPBA1": 0,
+      "SPBA2": 0,
+      "SVTE": 0,
+      "PERM": 0,
+      "AMIN": 0,
+      "ALIR": 0,
+      "file_sequenza": "Heating_Cooling_Default",
+      "nome_spalla": null,
+      "nome_tegolo": null,
+      "nome_convogliatore": null
+    },
+    {
+      "IdCalc": 4,
+      "Name": "lambda 1",
+      "NTUBI": 28,
+      "NRAN": 6,
+      "LUNGA": 2134,
+      "PASSO": 2.0,
+      "ALIM": 28,
+      "PARA": 27.3999996185,
+      "PATU": 31.75,
+      "NTS": 0,
+      "LUNGP": 0,
+      "PERCR": 0,
+      "SVCO": 0,
+      "SVCA": 0,
+      "SVNI": 0,
+      "SVAT": 0,
+      "SPBA1": 0,
+      "SPBA2": 0,
+      "SVTE": 0,
+      "PERM": 0,
+      "AMIN": 0,
+      "ALIR": 0,
+      "file_sequenza": "Heating_Cooling_Default time set",
+      "nome_spalla": null,
+      "nome_tegolo": null,
+      "nome_convogliatore": null
+    },
+    {
+      "IdCalc": 5,
+      "Name": "yvuui",
+      "NTUBI": 20,
+      "NRAN": 4,
+      "LUNGA": 1500,
+      "PASSO": 2.5,
+      "ALIM": 10,
+      "PARA": 30.0,
+      "PATU": 60.0,
+      "NTS": 0,
+      "LUNGP": 20,
+      "PERCR": 4,
+      "SVCO": 0,
+      "SVCA": 0,
+      "SVNI": 0,
+      "SVAT": 0,
+      "SPBA1": 0,
+      "SPBA2": 0,
+      "SVTE": 0,
+      "PERM": 0,
+      "AMIN": 0,
+      "ALIR": 0,
+      "file_sequenza": "Heating_Cooling_FastCalc",
+      "nome_spalla": null,
+      "nome_tegolo": null,
+      "nome_convogliatore": null
+    }
+  ],
+  "elements": [
+    {
+      "Id": 1,
+      "id_testo": 276,
+      "Descrizione": "TUBO RAME RIC. DA 9.54 SP 0.30",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.3,
+      "GUID": "D86E144B-6BE1-484A-B8D36B9E8E5D777F",
+      "IdMateriale": 2,
+      "Diametro": 9.54,
+      "Default": 0
+    },
+    {
+      "Id": 2,
+      "id_testo": 278,
+      "Descrizione": "TUBO RAME RIC. DA 9.54 SP 0.35",
+      "Peso": 0.089866,
+      "Costo": 6.5,
+      "Spessore": 0.35,
+      "GUID": "837C17C3-C20A-4099-A7000D1DCF27870D",
+      "IdMateriale": 2,
+      "Diametro": 9.54,
+      "Default": 0
+    },
+    {
+      "Id": 3,
+      "id_testo": 280,
+      "Descrizione": "TUBO RAME RIC. DA 9.54 SP 0.50",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.5,
+      "GUID": "315F6004-3F0E-4579-B739538F771C8154",
+      "IdMateriale": 2,
+      "Diametro": 9.54,
+      "Default": 0
+    },
+    {
+      "Id": 4,
+      "id_testo": 282,
+      "Descrizione": "TUBO RAME RIC. DA 9.54 SP 0.75",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.74,
+      "GUID": "258DCB7E-CD54-4225-9F37028FA7FBABE7",
+      "IdMateriale": 2,
+      "Diametro": 9.54,
+      "Default": 0
+    },
+    {
+      "Id": 5,
+      "id_testo": 284,
+      "Descrizione": "TUBO RAME RIC. DA 9.54 SP 1.00",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 1.0,
+      "GUID": "33400DA7-0270-47F1-925A5655F13FC7DD",
+      "IdMateriale": 2,
+      "Diametro": 9.54,
+      "Default": 0
+    },
+    {
+      "Id": 6,
+      "id_testo": 286,
+      "Descrizione": "TUBO RAME RIC. DA 12   SP 0.35",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.35,
+      "GUID": "BD2BCB5F-27B4-4156-AACC7B13C07FEEE4",
+      "IdMateriale": 2,
+      "Diametro": 12.0,
+      "Default": 0
+    },
+    {
+      "Id": 7,
+      "id_testo": 288,
+      "Descrizione": "TUBO RAME RIC. DA 12   SP 0.38",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.38,
+      "GUID": "4BD0D48B-2058-4DC3-B67190FFA6DF6D67",
+      "IdMateriale": 2,
+      "Diametro": 12.0,
+      "Default": 0
+    },
+    {
+      "Id": 8,
+      "id_testo": 290,
+      "Descrizione": "TUBO RAME RIC. DA  1\"   SP 0.41",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.41,
+      "GUID": "F50718B0-0D0C-4AB7-B874AA653232F6C6",
+      "IdMateriale": 2,
+      "Diametro": 25.4,
+      "Default": 0
+    },
+    {
+      "Id": 9,
+      "id_testo": 292,
+      "Descrizione": "TUBO RAME RIC. DA  1\"   SP 0.50",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.5,
+      "GUID": "E95DB5D3-B87E-4116-B9B128AE5627816F",
+      "IdMateriale": 2,
+      "Diametro": 25.4,
+      "Default": 0
+    },
+    {
+      "Id": 10,
+      "id_testo": 294,
+      "Descrizione": "TUBO RAME RIC. DA 1 \"   SP 0.75",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.75,
+      "GUID": "69061845-869D-42DC-8DB3498F0769CFA2",
+      "IdMateriale": 2,
+      "Diametro": 25.4,
+      "Default": 0
+    },
+    {
+      "Id": 11,
+      "id_testo": 296,
+      "Descrizione": "TUBO RAME RIC. DA 12   SP 1.00",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 1.0,
+      "GUID": "4BF37070-D4E0-4BF2-869211AB7E126DFF",
+      "IdMateriale": 2,
+      "Diametro": 25.4,
+      "Default": 0
+    },
+    {
+      "Id": 12,
+      "id_testo": 298,
+      "Descrizione": "TUBO IN ACCIAIO 3/4",
+      "Peso": 1.0,
+      "Costo": 1.0,
+      "Spessore": 0.15,
+      "GUID": "45F702A1-F48C-4B77-98334823080561FD",
+      "IdMateriale": 4,
+      "Diametro": 19.05,
+      "Default": 0
+    },
+    {
+      "Id": 18,
+      "id_testo": 760,
+      "Descrizione": "NONE",
+      "Peso": 0.0,
+      "Costo": 0.0,
+      "Spessore": 0.0,
+      "GUID": "50E116BD-5944-43F0-B3CCE447AF3C260B",
+      "IdMateriale": 0,
+      "Diametro": 0.0,
+      "Default": 1
+    }
+  ],
+  "frame": [
+    {
+      "Id": 13,
+      "Descrizione": "ACCESSORIO 1",
+      "id_testo": 392,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "078640F5-8880-4650-9A925C9A306BFE96"
+    },
+    {
+      "Id": 14,
+      "Descrizione": "ACCESSORIO 2",
+      "id_testo": 394,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "40266A07-4CCD-443B-97A3B4D114607690"
+    },
+    {
+      "Id": 15,
+      "Descrizione": "ACCESSORIO 3",
+      "id_testo": 396,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "89529ACE-832D-4ABA-AD841F92DEB04F22"
+    },
+    {
+      "Id": 16,
+      "Descrizione": "ACCESSORIO 4",
+      "id_testo": 398,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "106EC705-29F2-42D0-B1DE29171FC9CE40"
+    },
+    {
+      "Id": 17,
+      "Descrizione": "ACCESSORIO 5",
+      "id_testo": 400,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "A6B9078B-AF63-4BC9-AA95AA7EC3786C73"
+    },
+    {
+      "Id": 18,
+      "Descrizione": "ACCESSORIO 6",
+      "id_testo": 402,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "158C8F5E-017B-431D-9FFE756D2383ED2C"
+    },
+    {
+      "Id": 19,
+      "Descrizione": "ACCESSORIO 7",
+      "id_testo": 404,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "BA951801-2D64-481A-ABA42B3A710D2F2D"
+    },
+    {
+      "Id": 20,
+      "Descrizione": "ACCESSORIO 8",
+      "id_testo": 406,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "11555420-3F82-4F0A-9E1A058E7705ABE3"
+    },
+    {
+      "Id": 21,
+      "Descrizione": "ACCESSORIO 9",
+      "id_testo": 408,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "C3AA75FF-597A-4A5C-ACFCF912E2D430BC"
+    },
+    {
+      "Id": 22,
+      "Descrizione": "ACCESSORIO 10",
+      "id_testo": 410,
+      "Peso": 1,
+      "Costo": 1,
+      "Spessore": 0,
+      "GUID": "A1E73AB7-40E4-4DD1-AD58DEA5A77E81D8"
+    }
+  ]
+}
