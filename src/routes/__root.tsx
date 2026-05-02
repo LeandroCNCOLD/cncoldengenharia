@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/lib/auth";
+import { ptBR } from "@/i18n/pt-BR";
 
 import appCss from "../styles.css?url";
 
@@ -35,23 +36,20 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CN Cold Engineering" },
+      { title: ptBR.meta.title },
       {
         name: "description",
-        content:
-          "Plataforma técnica interna da CN Cold para gestão de componentes frigoríficos, ingestão de arquivos e catálogo técnico.",
+        content: ptBR.meta.description,
       },
       { name: "author", content: "CN Cold" },
-      { property: "og:title", content: "CN Cold Engineering" },
+      { property: "og:title", content: ptBR.meta.title },
       {
         property: "og:description",
-        content: "Plataforma técnica interna da CN Cold.",
+        content: ptBR.meta.shortDescription,
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:title", content: "CN Cold Engineering" },
-      { name: "description", content: "Coldbase Hub manages technical data for refrigeration components, building a foundation for future engineering tools." },
-      { property: "og:description", content: "Coldbase Hub manages technical data for refrigeration components, building a foundation for future engineering tools." },
-      { name: "twitter:description", content: "Coldbase Hub manages technical data for refrigeration components, building a foundation for future engineering tools." },
+      { name: "twitter:title", content: ptBR.meta.title },
+      { name: "twitter:description", content: ptBR.meta.description },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0d3c5c2f-b7b9-4a8e-a349-8e62618bdd74/id-preview-d4ba03b9--df3997bc-561a-4a74-bd68-343e76b9168d.lovable.app-1777406799331.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0d3c5c2f-b7b9-4a8e-a349-8e62618bdd74/id-preview-d4ba03b9--df3997bc-561a-4a74-bd68-343e76b9168d.lovable.app-1777406799331.png" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -12,35 +12,36 @@ import {
 import { PageContainer } from "../components/layout/PageContainer";
 import { useSessionStore } from "../stores/useSessionStore";
 import { useUserModeStore } from "../stores/useUserModeStore";
+import { useTranslation } from "@/i18n/useTranslation";
 
 const MODULES = [
   {
     to: "/coldpro/simulation",
-    label: "Equilíbrio do Sistema",
+    labelKey: "navigation.systemEquilibrium",
     description: "Resolve o equilíbrio termodinâmico completo do sistema.",
     Icon: Activity,
   },
   {
     to: "/coldpro/curve",
-    label: "Curva de Desempenho",
+    labelKey: "navigation.performanceCurve",
     description: "Gera a curva capacidade × temperatura do produto.",
     Icon: TrendingUp,
   },
   {
     to: "/coldpro/map",
-    label: "Mapa Operacional",
+    labelKey: "navigation.operatingMap",
     description: "Mapa multivariável de operação do equipamento.",
     Icon: Map,
   },
   {
     to: "/coldpro/record",
-    label: "Ficha Técnica",
+    labelKey: "navigation.productRecord",
     description: "Ficha técnica final auditada do produto.",
     Icon: FileText,
   },
   {
     to: "/coldpro/registry",
-    label: "Registry de Produtos",
+    labelKey: "navigation.productRegistry",
     description: "Registro de produtos versionados e auditados.",
     Icon: Database,
   },
@@ -58,6 +59,7 @@ function formatDateTime(iso: string): string {
 }
 
 export function DashboardPage() {
+  const { t } = useTranslation();
   const sessions = useSessionStore((s) => s.sessions);
   const activeSessionId = useSessionStore((s) => s.activeSessionId);
   const createSession = useSessionStore((s) => s.createSession);
@@ -75,8 +77,8 @@ export function DashboardPage() {
 
   return (
     <PageContainer
-      title="Dashboard ColdPro V2"
-      subtitle="Centro de operações técnicas — motor de cálculo CN COLD."
+      title={t("dashboard.title")}
+      subtitle={t("dashboard.subtitle")}
       actions={
         <button
           type="button"
@@ -84,20 +86,22 @@ export function DashboardPage() {
           className="inline-flex items-center gap-1.5 rounded-md bg-[#1E6FD9] px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#1858b0]"
         >
           <Plus className="h-4 w-4" />
-          Nova sessão
+          {t("dashboard.newSession")}
         </button>
       }
     >
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-900">Sessões recentes</h2>
-            <span className="text-xs text-slate-400">{sessions.length} no total</span>
+            <h2 className="text-sm font-semibold text-slate-900">{t("dashboard.recentSessions")}</h2>
+            <span className="text-xs text-slate-400">
+              {sessions.length} {t("dashboard.total")}
+            </span>
           </div>
 
           {recent.length === 0 ? (
             <div className="mt-4 rounded-md border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
-              Nenhuma sessão ainda. Crie uma nova sessão para começar.
+              {t("dashboard.emptySessions")}
             </div>
           ) : (
             <ul className="mt-4 divide-y divide-slate-100">
@@ -111,7 +115,7 @@ export function DashboardPage() {
                     <div className="min-w-0">
                       <p className="truncate font-medium text-slate-800">{s.name}</p>
                       <p className="text-xs text-slate-500">
-                        {formatDateTime(s.createdAt)} · modo {s.mode}
+                        {formatDateTime(s.createdAt)} · {t("dashboard.mode")} {s.mode}
                       </p>
                     </div>
                     <button
@@ -123,7 +127,7 @@ export function DashboardPage() {
                           : "border border-slate-300 text-slate-600 hover:bg-slate-50"
                       }`}
                     >
-                      {isActive ? "Ativa" : "Selecionar"}
+                      {isActive ? t("common.active") : t("common.select")}
                     </button>
                   </li>
                 );
@@ -133,18 +137,18 @@ export function DashboardPage() {
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-900">Status do motor</h2>
+          <h2 className="text-sm font-semibold text-slate-900">{t("dashboard.engineStatus")}</h2>
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex items-center justify-between">
-              <dt className="text-slate-500">Versão</dt>
+              <dt className="text-slate-500">{t("dashboard.version")}</dt>
               <dd className="font-medium text-slate-800">ColdPro V2</dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="text-slate-500">Modo atual</dt>
+              <dt className="text-slate-500">{t("dashboard.currentMode")}</dt>
               <dd className="font-medium capitalize text-slate-800">{mode}</dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="text-slate-500">Sessões em memória</dt>
+              <dt className="text-slate-500">{t("dashboard.memorySessions")}</dt>
               <dd className="font-medium text-slate-800">{sessions.length}</dd>
             </div>
           </dl>
@@ -152,7 +156,7 @@ export function DashboardPage() {
       </div>
 
       <section className="mt-6">
-        <h2 className="mb-3 text-sm font-semibold text-slate-900">Módulos disponíveis</h2>
+        <h2 className="mb-3 text-sm font-semibold text-slate-900">{t("dashboard.availableModules")}</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {MODULES.map((m) => {
             const Icon = m.Icon;
@@ -168,7 +172,7 @@ export function DashboardPage() {
                   </div>
                   <ArrowRight className="h-4 w-4 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-[#1E6FD9]" />
                 </div>
-                <h3 className="text-sm font-semibold text-slate-900">{m.label}</h3>
+                <h3 className="text-sm font-semibold text-slate-900">{t(m.labelKey)}</h3>
                 <p className="text-xs text-slate-500">{m.description}</p>
               </Link>
             );

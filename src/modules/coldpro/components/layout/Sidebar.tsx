@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/i18n/useTranslation";
 import { useAuth } from "@/lib/auth";
 import { UserModeSwitcher } from "../mode/UserModeSwitcher";
 
@@ -27,21 +28,22 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { to: "/coldpro", label: "Dashboard", Icon: LayoutDashboard, exact: true },
-  { to: "/coldpro/catalog", label: "Catálogo CN COLD", Icon: DatabaseIcon },
-  { to: "/coldpro/components", label: "Componentes", Icon: Boxes },
-  { to: "/coldpro/assembly", label: "Montagem", Icon: Wrench },
-  { to: "/coldpro/simulation", label: "Equilíbrio do Sistema", Icon: Activity },
-  { to: "/coldpro/curve", label: "Curva de Desempenho", Icon: TrendingUp },
-  { to: "/coldpro/unilab", label: "Cn Coils Simulator", Icon: Gauge },
-  { to: "/coldpro/map", label: "Mapa Operacional", Icon: Map },
-  { to: "/coldpro/record", label: "Ficha Técnica", Icon: FileText },
-  { to: "/coldpro/registry", label: "Registry de Produtos", Icon: Database },
-  { to: "/coldpro/export", label: "Exportação", Icon: Download },
-  { to: "/coldpro/audit", label: "Auditoria CN COLD", Icon: ShieldCheck },
+  { to: "/coldpro", label: "common.dashboard", Icon: LayoutDashboard, exact: true },
+  { to: "/coldpro/catalog", label: "navigation.catalog", Icon: DatabaseIcon },
+  { to: "/coldpro/components", label: "navigation.components", Icon: Boxes },
+  { to: "/coldpro/assembly", label: "navigation.assembly", Icon: Wrench },
+  { to: "/coldpro/simulation", label: "navigation.systemEquilibrium", Icon: Activity },
+  { to: "/coldpro/curve", label: "navigation.performanceCurve", Icon: TrendingUp },
+  { to: "/coldpro/unilab", label: "navigation.unilabSimulator", Icon: Gauge },
+  { to: "/coldpro/map", label: "navigation.operatingMap", Icon: Map },
+  { to: "/coldpro/record", label: "navigation.productRecord", Icon: FileText },
+  { to: "/coldpro/registry", label: "navigation.productRegistry", Icon: Database },
+  { to: "/coldpro/export", label: "navigation.export", Icon: Download },
+  { to: "/coldpro/audit", label: "navigation.audit", Icon: ShieldCheck },
 ];
 
 export function Sidebar() {
+  const { t } = useTranslation();
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -50,8 +52,8 @@ export function Sidebar() {
       <div className="flex items-center gap-3 border-b border-white/10 px-5 py-4">
         <CnLogo variant="dark" />
         <div className="min-w-0">
-          <p className="text-sm font-semibold leading-tight">ColdPro V2</p>
-          <p className="text-[10px] uppercase tracking-wider text-slate-400">CN COLD</p>
+          <p className="text-sm font-semibold leading-tight">{t("navigation.coldProV2")}</p>
+          <p className="text-[10px] uppercase tracking-wider text-slate-400">{t("navigation.cnCold")}</p>
         </div>
       </div>
 
@@ -74,7 +76,7 @@ export function Sidebar() {
                   }}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{item.label}</span>
+                  <span className="truncate">{t(item.label)}</span>
                 </Link>
               </li>
             );
@@ -83,7 +85,7 @@ export function Sidebar() {
       </nav>
 
       <div className="space-y-2 border-t border-white/10 px-4 py-3">
-        <p className="text-[10px] uppercase tracking-wider text-slate-400">Modo do usuário</p>
+        <p className="text-[10px] uppercase tracking-wider text-slate-400">{t("navigation.userMode")}</p>
         <UserModeSwitcher />
 
         <div className="pt-2">
@@ -91,7 +93,7 @@ export function Sidebar() {
             {user?.user_metadata?.full_name || user?.email}
           </p>
           <p className="truncate text-[10px] text-slate-400">
-            {isAdmin ? "Administrador" : "Engenheiro"}
+            {isAdmin ? t("common.administrator") : t("common.engineer")}
           </p>
         </div>
 
@@ -105,10 +107,10 @@ export function Sidebar() {
           }}
         >
           <LogOut className="h-4 w-4" />
-          Sair
+          {t("common.signOut")}
         </Button>
 
-        <p className="pt-1 text-[10px] text-slate-500">Motor V2 — CN COLD</p>
+        <p className="pt-1 text-[10px] text-slate-500">{t("navigation.engineV2")}</p>
       </div>
     </aside>
   );

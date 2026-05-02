@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TechnicalField } from "../ui/TechnicalField";
 import { useComponentStore } from "../../stores/useComponentStore";
 import type { FanSpec } from "@/modules/coldpro_v2";
+import { useTranslation } from "@/i18n/useTranslation";
 
 interface FanFormProps {
   onSaved: () => void;
@@ -16,6 +17,7 @@ const num = (v: string): number | undefined => {
 };
 
 export function FanForm({ onSaved }: FanFormProps) {
+  const { t } = useTranslation();
   const addFan = useComponentStore((s) => s.addFan);
   const [name, setName] = useState("");
   const [role, setRole] = useState<FanRole>("evaporator_fan");
@@ -46,7 +48,7 @@ export function FanForm({ onSaved }: FanFormProps) {
           value={name}
           onChange={(v) => setName(v)}
           type="text"
-          placeholder="Ex: Fan 4000m³/h"
+          placeholder={t("components.placeholders.fan")}
           required
         />
         <div>

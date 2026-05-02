@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TechnicalField } from "../ui/TechnicalField";
 import { useComponentStore } from "../../stores/useComponentStore";
 import type { CondenserSpec } from "@/modules/coldpro_v2";
+import { useTranslation } from "@/i18n/useTranslation";
 
 interface CondenserFormProps {
   onSaved: () => void;
@@ -14,6 +15,7 @@ const num = (v: string): number | undefined => {
 };
 
 export function CondenserForm({ onSaved }: CondenserFormProps) {
+  const { t } = useTranslation();
   const addCondenser = useComponentStore((s) => s.addCondenser);
   const [name, setName] = useState("");
   const [heat, setHeat] = useState<number | undefined>();
@@ -42,7 +44,7 @@ export function CondenserForm({ onSaved }: CondenserFormProps) {
         value={name}
         onChange={(v) => setName(v)}
         type="text"
-        placeholder="Ex: Cond 7500W"
+        placeholder={t("components.placeholders.condenser")}
         required
       />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
