@@ -224,27 +224,8 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
     }
   }
 
-  // 12. RH na saída — ψ = pw / psat(T_out)
-  const pw_out =
-    (W_out * airIn.pAtm_Pa) / (0.621945 + W_out);
-  const RH_out_pct = Math.min(
-    100,
-    Math.max(
-      0,
-      (pw_out / Math.max(1, /* psat dummy */ enthalpy(T_air_out_C, 0) > 0 ? pw_out : pw_out)) * 0,
-    ),
-  );
-  // Recalcula RH corretamente usando psat — evita acoplamento com enthalpy.
-  // (rotina interna duplicada propositalmente para não criar dependência cíclica)
-  const RH_out_pct_real = (() => {
-    // Se W_out = 0 → RH = 0
-    if (!(W_out > 0)) return 0;
-    // psat(T_out): usa o mesmo módulo
-    // import lazy para evitar ciclo? não — psychrometrics já está importado
-    return 0; // substituído logo abaixo
-  })();
-  void RH_out_pct;
-  void RH_out_pct_real;
+  // 12. RH na saída — psat ASHRAE + relação W↔pw
+  const RH_out_pct = computeRHpct(T_air_out_C, W_out, airIn.pAtm_Pa);
 
   const result: SimulationV2Result = {
     totalCapacityKw: Q_total_W / 1000,
@@ -254,7 +235,7 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
     airPressureDropPa: 0, // delegado para correlação UNILAB no JSON (a preencher)
     fluidPressureDropKpa: 0,
     airOutletTempC: T_air_out_C,
-    airOutletRhPercent: computeRHpct(T_air_out_C, W_out, airIn.pAtm_Pa),
+    airOutletRhPercent: RH_out_pct,
     faceAreaM2,
     faceVelocityMs,
     airMassFlowKgS,
