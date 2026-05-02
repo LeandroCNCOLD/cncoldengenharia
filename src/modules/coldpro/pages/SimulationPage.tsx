@@ -42,17 +42,34 @@ export function SimulationPage() {
   const [conditions, setConditions] = useState<Partial<SystemConditions>>({});
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const { selectedCompressor, selectedCondenser, clearSelection } = useCatalogSessionStore();
+  const {
+    selectedCompressor,
+    selectedCondenser,
+    selectedEvaporator,
+    selectedReheatCoil,
+    clearSelection,
+  } = useCatalogSessionStore();
   const lastAppliedCompressorId = useRef<string | undefined>(undefined);
   const lastAppliedCondenserId = useRef<string | undefined>(undefined);
+  const lastAppliedEvaporatorId = useRef<string | undefined>(undefined);
+  const [catalogWarnings, setCatalogWarnings] = useState<string[]>([]);
+  const [catalogEvaporatorInput, setCatalogEvaporatorInput] = useState<
+    ReturnType<typeof buildMotorComponentsFromCatalog>["evaporator"] | undefined
+  >(undefined);
 
   // Pré-preenche os formulários com dados do catálogo quando a seleção muda.
-  // Mantém o usuário livre para editar; só reaplica se o item selecionado mudar.
+  // Aplica apenas no momento em que o ID selecionado muda — não sobrescreve
+  // edições manuais posteriores. Catálogo só tem prioridade no instante da seleção.
   useEffect(() => {
     const motor = buildMotorComponentsFromCatalog({
       compressor: selectedCompressor,
       condenser: selectedCondenser,
+      evaporator: selectedEvaporator,
+      reheat_coil: selectedReheatCoil,
     });
+
+    setCatalogWarnings(motor.warnings);
+    setCatalogEvaporatorInput(motor.evaporator);
 
     if (selectedCompressor && selectedCompressor.id !== lastAppliedCompressorId.current) {
       lastAppliedCompressorId.current = selectedCompressor.id;
@@ -76,16 +93,41 @@ export function SimulationPage() {
     if (!selectedCondenser) {
       lastAppliedCondenserId.current = undefined;
     }
-  }, [selectedCompressor, selectedCondenser]);
 
-  const hasCatalogSelection = !!(selectedCompressor || selectedCondenser);
+    if (selectedEvaporator && selectedEvaporator.id !== lastAppliedEvaporatorId.current) {
+      lastAppliedEvaporatorId.current = selectedEvaporator.id;
+      // T_evap do evaporador também ajuda a calibrar o compressor
+      if (selectedEvaporator.tempEvaporacaoC !== undefined && !selectedCompressor) {
+        setCompressor((prev) => ({
+          ...prev,
+          evap_temp_c: selectedEvaporator.tempEvaporacaoC,
+        }));
+      }
+    }
+    if (!selectedEvaporator) {
+      lastAppliedEvaporatorId.current = undefined;
+    }
+  }, [selectedCompressor, selectedCondenser, selectedEvaporator, selectedReheatCoil]);
+
+  const hasCatalogSelection = !!(
+    selectedCompressor ||
+    selectedCondenser ||
+    selectedEvaporator ||
+    selectedReheatCoil
+  );
   const canCalculate = isComplete(compressor, condenser, conditions);
 
   const handleCalculate = () => {
     if (!canCalculate) return;
+    // Catálogo tem prioridade no input do evaporador SOMENTE se conseguiu gerar
+    // ProgressiveCoilInput completo. Caso contrário, fallback no input manual.
+    const evaporatorInput =
+      catalogEvaporatorInput ?? {
+        progressive_input: buildMinimalEvaporatorInput(compressor, conditions),
+      };
     calculate({
       compressor: compressor as CompressorSpec,
-      evaporator: { progressive_input: buildMinimalEvaporatorInput(compressor, conditions) },
+      evaporator: evaporatorInput,
       condenser: condenser as CondenserSpec,
       system_conditions: {
         ambient_temp_c: conditions.ambient_temp_c!,
@@ -134,8 +176,21 @@ export function SimulationPage() {
                 {selectedCondenser && selectedCondenser.id !== selectedCompressor?.id && (
                   <>Condensador: <strong>{selectedCondenser.modeloBaseReferencia ?? selectedCondenser.modelo}</strong>. </>
                 )}
+                {selectedEvaporator && (
+                  <>Evaporador: <strong>{selectedEvaporator.modeloBaseReferencia ?? selectedEvaporator.modelo}</strong>. </>
+                )}
+                {selectedReheatCoil && (
+                  <>Reaquecimento: <strong>{selectedReheatCoil.modeloBaseReferencia ?? selectedReheatCoil.modelo}</strong>. </>
+                )}
                 Os campos abaixo continuam editáveis.
               </p>
+              {catalogWarnings.length > 0 && (
+                <ul className="mt-2 list-disc space-y-0.5 pl-5 text-[11px] text-amber-700">
+                  {catalogWarnings.map((w, i) => (
+                    <li key={i}>{w}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           ) : (
             <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
