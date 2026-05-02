@@ -19,6 +19,7 @@ export function FanForm({ onSaved }: FanFormProps) {
   const addFan = useComponentStore((s) => s.addFan);
   const [name, setName] = useState("");
   const [role, setRole] = useState<FanRole>("evaporator_fan");
+  const [mode, setMode] = useState<"blower" | "exhaust">("exhaust");
   const [airflow, setAirflow] = useState<number | undefined>();
   const [pressure, setPressure] = useState<number | undefined>(50);
 
@@ -33,6 +34,7 @@ export function FanForm({ onSaved }: FanFormProps) {
     const spec: FanSpec = {
       airflow_m3_h: airflow!,
       available_static_pressure_pa: pressure!,
+      mode,
     };
     addFan(name.trim(), role, spec);
     onSaved();
@@ -61,6 +63,35 @@ export function FanForm({ onSaved }: FanFormProps) {
             <option value="evaporator_fan">Ventilador de evaporador</option>
             <option value="condenser_fan">Ventilador de condensador</option>
           </select>
+        </div>
+      </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-slate-700">
+          Tipo de operação
+        </label>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setMode("blower")}
+            className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition ${
+              mode === "blower"
+                ? "border-[#1E6FD9] bg-[#1E6FD9] text-white"
+                : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            Soprador
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("exhaust")}
+            className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition ${
+              mode === "exhaust"
+                ? "border-[#1E6FD9] bg-[#1E6FD9] text-white"
+                : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            Exaustor
+          </button>
         </div>
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

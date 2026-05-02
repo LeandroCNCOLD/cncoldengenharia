@@ -743,6 +743,8 @@ export interface CondenserSpec {
 export interface FanSpec {
   airflow_m3_h: number;
   available_static_pressure_pa: number;
+  /** "blower" = soprador, "exhaust" = exaustor. */
+  mode?: "blower" | "exhaust";
 }
 
 export interface ExpansionValveSpec {
