@@ -131,8 +131,23 @@ function enrich(entry: RawGeometryEntry): CoilGeometryItem {
   const finType = readNum(raw, "fin_type");
   const tubeType = readNum(raw, "tube_type");
 
+  // Coerções para o shape requerido pela base CoilGeometryCatalogItem.
+  // Os valores "verdadeiros" vêm dos campos físicos pt-BR abaixo (podem ser null).
+  const tubePitchTransverseMm =
+    entry.tubePitchTransverseMm ?? readNum(raw, "tube_pitch_mm") ?? 0;
+  const tubePitchLongitudinalMm =
+    entry.tubePitchLongitudinalMm ?? readNum(raw, "row_pitch_mm") ?? 0;
+  const tubeOuterDiameterMm =
+    entry.tubeOuterDiameterMm ?? readNum(raw, "tube_od_mm") ?? 0;
+  const tubeInnerDiameterMm =
+    entry.tubeInnerDiameterMm ?? readNum(raw, "tube_id_mm") ?? undefined;
+
   return {
     ...entry,
+    tubePitchTransverseMm,
+    tubePitchLongitudinalMm,
+    tubeOuterDiameterMm,
+    tubeInnerDiameterMm,
     tipo_serpentina: tipo,
     descricao: readStr(raw, "description") ?? entry.name,
     codigo: readStr(raw, "code") ?? entry.id,
