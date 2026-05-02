@@ -33,7 +33,7 @@ export function UserModeSwitcher({ variant = "inline", className = "" }: UserMod
   }
 
   return (
-    <div className={`inline-flex rounded-md border border-white/10 bg-white/5 p-0.5 ${className}`}>
+    <div className={`flex w-full flex-wrap gap-0.5 rounded border border-white/10 bg-white/5 p-0.5 ${className}`}>
       {MODES.map((m) => {
         const active = m.value === mode;
         return (
@@ -41,11 +41,12 @@ export function UserModeSwitcher({ variant = "inline", className = "" }: UserMod
             key={m.value}
             type="button"
             onClick={() => setMode(m.value)}
-            className={`rounded px-2.5 py-1 text-xs font-medium transition ${
+            className={`flex-1 min-w-0 truncate rounded px-1.5 py-0.5 text-[10px] font-medium transition ${
               active
                 ? "bg-[#1E6FD9] text-white shadow"
                 : "text-slate-300 hover:text-white"
             }`}
+            title={m.label}
           >
             {m.label}
           </button>

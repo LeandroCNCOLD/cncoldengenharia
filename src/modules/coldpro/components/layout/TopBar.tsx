@@ -27,19 +27,21 @@ export function TopBar({ onToggleAI }: TopBarProps) {
   );
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-5">
-      <div className="flex items-center gap-3 text-sm">
-        <span className="text-xs uppercase tracking-wider text-slate-400">Sessão</span>
+    <header className="flex h-11 shrink-0 items-center justify-between gap-2 border-b border-slate-200 bg-white px-3 sm:px-4">
+      <div className="flex min-w-0 items-center gap-2 text-xs">
+        <span className="hidden text-[10px] uppercase tracking-wider text-slate-400 sm:inline">
+          Sessão
+        </span>
         {activeSession ? (
-          <span className="font-medium text-slate-800">{activeSession.name}</span>
+          <span className="truncate font-medium text-slate-800">{activeSession.name}</span>
         ) : (
-          <span className="text-slate-400">Nenhuma sessão ativa</span>
+          <span className="truncate text-slate-400">Nenhuma sessão ativa</span>
         )}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-1.5">
         <span
-          className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${MODE_BADGE[mode]}`}
+          className={`hidden rounded-full px-2 py-0.5 text-[10px] font-medium sm:inline ${MODE_BADGE[mode]}`}
           title="Modo do usuário"
         >
           {MODE_LABEL[mode]}
@@ -49,17 +51,17 @@ export function TopBar({ onToggleAI }: TopBarProps) {
 
         <button
           type="button"
-          className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+          className="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
           aria-label="Notificações"
         >
-          <Bell className="h-4 w-4" />
+          <Bell className="h-3.5 w-3.5" />
         </button>
         <button
           type="button"
-          className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+          className="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
           aria-label="Configurações"
         >
-          <Settings className="h-4 w-4" />
+          <Settings className="h-3.5 w-3.5" />
         </button>
       </div>
     </header>
