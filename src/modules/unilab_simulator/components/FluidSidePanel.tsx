@@ -351,24 +351,22 @@ export function FluidSidePanel({ componentType, disabled, result }: FluidSidePan
 
 function Row({
   label,
-  unit,
+  unitNode,
   input,
   obtained,
 }: {
   label: string;
-  unit: string;
+  unitNode: React.ReactNode;
   input: React.ReactNode;
   obtained: string;
 }) {
   const isEmpty = obtained === "---" || obtained === "" || obtained === "—";
   return (
-    <div className="grid grid-cols-[160px_60px_1fr_88px] items-center gap-1.5">
+    <div className="grid grid-cols-[160px_84px_1fr_88px] items-center gap-1.5">
       <label className="truncate text-[11px] font-medium text-slate-700" title={label}>
         {label}
       </label>
-      <div className="rounded border border-slate-300 bg-white px-1.5 py-1 text-center text-[11px] text-slate-600">
-        {unit}
-      </div>
+      <div>{unitNode}</div>
       <div>{input}</div>
       <div
         className={`rounded border border-emerald-300 bg-emerald-100 px-2 py-1 text-right font-mono text-[11px] ${
@@ -377,6 +375,14 @@ function Row({
       >
         {obtained}
       </div>
+    </div>
+  );
+}
+
+function UnitText({ text }: { text: string }) {
+  return (
+    <div className="rounded border border-slate-300 bg-white px-1.5 py-1 text-center text-[11px] text-slate-600">
+      {text}
     </div>
   );
 }
