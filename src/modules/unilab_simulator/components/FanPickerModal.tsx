@@ -43,6 +43,7 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
   const setAirFlow = useUnilabSimulationStore((s) => s.setAirFlow);
 
   const [query, setQuery] = useState("");
+  const [brand, setBrand] = useState<string>("");
   const [draftId, setDraftId] = useState<string | undefined>(selectedFanId);
   const [draftCount, setDraftCount] = useState<number>(fanCount);
   const [draftRole, setDraftRole] = useState<"blower" | "exhaust">(fanRole);
@@ -50,21 +51,31 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
   useEffect(() => {
     if (open) {
       setQuery("");
+      setBrand("");
       setDraftId(selectedFanId);
       setDraftCount(fanCount);
       setDraftRole(fanRole);
     }
   }, [open, selectedFanId, fanCount, fanRole]);
 
+  const brands = useMemo(() => {
+    const set = new Set<string>();
+    for (const f of fans) {
+      if (f.manufacturer) set.add(f.manufacturer);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [fans]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return fans;
-    return fans.filter((f) =>
-      [f.manufacturer, f.model, f.id]
+    return fans.filter((f) => {
+      if (brand && f.manufacturer !== brand) return false;
+      if (!q) return true;
+      return [f.manufacturer, f.model, f.id]
         .filter(Boolean)
-        .some((v) => String(v).toLowerCase().includes(q)),
-    );
-  }, [fans, query]);
+        .some((v) => String(v).toLowerCase().includes(q));
+    });
+  }, [fans, query, brand]);
 
   const draft = fans.find((f) => f.id === draftId);
   const totalAirflow =
