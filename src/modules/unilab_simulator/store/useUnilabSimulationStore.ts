@@ -19,10 +19,12 @@ interface UnilabSimulationStore {
   tempInDB_C: number;
   rhIn_pct: number;
   foulingFactorAir: number;
+  selectedFanId?: string;
   setAirFlow: (val: number) => void;
   setTempInDB: (val: number) => void;
   setRhIn: (val: number) => void;
   setFoulingFactorAir: (val: number) => void;
+  setSelectedFan: (id: string | undefined) => void;
 
   setPhysicalInputs: (patch: Partial<UnilabPhysicalInputs>) => void;
   setThermoInputs: (patch: Partial<UnilabThermoInputs>) => void;
@@ -46,10 +48,12 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   tempInDB_C: 25,
   rhIn_pct: 60,
   foulingFactorAir: 0,
+  selectedFanId: undefined,
   setAirFlow: (val) => set({ airFlow_m3h: val }),
   setTempInDB: (val) => set({ tempInDB_C: val }),
   setRhIn: (val) => set({ rhIn_pct: val }),
   setFoulingFactorAir: (val) => set({ foulingFactorAir: val }),
+  setSelectedFan: (id) => set({ selectedFanId: id }),
 
   setPhysicalInputs: (patch) =>
     set((s) => ({ physicalInputs: { ...s.physicalInputs, ...patch } })),
@@ -88,5 +92,6 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       tempInDB_C: 25,
       rhIn_pct: 60,
       foulingFactorAir: 0,
+      selectedFanId: undefined,
     }),
 }));
