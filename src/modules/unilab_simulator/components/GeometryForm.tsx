@@ -152,7 +152,7 @@ export function GeometryForm({
           <legend className="px-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
             Campos da geometria (somente leitura)
           </legend>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+          <div className="grid grid-cols-1 gap-x-4 sm:grid-cols-2 gap-y-1 text-xs">
             <ReadOnlyRow label="Passo de fileiras" value={selected.passo_fileiras_mm} unit="mm" />
             <ReadOnlyRow label="Passo de tubos" value={selected.passo_tubos_mm} unit="mm" />
             <ReadOnlyRow label="Ø externo do tubo" value={selected.diametro_externo_tubo_mm} unit="mm" />
@@ -171,7 +171,7 @@ export function GeometryForm({
         </fieldset>
       )}
       {/* Campos complementares manuais */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <NumberField
           label={f.finnedHeight}
           unit="mm"
@@ -212,7 +212,7 @@ export function GeometryForm({
         disabled={disabled}
       />
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <SelectField
           label={f.finPitch}
           value={
