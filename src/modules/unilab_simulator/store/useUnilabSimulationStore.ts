@@ -11,6 +11,7 @@ import {
   type MaterialKey,
   type MaterialPrices,
 } from "../engine/costCalculator";
+import { snapFinPitchToTool } from "../config/finPitchTools";
 
 /**
  * Modo de cálculo do UNILAB:
