@@ -164,6 +164,32 @@ export function useCnCoilsCatalogs(): CnCoilsCatalogsState {
               err instanceof Error ? err.message : String(err);
           }
         })(),
+        ...([
+          ["warnings", "warnings.json"],
+          ["uiLabels", "uiLabels.json"],
+          ["distributorHoleSizes", "distributorHoleSizes.json"],
+        ] as const).map(([key, file]) =>
+          (async () => {
+            try {
+              const arr = await fetchJsonArray<unknown>(file);
+              (next as unknown as Record<string, unknown>)[key] = arr;
+            } catch (err) {
+              errs[file] = err instanceof Error ? err.message : String(err);
+            }
+          })(),
+        ),
+        (async () => {
+          try {
+            const res = await fetch(`${CATALOG_BASE}/distributorKappa.json`, {
+              cache: "no-cache",
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            next.distributorKappa = (await res.json()) as DistributorKappaMap;
+          } catch (err) {
+            errs["distributorKappa.json"] =
+              err instanceof Error ? err.message : String(err);
+          }
+        })(),
       ]);
 
       // Lista combinada ordenada
