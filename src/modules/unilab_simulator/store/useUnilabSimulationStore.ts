@@ -66,6 +66,7 @@ interface UnilabSimulationStore {
   // Lado Fluido / Refrigerante (Etapa 4)
   fluid: string;
   fluidMassFlow_kg_h: number;
+  isMassFlowLocked: boolean;
   fluidOperatingTemp_C: number;
   fluidTempReference: "inlet" | "middle" | "outlet";
   superheat_K: number;
@@ -73,11 +74,22 @@ interface UnilabSimulationStore {
   foulingFactorFluid: number;
   setFluid: (val: string) => void;
   setFluidMassFlow: (val: number) => void;
+  toggleMassFlowLock: () => void;
   setFluidOperatingTemp: (val: number) => void;
   setFluidTempReference: (val: "inlet" | "middle" | "outlet") => void;
   setSuperheat: (val: number) => void;
   setSubcooling: (val: number) => void;
   setFoulingFactorFluid: (val: number) => void;
+
+  // Etapa 3.6 — Custo da bateria
+  materialPrices: MaterialPrices;
+  calculatedCost: number;
+  tubeMaterialKey: MaterialKey;
+  finMaterialKey: MaterialKey;
+  setMaterialPrice: (material: MaterialKey, price: number) => void;
+  setTubeMaterialKey: (key: MaterialKey) => void;
+  setFinMaterialKey: (key: MaterialKey) => void;
+  recalculateCost: () => void;
 
   setPhysicalInputs: (patch: Partial<UnilabPhysicalInputs>) => void;
   setThermoInputs: (patch: Partial<UnilabThermoInputs>) => void;
