@@ -195,19 +195,13 @@ export function UnilabWorkspacePage() {
           canSimulate={canSimulate}
           isSimulating={isSimulating}
           faceAreaM2={result?.faceAreaM2}
+          onOpenSchematic={() => setSchematicOpen(true)}
         />
 
         <div className="min-w-0 space-y-2 xl:contents">
-          {/* COLUNA CENTRAL — Lado Ventilador (fixo). Esquema da serpentina abre em modal. */}
+          {/* COLUNA CENTRAL — Lado Ventilador (fixo). Esquema da serpentina abre via "Desenho". */}
           <div className="min-w-0 space-y-2">
             <AirSidePanel result={result} />
-            <button
-              type="button"
-              onClick={() => setSchematicOpen(true)}
-              className="inline-flex w-full items-center justify-center gap-2 rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-            >
-              Ver desenho da serpentina
-            </button>
           </div>
 
           {/* COLUNA DIREITA — Lado Fluido FIXO */}
