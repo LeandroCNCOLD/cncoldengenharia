@@ -4,6 +4,16 @@ import {
   validateAirSideInputs,
   type PsychrometricValidationResult,
 } from "../services/psychrometrics";
+import type { UnilabSimulationResult } from "../types/unilab.types";
+
+interface AirSidePanelProps {
+  result?: UnilabSimulationResult;
+}
+
+function fmt(n: number | undefined, digits = 1): string {
+  if (n === undefined || !Number.isFinite(n)) return "---";
+  return n.toFixed(digits);
+}
 
 /**
  * AirSidePanel — replica o bloco "LADO VENTILAÇÃO" do Unilab Coils 9.0.
