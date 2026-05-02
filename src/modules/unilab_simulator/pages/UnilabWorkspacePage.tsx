@@ -131,7 +131,11 @@ export function UnilabWorkspacePage() {
       setWarnings(errors);
       return;
     }
-    run();
+    if (engineVersion === "v2") {
+      runV2();
+    } else {
+      run();
+    }
   };
 
   const handleSendToAssembly = () => {
