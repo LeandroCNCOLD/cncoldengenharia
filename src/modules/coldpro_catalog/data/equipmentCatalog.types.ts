@@ -93,6 +93,36 @@ export interface CatalogEquipmentRow {
   evaporadorVolumeInternoL?: number;
   evaporadorAreaSuperficieM2?: number;
 
+  // --- Geometria detalhada do evaporador (para ProgressiveCoilInput) ---
+  evaporadorTubeInnerDiameterMm?: number;
+  evaporadorTubePitchTransverseMm?: number;
+  evaporadorTubePitchLongitudinalMm?: number;
+  evaporadorFinHeightMm?: number;
+  evaporadorFinThicknessMm?: number;
+  evaporadorCoilWidthM?: number;
+  evaporadorCoilHeightM?: number;
+  evaporadorTubeMaterial?: "copper" | "aluminum" | "steel";
+  evaporadorFinMaterial?: "copper" | "aluminum" | "steel";
+  evaporadorAirTemperatureInC?: number;
+  evaporadorAirRelativeHumidityIn?: number;
+  evaporadorAirMassFlowKgS?: number;
+
+  // --- Serpentina de reaquecimento (para ReheatCoilSizingInput) ---
+  reheatQTargetW?: number;
+  reheatTAirInC?: number;
+  reheatTAirOutC?: number;
+  reheatAirMassFlowKgS?: number;
+  reheatTCondensingC?: number;
+  reheatTHotGasInC?: number;
+  reheatTubeOuterDiameterM?: number;
+  reheatTubeThicknessM?: number;
+  reheatFinSpacingM?: number;
+  reheatFinThicknessM?: number;
+  reheatTubePitchTransversalM?: number;
+  reheatTubePitchLongitudinalM?: number;
+  reheatCoilLengthM?: number;
+  reheatCircuits?: number;
+
   linhaSucao?: string;
   linhaDescarga?: string;
   linhaLiquido?: string;
