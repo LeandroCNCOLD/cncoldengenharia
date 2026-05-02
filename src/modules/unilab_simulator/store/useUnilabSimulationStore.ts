@@ -139,7 +139,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   setFluidExtras: (patch) =>
     set((s) => ({ fluidExtras: { ...s.fluidExtras, ...patch } })),
 
-  fluid: "R404A",
+  fluid: "REFMIX_R404A",
   fluidMassFlow_kg_h: 0,
   isMassFlowLocked: true,
   fluidOperatingTemp_C: 45,
