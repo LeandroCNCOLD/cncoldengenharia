@@ -268,3 +268,50 @@ export function translateEntry(
   if (!entry) return "";
   return entry.translations[lang] ?? entry.translations.en ?? "";
 }
+
+// ───────────── LOTE 8 — Termofísica e auxiliares ─────────────
+
+export interface ThermoPhysicalProperty {
+  IDFluido: string | null;
+  IDProp: string | null;
+  IDStep: string | null;
+  MinValue: string | null;
+  MaxValue: string | null;
+  [extra: string]: unknown;
+}
+
+export interface CorrectionPolynomial {
+  CodiceBatteria: string | null;
+  ItipoB: string | null;
+  AlCS: string | null;
+  Psq: string | null;
+  Descrizione: string | null;
+  [extra: string]: unknown;
+}
+
+export interface FanElectricalData {
+  IDFan: string | null;
+  Description: string | null;
+  Tension: string | null;
+  ICurva: string | null;
+  Var01: string | null;
+  [extra: string]: unknown;
+}
+
+export interface PumpData {
+  IDPump: string | null;
+  Description: string | null;
+  ICurva: string | null;
+  Var01: string | null;
+  Var02: string | null;
+  [extra: string]: unknown;
+}
+
+export interface CompressorOutletTemperature {
+  FreonID: string | null;
+  Descrizione: string | null;
+  DescriptionID: string | null;
+  CAS: string | null;
+  ChemicalName: string | null;
+  [extra: string]: unknown;
+}
