@@ -76,6 +76,7 @@ export interface CnCoilsCatalogsData {
   uiLabels: UiLabelEntry[];
   distributorKappa: DistributorKappaMap;
   distributorHoleSizes: DistributorHoleSize[];
+  engineErrors: EngineErrorMessage[];
 }
 
 export interface CnCoilsCatalogsState extends CnCoilsCatalogsData {
