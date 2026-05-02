@@ -94,6 +94,8 @@ export function FluidSidePanel({
 
   const [refrigerants, setRefrigerants] = useState<RefrigerantOption[]>([]);
   const [compressors, setCompressors] = useState<Array<{ id: string; label: string }>>([]);
+  const [compressorModalOpen, setCompressorModalOpen] = useState(false);
+  const compressorCount = useUnilabSimulationStore((s) => s.compressorCount);
 
   const [uMassFlow, setUMassFlow] = useState<MassFlowUnit>("kg_h");
   const [uOpTemp, setUOpTemp] = useState<TempUnit>("C");
