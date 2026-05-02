@@ -65,6 +65,35 @@ export function FanForm({ onSaved }: FanFormProps) {
           </select>
         </div>
       </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-slate-700">
+          Tipo de operação
+        </label>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setMode("blower")}
+            className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition ${
+              mode === "blower"
+                ? "border-[#1E6FD9] bg-[#1E6FD9] text-white"
+                : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            Soprador
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("exhaust")}
+            className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition ${
+              mode === "exhaust"
+                ? "border-[#1E6FD9] bg-[#1E6FD9] text-white"
+                : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            Exaustor
+          </button>
+        </div>
+      </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <TechnicalField
           label="Vazão de ar"
