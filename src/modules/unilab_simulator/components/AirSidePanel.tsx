@@ -213,15 +213,13 @@ function Row({
   unit,
   input,
   obtained,
-  obtainedTone,
 }: {
   label: string;
   unit: string;
   input: React.ReactNode;
   obtained: string;
-  obtainedTone: "gray" | "green";
 }) {
-  const obtBg = obtainedTone === "green" ? "bg-emerald-100" : "bg-slate-200";
+  const isEmpty = obtained === "---" || obtained === "";
   return (
     <div className="grid grid-cols-[160px_60px_1fr_88px] items-center gap-1.5">
       <label className="truncate text-[11px] font-medium text-slate-700" title={label}>
@@ -232,7 +230,9 @@ function Row({
       </div>
       <div>{input}</div>
       <div
-        className={`rounded border border-slate-300 ${obtBg} px-2 py-1 text-right font-mono text-[11px] text-slate-700`}
+        className={`rounded border border-emerald-300 bg-emerald-100 px-2 py-1 text-right font-mono text-[11px] ${
+          isEmpty ? "text-emerald-700/60" : "text-emerald-900 font-semibold"
+        }`}
       >
         {obtained}
       </div>
