@@ -344,6 +344,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       pairedTempC: null,
       dischargeSuperheatK: null,
       selectedCompressorId: undefined,
+      compressorCount: 1,
       materialPrices: { ...DEFAULT_MATERIAL_PRICES },
       calculatedCost: 0,
       tubeMaterialKey: "copper_kg",
