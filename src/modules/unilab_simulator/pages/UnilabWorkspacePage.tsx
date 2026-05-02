@@ -109,6 +109,7 @@ export function UnilabWorkspacePage() {
   });
   const [sending, setSending] = useState(false);
   const [schematicOpen, setSchematicOpen] = useState(false);
+  const [machineImportOpen, setMachineImportOpen] = useState(false);
 
   const inputsValid =
     validatePhysicalInputs(physical).isValid &&
