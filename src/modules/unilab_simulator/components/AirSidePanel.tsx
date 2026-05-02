@@ -272,10 +272,14 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
         />
 
         <Row
-          label="Fan working @"
-          unitNode={<UnitText text="%" />}
+          label="Pressão estática (ventilador)"
+          unitNode={<UnitText text="Pa" />}
           input={<DisabledInput />}
-          obtained="---"
+          obtained={
+            fanStaticPressurePa === null || fanStaticPressurePa === undefined
+              ? "---"
+              : fanStaticPressurePa.toFixed(0)
+          }
         />
 
         {/* TEMP / RH ENTRADA */}
