@@ -12,6 +12,7 @@ import {
   Boxes,
   Wrench,
   Database as DatabaseIcon,
+  Gauge,
 } from "lucide-react";
 import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/coldpro/assembly", label: "Montagem", Icon: Wrench },
   { to: "/coldpro/simulation", label: "Equilíbrio do Sistema", Icon: Activity },
   { to: "/coldpro/curve", label: "Curva de Desempenho", Icon: TrendingUp },
+  { to: "/coldpro/unilab", label: "UNILAB Simulator", Icon: Gauge },
   { to: "/coldpro/map", label: "Mapa Operacional", Icon: Map },
   { to: "/coldpro/record", label: "Ficha Técnica", Icon: FileText },
   { to: "/coldpro/registry", label: "Registry de Produtos", Icon: Database },
