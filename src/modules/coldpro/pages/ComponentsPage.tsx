@@ -294,8 +294,18 @@ export function ComponentsPage() {
             <div className="space-y-4">
               {activeTab === "compressor" && (
                 <>
-                  <BitzerLibraryBrowser />
-                  <CompressorLibraryBrowser />
+                  <div>
+                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Catálogo Bitzer (oficial)
+                    </h3>
+                    <BitzerLibraryBrowser />
+                  </div>
+                  <div className="mt-6">
+                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Catálogo geral (Copeland · Bristol · outros)
+                    </h3>
+                    <CompressorLibraryBrowser />
+                  </div>
                 </>
               )}
               {activeTab === "fan" && <FanLibraryBrowser />}
