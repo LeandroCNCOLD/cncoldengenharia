@@ -59,11 +59,15 @@ interface UnilabSimulationStore {
   rhIn_pct: number;
   foulingFactorAir: number;
   selectedFanId?: string;
+  fanCount: number;
+  fanRole: "blower" | "exhaust";
   setAirFlow: (val: number) => void;
   setTempInDB: (val: number) => void;
   setRhIn: (val: number) => void;
   setFoulingFactorAir: (val: number) => void;
   setSelectedFan: (id: string | undefined) => void;
+  setFanCount: (n: number) => void;
+  setFanRole: (r: "blower" | "exhaust") => void;
 
   // Lado Fluido (campos extras por aplicação — hidrônico/vapor)
   fluidExtras: FluidSideExtras;
@@ -129,11 +133,15 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   rhIn_pct: 60,
   foulingFactorAir: 0,
   selectedFanId: undefined,
+  fanCount: 1,
+  fanRole: "blower",
   setAirFlow: (val) => set({ airFlow_m3h: val }),
   setTempInDB: (val) => set({ tempInDB_C: val }),
   setRhIn: (val) => set({ rhIn_pct: val }),
   setFoulingFactorAir: (val) => set({ foulingFactorAir: val }),
   setSelectedFan: (id) => set({ selectedFanId: id }),
+  setFanCount: (n) => set({ fanCount: Math.max(1, Math.floor(n) || 1) }),
+  setFanRole: (r) => set({ fanRole: r }),
 
   fluidExtras: {},
   setFluidExtras: (patch) =>
@@ -270,6 +278,8 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       rhIn_pct: 60,
       foulingFactorAir: 0,
       selectedFanId: undefined,
+      fanCount: 1,
+      fanRole: "blower",
       fluidExtras: {},
       fluid: "REFMIX_R404A",
       fluidMassFlow_kg_h: 0,
