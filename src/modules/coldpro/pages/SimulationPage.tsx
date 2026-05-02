@@ -185,7 +185,17 @@ export function SimulationPage() {
     selectedEvaporator ||
     selectedReheatCoil
   );
-  const canCalculate = isComplete(compressor, condenser, conditions);
+  const missingFields: string[] = [];
+  if (!compressor.cooling_capacity_w) missingFields.push("Compressor: capacidade de refrigeração");
+  if (!compressor.power_w) missingFields.push("Compressor: potência");
+  if (compressor.evap_temp_c === undefined) missingFields.push("Compressor: T evap nominal");
+  if (compressor.cond_temp_c === undefined) missingFields.push("Compressor: T cond nominal");
+  if (!compressor.refrigerant) missingFields.push("Compressor: refrigerante");
+  if (!condenser.heat_rejection_capacity_w) missingFields.push("Condensador: capacidade de rejeição");
+  if (condenser.max_cond_temp_c === undefined) missingFields.push("Condensador: T cond máxima");
+  if (conditions.ambient_temp_c === undefined) missingFields.push("Condições: T ambiente");
+  if (!conditions.required_airflow_m3_h) missingFields.push("Condições: vazão de ar requerida");
+  const canCalculate = missingFields.length === 0;
 
   const addRevision = useCatalogRevisionStore((s) => s.addRevision);
 
@@ -231,7 +241,12 @@ export function SimulationPage() {
           type="button"
           onClick={handleCalculate}
           disabled={!canCalculate || isCalculating}
-          className="inline-flex items-center gap-2 rounded-md bg-[#1E6FD9] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#1759b3] disabled:cursor-not-allowed disabled:bg-slate-300"
+          title={
+            !canCalculate
+              ? `Preencha para habilitar:\n• ${missingFields.join("\n• ")}`
+              : "Calcular equilíbrio do sistema"
+          }
+          className="inline-flex items-center gap-2 rounded-md bg-[#1E6FD9] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#1759b3] disabled:cursor-not-allowed disabled:bg-slate-400 disabled:text-white/90"
         >
           <Play className="h-4 w-4" />
           {isCalculating ? "Calculando..." : "Calcular Equilíbrio"}
@@ -285,6 +300,17 @@ export function SimulationPage() {
                 Catálogo CN COLD
               </Link>{" "}
               ou preencher manualmente.
+            </div>
+          )}
+          {!canCalculate && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+              <div className="mb-1 font-semibold">Para calcular o equilíbrio, ainda falta preencher:</div>
+              <ul className="list-disc space-y-0.5 pl-5">
+                {missingFields.slice(0, 6).map((f, i) => (
+                  <li key={i}>{f}</li>
+                ))}
+                {missingFields.length > 6 && <li>+{missingFields.length - 6} campo(s)…</li>}
+              </ul>
             </div>
           )}
           <CompressorForm value={compressor} onChange={setCompressor} />
