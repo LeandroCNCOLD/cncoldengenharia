@@ -65,6 +65,8 @@ export interface PressureDropFanItem {
   vMax?: number;
 }
 
+export type HeaderPosition = "LL" | "LR" | "RL" | "RR" | "TB" | "BT";
+
 export interface UnilabPhysicalInputs {
   componentType: UnilabComponentType;
   geometryId: string;
@@ -79,6 +81,8 @@ export interface UnilabPhysicalInputs {
   tubePitchLongitudinalMm: number;
   tubeOuterDiameterMm: number;
   tubeInnerDiameterMm: number;
+  /** Posição do distribuidor / coletor (CN COILS — Etapa de circuitagem). */
+  headerPosition?: HeaderPosition;
 }
 
 export interface UnilabThermoInputs {
