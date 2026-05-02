@@ -1,10 +1,30 @@
-import { Link, useSearch } from "@tanstack/react-router";
-import { ArrowLeft, Play, Construction } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { ArrowLeft, Play, Send, RotateCcw } from "lucide-react";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
 import { ptBR } from "../i18n/messages.ptBR";
 import { useUnilabCatalogs } from "../hooks/useUnilabCatalogs";
 import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
-import type { UnilabComponentType } from "../types/unilab.types";
+import { GeometryForm } from "../components/GeometryForm";
+import { ThermoForm } from "../components/ThermoForm";
+import { ResultPanel } from "../components/ResultPanel";
+import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useUnilabSimulation } from "../hooks/useUnilabSimulation";
+import {
+  validatePhysicalInputs,
+  validateThermoInputs,
+  validateCanSendToAssembly,
+} from "../validators/simulationValidator";
+import {
+  toEvaporatorInput,
+  toCondenserInput,
+} from "../adapters/toColdProAdapter";
+import { useComponentStore } from "@/modules/coldpro/stores/useComponentStore";
+import type {
+  UnilabComponentType,
+  UnilabPhysicalInputs,
+  UnilabThermoInputs,
+} from "../types/unilab.types";
 
 const COMPONENT_LABELS: Record<UnilabComponentType, string> = {
   evaporator_dx: "Evaporador DX",
@@ -16,22 +36,98 @@ const COMPONENT_LABELS: Record<UnilabComponentType, string> = {
   defrost_steam_coil: "Serpentina de Degelo",
 };
 
+function isCondenser(t: UnilabComponentType) {
+  return t === "condenser_air" || t === "condenser_shell_tube";
+}
+
 export function UnilabWorkspacePage() {
   const search = useSearch({ from: "/_app/coldpro/unilab/workspace" }) as {
     type?: UnilabComponentType;
   };
   const componentType = search.type ?? "evaporator_dx";
   const componentLabel = COMPONENT_LABELS[componentType] ?? componentType;
+  const navigate = useNavigate();
 
   const catalogs = useUnilabCatalogs();
-  const canSimulate = catalogs.ready;
+  const physical = useUnilabSimulationStore((s) => s.physicalInputs);
+  const thermo = useUnilabSimulationStore((s) => s.thermoInputs);
+  const result = useUnilabSimulationStore((s) => s.result);
+  const warnings = useUnilabSimulationStore((s) => s.warnings);
+  const isSimulating = useUnilabSimulationStore((s) => s.isSimulating);
+  const reset = useUnilabSimulationStore((s) => s.reset);
+  const setWarnings = useUnilabSimulationStore((s) => s.setWarnings);
+
+  const simulationDeps = useMemo(
+    () => ({
+      geometries: catalogs.geometries,
+      tubeMaterials: catalogs.tubeMaterials,
+      correctionCoefficients: catalogs.correctionCoefficients,
+      pressureDropFan: catalogs.pressureDropFan,
+    }),
+    [
+      catalogs.geometries,
+      catalogs.tubeMaterials,
+      catalogs.correctionCoefficients,
+      catalogs.pressureDropFan,
+    ],
+  );
+
+  const { run } = useUnilabSimulation(simulationDeps);
+  const [sending, setSending] = useState(false);
+
+  const inputsValid =
+    validatePhysicalInputs(physical).isValid &&
+    validateThermoInputs(thermo).isValid;
+  const canSimulate = catalogs.ready && inputsValid && !isSimulating;
+
+  const handleSimulate = () => {
+    const physCheck = validatePhysicalInputs(physical);
+    const thermoCheck = validateThermoInputs(thermo);
+    const errors = [...physCheck.errors, ...thermoCheck.errors];
+    if (errors.length > 0) {
+      setWarnings(errors);
+      return;
+    }
+    run();
+  };
+
+  const handleSendToAssembly = () => {
+    const sendCheck = validateCanSendToAssembly(result, physical);
+    if (!sendCheck.isValid) {
+      setWarnings(sendCheck.errors);
+      return;
+    }
+    setSending(true);
+    try {
+      const phys = physical as UnilabPhysicalInputs;
+      const therm = thermo as UnilabThermoInputs;
+      const ctx = { tubeMaterials: catalogs.tubeMaterials };
+      const baseName = `UNILAB ${componentLabel} ${new Date().toLocaleString("pt-BR")}`;
+
+      if (isCondenser(componentType)) {
+        const spec = toCondenserInput(therm, result!);
+        useComponentStore.getState().addCondenser(baseName, spec);
+        navigate({ to: "/coldpro/components" });
+      } else {
+        const spec = toEvaporatorInput(phys, therm, result!, ctx);
+        useComponentStore
+          .getState()
+          .addCoil(baseName, "evaporator", spec);
+        navigate({ to: "/coldpro/components" });
+      }
+    } catch (err) {
+      setWarnings([err instanceof Error ? err.message : String(err)]);
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <PageContainer
       title={`${ptBR.workspace.title} — ${componentLabel}`}
       subtitle={ptBR.module.subtitle}
       actions={
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Link
             to="/coldpro/unilab"
             className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
@@ -41,24 +137,64 @@ export function UnilabWorkspacePage() {
           </Link>
           <button
             type="button"
+            onClick={reset}
+            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Limpar
+          </button>
+          <button
+            type="button"
             disabled={!canSimulate}
+            onClick={handleSimulate}
             title={
-              !canSimulate ? ptBR.validation.blockedNoDatasets : ptBR.workspace.actions.simulate
+              !catalogs.ready
+                ? ptBR.validation.blockedNoDatasets
+                : !inputsValid
+                  ? "Preencha todos os campos obrigatórios."
+                  : ptBR.workspace.actions.simulate
             }
             className="inline-flex items-center gap-2 rounded-md bg-[#1E6FD9] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#1759b3] disabled:cursor-not-allowed disabled:bg-slate-400"
           >
             <Play className="h-4 w-4" />
-            {ptBR.workspace.actions.simulate}
+            {isSimulating ? "Simulando…" : ptBR.workspace.actions.simulate}
+          </button>
+          <button
+            type="button"
+            disabled={!result || sending}
+            onClick={handleSendToAssembly}
+            className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+          >
+            <Send className="h-4 w-4" />
+            {ptBR.workspace.actions.sendToAssembly}
           </button>
         </div>
       }
     >
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Column title={ptBR.workspace.columns.geometry}>
-          <PlaceholderBox />
+          {catalogs.loading ? (
+            <SkeletonCard />
+          ) : (
+            <GeometryForm
+              geometries={catalogs.geometries}
+              tubeMaterials={catalogs.tubeMaterials}
+              finPitches={catalogs.finPitches}
+              finThicknesses={catalogs.finThicknesses}
+              disabled={!catalogs.ready}
+            />
+          )}
         </Column>
         <Column title={ptBR.workspace.columns.thermo}>
-          <PlaceholderBox />
+          {catalogs.loading ? (
+            <SkeletonCard />
+          ) : (
+            <ThermoForm
+              refrigerants={catalogs.refrigerants}
+              componentType={componentType}
+              disabled={!catalogs.ready}
+            />
+          )}
         </Column>
         <Column title={ptBR.workspace.columns.result}>
           <DatasetStatusPanel
@@ -68,11 +204,9 @@ export function UnilabWorkspacePage() {
             missing={catalogs.missing}
             compact
           />
-          {catalogs.ready && (
-            <div className="mt-4 rounded-lg border-2 border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
-              {ptBR.workspace.result.empty}
-            </div>
-          )}
+          <div className="mt-4">
+            <ResultPanel result={result} warnings={warnings} />
+          </div>
         </Column>
       </div>
     </PageContainer>
@@ -88,13 +222,13 @@ function Column({ title, children }: { title: string; children: React.ReactNode 
   );
 }
 
-function PlaceholderBox() {
+function SkeletonCard() {
   return (
-    <div className="rounded-lg border-2 border-dashed border-slate-200 bg-white p-6 text-center">
-      <Construction className="mx-auto mb-2 h-6 w-6 text-slate-400" />
-      <p className="text-xs text-slate-500">
-        Formulário será habilitado na próxima fase, junto com o motor termodinâmico.
-      </p>
+    <div className="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
+      <div className="h-4 w-1/2 animate-pulse rounded bg-slate-100" />
+      <div className="h-8 w-full animate-pulse rounded bg-slate-100" />
+      <div className="h-8 w-full animate-pulse rounded bg-slate-100" />
+      <div className="h-8 w-2/3 animate-pulse rounded bg-slate-100" />
     </div>
   );
 }
