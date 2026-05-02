@@ -221,6 +221,22 @@ export function WorkspaceSidebar({
         open={costModalOpen}
         onClose={() => setCostModalOpen(false)}
       />
+      <GeometryPickerModal
+        open={activeModal === "geometry"}
+        onClose={() => setActiveModal(null)}
+      />
+      <TubeModal
+        open={activeModal === "tube"}
+        onClose={() => setActiveModal(null)}
+      />
+      <FinModal
+        open={activeModal === "fin"}
+        onClose={() => setActiveModal(null)}
+      />
+      <DistributorModal
+        open={activeModal === "distributor"}
+        onClose={() => setActiveModal(null)}
+      />
     </aside>
   );
 }
