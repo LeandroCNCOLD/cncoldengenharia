@@ -73,6 +73,9 @@ export function FluidSidePanel({
   const superheat_K = useUnilabSimulationStore((s) => s.superheat_K);
   const subcooling_K = useUnilabSimulationStore((s) => s.subcooling_K);
   const foulingFactorFluid = useUnilabSimulationStore((s) => s.foulingFactorFluid);
+  const pairedTempC = useUnilabSimulationStore((s) => s.pairedTempC);
+  const dischargeSuperheatK = useUnilabSimulationStore((s) => s.dischargeSuperheatK);
+  const selectedCompressorId = useUnilabSimulationStore((s) => s.selectedCompressorId);
   const setFluid = useUnilabSimulationStore((s) => s.setFluid);
   const setFluidMassFlow = useUnilabSimulationStore((s) => s.setFluidMassFlow);
   const toggleMassFlowLock = useUnilabSimulationStore((s) => s.toggleMassFlowLock);
@@ -84,6 +87,9 @@ export function FluidSidePanel({
   const setFoulingFactorFluid = useUnilabSimulationStore(
     (s) => s.setFoulingFactorFluid,
   );
+  const setPairedTempC = useUnilabSimulationStore((s) => s.setPairedTempC);
+  const setDischargeSuperheatK = useUnilabSimulationStore((s) => s.setDischargeSuperheatK);
+  const setSelectedCompressor = useUnilabSimulationStore((s) => s.setSelectedCompressor);
 
   const [refrigerants, setRefrigerants] = useState<RefrigerantOption[]>([]);
 
