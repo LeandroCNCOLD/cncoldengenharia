@@ -59,11 +59,15 @@ interface UnilabSimulationStore {
   rhIn_pct: number;
   foulingFactorAir: number;
   selectedFanId?: string;
+  fanCount: number;
+  fanRole: "blower" | "exhaust";
   setAirFlow: (val: number) => void;
   setTempInDB: (val: number) => void;
   setRhIn: (val: number) => void;
   setFoulingFactorAir: (val: number) => void;
   setSelectedFan: (id: string | undefined) => void;
+  setFanCount: (n: number) => void;
+  setFanRole: (r: "blower" | "exhaust") => void;
 
   // Lado Fluido (campos extras por aplicação — hidrônico/vapor)
   fluidExtras: FluidSideExtras;
