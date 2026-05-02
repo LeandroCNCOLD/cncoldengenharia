@@ -47,7 +47,7 @@ const MODULES = [
   },
   {
     to: "/coldpro/audit",
-    label: "Auditoria CN COLD",
+    labelKey: "navigation.audit",
     description: "Audita o catálogo CN COLD contra o motor.",
     Icon: ShieldCheck,
   },
