@@ -44,6 +44,7 @@ import {
   calculateNTU,
 } from "./heatTransfer";
 import { calculateOverallU } from "./overallU";
+import { calculateWangChiChang } from "./wangChiChang";
 import { applyAirVelocityCorrection } from "./unilabCorrections";
 import {
   calculateAirPressureDrop,
