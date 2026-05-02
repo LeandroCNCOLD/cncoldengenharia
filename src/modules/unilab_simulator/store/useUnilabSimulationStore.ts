@@ -5,6 +5,12 @@ import type {
   UnilabSimulationResult,
   UnilabThermoInputs,
 } from "../types/unilab.types";
+import {
+  DEFAULT_MATERIAL_PRICES,
+  calculateBatteryCost,
+  type MaterialKey,
+  type MaterialPrices,
+} from "../engine/costCalculator";
 
 /**
  * Modo de cálculo do UNILAB:
@@ -66,6 +72,7 @@ interface UnilabSimulationStore {
   // Lado Fluido / Refrigerante (Etapa 4)
   fluid: string;
   fluidMassFlow_kg_h: number;
+  isMassFlowLocked: boolean;
   fluidOperatingTemp_C: number;
   fluidTempReference: "inlet" | "middle" | "outlet";
   superheat_K: number;
@@ -73,11 +80,22 @@ interface UnilabSimulationStore {
   foulingFactorFluid: number;
   setFluid: (val: string) => void;
   setFluidMassFlow: (val: number) => void;
+  toggleMassFlowLock: () => void;
   setFluidOperatingTemp: (val: number) => void;
   setFluidTempReference: (val: "inlet" | "middle" | "outlet") => void;
   setSuperheat: (val: number) => void;
   setSubcooling: (val: number) => void;
   setFoulingFactorFluid: (val: number) => void;
+
+  // Etapa 3.6 — Custo da bateria
+  materialPrices: MaterialPrices;
+  calculatedCost: number;
+  tubeMaterialKey: MaterialKey;
+  finMaterialKey: MaterialKey;
+  setMaterialPrice: (material: MaterialKey, price: number) => void;
+  setTubeMaterialKey: (key: MaterialKey) => void;
+  setFinMaterialKey: (key: MaterialKey) => void;
+  recalculateCost: () => void;
 
   setPhysicalInputs: (patch: Partial<UnilabPhysicalInputs>) => void;
   setThermoInputs: (patch: Partial<UnilabThermoInputs>) => void;
@@ -123,27 +141,68 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
 
   fluid: "R404A",
   fluidMassFlow_kg_h: 0,
-  fluidOperatingTemp_C: 0,
+  isMassFlowLocked: true,
+  fluidOperatingTemp_C: 45,
   fluidTempReference: "middle",
-  superheat_K: 0,
-  subcooling_K: 0,
+  superheat_K: 5,
+  subcooling_K: 3,
   foulingFactorFluid: 0,
   setFluid: (val) => set({ fluid: val }),
   setFluidMassFlow: (val) => set({ fluidMassFlow_kg_h: val }),
+  toggleMassFlowLock: () =>
+    set((s) => ({ isMassFlowLocked: !s.isMassFlowLocked })),
   setFluidOperatingTemp: (val) => set({ fluidOperatingTemp_C: val }),
   setFluidTempReference: (val) => set({ fluidTempReference: val }),
   setSuperheat: (val) => set({ superheat_K: val }),
   setSubcooling: (val) => set({ subcooling_K: val }),
   setFoulingFactorFluid: (val) => set({ foulingFactorFluid: val }),
 
+  // Etapa 3.6 — Custo da bateria
+  materialPrices: { ...DEFAULT_MATERIAL_PRICES },
+  calculatedCost: 0,
+  tubeMaterialKey: "copper_kg",
+  finMaterialKey: "aluminum_kg",
+  setMaterialPrice: (material, price) =>
+    set((s) => {
+      const materialPrices = { ...s.materialPrices, [material]: price };
+      const cost = computeCostFromState({ ...s, materialPrices });
+      return { materialPrices, calculatedCost: cost };
+    }),
+  setTubeMaterialKey: (key) =>
+    set((s) => {
+      const cost = computeCostFromState({ ...s, tubeMaterialKey: key });
+      return { tubeMaterialKey: key, calculatedCost: cost };
+    }),
+  setFinMaterialKey: (key) =>
+    set((s) => {
+      const cost = computeCostFromState({ ...s, finMaterialKey: key });
+      return { finMaterialKey: key, calculatedCost: cost };
+    }),
+  recalculateCost: () =>
+    set((s) => ({ calculatedCost: computeCostFromState(s) })),
+
   setPhysicalInputs: (patch) =>
-    set((s) => ({ physicalInputs: { ...s.physicalInputs, ...patch } })),
+    set((s) => {
+      const physicalInputs = { ...s.physicalInputs, ...patch };
+      return {
+        physicalInputs,
+        calculatedCost: computeCostFromState({ ...s, physicalInputs }),
+      };
+    }),
   setThermoInputs: (patch) =>
     set((s) => ({ thermoInputs: { ...s.thermoInputs, ...patch } })),
   setSelectedGeometry: (geometry) =>
-    set((s) => ({
-      selectedGeometry: geometry,
-      physicalInputs: geometry
+    set((s) => {
+      // Etapa 3.5 — auto-fill ao selecionar geometria do catálogo.
+      // O CoilGeometryItem (enriquecido) traz espessuras em pt-BR; o catálogo
+      // base não. Em ambos os casos preservamos valores anteriores do usuário.
+      const enriched = geometry as
+        | (CoilGeometryCatalogItem & {
+            espessura_tubo_mm?: number | null;
+            espessura_aleta_mm?: number | null;
+          })
+        | undefined;
+      const physicalInputs = geometry
         ? {
             ...s.physicalInputs,
             geometryId: geometry.id,
@@ -152,11 +211,18 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
             tubeOuterDiameterMm: geometry.tubeOuterDiameterMm,
             tubeInnerDiameterMm:
               geometry.tubeInnerDiameterMm ?? s.physicalInputs.tubeInnerDiameterMm,
+            finThicknessMm:
+              enriched?.espessura_aleta_mm ?? s.physicalInputs.finThicknessMm,
             rows: geometry.defaultRows ?? s.physicalInputs.rows,
             circuits: geometry.defaultCircuits ?? s.physicalInputs.circuits,
           }
-        : s.physicalInputs,
-    })),
+        : s.physicalInputs;
+      return {
+        selectedGeometry: geometry,
+        physicalInputs,
+        calculatedCost: computeCostFromState({ ...s, physicalInputs }),
+      };
+    }),
   setResult: (result) => set({ result }),
   setWarnings: (warnings) => set({ warnings }),
   setIsSimulating: (value) => set({ isSimulating: value }),
@@ -179,10 +245,47 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       fluidExtras: {},
       fluid: "R404A",
       fluidMassFlow_kg_h: 0,
-      fluidOperatingTemp_C: 0,
+      isMassFlowLocked: true,
+      fluidOperatingTemp_C: 45,
       fluidTempReference: "middle",
-      superheat_K: 0,
-      subcooling_K: 0,
+      superheat_K: 5,
+      subcooling_K: 3,
       foulingFactorFluid: 0,
+      materialPrices: { ...DEFAULT_MATERIAL_PRICES },
+      calculatedCost: 0,
+      tubeMaterialKey: "copper_kg",
+      finMaterialKey: "aluminum_kg",
     }),
 }));
+
+/**
+ * Calcula o custo a partir de um snapshot do estado.
+ * Defensivo: retorna 0 quando faltam dados (evita NaN/Infinity).
+ */
+function computeCostFromState(s: {
+  physicalInputs: Partial<UnilabPhysicalInputs>;
+  materialPrices: MaterialPrices;
+  tubeMaterialKey: MaterialKey;
+  finMaterialKey: MaterialKey;
+}): number {
+  const p = s.physicalInputs;
+  const tubesPerRow =
+    p.finnedHeightMm && p.tubePitchTransverseMm && p.tubePitchTransverseMm > 0
+      ? Math.max(1, Math.round(p.finnedHeightMm / p.tubePitchTransverseMm))
+      : 0;
+  const result = calculateBatteryCost({
+    tubesPerRow,
+    rows: p.rows ?? 0,
+    finnedLengthMm: p.finnedLengthMm ?? 0,
+    finnedHeightMm: p.finnedHeightMm ?? 0,
+    finPitchMm: p.finPitchMm ?? 0,
+    tubeOuterDiameterMm: p.tubeOuterDiameterMm ?? 0,
+    tubeInnerDiameterMm: p.tubeInnerDiameterMm ?? 0,
+    finThicknessMm: p.finThicknessMm ?? 0,
+    tubePitchTransverseMm: p.tubePitchTransverseMm ?? 0,
+    tubeMaterial: s.tubeMaterialKey,
+    finMaterial: s.finMaterialKey,
+    prices: s.materialPrices,
+  });
+  return result.totalCost;
+}

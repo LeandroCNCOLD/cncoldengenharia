@@ -9,6 +9,7 @@ import { GeometryForm } from "../components/GeometryForm";
 import { ResultPanel } from "../components/ResultPanel";
 import { AirSidePanel } from "../components/AirSidePanel";
 import { FluidSidePanel } from "../components/FluidSidePanel";
+import { GeometryBottomBar } from "../components/GeometryBottomBar";
 import {
   WorkspaceSidebar,
   type WorkspaceSection,
@@ -61,10 +62,10 @@ export function UnilabWorkspacePage() {
   const reset = useUnilabSimulationStore((s) => s.reset);
   const setWarnings = useUnilabSimulationStore((s) => s.setWarnings);
 
-  // Espelha campos das Etapas 3/4 → thermoInputs/physicalInputs (motor)
   useUnilabInputBridge(componentType);
 
-  const [activeSection, setActiveSection] = useState<WorkspaceSection>("geometry");
+  const [activeSection, setActiveSection] =
+    useState<WorkspaceSection>("ventilacao");
 
   const [enrichedGeometries, setEnrichedGeometries] = useState<CoilGeometryItem[]>([]);
   useEffect(() => {
@@ -100,7 +101,6 @@ export function UnilabWorkspacePage() {
 
   const { run } = useUnilabSimulation(simulationDeps);
 
-  // Catálogo de coeficientes UNILAB para o motor V2
   const [htCatalog, setHtCatalog] = useState<UnilabHeatTransferCatalog>({
     entries: [],
   });
@@ -167,6 +167,35 @@ export function UnilabWorkspacePage() {
     }
   };
 
+  const renderCentralPanel = () => {
+    if (activeSection === "geometria") {
+      if (catalogs.loading) return <SkeletonCard />;
+      return (
+        <GeometryForm
+          geometries={
+            enrichedGeometries.length > 0
+              ? enrichedGeometries
+              : catalogs.geometries
+          }
+          tubeMaterials={catalogs.tubeMaterials}
+          finPitches={catalogs.finPitches}
+          finThicknesses={catalogs.finThicknesses}
+          disabled={!catalogs.ready}
+        />
+      );
+    }
+    if (activeSection === "tubo") {
+      return <PlaceholderPanel title="Tubo" />;
+    }
+    if (activeSection === "aleta") {
+      return <PlaceholderPanel title="Aleta" />;
+    }
+    if (activeSection === "distribuidor") {
+      return <PlaceholderPanel title="Distribuidor" />;
+    }
+    return <AirSidePanel result={result} />;
+  };
+
   return (
     <PageContainer
       title={`UNILAB — ${componentLabel}`}
@@ -193,13 +222,13 @@ export function UnilabWorkspacePage() {
       }
     >
       {/*
-        Layout responsivo estilo UNILAB Coils 9.0:
-        - mobile/tablet (<lg): tudo empilhado em 1 coluna
-        - lg (>=1024) e xl (<1280): sidebar fina + 1 coluna larga (centro e direita empilhados)
-        - 2xl (>=1536): 3 colunas completas lado a lado
+        Layout Etapa 3.5 — replica o configurador UNILAB:
+        - Esquerda: WorkspaceSidebar (menu fixo)
+        - Centro: painel dinâmico (Lado Ventilação por padrão; troca conforme menu)
+        - Direita: FluidSidePanel SEMPRE visível
+        - Rodapé: GeometryBottomBar SEMPRE visível, full width
       */}
       <div className="grid grid-cols-1 gap-2 md:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[190px_minmax(0,1fr)_minmax(0,1fr)] 2xl:grid-cols-[210px_minmax(0,1fr)_minmax(0,1fr)]">
-        {/* COLUNA ESQUERDA — sidebar de navegação */}
         <WorkspaceSidebar
           componentType={componentType}
           activeSection={activeSection}
@@ -211,33 +240,11 @@ export function UnilabWorkspacePage() {
           faceAreaM2={result?.faceAreaM2}
         />
 
-        {/* Em <2xl, centro+direita empilham dentro de uma única coluna ao lado da sidebar.
-            Em 2xl, `display:contents` os promove para colunas irmãs do grid. */}
         <div className="min-w-0 space-y-2 xl:contents">
-          {/* COLUNA CENTRAL — Lado Ventilação + Geometria conforme seção ativa */}
-          <div className="min-w-0 space-y-2">
-            {activeSection === "geometry" ? (
-              catalogs.loading ? (
-                <SkeletonCard />
-              ) : (
-                <GeometryForm
-                  geometries={
-                    enrichedGeometries.length > 0
-                      ? enrichedGeometries
-                      : catalogs.geometries
-                  }
-                  tubeMaterials={catalogs.tubeMaterials}
-                  finPitches={catalogs.finPitches}
-                  finThicknesses={catalogs.finThicknesses}
-                  disabled={!catalogs.ready}
-                />
-              )
-            ) : (
-              <AirSidePanel result={result} />
-            )}
-          </div>
+          {/* COLUNA CENTRAL — dinâmico */}
+          <div className="min-w-0 space-y-2">{renderCentralPanel()}</div>
 
-          {/* COLUNA DIREITA — Lado Fluido + status + resultado */}
+          {/* COLUNA DIREITA — Lado Fluido FIXO */}
           <div className="min-w-0 space-y-2">
             <FluidSidePanel
               componentType={componentType}
@@ -256,6 +263,11 @@ export function UnilabWorkspacePage() {
           </div>
         </div>
       </div>
+
+      {/* BARRA INFERIOR — Geometria, full width */}
+      <div className="mt-2">
+        <GeometryBottomBar />
+      </div>
     </PageContainer>
   );
 }
@@ -267,6 +279,20 @@ function SkeletonCard() {
       <div className="h-8 w-full animate-pulse rounded bg-slate-100" />
       <div className="h-8 w-full animate-pulse rounded bg-slate-100" />
       <div className="h-8 w-2/3 animate-pulse rounded bg-slate-100" />
+    </div>
+  );
+}
+
+function PlaceholderPanel({ title }: { title: string }) {
+  return (
+    <div className="rounded border border-slate-300 bg-slate-50 shadow-sm">
+      <div className="border-b border-slate-300 bg-[#1E6FD9] px-3 py-1.5 text-center text-xs font-bold uppercase tracking-wider text-white">
+        {title}
+      </div>
+      <div className="p-6 text-center text-xs text-slate-500">
+        Esta seção será detalhada em uma próxima etapa. Os parâmetros atuais já
+        estão acessíveis na barra inferior de Geometria e na tela de Geometria.
+      </div>
     </div>
   );
 }

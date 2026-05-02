@@ -1,16 +1,17 @@
-import { Calculator, Printer, RotateCcw } from "lucide-react";
+import { Calculator, Printer, RotateCcw, Settings2 } from "lucide-react";
+import { useState } from "react";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { getApplicationConfig } from "../config/applicationConfig";
+import { formatBRL } from "../engine/costCalculator";
+import { MaterialCostConfigModal } from "./MaterialCostConfigModal";
 import type { UnilabComponentType } from "../types/unilab.types";
 
 const SECTIONS = [
-  { id: "geometry", label: "Geometria" },
-  { id: "tube", label: "Tubo" },
-  { id: "fin", label: "Aleta" },
-  { id: "fan_details", label: "Detalhes Lado Ventilação" },
-  { id: "distributor", label: "Distribuidor" },
-  { id: "fluid_details", label: "Detalhes Lado Fluido" },
-  { id: "output", label: "Saída" },
+  { id: "ventilacao", label: "Lado Ventilação" },
+  { id: "geometria", label: "Geometria" },
+  { id: "tubo", label: "Tubo" },
+  { id: "aleta", label: "Aleta" },
+  { id: "distribuidor", label: "Distribuidor" },
 ] as const;
 
 export type WorkspaceSection = (typeof SECTIONS)[number]["id"];
@@ -26,14 +27,6 @@ interface WorkspaceSidebarProps {
   faceAreaM2?: number;
 }
 
-/**
- * WorkspaceSidebar — replica a coluna esquerda do Unilab Coils 9.0:
- * - Cabeçalho com a aplicação ativa (Condensação / Evaporação / etc.)
- * - Modo de Cálculo (Verificar / Desenho)
- * - Navegação por seções (Geometria, Tubo, Aleta, ...)
- * - Resumo "Superfície de Troca" + descrição do projeto
- * - Botões Calcular / Imprimir
- */
 export function WorkspaceSidebar({
   componentType,
   activeSection,
@@ -49,6 +42,9 @@ export function WorkspaceSidebar({
   const setCalcMode = useUnilabSimulationStore((s) => s.setCalcMode);
   const engineVersion = useUnilabSimulationStore((s) => s.engineVersion);
   const setEngineVersion = useUnilabSimulationStore((s) => s.setEngineVersion);
+  const calculatedCost = useUnilabSimulationStore((s) => s.calculatedCost);
+
+  const [costModalOpen, setCostModalOpen] = useState(false);
 
   return (
     <aside className="flex h-full w-full flex-col gap-1.5 rounded border border-slate-300 bg-slate-50 p-1.5 text-[10px] shadow-sm">
@@ -115,7 +111,7 @@ export function WorkspaceSidebar({
         </div>
       </div>
 
-      {/* Seções */}
+      {/* Seções (navegação do painel central) */}
       <nav className="rounded border border-slate-300 bg-white">
         <ul>
           {SECTIONS.map((s) => {
@@ -160,13 +156,31 @@ export function WorkspaceSidebar({
           />
         </div>
         <div className="px-1.5 pb-1.5">
-          <input
-            type="text"
-            placeholder="Descrição (opcional)"
-            className="w-full rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] text-slate-900 focus:border-[#1E6FD9] focus:outline-none"
-          />
-          <div className="mt-1 flex items-center gap-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-800">
+          <div className="flex items-center gap-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-800">
             ✓ Sem Avisos
+          </div>
+        </div>
+      </div>
+
+      {/* Custo da bateria (Etapa 3.6) */}
+      <div className="rounded border border-slate-300 bg-white">
+        <div className="flex items-center justify-between border-b border-slate-200 bg-slate-100 px-1.5 py-0.5">
+          <span className="text-[10px] font-semibold text-slate-700">
+            Custo da bateria
+          </span>
+          <button
+            type="button"
+            onClick={() => setCostModalOpen(true)}
+            className="rounded p-0.5 text-slate-600 hover:bg-slate-200 hover:text-[#1E6FD9]"
+            title="Configurar preços de materiais"
+            aria-label="Configurar preços"
+          >
+            <Settings2 className="h-3 w-3" />
+          </button>
+        </div>
+        <div className="p-1.5">
+          <div className="rounded border border-emerald-300 bg-emerald-50 px-1.5 py-1 text-right font-mono text-[10px] font-bold text-emerald-900">
+            {calculatedCost > 0 ? formatBRL(calculatedCost) : "R$ ---"}
           </div>
         </div>
       </div>
@@ -201,6 +215,11 @@ export function WorkspaceSidebar({
           </button>
         </div>
       </div>
+
+      <MaterialCostConfigModal
+        open={costModalOpen}
+        onClose={() => setCostModalOpen(false)}
+      />
     </aside>
   );
 }
