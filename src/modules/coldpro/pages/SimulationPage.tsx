@@ -74,8 +74,12 @@ export function SimulationPage() {
 
     if (selectedCompressor && selectedCompressor.id !== lastAppliedCompressorId.current) {
       lastAppliedCompressorId.current = selectedCompressor.id;
-      if (motor.compressor) {
-        setCompressor((prev) => ({ ...prev, ...motor.compressor }));
+      // Aplica o pré-preenchimento parcial sempre que existir — mesmo quando
+      // o compressor não está 100% completo, os campos disponíveis no catálogo
+      // (T_evap, T_cond, potência, refrigerante, etc.) já são populados.
+      const compressorPatch = motor.compressor ?? motor.compressor_partial;
+      if (compressorPatch) {
+        setCompressor((prev) => ({ ...prev, ...compressorPatch }));
       }
     }
     if (!selectedCompressor) {
