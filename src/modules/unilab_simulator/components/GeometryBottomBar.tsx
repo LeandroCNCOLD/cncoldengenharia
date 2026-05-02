@@ -1,29 +1,16 @@
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 
 /**
- * GeometryBottomBar — Etapa 3.5
+ * GeometryBottomBar — Etapa 3.5 (CN COILS)
  *
- * Barra horizontal fixa no rodapé da área de trabalho com os parâmetros
- * numéricos da geometria. Os campos `Passo da Aleta` e dimensões de tubo são
- * herdados automaticamente da geometria selecionada (ver store). O usuário
- * pode sobrescrever manualmente.
+ * Barra horizontal com os parâmetros numéricos da geometria.
+ * Todos os campos são controlados pelo store de forma direta
+ * (sem derivação a partir de outros campos), garantindo persistência
+ * do valor digitado pelo usuário.
  */
 export function GeometryBottomBar() {
   const physical = useUnilabSimulationStore((s) => s.physicalInputs);
   const setPhysical = useUnilabSimulationStore((s) => s.setPhysicalInputs);
-
-  // tubesPerRow não existe no schema do motor — derivamos via altura/pitch
-  // e mantemos como override armazenado em physicalInputs.finnedHeightMm
-  const tubesPerRow =
-    physical.finnedHeightMm && physical.tubePitchTransverseMm
-      ? Math.max(1, Math.round(physical.finnedHeightMm / physical.tubePitchTransverseMm))
-      : 0;
-
-  const setTubesPerRow = (n: number) => {
-    if (n > 0 && physical.tubePitchTransverseMm) {
-      setPhysical({ finnedHeightMm: n * physical.tubePitchTransverseMm });
-    }
-  };
 
   return (
     <div className="rounded border border-slate-300 bg-slate-50 shadow-sm">
@@ -33,8 +20,8 @@ export function GeometryBottomBar() {
       <div className="grid grid-cols-2 gap-2 p-2 sm:grid-cols-3 lg:grid-cols-7">
         <Field
           label="Nº Tubos por fila"
-          value={tubesPerRow}
-          onChange={setTubesPerRow}
+          value={physical.tubesPerRow}
+          onChange={(v) => setPhysical({ tubesPerRow: v })}
           step={1}
           min={1}
         />
@@ -54,10 +41,8 @@ export function GeometryBottomBar() {
         />
         <Field
           label="Nº Tubos não utilizados"
-          value={(physical as { unusedTubes?: number }).unusedTubes}
-          onChange={(v) =>
-            setPhysical({ ...(physical as object), unusedTubes: v } as never)
-          }
+          value={physical.unusedTubes}
+          onChange={(v) => setPhysical({ unusedTubes: v })}
           step={1}
           min={0}
         />
@@ -77,10 +62,8 @@ export function GeometryBottomBar() {
         />
         <Field
           label="Nº Divisores"
-          value={(physical as { dividers?: number }).dividers}
-          onChange={(v) =>
-            setPhysical({ ...(physical as object), dividers: v } as never)
-          }
+          value={physical.dividers}
+          onChange={(v) => setPhysical({ dividers: v })}
           step={1}
           min={0}
         />
@@ -102,6 +85,13 @@ function Field({
   step?: number;
   min?: number;
 }) {
+  // Binding controlado: usa string vazia quando indefinido para evitar
+  // que o input mostre "0" e bloqueie a digitação. O onChange propaga
+  // imediatamente o valor numérico ao store.
+  const displayValue =
+    value === undefined || value === null || !Number.isFinite(value)
+      ? ""
+      : value;
   return (
     <label className="flex min-w-0 flex-col gap-0.5">
       <span
@@ -112,11 +102,16 @@ function Field({
       </span>
       <input
         type="number"
-        value={Number.isFinite(value) ? value : ""}
+        value={displayValue}
         step={step ?? "any"}
         min={min}
         onChange={(e) => {
-          const n = parseFloat(e.target.value);
+          const raw = e.target.value;
+          if (raw === "") {
+            onChange(0);
+            return;
+          }
+          const n = Number(raw);
           onChange(Number.isFinite(n) ? n : 0);
         }}
         className="w-full min-w-0 rounded border border-slate-300 bg-white px-1.5 py-1 text-right text-[11px] text-slate-900 focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9]"
