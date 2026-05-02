@@ -16,7 +16,6 @@ import {
 } from "./airProperties";
 import {
   checkCondensation,
-  enthalpy,
   humidityRatio,
   saturationPressure,
   PSY_CONSTANTS,
