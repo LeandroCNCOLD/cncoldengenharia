@@ -133,11 +133,15 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   rhIn_pct: 60,
   foulingFactorAir: 0,
   selectedFanId: undefined,
+  fanCount: 1,
+  fanRole: "blower",
   setAirFlow: (val) => set({ airFlow_m3h: val }),
   setTempInDB: (val) => set({ tempInDB_C: val }),
   setRhIn: (val) => set({ rhIn_pct: val }),
   setFoulingFactorAir: (val) => set({ foulingFactorAir: val }),
   setSelectedFan: (id) => set({ selectedFanId: id }),
+  setFanCount: (n) => set({ fanCount: Math.max(1, Math.floor(n) || 1) }),
+  setFanRole: (r) => set({ fanRole: r }),
 
   fluidExtras: {},
   setFluidExtras: (patch) =>
