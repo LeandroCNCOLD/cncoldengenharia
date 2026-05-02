@@ -69,15 +69,20 @@ export function EquipmentDetailModal({ equipment, onClose }: Props) {
   const [showRaw, setShowRaw] = useState(false);
   const [manualNote, setManualNote] = useState("");
 
-  const revisions = useCatalogRevisionStore((s) =>
-    equipment ? s.listRevisions(equipment.id) : [],
-  );
+  const allRevisions = useCatalogRevisionStore((s) => s.revisions);
   const addRevision = useCatalogRevisionStore((s) => s.addRevision);
   const clearRevisions = useCatalogRevisionStore((s) => s.clearRevisions);
-  const validationOverride = useCatalogValidationStore((s) =>
-    equipment ? s.getOverride(equipment.id) : undefined,
-  );
+  const overridesMap = useCatalogValidationStore((s) => s.overrides);
   const setValidationStatus = useCatalogValidationStore((s) => s.setStatus);
+
+  const revisions = useMemo(() => {
+    if (!equipment) return [];
+    return allRevisions
+      .filter((r) => r.equipmentId === equipment.id)
+      .sort((a, b) => b.revisionNumber - a.revisionNumber);
+  }, [allRevisions, equipment]);
+
+  const validationOverride = equipment ? overridesMap?.[equipment.id] : undefined;
 
   const effectiveValidation: ValidationStatus =
     validationOverride?.validationStatus ??
