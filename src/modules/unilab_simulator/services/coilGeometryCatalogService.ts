@@ -316,7 +316,20 @@ export function diagnoseGeometry(g: CoilGeometryItem): GeometryDiagnostic {
 
 /** Lista os campos físicos que estão `null` na geometria (para diagnóstico). */
 export function listMissingPhysicalFields(g: CoilGeometryItem): string[] {
-...
+  const checks: Array<[string, unknown]> = [
+    ["passo_fileiras_mm", g.passo_fileiras_mm],
+    ["passo_tubos_mm", g.passo_tubos_mm],
+    ["diametro_externo_tubo_mm", g.diametro_externo_tubo_mm],
+    ["diametro_interno_tubo_mm", g.diametro_interno_tubo_mm],
+    ["espessura_tubo_mm", g.espessura_tubo_mm],
+    ["espessura_aleta_mm", g.espessura_aleta_mm],
+    ["forma_aleta", g.forma_aleta],
+    ["tipo_bateria", g.tipo_bateria],
+    ["fator_correcao_aleta", g.fator_correcao_aleta],
+    ["fator_atrito_ar", g.fator_atrito_ar],
+    ["razao_superficies_internas", g.razao_superficies_internas],
+    ["tubo_liso", g.tubo_liso],
+    ["certificacao_ahri", g.certificacao_ahri],
     ["certificacao_eurovent", g.certificacao_eurovent],
   ];
   return checks.filter(([, v]) => v === null || v === undefined).map(([k]) => k);
