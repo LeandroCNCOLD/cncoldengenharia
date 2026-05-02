@@ -5,6 +5,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import type { CoilGeometryItem } from "../services/coilGeometryCatalogService";
 
 /**
  * Modais informativos (read-only) para Tubo / Aleta / Distribuidor.
