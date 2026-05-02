@@ -270,9 +270,11 @@ function computeCostFromState(s: {
 }): number {
   const p = s.physicalInputs;
   const tubesPerRow =
-    p.finnedHeightMm && p.tubePitchTransverseMm && p.tubePitchTransverseMm > 0
-      ? Math.max(1, Math.round(p.finnedHeightMm / p.tubePitchTransverseMm))
-      : 0;
+    p.tubesPerRow && p.tubesPerRow > 0
+      ? p.tubesPerRow
+      : p.finnedHeightMm && p.tubePitchTransverseMm && p.tubePitchTransverseMm > 0
+        ? Math.max(1, Math.round(p.finnedHeightMm / p.tubePitchTransverseMm))
+        : 0;
   const result = calculateBatteryCost({
     tubesPerRow,
     rows: p.rows ?? 0,
