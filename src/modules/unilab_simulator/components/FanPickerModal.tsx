@@ -239,13 +239,25 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
           )}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancelar
+        <DialogFooter className="sm:justify-between">
+          <Button variant="ghost" size="sm" asChild onClick={onClose}>
+            <Link
+              to="/coldpro/components"
+              search={{ tab: "fan" }}
+              className="inline-flex items-center gap-1 text-xs text-[#1E6FD9]"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Cadastrar novo ventilador
+            </Link>
           </Button>
-          <Button onClick={handleConfirm} disabled={!draft}>
-            Aplicar
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirm} disabled={!draft}>
+              Aplicar
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
