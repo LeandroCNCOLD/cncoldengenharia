@@ -98,7 +98,13 @@ export function FluidSidePanel({
     let cancelled = false;
     loadRefrigerants()
       .then((list) => {
-        if (!cancelled) setRefrigerants(list);
+        if (cancelled) return;
+        setRefrigerants(list);
+        // Sincroniza store: se o fluido atual não existe no catálogo,
+        // adota o primeiro disponível para evitar que o motor receba um id inválido.
+        if (list.length > 0 && !list.some((r) => r.id === fluid)) {
+          setFluid(list[0].id);
+        }
       })
       .catch(() => {
         if (!cancelled) setRefrigerants([]);
@@ -106,6 +112,7 @@ export function FluidSidePanel({
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const operatingTempLabel = isCondenser
