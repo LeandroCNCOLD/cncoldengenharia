@@ -5,6 +5,12 @@ import type {
   UnilabSimulationResult,
   UnilabThermoInputs,
 } from "../types/unilab.types";
+import {
+  DEFAULT_MATERIAL_PRICES,
+  calculateBatteryCost,
+  type MaterialKey,
+  type MaterialPrices,
+} from "../engine/costCalculator";
 
 /**
  * Modo de cálculo do UNILAB:
