@@ -95,6 +95,11 @@ const EMPTY: CnCoilsCatalogsData = {
   coilShapes: [],
   finTreatments: [],
   powerSupplies: [],
+  bom: {
+    collectors: [], tubes: [], bends: [], distributors: [], endCaps: [],
+    sheets: [], nipples: [], nodes: [], fins: [], capillaries: [],
+    plugs: [], soldering: [], groups: [], elements: [], frame: [],
+  },
 };
 
 async function fetchJsonArray<T>(file: string): Promise<T[]> {
