@@ -211,8 +211,9 @@ export function UnilabWorkspacePage() {
           faceAreaM2={result?.faceAreaM2}
         />
 
-        {/* Wrapper das colunas centro+direita: empilha em <2xl, lado a lado em 2xl */}
-        <div className="contents 2xl:contents">
+        {/* Em <2xl, centro+direita empilham dentro de uma única coluna ao lado da sidebar.
+            Em 2xl, `display:contents` os promove para colunas irmãs do grid. */}
+        <div className="min-w-0 space-y-3 2xl:contents">
           {/* COLUNA CENTRAL — Lado Ventilação + Geometria conforme seção ativa */}
           <div className="min-w-0 space-y-3">
             {activeSection === "geometry" ? (
