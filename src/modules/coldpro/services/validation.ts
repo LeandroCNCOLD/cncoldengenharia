@@ -35,18 +35,14 @@ export function validateNumberRange(
   return OK;
 }
 
-export function validatePositiveNumber(
-  value: number | null | undefined,
-): FieldValidation {
+export function validatePositiveNumber(value: number | null | undefined): FieldValidation {
   if (value === null || value === undefined) return fail("Campo obrigatório.");
   if (!Number.isFinite(value)) return fail("Valor inválido.");
   if (value <= 0) return fail("Deve ser maior que zero.");
   return OK;
 }
 
-export function validateTemperatureC(
-  value: number | null | undefined,
-): FieldValidation {
+export function validateTemperatureC(value: number | null | undefined): FieldValidation {
   return validateNumberRange(value, -80, 120);
 }
 
@@ -62,9 +58,7 @@ export function validateNonEmptyString(
   return OK;
 }
 
-export function combineValidations(
-  ...results: readonly FieldValidation[]
-): FieldValidation {
+export function combineValidations(...results: readonly FieldValidation[]): FieldValidation {
   for (const r of results) {
     if (!r.valid) return r;
   }

@@ -5,15 +5,10 @@
 // claramente a ausência de dados via flag `pending`. Quando a tabela for
 // criada, basta substituir o corpo pelas chamadas Supabase reais.
 
-import type {
-  CatalogEntry,
-  CatalogFilter,
-  CatalogPage,
-} from "../types/frontend.types";
+import type { CatalogEntry, CatalogFilter, CatalogPage } from "../types/frontend.types";
 import { ServiceError } from "../types/frontend.types";
 
-const NOT_IMPLEMENTED_MESSAGE =
-  "Catálogo de equipamentos ainda não está conectado ao backend.";
+const NOT_IMPLEMENTED_MESSAGE = "Catálogo de equipamentos ainda não está conectado ao backend.";
 
 export interface CatalogServiceStatus {
   readonly available: boolean;
@@ -27,9 +22,7 @@ export function getCatalogStatus(): CatalogServiceStatus {
   };
 }
 
-export async function listCatalog(
-  _filter: CatalogFilter = {},
-): Promise<CatalogPage> {
+export async function listCatalog(_filter: CatalogFilter = {}): Promise<CatalogPage> {
   return {
     items: [],
     total: 0,

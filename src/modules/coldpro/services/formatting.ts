@@ -7,10 +7,7 @@ function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
 }
 
-export function formatNumber(
-  value: number | null | undefined,
-  fractionDigits = 2,
-): string {
+export function formatNumber(value: number | null | undefined, fractionDigits = 2): string {
   if (!isFiniteNumber(value)) {
     return "—";
   }
@@ -33,10 +30,7 @@ export function formatPowerW(value: number | null | undefined): string {
   return `${formatNumber(value, 0)} W`;
 }
 
-export function formatPercent(
-  value: number | null | undefined,
-  fractionDigits = 1,
-): string {
+export function formatPercent(value: number | null | undefined, fractionDigits = 1): string {
   if (!isFiniteNumber(value)) return "—";
   return `${formatNumber(value * 100, fractionDigits)} %`;
 }

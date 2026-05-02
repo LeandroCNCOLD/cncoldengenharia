@@ -49,11 +49,6 @@ export function getAIAssistantStatus(): AIAssistantStatus {
   };
 }
 
-export async function sendMessage(
-  _request: AIAssistantRequest,
-): Promise<AIAssistantResponse> {
-  throw new ServiceError(
-    "NOT_IMPLEMENTED",
-    "AI Assistant ainda não está disponível neste build.",
-  );
+export async function sendMessage(_request: AIAssistantRequest): Promise<AIAssistantResponse> {
+  throw new ServiceError("NOT_IMPLEMENTED", "AI Assistant ainda não está disponível neste build.");
 }
