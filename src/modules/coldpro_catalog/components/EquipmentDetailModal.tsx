@@ -565,20 +565,66 @@ function TabButton({
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+  block,
+  completeness,
+}: {
+  title: string;
+  children: React.ReactNode;
+  block?: BlockKey;
+  completeness?: CatalogCompleteness;
+}) {
+  const detail = block && completeness ? completeness.byBlock[block] : undefined;
+  const showStatus = !!detail;
+  const isComplete = detail?.complete ?? false;
   return (
     <section>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-        {title}
-      </h3>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          {title}
+        </h3>
+        {showStatus && (
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+              isComplete
+                ? "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200"
+                : "bg-amber-50 text-amber-800 ring-1 ring-amber-200"
+            }`}
+            title={
+              isComplete
+                ? "Bloco completo — pode ser usado pelo simulador"
+                : `Faltam: ${detail!.missing.join(", ")}`
+            }
+          >
+            {isComplete ? "Completo" : `Incompleto · ${detail!.missing.length} pendência(s)`}
+          </span>
+        )}
+      </div>
       <dl className="grid grid-cols-1 gap-x-4 gap-y-2 rounded-lg border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-3">
         {children}
       </dl>
+      {showStatus && !isComplete && detail!.missing.length > 0 && (
+        <p className="mt-1 text-[11px] text-amber-700">
+          Pendente: {detail!.missing.join(", ")}
+        </p>
+      )}
     </section>
   );
 }
 
-function Field({ label, value }: { label: string; value: unknown }) {
+function Field({
+  label,
+  value,
+  fieldKey,
+  missingSet,
+}: {
+  label: string;
+  value: unknown;
+  fieldKey?: string;
+  missingSet?: Set<string>;
+}) {
   const display =
     value === undefined || value === null || value === ""
       ? NA
@@ -586,11 +632,28 @@ function Field({ label, value }: { label: string; value: unknown }) {
         ? value.toLocaleString("pt-BR", { maximumFractionDigits: 4 })
         : String(value);
   const isMissing = display === NA;
+  const isPendency = !!fieldKey && !!missingSet && missingSet.has(fieldKey);
   return (
     <div className="min-w-0">
-      <dt className="truncate text-[11px] uppercase tracking-wide text-slate-500">{label}</dt>
+      <dt className="truncate text-[11px] uppercase tracking-wide text-slate-500">
+        {label}
+        {isPendency && (
+          <span
+            className="ml-1 inline-block rounded-sm bg-amber-100 px-1 text-[9px] font-semibold uppercase text-amber-800"
+            title="Campo obrigatório para simulação automática"
+          >
+            req
+          </span>
+        )}
+      </dt>
       <dd
-        className={`mt-0.5 truncate text-sm ${isMissing ? "text-slate-400 italic" : "text-slate-900"}`}
+        className={`mt-0.5 truncate text-sm ${
+          isPendency
+            ? "text-amber-700 font-medium"
+            : isMissing
+              ? "text-slate-400 italic"
+              : "text-slate-900"
+        }`}
         title={display}
       >
         {display}
@@ -598,3 +661,62 @@ function Field({ label, value }: { label: string; value: unknown }) {
     </div>
   );
 }
+
+function BlockStatusBar({ completeness }: { completeness: CatalogCompleteness }) {
+  const blocks: BlockKey[] = ["compressor", "eletrica", "condensador", "evaporador", "reheat"];
+  return (
+    <section className="rounded-lg border border-slate-200 bg-white p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Status por bloco
+        </h3>
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+            completeness.simulacaoCompleta
+              ? "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200"
+              : "bg-amber-50 text-amber-800 ring-1 ring-amber-200"
+          }`}
+        >
+          {completeness.simulacaoCompleta
+            ? "Pronto para simulação automática"
+            : "Simulação automática indisponível"}
+        </span>
+      </div>
+      <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        {blocks.map((b) => {
+          const d = completeness.byBlock[b];
+          const ok = d.complete;
+          return (
+            <li
+              key={b}
+              className={`rounded-md border p-2 text-xs ${
+                ok
+                  ? "border-emerald-200 bg-emerald-50"
+                  : "border-amber-200 bg-amber-50"
+              }`}
+              title={ok ? "Completo" : `Faltam: ${d.missing.join(", ")}`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-medium text-slate-800">{BLOCK_LABEL[b]}</span>
+                <span
+                  className={`text-[10px] font-semibold uppercase ${
+                    ok ? "text-emerald-700" : "text-amber-800"
+                  }`}
+                >
+                  {ok ? "OK" : `${d.missing.length} pend.`}
+                </span>
+              </div>
+              {!ok && (
+                <p className="mt-1 line-clamp-2 text-[10px] text-amber-700" title={d.missing.join(", ")}>
+                  {d.missing.slice(0, 3).join(", ")}
+                  {d.missing.length > 3 ? `, +${d.missing.length - 3}` : ""}
+                </p>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
