@@ -201,7 +201,7 @@ export function UnilabWorkspacePage() {
               />
             )
           ) : (
-            <AirSidePanel />
+            <AirSidePanel result={result} />
           )}
         </div>
 
@@ -211,6 +211,7 @@ export function UnilabWorkspacePage() {
             componentType={componentType}
             refrigerants={catalogs.refrigerants}
             disabled={!catalogs.ready}
+            result={result}
           />
           <DatasetStatusPanel
             loading={catalogs.loading}
