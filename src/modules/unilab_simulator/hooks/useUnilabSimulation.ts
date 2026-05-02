@@ -51,7 +51,7 @@ export function useUnilabSimulation(catalogs: UseUnilabSimulationParams) {
           pressureDropFan: catalogs.pressureDropFan,
         },
         tubeMaterialConductivity: tubeMat.conductivityWmK,
-        uBaseWm2K: geometry?.uBaseWm2K,
+        uBaseWm2K: geometry?.uBaseWm2K ?? 35,
       });
 
       const k = 1 + (Number.isFinite(errorFactorPercent) ? errorFactorPercent : 0) / 100;
