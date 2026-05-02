@@ -19,9 +19,10 @@ function fmt(n: number | undefined, digits = 2): string {
   return n.toFixed(digits);
 }
 
-export function ResultPanel({ result, warnings }: ResultPanelProps) {
+export function ResultPanel({ result, warnings, onGoalSeek }: ResultPanelProps) {
   const r = ptBR.workspace.result;
   const fanAudit = useFanAudit();
+  const [targetKw, setTargetKw] = useState<string>("");
 
   if (!result) {
     return (
@@ -35,7 +36,6 @@ export function ResultPanel({ result, warnings }: ResultPanelProps) {
   }
 
   const items: Array<{ label: string; value: string }> = [
-    { label: r.totalCapacity, value: `${fmt(result.totalCapacityKw)} kW` },
     { label: r.sensibleCapacity, value: `${fmt(result.sensibleCapacityKw)} kW` },
     { label: r.latentCapacity, value: `${fmt(result.latentCapacityKw)} kW` },
     { label: r.shf, value: fmt(result.shf, 3) },
@@ -51,6 +51,40 @@ export function ResultPanel({ result, warnings }: ResultPanelProps) {
   return (
     <div className="space-y-3">
       <div className="rounded-lg border border-slate-200 bg-white p-4">
+        {/* Capacidade Total — bidirecional (Goal Seek) */}
+        <div className="mb-3 rounded border border-emerald-200 bg-emerald-50 p-2">
+          <div className="mb-1 flex items-center justify-between">
+            <span className="text-xs font-semibold text-emerald-900">
+              {r.totalCapacity}
+            </span>
+            <span className="text-sm font-bold text-emerald-900">
+              {fmt(result.totalCapacityKw)} kW
+            </span>
+          </div>
+          {onGoalSeek && (
+            <div className="flex items-center gap-1.5">
+              <input
+                type="number"
+                step="0.1"
+                value={targetKw}
+                onChange={(e) => setTargetKw(e.target.value)}
+                placeholder="Capacidade desejada (kW)"
+                className="min-w-0 flex-1 rounded border border-emerald-300 bg-white px-2 py-1 text-right text-xs text-slate-900 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const v = Number(targetKw);
+                  if (Number.isFinite(v) && v > 0) onGoalSeek(v);
+                }}
+                className="inline-flex items-center gap-1 rounded bg-emerald-600 px-2 py-1 text-[11px] font-medium text-white hover:bg-emerald-700"
+              >
+                <Target className="h-3 w-3" />
+                Atingir Meta
+              </button>
+            </div>
+          )}
+        </div>
         <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {items.map((it) => (
             <div
