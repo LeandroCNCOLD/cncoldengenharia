@@ -83,9 +83,18 @@ export class SimulationError extends Error {
  * simulador (correção UNILAB cobre o resíduo), basta um fator linear.
  */
 function estimateEffectiveAreaM2(physical: UnilabPhysicalInputs, faceAreaM2: number): number {
-  // Fator de aleta: razão entre área aletada e área de tubo nu — escala com
-  // 1/finPitch. Para um catálogo UNILAB típico, finPitchMm 2..6 mm gera
-  // 8..16 vezes a área externa do tubo nu por fileira.
+  // Quando passo variável estiver ativo, soma a contribuição fila a fila
+  // (cada fila com seu próprio passo de aleta).
+  if (physical.isVariableFinPitch && Array.isArray(physical.rowFinPitchesMm) && physical.rowFinPitchesMm.length > 0) {
+    let sum = 0;
+    for (let i = 0; i < physical.rows; i++) {
+      const pitchMm = physical.rowFinPitchesMm[i] ?? physical.rowFinPitchesMm[physical.rowFinPitchesMm.length - 1] ?? physical.finPitchMm;
+      const finPitchM = mmToM(Math.max(pitchMm, 0.1));
+      const finFactorPerRow = 1 + 0.1 / finPitchM;
+      sum += faceAreaM2 * finFactorPerRow;
+    }
+    return sum;
+  }
   const finPitchM = mmToM(Math.max(physical.finPitchMm, 0.1));
   const finFactorPerRow = 1 + 0.1 / finPitchM; // adimensional
   return faceAreaM2 * physical.rows * finFactorPerRow;

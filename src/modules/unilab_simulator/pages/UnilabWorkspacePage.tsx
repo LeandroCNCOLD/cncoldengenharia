@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ArrowLeft, Send } from "lucide-react";
+import { toast } from "sonner";
+import { runSimulation, SimulationError } from "../engine/simulatorCore";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
 import { ptBR } from "../i18n/messages.ptBR";
 import { useUnilabCatalogs } from "../hooks/useUnilabCatalogs";
@@ -127,6 +129,89 @@ export function UnilabWorkspacePage() {
     }
   };
 
+  const handleGoalSeek = (targetKw: number) => {
+    if (!Number.isFinite(targetKw) || targetKw <= 0) return;
+    const physCheck = validatePhysicalInputs(physical);
+    const thermoCheck = validateThermoInputs(thermo);
+    if (!physCheck.isValid || !thermoCheck.isValid) {
+      setWarnings([...physCheck.errors, ...thermoCheck.errors]);
+      return;
+    }
+    const phys = physical as UnilabPhysicalInputs;
+    const therm = thermo as UnilabThermoInputs;
+    const tubeMat = catalogs.tubeMaterials.find((m) => m.id === phys.tubeMaterialId);
+    if (!tubeMat) {
+      toast.error("Material do tubo não encontrado.");
+      return;
+    }
+    const geometry = catalogs.geometries.find((g) => g.id === phys.geometryId);
+
+    // Busca binária em finnedLengthMm — apenas o comprimento aletado pode mudar.
+    const runAt = (lengthMm: number) =>
+      runSimulation({
+        physical: { ...phys, finnedLengthMm: lengthMm },
+        thermo: therm,
+        catalogs: {
+          correctionCoefficients: catalogs.correctionCoefficients,
+          pressureDropFan: catalogs.pressureDropFan,
+        },
+        tubeMaterialConductivity: tubeMat.conductivityWmK,
+        uBaseWm2K: geometry?.uBaseWm2K,
+      });
+
+    try {
+      // Estima por proporcionalidade e refina por bisseção.
+      const baseLen = phys.finnedLengthMm || 1000;
+      const baseQ = result?.totalCapacityKw ?? runAt(baseLen).totalCapacityKw;
+      let lo = 50;
+      let hi = Math.max(baseLen * Math.max(targetKw / Math.max(baseQ, 1e-6), 1) * 2, baseLen * 2);
+      // Garante bracket
+      let loQ = runAt(lo).totalCapacityKw;
+      let hiQ = runAt(hi).totalCapacityKw;
+      let guard = 0;
+      while (hiQ < targetKw && guard < 8) {
+        hi *= 2;
+        hiQ = runAt(hi).totalCapacityKw;
+        guard++;
+      }
+      if (loQ > targetKw) {
+        toast.warning(`Capacidade mínima (${loQ.toFixed(2)} kW) já excede a meta.`);
+        return;
+      }
+      if (hiQ < targetKw) {
+        toast.error(`Não foi possível atingir ${targetKw} kW alterando apenas o comprimento.`);
+        return;
+      }
+      // Bisseção
+      let mid = lo;
+      let midQ = loQ;
+      for (let i = 0; i < 24; i++) {
+        mid = (lo + hi) / 2;
+        midQ = runAt(mid).totalCapacityKw;
+        if (Math.abs(midQ - targetKw) / targetKw < 0.005) break;
+        if (midQ < targetKw) {
+          lo = mid;
+          loQ = midQ;
+        } else {
+          hi = mid;
+          hiQ = midQ;
+        }
+      }
+      const finalLen = Math.round(mid);
+      // Atualiza store + roda final
+      useUnilabSimulationStore.getState().setPhysicalInputs({ finnedLengthMm: finalLen });
+      const finalRes = runAt(finalLen);
+      useUnilabSimulationStore.getState().setResult(finalRes);
+      useUnilabSimulationStore.getState().setWarnings(finalRes.warnings);
+      toast.success(
+        `Para atingir ${targetKw} kW, o Comprimento Aletado foi ajustado para ${finalLen} mm.`,
+      );
+    } catch (err) {
+      const msg = err instanceof SimulationError ? err.errors.join("; ") : String(err);
+      toast.error(`Goal Seek falhou: ${msg}`);
+    }
+  };
+
   const handleSendToAssembly = () => {
     const sendCheck = validateCanSendToAssembly(result, physical);
     if (!sendCheck.isValid) {
@@ -220,7 +305,7 @@ export function UnilabWorkspacePage() {
               missing={catalogs.missing}
               compact
             />
-            <ResultPanel result={result} warnings={warnings} />
+            <ResultPanel result={result} warnings={warnings} onGoalSeek={handleGoalSeek} />
           </div>
         </div>
       </div>
