@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Lock, Unlock, Zap, Search } from "lucide-react";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { CompressorPickerModal } from "./CompressorPickerModal";
+import { RefrigerantPickerModal } from "./RefrigerantPickerModal";
 import type {
   UnilabComponentType,
   UnilabSimulationResult,
@@ -95,6 +96,7 @@ export function FluidSidePanel({
   const [refrigerants, setRefrigerants] = useState<RefrigerantOption[]>([]);
   const [compressors, setCompressors] = useState<Array<{ id: string; label: string }>>([]);
   const [compressorModalOpen, setCompressorModalOpen] = useState(false);
+  const [refrigerantModalOpen, setRefrigerantModalOpen] = useState(false);
   const compressorCount = useUnilabSimulationStore((s) => s.compressorCount);
 
   const [uMassFlow, setUMassFlow] = useState<MassFlowUnit>("kg_h");
@@ -214,27 +216,26 @@ export function FluidSidePanel({
       <div className="space-y-1.5 p-2">
         {/* 1) Fluido */}
         <FieldRow label="Fluido">
-          <select
-            value={fluid}
-            onChange={(e) => setFluid(e.target.value)}
+          <button
+            type="button"
+            onClick={() => setRefrigerantModalOpen(true)}
             disabled={disabled}
-            className="w-full min-w-0 rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100"
+            className="flex w-full min-w-0 items-center justify-between gap-1 rounded border border-slate-300 bg-white px-2 py-1 text-left text-xs text-slate-900 hover:border-sky-400 hover:bg-sky-50 disabled:cursor-not-allowed disabled:bg-slate-100"
           >
-            {refrigerants.length === 0 && <option value={fluid}>{fluid}</option>}
-            {refrigerants.map((r) => {
-              const label = r.shortName ?? r.name ?? r.id;
-              const suffix =
-                r.commercialName && r.commercialName !== label
-                  ? ` (${r.commercialName})`
-                  : "";
-              return (
-                <option key={r.id} value={r.id}>
-                  {label}
-                  {suffix}
-                </option>
-              );
-            })}
-          </select>
+            <span className="min-w-0 flex-1 truncate font-medium">
+              {(() => {
+                const r = refrigerants.find((x) => x.id === fluid);
+                if (!r) return fluid || "Selecionar fluido…";
+                const label = r.shortName ?? r.name ?? r.id;
+                const suffix =
+                  r.commercialName && r.commercialName !== label
+                    ? ` (${r.commercialName})`
+                    : "";
+                return `${label}${suffix}`;
+              })()}
+            </span>
+            <Search className="h-3 w-3 shrink-0 text-slate-400" />
+          </button>
         </FieldRow>
 
         {/* 1.5) Compressor (acopla cálculo ao polinômio ASHRAE) */}
@@ -528,6 +529,10 @@ export function FluidSidePanel({
     <CompressorPickerModal
       open={compressorModalOpen}
       onClose={() => setCompressorModalOpen(false)}
+    />
+    <RefrigerantPickerModal
+      open={refrigerantModalOpen}
+      onClose={() => setRefrigerantModalOpen(false)}
     />
     </>
   );
