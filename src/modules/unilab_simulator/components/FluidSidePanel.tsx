@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Lock, Unlock, Zap } from "lucide-react";
+import { Lock, Unlock, Zap, Search } from "lucide-react";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { CompressorPickerModal } from "./CompressorPickerModal";
 import type {
   UnilabComponentType,
   UnilabSimulationResult,
