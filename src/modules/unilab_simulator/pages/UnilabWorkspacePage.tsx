@@ -5,15 +5,12 @@ import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer
 import { ptBR } from "../i18n/messages.ptBR";
 import { useUnilabCatalogs } from "../hooks/useUnilabCatalogs";
 import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
-import { GeometryForm } from "../components/GeometryForm";
 import { ResultPanel } from "../components/ResultPanel";
 import { AirSidePanel } from "../components/AirSidePanel";
 import { FluidSidePanel } from "../components/FluidSidePanel";
 import { GeometryBottomBar } from "../components/GeometryBottomBar";
-import {
-  WorkspaceSidebar,
-  type WorkspaceSection,
-} from "../components/WorkspaceSidebar";
+import { CoilSchematic } from "../components/CoilSchematic";
+import { WorkspaceSidebar } from "../components/WorkspaceSidebar";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { useUnilabSimulation } from "../hooks/useUnilabSimulation";
 import { useUnilabSimulationV2 } from "../hooks/useUnilabSimulationV2";
@@ -30,10 +27,7 @@ import {
   toCondenserInput,
 } from "../adapters/toColdProAdapter";
 import { useComponentStore } from "@/modules/coldpro/stores/useComponentStore";
-import {
-  loadCoilGeometries,
-  type CoilGeometryItem,
-} from "../services/coilGeometryCatalogService";
+import { loadCoilGeometries } from "../services/coilGeometryCatalogService";
 import { getApplicationConfig } from "../config/applicationConfig";
 import type {
   UnilabComponentType,
