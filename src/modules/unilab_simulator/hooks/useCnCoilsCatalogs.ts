@@ -12,6 +12,8 @@ import type {
   CoilShape,
   Compressor,
   CompressorStandard,
+  DistributorHoleSize,
+  DistributorKappaMap,
   Fan,
   FinHeight,
   FinPitch,
@@ -23,6 +25,8 @@ import type {
   Refrigerant,
   SecondaryFluid,
   TubeThickness,
+  UiLabelEntry,
+  WarningEntry,
 } from "../types/catalogs";
 
 const CATALOG_BASE = "/data/catalogs";
@@ -67,6 +71,10 @@ export interface CnCoilsCatalogsData {
   powerSupplies: PowerSupply[];
   /** Lista de Materiais (BOM) — 15 grupos consolidados do UNILAB. */
   bom: BomCatalog;
+  warnings: WarningEntry[];
+  uiLabels: UiLabelEntry[];
+  distributorKappa: DistributorKappaMap;
+  distributorHoleSizes: DistributorHoleSize[];
 }
 
 export interface CnCoilsCatalogsState extends CnCoilsCatalogsData {
@@ -100,6 +108,10 @@ const EMPTY: CnCoilsCatalogsData = {
     sheets: [], nipples: [], nodes: [], fins: [], capillaries: [],
     plugs: [], soldering: [], groups: [], elements: [], frame: [],
   },
+  warnings: [],
+  uiLabels: [],
+  distributorKappa: {},
+  distributorHoleSizes: [],
 };
 
 async function fetchJsonArray<T>(file: string): Promise<T[]> {
@@ -149,6 +161,32 @@ export function useCnCoilsCatalogs(): CnCoilsCatalogsState {
             next.bom = { ...next.bom, ...raw };
           } catch (err) {
             errs["bomComponents.json"] =
+              err instanceof Error ? err.message : String(err);
+          }
+        })(),
+        ...([
+          ["warnings", "warnings.json"],
+          ["uiLabels", "uiLabels.json"],
+          ["distributorHoleSizes", "distributorHoleSizes.json"],
+        ] as const).map(([key, file]) =>
+          (async () => {
+            try {
+              const arr = await fetchJsonArray<unknown>(file);
+              (next as unknown as Record<string, unknown>)[key] = arr;
+            } catch (err) {
+              errs[file] = err instanceof Error ? err.message : String(err);
+            }
+          })(),
+        ),
+        (async () => {
+          try {
+            const res = await fetch(`${CATALOG_BASE}/distributorKappa.json`, {
+              cache: "no-cache",
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            next.distributorKappa = (await res.json()) as DistributorKappaMap;
+          } catch (err) {
+            errs["distributorKappa.json"] =
               err instanceof Error ? err.message : String(err);
           }
         })(),

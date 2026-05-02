@@ -187,3 +187,53 @@ export interface BomCatalog {
   elements: Array<Record<string, unknown>>;
   frame: Array<Record<string, unknown>>;
 }
+
+export interface WarningEntry {
+  id: number | null;
+  translations: Record<string, string>;
+}
+
+export interface UiLabelEntry {
+  id: number | null;
+  translations: Record<string, string>;
+}
+
+/** Kappa do distribuidor: { "R404A": { "-40": 0.28, ... } } */
+export type DistributorKappaMap = Record<string, Record<string, number>>;
+
+export interface DistributorHoleSize {
+  ID: number;
+  Fase: number;
+  TipoScambiatore: number;
+  Abilita: number;
+  InVerifica: number;
+  [extra: string]: unknown;
+}
+
+/**
+ * Resolve o Kappa do distribuidor para um fluido e Tevap (°C),
+ * usando o ponto de temperatura mais próximo disponível na tabela.
+ */
+export function getDistributorKappa(
+  kappaMap: DistributorKappaMap,
+  fluid: string,
+  tevapC: number,
+): number {
+  const fluidMap = kappaMap[fluid];
+  if (!fluidMap) return 0.25;
+  const temps = Object.keys(fluidMap).map(Number).sort((a, b) => a - b);
+  if (temps.length === 0) return 0.25;
+  const closest = temps.reduce((prev, curr) =>
+    Math.abs(curr - tevapC) < Math.abs(prev - tevapC) ? curr : prev,
+  );
+  return fluidMap[String(closest)] ?? 0.25;
+}
+
+/** Helper: traduz um label/aviso para o idioma desejado, com fallback EN. */
+export function translateEntry(
+  entry: { translations: Record<string, string> } | undefined,
+  lang = "pt",
+): string {
+  if (!entry) return "";
+  return entry.translations[lang] ?? entry.translations.en ?? "";
+}
