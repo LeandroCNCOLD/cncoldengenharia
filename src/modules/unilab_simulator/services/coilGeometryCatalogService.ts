@@ -227,10 +227,9 @@ export function filterCoilGeometries(
     tipo = tipo_serpentina;
   } else {
     search = searchOrOptions.search ?? "";
-    tipo =
-      searchOrOptions.tipo && searchOrOptions.tipo !== ""
-        ? (searchOrOptions.tipo as TipoSerpentina)
-        : undefined;
+    tipo = searchOrOptions.tipo
+      ? (searchOrOptions.tipo as TipoSerpentina)
+      : undefined;
   }
   const q = search.trim().toLowerCase();
   return items.filter((g) => {
