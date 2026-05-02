@@ -1,4 +1,4 @@
-import { AlertCircle, AlertTriangle, Info } from "lucide-react";
+import { AlertCircle, AlertTriangle, Info, Target } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { UnilabSimulationResult } from "../types/unilab.types";
 import { ptBR } from "../i18n/messages.ptBR";
@@ -11,6 +11,7 @@ import {
 interface ResultPanelProps {
   result: UnilabSimulationResult | undefined;
   warnings: string[];
+  onGoalSeek?: (targetKw: number) => void;
 }
 
 function fmt(n: number | undefined, digits = 2): string {
