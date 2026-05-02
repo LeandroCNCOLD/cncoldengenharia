@@ -94,6 +94,8 @@ interface UnilabSimulationStore {
   dischargeSuperheatK: number | null;
   /** Compressor selecionado (acopla o cálculo ao polinômio ASHRAE). */
   selectedCompressorId?: string;
+  /** Quantidade de compressores aplicados (multiplica vazão mássica/capacidade). */
+  compressorCount: number;
   setFluid: (val: string) => void;
   setFluidMassFlow: (val: number) => void;
   toggleMassFlowLock: () => void;
@@ -105,6 +107,7 @@ interface UnilabSimulationStore {
   setPairedTempC: (val: number | null) => void;
   setDischargeSuperheatK: (val: number | null) => void;
   setSelectedCompressor: (id: string | undefined) => void;
+  setCompressorCount: (n: number) => void;
 
   // Etapa 3.6 — Custo da bateria
   materialPrices: MaterialPrices;
@@ -182,9 +185,11 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   pairedTempC: null,
   dischargeSuperheatK: null,
   selectedCompressorId: undefined,
+  compressorCount: 1,
   setPairedTempC: (val) => set({ pairedTempC: val }),
   setDischargeSuperheatK: (val) => set({ dischargeSuperheatK: val }),
   setSelectedCompressor: (id) => set({ selectedCompressorId: id }),
+  setCompressorCount: (n) => set({ compressorCount: Math.max(1, Math.floor(n) || 1) }),
 
   // Etapa 3.6 — Custo da bateria
   materialPrices: { ...DEFAULT_MATERIAL_PRICES },
@@ -339,6 +344,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       pairedTempC: null,
       dischargeSuperheatK: null,
       selectedCompressorId: undefined,
+      compressorCount: 1,
       materialPrices: { ...DEFAULT_MATERIAL_PRICES },
       calculatedCost: 0,
       tubeMaterialKey: "copper_kg",

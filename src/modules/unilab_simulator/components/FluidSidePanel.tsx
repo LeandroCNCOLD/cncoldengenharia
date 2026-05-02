@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Lock, Unlock, Zap } from "lucide-react";
+import { Lock, Unlock, Zap, Search } from "lucide-react";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { CompressorPickerModal } from "./CompressorPickerModal";
 import type {
   UnilabComponentType,
   UnilabSimulationResult,
@@ -93,6 +94,8 @@ export function FluidSidePanel({
 
   const [refrigerants, setRefrigerants] = useState<RefrigerantOption[]>([]);
   const [compressors, setCompressors] = useState<Array<{ id: string; label: string }>>([]);
+  const [compressorModalOpen, setCompressorModalOpen] = useState(false);
+  const compressorCount = useUnilabSimulationStore((s) => s.compressorCount);
 
   const [uMassFlow, setUMassFlow] = useState<MassFlowUnit>("kg_h");
   const [uOpTemp, setUOpTemp] = useState<TempUnit>("C");
@@ -202,6 +205,7 @@ export function FluidSidePanel({
   }
 
   return (
+    <>
     <div className="rounded border border-slate-300 bg-slate-50 shadow-sm">
       <div className="border-b border-slate-300 bg-[#1E6FD9] px-3 py-1.5 text-center text-xs font-bold uppercase tracking-wider text-white">
         Lado Fluido
@@ -237,30 +241,25 @@ export function FluidSidePanel({
         <FieldRow
           label="Compressor"
           unit={
-            <button
-              type="button"
-              onClick={() => setSelectedCompressor(undefined)}
-              disabled={!hasCompressor}
-              title="Remover compressor"
-              className="flex w-full items-center justify-center rounded border border-slate-300 bg-white px-1 py-0.5 text-[10px] text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Zap className="h-3 w-3" />
-            </button>
+            <div className="flex w-full items-center justify-center rounded border border-amber-300 bg-amber-50 px-1 py-0.5 text-[10px] font-bold text-amber-900">
+              {compressorCount}×
+            </div>
           }
         >
-          <select
-            value={selectedCompressorId ?? ""}
-            onChange={(e) => setSelectedCompressor(e.target.value || undefined)}
+          <button
+            type="button"
+            onClick={() => setCompressorModalOpen(true)}
             disabled={disabled}
-            className="w-full min-w-0 rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100"
+            className="flex w-full min-w-0 items-center justify-between gap-1 rounded border border-slate-300 bg-white px-2 py-1 text-left text-xs text-slate-900 hover:border-amber-400 hover:bg-amber-50 disabled:cursor-not-allowed disabled:bg-slate-100"
           >
-            <option value="">— sem compressor —</option>
-            {compressors.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.label}
-              </option>
-            ))}
-          </select>
+            <span className="min-w-0 flex-1 truncate">
+              {hasCompressor
+                ? compressors.find((c) => c.id === selectedCompressorId)?.label ??
+                  selectedCompressorId
+                : "— sem compressor —"}
+            </span>
+            <Search className="h-3 w-3 shrink-0 text-slate-400" />
+          </button>
         </FieldRow>
 
         {/* 2) Vazão + cadeado */}
@@ -526,6 +525,11 @@ export function FluidSidePanel({
         </ul>
       )}
     </div>
+    <CompressorPickerModal
+      open={compressorModalOpen}
+      onClose={() => setCompressorModalOpen(false)}
+    />
+    </>
   );
 }
 
