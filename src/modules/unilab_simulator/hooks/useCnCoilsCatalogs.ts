@@ -164,6 +164,30 @@ const EMPTY: CnCoilsCatalogsData = {
   fanElectricalData: [],
   pumpData: [],
   compressorOutletTemperature: [],
+  // ── LOTE FINAL ──
+  compressorCapacityPolynomials: [],
+  compressorPowerPolynomials: [],
+  compressorCurrentPolynomials: [],
+  compressorBackupPolynomials: { capacity: [], power: [] },
+  geometriesComplete: {
+    condensation: [], direct_expansion: [], evaporator_flooded: [],
+    cooling: [], heating: [], steam: [],
+  },
+  tubesCatalog: [],
+  fansComplete: [],
+  fluidsThermoPhysical: {
+    pureGases: [], gasMixtures: [], pureLiquids: [],
+    liquidMixtures: [], refrigerants: [], refrigerantMixtures: [],
+  },
+  refrigerantsLimits: [],
+  secondaryFluidsComplete: [],
+  liquidMixtures: [],
+  distributorComplete: { models: [], dimensions: [], kappa: [] },
+  distributorKappaFull: [],
+  pumpComplete: { pumpModels: [], pumpData: [], pumpCurves: [] },
+  pumpCurves: [],
+  shellTubeCondenser: [],
+  collectionErrors: [],
 };
 
 async function fetchJsonArray<T>(file: string): Promise<T[]> {
@@ -172,6 +196,12 @@ async function fetchJsonArray<T>(file: string): Promise<T[]> {
   const raw = (await res.json()) as unknown;
   if (!Array.isArray(raw)) throw new Error(`Conteúdo inválido em ${file}`);
   return raw as T[];
+}
+
+async function fetchJsonObject<T>(file: string): Promise<T> {
+  const res = await fetch(`${CATALOG_BASE}/${file}`, { cache: "no-cache" });
+  if (!res.ok) throw new Error(`HTTP ${res.status} em ${file}`);
+  return (await res.json()) as T;
 }
 
 // Cache em módulo — evita refetch entre páginas/componentes na mesma sessão.
