@@ -13,16 +13,6 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
-import { Route as AppAdminRouteImport } from './routes/_app/admin'
-import { Route as AppColdproProjetosRouteImport } from './routes/_app/coldpro/projetos'
-import { Route as AppColdproDashboardRouteImport } from './routes/_app/coldpro/dashboard'
-import { Route as AppColdproCatalogoRouteImport } from './routes/_app/coldpro/catalogo'
-import { Route as AppAdminUnilabImportRouteImport } from './routes/_app/admin_.unilab-import'
-import { Route as AppColdproEquipamentosIndexRouteImport } from './routes/_app/coldpro/equipamentos/index'
-import { Route as AppAdminDatabaseIndexRouteImport } from './routes/_app/admin_.database.index'
-import { Route as AppColdproEquipamentosIdRouteImport } from './routes/_app/coldpro/equipamentos/$id'
-import { Route as AppAdminDatabaseModeRouteImport } from './routes/_app/admin_.database.$mode'
-import { Route as AppColdproEquipamentosIdCoilSimulatorRouteImport } from './routes/_app/coldpro/equipamentos/$id/coil-simulator'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -43,154 +33,30 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAdminRoute = AppAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppColdproProjetosRoute = AppColdproProjetosRouteImport.update({
-  id: '/coldpro/projetos',
-  path: '/coldpro/projetos',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppColdproDashboardRoute = AppColdproDashboardRouteImport.update({
-  id: '/coldpro/dashboard',
-  path: '/coldpro/dashboard',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppColdproCatalogoRoute = AppColdproCatalogoRouteImport.update({
-  id: '/coldpro/catalogo',
-  path: '/coldpro/catalogo',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppAdminUnilabImportRoute = AppAdminUnilabImportRouteImport.update({
-  id: '/admin_/unilab-import',
-  path: '/admin/unilab-import',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppColdproEquipamentosIndexRoute =
-  AppColdproEquipamentosIndexRouteImport.update({
-    id: '/coldpro/equipamentos/',
-    path: '/coldpro/equipamentos/',
-    getParentRoute: () => AppRoute,
-  } as any)
-const AppAdminDatabaseIndexRoute = AppAdminDatabaseIndexRouteImport.update({
-  id: '/admin_/database/',
-  path: '/admin/database/',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppColdproEquipamentosIdRoute =
-  AppColdproEquipamentosIdRouteImport.update({
-    id: '/coldpro/equipamentos/$id',
-    path: '/coldpro/equipamentos/$id',
-    getParentRoute: () => AppRoute,
-  } as any)
-const AppAdminDatabaseModeRoute = AppAdminDatabaseModeRouteImport.update({
-  id: '/admin_/database/$mode',
-  path: '/admin/database/$mode',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppColdproEquipamentosIdCoilSimulatorRoute =
-  AppColdproEquipamentosIdCoilSimulatorRouteImport.update({
-    id: '/coil-simulator',
-    path: '/coil-simulator',
-    getParentRoute: () => AppColdproEquipamentosIdRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/admin': typeof AppAdminRoute
   '/dashboard': typeof AppDashboardRoute
-  '/admin/unilab-import': typeof AppAdminUnilabImportRoute
-  '/coldpro/catalogo': typeof AppColdproCatalogoRoute
-  '/coldpro/dashboard': typeof AppColdproDashboardRoute
-  '/coldpro/projetos': typeof AppColdproProjetosRoute
-  '/admin/database/$mode': typeof AppAdminDatabaseModeRoute
-  '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRouteWithChildren
-  '/admin/database/': typeof AppAdminDatabaseIndexRoute
-  '/coldpro/equipamentos/': typeof AppColdproEquipamentosIndexRoute
-  '/coldpro/equipamentos/$id/coil-simulator': typeof AppColdproEquipamentosIdCoilSimulatorRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/admin': typeof AppAdminRoute
   '/dashboard': typeof AppDashboardRoute
-  '/admin/unilab-import': typeof AppAdminUnilabImportRoute
-  '/coldpro/catalogo': typeof AppColdproCatalogoRoute
-  '/coldpro/dashboard': typeof AppColdproDashboardRoute
-  '/coldpro/projetos': typeof AppColdproProjetosRoute
-  '/admin/database/$mode': typeof AppAdminDatabaseModeRoute
-  '/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRouteWithChildren
-  '/admin/database': typeof AppAdminDatabaseIndexRoute
-  '/coldpro/equipamentos': typeof AppColdproEquipamentosIndexRoute
-  '/coldpro/equipamentos/$id/coil-simulator': typeof AppColdproEquipamentosIdCoilSimulatorRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_app/admin': typeof AppAdminRoute
   '/_app/dashboard': typeof AppDashboardRoute
-  '/_app/admin_/unilab-import': typeof AppAdminUnilabImportRoute
-  '/_app/coldpro/catalogo': typeof AppColdproCatalogoRoute
-  '/_app/coldpro/dashboard': typeof AppColdproDashboardRoute
-  '/_app/coldpro/projetos': typeof AppColdproProjetosRoute
-  '/_app/admin_/database/$mode': typeof AppAdminDatabaseModeRoute
-  '/_app/coldpro/equipamentos/$id': typeof AppColdproEquipamentosIdRouteWithChildren
-  '/_app/admin_/database/': typeof AppAdminDatabaseIndexRoute
-  '/_app/coldpro/equipamentos/': typeof AppColdproEquipamentosIndexRoute
-  '/_app/coldpro/equipamentos/$id/coil-simulator': typeof AppColdproEquipamentosIdCoilSimulatorRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/auth'
-    | '/admin'
-    | '/dashboard'
-    | '/admin/unilab-import'
-    | '/coldpro/catalogo'
-    | '/coldpro/dashboard'
-    | '/coldpro/projetos'
-    | '/admin/database/$mode'
-    | '/coldpro/equipamentos/$id'
-    | '/admin/database/'
-    | '/coldpro/equipamentos/'
-    | '/coldpro/equipamentos/$id/coil-simulator'
+  fullPaths: '/' | '/auth' | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/auth'
-    | '/admin'
-    | '/dashboard'
-    | '/admin/unilab-import'
-    | '/coldpro/catalogo'
-    | '/coldpro/dashboard'
-    | '/coldpro/projetos'
-    | '/admin/database/$mode'
-    | '/coldpro/equipamentos/$id'
-    | '/admin/database'
-    | '/coldpro/equipamentos'
-    | '/coldpro/equipamentos/$id/coil-simulator'
-  id:
-    | '__root__'
-    | '/'
-    | '/_app'
-    | '/auth'
-    | '/_app/admin'
-    | '/_app/dashboard'
-    | '/_app/admin_/unilab-import'
-    | '/_app/coldpro/catalogo'
-    | '/_app/coldpro/dashboard'
-    | '/_app/coldpro/projetos'
-    | '/_app/admin_/database/$mode'
-    | '/_app/coldpro/equipamentos/$id'
-    | '/_app/admin_/database/'
-    | '/_app/coldpro/equipamentos/'
-    | '/_app/coldpro/equipamentos/$id/coil-simulator'
+  to: '/' | '/auth' | '/dashboard'
+  id: '__root__' | '/' | '/_app' | '/auth' | '/_app/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -229,118 +95,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/admin': {
-      id: '/_app/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AppAdminRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/coldpro/projetos': {
-      id: '/_app/coldpro/projetos'
-      path: '/coldpro/projetos'
-      fullPath: '/coldpro/projetos'
-      preLoaderRoute: typeof AppColdproProjetosRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/coldpro/dashboard': {
-      id: '/_app/coldpro/dashboard'
-      path: '/coldpro/dashboard'
-      fullPath: '/coldpro/dashboard'
-      preLoaderRoute: typeof AppColdproDashboardRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/coldpro/catalogo': {
-      id: '/_app/coldpro/catalogo'
-      path: '/coldpro/catalogo'
-      fullPath: '/coldpro/catalogo'
-      preLoaderRoute: typeof AppColdproCatalogoRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/admin_/unilab-import': {
-      id: '/_app/admin_/unilab-import'
-      path: '/admin/unilab-import'
-      fullPath: '/admin/unilab-import'
-      preLoaderRoute: typeof AppAdminUnilabImportRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/coldpro/equipamentos/': {
-      id: '/_app/coldpro/equipamentos/'
-      path: '/coldpro/equipamentos'
-      fullPath: '/coldpro/equipamentos/'
-      preLoaderRoute: typeof AppColdproEquipamentosIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/admin_/database/': {
-      id: '/_app/admin_/database/'
-      path: '/admin/database'
-      fullPath: '/admin/database/'
-      preLoaderRoute: typeof AppAdminDatabaseIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/coldpro/equipamentos/$id': {
-      id: '/_app/coldpro/equipamentos/$id'
-      path: '/coldpro/equipamentos/$id'
-      fullPath: '/coldpro/equipamentos/$id'
-      preLoaderRoute: typeof AppColdproEquipamentosIdRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/admin_/database/$mode': {
-      id: '/_app/admin_/database/$mode'
-      path: '/admin/database/$mode'
-      fullPath: '/admin/database/$mode'
-      preLoaderRoute: typeof AppAdminDatabaseModeRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/coldpro/equipamentos/$id/coil-simulator': {
-      id: '/_app/coldpro/equipamentos/$id/coil-simulator'
-      path: '/coil-simulator'
-      fullPath: '/coldpro/equipamentos/$id/coil-simulator'
-      preLoaderRoute: typeof AppColdproEquipamentosIdCoilSimulatorRouteImport
-      parentRoute: typeof AppColdproEquipamentosIdRoute
-    }
   }
 }
-
-interface AppColdproEquipamentosIdRouteChildren {
-  AppColdproEquipamentosIdCoilSimulatorRoute: typeof AppColdproEquipamentosIdCoilSimulatorRoute
-}
-
-const AppColdproEquipamentosIdRouteChildren: AppColdproEquipamentosIdRouteChildren =
-  {
-    AppColdproEquipamentosIdCoilSimulatorRoute:
-      AppColdproEquipamentosIdCoilSimulatorRoute,
-  }
-
-const AppColdproEquipamentosIdRouteWithChildren =
-  AppColdproEquipamentosIdRoute._addFileChildren(
-    AppColdproEquipamentosIdRouteChildren,
-  )
 
 interface AppRouteChildren {
-  AppAdminRoute: typeof AppAdminRoute
   AppDashboardRoute: typeof AppDashboardRoute
-  AppAdminUnilabImportRoute: typeof AppAdminUnilabImportRoute
-  AppColdproCatalogoRoute: typeof AppColdproCatalogoRoute
-  AppColdproDashboardRoute: typeof AppColdproDashboardRoute
-  AppColdproProjetosRoute: typeof AppColdproProjetosRoute
-  AppAdminDatabaseModeRoute: typeof AppAdminDatabaseModeRoute
-  AppColdproEquipamentosIdRoute: typeof AppColdproEquipamentosIdRouteWithChildren
-  AppAdminDatabaseIndexRoute: typeof AppAdminDatabaseIndexRoute
-  AppColdproEquipamentosIndexRoute: typeof AppColdproEquipamentosIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppAdminRoute: AppAdminRoute,
   AppDashboardRoute: AppDashboardRoute,
-  AppAdminUnilabImportRoute: AppAdminUnilabImportRoute,
-  AppColdproCatalogoRoute: AppColdproCatalogoRoute,
-  AppColdproDashboardRoute: AppColdproDashboardRoute,
-  AppColdproProjetosRoute: AppColdproProjetosRoute,
-  AppAdminDatabaseModeRoute: AppAdminDatabaseModeRoute,
-  AppColdproEquipamentosIdRoute: AppColdproEquipamentosIdRouteWithChildren,
-  AppAdminDatabaseIndexRoute: AppAdminDatabaseIndexRoute,
-  AppColdproEquipamentosIndexRoute: AppColdproEquipamentosIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
