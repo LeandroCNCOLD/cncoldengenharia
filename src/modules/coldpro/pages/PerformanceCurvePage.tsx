@@ -54,9 +54,24 @@ export function PerformanceCurvePage() {
     ReturnType<typeof buildMotorComponentsFromCatalog>["evaporator"] | undefined
   >(undefined);
 
-  // Mesmo fluxo de pré-preenchimento usado em SimulationPage. Cada bloco do
-  // catálogo é aplicado uma única vez (no instante em que o ID muda) — não
-  // sobrescreve edições manuais subsequentes.
+  // Reseta TODOS os formulários ao estado inicial.
+  const resetAllForms = () => {
+    setCompressor({ refrigerant: "R404A" });
+    setCondenser({});
+    setEvaporator({});
+    setConditions({});
+    setGridConfig({
+      evap_temps: [-15, -10, -5, 0],
+      cond_temps: [30, 35, 40, 45],
+    });
+    setCatalogWarnings([]);
+    setCatalogEvaporatorInput(undefined);
+  };
+
+  // Mesmo fluxo de pré-preenchimento usado em SimulationPage. Ao detectar
+  // troca de equipamento, zera primeiro os formulários para evitar mistura
+  // de dados do equipamento anterior. Em seguida aplica os valores do
+  // novo catálogo (substituição, não merge).
   useEffect(() => {
     const motor = buildMotorComponentsFromCatalog({
       compressor: selectedCompressor,
@@ -68,13 +83,26 @@ export function PerformanceCurvePage() {
     setCatalogWarnings(motor.warnings);
     setCatalogEvaporatorInput(motor.evaporator);
 
-    if (selectedCompressor && selectedCompressor.id !== lastAppliedCompressorId.current) {
+    const compressorChanged =
+      (selectedCompressor?.id ?? undefined) !== lastAppliedCompressorId.current;
+    const condenserChanged =
+      (selectedCondenser?.id ?? undefined) !== lastAppliedCondenserId.current;
+    const evaporatorChanged =
+      (selectedEvaporator?.id ?? undefined) !== lastAppliedEvaporatorId.current;
+
+    if (compressorChanged || condenserChanged || evaporatorChanged) {
+      setCompressor({ refrigerant: "R404A" });
+      setCondenser({});
+      setEvaporator({});
+      // Conditions e gridConfig são preservados (gridConfig será resugerido abaixo).
+    }
+
+    if (selectedCompressor && compressorChanged) {
       lastAppliedCompressorId.current = selectedCompressor.id;
       const compressorPatch = motor.compressor ?? motor.compressor_partial;
       if (compressorPatch) {
         setCompressor((prev) => ({ ...prev, ...compressorPatch }));
       }
-      // Sugere uma grade ao redor das condições nominais do catálogo
       const evapNom = selectedCompressor.tempEvaporacaoC;
       const condNom = selectedCompressor.tempCondensacaoC;
       if (evapNom !== undefined || condNom !== undefined) {
@@ -92,7 +120,7 @@ export function PerformanceCurvePage() {
     }
     if (!selectedCompressor) lastAppliedCompressorId.current = undefined;
 
-    if (selectedCondenser && selectedCondenser.id !== lastAppliedCondenserId.current) {
+    if (selectedCondenser && condenserChanged) {
       lastAppliedCondenserId.current = selectedCondenser.id;
       if (motor.condenser) {
         setCondenser((prev) => ({ ...prev, ...motor.condenser }));
@@ -100,39 +128,47 @@ export function PerformanceCurvePage() {
     }
     if (!selectedCondenser) lastAppliedCondenserId.current = undefined;
 
-    if (selectedEvaporator && selectedEvaporator.id !== lastAppliedEvaporatorId.current) {
+    if (selectedEvaporator && evaporatorChanged) {
       lastAppliedEvaporatorId.current = selectedEvaporator.id;
       const ev = selectedEvaporator;
-      setEvaporator((prev) => ({
-        ...prev,
-        T_evaporating_c: ev.tempEvaporacaoC ?? prev.T_evaporating_c,
-        airflow_m3_h: ev.vazaoArEvaporadorM3H ?? prev.airflow_m3_h,
-        air_temperature_in_c: ev.evaporadorAirTemperatureInC ?? prev.air_temperature_in_c,
-        air_relative_humidity_in:
-          ev.evaporadorAirRelativeHumidityIn ?? prev.air_relative_humidity_in,
-        tube_outer_diameter_mm: ev.evaporadorTuboDiametroMm ?? prev.tube_outer_diameter_mm,
-        tube_inner_diameter_mm: ev.evaporadorTubeInnerDiameterMm ?? prev.tube_inner_diameter_mm,
-        tube_pitch_transverse_mm:
-          ev.evaporadorTubePitchTransverseMm ?? prev.tube_pitch_transverse_mm,
-        tube_pitch_longitudinal_mm:
-          ev.evaporadorTubePitchLongitudinalMm ?? prev.tube_pitch_longitudinal_mm,
-        fin_spacing_mm: ev.evaporadorFinSpacingMm ?? prev.fin_spacing_mm,
-        rows_total:
-          ev.evaporadorRows !== undefined ? ev.evaporadorRows : prev.rows_total,
-        fin_thickness_mm: ev.evaporadorFinThicknessMm ?? prev.fin_thickness_mm,
-        fin_height_mm: ev.evaporadorFinHeightMm ?? prev.fin_height_mm,
-        coil_width_m: ev.evaporadorCoilWidthM ?? prev.coil_width_m,
-        coil_height_m: ev.evaporadorCoilHeightM ?? prev.coil_height_m,
-        tube_material:
-          (ev.evaporadorTubeMaterial as EvaporatorFormValue["tube_material"]) ??
-          prev.tube_material,
-        fin_material:
-          (ev.evaporadorFinMaterial as EvaporatorFormValue["fin_material"]) ??
-          prev.fin_material,
-      }));
+      // Substituição completa — campos ausentes ficam undefined.
+      setEvaporator({
+        T_evaporating_c: ev.tempEvaporacaoC,
+        airflow_m3_h: ev.vazaoArEvaporadorM3H,
+        air_temperature_in_c: ev.evaporadorAirTemperatureInC,
+        air_relative_humidity_in: ev.evaporadorAirRelativeHumidityIn,
+        tube_outer_diameter_mm: ev.evaporadorTuboDiametroMm,
+        tube_inner_diameter_mm: ev.evaporadorTubeInnerDiameterMm,
+        tube_pitch_transverse_mm: ev.evaporadorTubePitchTransverseMm,
+        tube_pitch_longitudinal_mm: ev.evaporadorTubePitchLongitudinalMm,
+        fin_spacing_mm: ev.evaporadorFinSpacingMm,
+        rows_total: ev.evaporadorRows,
+        fin_thickness_mm: ev.evaporadorFinThicknessMm,
+        fin_height_mm: ev.evaporadorFinHeightMm,
+        coil_width_m: ev.evaporadorCoilWidthM,
+        coil_height_m: ev.evaporadorCoilHeightM,
+        tube_material: ev.evaporadorTubeMaterial as EvaporatorFormValue["tube_material"],
+        fin_material: ev.evaporadorFinMaterial as EvaporatorFormValue["fin_material"],
+      });
     }
     if (!selectedEvaporator) lastAppliedEvaporatorId.current = undefined;
   }, [selectedCompressor, selectedCondenser, selectedEvaporator, selectedReheatCoil]);
+
+  // Limpa seleção ao sair da página, evitando vazamento entre visitas.
+  useEffect(() => {
+    return () => {
+      clearSelection();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleClearAll = () => {
+    clearSelection();
+    lastAppliedCompressorId.current = undefined;
+    lastAppliedCondenserId.current = undefined;
+    lastAppliedEvaporatorId.current = undefined;
+    resetAllForms();
+  };
 
   const hasCatalogSelection = !!(
     selectedCompressor || selectedCondenser || selectedEvaporator || selectedReheatCoil
