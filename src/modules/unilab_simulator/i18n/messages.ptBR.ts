@@ -98,17 +98,17 @@ export const ptBR = {
     },
   },
   datasets: {
-    title: "Status dos catálogos UNILAB",
+    title: "Status dos catálogos CN Coils",
     loading: "Carregando catálogos…",
     ready: "Todos os catálogos carregados.",
-    missingTitle: "Catálogos UNILAB ausentes",
+    missingTitle: "Catálogos CN Coils ausentes",
     missingHint:
       "A simulação fica bloqueada até que todos os catálogos obrigatórios sejam disponibilizados em /data/catalogs/.",
-    fileMissing: (file: string) => `Catálogo UNILAB não carregado: ${file}`,
+    fileMissing: (file: string) => `Catálogo CN Coils não carregado: ${file}`,
     fileLoaded: (file: string) => `Catálogo carregado: ${file}`,
   },
   validation: {
-    blockedNoDatasets: "Dados UNILAB não disponíveis para esta geometria.",
+    blockedNoDatasets: "Dados CN Coils não disponíveis para esta geometria.",
     geometryIncomplete: "Geometria incompleta para integração com ColdPro.",
     requiredField: (field: string) => `Campo obrigatório: ${field}`,
     invalidNumber: (field: string) => `Valor inválido em: ${field}`,
