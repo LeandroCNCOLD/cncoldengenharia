@@ -297,6 +297,7 @@ export function UnilabWorkspacePage() {
           isSimulating={isSimulating}
           faceAreaM2={result?.faceAreaM2}
           onOpenSchematic={() => setSchematicOpen(true)}
+          disabledReason={disabledReason}
         />
 
         <div className="min-w-0 space-y-2 xl:contents">
