@@ -224,6 +224,36 @@ export function FluidSidePanel({
           </select>
         </FieldRow>
 
+        {/* 1.5) Compressor (acopla cálculo ao polinômio ASHRAE) */}
+        <FieldRow
+          label="Compressor"
+          unit={
+            <button
+              type="button"
+              onClick={() => setSelectedCompressor(undefined)}
+              disabled={!hasCompressor}
+              title="Remover compressor"
+              className="flex w-full items-center justify-center rounded border border-slate-300 bg-white px-1 py-0.5 text-[10px] text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Zap className="h-3 w-3" />
+            </button>
+          }
+        >
+          <select
+            value={selectedCompressorId ?? ""}
+            onChange={(e) => setSelectedCompressor(e.target.value || undefined)}
+            disabled={disabled}
+            className="w-full min-w-0 rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100"
+          >
+            <option value="">— sem compressor —</option>
+            {compressors.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        </FieldRow>
+
         {/* 2) Vazão + cadeado */}
         <FieldRow
           label="Vazão"
@@ -237,28 +267,34 @@ export function FluidSidePanel({
           }
         >
           <div className="flex min-w-0 items-center gap-1">
-            <input
-              type="number"
-              value={
-                Number.isFinite(fluidMassFlow_kg_h)
-                  ? massFlowConv.fromCanonical(fluidMassFlow_kg_h, uMassFlow)
-                  : 0
-              }
-              step="any"
-              min={0}
-              disabled={disabled || isMassFlowLocked}
-              onChange={(e) => {
-                const n = parseFloat(e.target.value);
-                setFluidMassFlow(
-                  massFlowConv.toCanonical(Number.isFinite(n) ? n : 0, uMassFlow),
-                );
-              }}
-              className="w-full min-w-0 rounded border border-slate-300 bg-white px-1.5 py-1 text-right text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
-            />
+            {massFlowReadOnly ? (
+              <div className="w-full min-w-0 truncate rounded border border-amber-300 bg-amber-50 px-1.5 py-1 text-right text-[10px] italic text-amber-900">
+                Calculado pelo Compressor
+              </div>
+            ) : (
+              <input
+                type="number"
+                value={
+                  Number.isFinite(fluidMassFlow_kg_h)
+                    ? massFlowConv.fromCanonical(fluidMassFlow_kg_h, uMassFlow)
+                    : 0
+                }
+                step="any"
+                min={0}
+                disabled={disabled || isMassFlowLocked}
+                onChange={(e) => {
+                  const n = parseFloat(e.target.value);
+                  setFluidMassFlow(
+                    massFlowConv.toCanonical(Number.isFinite(n) ? n : 0, uMassFlow),
+                  );
+                }}
+                className="w-full min-w-0 rounded border border-slate-300 bg-white px-1.5 py-1 text-right text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+              />
+            )}
             <button
               type="button"
               onClick={toggleMassFlowLock}
-              disabled={disabled}
+              disabled={disabled || massFlowReadOnly}
               title={
                 isMassFlowLocked
                   ? "Vazão como incógnita (motor resolve)"
@@ -291,16 +327,64 @@ export function FluidSidePanel({
             />
           }
         >
-          <NumInput
-            value={tempConv.fromCanonical(fluidOperatingTemp_C, uOpTemp)}
-            onChange={(v) =>
-              setFluidOperatingTemp(tempConv.toCanonical(v, uOpTemp))
-            }
-            disabled={thermalInputsDisabled}
-          />
+          {opTempReadOnly ? (
+            <div className="w-full min-w-0 truncate rounded border border-amber-300 bg-amber-50 px-1.5 py-1 text-right text-[10px] italic text-amber-900">
+              Buscando Equilíbrio…
+            </div>
+          ) : (
+            <NumInput
+              value={tempConv.fromCanonical(fluidOperatingTemp_C, uOpTemp)}
+              onChange={(v) =>
+                setFluidOperatingTemp(tempConv.toCanonical(v, uOpTemp))
+              }
+              disabled={thermalInputsDisabled}
+            />
+          )}
         </FieldRow>
 
-        {/* 4) Sobreaquecimento — só evaporadores */}
+        {/* 3.5) Temperatura emparelhada (Tc para evap, Te para condensador) */}
+        <FieldRow
+          label={pairedTempLabel + (pairedRequired ? " *" : "")}
+          unit={
+            <UnitSelect
+              value={uPaired}
+              onChange={setUPaired}
+              options={TEMP_UNITS}
+              disabled={disabled}
+            />
+          }
+        >
+          <div className="min-w-0">
+            <input
+              type="number"
+              value={
+                pairedTempC != null && Number.isFinite(pairedTempC)
+                  ? tempConv.fromCanonical(pairedTempC, uPaired)
+                  : ""
+              }
+              step="any"
+              placeholder={pairedRequired ? "Obrigatório" : "Opcional"}
+              onChange={(e) => {
+                const raw = e.target.value;
+                if (raw === "") {
+                  setPairedTempC(null);
+                  return;
+                }
+                const n = parseFloat(raw);
+                setPairedTempC(
+                  Number.isFinite(n) ? tempConv.toCanonical(n, uPaired) : null,
+                );
+              }}
+              className={`w-full min-w-0 rounded border px-1.5 py-1 text-right text-xs focus:outline-none focus:ring-1 ${
+                pairedMissing
+                  ? "border-red-500 bg-red-50 text-red-900 focus:border-red-600 focus:ring-red-500"
+                  : "border-slate-300 bg-white text-slate-900 focus:border-[#1E6FD9] focus:ring-[#1E6FD9]"
+              }`}
+            />
+          </div>
+        </FieldRow>
+
+        {/* 4) Sobreaquecimento — evaporadores (útil) e condensadores (descarga) */}
         {isEvaporator && (
           <FieldRow
             label="Sobreaquecimento"
@@ -321,28 +405,52 @@ export function FluidSidePanel({
             />
           </FieldRow>
         )}
-
-        {/* 5) Subresfriamento — só condensadores */}
         {isCondenser && (
           <FieldRow
-            label="Subresfriamento"
+            label="Sobreaq. Descarga"
             unit={
               <UnitSelect
-                value={uSC}
-                onChange={setUSC}
+                value={uDSH}
+                onChange={setUDSH}
                 options={DELTA_T_UNITS}
                 disabled={thermalInputsDisabled}
               />
             }
           >
             <NumInput
-              value={deltaTConv.fromCanonical(subcooling_K, uSC)}
-              onChange={(v) => setSubcooling(deltaTConv.toCanonical(v, uSC))}
+              value={
+                dischargeSuperheatK != null
+                  ? deltaTConv.fromCanonical(dischargeSuperheatK, uDSH)
+                  : 0
+              }
+              onChange={(v) =>
+                setDischargeSuperheatK(deltaTConv.toCanonical(v, uDSH))
+              }
               min={0}
               disabled={thermalInputsDisabled}
             />
           </FieldRow>
         )}
+
+        {/* 5) Subresfriamento — sempre disponível (necessário para entalpia da válvula) */}
+        <FieldRow
+          label="Subresfriamento"
+          unit={
+            <UnitSelect
+              value={uSC}
+              onChange={setUSC}
+              options={DELTA_T_UNITS}
+              disabled={thermalInputsDisabled}
+            />
+          }
+        >
+          <NumInput
+            value={deltaTConv.fromCanonical(subcooling_K, uSC)}
+            onChange={(v) => setSubcooling(deltaTConv.toCanonical(v, uSC))}
+            min={0}
+            disabled={thermalInputsDisabled}
+          />
+        </FieldRow>
 
         {/* 6) Queda de Pressão (resultado) */}
         <FieldRow
