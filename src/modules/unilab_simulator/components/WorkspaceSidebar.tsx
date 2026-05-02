@@ -50,9 +50,94 @@ export function WorkspaceSidebar({
   const engineVersion = useUnilabSimulationStore((s) => s.engineVersion);
   const setEngineVersion = useUnilabSimulationStore((s) => s.setEngineVersion);
   const calculatedCost = useUnilabSimulationStore((s) => s.calculatedCost);
+  const result = useUnilabSimulationStore((s) => s.result);
+  const warnings = useUnilabSimulationStore((s) => s.warnings);
+  const physicalInputs = useUnilabSimulationStore((s) => s.physicalInputs);
+  const selectedGeometry = useUnilabSimulationStore((s) => s.selectedGeometry);
+  const airFlow_m3h = useUnilabSimulationStore((s) => s.airFlow_m3h);
+  const tempInDB_C = useUnilabSimulationStore((s) => s.tempInDB_C);
+  const rhIn_pct = useUnilabSimulationStore((s) => s.rhIn_pct);
+  const foulingFactorAir = useUnilabSimulationStore((s) => s.foulingFactorAir);
+  const fanCount = useUnilabSimulationStore((s) => s.fanCount);
+  const fanRole = useUnilabSimulationStore((s) => s.fanRole);
+  const fluid = useUnilabSimulationStore((s) => s.fluid);
+  const fluidMassFlow_kg_h = useUnilabSimulationStore((s) => s.fluidMassFlow_kg_h);
+  const fluidOperatingTemp_C = useUnilabSimulationStore((s) => s.fluidOperatingTemp_C);
+  const superheat_K = useUnilabSimulationStore((s) => s.superheat_K);
+  const subcooling_K = useUnilabSimulationStore((s) => s.subcooling_K);
+  const foulingFactorFluid = useUnilabSimulationStore((s) => s.foulingFactorFluid);
+  const pairedTempC = useUnilabSimulationStore((s) => s.pairedTempC);
+  const dischargeSuperheatK = useUnilabSimulationStore((s) => s.dischargeSuperheatK);
+  const compressorCount = useUnilabSimulationStore((s) => s.compressorCount);
+  const selectedCompressorId = useUnilabSimulationStore((s) => s.selectedCompressorId);
 
   const [costModalOpen, setCostModalOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalKey>(null);
+
+  const buildSnapshot = (): ReportSnapshot => ({
+    componentLabel: cfg.shortLabel,
+    geometryName: selectedGeometry?.name,
+    physical: physicalInputs,
+    air: {
+      flowM3h: airFlow_m3h,
+      tempInC: tempInDB_C,
+      rhInPct: rhIn_pct,
+      foulingFactor: foulingFactorAir,
+      fanCount,
+      fanRole,
+    },
+    fluid: {
+      refrigerant: fluid,
+      massFlowKgH: fluidMassFlow_kg_h,
+      operatingTempC: fluidOperatingTemp_C,
+      superheatK: superheat_K,
+      subcoolingK: subcooling_K,
+      foulingFactor: foulingFactorFluid,
+      pairedTempC,
+      dischargeSuperheatK,
+      compressorCount,
+      compressorId: selectedCompressorId,
+    },
+    cost: calculatedCost,
+    result,
+    warnings,
+    meta: {
+      project: "-",
+      client: "",
+      contact: "",
+      code: "",
+      description: `BATERIA ${cfg.shortLabel} — ${selectedGeometry?.name ?? ""}`,
+      date: new Date().toLocaleDateString("pt-BR"),
+    },
+  });
+
+  const handlePrint = () => {
+    if (!result) {
+      alert("Calcule a simulação antes de imprimir.");
+      return;
+    }
+    const doc = generateReportPdf(buildSnapshot());
+    const filename = `relatorio_cncold_${(selectedGeometry?.id ?? "bateria").replace(/[^a-z0-9_-]/gi, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`;
+    doc.save(filename);
+  };
+
+  const handleSave = () => {
+    const name = window.prompt("Nome para salvar este projeto:", `Projeto ${new Date().toLocaleDateString("pt-BR")}`);
+    if (!name) return;
+    try {
+      const key = "unilab.savedProjects";
+      const raw = localStorage.getItem(key);
+      const list: Array<{ name: string; savedAt: string; snapshot: ReportSnapshot }> =
+        raw ? JSON.parse(raw) : [];
+      list.push({ name, savedAt: new Date().toISOString(), snapshot: buildSnapshot() });
+      localStorage.setItem(key, JSON.stringify(list));
+      alert(`Projeto "${name}" salvo com sucesso (${list.length} no histórico).`);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao salvar o projeto. Veja o console.");
+    }
+  };
+
 
   return (
     <aside className="flex h-full w-full flex-col gap-1.5 rounded border border-slate-300 bg-slate-50 p-1.5 text-[10px] shadow-sm">
