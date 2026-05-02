@@ -61,6 +61,26 @@ export function UnilabWorkspacePage() {
   const reset = useUnilabSimulationStore((s) => s.reset);
   const setWarnings = useUnilabSimulationStore((s) => s.setWarnings);
 
+  // Catálogo enriquecido de geometrias (com tipo_serpentina, campos pt-BR etc.).
+  // Carregado via service dedicado; o `useUnilabCatalogs` continua provendo a
+  // versão base usada pelo motor termodinâmico (não alteramos coldpro_v2).
+  const [enrichedGeometries, setEnrichedGeometries] = useState<CoilGeometryItem[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    loadCoilGeometries()
+      .then((items) => {
+        if (!cancelled) setEnrichedGeometries(items);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        const msg = err instanceof Error ? err.message : String(err);
+        setWarnings([`Falha ao carregar coilGeometries.json: ${msg}`]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [setWarnings]);
+
   const simulationDeps = useMemo(
     () => ({
       geometries: catalogs.geometries,
