@@ -191,6 +191,8 @@ export type {
 
 // Adapters
 export { normalizeOperationalOutput } from "./adapters/unifiedOperationalOutputAdapter";
+export { exportProductTechnicalData } from "./adapters/productTechnicalExportAdapter";
+export type { ProductTechnicalExportInput, ProductTechnicalExportPayload } from "./domain/types";
 
 // Services
 export {

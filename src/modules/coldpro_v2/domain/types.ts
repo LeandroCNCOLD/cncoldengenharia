@@ -1236,6 +1236,50 @@ export interface ProductTechnicalRegistryHandle {
   all(): ProductTechnicalRecord[];
 }
 
+export interface ProductTechnicalExportPayload {
+  schema_version: string;
+  exported_at: string;
+  product: {
+    id: string;
+    model: string;
+    family: string;
+    line: string;
+    refrigerant: string;
+    application?: string;
+  };
+  validation: ProductValidationSummary;
+  operating_limits: ProductOperatingLimits;
+  performance_curve: {
+    evap_temp_c: number;
+    cond_temp_c: number;
+    capacity_w: number;
+    compressor_power_w: number;
+    cop: number;
+    q_cond_w: number;
+    status: "approved" | "warning" | "rejected";
+  }[];
+  polynomial_coefficients: PolynomialCoefficientSet[];
+  operating_map?: {
+    stats: OperatingMapStats;
+    max_capacity_point: OperatingMapPoint | null;
+    max_cop_point: OperatingMapPoint | null;
+  };
+  warnings: string[];
+  traceability: {
+    generated_at: string;
+    engine_version: string;
+    source: "calculated" | "imported" | "hybrid";
+  };
+}
+
+export interface ProductTechnicalExportInput {
+  record: ProductTechnicalRecord;
+  operating_map?: OperatingMapResult;
+  options?: {
+    schema_version?: string;
+  };
+}
+
 export type DefrostMethod = "hot_gas_reversal" | "hot_gas_bypass" | "electric";
 
 export interface DefrostCycleInput {
