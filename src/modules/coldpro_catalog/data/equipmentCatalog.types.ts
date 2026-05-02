@@ -141,6 +141,14 @@ export interface CatalogEquipmentRow {
   reheatTubePitchLongitudinalM?: number;
   reheatCoilLengthM?: number;
   reheatCircuits?: number;
+  reheatTubeMaterial?: "copper" | "aluminum" | "steel";
+  reheatFinMaterial?: "copper" | "aluminum" | "steel";
+  reheatCoilWidthM?: number;
+  reheatCoilHeightM?: number;
+  reheatCoilDepthM?: number;
+  reheatAreaFaceM2?: number;
+  reheatAreaTrocaM2?: number;
+  reheatVolumeInternoL?: number;
 
   linhaSucao?: string;
   linhaDescarga?: string;
