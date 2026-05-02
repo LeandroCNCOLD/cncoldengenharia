@@ -92,13 +92,42 @@ export function FluidSidePanel({
   const setSelectedCompressor = useUnilabSimulationStore((s) => s.setSelectedCompressor);
 
   const [refrigerants, setRefrigerants] = useState<RefrigerantOption[]>([]);
+  const [compressors, setCompressors] = useState<Array<{ id: string; label: string }>>([]);
 
   const [uMassFlow, setUMassFlow] = useState<MassFlowUnit>("kg_h");
   const [uOpTemp, setUOpTemp] = useState<TempUnit>("C");
+  const [uPaired, setUPaired] = useState<TempUnit>("C");
   const [uSH, setUSH] = useState<DeltaTUnit>("K");
   const [uSC, setUSC] = useState<DeltaTUnit>("K");
+  const [uDSH, setUDSH] = useState<DeltaTUnit>("K");
   const [uPdrop, setUPdrop] = useState<PressureUnit>("kPa");
   const [uVel, setUVel] = useState<VelocityUnit>("m_s");
+
+  // Carrega lista de compressores do catálogo
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/data/catalogs/compressors.json", { cache: "no-cache" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list: unknown) => {
+        if (cancelled || !Array.isArray(list)) return;
+        const items = list
+          .map((c) => {
+            const obj = c as Record<string, unknown>;
+            const id = String(obj.id ?? obj.model ?? "");
+            const model = String(obj.model ?? id);
+            const series = obj.series ? ` · ${obj.series}` : "";
+            return { id, label: `${model}${series}` };
+          })
+          .filter((x) => x.id);
+        setCompressors(items);
+      })
+      .catch(() => {
+        if (!cancelled) setCompressors([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
