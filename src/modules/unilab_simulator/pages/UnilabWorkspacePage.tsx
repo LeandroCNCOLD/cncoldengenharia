@@ -1,14 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { ArrowLeft, Play, Send, RotateCcw } from "lucide-react";
+import { ArrowLeft, Send } from "lucide-react";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
 import { ptBR } from "../i18n/messages.ptBR";
 import { useUnilabCatalogs } from "../hooks/useUnilabCatalogs";
 import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
 import { GeometryForm } from "../components/GeometryForm";
-import { ThermoForm } from "../components/ThermoForm";
 import { ResultPanel } from "../components/ResultPanel";
 import { AirSidePanel } from "../components/AirSidePanel";
+import { FluidSidePanel } from "../components/FluidSidePanel";
+import {
+  WorkspaceSidebar,
+  type WorkspaceSection,
+} from "../components/WorkspaceSidebar";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { useUnilabSimulation } from "../hooks/useUnilabSimulation";
 import {
@@ -25,21 +29,12 @@ import {
   loadCoilGeometries,
   type CoilGeometryItem,
 } from "../services/coilGeometryCatalogService";
+import { getApplicationConfig } from "../config/applicationConfig";
 import type {
   UnilabComponentType,
   UnilabPhysicalInputs,
   UnilabThermoInputs,
 } from "../types/unilab.types";
-
-const COMPONENT_LABELS: Record<UnilabComponentType, string> = {
-  evaporator_dx: "Evaporador DX",
-  evaporator_pumped: "Evaporador Bombeado",
-  condenser_air: "Condensador a Ar",
-  condenser_shell_tube: "Condensador Casco-Tubo",
-  heating_coil: "Bateria de Aquecimento",
-  cooling_coil: "Bateria de Resfriamento",
-  defrost_steam_coil: "Serpentina de Degelo",
-};
 
 function isCondenser(t: UnilabComponentType) {
   return t === "condenser_air" || t === "condenser_shell_tube";
@@ -50,7 +45,7 @@ export function UnilabWorkspacePage() {
     type?: UnilabComponentType;
   };
   const componentType = search.type ?? "evaporator_dx";
-  const componentLabel = COMPONENT_LABELS[componentType] ?? componentType;
+  const componentLabel = getApplicationConfig(componentType).label;
   const navigate = useNavigate();
 
   const catalogs = useUnilabCatalogs();
@@ -62,9 +57,8 @@ export function UnilabWorkspacePage() {
   const reset = useUnilabSimulationStore((s) => s.reset);
   const setWarnings = useUnilabSimulationStore((s) => s.setWarnings);
 
-  // Catálogo enriquecido de geometrias (com tipo_serpentina, campos pt-BR etc.).
-  // Carregado via service dedicado; o `useUnilabCatalogs` continua provendo a
-  // versão base usada pelo motor termodinâmico (não alteramos coldpro_v2).
+  const [activeSection, setActiveSection] = useState<WorkspaceSection>("geometry");
+
   const [enrichedGeometries, setEnrichedGeometries] = useState<CoilGeometryItem[]>([]);
   useEffect(() => {
     let cancelled = false;
@@ -135,9 +129,7 @@ export function UnilabWorkspacePage() {
         navigate({ to: "/coldpro/components" });
       } else {
         const spec = toEvaporatorInput(phys, therm, result!, ctx);
-        useComponentStore
-          .getState()
-          .addCoil(baseName, "evaporator", spec);
+        useComponentStore.getState().addCoil(baseName, "evaporator", spec);
         navigate({ to: "/coldpro/components" });
       }
     } catch (err) {
@@ -149,7 +141,7 @@ export function UnilabWorkspacePage() {
 
   return (
     <PageContainer
-      title={`${ptBR.workspace.title} — ${componentLabel}`}
+      title={`UNILAB — ${componentLabel}`}
       subtitle={ptBR.module.subtitle}
       actions={
         <div className="flex flex-wrap items-center gap-2">
@@ -162,30 +154,6 @@ export function UnilabWorkspacePage() {
           </Link>
           <button
             type="button"
-            onClick={reset}
-            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-          >
-            <RotateCcw className="h-4 w-4" />
-            Limpar
-          </button>
-          <button
-            type="button"
-            disabled={!canSimulate}
-            onClick={handleSimulate}
-            title={
-              !catalogs.ready
-                ? ptBR.validation.blockedNoDatasets
-                : !inputsValid
-                  ? "Preencha todos os campos obrigatórios."
-                  : ptBR.workspace.actions.simulate
-            }
-            className="inline-flex items-center gap-2 rounded-md bg-[#1E6FD9] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#1759b3] disabled:cursor-not-allowed disabled:bg-slate-400"
-          >
-            <Play className="h-4 w-4" />
-            {isSimulating ? "Simulando…" : ptBR.workspace.actions.simulate}
-          </button>
-          <button
-            type="button"
             disabled={!result || sending}
             onClick={handleSendToAssembly}
             className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-400"
@@ -196,39 +164,50 @@ export function UnilabWorkspacePage() {
         </div>
       }
     >
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
-        <Column title={ptBR.workspace.columns.geometry}>
-          {catalogs.loading ? (
-            <SkeletonCard />
+      {/* Layout 3 colunas estilo UNILAB Coils 9.0 */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[220px_1fr_1fr]">
+        {/* COLUNA ESQUERDA — sidebar de navegação */}
+        <WorkspaceSidebar
+          componentType={componentType}
+          activeSection={activeSection}
+          onSectionChange={setActiveSection}
+          onSimulate={handleSimulate}
+          onReset={reset}
+          canSimulate={canSimulate}
+          isSimulating={isSimulating}
+          faceAreaM2={result?.faceAreaM2}
+        />
+
+        {/* COLUNA CENTRAL — Lado Ventilação + Geometria conforme seção ativa */}
+        <div className="space-y-3">
+          {activeSection === "geometry" ? (
+            catalogs.loading ? (
+              <SkeletonCard />
+            ) : (
+              <GeometryForm
+                geometries={
+                  enrichedGeometries.length > 0
+                    ? enrichedGeometries
+                    : catalogs.geometries
+                }
+                tubeMaterials={catalogs.tubeMaterials}
+                finPitches={catalogs.finPitches}
+                finThicknesses={catalogs.finThicknesses}
+                disabled={!catalogs.ready}
+              />
+            )
           ) : (
-            <GeometryForm
-              geometries={
-                enrichedGeometries.length > 0
-                  ? enrichedGeometries
-                  : catalogs.geometries
-              }
-              tubeMaterials={catalogs.tubeMaterials}
-              finPitches={catalogs.finPitches}
-              finThicknesses={catalogs.finThicknesses}
-              disabled={!catalogs.ready}
-            />
+            <AirSidePanel />
           )}
-        </Column>
-        <Column title="Lado Ar / Ventilação">
-          <AirSidePanel />
-        </Column>
-        <Column title={ptBR.workspace.columns.thermo}>
-          {catalogs.loading ? (
-            <SkeletonCard />
-          ) : (
-            <ThermoForm
-              refrigerants={catalogs.refrigerants}
-              componentType={componentType}
-              disabled={!catalogs.ready}
-            />
-          )}
-        </Column>
-        <Column title={ptBR.workspace.columns.result}>
+        </div>
+
+        {/* COLUNA DIREITA — Lado Fluido + status + resultado */}
+        <div className="space-y-3">
+          <FluidSidePanel
+            componentType={componentType}
+            refrigerants={catalogs.refrigerants}
+            disabled={!catalogs.ready}
+          />
           <DatasetStatusPanel
             loading={catalogs.loading}
             ready={catalogs.ready}
@@ -236,21 +215,10 @@ export function UnilabWorkspacePage() {
             missing={catalogs.missing}
             compact
           />
-          <div className="mt-4">
-            <ResultPanel result={result} warnings={warnings} />
-          </div>
-        </Column>
+          <ResultPanel result={result} warnings={warnings} />
+        </div>
       </div>
     </PageContainer>
-  );
-}
-
-function Column({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="space-y-3">
-      <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-      {children}
-    </section>
   );
 }
 
