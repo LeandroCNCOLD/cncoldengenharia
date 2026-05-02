@@ -192,8 +192,13 @@ export function UnilabWorkspacePage() {
         </div>
       }
     >
-      {/* Layout 3 colunas estilo UNILAB Coils 9.0 */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[220px_1fr_1fr]">
+      {/*
+        Layout responsivo estilo UNILAB Coils 9.0:
+        - mobile/tablet (<lg): tudo empilhado em 1 coluna
+        - lg (>=1024) e xl (<1280): sidebar fina + 1 coluna larga (centro e direita empilhados)
+        - 2xl (>=1536): 3 colunas completas lado a lado
+      */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[200px_minmax(0,1fr)] 2xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)]">
         {/* COLUNA ESQUERDA — sidebar de navegação */}
         <WorkspaceSidebar
           componentType={componentType}
