@@ -136,6 +136,19 @@ export function UnilabWorkspacePage() {
     }
   };
 
+  // Auto-recalculo: sempre que os inputs mudarem e estiverem válidos, dispara
+  // a simulação após um pequeno debounce. O usuário também pode forçar pelo
+  // botão "Calcular" a qualquer momento.
+  useEffect(() => {
+    if (!catalogs.ready || !inputsValid || isSimulating) return;
+    const t = setTimeout(() => {
+      if (engineVersion === "v2") runV2();
+      else run();
+    }, 350);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [catalogs.ready, inputsValid, engineVersion, physical, thermo]);
+
   const handleGoalSeek = (targetKw: number) => {
     if (!Number.isFinite(targetKw) || targetKw <= 0) return;
     const physCheck = validatePhysicalInputs(physical);
