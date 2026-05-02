@@ -1,3 +1,3 @@
 // ColdPro frontend module — entrypoint.
-// Re-exporte componentes/screens públicos aqui conforme forem criados.
-export {};
+export * from "./types";
+export * as services from "./services";
