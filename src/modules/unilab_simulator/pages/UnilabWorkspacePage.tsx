@@ -5,15 +5,12 @@ import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer
 import { ptBR } from "../i18n/messages.ptBR";
 import { useUnilabCatalogs } from "../hooks/useUnilabCatalogs";
 import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
-import { GeometryForm } from "../components/GeometryForm";
 import { ResultPanel } from "../components/ResultPanel";
 import { AirSidePanel } from "../components/AirSidePanel";
 import { FluidSidePanel } from "../components/FluidSidePanel";
 import { GeometryBottomBar } from "../components/GeometryBottomBar";
-import {
-  WorkspaceSidebar,
-  type WorkspaceSection,
-} from "../components/WorkspaceSidebar";
+import { CoilSchematic } from "../components/CoilSchematic";
+import { WorkspaceSidebar } from "../components/WorkspaceSidebar";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { useUnilabSimulation } from "../hooks/useUnilabSimulation";
 import { useUnilabSimulationV2 } from "../hooks/useUnilabSimulationV2";
@@ -30,10 +27,7 @@ import {
   toCondenserInput,
 } from "../adapters/toColdProAdapter";
 import { useComponentStore } from "@/modules/coldpro/stores/useComponentStore";
-import {
-  loadCoilGeometries,
-  type CoilGeometryItem,
-} from "../services/coilGeometryCatalogService";
+import { loadCoilGeometries } from "../services/coilGeometryCatalogService";
 import { getApplicationConfig } from "../config/applicationConfig";
 import type {
   UnilabComponentType,
@@ -64,21 +58,14 @@ export function UnilabWorkspacePage() {
 
   useUnilabInputBridge(componentType);
 
-  const [activeSection, setActiveSection] =
-    useState<WorkspaceSection>("ventilacao");
-
-  const [enrichedGeometries, setEnrichedGeometries] = useState<CoilGeometryItem[]>([]);
+  // Pré-aquece o cache do catálogo de geometrias (modal carrega sob demanda)
   useEffect(() => {
     let cancelled = false;
-    loadCoilGeometries()
-      .then((items) => {
-        if (!cancelled) setEnrichedGeometries(items);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        const msg = err instanceof Error ? err.message : String(err);
-        setWarnings([`Falha ao carregar coilGeometries.json: ${msg}`]);
-      });
+    loadCoilGeometries().catch((err) => {
+      if (cancelled) return;
+      const msg = err instanceof Error ? err.message : String(err);
+      setWarnings([`Falha ao carregar coilGeometries.json: ${msg}`]);
+    });
     return () => {
       cancelled = true;
     };
@@ -167,35 +154,6 @@ export function UnilabWorkspacePage() {
     }
   };
 
-  const renderCentralPanel = () => {
-    if (activeSection === "geometria") {
-      if (catalogs.loading) return <SkeletonCard />;
-      return (
-        <GeometryForm
-          geometries={
-            enrichedGeometries.length > 0
-              ? enrichedGeometries
-              : catalogs.geometries
-          }
-          tubeMaterials={catalogs.tubeMaterials}
-          finPitches={catalogs.finPitches}
-          finThicknesses={catalogs.finThicknesses}
-          disabled={!catalogs.ready}
-        />
-      );
-    }
-    if (activeSection === "tubo") {
-      return <PlaceholderPanel title="Tubo" />;
-    }
-    if (activeSection === "aleta") {
-      return <PlaceholderPanel title="Aleta" />;
-    }
-    if (activeSection === "distribuidor") {
-      return <PlaceholderPanel title="Distribuidor" />;
-    }
-    return <AirSidePanel result={result} />;
-  };
-
   return (
     <PageContainer
       title={`UNILAB — ${componentLabel}`}
@@ -222,17 +180,15 @@ export function UnilabWorkspacePage() {
       }
     >
       {/*
-        Layout Etapa 3.5 — replica o configurador UNILAB:
-        - Esquerda: WorkspaceSidebar (menu fixo)
-        - Centro: painel dinâmico (Lado Ventilação por padrão; troca conforme menu)
-        - Direita: FluidSidePanel SEMPRE visível
-        - Rodapé: GeometryBottomBar SEMPRE visível, full width
+        Layout configurador CN COILS:
+        - Esquerda: WorkspaceSidebar (Geometria/Tubo/Aleta/Distribuidor abrem em modal)
+        - Centro: Lado Ventilação + Esquema da serpentina (SEMPRE fixos)
+        - Direita: FluidSidePanel + Resultado (SEMPRE fixos)
+        - Rodapé: GeometryBottomBar (SEMPRE fixo, full width)
       */}
       <div className="grid grid-cols-1 gap-2 md:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[190px_minmax(0,1fr)_minmax(0,1fr)] 2xl:grid-cols-[210px_minmax(0,1fr)_minmax(0,1fr)]">
         <WorkspaceSidebar
           componentType={componentType}
-          activeSection={activeSection}
-          onSectionChange={setActiveSection}
           onSimulate={handleSimulate}
           onReset={reset}
           canSimulate={canSimulate}
@@ -241,8 +197,11 @@ export function UnilabWorkspacePage() {
         />
 
         <div className="min-w-0 space-y-2 xl:contents">
-          {/* COLUNA CENTRAL — dinâmico */}
-          <div className="min-w-0 space-y-2">{renderCentralPanel()}</div>
+          {/* COLUNA CENTRAL — Lado Ventilador + esquema visual (fixos) */}
+          <div className="min-w-0 space-y-2">
+            <AirSidePanel result={result} />
+            <CoilSchematic />
+          </div>
 
           {/* COLUNA DIREITA — Lado Fluido FIXO */}
           <div className="min-w-0 space-y-2">
@@ -272,27 +231,3 @@ export function UnilabWorkspacePage() {
   );
 }
 
-function SkeletonCard() {
-  return (
-    <div className="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
-      <div className="h-4 w-1/2 animate-pulse rounded bg-slate-100" />
-      <div className="h-8 w-full animate-pulse rounded bg-slate-100" />
-      <div className="h-8 w-full animate-pulse rounded bg-slate-100" />
-      <div className="h-8 w-2/3 animate-pulse rounded bg-slate-100" />
-    </div>
-  );
-}
-
-function PlaceholderPanel({ title }: { title: string }) {
-  return (
-    <div className="rounded border border-slate-300 bg-slate-50 shadow-sm">
-      <div className="border-b border-slate-300 bg-[#1E6FD9] px-3 py-1.5 text-center text-xs font-bold uppercase tracking-wider text-white">
-        {title}
-      </div>
-      <div className="p-6 text-center text-xs text-slate-500">
-        Esta seção será detalhada em uma próxima etapa. Os parâmetros atuais já
-        estão acessíveis na barra inferior de Geometria e na tela de Geometria.
-      </div>
-    </div>
-  );
-}

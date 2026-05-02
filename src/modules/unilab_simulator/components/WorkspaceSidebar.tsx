@@ -4,22 +4,28 @@ import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { getApplicationConfig } from "../config/applicationConfig";
 import { formatBRL } from "../engine/costCalculator";
 import { MaterialCostConfigModal } from "./MaterialCostConfigModal";
+import { GeometryPickerModal } from "./GeometryPickerModal";
+import {
+  TubeModal,
+  FinModal,
+  DistributorModal,
+} from "./GeometryDerivedModals";
 import type { UnilabComponentType } from "../types/unilab.types";
 
-const SECTIONS = [
-  { id: "ventilacao", label: "Lado Ventilação" },
-  { id: "geometria", label: "Geometria" },
-  { id: "tubo", label: "Tubo" },
-  { id: "aleta", label: "Aleta" },
-  { id: "distribuidor", label: "Distribuidor" },
-] as const;
+type ModalKey = "geometry" | "tube" | "fin" | "distributor" | null;
 
-export type WorkspaceSection = (typeof SECTIONS)[number]["id"];
+const MODAL_BUTTONS: Array<{ id: Exclude<ModalKey, null>; label: string }> = [
+  { id: "geometry", label: "Geometria…" },
+  { id: "tube", label: "Tubo…" },
+  { id: "fin", label: "Aleta…" },
+  { id: "distributor", label: "Distribuidor…" },
+];
+
+// Mantido para compatibilidade externa: hoje só "ventilacao" é usado (fixo no centro).
+export type WorkspaceSection = "ventilacao";
 
 interface WorkspaceSidebarProps {
   componentType: UnilabComponentType;
-  activeSection: WorkspaceSection;
-  onSectionChange: (s: WorkspaceSection) => void;
   onSimulate: () => void;
   onReset: () => void;
   canSimulate: boolean;
@@ -29,8 +35,6 @@ interface WorkspaceSidebarProps {
 
 export function WorkspaceSidebar({
   componentType,
-  activeSection,
-  onSectionChange,
   onSimulate,
   onReset,
   canSimulate,
@@ -45,6 +49,7 @@ export function WorkspaceSidebar({
   const calculatedCost = useUnilabSimulationStore((s) => s.calculatedCost);
 
   const [costModalOpen, setCostModalOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState<ModalKey>(null);
 
   return (
     <aside className="flex h-full w-full flex-col gap-1.5 rounded border border-slate-300 bg-slate-50 p-1.5 text-[10px] shadow-sm">
@@ -111,27 +116,23 @@ export function WorkspaceSidebar({
         </div>
       </div>
 
-      {/* Seções (navegação do painel central) */}
+      {/* Configuradores (abrem em modal) */}
       <nav className="rounded border border-slate-300 bg-white">
+        <div className="border-b border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
+          Configurar
+        </div>
         <ul>
-          {SECTIONS.map((s) => {
-            const active = s.id === activeSection;
-            return (
-              <li key={s.id}>
-                <button
-                  type="button"
-                  onClick={() => onSectionChange(s.id)}
-                  className={`block w-full border-b border-slate-100 px-2 py-1 text-left text-[10px] last:border-b-0 ${
-                    active
-                      ? "bg-[#1E6FD9] font-semibold text-white"
-                      : "text-slate-700 hover:bg-slate-100"
-                  }`}
-                >
-                  {s.label}
-                </button>
-              </li>
-            );
-          })}
+          {MODAL_BUTTONS.map((m) => (
+            <li key={m.id}>
+              <button
+                type="button"
+                onClick={() => setActiveModal(m.id)}
+                className="block w-full border-b border-slate-100 px-2 py-1 text-left text-[10px] text-slate-700 last:border-b-0 hover:bg-slate-100"
+              >
+                {m.label}
+              </button>
+            </li>
+          ))}
         </ul>
       </nav>
 
@@ -219,6 +220,22 @@ export function WorkspaceSidebar({
       <MaterialCostConfigModal
         open={costModalOpen}
         onClose={() => setCostModalOpen(false)}
+      />
+      <GeometryPickerModal
+        open={activeModal === "geometry"}
+        onClose={() => setActiveModal(null)}
+      />
+      <TubeModal
+        open={activeModal === "tube"}
+        onClose={() => setActiveModal(null)}
+      />
+      <FinModal
+        open={activeModal === "fin"}
+        onClose={() => setActiveModal(null)}
+      />
+      <DistributorModal
+        open={activeModal === "distributor"}
+        onClose={() => setActiveModal(null)}
       />
     </aside>
   );
