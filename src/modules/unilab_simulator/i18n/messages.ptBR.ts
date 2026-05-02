@@ -47,7 +47,7 @@ export const ptBR = {
     },
   },
   workspace: {
-    title: "Workspace CN Coils Simulator",
+    title: "Workspace CN COILS",
     columns: {
       geometry: "Geometria",
       thermo: "Termodinâmica",
