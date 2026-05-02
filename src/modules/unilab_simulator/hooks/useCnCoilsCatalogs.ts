@@ -187,6 +187,11 @@ export function useCnCoilsCatalogs(): CnCoilsCatalogsState {
           ["uiLabels", "uiLabels.json"],
           ["distributorHoleSizes", "distributorHoleSizes.json"],
           ["engineErrors", "engineErrorMessages.json"],
+          ["thermoPhysicalProperties", "thermoPhysicalProperties.json"],
+          ["correctionPolynomials", "correctionPolynomials.json"],
+          ["fanElectricalData", "fanElectricalData.json"],
+          ["pumpData", "pumpData.json"],
+          ["compressorOutletTemperature", "compressorOutletTemperature.json"],
         ] as const).map(([key, file]) =>
           (async () => {
             try {
