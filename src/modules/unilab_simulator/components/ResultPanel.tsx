@@ -7,7 +7,6 @@ import {
   buildFanAudit,
   type FanAuditSummary,
 } from "../services/unilabCoefficientsService";
-import { ptBR } from "../i18n/messages.ptBR";
 
 interface ResultPanelProps {
   result: UnilabSimulationResult | undefined;
