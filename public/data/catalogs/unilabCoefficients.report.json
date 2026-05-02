@@ -1,0 +1,32 @@
+{
+  "generatedAt": "2026-05-02T16:29:00.626Z",
+  "inputs": {
+    "coilCorrectionCoefficients_principal": 115,
+    "coilSubcoolingCoefficients_principal": 39,
+    "fanAxial_type0_config1": 346,
+    "fanAxial_type0_config2": 390,
+    "fanAxial_type1_config1": 252,
+    "fanAxial_type1_config2": 340,
+    "fanCentrifugal_curves": 230,
+    "fanCentrifugal_data": 115,
+    "vapcyc_coildesigner_correlations": 321,
+    "vapcyc_hx_correlations": 3285
+  },
+  "outputs": {
+    "coilCorrections": 114,
+    "subcoolingCorrections": 39,
+    "fansAxial": 1328,
+    "fansCentrifugal": 115,
+    "coilDesignerCorrelations": 321,
+    "heatExchangerCorrelations": 3285
+  },
+  "discarded": [
+    {
+      "source": "coilCorrectionCoefficients_principal",
+      "reason": "IdCorr zero com coeficientes e velocidades zerados",
+      "index": 0,
+      "id": 0
+    }
+  ],
+  "status": "OK"
+}

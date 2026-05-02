@@ -1,0 +1,1607 @@
+[
+  {
+    "tag": "coildesignercorrelations",
+    "name": "",
+    "value": ""
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.MihailovicEtAl2019PlainFinsTFAHTC",
+    "value": "Reference : Mihailović M., Milovancevic U., Genic S., Jacimovic B., Otović M., Kolendić P., (2019). Air side heat transfer coefficient in plate finned tube heat exchangers. Experimental Heat Transfer. 33. 1-12. 10.1080/08916152.2019.1656298. \n\nApplication Range:\n\nCollar Diameter : 7.01 - 18.60 mm\nNumber of banks :  1 - 12\nConfiguration : Staggered Convergent only\nVertical Spacing : 12.7 - 34.5 mm\nHorizontal Spacing : 20.32 - 42.00 mm\nFin Pitch : 1.22 - 8.69 mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.Shah2022MiniMacroChannelsTFCondRTPHTC",
+    "value": "Reference : Shah, Mirza M. \"Improved correlation for heat transfer during condensation in mini and macro channels.\" \nInternational Journal of Heat and Mass Transfer 194 (2022): 123069.\n\nApplication Range:\n\nRefrigerants : (51 fluids) Water, R-11, R-12, R-22, R-32, R-41, R-113, R-123, R-125, R-134a, R-141b, R-142b, R-152a, R-161, R-236ea, R-245fa, R-404A, R-410A, R-448A, R-449A, R-450A, R-502, R-507, R-513A, R-452B, R-454C, R-455A, R-1234fa, R-1234yf, R-1234ze(E), DME, butane, propane, carbon dioxide, methane, FC-72, isobutane, propylene, benzene, ethanol, methanol, toluene, Dowtherm 209, HFE-7000, HFE-7100, ethane, pentane, Novec 649, ammonia, nitrogen\n\nHydraulic Diameter : 0.08 - 49 mm\nMass Flux : 1.1 - 1400 kg/m^2*s\nGeometry : Round, rectangular, triangular ports, round tubes\nReduced Pressure : 0.0006 - 0.949\nQuality : 0.01 - 0.99\nTemperature glide : 0.1 - 9.5 K"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCADPCorrelations.ChangWangLouverDP",
+    "value": "Chang Y. J., Hsu Kuei-Chang, Ln Yur-Tsai, Wang Chi-Chuan, 2000, \"A generlized friction correlation for louver fin  \ngeometry\", International Journal of Heat and Mass Transfer, No 43, pp 2237-2243.\n\nProposes a friction factor correlation that can correlate 1109 datapoints from existing work.\nTwo sets of equations are proposed: One for ReLp < 150 and other for 150 <=  ReLp <= 5000, where ReLp is the  \nReynolds number based on louver pitch.\n\nConclusion:\tA total of 91 samples of louver fin coils are used in the analysis. 83.14% of the friction data  \ncan be correlated within +/- 15%."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCADPCorrelations.KaysLondonDP",
+    "value": "Kays, W.M., London, A.L., 1984, Compact Heat Exchangers, McGraw-Hill."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCADPCorrelations.KimBullardLouverDP",
+    "value": "Kim Man-Hoe, Bullard Clark W., 2002, \"Air-side thermal hydraulic performance of multi-louvered fin aluminum heat  \nexchangers.\", International Journal of Refrigerant, No. 25, pp 390-400."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCADPCorrelations.DongChenChenZhangZhouLouverDP",
+    "value": "Heat transfer and pressure drop correlations for the multi-louvered fin compact heat exchangers\nJunqi Dong a,*, Jiangping Chen a, Zhijiu Chen a, Wenfeng Zhang b, Yimin Zhou b\nEnergy Conversion and Management 48 (2007) 1506–1515"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCADPCorrelations.ParkJacobiLouverDP",
+    "value": "reference: 1. Park Y-G, Jacobi AM. Air-Side Heat Transfer and Friction Correlations for Flat-Tube Louver-Fin Heat Exchangers.  Journal of Heat Transfer. 2009;131(2):021801."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCAHTCCorrelations.ChangWangLouverHTC",
+    "value": "Chang Yu-Juei, Wang Chi-Chuan, 1997, \"A generlized heat transfer correlation for louver fin geometry.\",  \nInternation Journal of Heat and Mass Tranfer, Vol 40 No. 3, pp 533-544.\n\nExisting heat transfer data is used to developed a generalized correlation. For corrugated louver fin geometry,  \n89.3% of the data points are correlated within +/- 15%.\nCorrelation developed for 100 < ReLp < 3000, where ReLp is Reynolds number based on louver pitch.\n\nApplicability:\n\tFin Pattern = Louver\n\tLouver Pitch = 0.5 -3 mm\n\tLouver Length = 2.13 -18.5 mm\n\tLouver Angle = 8.43- 35 degrees\n\tFin Pitch = 0.51- 3.33 mm\n\tTube Depth = 15.6- 57.4 mm\n\tFin Depth = 15.6 -57.4 mm\n\tFin Length = 2.84- 20 mm\n\tFin Thickness = 0.0254 -0.16 mm\n\tTube Pitch = 7.51 -25 mm\n\tRows of Tubes = 1- 2"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCAHTCCorrelations.KaysLondonHTC",
+    "value": "Kays, W.M., London, A.L., 1984, Compact Heat Exchangers, McGraw-Hill."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCAHTCCorrelations.DongChenChenZhangZhouLouverHTC",
+    "value": "Heat transfer and pressure drop correlations for the multi-louvered fin compact heat exchangers\nJunqi Dong a,*, Jiangping Chen a, Zhijiu Chen a, Wenfeng Zhang b, Yimin Zhou b\nEnergy Conversion and Management 48 (2007) 1506–1515"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCAHTCCorrelations.ParkJacobiLouverHTC",
+    "value": "reference: 1. Park Y-G, Jacobi AM. Air-Side Heat Transfer and Friction Correlations for Flat-Tube Louver-Fin Heat Exchangers.  Journal of Heat Transfer. 2009;131(2):021801."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCAHTCCorrelations.KimBullardLouverHTC",
+    "value": "Kim Man-Hoe, Bullard Clark W., 2002, \"Air-side thermal hydraulic performance of multi-louvered fin aluminum heat  \nexchangers.\", International Journal of Refrigerant, No. 25, pp 390-400.\nApplicability:\n\tFin Pattern: Louver\n\tFlow depth = 16- 24 mm\n\tFin Pitch = 1.0-1.4 mm\n\tTube Pitch = 10.15- 11.15 mm\n\tNumber of Louvers = 8- 12\n\tLouver Angle = 15 -29 degrees"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRLDPCorrelations.BhattiShahMCRLDP",
+    "value": "Reference: Bhatti, M.S., and R.K. Shah. 1987. Turbulent and transition flow convective heat transfer in ducts. In  \nKacak, S., R.K. Shah, and W. Aung (eds.). Handbook of Single Phase Heat Transfer. New York: John Wiley."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRLDPCorrelations.BlasiusType",
+    "value": "F.P. Incropera and D.P. DeWitt, Introduction to heat transfer. (3rd ed.),, John Wiley & Sons, New York (1996)."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRLDPCorrelations.Churchill",
+    "value": "Reference: Churchill, S.W., 1977, Frictional equation spans all fluid flow regimes, Chem. Eng. 84, 91-92."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRLDPCorrelations.SwameeJainMCRLDP",
+    "value": "Swamee, P.K.; Jain, A.K. (1976). \"Explicit equations for pipe-flow problems\". Journal of the Hydraulics Division,  \nASCE 102 (5): 657-664."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRLHTCCorrelations.DittusBoelterTurbulent",
+    "value": "Dittus-Boelter Single-Phase Heat Transfer Coefficient Correlation\nReference:  F.W. Dittus, L.M.K. Boelter, Heat Transfer in Automobile Radiators of the Tubular Type, International Communications in Heat and Mass Transfer 12 (1) (1985) 3-22.  Originally published in the University of California Publications in Engineering 2 (13) (1930) 443-461.\nCorrelation for heat transfer coefficient originally developed for water flowing through tubes.\nApplication Range: (Correlation tested for gases in this range)\nTube diameter: 0.5 - 6 inches\nTemperature: 60 - 1400 F\nPressure: 1.5 - 190 psia\nMass Flux: 0.2 - 6.6 lb/ft^2-s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRLHTCCorrelations.PengPetersonLaminarRLHTC",
+    "value": "Convective heat transfer and flow friction for water flow in microchannel structures;\nX.F.Peng;\n\tW=[0.1,0.4mm]\n\tWc=[2.0,4.5mm]"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRLHTCCorrelations.PengPetersonTurbulentRLHTC",
+    "value": "Convective heat transfer and flow friction for water flow in microchannel structures;\nX.F.Peng;\n\tW=[0.1,0.4mm]\n\tWc=[2.0,4.5mm]"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRLHTCCorrelations.ARI410SmoothTubeRLHTC",
+    "value": "Based on ARI-410 Standard Figure - 17. This page contains equations and also a plot\n\n1. ARI Standard 410-2001 with Addendum 1, Forced-Circulation Air-Heating and Air-Cooling Coils.\nARI STANDARD 410-2001 WITH ADDENDUM 2"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRLHTCCorrelations.DittusBoelter",
+    "value": "Reference:  F.W. Dittus, L.M.K. Boelter, Heat Transfer in Automobile Radiators of the Tubular Type, International  \nCommunications in Heat and Mass Transfer 12 (1) (1985) 3-22.  Originally published in the University of California  \nPublications in Engineering 2 (13) (1930) 443-461.\nCorrelation for heat transfer coefficient originally developed for water flowing through tubes."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRLHTCCorrelations.Gnielinski",
+    "value": "Reference:  V. Gnielinski, New equations for heat and mass transfer in turbulent pipe and channel flow,  \nInternational Chemical Engineering 16 (2) (1976) 359-368."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRLHTCCorrelations.PetukhovPopovRLHTC",
+    "value": "Correlations for transition and turbulent flows in circular and noncircular smooth tubes,  \nTable 7.6, Eqn. 7.74,  Fundamentals of Heat Exchanger Design, by Shah and Sekulic, J Wiley.\nAccuracy: +/- 5%\nApplicability:\n\t4000 <= Re <= 5 x 10^6\n\t0.5 <= Pr <= 10^6"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.MullerSteinhagenHeckDP",
+    "value": "Muller-Steinhagen & Heck Correlation for evaporation pressure drop\nReference:  M. B. Ould Didi, N. Kattan, J. R. Thome, 2002, Prediction of two-phase pressure gradients of refrigerants in horizontal tubes, International Journal of Refrigeration 25 (2002) pp 935-947.\nThe correlation was originally published in  Reference [8] in the above paper. The above paper compares several correlations against experimental data obtained from several sources.\nRanges:\n\tRefrigerants  R134a, R123, R402A, R404A, R502\n\tMass Flux = 100 - 500 kg/(m^2 s)\n\tQuality = 0.04 to 1.0"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.MishimaHibikiDP",
+    "value": "Reference: \nK. Mishima & T. Hibiki., Some Characteristics of Air-Water Two-Phase Flow in Small Diameter Vertical Tubes. Int. J. Multiphase Flow Vol 22, No4, 1996\nTube ID: 1.09-4.9mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.ChenEtAlR410ADP",
+    "value": "Reference: Two-Phase pressure drop of air-water and R-410A in small horizontal tubes \nIng Youn Chen, kai-Shing Yang, Yu-Juei Chang, Chi-Chung Wang\nInternational journal of Multiphase flow 27 (2001) 1293-1299\nTube diameter: 1 to 9mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.JassimNewellProbabilisticFlowDP",
+    "value": "All References\n1. J. Jin, J. Chen, Z. Chen. Development and validation of a microchannel evaporator model for a CO2 air-conditioning system,\nApplied Thermal Engineering (2010), doi: 10.1016/j.applthermaleng.2010.06.019\n2. Prediction of two-phase pressure drop and void fraction in microchannels using probabilistic flow regime mapping,\nE.W. Jassim *, T.A. Newell Department of Mechanical and Industrial Engineering, University of Illinois at Urbana-Champaign, 1206 West Green Street, Urbana, IL 61801, USA\n Received 8 June 2005; received in revised form 26 September 2005 Available online 11 April 2006, Abstract\n\n\nTest Specification\nTube diameter D = 0.8 mm;\nTemperature T_sat = 10C\nTotal refrigerent mass flux G = 50, 100, 200, 300kg/m^2.s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.ChengThomeTPCO2EvapFlowPatternMap2008DP",
+    "value": "New prediction methods for CO2 evaporation inside tubes:Part I \nA two-phase flow pattern map and a flow pattern based phenomenological model\nfor two-phase flow frictional pressure drops\nLixin Cheng, Gherhardt Ribatski, Jesus Moreno Quiben, John R. Thome\nInternational Journal of Heat and Mass Transfer 51 (2008) 111-124\nApplicability:\n\tTube diameter: 0.6 to 10mm\n\tMass velocity: 50 to 1500 kg/m2s\n\tHeat flux: 1.8 to 46 kW/m2\n\tTSat: -28 to 25C (Reduced pressure: 0.21 to 0.87)"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.Friedel",
+    "value": "Reference: Friedel, L., 1979. Improved friction pressure drop correlations for horizontal and vertical two phase  \npipe flow. Paper E2. European Two Phase Flow Group Meeting, Ispra, Italy"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.Homogenuous",
+    "value": "Muller-Steinhagen & Heck Correlation for evaporation pressure drop\nReference:  M. B. Ould Didi, N. Kattan, J. R. Thome, 2002, \"Prediction of two-phase pressure gradients of  \nrefrigerants in horizontal tubes\", International Journal of Refrigeration 25 (2002) pp 935-947.\nThe correlation was originally published in  Reference [8] in the above paper. The above paper compares several  \ncorrelations against experimental data obtained from several sources.\nRanges:\n\tRefrigerants -R134a, R123, R402A, R404A, R502\n\tMass Flux = 100 - 500 kg/(m^2 s)\n\tQuality = 0.04 to 1.0"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.JungRadermacherDP",
+    "value": "Jung-Radermacher Two-Phase Pressure Drop Correlation\nReference:  D.S. Jung, R. Radermacher, Prediction of pressure drop during horizontal annular flow boiling of pure  \nand mixed refrigerants, International Journal of Heat and Mass Transfer 32 (12) (1989) 2435-2446.\nCorrelation developed for pressure drop of pure and mixed refrigerants during evaporation.\nRanges:\n\tMass Flow Rate = 16 - 46 g/s\n\tMass Flux = 230 - 720 kg/(m^2 s)\n\tHeat Flux = 10 - 45 kW/m^2\n\tQuality = up to 0.95"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.LockhartMartinelli",
+    "value": "Lockhart-Martinelli Two-Phase Pressure Drop Correlation\nReference:  R.W. Lockhart, R.C. Martinelli, Proposed Correlation of Data for Isothermal Two-Phase, Two-Component  \nFlow in Pipes, Chemical Engineering Progress 45 (1) (1949) 39-48.\nThe correlation was developed using data from the simultaneous flow of air and liquids.  It was developed using  \ndata corresponding to the following parameters:\n\tFluids = benzene, kerosene, water and various oils\n\tTube Diameter = 0.0586 - 1.017 in (1.488 - 25.832 mm)"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.ParkHrnjakBoilingDP",
+    "value": "Reference:  Park, Hrnjak; CO2 and R410A flow boiling heat transfer, pressure drop, and flow pattern at low  \ntemperatures in a horizontal smooth tube. International Journal of Refrigeration 30 (2007) 166-178\n\nFlow boiling heat transfer coefficient, pressure drop, and flow pattern are investigated in the horizontal smooth  \ntube of 6.1 mm inner diameter for CO2, R410A, and R22. Flow boiling heat transfer coefficients are measured at the  \nconstant wall temperature conditions, while pressure drop measurement and flow visualization are carried out at  \nadiabatic conditions. This research is performed at evaporation temperatures of _15 and _30 _C, mass flux from 100  \nto 400 kg m_2 s_1, and heat flux\nfrom 5 to 15 kWm_2 for vapor qualities ranging from 0.1 to 0.8"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.ChengThomeTPCO2EvapFlowPatternMap2008HTC",
+    "value": "New prediction methods for CO2 evaporation inside tubes: Part II\nAn updated general flow boiling heat transfer model based on flow patterns\nLixin Cheng, Gherhardt Ribatski, John R. Thome\nInternational Journal of Heat and Mass Transfer 51 (2008) 125-135\nApplicability:\n\tTube diameter: 0.6 to 10mm\n\tMass velocity: 50 to 1500 kg/m2s\n\tHeat flux: 1.8 to 46 kW/m2\n\tTSat: -28 to 25C (Reduced pressure: 0.21 to 0.87)"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.Dobson",
+    "value": "Dobon Two-Phase Heat Transfer Coefficient Correlation\nReference:  M.K. Dobson, J.C. Chato, Condensation in Smooth Horizontal Tubes, Transactions of the ASME, Journal of  \nHeat Transfer 120 (1998) 193-213.\nThe correlation was developed to predict heat transfer coefficients during condensation.  It was verified using  \ndata with the following parameters:\n\tFluids = R-12, R-22, R-134a and near-azeotropic blends of R-32/R-125\n\tTube Diameter = 3.14 - 7.04 mm\n\tReduced Pressure = 0.21 - 0.57\n\tSaturation Temperature = 35 - 60 C\n\tQuality = 10 - 90 %\n\tMass Flux = 25 - 800 kg/(m^2 s)\n\tHeat Flux = 5 - 15 kW/m^2"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.GungerWinterton",
+    "value": "Gungor Winterton Two-Phase Heat Transfer Coefficient Correlation\nReference:  K.E. Gungor, R.H.S. Winterton, Simplified General Correlation for Saturated Flow Boiling and Comparisons of Correlations with Data, Transactions of the Institute of Chemical Engineers, Chemical Engineering Research and Design 65 (1987) 148-156.\nThe correlation was developed to predict saturated boiling heat transfer coefficients.  It was verified using 4,202 data points with the following parameters:\n\tFluids = water, R-11, R-12, R-13, R-22, R-113, R-114, ethanol, ethylene glycol and n-butanol"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.JungRadermacherHTC",
+    "value": "Jung-Radermacher Two-Phase Heat Transfer Coefficient Correlation\nReference:  D.S. Jung, R. Radermacher, A study of flow boiling heat transfer with refrigerant mixtures,  \nInternational Journal of Heat and Mass Transfer 32 (9) (1989) 1751-1764.\nCorrelation developed for heat transfer coefficients of pure refrigerants and azeotropic refrigerant mixtures  \nduring evaporation.\n\nApplicability:\n\tMass Flow Rate = 16 - 46 g/s\n\tMass Flux = 250 - 720 kg/(m^2 s)\n\tHeat Flux = 10 - 45 kW/m^2\n\tQuality = up to 0.95"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.Kandlikar",
+    "value": "Kandlikar Two-Phase Heat Transfer Coefficient Correlation\nReference:  S.G. Kandlikar, A General Correlation for Saturated Two-Phase Flow Boiling Heat Transfer Inside  \nHorizontal and Vertical Tubes, Transactions of the ASME, Journal of Heat Transfer 112 (1990) 219-228.\nThe correlation was verified with 5,246 data points for 10 refrigerants (water, R-11, R-12, R13-B1, R-22, R-113,  \nR-114, R-152a, nitrogen and neon).  The mean deviation was 18.8%."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.KandlikarBalasubramanianEvapMCRTPHTC",
+    "value": "Kandlikar flow boiling correlation\nReference:  S.G. Kandlikar and P. Balasubramanian, An extension of the flow boiling correlation to transition,  \nlaminar, and deep laminar flows in minichannels and microchannels, Heat Transfer Engineering 25(3): 86-93, 2004.\nRe for laminar and transition flow region in minichannels: 1600 < Re < 300\nRe with low Reynolds number flows in minichannels: 410 < Re < 100\nRe with very low Reynolds numbers in microchannels: Re <= 100\nFluid = R-113, R-141b, HCFC 123\nRe ranges (used in studies) = 72-2013\nQuality = 0 - 1\nDiameter = 0.19 = 2.92\nRecommended F_fl (fluid-surface parameter):\n\tWater = 1.00\n\tR-11 = 1.30\n\tR-12 = 1.50\n\tR-13B1 = 1.31\n\tR-22 = 2.20\n\tR-113 = 1.30\n\tR-114 = 1.24\n\tR-134a = 1.63\n\tR-152a = 1.10\nR-32/R-132 = 3.30\nR-141b = 1.80\nR-124 = 1.00\nKerosene = 0.488\nNote: F_fl = 1 for stainless steel tubes for all fluids"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.ShahCond",
+    "value": "Shah's Condensation Condensation Heat Transfer Coefficient Correlation\nReference:  M.M. Shah, A General Correlation for Heat Transfer During Film Condensation Inside Pipes, International Journal of Heat and Mass Transfer 22 (1979) 547-556.\nThe correlation was verified using 474 data points with the following parameters:\n\tFluids = water, R-11, R-12, R-22, R-113, methanol, ethanol, benzene, toluene and trichloroethylene\n\tTube Diameter = 7 - 40 mm\n\tReduced Pressure = 0.002 - 0.44\n\tSaturation Temperature = 21 - 310 C\n\tVapor Velocity = 3 - 300 m/s\n\tQuality = 0 - 1\n\tMass Flux = 10.8 - 210.5 kg/(m^2 s)\n\tHeat Flux = 158 - 1,893,000 W/m^2\n\tLiquid Reynolds Number = 100 - 63,000\n\tLiquid Prandtl Number = 1 - 13\nThe mean deviation was found to be 15.4%"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.ShahEvap",
+    "value": "Shah's Evaporation Heat Transfer Coefficient Correlation\nReference:  M.M. Shah, Chart Correlation for Saturated Boiling Heat Transfer: Equations and Further Study, ASHRAE Transactions 88 (1) (1982) 185-196.\nCorrelation developed to predict saturated boiling heat transfer coefficients in tubes and annuli.  Verified for 12 fluids with pressures up to a reduced pressure of 0.89."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.Traviss",
+    "value": "Traviss, D.P., Rohsenow, W.M., Baron, A.B., 1973, \"Forced convection\ncondensation inside tubes: A heat transfer equation for condenser design\",\nASHRAE Transactions, Vol. 79, pp. 157-165."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.YunEtAlR410MCHTC",
+    "value": "Reference:Evaporative heat transfer and pressure drop of R410A in microchannels \nRin Yun, Jae Hyeok Heo, Yongchan Kim\nInternational Journal of Refrigeration, 29, 2006, pp. 92-100\n\nApplicability:\n\tHydraulic diameters: 1.36 and 1.44 mm. \n\tMass flux: 200 to 400 kg/m2s\n\tHeat flux: 10 to 20 kW/m2\n\tSaturation temperature: 0-10C"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRVDPCorrelations.BlasiusType",
+    "value": "F.P. Incropera and D.P. DeWitt, Introduction to heat transfer. (3rd ed.),, John Wiley & Sons, New York (1996)."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRVDPCorrelations.Churchill",
+    "value": "Reference: Churchill, S.W., 1977, Frictional equation spans all fluid flow regimes, Chem. Eng. 84, 91-92."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRVHTCCorrelations.DittusBoelter",
+    "value": "Dittus-Boelter Single-Phase Heat Transfer Coefficient Correlation\nReference:  F.W. Dittus, L.M.K. Boelter, Heat Transfer in Automobile Radiators of the Tubular Type, International Communications in Heat and Mass Transfer 12 (1) (1985) 3-22.  Originally published in the University of California Publications in Engineering 2 (13) (1930) 443-461.\nCorrelation for heat transfer coefficient originally developed for water flowing through tubes.\n\nApplication Range: (Correlation tested for gases in this range)\nTube diameter: 0.5 - 6 inches\nTemperature: 60 - 1400 F\nPressure: 1.5 - 190 psia\nMass Flux: 0.2 - 6.6 lb/ft^2-s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRVHTCCorrelations.DittusBoelterTurbulent",
+    "value": "Dittus-Boelter Single-Phase Heat Transfer Coefficient Correlation\nReference:  F.W. Dittus, L.M.K. Boelter, Heat Transfer in Automobile Radiators of the Tubular Type, International Communications in Heat and Mass Transfer 12 (1) (1985) 3-22.  Originally published in the University of California Publications in Engineering 2 (13) (1930) 443-461.\nCorrelation for heat transfer coefficient originally developed for water flowing through tubes.\n\nApplication Range: (Correlation tested for gases in this range)\nTube diameter: 0.5 - 6 inches\nTemperature: 60 - 1400 F\nPressure: 1.5 - 190 psia\nMass Flux: 0.2 - 6.6 lb/ft^2-s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRVHTCCorrelations.Gnielinski",
+    "value": "Gnielinski Single-Phase Heat Transfer Coefficient Correlation\nReference:  V. Gnielinski, New equations for heat and mass transfer in turbulent pipe and channel flow, International Chemical Engineering 16 (2) (1976) 359-368."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRVHTCCorrelations.GnielinskiSupCritCO2",
+    "value": "Gnielinski heat transfer correlation for the Nusselt number using the Haaland\nfriction factor and ignoring the influence of the wall temperature (slightly better\naccuracy would be obtained taking the wall temperature into account).\nRecommended by \"Heat Transfer and Pressure Drop for Flow of Supercritical and\nSubcritical CO2 in Microchannel Tubes.\" Pettersen, Rieberer, Munkejord.\nTechnical Report for US Army.  February 2000."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRVHTCCorrelations.HuaiCO2HTC",
+    "value": "Huai, X., Koyama, S., 2007. Heat transfer characteristics of\nsupercritical CO2 flow in small-channeled structures. \nExp. Heat Transf. 20, 19-33.\nThe applicable ranges of the equation are\n7.4 < p < 8.5 MPa, \n22C < Tbulk< 53C,\n113.7<G < 418.6 kg/m2s1\n0.8<q<9 kW/m2\ninner diameter about 1.31mm under cooling conditions"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRVHTCCorrelations.LiaoZhaoCO2HTC",
+    "value": "Liao's Heat Transfer Coefficient Correlation\nReference:  Measurement of heat transfer coefficient from supercritical carbon dioxide flowing in horizontal mini/micro channels, Journal of heat transfer 124(3) (2002) 413-420.\nThe correlation was verified using data points with the following parameters:\n\tFluids = CO2\n\tTube Diameter = 0.50, 0.70, 1.10, 1.40, 1.55, 2.16 mm\n\tPressure = 7.4 - 12 MPa\n\tTemperature = 20 - 100 C\n\tVapor Velocity = 3.333 x 10-4 - 3.333 x 10-3 m/s\n\tLiquid Reynolds Number = Re < 10^5"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCAHTCCorrelations.JacobiEtAlLouverFinAHTC",
+    "value": "Reference: Jacobi M, Park Y, Zhong Y, Michna G, Xia Y. High performance heat exchangers for air-conditioning and refrigeration applications (non-circular tubes): Air-Conditioning and Refrigeration Technology Institute. University of Illinois, Urbana, IL. ARTI-21CR/605-20021-01; 2005. p. 288.\n             \nApplication Range:\n\tRe (Louver pitch based)= 27-4132\n\tFin Pitch = 0.51-5.08 mm\n\tLouver Pitch = 0.81-3.0 mm\n\tLouver Angle = 8.34-35.92°\n\tFin Length = 2.84-19.0 mm\n\tLouver Length = 2.13-17.18 mm\n\tFin Depth = 15.6-44.0 mm\n\tTube Vertical Spacing = 7.51-24.0mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.KimMudawar2013MiniMacroTFCondRTPHTC",
+    "value": "Reference: Kim, Sung-Min, and Issam Mudawar. \"Universal approach to predicting heat transfer coefficient for condensing mini/micro-channel flow.\" International Journal of Heat and Mass Transfer 56.1-2 (2013): 238-250.\nCorrelation based on consolidated database of 4045 condensation heat transfer data points from 28 sources with the following application range:\n\nApplicability:\n\tWorking fluid: R12, R123, R1234yf, R1234ze (E), R134a, R22, R236fa, R245fa, R32, R404A, R410A, R600a, FC72, methane, and CO2\n\tHydraulic diameter: 0.424 < Dh < 6.22 mm\n\tMass velocity: 53 < G < 1403 kg/m2 s\n\tLiquid-only Reynolds number: 276 < Refo =G Dh/lf < 89798\n\tSuperficial liquid Reynolds number: 0 < Ref  < 79202\n\tSuperficial vapor Reynolds number: 0 < Reg < 247740\n\tFlow quality: 0 < x < 1\n\tReduced pressure: 0.04 < PR < 0.91."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.Mehendale2018FNARMMicrofinTFEvapRTPHTC",
+    "value": "Reference: Mehendale, Sunil. \"A new heat transfer coefficient correlation for pure refrigerants and near-azeotropic refrigerant mixtures flow boiling within horizontal microfin tubes.\" International Journal of Refrigeration 86 (2018): 292-311.\nFor flow boiling, microfin tube, pure fluids or azeotropic mixture.\n           \nApplicability:\n\tRefrigerants: CO2, R12, R1234yf, R1234ze(E), R134a, R22, R32, R404A, R410A\n\tFin root diameter: 2.1-14.85 mm\n\tTsat: -20 C-39.9 C\n\tMass flux: 25 to 820 kg/m^2*s\n\tHeat flux: 1-58.7 kW/m2\n\tReduced pressure: 0.03-0.78\n\tVapor quality: 0.06-1.0\n\tAll liquid Reynolds number: 524-62806\n\tAll vapor Reynolds number: 11212-618755"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.Mehendale2019MicrofinCondRTPHTC",
+    "value": "Reference: Mehendale, S.S., 2019, \"Condensing Heat Transfer for Pure Refrigerants and Refrigerant Mixtures Flowing within Horizontal Microfin Tubes: A New Model,\"\nInternational Journal of Refrigeration, 103, pp. 223-242.\n           \nApplicability:\n\tRefrigerants: CO2, R1234yf, R1234ze(E), R134a, R22, R407C, R404A, R410A\n\tFin root diameter: 2.64-8.98 mm\n\tFin Height : 0.06 - 0.305 mm\n\tNumber of fins : 35 - 82\n\tHelix angle : 0 - 30 degrees\n\tApex angle : 0 - 67 degrees\n\tTsat: -25 - 50 C\n\tMass flux: 49 - 872.5 kg/m^2*s\n\tHeat flux: 1.79 - 98.1 kW/m2\n\tReduced pressure: 0.16 - 0.81"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.KimMudawar2013MiniMacroMCCondRTPHTC",
+    "value": "Reference: Kim, Sung-Min, and Issam Mudawar. \"Universal approach to predicting heat transfer coefficient for condensing mini/micro-channel flow.\" International Journal of Heat and Mass Transfer 56.1-2 (2013): 238-250.\nCorrelation based on consolidated database of 4045 condensation heat transfer data points from 28 sources with the following application range:\n– working fluid: R12, R123, R1234yf, R1234ze (E), R134a, R22, R236fa, R245fa, R32, R404A, R410A, R600a, FC72, methane, and CO2\n– hydraulic diameter: 0.424 < Dh < 6.22 mm\n– mass velocity: 53 < G < 1403 kg/m2 s\n– liquid-only Reynolds number: 276 < Refo =G Dh/lf < 89798\n– superficial liquid Reynolds number: 0 < Ref  < 79202\n– superficial vapor Reynolds number: 0 < Reg < 247740\n– flow quality: 0 < x < 1\n– reduced pressure: 0.04 < PR < 0.91."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.ZhukauskasBareTubes",
+    "value": "Reference:\nZhukauskas, A., \"Heat Transfer from Tubes in Cross Flow\" in JP Hartnett and TF Irvine Jr., Eds.\n * Advances in Heat Transfer, v11, Academic Press, New York, 1975"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.WangFuChangWavyHerringbone",
+    "value": "C.C. Wang, W.L. Fu, C.T. Chang, Heat Trasnfer and Friction Characteristics of Typical Wavy Fin-and-Tube Heat Exchangers\nExperimental Thermal and Fluid Science, 1997; 13; 174-186\n\nTested both staggered and inline config\nFin pitch (mm) 1.69-4.8\nDC (mm) 10.3\nPt (mm) 25.4-29.4\nPl (mm) 19.05-29.4\nRow No. 1-4"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.MirthRamadhyaniWavyHerringbone",
+    "value": "reference: Correlations for predicting the air-side Nusselt numbers and friction factors in chilled-water cooling coils\nby D.R.Mirth &S.Ramadhyani\n\nparameter range:Rea[440-1680],St/2s[5.1-11],dcol/2*s[2.2-4.6],Lcoil/2s[31-75],wh/2s[0.39-0.81],wl/2s[1.8-3.7];"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.KimYounWebbPlainWavyFinDP",
+    "value": "Kim-Youn-Webb Plate/Wavy Fin Pressure Drop Correlation\nReferences:  N.H. Kim, B. Youn, R.L. Webb, Air-Side Heat Transfer and Friction Correlations for Plain Fin-and-Tube Heat Exchangers With Staggered Tube Arrangements, Transactions of the ASME, Journal of Heat Transfer 121 (1999) 662-667.\nN.H. Kim, J.H. Yun, R.L. Webb, Heat Transfer and Friction Correlations for Wavy Plate Fin-and-Tube Heat Exchangers, Transactions of the ASME, Journal of Heat Transfer 119 (1997) 560-567."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.WangChangLouverFinDP",
+    "value": "Wang Chang et al. Louver Fin Pressure Drop Correlation\nReference:  C.C. Wang, C.J. Lee, C.T. Chang, S.P. Lin, Heat transfer and friction correlation for compact louvered fin-and-tube heat exchangers, International Journal of Heat and Mass Transfer 42 (1999) 1945-1956.\nGeometry Ranges:\n\tFin Pattern = Louver\n\tTube Outside Diameter = 6.9 - 10.4 mm\n\tTube Horizontal Spacing = 17.7 - 25.4 mm\n\tTube Vertical Spacing = 12.7 - 22.0 mm\n\tFin Pitch = 1.2 - 2.49 mm\n\tLouver Height = 0.79 - 1.4 mm\n\tLouver Pitch = 1.7 - 3.75 mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.WangChiChangPlateFin",
+    "value": "Wang Chi Chang Plate Fin Pressure Drop Correlation\nReference:  C.C. Wang, K.Y. Chi, C.J. Chang, Heat transfer and friction characteristics of plain fin-and-tube heat exchangers, part II:  Correlation, International Journal of Heat and Mass Transfer 43 (2000) 2693-2700.\nGeometry Ranges:\n\tFin Pattern = plain\n\tNumber of Columns = 1 - 6\n\tTube Outside Diameter = 6.35 - 12.7 mm\n\tFin Pitch = 1.19 - 8.7 mm\n\tTube Horizontal Spacing = 17.7 - 31.75 mm\n\tTube Vertical Spacing = 12.4 - 27.5 mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.WangHwangLinWavyHerringboneFinDP",
+    "value": "Wang Hwang Lin Wavy Herringbone Air Side Correlation\nReference:  C-C. Wang, Y-M Hwang, Y-T Lin, Empirical Correlations for Heat Transfer\nAnd Flow Friction Characteristics of Herringbone Wavy Fin and Tube Heat Exchangers,\nInternational Journal of Refrigeration 25 (2002) 673-680\nGeometry Ranges:\n\tFin Pattern = Wavy Herringbone\n\tNumber of Columns = 1 - 6\n\tTube Outside Diameter = 7.66 -16.85 mm\n\tFin Pattern Depth = 0.3 - 1.8 mm\n\tTube Horizontal Spacing = 12 - 33 mm\n\tTube Vertical Spacing = 21-38 mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.WangLeeSlitFin",
+    "value": "Wang Lee Sheu: Fin-and-tube heat exchangers coefficient correlation\nReference: C.C. Wang, W.S. Lee, W.J. Sheu, A comparative study of compact enhanced fin-and-tube heat exchangers, International Journal of Heat and Mass Transfer 44 (2001) 3565-3573.\nGeometry Ranges:\n\tFin Pattern = Compact Slit Fin\n\tFin Pitch = 1.20 - 2.50 mm\n\tTube Outside Diameter = 7.52 - 16.4 mm\n\tLongitudinal Tube Pitch = 12.7 - 33.0 mm\n\tTransverse Tube Pitch = 20.0 -38.0 mm\n\tFin Thickness = 0.11 - 0.2 mm\n\tNumber of Longitudinal tube rows = 1 - 6\n\tHeight of Slit = 0.99 - 2 mm\n\tBreadth of a Slit (in the direction of airflow) = 1 - 2.2 mm\n\tNumber of Slits in an Enhanced Zone = 3 - 7"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.WangTsaiLuWavySmoothLouveredFinDP",
+    "value": "Wang Tsai Lu Wavy-Smooth Louvered Fin Air Side Correlation\nReference:  C-C. Wang, Y-M tsai, D-C Lu, Comprehensive Study of \nConvex-Louver and Wavy Fin-and-Tube Heat Exchangers,\nJournal of Thermophysics and Heat Transfer, vol 12, No 3, July-September 1998\nGeometry Ranges:\n\tFin Pattern = Smooth Wavy with Louvered fin (Convex-Louver)\n\tNumber of Columns = 1 - 4\n\tFin Pitch = 1.21 - 2.54 mm\n\tFin Thickness = 0.115 mm\n\tTube Outside Diameter = 8.54 mm\n\tTube Horizontal Spacing = 19.05 mm\n\tTube Vertical Spacing = 25.4 mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.ChangWangLouverFinHTC",
+    "value": "Wang Chang et al. Louver Fin Heat Transfer Coefficient Correlation\nReference:  C.C. Wang, C.J. Lee, C.T. Chang, S.P. Lin, Heat transfer and friction correlation for compact louvered fin-and-tube heat exchangers, International Journal of Heat and Mass Transfer 42 (1999) 1945-1956.\nGeometry Ranges:\n\tFin Pattern = Louver\n\tTube Outside Diameter = 6.9 - 10.4 mm\n\tTube Horizontal Spacing = 17.7 - 25.4 mm\n\tTube Vertical Spacing = 12.7 - 22.0 mm\n\tFin Pitch = 1.2 - 2.49 mm\n\tLouver Height = 0.79 - 1.4 mm\n\tLouver Pitch = 1.7 - 3.75 mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.ZhukauskasBareTubes",
+    "value": "Reference:\nZhukauskas, A., \"Heat Transfer from Tubes in Cross Flow\" in JP Hartnett and TF Irvine Jr., Eds.\n * Advances in Heat Transfer, v11, Academic Press, New York, 1975"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.WangFuChangWavyHerringbone",
+    "value": "C.C. Wang, W.L. Fu, C.T. Chang, Heat Trasnfer and Friction Characteristics of Typical Wavy Fin-and-Tube Heat Exchangers\nExperimental Thermal and Fluid Science, 1997; 13; 174-186\n\nTested both staggered and inline config\nFin pitch (mm) 1.69-4.8\nDC (mm) 10.3\nPt (mm) 25.4-29.4\nPl (mm) 19.05-29.4\nRow No. 1-4"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.MirthRamadhyaniWavyHerringbone",
+    "value": "reference: Correlations for predicting the air-side Nusselt numbers and friction factors in chilled-water cooling coils\nby D.R.Mirth &S.Ramadhyani\n\nparameter range:Rea[440-1680],St/2s[5.1-11],dcol/2*s[2.2-4.6],Lcoil/2s[31-75],wh/2s[0.39-0.81],wl/2s[1.8-3.7];"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.ChangWangLouverFinHTC_uMax",
+    "value": "Wang Chang et al. Louver Fin Heat Transfer Coefficient Correlation\nReference:  C.C. Wang, C.J. Lee, C.T. Chang, S.P. Lin, Heat transfer and friction correlation for compact louvered fin-and-tube heat exchangers, International Journal of Heat and Mass Transfer 42 (1999) 1945-1956.\nGeometry Ranges:\n\tFin Pattern = Louver\n\tTube Outside Diameter = 6.9 - 10.4 mm\n\tTube Horizontal Spacing = 17.7 - 25.4 mm\n\tTube Vertical Spacing = 12.7 - 22.0 mm\n\tFin Pitch = 1.2 - 2.49 mm\n\tLouver Height = 0.79 - 1.4 mm\n\tLouver Pitch = 1.7 - 3.75 mm\n\nThis correlation is identical to ChangWangLouverFinHTC except it uses umax in the calculation of the Reynolds number."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.GranrydPlateHTC_OneBankPerFinSheet",
+    "value": "Granryd Plain Fin Heat Transfer Coefficient Correlation for 1 tube bank per sheet\nReference:  E. Granryd, Fin coil heat transfer and pressure drop KULDE 1965\nGeometry Ranges:\n\tFin Pattern = Plain\n\tTube Outside Diameter = 10 - 35 mm\n\tTube Horizontal Spacing = 33.3 - 100 mm\n\tTube Vertical Spacing = 33.3 - 100 mm\n\tFin Spacing = 3 - 16 mm\n\tFin Thickness = 1.2 mm\n\tOther comments : No more than 5 banks"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.GranrydPlateHTC_ThreeBankPerFinSheet",
+    "value": "Granryd Plain Fin Heat Transfer Coefficient Correlation for 3 tube banks per sheet\nReference:  E. Granryd, Fin coil heat transfer and pressure drop KULDE 1965\nGeometry Ranges:\n\tFin Pattern = Plain\n\tTube Outside Diameter = 10 - 35 mm\n\tTube Horizontal Spacing = 33.3 - 100 mm\n\tTube Vertical Spacing = 33.3 - 100 mm\n\tFin Spacing = 3 - 16 mm\n\tFin Thickness = 1.2 mm\n\tOther comments : Only for inline configurations. Between 3 and 9 banks"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.GranrydPlateHTC_TwoBankPerFinSheet",
+    "value": "Granryd Plain Fin Heat Transfer Coefficient Correlation for 2 tube banks per sheet\nReference:  E. Granryd, Fin coil heat transfer and pressure drop KULDE 1965\nGeometry Ranges:\n\tFin Pattern = Plain\n\tTube Outside Diameter = 10 - 35 mm\n\tTube Horizontal Spacing = 33.3 - 100 mm\n\tTube Vertical Spacing = 33.3 - 100 mm\n\tFin Spacing = 3 - 16 mm\n\tFin Thickness = 1.2 mm\n\tOther comments : Between 2 and 6 tube banks"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.KimYounWebbPlainWavyFinHTC",
+    "value": "Kim-Youn-Webb Plate/Wavy Fin Heat Transfer Coefficient Correlation\nReferences:  N.H. Kim, B. Youn, R.L. Webb, Air-Side Heat Transfer and Friction Correlations for Plain Fin-and-Tube Heat Exchangers With Staggered Tube Arrangements, Transactions of the ASME, Journal of Heat Transfer 121 (1999) 662-667.\nN.H. Kim, J.H. Yun, R.L. Webb, Heat Transfer and Friction Correlations for Wavy Plate Fin-and-Tube Heat Exchangers, Transactions of the ASME, Journal of Heat Transfer 119 (1997) 560-567."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.WangChiChangPlateFinHTC",
+    "value": "Wang Chi Chang Plate Fin Heat Transfer Coefficient Correlation\nReference:  C.C. Wang, K.Y. Chi, C.J. Chang, Heat transfer and friction characteristics of plain fin-and-tube heat exchangers, part II:  Correlation, International Journal of Heat and Mass Transfer 43 (2000) 2693-2700.\nGeometry Ranges:\n\tFin Pattern = plain\n\tNumber of Columns = 1 - 6\n\tTube Outside Diameter = 6.35 - 12.7 mm\n\tFin Pitch = 1.19 - 8.7 mm\n\tTube Horizontal Spacing = 17.7 - 31.75 mm\n\tTube Vertical Spacing = 12.4 - 27.5 mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.WangHwangLinWavyHerringboneFinHTC",
+    "value": "Wang Hwang Lin Wavy Herringbone Air Side Correlation\nReference:  C-C. Wang, Y-M Hwang, Y-T Lin, Empirical Correlations for Heat Transfer\nAnd Flow Friction Characteristics of Herringbone Wavy Fin and Tube Heat Exchangers,\nInternational Journal of Refrigeration 25 (2002) 673-680\nGeometry Ranges:\n\tFin Pattern = Wavy Herringbone\n\tNumber of Columns = 1 - 6\n\tTube Outside Diameter = 7.66 - 16.85 mm\n\tFin Pattern Depth = 0.3 - 1.8 mm\n\tTube Horizontal Spacing = 12 - 33 mm\n\tTube Vertical Spacing = 21-38 mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.WangLeeSlitFin",
+    "value": "Wang Lee Sheu: Fin-and-tube heat exchangers coefficient correlation\nReference: C.C. Wang, W.S. Lee, W.J. Sheu, A comparative study of compact enhanced fin-and-tube heat exchangers, International Journal of Heat and Mass Transfer 44 (2001) 3565-3573.\nGeometry Ranges:\n\tFin Pattern = Compact Slit Fin\n\tFin Pitch = 1.20 - 2.50 mm\n\tTube Outside Diameter = 7.52 - 16.4 mm\n\tLongitudinal Tube Pitch = 12.7 - 33.0 mm\n\tTransverse Tube Pitch = 20.0 - 38.0 mm\n\tFin Thickness = 0.11 - 0.2 mm\n\tNumber of Longitudinal tube rows = 1 - 6\n\tHeight of Slit = 0.99 - 2 mm\n\tBreadth of a Slit (in the direction of airflow) = 1 - 2.2 mm\n\tNumber of Slits in an Enhanced Zone = 3 - 7"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.WangTsaiLuWavySmoothLouveredFinHTC",
+    "value": "Wang Tsai Lu Wavy-Smooth Louvered Fin Air Side Correlation\nReference:  C-C. Wang, Y-M tsai, D-C Lu, Comprehensive Study of \nConvex-Louver and Wavy Fin-and-Tube Heat Exchangers,\nJournal of Thermophysics and Heat Transfer, vol 12, No 3, July-September 1998\nGeometry Ranges:\n\tFin Pattern = Smooth Wavy with Louvered fin (Convex-Louver)\n\tNumber of Columns = 1 - 4\n\tFin Pitch = 1.21 - 2.54 mm\n\tFin Thickness = 0.115 mm\n\tTube Outside Diameter = 8.54 mm\n\tTube Horizontal Spacing = 19.05 mm\n\tTube Vertical Spacing = 25.4 mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAWDPCorrelations.WetLinHwangWangHerringboneWavyADP",
+    "value": "Performance of the herringbone wavy fin under dehumidifying conditions \nYur-Tsai Lin, Young-Ming Hwang, Chi-Chuan Wang\nInternational Journal of Heat and Mass Transfer 45 (2002) 5035-5044"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAWDPCorrelations.WetWangLinLeeLouverADP",
+    "value": "Heat and momentum transfer for compact louvered fin-and-tube heat exchangers in wet conditions \nChi-Chuan Wang, Yur-Tsai Lin, Chi-Juan Lee\nInternational Journal of Heat and Mass Transfer 43 (2000) 3443 - 3452"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAWDPCorrelations.WetWangLinLeePlainADP",
+    "value": "Heat and momentum transfer for compact louvered fin-and-tube heat exchangers in wet conditions\nChi-Chuan Wang, Yur-Tsai Lin, Chi-Juan Lee\nInternational Journal of Heat and Mass Transfer 43 (2000) 3443-3452"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAWHTCCorrelations.WetLinHwangWangHerringboneWavyAHTC",
+    "value": "Performance of the herringbone wavy fin under dehumidifying conditions \nYur-Tsai Lin, Young-Ming Hwang, Chi-Chuan Wang\nInternational Journal of Heat and Mass Transfer 45 (2002) 5035-5044"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAWHTCCorrelations.WetWangLinLeeLouverAHTC",
+    "value": "Heat and momentum transfer for compact louvered fin-and-tube heat exchangers in wet conditions\nChi-Chuan Wang, Yur-Tsai Lin, Chi-Juan Lee\nInternational Journal of Heat and Mass Transfer 43 (2000) 3443-3452"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAWHTCCorrelations.WetWangLinLeePlainAHTC",
+    "value": "Heat and momentum transfer for compact louvered fin-and-tube heat exchangers in wet conditions\nChi-Chuan Wang, Yur-Tsai Lin, Chi-Juan Lee\nInternational Journal of Heat and Mass Transfer 43 (2000) 3443-3452"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLDPCorrelations.BhattiShahTFRLDP",
+    "value": "Reference: Bhatti, M.S., and R.K. Shah. 1987. Turbulent and transition flow convective heat transfer in ducts. In Kacak, S., R.K. Shah, and W. Aung (eds.). Handbook of Single Phase Heat Transfer. New York: John Wiley."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLDPCorrelations.BlasiusTypeRLDP",
+    "value": "F.P. Incropera and D.P. DeWitt, Introduction to heat transfer. (3rd ed.),, John Wiley & Sons, New York (1996)."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLDPCorrelations.GotoEtAlHerringbone2001RLDP",
+    "value": "Ref.1 Prediction of condensation pressure drop inside herringbone microfin tubes by Hasan M.M. Afroz a, Akio Miyara b,* a Department of Mechanical Engineering, Dhaka University of Engineering & Technology, Gazipur 1700, Bangladesh\n    b Department of Mechanical Engineering, Saga University, 1 Honjomachi, Saga-shi, 840-8502, Japan\n\n Goto, M., Inoue, N., Ishiwatari, N., 2001. Condensation and\nevaporation heat transfer of R410A inside internally grooved\ntubes. Int. J. Refrigeration 24, 628e638."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLDPCorrelations.CarnavosMicrofinRLDP",
+    "value": "Heat Transfer Performance of Internally Finned Tubes in Turbulent Flow\nT. C. Carnavos\nFluid: Hot Water"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLDPCorrelations.ChurchillRLDP",
+    "value": "Reference: Churchill, S.W., 1977, Frictional equation spans all fluid flow regimes, Chem. Eng. 84, 91-92."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLDPCorrelations.SchalgerBerglesMicrofinTFRLDP",
+    "value": "Schlager Pate Bergles R22 in horizontal micro-fin tubes coefficient correlation\nReference: L.M. Schlager, M.B. Pate and A.E. Bergles, Heat transfer and pressure drop during evaporation and condensation of R22 in horizontal micro-fin tubes, International Journal of Refrigeration (1989) 0140-7007\nA correction factor of 1.9 (median value picked from the paper) is applied to Gnielinski correlation for smooth tubes"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLDPCorrelations.SwameeJainTFRLDP",
+    "value": "Swamee, P.K.; Jain, A.K. (1976). \"Explicit equations for pipe-flow problems\". Journal of the Hydraulics Division, ASCE 102 (5): 657-664."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLHTCCorrelations.CarnavosMicrofinRLHTC",
+    "value": "Heat Transfer Performance of Internally Finned Tubes in Turbulent Flow\nT. C. Carnavos\nFluid: Hot Water"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLHTCCorrelations.DittusBoelterTurbulentRLHTC",
+    "value": "Dittus-Boelter Single-Phase Heat Transfer Coefficient Correlation\nReference:  F.W. Dittus, L.M.K. Boelter, Heat Transfer in Automobile Radiators of the Tubular Type, International Communications in Heat and Mass Transfer 12 (1) (1985) 3-22.  Originally published in the University of California Publications in Engineering 2 (13) (1930) 443-461.\nCorrelation for heat transfer coefficient originally developed for water flowing through tubes.\n\nApplication Range: (Correlation tested for gases in this range)\nTube diameter: 0.5 - 6 inches\nTemperature: 60 - 1400 F\nPressure: 1.5 - 190 psia\nMass Flux: 0.2 - 6.6 lb/ft^2-s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLHTCCorrelations.ARI410SmoothTubeRLHTC",
+    "value": "Based on ARI-410 Standard Figure - 17. This page contains equations and also a plot\n\n1. ARI Standard 410-2001 with Addendum 1, Forced-Circulation Air-Heating and Air-Cooling Coils.\nARI STANDARD 410-2001 WITH ADDENDUM 2"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLHTCCorrelations.DittusBoelterRLHTC",
+    "value": "Dittus-Boelter Single-Phase Heat Transfer Coefficient Correlation\nReference:  F.W. Dittus, L.M.K. Boelter, Heat Transfer in Automobile Radiators of the Tubular Type, International Communications in Heat and Mass Transfer 12 (1) (1985) 3-22.  Originally published in the University of California Publications in Engineering 2 (13) (1930) 443-461.\nCorrelation for heat transfer coefficient originally developed for water flowing through tubes.\n\nApplication Range: (Correlation tested for gases in this range)\nTube diameter: 0.5 - 6 inches\nTemperature: 60 - 1400 F\nPressure: 1.5 - 190 psia\nMass Flux: 0.2 - 6.6 lb/ft^2-s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLHTCCorrelations.GnielinskiRLHTC",
+    "value": "Gnielinski Single-Phase Heat Transfer Coefficient Correlation\nReference:  V. Gnielinski, New equations for heat and mass transfer in turbulent pipe and channel flow, International Chemical Engineering 16 (2) (1976) 359-368."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLHTCCorrelations.PetukhovPopovRLHTC",
+    "value": "Petukhov-Popov Correlation Single-Phase Heat Transfer Coefficient Correlation\nReference:  Table 7.6 Correlations for transition and turbulent flows in circular and noncircular smooth tubes, Eqn. 7.74,  Fundamentals of Heat Exchanger Design, by Shah and Sekulic,\nJ Wiley\nAccuracy: +/- 5%\nApplicability:\n4000 <= Re <= 5 x 10^6\n0.5 <= Pr <= 10^6"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLHTCCorrelations.SchalgerBerglesMicrofinTFRLHTC",
+    "value": "Schlager Pate Bergles R22 in horizontal micro-fin tubes coefficient correlation\nReference: L.M. Schlager, M.B. Pate and A.E. Bergles, Heat transfer and pressure drop during evaporation and condensation of R22 in horizontal micro-fin tubes, International Journal of Refrigeration (1989) 0140-7007\nA correction factor of 1.9 (median value picked from the paper) is applied to Gnielinski correlation for smooth tubes"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.FriedelRTPDP",
+    "value": "Reference: Friedel, L., 1979. Improved friction pressure drop correlations for horizontal and vertical two phase pipe flow. Paper E2. European Two Phase Flow Group Meeting, Ispra, Italy"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.ChengThomeTPCO2EvapFlowPatternMap2008DP",
+    "value": "New prediction methods for CO2 evaporation inside tubes:Part I \nA two-phase flow pattern map and a flow pattern based phenomenological model\nfor two-phase flow frictional pressure drops\nLixin Cheng, Gherhardt Ribatski, Jesus Moreno Quiben, John R. Thome\nInternational Journal of Heat and Mass Transfer 51 (2008) 111-124\nApplicability:\nTube diameter: 0.6 to 10mm\nMass velocity: 50 to 1500 kg/m2s\nHeat flux: 1.8 to 46 kW/m2\nTSat: -28 to 25C (Reduced pressure: 0.21 to 0.87)"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.GronnerudRTPDP",
+    "value": "Reference: Gronnerud R. Investigation of liquid hold-up, flow-resistance and heat transfer in circulation type evaporators, part IV: two-phase flow resistance in boiling refrigerants. Annexe 1972-1, Bull. de l'Inst. du Froid, 1979."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.HomogeneousRTPDP",
+    "value": "Muller-Steinhagen & Heck Correlation for evaporation pressure drop\n\nReference:  M. B. Ould Didi, N. Kattan, J. R. Thome, 2002, Prediction of two-phase pressure gradients of refrigerants in horizontal tubes, International Journal of Refrigeration 25 (2002) pp 935-947.\nThe correlation was originally published in  Reference [8] in the above paper. The above paper compares several correlations against experimental data obtained from several sources.\n\nRanges:\n\tRefrigerants - R134a, R123, R402A, R404A, R502\n\tMass Flux = 100 - 500 kg/(m^2 s)\n\tQuality = 0.04 to 1.0"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.JungRadermacherRTPDP",
+    "value": "Jung-Radermacher Two-Phase Pressure Drop Correlation\n\nReference:  D.S. Jung, R. Radermacher, Prediction of pressure drop during horizontal annular flow boiling of pure and mixed refrigerants, International Journal of Heat and Mass Transfer 32 (12) (1989) 2435-2446.\nCorrelation developed for pressure drop of pure and mixed refrigerants during evaporation.\n\nRanges:\n\tMass Flow Rate = 16 - 46 g/s\n\tMass Flux = 230 - 720 kg/(m^2 s)\n\tHeat Flux = 10 - 45 kW/m^2\n\tQuality = up to 0.95"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.Shah2016MicroMiniTFCondHTC",
+    "value": "Mirza M. Shah, A correlation for heat transfer during condensation in horizontal mini/micro channels, International Journal of Refrigeration (2016).\nThis paper is a revised version of Shah(2009) and Shah(2013), the main difference is that the Shah(1979) is replaced by Cavallini et al(2006). And the boundaries of Regime I II III are redefined using Jg and We number.\nData range covered in the experiment \nFor condensation heat transfer\nRefrigerants: water, CO2, halocarbon refrigerants and hydrocarbons.\nChannel type: single and multi-channels of many shapes\nTube ID: ID<= 3mm\nAspect ratio: 0.14 to 13.9\nReduced pressure: 0.0055 to 0.94\nMass flux: 20 to 1400 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.Shah2016UnifiedTFEvapHTC",
+    "value": "Shah, Mirza M. \"Unified correlation for heat transfer during boiling in plain mini/micro and conventional channels.\" International Journal of Refrigeration (2016).\n\nData range covered in the experiment \nFor evaporation\n30 fluids\nTube ID: 0.38<=ID<=27.1mm\nReduced pressure: 0.0046 to 0.787\nMass flux: 15 to 2437 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.CavalliniEtAl2006MiniChannelCondHTC",
+    "value": "Cavallini, A., Doretti, L., Matkovic, M., and Rossetto, L. 2006.Update on Condensation Heat Transfer and Pressure Drop inside Minichannels.Heat Transfer Engineering 27(4):74–87.\n\nFor condensation\nFluids: R410A, R134a, R236ea, R22, R11, R12, R404A, R407C, R123\n20C <= Tsat <= 72C\n0.4mm <= Dh <= 3mm\n70 kg/m^2*s <= G <= 1400 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.CavalliniEtAl2006MiniChannelCondRTPDP",
+    "value": "Cavallini, A., Doretti, L., Matkovic, M., and Rossetto, L. 2006.Update on Condensation Heat Transfer and Pressure Drop inside Minichannels.Heat Transfer Engineering 27(4):74–87.\n\nFor condensation\nFluids: R410A, R134a, R236ea, R22, R11, R12, R404A, R407C, R123\n20C <= Tsat <= 72C\n0.4mm <= Dh <= 3mm\n70 kg/m^2*s <= G <= 1400 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.Shah2016UnifiedMCEvapHTC",
+    "value": "Shah, Mirza M. \"Unified correlation for heat transfer during boiling in plain mini/micro and conventional channels.\" International Journal of Refrigeration (2016).\n\nData range covered in the experiment \nFor evaporation\n30 fluids\nTube ID: 0.38<=ID<=27.1mm\nReduced pressure: 0.0046 to 0.787\nMass flux: 15 to 2437 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.CavalliniEtAl2006MiniChannelCondHTC",
+    "value": "Cavallini, A., Doretti, L., Matkovic, M., and Rossetto, L. 2006.Update on Condensation Heat Transfer and Pressure Drop inside Minichannels.Heat Transfer Engineering 27(4):74–87.\n\nFor condensation\nFluids: R410A, R134a, R236ea, R22, R11, R12, R404A, R407C, R123\n20C <= Tsat <= 72C\n0.4mm <= Dh <= 3mm\n70 kg/m^2*s <= G <= 1400 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.CavalliniEtAl2006MiniChannelCondRTPDP",
+    "value": "Cavallini, A., Doretti, L., Matkovic, M., and Rossetto, L. 2006.Update on Condensation Heat Transfer and Pressure Drop inside Minichannels.Heat Transfer Engineering 27(4):74–87.\n\nFor condensation\nFluids: R410A, R134a, R236ea, R22, R11, R12, R404A, R407C, R123\n20C <= Tsat <= 72C\n0.4mm <= Dh <= 3mm\n70 kg/m^2*s <= G <= 1400 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.Shah2016AllChannelsTFCondHTC",
+    "value": "Reference: Mirza M. Shah,Comprehensive correlations for heat transfer during condensation in conventional and mini/micro channels in all orientations, International Journal of Refrigeration 67(2016)22-41. \nThis paper develops two comprehensive correlations, this one corresponds to comprehensive correlation #1 described in section 4.1\nApplication Range:\nHeat transfer mode: Condensation\nRefrigerants: 33 fluids including water, CO2, halocarbon refrigerants and hydrocarbons.\nChannel type: single and multi-channels of many shapes\nTube ID: 0.1-49 mm\nReduced pressure: 0.0008 to 0.946\nMass flux: 1.1 to 1400 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.SaitohEtAl2007R134aTFEvapHTC",
+    "value": "Reference: S.Saitoh, H.Daiguji, E. Hihara, Boiling Heat transfer of R134a Flowing in Horizontal Small-diameter tubes, Proceedings of the ASME/JSME Thermal Engineering Summer Heat Transfer Conference, Vol.3, July 2007\nApplication Range:\nRefrigerant: R134a\nHeat transfer model: Evaporation\nTube ID: 0.5-11mm\nHeat flux: 5-39 kW/m^2\nMass flux: 100-450 kg/m\nSaturation pressure: 0.49-3.7 MPa\nSaturation temperature: 288K -370K"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.Shah2016MicroMiniMCCondHTC",
+    "value": "Mirza M. Shah, A correlation for heat transfer during condensation in horizontal mini/micro channels, International Journal of Refrigeration (2016).\nThis paper is a revised version of Shah(2009) and Shah(2013), the main difference is that the Shah(1979) is replaced by Cavallini et al(2006). And the boundaries of Regime I II III are redefined using Jg and We number.\nData range covered in the experiment \nFor condensation heat transfer\nRefrigerants: water, CO2, halocarbon refrigerants and hydrocarbons.\nChannel type: single and multi-channels of many shapes\nTube ID: ID<= 3mm\nAspect ratio: 0.14 to 13.9\nReduced pressure: 0.0055 to 0.94\nMass flux: 20 to 1400 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.KoyamaMicroFinCond2006DP",
+    "value": "Experimental Study on Condensation of Pure Refrigerants in Horizontal Micro-Fin Tube-Proposal of Correlations for Heat Transfer Coefficient and Frictional Pressure Drop\nAuthor: Shigeru Koyama, Ryuichiro Yonemoto\nFin height: 0.16-0.24 mm\nApex angle: 27-58 degree\nSpiral angle: 7-30 degree\nFin count: 50-85 \nPitch: 0.25-0.71 mm\nMass Flux: 100-500 kg/m2s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.KoyamaMicroFinCO2Cond2008DP",
+    "value": "Reference: An Experimental Study on Condensation of CO2 in a Horizontal Micro-fin Tube\nAuthor: Shigeru KOYAMA, Ryuichiro YONEMOTO\nHeat Flux: 10-20 kW/m2\nMass Flux: 200-350 kg/m2s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.LockhartMartinelliRTPDP",
+    "value": "Lockhart-Martinelli Two-Phase Pressure Drop Correlation\n\nReference:  R.W. Lockhart, R.C. Martinelli, Proposed Correlation of Data for Isothermal Two-Phase, Two-Component Flow in Pipes, Chemical Engineering Progress 45 (1) (1949) 39-48.\n\nThe correlation was developed using data from the simultaneous flow of air and liquids.  It was developed using data corresponding to the following parameters:\n\tFluids = benzene, kerosene, water and various oils\n\tTube Diameter = 0.0586 - 1.017 in (1.488 - 25.832 mm)"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.MullerSteinhagenHeckRTPDP",
+    "value": "Muller-Steinhagen & Heck Correlation for evaporation pressure drop\nReference:  M. B. Ould Didi, N. Kattan, J. R. Thome, 2002, Prediction of two-phase pressure gradients of refrigerants in horizontal tubes, International Journal of Refrigeration 25 (2002) pp 935-947.\nThe correlation was originally published in  Reference [8] in the above paper. The above paper compares several correlations against experimental data obtained from several sources.\nRanges:\n\tRefrigerants  R134a, R123, R402A, R404A, R502\n\tMass Flux = 100 - 500 kg/(m^2 s)\n\tQuality = 0.04 to 1.0"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.MishimaHibikiDP",
+    "value": "Reference: \nK. Mishima & T. Hibiki., Some Characteristics of Air-Water Two-Phase Flow in Small Diameter Vertical Tubes. Int. J. Multiphase Flow Vol 22, No4, 1996\nTube ID: 1.09-4.9mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.SchalgerBerglesMicrofinTFRTPDP",
+    "value": "Schlager Pate Bergles R22 in horizontal micro-fin tubes coefficient correlation\n\nReference: L.M. Schlager, M.B. Pate and A.E. Bergles, Heat transfer and pressure drop during evaporation and condensation of R22 in horizontal micro-fin tubes, International Journal of Refrigeration (1989) 0140-7007\nA correction factor of 1.9 (median value picked from the paper) is applied to Jung-Radermacher correlation for smooth tubes"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.ThomeTPEvapFlowPatternMap2005DP",
+    "value": "Investigation of flow boiling in horizontal tubes: Part I A new diabatic two-phase flow pattern map Leszek Wojtan, Thierry Ursenbacher, John R. Thome *\nLaboratory of Heat and Mass Transfer (LTCM), Faculty of Engineering Science (STI),\nEcole Polytechnique Federale de Lausanne (EPFL), CH-1015 Lausanne, Switzerland\t\nInternational Journal of Heat and Mass Transfer 48 (2005) 2955-2969"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.WielandCuprofinC2ADCondDP",
+    "value": "Manufacturer provided correlations for Wieland Cuprofin Enhanced Tubes for Tube-Fin Condensation applications"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.WielandCuprofinC2ADEvapDP",
+    "value": "Manufacturer provided correlations for Wieland Cuprofin Enhanced Tubes for Tube-Fin Condensation applications"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.WielandCuprofinC3ADCondDP",
+    "value": "Manufacturer provided correlations for Wieland Cuprofin Enhanced Tubes for Tube-Fin Condensation applications"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.WielandCuprofinC3ADEvapDP",
+    "value": "Manufacturer provided correlations for Wieland Cuprofin Enhanced Tubes for Tube-Fin Condensation applications"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.WielandCuprofinS2ADCondDP",
+    "value": "Manufacturer provided correlations for Wieland Cuprofin Enhanced Tubes for All-round applications"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.WielandCuprofinS2ADEvapDP",
+    "value": "Manufacturer provided correlations for Wieland Cuprofin Enhanced Tubes for All-round applications"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations-GronnerudRTPDP",
+    "value": "Gronnerud Correlation for evaporation pressure drop\nReference:  M. B. Ould Didi, N. Kattan, J. R. Thome, 2002, Prediction of two-phase pressure gradients of refrigerants in horizontal tubes, International Journal of Refrigeration 25 (2002) pp 935-947.\nThe correlation was originally published in  Reference [4] in the above paper. The above paper compares several correlations against experimental data obtained from several sources.\nRanges:\n\tRefrigerants  R134a, R123, R402A, R404A, R502\n\tMass Flux = 100 - 500 kg/(m^2 s)\n\tQuality = 0.04 to 1.0"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.CavalliniCondensation",
+    "value": "Reference:  Cavallini, Censi, Del Col, Doretti, Longo, Rossetto, Zilio; Condensation inside and outside smooth and enhanced tubes - a review of recent research International Journal of Refrigeration 26 (2003) 373-392\nActual correlation taken from Cavallini A, Censi G, Del Col D, Doretti L, Longo GA, Rossetto L. Intube condensation of halogenated refrigerants. [paper H-1718] ASHRAE Trans., 2002, 108, (pt. 1).\nD > 3mm\nApplication Range:\n\nRefrigerants: R22, R134a, R125, R32, R236ea, R407C, R410A (halogenated refrigerants)\nSaturation temperature: 30 - 50 C\nMass flux: 100 - 750 kg/m^2-s\nReduced pressure < 0.75\nDensity ratio rho_l/rho_g > 4"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.KellyEtAlNH3SmoothEvapHTC2002",
+    "value": "All references\n(1) ASHRAE Report 866 \n(2) Kelly, J. E., S. J. Eckels, and D. L. Fenton. “An Experimental Investigation of In-Tube Evaporation of Pure Ammonia in a Smooth and a Microfin Tube, Part 1 – Heat Transfer (RP-866).” Int’l Journal of Heating, Ventilating, Air-Conditioning and Refrigeration Research, Vol. 8, No. 3, July 2002.\n(3) Kelly, J. E., S. J. Eckels, and D. L. Fenton. “An Experimental Investigation of In-Tube Evaporation of Pure Ammonia in a Smooth and a Microfin Tube, Part 2 – Pressure Drop (RP-866).” Int’l Journal of Heating, Ventilating, Air-Conditioning and Refrigeration Research, Vol. 8, No. 3, July 2002.\n(4) Lixin Cheng a, Gherhardt Ribatski a,b, Jesu´ s Moreno Quibe´n a, John R. Thome a,\"New prediction methods for CO2 evaporation inside tubes: Part I – A two-phase flow pattern map and a flow pattern based phenomenological model for two-phase flow frictional pressure drops.\",International Journal of Heat and Mass Transfer 51 (2008) 111–124.\n\nTest conditions\nMass Flux: from 9 to 61 kg/m2*s\nHeat Flux: 820 W/m2, 2710 W/m2, 5430 W/m2 \nSaturation temperature: from -20 to 5 degree C\nDimension of Smooth Tube\nInside Diameter: 10.92mm\nOutside Diameter: 12.7mm\nWall Thickness: 0.89mm\nTube lenth:3.04m"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.ChengThomeTPCO2EvapFlowPatternMap2008HTC",
+    "value": "New prediction methods for CO2 evaporation inside tubes: Part II\nAn updated general flow boiling heat transfer model based on flow patterns\nLixin Cheng, Gherhardt Ribatski, John R. Thome\nInternational Journal of Heat and Mass Transfer 51 (2008) 125-135\nApplicability:\nTube diameter: 0.6 to 10mm\nMass velocity: 50 to 1500 kg/m2s\nHeat flux: 1.8 to 46 kW/m2\nTSat: -28 to 25C (Reduced pressure: 0.21 to 0.87)"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.ChengThomeTPCO2EvapFlowPatternMap2006HTC",
+    "value": "New flow boiling heat transfer model and flow pattern map for carbon dioxide evaporating inside horizontal tubes Lixin Cheng a,b, Gherhardt Ribatski a, Leszek Wojtan a, John R. Thome\nLaboratory of Heat and Mass Transfer (LTCM), Faculty of Engineering Science (STI), E cole Polytechnique Federale de Lausanne (EPFL),\nInternational Journal of Heat and Mass Transfer 49 (2006) 4082-4094"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.BasuEtAl2011MicroTubeTFEvapHTC",
+    "value": "Basu, S., Ndao, S., Michna, G., Peles, Y., Jensen, M. “Flow Boiling of R134a in Circular\nMicrotubes—Part I: Study of Heat Transfer Characteristics”, Journal of Heat Transfer Vol 133(5)\nApplication range:\nSaturation boiling\nRefrigerant: R134a\nTube ID: 0.5mm-1.6mm\nTsat = 25C-45 C\nG = 300-1500 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.Dobson",
+    "value": "Dobon Two-Phase Heat Transfer Coefficient Correlation\nReference:  M.K. Dobson, J.C. Chato, Condensation in Smooth Horizontal Tubes, Transactions of the ASME, Journal of Heat Transfer 120 (1998) 193-213.\nThe correlation was developed to predict heat transfer coefficients during condensation.  It was verified using data with the following parameters:\n\tFluids = R-12, R-22, R-134a and near-azeotropic blends of R-32/R-125\n\tTube Diameter = 3.14 - 7.04 mm\n\tReduced Pressure = 0.21 - 0.57\n\tSaturation Temperature = 35 - 60 C\n\tQuality = 10 - 90 %\n\tMass Flux = 25 - 800 kg/(m^2 s)\n\tHeat Flux = 5 - 15 kW/m^2"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.FangCO2Evap",
+    "value": "Xiande Fang, A new correlation of flow boiling heat transfer coefficients for carbondioxide, 2013, Int. J of Heat and Mass Transfer\n\nQuality: 0.0046-0.998. Most data points: [0.05-0.95], a correction of x is made based on [0.05-0.95]\nID: 0.529-7.75 [mm]\nMass flux: 97.5-1400 [kg/m^2s], most points: [100-800]\nHeat flux: 3.93-40 [kW/m^2], most points: [4-30]\nPr, 0.14-0.91"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.GungorWinterton",
+    "value": "Gungor Winterton Two-Phase Heat Transfer Coefficient Correlation\nReference:  K.E. Gungor, R.H.S. Winterton, Simplified General Correlation for Saturated Flow Boiling and Comparisons of Correlations with Data, Transactions of the Institute of Chemical Engineers, Chemical Engineering Research and Design 65 (1987) 148-156.\nThe correlation was developed to predict saturated boiling heat transfer coefficients.  It was verified using 4,202 data points with the following parameters:\n\tFluids = water, R-11, R-12, R-13, R-22, R-113, R-114, ethanol, ethylene glycol and n-butanol"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.JungRadermacher",
+    "value": "Jung-Radermacher Two-Phase Heat Transfer Coefficient Correlation\nReference:  D.S. Jung, R. Radermacher, A study of flow boiling heat transfer with refrigerant mixtures, International Journal of Heat and Mass Transfer 32 (9) (1989) 1751-1764.\nCorrelation developed for heat transfer coefficients of pure refrigerants and azeotropic refrigerant mixtures during evaporation.\nRanges:\n\tMass Flow Rate = 16 - 46 g/s\n\tMass Flux = 250 - 720 kg/(m^2 s)\n\tHeat Flux = 10 - 45 kW/m^2\n\tQuality = up to 0.95"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.Kandlikar",
+    "value": "Kandlikar Two-Phase Heat Transfer Coefficient Correlation\nReference:  S.G. Kandlikar, A General Correlation for Saturated Two-Phase Flow Boiling Heat Transfer Inside Horizontal and Vertical Tubes, Transactions of the ASME, Journal of Heat Transfer 112 (1990) 219-228.\nThe correlation was verified with 5,246 data points for 10 refrigerants (water, R-11, R-12, R13-B1, R-22, R-113, R-114, R-152a, nitrogen and neon).  The mean deviation was 18.8%."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.KoyamaMicroFinCond2006HTC",
+    "value": "Experimental Study on Condensation of Pure Refrigerants in Horizontal Micro-Fin Tube-Proposal of Correlations for Heat Transfer Coefficient and Frictional Pressure Drop\nAuthor: Shigeru Koyama, Ryuichiro Yonemoto\nFin height: 0.16-0.24 mm\nApex angle: 27-58 degree\nSpiral angle: 7-30 degree\nFin count: 50-85 \nPitch: 0.25-0.71 mm\nMass Flux: 100-500 kg/m2s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.KoyamaMicroFinCO2Cond2008HTC",
+    "value": "Reference: An Experimental Study on Condensation of CO2 in a Horizontal Micro-fin Tube\nAuthor: Shigeru KOYAMA, Ryuichiro YONEMOTO\nHeat Flux: 10-20 kW/m2\nMass Flux: 200-350 kg/m2s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.SchalgerBerglesMicrofinTFRTPHTC",
+    "value": "Schlager Pate Bergles R22 in horizontal micro-fin tubes coefficient correlation\n\nReference: L.M. Schlager, M.B. Pate and A.E. Bergles, Heat transfer and pressure drop during evaporation and condensation of R22 in horizontal micro-fin tubes, International Journal of Refrigeration (1989) 0140-7007\nA correction factor of 1.9 (median value picked from the paper) is applied to Jung-Radermacher correlation for smooth tubes"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.ShahCond",
+    "value": "Shah's Condensation Condensation Heat Transfer Coefficient Correlation\n\nReference:  M.M. Shah, A General Correlation for Heat Transfer During Film Condensation Inside Pipes, International Journal of Heat and Mass Transfer 22 (1979) 547-556.\n\nThe correlation was verified using 474 data points with the following parameters:\n\tFluids = water, R-11, R-12, R-22, R-113, methanol, ethanol, benzene, toluene and trichloroethylene\n\tTube Diameter = 7 - 40 mm\n\tReduced Pressure = 0.002 - 0.44\n\tSaturation Temperature = 21 - 310 C\n\tVapor Velocity = 3 - 300 m/s\n\tQuality = 0 - 1\n\tMass Flux = 10.8 - 210.5 kg/(m^2 s)\n\tHeat Flux = 158 - 1,893,000 W/m^2\n\tLiquid Reynolds Number = 100 - 63,000\n\tLiquid Prandtl Number = 1 - 13\nThe mean deviation was found to be 15.4%"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.ShahCond2009HTC",
+    "value": "Shah, M. M. (2009). An Improved and Extended General Correlation for Heat Transfer During Condensation in Plain Tubes. HVAC&R, 15(5), 889-914.\nFluids\tWater, R-11, R-12, R-22, R-32, R-113, R-123, R-125, R-134a, R-142b, R-404A, R-410A, R-502, R-507, isobutane, propylene, propane, ben¬zene, ethanol, methanol, toluene, and dowtherm 209\nTube diameter, mm\t2 to 49\nTube orientations\tHorizontal, vertical downwards, 15° downward\nReduced pressure\t0.0008 to 0.905\nG, kg/m2s\t4 to 820\nPrf\t1 to 18\nReLT\t68 to 84827\nReGT\t9534 to 523317\nx\t0.01 to 0.99\nZ\t0.005 to 20\nJg\t0.06 to 20"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.ShahCond2013HTC",
+    "value": "Shah, M. M. (2013).General Correlation For Heat Transfer During Condensation in Plain Tubes: Further Development and Verification. 2013 ASHRAE\nFluids: Water, R-11, R-12, R-22, R-32, R-113,\nR-123, R-125, R-134a, R-142b, R-404A,\nR-410A, R-502, R-507, isobutane, propylene,\npropane, benzene, ethanol, methanol,\ntoluene, Dowtherm 209, DME, CO2\nTube diameter, mm (in.)\n2 to 49 (0.079 to 1.93)\nTube orientations: Horizontal, vertical downwards, 15 degrees downwards\nReduced pressure: 0.0008 to 0.946\nG,kg/m2s (lb/ft2s) \t4 to 820 (0.82 to 168.1)\nPrf \t1 to 18\nReLT \t68 to 84827\nReGT \t9534 to 523317\nx \t0.01 to 0.99\nZ \t0.005 to 20\nJg \t0.06 to 20"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.ShahEvap",
+    "value": "Shah's Evaporation Heat Transfer Coefficient Correlation\n\nReference:  M.M. Shah, Chart Correlation for Saturated Boiling Heat Transfer: Equations and Further Study, ASHRAE Transactions 88 (1) (1982) 185-196.\n\nCorrelation developed to predict saturated boiling heat transfer coefficients in tubes and annuli.  Verified for 12 fluids with pressures up to a reduced pressure of 0.89."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.SteinerVDIAtlasEvapRTPHTC",
+    "value": "from VDI Atlas (1993). Chapter on flow boiling, Chapter Hbb, section 3.2 and 4.2\n* Also found in (though incorrect):\nAssessment of boiling heat transfer correlations in the modelling of fin and tube heat exchangers\nCascales et al IJR 30 (2007) 1004-1017"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.ThomeTPEvapFlowPatternMap2005HTC",
+    "value": "Investigation of flow boiling in horizontal tubes: Part II Development of a new heat transfer model for stratified-wavy,dryout and mist flow regimes\nLeszek Wojtan, Thierry Ursenbacher, John R. Thome\nLaboratory of Heat and Mass Transfer (LTCM), Faculty of Engineering Science (STI), Ecole Polytechnique Federale de Lausanne (EPFL), CH-1015 Lausanne, Switzerland \nInternational Journal of Heat and Mass Transfer 48 (2005) 2970-2985"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.Traviss",
+    "value": "Traviss, D.P., Rohsenow, W.M., Baron, A.B., 1973, \"Forced convection\ncondensation inside tubes: A heat transfer equation for condenser design\",\nASHRAE Transactions, Vol. 79, pp. 157-165."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.WielandCuprofinC2ADCondHTC",
+    "value": "Manufacturer provided correlations for Wieland Cuprofin Enhanced Tubes for Tube-Fin Condensation applications"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.WielandCuprofinC2ADEvapHTC",
+    "value": "Manufacturer provided correlations for Wieland Cuprofin Enhanced Tubes for Tube-Fin Condensation applications"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.WielandCuprofinC3ADCondHTC",
+    "value": "Manufacturer provided correlations for Wieland Cuprofin Enhanced Tubes for Tube-Fin Condensation applications"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.WielandCuprofinC3ADEvapHTC",
+    "value": "Manufacturer provided correlations for Wieland Cuprofin Enhanced Tubes for Tube-Fin Condensation applications"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.WielandCuprofinS2ADCondHTC",
+    "value": "Manufacturer provided correlations for Wieland Cuprofin Enhanced Tubes for All-round applications"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.WielandCuprofinS2ADEvapHTC",
+    "value": "Manufacturer provided correlations for Wieland Cuprofin Enhanced Tubes for All-round applications"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVDPCorrelations.GotoEtAlHerringbone2001RVDP",
+    "value": "Ref.1 Prediction of condensation pressure drop inside herringbone microfin tubes by Hasan M.M. Afroz a, Akio Miyara b,* a Department of Mechanical Engineering, Dhaka University of Engineering & Technology, Gazipur 1700, Bangladesh\n    b Department of Mechanical Engineering, Saga University, 1 Honjomachi, Saga-shi, 840-8502, Japan\n\n Goto, M., Inoue, N., Ishiwatari, N., 2001. Condensation and\nevaporation heat transfer of R410A inside internally grooved\ntubes. Int. J. Refrigeration 24, 628e638."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVDPCorrelations.CarnavosMicrofinRVDP",
+    "value": "Heat Transfer Performance of Internally Finned Tubes in Turbulent Flow\nT. C. Carnavos\nFluid: Hot Water"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVDPCorrelations.BlasiusTypeRVDP",
+    "value": "F.P. Incropera and D.P. DeWitt, Introduction to heat transfer. (3rd ed.),, John Wiley & Sons, New York (1996)."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVDPCorrelations.ChurchillRVDP",
+    "value": "Reference: Churchill, S.W., 1977, Frictional equation spans all fluid flow regimes, Chem. Eng. 84, 91-92."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVDPCorrelations.SchalgerBerglesMicrofinTFRVDP",
+    "value": "Schlager Pate Bergles R22 in horizontal micro-fin tubes coefficient correlation\nReference: L.M. Schlager, M.B. Pate and A.E. Bergles, Heat transfer and pressure drop during evaporation and condensation of R22 in horizontal micro-fin tubes, International Journal of Refrigeration (1989) 0140-7007\nA correction factor of 1.9 (median value picked from the paper) is applied to Gnielinski correlation for smooth tubes"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVHTCCorrelations.CarnavosMicrofinRVHTC",
+    "value": "Heat Transfer Performance of Internally Finned Tubes in Turbulent Flow\nT. C. Carnavos\nFluid: Hot Water"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVHTCCorrelations.DittusBoelterTurbulentRVHTC",
+    "value": "Dittus-Boelter Single-Phase Heat Transfer Coefficient Correlation\nReference:  F.W. Dittus, L.M.K. Boelter, Heat Transfer in Automobile Radiators of the Tubular Type, International Communications in Heat and Mass Transfer 12 (1) (1985) 3-22.  Originally published in the University of California Publications in Engineering 2 (13) (1930) 443-461.\nCorrelation for heat transfer coefficient originally developed for water flowing through tubes.\n\nApplication Range: (Correlation tested for gases in this range)\nTube diameter: 0.5 - 6 inches\nTemperature: 60 - 1400 F\nPressure: 1.5 - 190 psia\nMass Flux: 0.2 - 6.6 lb/ft^2-s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVHTCCorrelations.BaskovKuraevaProtopopovCO2HTC",
+    "value": "Baskov's Heat Transfer Coefficient Correlation\nReference:  Baskov, Heat transfer with the turbulent flow of a liquid under super critical pressure in tubes under cooling conditions, High Temp 15(1) (1977) 81-86.\nThe correlation was verified using  data points with the following parameters:\n\tFluids = CO2"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVHTCCorrelations.DittusBoelterRVHTC",
+    "value": "Dittus-Boelter Single-Phase Heat Transfer Coefficient Correlation\nReference:  F.W. Dittus, L.M.K. Boelter, Heat Transfer in Automobile Radiators of the Tubular Type, International Communications in Heat and Mass Transfer 12 (1) (1985) 3-22.  Originally published in the University of California Publications in Engineering 2 (13) (1930) 443-461.\nCorrelation for heat transfer coefficient originally developed for water flowing through tubes.\n\nApplication Range: (Correlation tested for gases in this range)\nTube diameter: 0.5 - 6 inches\nTemperature: 60 - 1400 F\nPressure: 1.5 - 190 psia\nMass Flux: 0.2 - 6.6 lb/ft^2-s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVHTCCorrelations.FangCO2HTC",
+    "value": "Fang's Heat Transfer Coefficient Correlation\n\nReference:  Modeling and analysis of gas coolers, ASHARE transactions 107(1) (2001b) 4-13.\nThe correlation was verified using  data points with the following parameters:\n\tFluids = CO2\n\tWall Reynolds Number = 3000 - 106\n\tHeat Flux / Mass flow rate = -350 ~ 0"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVHTCCorrelations.GnielinskiRVHTC",
+    "value": "Gnielinski Single-Phase Heat Transfer Coefficient Correlation\n\nReference:  V. Gnielinski, New equations for heat and mass transfer in turbulent pipe and channel flow, International Chemical Engineering 16 (2) (1976) 359-368."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVHTCCorrelations.HuaiCO2HTC",
+    "value": "Huai, X., Koyama, S., 2007. Heat transfer characteristics of\nsupercritical CO2 flow in small-channeled structures. \nExp. Heat Transf. 20, 19-33.\n\nThe applicable ranges of the equation are\n7.4 < p < 8.5 MPa, \n22C < Tbulk< 53C,\n113.7<G < 418.6 kg/m2s1\n0.8<q<9 kW/m2\ninner diameter about 1.31mm under cooling conditions"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVHTCCorrelations.KrasnoshchekovKuraevaProtopopovCO2HTC",
+    "value": "Krasnoshchekov's Heat Transfer Coefficient Correlation\nReference:  Krasnoshchekov, Local heat transfer of carbon dioxide under supercritical pressure under cooling conditions, Telofiz. Vys. Temp. 7(5)  (1969) 922-930.\nThe correlation was verified using 474 data points with the following parameters:\n\tFluids = CO2\n\tBulk Reynolds Number = 9 x 104 - 3.2 x 105 \n\tWall Reynolds Number = 6.3 x 104 - 2.9 x 105"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVHTCCorrelations.LiaoZhaoCO2HTC",
+    "value": "Liao's Heat Transfer Coefficient Correlation\n\nReference:  Measurement of heat transfer coefficient from supercritical carbon dioxide flowing in horizontal mini/micro channels, Journal of heat transfer 124(3) (2002) 413-420.\nThe correlation was verified using data points with the following parameters:\n\tFluids = CO2\n\tTube Diameter = 0.50, 0.70, 1.10, 1.40, 1.55, 2.16 mm\n\tPressure = 7.4 - 12 MPa\n\tTemperature = 20 - 100 -C\n\tVapor Velocity = 3.333 x 10-4 - 3.333 x 10-3 m/s\n\tLiquid Reynolds Number = Re < 105"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVHTCCorrelations.PetrovPopovCO2HTC",
+    "value": "Petrov's Heat Transfer Coefficient Correlation\n\nReference:  Petrov, Heat transfer and resistance of carbon dioxide being cooled in the super critical region, Thermo Engineering 32(3) (1985) 131-134.\nThe correlation was verified using   data points with the following parameters:\n\tFluids = CO2\n\tHeat Flux / Mass flow rate = -350 ~ - 29\n\tBulk Reynolds Number = 3.1 x 104 - 8x105 \n\tWall Reynolds Number = 1.4 x 104 - 7.9x105"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVHTCCorrelations.PitlaCO2HTC",
+    "value": "Pitla's Heat Transfer Coefficient Correlation\n\nReference:  Pitla, New Correlation to predict the heat transfer coefficient during in-tube cooling of turbulent supercritical CO2, International Journal of heating , ventilating, air-conditioning, and refrigerating research  4(3) (1998) 281-301.\nThe correlation was verified using   data points with the following parameters:\n\tFluids = CO2"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVHTCCorrelations.SchalgerBerglesMicrofinTFRVHTC",
+    "value": "Schlager Pate Bergles R22 in horizontal micro-fin tubes coefficient correlation\nReference: L.M. Schlager, M.B. Pate and A.E. Bergles, Heat transfer and pressure drop during evaporation and condensation of R22 in horizontal micro-fin tubes, International Journal of Refrigeration (1989) 0140-7007\nA correction factor of 1.9 (median value picked from the paper) is applied to Gnielinski correlation for smooth tubes"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVHTCCorrelations.SonParkCO2HTC",
+    "value": "Son, C.H., Park, S.J., 2006. An experimental study on heat\ntransfer and pressure drop characteristics of carbon dioxide\nduring gas cooling process in a horizontal tube. Int. J. Refrig.\n29, 539-546.\nTube diameter: 7.75mm\nInlet temperature: 90-100 C\nInlet pressure: 7.5-10 MPa\nMass flux: 200-400"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVHTCCorrelations.YoonKimSuperCritCO2HTC",
+    "value": "Yoon correlation to predict the near-critical heat transfer coefficient\nReference:  S.H. Yoon, J.H. Kim, Y.W. Hwang, M.S. Kim, K. Min and Y. Kim, Heat transfer and pressure drop characteristics during the in-tube cooling process of carbon dioxide in the supercritical region, International Journal of Refrigeration 26 (2003) 857-864.\nInner diameter of the tubes which carbon dioxide flows are 7.73 mm made with Cu.\nMass fluxes = 225,337 and 450 kgm-2s-1.\nInlet pressure = 7.5 - 8.8 MPa"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCVoidFractionCorrelations.Homogeneous",
+    "value": "Ideal case -> overpredicts the void fraction\n\nReference:\t\"An investigation on void fraction of vapor-liquid two-phase flow for smooth\nand microfin tubes with R134a at adiabatic condition,\" Koyama, Lee and Yonemoto.\nInternational Journal of Multiphase Flow, Vol. 30, 2004, pp. 291-310."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCVoidFractionCorrelations.AliSadatomiKawaji",
+    "value": "Accurate for microchannel tubes (Dh ~1mm).  Developed using channels of width 0.778mm and 1.465mm.\n\nReference:\t\"Adiabatic Two-Phase Flow in Narrow Channels Between Two Flat Plates,\" M.I. Ali,\nM. Sadatomi, M. Kawaji.  The Canadian Journal of Chemical Engineering, Vol. 71,\nOctober 1993, pp. 657-666."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCVoidFractionCorrelations.Armand",
+    "value": "Useful for microchannel tubes (Dh ~1mm) according to Chung and Kawaji.\n\nReferences:\t\"The resistance during the movement of a two-phase system in horizontal pipes,\"\n A.A. Armand.  Izv. Vses. Teplotekh. Inst., 1, 16-23 (AERE-Lib/Trans 828), 1946.\n\n\"The Effect of channel diameter on adiabatic two-phase flow characteristics in\nmicrochannels,\" P.M. Chung, M. Kawaji.  International Journal of Multiphase\nFlow, Vol. 30, 2004, pp. 735-761."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.Homogeneous",
+    "value": "Ideal case -> overpredicts the void fraction\n\nReference:\t\"An investigation on void fraction of vapor-liquid two-phase flow for smooth\nand microfin tubes with R134a at adiabatic condition,\" Koyama, Lee and Yonemoto.\nInternational Journal of Multiphase Flow, Vol. 30, 2004, pp. 291-310."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.Rigot",
+    "value": "Reference:\t\"The Effect of Void Fraction Correlation and Heat Flux Assumption on Refrigerant\nCharge Inventory Predictions,\" C.K. Rice.  ASHRAE Transactions, Vol. 93, Part 1,1987, pp. 341-367.\n\nOriginal Reference:\t\"Contenance en fluide d'un evaporateur en detente directe,\" Rigot.  Chaud-\nFroid-Plomberie, No. 328, pp. 133-144.  English translation: ORNL-tr-5217,Oak Ridge National Laboratory, Oak Ridge, TN, 1973.This reference could not be found."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.Thom",
+    "value": "References:\t\"The Effect of Void Fraction Correlation and Heat Flux Assumption on Refrigerant\nCharge Inventory Predictions,\" C.K. Rice.  ASHRAE Transactions, Vol. 93, Part 1,1987, pp. 341-367.\n\n\"Prediction of Pressure Drop During Forced Circulation Boiling of Water,\" J.R.S. Thom. International Journal of Heat and Mass Transfer, Vol. 7, 1964, pp. 709-724."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.Zivi",
+    "value": "Reference:\t\"Estimation of Steady-State Steam Void-Fraction by Means of the Principle of Minimum\nEntropy Production,\" Zivi.  Journal of Heat Transfer, May 1964, pp. 247-252."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.Smith",
+    "value": "Reference:\t\"A void fraction model for annular two-phase flow,\" Tandon, Varma and Gupta.\nInternational Journal of Heat and Mass Transfer, Vol. 28, No. 1, 1985, pp. 191-198.\n\nOriginal Reference:\t\"Void fractions in two-phase flow: a correlation based upon an equal velocity\nmodel,\" Smith.  Proceedings of the Institution of Mechanical Engineers,Vol. 184, 1969, pp. 647-664."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.LockhartMartinelli",
+    "value": "Reference:\t\"The Effect of Void Fraction Correlation and Heat Flux Assumption on Refrigerant\nCharge Inventory Predictions,\" C.K. Rice.  ASHRAE Transactions, Vol. 93, Part 1,1987, pp. 341-367."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.Baroczy",
+    "value": "Reference:\t\"An investigation on void fraction of vapor-liquid two-phase flow for smooth and microfin tubes with R134a at adiabatic condition,\" Koyama, Lee and Yonemoto. International Journal of Multiphase Flow, Vol. 30, 2004, pp. 291-310.\n\nOriginal Reference:\t\"A systematic correlation for two-phase pressure drop,\" Baroczy.  Chemical\nEngineering Progress Symposium Series, Vol. 62, No. 64, 1965, pp. 232-249."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.Tandon",
+    "value": "Reference:\t\"A void fraction model for annular two-phase flow,\" Tandon, Varma and Gupta.\nInternational Journal of Heat and Mass Transfer, Vol. 28, No. 1, 1985, pp. 191-198."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.Premoli",
+    "value": "Also known as CISE correlation\nReference:\tBoilers, Evaporators, and Condensers.  Sadik Kakac, 1991.p. 758\nAlso in:\tHandbook of Multiphase Systems.  Gad Hetsroni, 1982.\n\nOriginal Reference:\t\"Una correlazione adimensionale perla determinazione della densita di miscele bifasiche,\" Premoli, Francesco, Prina.  La Termotecnica,Vol. 25, 1971, pp. 17-26."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.Yahsar",
+    "value": "Reference:\t\"An Investigation of Refrigerant Void Fraction in Horizontal, Microfin Tubes,\"\nD.A. Yashar, M.J. Wilson, H.R. Kopke, D.M. Graham, J.C. Chato, T.A. Newell.International Journal of HVAC & R Research 107 (Part 2), 173-188. Preprinted copy found in ASHRAE Transactions, June 2001, Paper #4472.\n\nMass-flux-dependent model that uses a \"Froude rate\" parameter defined by Graham et al. (1998)\nin combination with the Lockhart-Martinelli parameter.  It can be used for the stratified to\nannular flow region.  It was found to model the void fraction in microfin tubes well, especially\nevaporators."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.Hughmark",
+    "value": "The Hughmark Void Fraction model equations are solved iteratively to find the void fraction.\nIt is therefore the most complicated and time-consuming model.\nIt is a generalization of Bankoff's correlation (1960).  Hughmark found it to work well for\nhorizontal flow, even though it was developed for vertical upward flow in air-liquid systems.\n\nReferences:\t\"The Effect of Void Fraction Correlation and Heat Flux Assumption on Refrigerant\nCharge Inventory Predictions,\" C.K. Rice.  ASHRAE Transactions, Vol. 93, Part 1,\n1987, pp. 341-367.\n\"Holdup in gas-liquid flow,\" G.A. Hughmark.  Chemical Engineering Progress, mVol. 58, No. 4, April 1962, pp. 62-65."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.Harms",
+    "value": "An explicit void fraction model for annular flow at moderate mass fluxes.  It takes\ninto account damping of the momentum eddy diffusivity at the film interface.\n\nReference:\t\"A void fraction model for annular flow in horizontal tubes,\" T.M. Harms,\nD. Li, E.A. Groll, J.E. Braun.  International Journal of Heat and Mass Transfer, Vol. 46, 2003, pp. 4051-4057."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.RouhaniAxelsson",
+    "value": "Reference:\t\"Calculation of Void Volume Fraction in the Subcooled and Quality Boiling Regions,\"\nS.Z. Rouhani and E. Axelsson.  International Journal of Heat and Mass Transfer, Vol. 13, 1970, pp. 383-393."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.JassimNewellProbabilisticMapHXTFVF",
+    "value": "Prediction of refrigerant void fraction in horizontal tubes using probabilistic flow regime maps by E.W. Jassim *, T.A. Newell, J.C. Chato Experimental Thermal and Fluid Science 32 (2008) 1141–1155"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.DingEtAlTBHarmsCond",
+    "value": "//Reference\n(1) Xiaokui Ma, Guoliang Dinga,*, Ping Zhang, Weizhe Han, Shinichi Kasahara, Takahiro Yamaguchi,\"Experimental validation of void fraction models for R410A air conditioners\", i n t e r n a t i o n a l j ournal of r e f r i g e r a t i on 3 2 ( 2 0 0 9 ) 7 8 0 – 7 9 0\n//Test condition\nrefrigerant is R410A\nThe inner diameter of tube is 7.68 mm\nQuality: 0.01<=x<=0.99\nThe rating cooling capacity, heating capacity and compressor input power are 7.1 kW, 8.0 kW and 1.7 kW\nThe refrigerant charge is 2 kg.\nCooling-mode conditions, the air dry-bulb temperatures in the indoor unit and outdoor unit rooms were controlled at 27 _ 1.0 _C and 35_ 1.0 _C, respectively. The indoor air flow rate was controlled at 18 _ 0.36m3 min_1.\nHeating mode conditions, the air dry-bulb temperatures in the indoor unit and outdoor unit rooms were controlled at 20 _ 1.0 _C and 7 _ 1.0 _C, respectively. The indoor air flow rate was controlled at 18 _ 0.36m3 min_1."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFVoidFractionCorrelations.DingEtAlTBPremoliEvap",
+    "value": "//Reference\n(1) Xiaokui Ma, Guoliang Dinga,*, Ping Zhang, Weizhe Han, Shinichi Kasahara, Takahiro Yamaguchi,\"Experimental validation of void fraction models for R410A air conditioners\", i n t e r n a t i o n a l j ournal of r e f r i g e r a t i on 3 2 ( 2 0 0 9 ) 7 8 0 – 7 9 0\n//Test condition\nrefrigerant is R410A\nThe inner diameter of tube is 7.68 mm\nQuality: 0.01<=x<=0.99\nThe rating cooling capacity, heating capacity and compressor input power are 7.1 kW, 8.0 kW and 1.7 kW\nThe refrigerant charge is 2 kg.\nCooling-mode conditions, the air dry-bulb temperatures in the indoor unit and outdoor unit rooms were controlled at 27 _ 1.0 _C and 35_ 1.0 _C, respectively. The indoor air flow rate was controlled at 18 _ 0.36m3 min_1.\nHeating mode conditions, the air dry-bulb temperatures in the indoor unit and outdoor unit rooms were controlled at 20 _ 1.0 _C and 7 _ 1.0 _C, respectively. The indoor air flow rate was controlled at 18 _ 0.36m3 min_1."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.XuFang2013RTPEvapDP",
+    "value": "Xu-Fang Two-Phase Frictional Pressure Drop Correlation for Evaporating Flow in Pipes\n\nYu Xu, Xiande Fang, 2013, \"A new correlation of two-phase frictional pressure drop for evaporating flow in pipes\",\nNuclear Engineering and Design 263 (2013) 87– 96\n\nA comprehensive survey of correlations and experimental investigations of two-phase frictional pressure drop is\nconducted. The 2622 experimental data points of 15 refrigerants are obtained, with hydraulic diameter from 0.81 to 19.1 mm, mass flux from 25.4 to 1150 kg m 2 s 1, and heat flux from 0.6 to 150 kW m 2. There are 29 existing correlations evaluated against the experimental database. It is found that the best correlation has a mean absolute relative deviation (MARD) of 28.5%. Based on the experimental database, a new correlation is proposed, which has an MARD of 25.2%, improving remarkably the prediction of two-phase frictional pressure drop for pipe evaporating flow, especially for micro-channels.\n\nIncludes 15 refrigerants, ammonia, R11, R12, R22, R32, R125, R32/R125 (0.6/0.4,wt), R123, R134a, R407C, R410A, R507, R600a, R290 and CO2."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.XuFang2013MCRTPEvapDP",
+    "value": "Xu-Fang Two-Phase Frictional Pressure Drop Correlation for Evaporating Flow in Pipes\n\nYu Xu, Xiande Fang, 2013, \"A new correlation of two-phase frictional pressure drop for evaporating flow in pipes\",\nNuclear Engineering and Design 263 (2013) 87– 96\n\nA comprehensive survey of correlations and experimental investigations of two-phase frictional pressure drop is\nconducted. The 2622 experimental data points of 15 refrigerants are obtained, with hydraulic diameter from 0.81 to 19.1 mm, mass flux from 25.4 to 1150 kg m 2 s 1, and heat flux from 0.6 to 150 kW m 2. There are 29 existing correlations evaluated against the experimental database. It is found that the best correlation has a mean absolute relative deviation (MARD) of 28.5%. Based on the experimental database, a new correlation is proposed, which has an MARD of 25.2%, improving remarkably the prediction of two-phase frictional pressure drop for pipe evaporating flow, especially for micro-channels.\n\nIncludes 15 refrigerants, ammonia, R11, R12, R22, R32, R125, R32/R125 (0.6/0.4,wt), R123, R134a, R407C, R410A, R507, R600a, R290 and CO2."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.SunMishimaDP",
+    "value": "Sun-Mishima Two-Phase Flow Pressure Drop Correlation in Mini-channels\n\nLicheng Sun, Kaichiro Mishima, 2009, \"Evaluation analysis of prediction methods for two-phase flow pressure drop in mini-channels\", International Journal of Multiphase Flow 35 (2009) 47–54\n\nTwo-thousand and ninety-two data of two-phase flow pressure drop were collected from 18 published papers of which the working fluids include R123, R134a, R22, R236ea, R245fa, R404a, R407C, R410a,R507, CO2, water and air. \nThe hydraulic diameter ranges from 0.506 to 12 mm; Rel from 10 to 37,000, and Reg from 3 to 4e5."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.SunMishimaDP",
+    "value": "Sun-Mishima Two-Phase Flow Pressure Drop Correlation in Mini-channels\n\nLicheng Sun, Kaichiro Mishima, 2009, \"Evaluation analysis of prediction methods for two-phase flow pressure drop in mini-channels\", International Journal of Multiphase Flow 35 (2009) 47–54\n\nTwo-thousand and ninety-two data of two-phase flow pressure drop were collected from 18 published papers of which the working fluids include R123, R134a, R22, R236ea, R245fa, R404a, R407C, R410a,R507, CO2, water and air. \nThe hydraulic diameter ranges from 0.506 to 12 mm; Rel from 10 to 37,000, and Reg from 3 to 4e5."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.PetersKandlikar2007MCEvapRTPHTC",
+    "value": "Peters proposed modifications to the use of Kandlikar's Heat Transfer correlation for Evaporaion with deep laminar flows.\n\nJulian V. S. Peters & Satish G. Kandlikar, 2007, \"FURTHER EVALUATION OF A FLOW BOILING CORRELATION FOR MICROCHANNELS AND MINICHANNELS\", Proceedings of the Fifth International Conference on Nanochannels, Microchannels and Minichannels, CNMM2007-30027, June 18-20, 2007, Puebla, Mexico.\n\nFor liquid-only Reynolds numbers between 100 and 410, only the NBD correlation applies. For very low Reynolds numbers, generally under 100, the convective boiling term is removed from the NBD correlation.\n\n\nAlso refer to \nSATISH G. KANDLIKAR & PRABHU BALASUBRAMANIAN, 2004, \"An Extension of the Flow Boiling Correlation to Transition, Laminar, and Deep Laminar Flows in Minichannels and Microchannels\", Heat Transfer Engineering, 25(3):86–93, 2004"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPTHCCorrelations.GrecoVanoliTFRTPHTC",
+    "value": "Greco and Vanoli proposed modifications to the use of Kandlikar's Heat Transfer correlation for Evaporaion with deep laminar flows.\n\nGreco a, G.P. Vanoli b, 2005, \"Flow boiling heat transfer with HFC mixtures in a smooth horizontal tube. Part II: Assessment of predictive methods\", Experimental Thermal and Fluid Science 29 (2005) 199–208\n\nR410A and R404A have been experimentally investigated in a smooth horizontal tube made of stainless steel with an inner diameter of 6 mm and a length of 6 m, uniformly heated by the Joule effect. The evaporation pressures has been varied within the range from 3 to 12 bar, the refrigerant mass flux within the range from 290 to 1100 kg/m2 s and the heat flux within the range from 11 to 39 kW/m2. A modification of the Kandlikar correlation has been proposed to predict the local heat transfer coefficients obtained with the test facility. A correction factor that enhance the influence of the nucleate boiling term has been introduced to take into account the influence of the reduced pressure on the heat transfer coefficients.\n\nAlso refer to \nSATISH G. KANDLIKAR & PRABHU BALASUBRAMANIAN, 2004, \"An Extension of the Flow Boiling Correlation to Transition, Laminar, and Deep Laminar Flows in Minichannels and Microchannels\", Heat Transfer Engineering, 25(3):86–93, 2004"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.Shah2014MixturesEvapHTC",
+    "value": "Mirza M. Shah proposed two-Phase heat transfer correlation for evaporating Flow in plain tube\n\nMirza M. Shah, 2014, \"Evaluation of a method for predicting heat transfer during boiling of mixtures in plain tubes\",\n15th international heat transfer conference, IHTC-15, August 10-15, 2014, Kyoto, Japan, IHTC15-8351\n\nThis method has been validated by comparison with an extensive database consisting of 695 data points for 42 binary and ternary mixtures from 18 independent studies.\n\nThe rane of parameters covered by the data is:\n- Tube diameters 2 to 14mm\n- Horizontal and vertical orientations\n- Flow rates from 50 to 930 kg/m2s\n- Reduced pressures from 0.05 to 0.63\n- Temperature glides upto 28C\n- Boiling numbers from 0.00004 to 0.00462"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.Shah2014MixturesMCEvapHTC",
+    "value": "Mirza M. Shah proposed two-Phase heat transfer correlation for evaporating Flow in plain tube\n\nMirza M. Shah, 2014, \"Evaluation of a method for predicting heat transfer during boiling of mixtures in plain tubes\",\n15th international heat transfer conference, IHTC-15, August 10-15, 2014, Kyoto, Japan, IHTC15-8351\n\nThis method has been validated by comparison with an extensive database cosisting of 695 data points for 42 binary and ternary mixtures from 18 independent studies.\n\nThe rane of parameters covered by the data is:\n- Tube diameters 2 to 14mm\n- Horizontal and vertical orientations\n- Flow rates from 50 to 930 kg/m2s\n- Reduced pressures from 0.05 to 0.63\n- Temperature glides upto 28C\n- Boiling numbers from 0.00004 to 0.00462"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.Shah2014CO2EvapHTC",
+    "value": "Mirza M. Shah, 2014, \"Evaluation of correlations for predicting heat transder during boiling of carbon dioxide inside channels\",\n15th international heat transfer conference, IHTC-15, August 10-15, 2014, Kyoto, Japan, IHTC15-8435\n\nA modified form of Shah's general correlation was proposed. It was compared with a database which included 1052 data points from 41 data sets for oil-free CO2 from 32 published studies. \n\nThe range of data analyzed included:\n- Single and multichannel circular, triangular and rectangular geometries\n- Several materials (copper, aluminum, stainless steels, nickel)\n- Equivalent diameters frm 0.51 to 14mm\n- Reduced pressure from 0.19 to 0.88\n- Mass flux from 75 to 1500 kg/m2s\n- Boiling numbers from 0.00003 to 0.0035"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.Shah2014CO2MCEvapHTC",
+    "value": "Mirza M. Shah, 2014, \"Evaluation of correlations for predicting heat transder during boiling of carbon dioxide inside channels\",\n15th international heat transfer conference, IHTC-15, August 10-15, 2014, Kyoto, Japan, IHTC15-8435\n\nA modified form of Shah's general correlation was proposed. It was compared with a database which included 1052 data points from 41 data sets for oil-free CO2 from 32 published studies. \n\nThe range of data analyzed included:\n- Single and multichannel circular, triangular and rectangular geometries\n- Several materials (copper, aluminum, stainless steels, nickel)\n- Equivalent diameters frm 0.51 to 14mm\n- Reduced pressure from 0.19 to 0.88\n- Mass flux from 75 to 1500 kg/m2s\n- Boiling numbers from 0.00003 to 0.0035"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.BacellarEtAl2014BareTubeCFDHTC",
+    "value": "Daniel Bacellar, Vikrant Aute, Reinhard Radermacher,\"CFD-Based Correlation Development for Air Side Performance of Finned and Finless Tube Heat Exchangers with Small Diameter Tubes\", \n15th International Refrigeration and Air Conditionnig Conference at Purdue, July 14-17,2014\nApplication Range:\nTube OD: 2.0-5.0 mm\nRatio of transversal tube pitch to Tube OD: 1.5-3.0\nRatio of longitudinal tube pitch to Tube OD:1.5-3.0\nNumber of tube banks:2-20\nAir velocity:0.5-7.0"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.BacellarEtAl2016BareInlineTube052CFDHTC",
+    "value": "Bacellar, D., Aute, V., Radermacher, R.(2016), “Airside Performance Correlations and Optimal Heat Pump Heat Exchanger Designs Based on 0.5mm-2mm Finless Round Tube Bundles”, 16th International Refrigeration and Air Conditionnig Conference at Purdue University, West Lafayette, Indiana, Paper 2118\nApplication range:\nTube OD: 0.5mm to 2mm\nTube configuration: Inline\nNumber of banks: 2-40\nTube horizontal spacing : 0.6mm-8mm\nTube vertical spacing : 0.6mm-8mm\nAir velocity : 0.5-7 m/s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.BacellarEtAl2016WavySmoothFinsCFDHTC",
+    "value": "Bacellar, D., Aute, V., Radermacher, R.(2016).“ CFD-Based Correlation Development for Air Side Performance of Wavy Fin Tube Heat Exchangers using 2mm-5mm Tube Diameters”, 16th International Refrigeration and Air Conditionnig Conference at Purdue University, West Lafayette, Indiana, Paper 2120\nApplication range:\nTube OD: 2mm-5mm\nNumber of banks: 2-20\nHorizontal tube spacing / tube OD = 1.25-4\nVertical tube spacing / tube OD = 1.25-4\nFin pitch: 0.5mm-2.5mm\nFin thickness: 0.05mm-0.1mm\nAir velocity: 0.5-7 m/s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.BacellarEtAl2016WavyHerringboneFinsCFDHTC",
+    "value": "Bacellar, D., Aute, V., Radermacher, R.(2016).“ CFD-Based Correlation Development for Air Side Performance of Wavy Fin Tube Heat Exchangers using 2mm-5mm Tube Diameters”, 16th International Refrigeration and Air Conditionnig Conference at Purdue University, West Lafayette, Indiana, Paper 2120\nApplication range:\nTube OD: 2mm-5mm\nNumber of banks: 2-20\nHorizontal tube spacing / tube OD = 1.25-4\nVertical tube spacing / tube OD = 1.25-4\nFin pitch: 0.5mm-2.5mm\nFin thickness: 0.05mm-0.1mm\nAir velocity: 0.5-7 m/s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.SarpotdarEtAl2016LouverFin35ODCFDHTC",
+    "value": "Sarpotdar, S., Nasuta, D., Aute, V.(2016) \"CFD-Based Airside Heat Transfer and Pressure Drop Correlation Development for Small Diameter (3 mm to 5 mm) Louver Fin Heat Exchangers\", 16th International Refrigeration and Air Conditionnig Conference at Purdue University, West Lafayette, Indiana, Paper 2363\nApplication Range:\nTube OD: 3-5mm\nStaggered tube configuration only\nNumber of Tube Banks: 1-6  \nFPI:14-40  \nLouver pitch: 0.8-1.8  \nLouver angel: 27 degree\nAir Velocity: 0.75-5 m/s\nFin Thickness: 0.125 mm\nTube horizontal spacing / tube OD = 2-4\nTube vertical spacing / tube horizontal spacing = 1-2"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.SarpotdarEtAl2016LouverFin35ODCFDDP",
+    "value": "Sarpotdar, S., Nasuta, D., Aute, V.(2016) \"CFD-Based Airside Heat Transfer and Pressure Drop Correlation Development for Small Diameter (3 mm to 5 mm) Louver Fin Heat Exchangers\", 16th International Refrigeration and Air Conditionnig Conference at Purdue University, West Lafayette, Indiana, Paper 2363\nApplication Range:\nTube OD: 3-5mm\nStaggered tube configuration only\nNumber of Tube Banks: 1-6  \nFPI:14-40  \nLouver pitch: 0.8-1.8  \nLouver angel: 27 degree\nAir Velocity: 0.75-5 m/s\nFin Thickness: 0.125 mm\nTube horizontal spacing / tube OD = 2-4\nTube vertical spacing / tube horizontal spacing = 1-2"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.BacellarEtAl2016WavyHerringboneFinsCFDDP",
+    "value": "Bacellar, D., Aute, V., Radermacher, R.(2016).“ CFD-Based Correlation Development for Air Side Performance of Wavy Fin Tube Heat Exchangers using 2mm-5mm Tube Diameters”, 16th International Refrigeration and Air Conditionnig Conference at Purdue University, West Lafayette, Indiana, Paper 2120\nApplication range:\nTube OD: 2mm-5mm\nNumber of banks: 2-20\nHorizontal tube spacing / tube OD = 1.25-4\nVertical tube spacing / tube OD = 1.25-4\nFin pitch: 0.5mm-2.5mm\nFin thickness: 0.05mm-0.1mm\nAir velocity: 0.5-7 m/s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.BacellarEtAl2016WavySmoothFinsCFDDP",
+    "value": "Bacellar, D., Aute, V., Radermacher, R.(2016).“ CFD-Based Correlation Development for Air Side Performance of Wavy Fin Tube Heat Exchangers using 2mm-5mm Tube Diameters”, 16th International Refrigeration and Air Conditionnig Conference at Purdue University, West Lafayette, Indiana, Paper 2120\nApplication range:\nTube OD: 2mm-5mm\nNumber of banks: 2-20\nHorizontal tube spacing / tube OD = 1.25-4\nVertical tube spacing / tube OD = 1.25-4\nFin pitch: 0.5mm-2.5mm\nFin thickness: 0.05mm-0.1mm\nAir velocity: 0.5-7 m/s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.BacellarEtAl2016BareInlineTube052CFDDP",
+    "value": "Bacellar, D., Aute, V., Radermacher, R.(2016), “Airside Performance Correlations and Optimal Heat Pump Heat Exchanger Designs Based on 0.5mm-2mm Finless Round Tube Bundles”, 16th International Refrigeration and Air Conditionnig Conference at Purdue University, West Lafayette, Indiana, Paper 2118\nApplication range:\nTube OD: 0.5mm to 2mm\nTube configuration: Inline\nNumber of banks: 2-40\nTube horizontal spacing : 0.6mm-8mm\nTube vertical spacing : 0.6mm-8mm\nAir velocity : 0.5-7 m/s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.BacellarEtAl2014PlainFinsCFDHTC",
+    "value": "Daniel Bacellar, Vikrant Aute, Reinhard Radermacher,\"CFD-Based Correlation Development for Air Side Performance of Finned and Finless Tube Heat Exchangers with Small Diameter Tubes\", \n15th International Refrigeration and Air Conditionnig Conference at Purdue, July 14-17,2014\nApplication Range:\nTube OD: 2.0-5.0 mm\nRatio of transversal tube pitch to Tube OD: 1.5-3.0\nRatio of longitudinal tube pitch to Tube OD:1.5-3.0\nNumber of tube banks:2-10\nFPI:8-24\nAir velocity:0.5-7.0\nFin thickness:0.115\nA correction factor has been applied compared with the paper and the range of fin density applicability is from 7.7 to 21.7 - previously 8 to 24."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.HaraguchiEtAl1994CondHTC",
+    "value": "Haraguchi, H., Koyama, S., Fujii, T., 1994. Condensation of refrigerants HCFC 22, HFC 134a and HCFC 123 in a horizontal smooth tube (2nd report, proposals of empirical expressions for local heat transfer coefficient). Trans. JSME 60 (574), 245-252 (in Japanese).\nApplication Range:\nExperiments were done in condensation process, horizontal inner smooth tube.\nRefrigerants: R22, R134a, R123\nMass Flux: 90-400 kg/m2*s\nHeat Flux: 3-33 kW/m2"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.FangEtAl2015EvapHTC",
+    "value": "Xiande Fang,Zhanru Zhou, Hao Wang, Heat transfer correlation for saturated flow boiling of water, Applied Thermal Engineering 76(2015)147-156\n\nThis correlation works best for H2O, also works well for R22, R134a, R410A, NH3.\n\nThe range of H2O experiment data included:\nQuality: 0.0-0.958. \nID: 0.207-1.73 [mm]\nMass flux: 17-1782 [kg/m^2s]\nHeat flux: 27.7-4788 [kW/m^2]\nTsat: 99.6-201.31[C]\nPsat: 1.01-16[bar]"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.FangEtAl2015MCEvapHTC",
+    "value": "Xiande Fang,Zhanru Zhou, Hao Wang, Heat transfer correlation for saturated flow boiling of water, Applied Thermal Engineering 76(2015)147-156\nThis correlation works best for H2O, also works well for R22, R134a, R410A, NH3.\nThe range of H2O experiment data included:\nQuality: 0.0-0.958. \nID: 0.207-1.73 [mm]\nMass flux: 17-1782 [kg/m^2s]\nHeat flux: 27.7-4788 [kW/m^2]\nTsat: 99.6-201.31[C]\nPsat: 1.01-16[bar]"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.BacellarEtAl2014BareTubeCFDDP",
+    "value": "Daniel Bacellar, Vikrant Aute, Reinhard Radermacher,\"CFD-Based Correlation Development for Air Side Performance of Finned and Finless Tube Heat Exchangers with Small Diameter Tubes\", \n15th International Refrigeration and Air Conditionnig Conference at Purdue, July 14-17,2014\nApplication Range:\nTube OD: 2.0-5.0 mm\nRatio of transversal tube pitch to Tube OD: 1.5-3.0\nRatio of longitudinal tube pitch to Tube OD:1.5-3.0\nNumber of tube banks:2-20\nAir velocity:0.5-7.0"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.BacellarEtAl2014PlainFinsCFDDP",
+    "value": "Daniel Bacellar, Vikrant Aute, Reinhard Radermacher,\"CFD-Based Correlation Development for Air Side Performance of Finned and Finless Tube Heat Exchangers with Small Diameter Tubes\", \n15th International Refrigeration and Air Conditionnig Conference at Purdue, July 14-17,2014\nApplication Range:\nTube OD: 2.0-5.0 mm\nRatio of transversal tube pitch to Tube OD: 1.5-3.0\nRatio of longitudinal tube pitch to Tube OD:1.5-3.0\nNumber of tube banks:2-10\nFPI:8-24\nAir velocity:0.5-7.0\nFin thickness:0.115\nA correction factor has been applied compared with the paper and the range of fin density applicability is from 7.7 to 21.7 - previously 8 to 24."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.XuFang2013RTPCondDP",
+    "value": "Yu Xu, Xiande Fang, “A new correlation of two-phase frictional pressure drop for condensing flow in pipes”, Nuclear Engineering and Design 263 (2013) 87–96\nApplication Range:\nRefrigerant: R134a, R22,R410A, R236ea, R125, R32, NH3, R600a, R290\nHydraulic diameter 0.1-10.07mm\nMass flux: 20-800kg/m2\nHeat flux: 2-55.3kW/m2"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.XuFang2013MCRTPCondDP",
+    "value": "Yu Xu, Xiande Fang, “A new correlation of two-phase frictional pressure drop for condensing flow in pipes”, Nuclear Engineering and Design 263 (2013) 87–96\nApplication Range:\nRefrigerant: R134a, R22,R410A, R236ea, R125, R32, NH3, R600a, R290\nHydraulic diameter 0.1-10.07mm\nMass flux: 20-800kg/m2\nHeat flux: 2-55.3kW/m2"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.MiyaraEtal2004RTPCondDP",
+    "value": "Miyara, A., Kuwahara, K., Koyama, S., 2004. Correlation of frictional pressure loss of two-phase flow including effects of tube diameter and mass velocity. In: Proceedings of JSME, 57th\nKyushu Conference No. 048-1, pp. 117e118 (in Japanese).\nApplication Range:\nMass flux G >=200 kg/m2*s\nRefrigerants: Experiment data is validated on Water, R134a, R410a, R32, R1234ze."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.LockhartMartinelliXActualRTPDP",
+    "value": "Reference:  R.W. Lockhart, R.C. Martinelli, Proposed Correlation of Data for Isothermal Two-Phase, Two-Component  \nFlow in Pipes, Chemical Engineering Progress 45 (1) (1949) 39-48."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.LockhartMartinelliXActualRTPDP",
+    "value": "Reference:  R.W. Lockhart, R.C. Martinelli, Proposed Correlation of Data for Isothermal Two-Phase, Two-Component  \nFlow in Pipes, Chemical Engineering Progress 45 (1) (1949) 39-48."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.KimMudawar2013MCRTPEvapDP",
+    "value": "Sung-Min Kim, Issam Mudawar,\"Universal approach to predicting two-phase frictional pressure drop for mini/micro-channel saturated flow boiling\",\nInternational Journal of Heat and Mass Transfer 58 (2013) 718–734\nApplication Range:\nRefrigerant: R12, R134a, R410A, R22, R245fa, FC72, CO2, H2O, NH3\nHydraulic diameter: 0.349-5.35 mm\nMass flux: 33-2737 kg/m2*s\nLiquid only Re number: 156-28010\nQualitiy: 0-1\nReduced Pressures: 0.005-0.78"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.BacellarEtAl2015BareTube052CFDHTC",
+    "value": "Daniel Bacellar, Vikrant Aute, Zhiwei Huang, Reinhard Radermacher,\"CFD-Based Correlations, with Experimental Verification, for Air Side Performance of Round Finless Tube Heat Exchangers with Diameters below 2.0mm\", IJR,2015\nApplication Range:\nTube OD: 0.5-2 mm\nAir Velocity: 0.5-7 m/s\nNumber of Tube Banks: 2 - 40 \nHorizontal Tube Spacing: 1.2 - 4.0 mm\nVertical Tube Spacing:  1.2- 4.0 mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.SarpotdarEtAl2015SlitFin35ODCFDHTC",
+    "value": "Sarpotdar, S.; Nasuta, D.; Aute, V. 2015. \"CFD-Baseed Air Side Correlation for Slit Fin and Tube Heat Exchangers with Small Diameter Tubes\"\nTube OD: 3-5mm\nAir Velocity: 0.75-5 m/s\nNumber of Slits: 2-6\nNumber of Tube Banks: 1-6\nFPI: 14-40 \nFin Thickness: 0.098 mm\nLongitudinal Tube Pitch: 2-4 x Dnominal                 (6-20mm)\nTransverse Tube Pitch:  1.1-2 x Longitudinal Pitch              (6.6-40mm)\nSlit Height: 0.1905-1.27 mm\nSlit Width: 1 mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.WuEtAl5mmMicrofin2013TFEvapRTPHTC",
+    "value": "Zan Wu Yang Wu, Bengt Sunden, Wei Li, \"Convective vaporization in micro-fin tubes of different geometries\", Experimental Thermal and Fluid Science 44(2013)398-408\nApplication range:\nNominal diameter: 2.1-14.8mm\nMass flux = 100-650 kg/m^2*s\nHeat flux = 0-30 kW/ m^2\nTsat = 279K\nReduced pressure = 0.08-0.69"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.BacellarEtAl2015BareTube052CFDDP",
+    "value": "Daniel Bacellar, Vikrant Aute, Zhiwei Huang, Reinhard Radermacher,\"CFD-Based Correlations, with Experimental Verification, for Air Side Performance of Round Finless Tube Heat Exchangers with Diameters below 2.0mm\", \nIJR,2015\nApplication Range:\nTube OD: 0.5-2 mm\nAir Velocity: 0.5-7 m/s\nNumber of Tube Banks: 2 - 40 \nHorizontal Tube Spacing: 1.2 - 4.0 mm\nVertical Tube Spacing:  1.2- 4.0 mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.SarpotdarEtAl2015SlitFin35ODCFDDP",
+    "value": "Sarpotdar, S.; Nasuta, D.; Aute, V. 2015. \"CFD-Baseed Air Side Correlation for Slit Fin and Tube Heat Exchangers with Small Diameter Tubes\"\nTube OD: 3-5mm\nAir Velocity: 0.75-5 m/s\nNumber of Slits: 2-6\nNumber of Tube Banks: 1-6\nFPI: 14-40 \nFin Thickness: 0.098 mm\nLongitudinal Tube Pitch: 2-4 x Dnominal                 (6-20mm)\nTransverse Tube Pitch:  1.1-2 x Longitudinal Pitch              (6.6-40mm)\nSlit Height: 0.1905-1.27 mm\nSlit Width: 1 mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.WuEtAl5mmMicrofin2013TFEvapRTPDP",
+    "value": "Zan Wu Yang Wu, Bengt Sunden, Wei Li, \"Convective vaporization in micro-fin tubes of different geometries\", Experimental Thermal and Fluid Science 44(2013)398-408\nApplication range:\nNominal diameter: 2.1-14.8mm\nMass flux = 100-650 kg/m^2*s\nHeat flux = 0-30 kW/ m^2\nTsat = 279K\nReduced pressure = 0.08-0.69"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFAHTCCorrelations.LeeEtAl2010SpiralSmoothFinAHTC",
+    "value": "Mooyeon Lee, Taehyung Kang, Yongchan Kim,\"Air-side heat transfer characteristics of spiral-type circular fin-tube heat exchangers\", IJR 33(2010)313-320\napplication range:\nRe = 340-1050\nfin pitch = 5.0-12.5 mm\nNrow = 1-5\nTube OD =8 mm \nSpiral fin OD = 24.5 mm\ntube horizontal spacing = 30 mm\ntube vertical spacing = 30 mm\nfin thickness = 0.2mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLHTCCorrelations.RavigururajanBerglesMicrofinRLHTC",
+    "value": "T.S.Ravigururajan, A.E.Bergles, \"Development and Verification of General Correlations for Pressure Drop and Heat Transfer in Single-Phase Turbulent Flow in Enhanced Tubes\", Experimental Thermal and Fluid Science 1996; 13:55-70\nApplication range:\nRe = 5000-60,000\ne/d = 0.023-0.127\np/d = 0.17-1.12\nalpha/90 = 0.34-0.91\nwhere:\ne -- fin height\np -- axial pitch\nd -- inner tube diameter\nalpha -- helical fin angle"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.SonOhMicrofinCO2CondRTPHTC",
+    "value": "Chang-Hyo Son, Hoo-Kyu Oh,\"Condensation heat transfer characteristics of CO2 in a horizontal smooth- and microfin-tube at high saturation temperatures\", Applied Thermal Engineering 36 (2012) 51-62\nApplication range:\nID = 4.6 - 4.95mm;\nTsat = 20-30C\nMass flux = 400 - 800 kg/(m^2*s)"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.SonOhSmoothCO2CondRTPHTC",
+    "value": "Chang-Hyo Son, Hoo-Kyu Oh,\"Condensation heat transfer characteristics of CO2 in a horizontal smooth- and microfin-tube at high saturation temperatures\", Applied Thermal Engineering 36 (2012) 51-62\nApplication range:\nID = 4.6 - 4.95mm;\nTsat = 20-30C\nMass flux = 400 - 800 kg/(m^2*s)"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRVHTCCorrelations.RavigururajanBerglesMicrofinRVHTC",
+    "value": "T.S.Ravigururajan, A.E.Bergles, \"Development and Verification of General Correlations for Pressure Drop and Heat Transfer in Single-Phase Turbulent Flow in Enhanced Tubes\", Experimental Thermal and Fluid Science 1996; 13:55-70\nApplication range:\nRe = 5000-60,000\ne/d = 0.023-0.127\np/d = 0.17-1.12\nalpha/90 = 0.34-0.91\nwhere:\ne -- fin height\np -- axial pitch\nd -- inner tube diameter\nalpha -- helical fin angle"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFADPCorrelations.GenicEtAl2006SmoothSpiralFinADP",
+    "value": "Srbislav B. Genic, Branislav M. Jacimovic, Boris R. Latinovic,\"Research on air pressure drop in helically-finned tube heat exchangers\", \nApplied Thermal Engineering 26 (2006) 478–485\nFor staggerd tube Re = 550-130000\nFor inline tube Re = 6000-200000\nTube OD =9.65-26.01 mm \nSpiral fin OD = 21.87-44.12 mm\ntube horizontal spacing = 20.32-112 mm\ntube vertical spacing = 24.77-128 mm\nfin pitch = 2.22-6 mm\nfin thickness = 0.254-0.457mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLHTCCorrelations.DittusBoelterTurbulentCoolingRLHTC",
+    "value": "Dittus-Boelter Single-Phase Heat Transfer Coefficient Correlation (Turbulent Region Only. Uses exponent of 0.3 on Prandtl number)\nReference:  F.W. Dittus, L.M.K. Boelter, Heat Transfer in Automobile Radiators of the Tubular Type, International Communications in Heat and Mass Transfer 12 (1) (1985) 3-22.  Originally published in the University of California Publications in Engineering 2 (13) (1930) 443-461.\nCorrelation for heat transfer coefficient originally developed for water flowing through tubes.\n\nApplication Range: (Correlation tested for gases in this range)\nTube diameter: 0.5 - 6 inches\nTemperature: 60 - 1400 F\nPressure: 1.5 - 190 psia\nMass Flux: 0.2 - 6.6 lb/ft^2-s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLHTCCorrelations.Gnielinski2013ConstWallRLHTC",
+    "value": "Reference:  Gnielinski, V. (2013). International Journal of Heat and Mass Transfer On heat transfer in tubes. International Journal of Heat and Mass Transfer, 63, 134–140."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLHTCCorrelations.GnielinskiSmoothingRLHTC",
+    "value": "Reference: Kind, Matthias, et al. \"VDI Heat Atlas.\" (2010).\nPart G, Chapter - 'Forced Convection', Section 4.2"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.Shah2019AllChannelsNonHCsTFCondRTPHTC",
+    "value": "Mirza M. Shah, Improved correlation for heat transfer during condensation in conventional and mini/micro channels (2018).\nThis paper is a revised version of Shah(2016), the main differences are that some fluid types are specified. And the boundaries of Regime I II III are redefined using Jg, We and Fr_L number.\nData range covered in the experiment \nFor condensation heat transfer\nRefrigerants: Water, R-11, R-12, R-22, R-32, R-41, R-113, R-123, R-125, R-134a, R-141b, R-142b, R-152a, R-161, R-236ea, R-245fa, R-404A, R-410A, R-502, R-507, R-1234fa, R-1234yf, R-1234ze(E), DME, FC-72, carbon dioxide, ethanol, methanol, Dowtherm 209, HFE-7000, HFE-7100, HFE-7000, Novec 649\nChannel type: single and multi-channels of many shapes\nTube ID: 0.08 to 49.0 mm\nAspect ratio: 0.14 to 13.9\nReduced pressure: 0.0008 to 0.946\nMass flux: 1.1 to 1400 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.Shah2019AllChannelsHCsOnlyTFCondRTPHTC",
+    "value": "Mirza M. Shah, Improved correlation for heat transfer during condensation in conventional and mini/micro channels (2018).\nThis paper is a revised version of Shah(2016), the main differences are that some fluid types are specified. And the boundaries of Regime I II III are redefined using Jg, We and Fr_L number.\nData range covered in the experiment \nFor condensation heat transfer\nRefrigerants:  butane, propane, methane, isobutane, propylene, benzene, ethane, pentane, toluene\nChannel type: single and multi-channels of many shapes\nTube ID: 0.08 to 49.0 mm\nAspect ratio: 0.14 to 13.9\nReduced pressure: 0.0008 to 0.946\nMass flux: 1.1 to 1400 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.ZhangEtAl2019ZeotropicPlainTubesEvapRTPHTC",
+    "value": "Reference: Zhang, J., Mondejar, M. E., & Haglind, F. (2019). General heat transfer correlations for flow boiling of zeotropic mixtures in horizontal plain tubes. Applied Thermal Engineering, 150(November 2018), 824–839.\nRefrigerant mixtures:\nR134a/R245fa, R14/R23,R32/R134a, Methane/Ethane/Propane, R32/R1234ze, R32/R1234tf, CO2/Propane, Propane/R152a,\nEthane/Propane, Propane/R134a/Isobutane, Propane/R134a, R116/R134a, R417A, R32/R125, Propane/Isobutane, R32/R134a,\nR407C, R134a/R123, SF6/R12, R22/R12, R22/R114\nG = 32 - 1100 kg/m^2*s\nq = 1.3 - 89.6 kg/m^2*s\nDh = 1.5 - 12.7 mm"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRLHTCCorrelations.DittusBoelterTurbulentCooling",
+    "value": "Dittus-Boelter Single-Phase Heat Transfer Coefficient Correlation (Turbulent Region Only. Uses exponent of 0.3 on Prandtl number)\nReference:  F.W. Dittus, L.M.K. Boelter, Heat Transfer in Automobile Radiators of the Tubular Type, International Communications in Heat and Mass Transfer 12 (1) (1985) 3-22.  Originally published in the University of California Publications in Engineering 2 (13) (1930) 443-461.\nCorrelation for heat transfer coefficient originally developed for water flowing through tubes.\nApplication Range: (Correlation tested for gases in this range)\nTube diameter: 0.5 - 6 inches\nTemperature: 60 - 1400 F\nPressure: 1.5 - 190 psia\nMass Flux: 0.2 - 6.6 lb/ft^2-s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRLHTCCorrelations.Gnielinski2013ConstWallRLHTC",
+    "value": "Gnielinski Single-Phase Heat Transfer Coefficient Correlation 2013\nReference:  Gnielinski, V. (2013). On heat transfer in tubes. International Journal of Heat and Mass Transfer, 63, 134–140."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.Shah2019AllChannelsNonHCsMCCondRTPHTC",
+    "value": "Mirza M. Shah, Improved correlation for heat transfer during condensation in conventional and mini/micro channels (2018).\nThis paper is a revised version of Shah(2016), the main differences are that some fluid types are specified. And the boundaries of Regime I II III are redefined using Jg, We and Fr_L number.\nData range covered in the experiment \nFor condensation heat transfer\nRefrigerants: Water, R-11, R-12, R-22, R-32, R-41, R-113, R-123, R-125, R-134a, R-141b, R-142b, R-152a, R-161, R-236ea, R-245fa, R-404A, R-410A, R-502, R-507, R-1234fa, R-1234yf, R-1234ze(E), DME, FC-72, carbon dioxide, ethanol, methanol, Dowtherm 209, HFE-7000, HFE-7100, HFE-7000, Novec 649\nChannel type: single and multi-channels of many shapes\nTube ID: 0.08 to 49.0 mm\nAspect ratio: 0.14 to 13.9\nReduced pressure: 0.0008 to 0.946\nMass flux: 1.1 to 1400 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.Shah2019AllChannelsHCsOnlyMCCondRTPHTC",
+    "value": "Mirza M. Shah, Improved correlation for heat transfer during condensation in conventional and mini/micro channels (2018).\nThis paper is a revised version of Shah(2016), the main differences are that some fluid types are specified. And the boundaries of Regime I II III are redefined using Jg, We and Fr_L number.\nData range covered in the experiment \nFor condensation heat transfer\nRefrigerants:  butane, propane, methane, isobutane, propylene, benzene, ethane, pentane, toluene\nChannel type: single and multi-channels of many shapes\nTube ID: 0.08 to 49.0 mm\nAspect ratio: 0.14 to 13.9\nReduced pressure: 0.0008 to 0.946\nMass flux: 1.1 to 1400 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.JigeEtAl2016MCHXCondRTPHTC",
+    "value": "Jige, Daisuke, Norihiro Inoue, and Shigeru Koyama. \"Condensation of refrigerants in a multiport tube with rectangular minichannels.\" International Journal of Refrigeration 67 (2016): 202-213.\nFlow condensation\nRefrigerants tested: R134a, R32, R1234ze(E) and R410A\nChannel type: multi-port tube with rectangular or circular port\nDh = 0.85 - 1.1 mm \nTsat = 40 - 60 C \nMass flux = 100-400 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.JigeEtAl2016MCHXCondRTPDP",
+    "value": "Jige, Daisuke, Norihiro Inoue, and Shigeru Koyama. \"Condensation of refrigerants in a multiport tube with rectangular minichannels.\" International Journal of Refrigeration 67 (2016): 202-213.\nFlow condensation\nRefrigerants tested: R134a, R32, R1234ze(E) and R410A\nChannel type: multi-port tube with rectangular or circular port\nDh = 0.85 - 1.1 mm \nTsat = 40 - 60 C \nMass flux = 100-400 kg/m^2*s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.KimMudawar2012MCRTPCondDP",
+    "value": "Kim and Mudawar , 2012 Two phase Pressure Drop Correlation\n\nReference : Sung-Min Kim and Issam Mudawar. “Universal Approach to Predicting Two-Phase Frictional Pressure Drop for Adiabatic and Condensing Mini/Micro-Channel Flows.” \nInternational Journal of Heat and Mass Transfer 55, no. 11–12 (May 2012): 3246–61. https://doi.org/10.1016/j.ijheatmasstransfer.2012.02.047.\n\nApplication Range:\nHydraulic Diameters : 0.0695 - 6.22 mm\nRefrigerants : R12, R22, R134a, R410A, water, methane\nMass Flux : 4.0 - 8528 kg/m^2*s\nLiquid-only Re = 3.9-89798\nReduced Pressure = 0.0052-0.91\nChannel type: Circular and Rectangular"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPDPCorrelations.TapiaRibatski2017MCRTPDP",
+    "value": "Tapia and Ribatski , 2017 Two phase Pressure Drop Correlation\n\nReference :  Sempértegui-Tapia, Daniel Felipe, and Gherhardt Ribatski. “Two-Phase Frictional Pressure Drop in Horizontal Micro-Scale Channels: Experimental Data Analysis and Prediction Method Development.” \nInternational Journal of Refrigeration 79 (July 2017): 143–63. https://doi.org/10.1016/j.ijrefrig.2017.03.024.\n\n\nApplication Range:\n\nHydraulic Diameters : 0.96 - 1.1 mm\nRefrigerants : R134a, R1234ze(E), R1234yf, R600a\nMass Flux : 100 - 1600 kg/m^2s\nQuality = 0.05-0.95\nSaturation Temperature = 31 and 41 deg C\nChannel type: Circular and Square"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.KimMudawar2012TFRPCondDP",
+    "value": "Kim and Mudawar , 2012 Two phase Pressure Drop Correlation\n\nReference : Sung-Min Kim and Issam Mudawar. “Universal Approach to Predicting Two-Phase Frictional Pressure Drop for Adiabatic and Condensing Mini/Micro-Channel Flows.” \nInternational Journal of Heat and Mass Transfer 55, no. 11–12 (May 2012): 3246–61. https://doi.org/10.1016/j.ijheatmasstransfer.2012.02.047.\n\nApplication Range:\nHydraulic Diameters : 0.0695 - 6.22 mm\nRefrigerants : R12, R22, R134a, R410A, water, methane\nMass Flux : 4.0 - 8528 kg/m^2*s\nLiquid-only Re = 3.9-89798\nReduced Pressure = 0.0052-0.91"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPDPCorrelations.TapiaRibatski2017MiniChannelTFRTPDP",
+    "value": "Tapia and Ribatski , 2017 Two phase Pressure Drop Correlation\n\nReference :  Sempértegui-Tapia, Daniel Felipe, and Gherhardt Ribatski. “Two-Phase Frictional Pressure Drop in Horizontal Micro-Scale Channels: Experimental Data Analysis and Prediction Method Development.” \nInternational Journal of Refrigeration 79 (July 2017): 143–63. https://doi.org/10.1016/j.ijrefrig.2017.03.024.\n\n\nApplication Range:\n\nHydraulic Diameters : 0.96 - 1.1 mm\nRefrigerants : R134a, R1234ze(E), R1234yf, R600a\nMass Flux : 100 - 1600 kg/m^2s\nQuality = 0.05-0.95\nSaturation Temperature = 31 and 41 deg C"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.LinEtAl2022MicrofinTubesEvapRTPHTC",
+    "value": "Lin et al , 2022 Two phase Heat Transfer Coefficient Correlation\n\nReference : Lin, L., Gao, L., Kedzierski, M. A., and Hwang, Y., 2022, “A General Model for Flow Boiling Heat Transfer in Microfin Tubes Based on a New Neural Network Architecture,” Energy and AI, 8, p. 100151.\n\n\nApplication Range:\nRefrigerants : CO2, R1234yf, R1234ze(E), R1234ze(Z), R1234zd(E), R1234yd(Z), R134a, R32, R125, R161\nR22, R245fa, R513A, R410A, R410B, R450A\nFin Root Diameter : 2.11 - 11.98 mm\nFin Height : 0.1 - 0.26 mm\nNumber of fins : 40 - 82\nHelix angle : 6.3 - 30 degrees\nApex angle : 11 - 66 degrees\nHeat Flux = 2.1 - 50.5 kW/cm^2\nMass Flux : 47.8 - 859 kg/m^2*s\nGeometry : Microfin tubes\nSaturation Temperature = -5 - 60 deg C"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.KimandKim2021R404AlternativeMicrofinRTPHTC",
+    "value": "Kim and Kim , 2021 Two phase Heat Transfer Coefficient Correlation\n\nReference : Kim, C.-H., and Kim, N.-H., 2021, “Evaporation Heat Transfer of the Low GWP Alternative Refrigerants (R-448A, R-449A, R-455A, R-454C) for R-404A in a Microfin Tube,” \nInternational Journal of Refrigeration, 128, pp. 118–128.\n\n\nApplication Range:\nRefrigerants : R448A, R449A, R455A, R454C \nFin Root Diameter : 6.44 mm\nFin Height : 0.1 mm\nNumber of fins : 65\nHelix angle : 18 degrees\nApex angle : 40 degrees\nHeat Flux = 5 - 15 kW/cm^2\nMass Flux : 90 - 300 kg/m^2*s\nGeometry : Microfin tubes\nSaturation Temperature = 10 deg C"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "BendDPCorrelations.Domanski2008",
+    "value": "Domanski and Hermes , 2008 Two phase U-bend Pressure Drop Correlation\n\nReference : Domanski, P. A., and Hermes, C. J. L., 2008, “An Improved Correlation for Two-Phase Pressure Drop of R-22 and R-410A in 180° Return Bends,” \nApplied Thermal Engineering, 28(7), pp. 793–800.\n\n\nApplication Range:\n\nHydraulic Diameters (D) : 3.3 - 11.6 mm\nRefrigerants : R22, R410A\nBend Radius (R) : 6.4 - 37.3 mm\nCurvature ratio (2R/D) : 2.3 - 8.2\nMass Flux : 100 - 900 kg/m^2-s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRLHTCCorrelations.ArnoldEtAl_FlutedAnnulusRLHTC",
+    "value": "Arnold et al (1993), Single phase HTC\n\nReference: Arnold, J.A., Garimella, S., Christenen, R.N., 1993. A Manual for Heat Exchanger Design Using Spirally Fluted Tubes\n\nValid for:\n0.104 < e_star < 0.384\n0.383 < pstar < 6.714\n0.279 < theta_star < 0.652\n0.216 < rstar < 0.604\n800 < Re < 40,000\nValid for annulus side\n\ne_star = (Flute Depth) / (Inner Flute Vol OD);\npstar = (Flute Pitch) / (Inner Flute Vol OD);\ntheta = arctan(pi * (Inner Flute Vol OD) / (No. of Flute Starts * Flute Pitch));\ntheta_star = theta / (pi / 2); (since theta is in radians)\n\nrstar = Inner Flute Vol OD / Inner flute volume based ID;\n\nInner Flute Vol OD = Inner flute volume based ID + 2*Inner Tube Wall Thickness"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRLHTCCorrelations.ArnoldEtAl_FlutedAnnulusRLHTCV2",
+    "value": "Same as Arnold et al HTC correlation, but with modified r_star calculation\n\ne_star = (Flute Depth) / (Inner Flute Vol OD);\npstar = (Flute Pitch) / (Inner Flute Vol OD);\ntheta = arctan(pi * (Inner Flute Vol OD) / (No. of Flute Starts * Flute Pitch));\ntheta_star = theta / (pi / 2); (since theta is in radians)\n\nOuter Tube ID = Hydraulic Diameter + Inner Flute Vol OD;\n\nrstar = Inner Flute Vol OD / Outer Tube ID; (Note that this calculation changes)\n\nInner Flute Vol OD = Inner flute volume based ID + 2*Inner Tube Wall Thickness"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRLDPCorrelations.ArnoldEtAl_FlutedAnnulusRLDP",
+    "value": "Arnold et al (1993), Single phase DP\n\nReference: Arnold, J.A., Garimella, S., Christenen, R.N., 1993. A Manual for Heat Exchanger Design Using Spirally Fluted Tubes\nValid for:\n0.124 < e_star < 0.309\n0.358 < pstar < 1.302\n0.431 < theta_star < 0.671\n0.388 < rstar < 0.688\nValid for annulus side\n\ne_star = (Flute Depth) / (Inner Flute Vol OD);\npstar = (Flute Pitch) / (Inner Flute Vol OD);\ntheta = arctan(pi * (Inner Flute Vol OD) / (No. of Flute Starts * Flute Pitch));\ntheta_star = theta / (pi / 2); (since theta is in radians)\n\nrstar = Inner Flute Vol OD / Inner flute volume based ID;\n\nInner Flute Vol OD = Inner flute volume based ID + 2*Inner Tube Wall Thickness"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRLDPCorrelations.ArnoldEtAl_FlutedAnnulusRLDPV2",
+    "value": "Same as Arnold et al DP correlation, but with modified r_star calculation\n\ne_star = (Flute Depth) / (Inner Flute Vol OD);\npstar = (Flute Pitch) / (Inner Flute Vol OD);\ntheta = arctan(pi * (Inner Flute Vol OD) / (No. of Flute Starts * Flute Pitch));\ntheta_star = theta / (pi / 2); (since theta is in radians)\n\nOuter Tube ID = Hydraulic Diameter + Inner Flute Vol OD;\n\nrstar = Inner Flute Vol OD / Outer Tube ID; (Note that this calculation changes)\n\nInner Flute Vol OD = Inner flute volume based ID + 2*Inner Tube Wall Thickness"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRLHTCCorrelations.ArnoldChristensenFlutedTubeRLHTC",
+    "value": "Arnold-Christensen, Single Phase HTC\n\nReference: Arnold, J.A., Garimella, S., Christenen, R.N., 1993. A Manual for Heat Exchanger Design Using Spirally Fluted Tubes\nValid for:\n0.11 < e_star < 0.42\n0.41 < pstar < 7.29\n0.28 < theta_star < 0.65\n0.28 < rstar < 0.65\n2.5 < Pr < 7.0\nValid for inner tube side\n\ne_star = (Flute Depth) / (Inner Flute Vol OD);\npstar = (Flute Pitch) / (Inner Flute Vol OD);\ntheta = arctan(pi * (Inner Flute Vol OD) / (No. of Flute Starts * Flute Pitch));\ntheta_star = theta / (pi / 2); (since theta is in radians)\n\nrstar = Inner Flute Vol OD / Inner flute volume based ID;\n\nInner Flute Vol OD = Inner flute volume based ID + 2*Inner Tube Wall Thickness"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRLDPCorrelations.ArnoldChristensenFlutedTubeRLDP",
+    "value": "Arnold-Christensen, Single Phase DP\n\nReference: Arnold, J.A., Garimella, S., Christenen, R.N., 1993. A Manual for Heat Exchanger Design Using Spirally Fluted Tubes\nValid for:\n0.11 < e_star < 0.42\n0.41 < pstar < 7.29\n0.28 < theta_star < 0.65\nValid for inner tube side\n\ne_star = (Flute Depth) / (Inner Flute Vol OD);\npstar = (Flute Pitch) / (Inner Flute Vol OD);\ntheta = arctan(pi * (Inner Flute Vol OD) / (No. of Flute Starts * Flute Pitch));\ntheta_star = theta / (pi / 2); (since theta is in radians)"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRVHTCCorrelations.ArnoldEtAl_FlutedAnnulusRVHTC",
+    "value": "Arnold et al (1993), Single phase HTC\n\nReference: Arnold, J.A., Garimella, S., Christenen, R.N., 1993. A Manual for Heat Exchanger Design Using Spirally Fluted Tubes\n\nValid for:\n0.104 < e_star < 0.384\n0.383 < pstar < 6.714\n0.279 < theta_star < 0.652\n0.216 < rstar < 0.604\n800 < Re < 40,000\nValid for annulus side\n\ne_star = (Flute Depth) / (Inner Flute Vol OD);\npstar = (Flute Pitch) / (Inner Flute Vol OD);\ntheta = arctan(pi * (Inner Flute Vol OD) / (No. of Flute Starts * Flute Pitch));\ntheta_star = theta / (pi / 2); (since theta is in radians)\n\nrstar = Inner Flute Vol OD / Inner flute volume based ID;\n\nInner Flute Vol OD = Inner flute volume based ID + 2*Inner Tube Wall Thickness"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRVHTCCorrelations.ArnoldEtAl_FlutedAnnulusRVHTCV2",
+    "value": "Same as Arnold et al HTC correlation, but with modified r_star calculation\n\ne_star = (Flute Depth) / (Inner Flute Vol OD);\npstar = (Flute Pitch) / (Inner Flute Vol OD);\ntheta = arctan(pi * (Inner Flute Vol OD) / (No. of Flute Starts * Flute Pitch));\ntheta_star = theta / (pi / 2); (since theta is in radians)\n\nOuter Tube ID = Hydraulic Diameter + Inner Flute Vol OD;\n\nrstar = Inner Flute Vol OD / Outer Tube ID; (Note that this calculation changes)\n\nInner Flute Vol OD = Inner flute volume based ID + 2*Inner Tube Wall Thickness"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRVDPCorrelations.ArnoldEtAl_FlutedAnnulusRVDP",
+    "value": "Arnold et al (1993), Single phase DP\n\nReference: Arnold, J.A., Garimella, S., Christenen, R.N., 1993. A Manual for Heat Exchanger Design Using Spirally Fluted Tubes\nValid for:\n0.124 < e_star < 0.309\n0.358 < pstar < 1.302\n0.431 < theta_star < 0.671\n0.388 < rstar < 0.688\nValid for annulus side\n\ne_star = (Flute Depth) / (Inner Flute Vol OD);\npstar = (Flute Pitch) / (Inner Flute Vol OD);\ntheta = arctan(pi * (Inner Flute Vol OD) / (No. of Flute Starts * Flute Pitch));\ntheta_star = theta / (pi / 2); (since theta is in radians)\n\nrstar = Inner Flute Vol OD / Inner flute volume based ID;\n\nInner Flute Vol OD = Inner flute volume based ID + 2*Inner Tube Wall Thickness"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRVDPCorrelations.ArnoldEtAl_FlutedAnnulusRVDPV2",
+    "value": "Same as Arnold et al DP correlation, but with modified r_star calculation\n\ne_star = (Flute Depth) / (Inner Flute Vol OD);\npstar = (Flute Pitch) / (Inner Flute Vol OD);\ntheta = arctan(pi * (Inner Flute Vol OD) / (No. of Flute Starts * Flute Pitch));\ntheta_star = theta / (pi / 2); (since theta is in radians)\n\nOuter Tube ID = Hydraulic Diameter + Inner Flute Vol OD;\n\nrstar = Inner Flute Vol OD / Outer Tube ID; (Note that this calculation changes)\n\nInner Flute Vol OD = Inner flute volume based ID + 2*Inner Tube Wall Thickness"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRVHTCCorrelations.ArnoldChristensen_FlutedTubeRVHTC",
+    "value": "Arnold-Christensen, Single Phase HTC\n\nReference: Arnold, J.A., Garimella, S., Christenen, R.N., 1993. A Manual for Heat Exchanger Design Using Spirally Fluted Tubes\nValid for:\n0.11 < e_star < 0.42\n0.41 < pstar < 7.29\n0.28 < theta_star < 0.65\n0.28 < rstar < 0.65\n2.5 < Pr < 7.0\nValid for inner tube side\n\ne_star = (Flute Depth) / (Inner Flute Vol OD);\npstar = (Flute Pitch) / (Inner Flute Vol OD);\ntheta = arctan(pi * (Inner Flute Vol OD) / (No. of Flute Starts * Flute Pitch));\ntheta_star = theta / (pi / 2); (since theta is in radians)\n\nrstar = Inner Flute Vol OD / Inner flute volume based ID;\n\nInner Flute Vol OD = Inner flute volume based ID + 2*Inner Tube Wall Thickness"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRVDPCorrelations.ArnoldChristensen_FlutedRVDP",
+    "value": "Arnold-Christensen, Single Phase DP\n\nReference: Arnold, J.A., Garimella, S., Christenen, R.N., 1993. A Manual for Heat Exchanger Design Using Spirally Fluted Tubes\nValid for:\n0.11 < e_star < 0.42\n0.41 < pstar < 7.29\n0.28 < theta_star < 0.65\nValid for inner tube side\n\ne_star = (Flute Depth) / (Inner Flute Vol OD);\npstar = (Flute Pitch) / (Inner Flute Vol OD);\ntheta = arctan(pi * (Inner Flute Vol OD) / (No. of Flute Starts * Flute Pitch));\ntheta_star = theta / (pi / 2); (since theta is in radians)"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.ArnoldEtAlShahCondMod_FlutedAnnulusRTPHTC",
+    "value": "Arnold et al - Shah Modified (1979), Condensation HTC\n\nReference: Shah, M.M., 1979. A general correlation for heat transfer during film condensation inside pipes. Int. J. Heat Mass Transf. 22, 547e556.\n\nThe two phase multiplier from Shah (1979) is used with the single phase Arnold correlation for fluted tubes.\n\nApplication Range:\nRefrigerants : R11, R12, R113, R22, water \nTube Diameter :7-40 mm\nHeat Flux : 0.158 - 1893 kW/m^2\nMass Flux : 10.83 - 210.56 kg/m^2*s\nReduced Pressure = 0.002 - 0.44\n\nFor geometry parameters, please refer to the Arnold et al correlation"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.ArnoldEtAlShahEvapMod_FlutedAnnulusRTPHTC",
+    "value": "Arnold et al - Shah Modified (1979), Evaporation HTC\n\nReference: M.M. Shah, Chart Correlation for Saturated Boiling Heat Transfer: Equations and Further Study, ASHRAE Transactions 88 (1) (1982) 185-196\n\nThe two phase multiplier from this correlation is used with the single phase Arnold correlation for fluted tubes.\n\nFor geometry parameters, please refer to the Arnold et al correlation"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.ArnoldEtAlKandlikarEvapMod_FlutedAnnulusRTPHTC",
+    "value": "Arnold et al - Kandlikar (1991), 2 phase HTC\n\nReference: Kandlikar, S.G., 1991. A model for correlating flow boiling heat transfer in Augmented tubes and compact evaporators. Trans.\nASME, J. Heat Transf. 113, 966e972\n\nThe two phase multiplier from Kandlikar (1991) is used with the single phase Arnold correlation for fluted tubes.\n\nApplication Range:\nRefrigerants : R11, R12, R113, R22, water, R114, R134a, R152a\nTube Diameter :2.65 - 8.75 mm\nHeat Flux : 1.3 - 159 kW/m^2\nMass Flux : 34.4 - 600 kg/m^2*s\nReduced Pressure = 0.002 - 0.44\n\nFor geometry parameters, please refer to the Arnold et al correlation"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPDPCorrelations.ArnoldEtAlFriedelMod_FlutedAnnulusRTPDP",
+    "value": "Reference: Friedel, L., 1979. Improved friction pressure drop correlations for horizontal and vertical two phase pipe flow. Paper E2. In:\nEuropean Two Phase Flow Group Meeting, Ispra, Italy.\n\nThe two phase multiplier from Friedel (1979) is used with the single phase Arnold correlation for fluted tubes.\nThe correlation is exactly the same as the Friedel (1979) correlation implemented in CoilDesigner\n\nFor geometry parameters, please refer to the Arnold et al correlation"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.ArnoldEtAlShahCondMod_FlutedAnnulusRTPHTCV2",
+    "value": "Arnold et al - Shah Modified (1979), Condensation HTC\n\nReference: Shah, M.M., 1979. A general correlation for heat transfer during film condensation inside pipes. Int. J. Heat Mass Transf. 22, 547e556.\n\nThe two phase multiplier from Shah (1979) is used with the single phase Arnold correlation for fluted tubes.\n\nApplication Range:\nRefrigerants : R11, R12, R113, R22, water \nTube Diameter :7-40 mm\nHeat Flux : 0.158 - 1893 kW/m^2\nMass Flux : 10.83 - 210.56 kg/m^2*s\nReduced Pressure = 0.002 - 0.44\n\nFor geometry parameters, please refer to the Arnold et al (V2) correlation"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.ArnoldEtAlShahEvapMod_FlutedAnnulusRTPHTCV2",
+    "value": "Arnold et al - Shah Modified (1979), Evaporation HTC\n\nReference: M.M. Shah, Chart Correlation for Saturated Boiling Heat Transfer: Equations and Further Study, ASHRAE Transactions 88 (1) (1982) 185-196\n\nThe two phase multiplier from this correlation is used with the single phase Arnold correlation for fluted tubes.\n\nFor geometry parameters, please refer to the Arnold et al (V2) correlation"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.ArnoldEtAlKandlikarEvapMod_FlutedAnnulusRTPHTCV2",
+    "value": "Arnold et al - Kandlikar (1991), 2 phase HTC\n\nReference: Kandlikar, S.G., 1991. A model for correlating flow boiling heat transfer in Augmented tubes and compact evaporators. Trans.\nASME, J. Heat Transf. 113, 966e972\n\nThe two phase multiplier from Kandlikar (1991) is used with the single phase Arnold correlation for fluted tubes.\n\nApplication Range:\nRefrigerants : R11, R12, R113, R22, water, R114, R134a, R152a\nTube Diameter :2.65 - 8.75 mm\nHeat Flux : 1.3 - 159 kW/m^2\nMass Flux : 34.4 - 600 kg/m^2*s\nReduced Pressure = 0.002 - 0.44\n\nFor geometry parameters, please refer to the Arnold et al (V2) correlation"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPDPCorrelations.ArnoldEtAlFriedelMod_FlutedAnnulusRTPDPV2",
+    "value": "Reference: Friedel, L., 1979. Improved friction pressure drop correlations for horizontal and vertical two phase pipe flow. Paper E2. In:\nEuropean Two Phase Flow Group Meeting, Ispra, Italy.\n\nThe two phase multiplier from Friedel (1979) is used with the single phase Arnold correlation for fluted tubes.\nThe correlation is exactly the same as the Friedel (1979) correlation implemented in CoilDesigner\n\nFor geometry parameters, please refer to the Arnold et al (V2) correlation"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPDPCorrelations.TravissAnnulusStraightRTPDP",
+    "value": "Reference: Reference: 1:Traviss DP, Rohsenhow WM, Baron AB. Forced convection condensation inside tubes: a heat transfer equation for condenser design. ASHRAE Journal 1973;79(1).\n           Reference: 2:P.G. Rousseau, M. van Eldik*, G.P. Greyvenstein, Detailed simulation of fluted tube water heating condensers, International Journal of Refrigeration 26 (2003) 232–239\n\nRefrigerants : R12, R22\nMass Flux : 161.4 - 1533 kg/m^2-s\nSaturation Temperature: 77 - 137 F\n\nFor geometry parameters, please refer to the Arnold et al (V2) correlation"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRLHTCCorrelations.DittusBoelterRLHTC",
+    "value": "Same as that in the tube-fin solver. For smooth tubes only."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRLHTCCorrelations.GnielinskiRLHTC",
+    "value": "Same as that in the tube-fin solver. For smooth tubes only."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRLHTCCorrelations.PetukhovPopovRLHTC",
+    "value": "Same as that in the tube-fin solver. For smooth tubes only."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRLHTCCorrelations.ARI410SmoothTubeRLHTC",
+    "value": "Same as that in the tube-fin solver. For smooth tubes only."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.Kandlikar",
+    "value": "Same as that in the tube-fin solver. For smooth tubes only."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.JungRadermacher",
+    "value": "Same as that in the tube-fin solver. For smooth tubes only."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.ShahEvap",
+    "value": "Same as that in the tube-fin solver. For smooth tubes only."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.GungorWinterton",
+    "value": "Same as that in the tube-fin solver. For smooth tubes only."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.Dobson",
+    "value": "Same as that in the tube-fin solver. For smooth tubes only."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.ShahCond",
+    "value": "Same as that in the tube-fin solver. For smooth tubes only."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.Traviss",
+    "value": "Same as that in the tube-fin solver. For smooth tubes only."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.ThomeTPEvapFlowPatternMap2005HTC",
+    "value": "Same as that in the tube-fin solver. For smooth tubes only."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.ChengThomeTPCO2EvapFlowPatternMap2006HTC",
+    "value": "Same as that in the tube-fin solver. For smooth tubes only."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.SchalgerBerglesMicrofinTFRTPHTC",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.SteinerVDIAtlasEvapRTPHTC",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.KellyEtAlNH3SmoothEvapHTC2002",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.CavalliniCondensation",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.ChengThomeTPCO2EvapFlowPatternMap2008HTC",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPHTCCorrelations.ShahCond2009HTC",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRVHTCCorrelations.DittusBoelterRVHTC",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRVHTCCorrelations.GnielinskiRVHTC",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRVHTCCorrelations.YoonKimSuperCritCO2HTC",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRLDPCorrelations.BlasiusTypeRLDP",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRLDPCorrelations.ChurchillRLDP",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRLDPCorrelations.BhattiShahTFRLDP",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRLDPCorrelations.SwameeJainTFRLDP",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPDPCorrelations.HomogeneousRTPDP",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPDPCorrelations.LockhartMartinelliRTPDP",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPDPCorrelations.FriedelRTPDP",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPDPCorrelations.JungRadermacherRTPDP",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPDPCorrelations.MullerSteinhagenHeckRTPDP",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPDPCorrelations.GronnerudRTPDP",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPDPCorrelations.ThomeTPEvapFlowPatternMap2005DP",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPDPCorrelations.ChengThomeTPCO2EvapFlowPatternMap2008DP",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRTPDPCorrelations.MishimaHibikiDP",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRVDPCorrelations.BlasiusTypeRVDP",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "HXTTRVDPCorrelations.ChurchillRVDP",
+    "value": "Same as that in the tube-fin solver."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.CavalliniEtAl2006NoHCCondRTPHTC",
+    "value": "Reference:  Alberto Cavallini, Davide Del Col, Luca Doretti , Marko Matkovic, Luisa Rossetto , Claudio Zilio &Giuseppe Censi(2006) \nCondensation in Horizontal Smooth Tubes: A New Heat Transfer Model for Heat Exchanger Design, Heat Transfer Engineering, 27:8, 31 - 38,\n\t\t\t\tDOI: 10.1080 / 01457630600793970\n\t\t\t\t\nUsed for non hydrocarbon refrigerants. Does not use SBG correction\n\nApplication Range:\nRefrigerants : R22, R134a, R410A, R125, R32, R236ea, R407C, R125/R236ea, R32/R125 (60/40%), R502, R507A, R407C, R404A, R142b, R744, R717, R718\nTube ID : 3.1 - 17 mm\nMass flux : 18 - 2240 kg/m^2-s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.CavalliniEtAl2006NoHCwSBGCondRTPHTC",
+    "value": "Reference:  Alberto Cavallini, Davide Del Col, Luca Doretti , Marko Matkovic, Luisa Rossetto , Claudio Zilio &Giuseppe Censi(2006) \nCondensation in Horizontal Smooth Tubes: A New Heat Transfer Model for Heat Exchanger Design, Heat Transfer Engineering, 27:8, 31 - 38,\n\t\t\t\tDOI: 10.1080 / 01457630600793970\n\t\t\t\t\nUsed for non hydrocarbon refrigerants. Applies SBG correction to account for temperature glide in refrigerant mixtures\n\nApplication Range:\nRefrigerants : R22, R134a, R410A, R125, R32, R236ea, R407C, R125/R236ea, R32/R125 (60/40%), R502, R507A, R407C, R404A, R142b, R744, R717, R718\nTube ID : 3.1 - 17 mm\nMass flux : 18 - 2240 kg/m^2-s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.CavalliniEtAl2006HCsCondRTPHTC",
+    "value": "Reference:  Alberto Cavallini, Davide Del Col, Luca Doretti , Marko Matkovic, Luisa Rossetto , Claudio Zilio &Giuseppe Censi(2006) \nCondensation in Horizontal Smooth Tubes: A New Heat Transfer Model for Heat Exchanger Design, Heat Transfer Engineering, 27:8, 31 - 38,\n\t\t\t\tDOI: 10.1080 / 01457630600793970\n\t\t\t\t\nUsed for hydrocarbon refrigerants. Does not use SBG correction\n\nApplication Range:\nRefrigerants : R290, R600, R600a, R1270, R290/R600, R290/R600a\nTube ID : 3.1 - 17 mm\nMass flux : 18 - 2240 kg/m^2-s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.CavalliniEtAl2006HCswSBGCondRTPHTC",
+    "value": "Reference:  Alberto Cavallini, Davide Del Col, Luca Doretti , Marko Matkovic, Luisa, Rossetto , Claudio Zilio &Giuseppe Censi(2006) \nCondensation in Horizontal Smooth Tubes: A New Heat Transfer Model for Heat Exchanger Design, Heat Transfer Engineering, 27:8, 31 - 38,\n\t\t\t\tDOI: 10.1080 / 01457630600793970\n\t\t\t\t\nUsed for hydrocarbon refrigerants. Applies SBG correction to account for temperature glide in refrigerant mixtures\n\nApplication Range:\nRefrigerants : R290, R600, R600a, R1270, R290/R600, R290/R600a\nTube ID : 3.1 - 17 mm\nMass flux : 18 - 2240 kg/m^2-s"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRTPHTCCorrelations.BertschEtAl2009MicroMiniEvapRTPHTC",
+    "value": "Reference:  S. S. Bertsch, E. A. Groll, and S. V. Garimella, “A composite heat transfer correlation for saturated flow boiling in small channels,”\nInt.J.Heat Mass Transf., vol. 52, no. 7–8, pp. 2110–2118, 2009, doi: 10.1016 / j.ijheatmasstransfer.2008.10.022.\n\t\t\t\t\nApplication Range:\nHydraulic diameter : 0.16 - 2.92 mm\nMass Flux : 20 - 3000 kg/m^2-s\nHeat Flux : 0.4 - 115 W/cm^2\nSaturation Temperature : -194 - 97 C\nConfinement number : 0.3 - 4.0"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "TFRLDPCorrelations.BrkicPraks2018RoughSurfaceTFRLDP",
+    "value": "Reference : Brkić, Dejan, and Pavel Praks. 2018. \"Unified Friction Formulation from Laminar to Fully Rough Turbulent Flow\" Applied Sciences 8, no. 11: 2036. https://doi.org/10.3390/app8112036\n\t\nThis correlation is a unified formula for all pipe flow regimes from laminar to fully turbulent\nApplication Range:\nDh = 6mm tested \nMass flux = 20-(14*10^6) kg/m^2*s \nFlow Regimes categories: Smooth Laminar, Transition, Smooth  turbulent, Non fully developed Partially Turbulent, Rough Turbulent \n\nNot applicable for smooth tubes. Must specify a non-zero roughness."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRLHTCCorrelations.Gnielinski2013PortBasedLamNuMCRLHTC",
+    "value": "It uses the original Gnielinski MC-RLHTC correlation and adds smoothing as per the 2013 Gnielinski paper\n\nGnielinski, 2013, On heat transfer in Tubes, Intl J of Heat and Mass Transfer, Vol 63, pp. 134-140.\nCompared to previous correlation, this one adds smoothing between constant Nu and the fully turbulent region in particular between Re = 2300 and 4000."
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.YunEtAlR410MCHTC_V2",
+    "value": "Corrected version of Yun et al (2006) R410A MCHX 2-phase correlation"
+  },
+  {
+    "tag": "correlationinfo",
+    "name": "MCRTPHTCCorrelations.BertschEtAl2009MicroMiniEvapMCRTPHTC",
+    "value": "Reference:  S. S. Bertsch, E. A. Groll, and S. V. Garimella, “A composite heat transfer correlation for saturated flow boiling in small channels,”\nInt.J.Heat Mass Transf., vol. 52, no. 7–8, pp. 2110–2118, 2009, doi: 10.1016 / j.ijheatmasstransfer.2008.10.022.\n\t\t\t\t\nApplication Range:\nHydraulic diameter : 0.16 - 2.92 mm\nMass Flux : 20 - 3000 kg/m^2-s\nHeat Flux : 0.4 - 115 W/cm^2\nSaturation Temperature : -194 - 97 C\nConfinement number : 0.3 - 4.0"
+  }
+]

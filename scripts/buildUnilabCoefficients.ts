@@ -101,6 +101,13 @@ function indexedValues(row: JsonRecord, prefix: string, count: number): number[]
   );
 }
 
+function rawRange(row: JsonRecord, minKeys: string[], maxKeys: string[], values: number[]) {
+  return {
+    min: numberValue(row, ...minKeys) ?? (values.length > 0 ? Math.min(...values) : 0),
+    max: numberValue(row, ...maxKeys) ?? (values.length > 0 ? Math.max(...values) : 0),
+  };
+}
+
 function isAllZero(values: Array<number | undefined>): boolean {
   return values.every((value) => value === undefined || value === 0);
 }
@@ -220,13 +227,13 @@ function consolidateAxialFans(
           model: stringValue(row, "Model", "Modello", "model") ?? "",
           voltage: numberValue(row, "Voltage", "Tensione", "voltage") ?? 0,
           frequency: numberValue(row, "Frequency", "Frequenza", "frequency") ?? 0,
-          rpm: numberValue(row, "Rpm", "RPM", "rpm") ?? 0,
-          power_W: numberValue(row, "Power", "Power_W", "Potenza", "power_W") ?? 0,
-          current_A: numberValue(row, "Current", "Current_A", "Corrente", "current_A") ?? 0,
-          airflowRange_m3h: {
-            min: x.length > 0 ? Math.min(...x) : 0,
-            max: x.length > 0 ? Math.max(...x) : 0,
-          },
+          rpm: numberValue(row, "Giri", "Rpm", "RPM", "rpm") ?? 0,
+          power_W:
+            numberValue(row, "PotenzaAssorbita", "Power", "Power_W", "Potenza", "power_W") ?? 0,
+          current_A:
+            numberValue(row, "CorrenteAssorbita", "Current", "Current_A", "Corrente", "current_A") ??
+            0,
+          airflowRange_m3h: rawRange(row, ["Xmin", "XMin", "AirflowMin"], ["Xmax", "XMax", "AirflowMax"], x),
           curve: { x, y },
           polynomial: {
             coefficients: coefficients(row, "Coeff", 5),
@@ -274,16 +281,16 @@ function consolidateCentrifugalFans(dataRows: JsonRecord[], curveRows: JsonRecor
         codVentRif,
         density_kg_m3: numberValue(row, "Density", "Rho", "density_kg_m3") ?? 0,
         rpmRange: {
-          min: numberValue(row, "RpmMin", "RPMMin", "rpmMin") ?? 0,
-          max: numberValue(row, "RpmMax", "RPMMax", "rpmMax") ?? 0,
+          min: numberValue(row, "MinRound", "RpmMin", "RPMMin", "rpmMin") ?? 0,
+          max: numberValue(row, "MaxRound", "RpmMax", "RPMMax", "rpmMax") ?? 0,
         },
         pressureRange_Pa: {
-          min: numberValue(row, "PressureMin", "Pmin", "pressureMin") ?? 0,
-          max: numberValue(row, "PressureMax", "Pmax", "pressureMax") ?? 0,
+          min: numberValue(row, "PressMin", "PressureMin", "Pmin", "pressureMin") ?? 0,
+          max: numberValue(row, "PressMax", "PressureMax", "Pmax", "pressureMax") ?? 0,
         },
         capacityRange_m3h: {
-          min: numberValue(row, "CapacityMin", "Qmin", "capacityMin") ?? 0,
-          max: numberValue(row, "CapacityMax", "Qmax", "capacityMax") ?? 0,
+          min: numberValue(row, "CapMin", "CapacityMin", "Qmin", "capacityMin") ?? 0,
+          max: numberValue(row, "CapMax", "CapacityMax", "Qmax", "capacityMax") ?? 0,
         },
         rawCurve,
       },
