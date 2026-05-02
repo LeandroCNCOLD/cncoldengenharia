@@ -12,6 +12,7 @@ export type Refrigerant =
   | "R507A"
   | "R134a"
   | "R22"
+  | "R410A"
   | "R448A"
   | "R449A"
   | "R452A"
