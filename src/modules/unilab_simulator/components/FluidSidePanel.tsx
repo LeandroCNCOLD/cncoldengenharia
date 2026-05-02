@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Lock, Unlock } from "lucide-react";
+import { Lock, Unlock, Zap } from "lucide-react";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import type {
   UnilabComponentType,
