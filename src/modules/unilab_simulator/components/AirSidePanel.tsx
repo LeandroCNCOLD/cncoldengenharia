@@ -209,7 +209,7 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
         {/* CAPACIDADE TOTAL — input em modo Desenho, output em Verificar */}
         <Row
           label="Capacidade Total"
-          unitNode={<UnitSelect value={uCapTotal} onChange={setUCapTotal} options={CAPACITY_UNITS} />}
+          unitNode={<UnitSelect value={uCapTotal} onChange={(u) => { setUCapTotal(u); setUCapSens(u); setUCapLat(u); }} options={CAPACITY_UNITS} />}
           input={
             isDesign ? (
               <NumberCell
