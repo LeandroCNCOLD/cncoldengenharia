@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
+  { label: "Painel", to: "/dashboard", icon: LayoutDashboard },
 ];
 
 export function AppSidebar() {

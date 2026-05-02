@@ -49,9 +49,21 @@ export const Route = createRootRoute({
       },
       { property: "og:type", content: "website" },
       { name: "twitter:title", content: "CN Cold Engineering" },
-      { name: "description", content: "Coldbase Hub manages technical data for refrigeration components, building a foundation for future engineering tools." },
-      { property: "og:description", content: "Coldbase Hub manages technical data for refrigeration components, building a foundation for future engineering tools." },
-      { name: "twitter:description", content: "Coldbase Hub manages technical data for refrigeration components, building a foundation for future engineering tools." },
+      {
+        name: "description",
+        content:
+          "Coldbase Hub gerencia dados técnicos de componentes frigoríficos e cria a base para futuras ferramentas de engenharia.",
+      },
+      {
+        property: "og:description",
+        content:
+          "Coldbase Hub gerencia dados técnicos de componentes frigoríficos e cria a base para futuras ferramentas de engenharia.",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "Coldbase Hub gerencia dados técnicos de componentes frigoríficos e cria a base para futuras ferramentas de engenharia.",
+      },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0d3c5c2f-b7b9-4a8e-a349-8e62618bdd74/id-preview-d4ba03b9--df3997bc-561a-4a74-bd68-343e76b9168d.lovable.app-1777406799331.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0d3c5c2f-b7b9-4a8e-a349-8e62618bdd74/id-preview-d4ba03b9--df3997bc-561a-4a74-bd68-343e76b9168d.lovable.app-1777406799331.png" },
       { name: "twitter:card", content: "summary_large_image" },
