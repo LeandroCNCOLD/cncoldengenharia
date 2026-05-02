@@ -315,3 +315,226 @@ export interface CompressorOutletTemperature {
   ChemicalName: string | null;
   [extra: string]: unknown;
 }
+
+// ───────────── LOTE FINAL — Polinômios e dados completos ─────────────
+
+/**
+ * Polinômio ASHRAE 10 termos para CAPACIDADE de compressores
+ * (formato cru — preserva campos italianos/UNILAB).
+ */
+export interface CompressorCapacityPolynomial {
+  IDCompressor: number;
+  Description: string;
+  Tcmax: number;
+  Tcmin: number;
+  Temax: number;
+  Temin: number;
+  Var01: number; Var02: number; Var03: number; Var04: number; Var05: number;
+  Var06: number; Var07: number; Var08: number; Var09: number; Var10: number;
+  Var11?: number; Var12?: number;
+  FattMolt?: number;
+  RPSmin?: number;
+  [extra: string]: unknown;
+}
+
+export interface CompressorPowerPolynomial {
+  IDCompressor: number;
+  Description: string;
+  CMax?: number;
+  CStart?: number;
+  Var01: number; Var02: number; Var03: number; Var04: number; Var05: number;
+  Var06: number; Var07: number; Var08: number; Var09: number; Var10: number;
+  Var11?: number; Var12?: number;
+  FattMolt?: number;
+  [extra: string]: unknown;
+}
+
+export interface CompressorCurrentPolynomial {
+  IdCompressor: number;
+  Description: string;
+  Var01: number; Var02: number; Var03: number; Var04: number; Var05: number;
+  Var06: number; Var07: number; Var08: number; Var09: number; Var10: number;
+  Var11?: number; Var12?: number;
+  FattMolt?: number;
+  [extra: string]: unknown;
+}
+
+export interface CompressorBackupPolynomials {
+  capacity: CompressorCapacityPolynomial[];
+  power: CompressorPowerPolynomial[];
+}
+
+/** Geometrias completas separadas por tipo de aplicação. */
+export interface GeometriesComplete {
+  condensation: Geometry[];
+  direct_expansion: Geometry[];
+  evaporator_flooded: Geometry[];
+  cooling: Geometry[];
+  heating: Geometry[];
+  steam: Geometry[];
+}
+
+export interface TubeCatalogEntry {
+  ID: number;
+  Description: string;
+  TubeSize: string | number;
+  NW?: string | number;
+  MaterialID?: number;
+  Umfactor?: number;
+  SCH?: string | number;
+  [extra: string]: unknown;
+}
+
+export interface FanCompleteCurve {
+  IDFan: number;
+  Description: string;
+  Tension: number;
+  ICurva: number;
+  Var01: number; Var02: number; Var03: number; Var04: number; Var05: number;
+  Vmin: number;
+  Vmax: number;
+  Frequency: number;
+  [extra: string]: unknown;
+}
+
+/**
+ * Bloco de fluidos termofísicos completo (campos italianos preservados).
+ * Cada subgrupo é uma lista de registros crus do banco UNILAB com todos
+ * os coeficientes (Pm, T, Cl/Pe, etc.) necessários para Cp, ρ, μ, k(T,p).
+ */
+export interface FluidsThermoPhysical {
+  pureGases: Array<Record<string, unknown>>;
+  gasMixtures: Array<Record<string, unknown>>;
+  pureLiquids: Array<Record<string, unknown>>;
+  liquidMixtures: Array<Record<string, unknown>>;
+  refrigerants: Array<Record<string, unknown>>;
+  refrigerantMixtures: Array<Record<string, unknown>>;
+}
+
+export interface RefrigerantLimit {
+  ID: number;
+  FileName: string;
+  DescriptionID: number | string;
+  Mix: number;
+  Fast?: number;
+  Unilab?: number;
+  PortataSpecifica_Min?: number;
+  PortataSpecifica_Max?: number;
+  PortataSpecifica_Ok?: number;
+  MaxTemp?: number;
+  MaxPress?: number;
+  [extra: string]: unknown;
+}
+
+export interface SecondaryFluidComplete {
+  ID: number;
+  Tipologia: number;
+  FileName: string;
+  DescriptionID: number | string;
+  GUIDFluido?: string;
+  Unilab?: number;
+  Raoult_PM1?: number; Raoult_KA1?: number; Raoult_KB1?: number;
+  Raoult_KC1?: number; Raoult_KD1?: number; Raoult_KE1?: number;
+  [extra: string]: unknown;
+}
+
+export interface LiquidMixtureEntry {
+  LiqMixId: number;
+  Description: string;
+  CL1?: number; Pe1?: number;
+  Cl2?: number; Pe2?: number;
+  Cl3?: number; Pe3?: number;
+  Cl4?: number; Pe4?: number;
+  Cl5?: number; Pe5?: number;
+  AccessLevel?: number;
+  [extra: string]: unknown;
+}
+
+export interface DistributorModel {
+  Codice: string | number;
+  Tipologia: number;
+  NCircuiti_Min?: number;
+  NCircuiti_Max?: number;
+  IdGrandezza?: number;
+  IdSistema?: number;
+  IdDimensioni?: number;
+  [extra: string]: unknown;
+}
+
+export interface DistributorDimension {
+  IdDimensioni: number;
+  IdDisegno?: number;
+  IdSistema?: number;
+  Descrizione?: string;
+  ODM?: number;
+  L?: number;
+  L1?: number;
+  D?: number;
+  [extra: string]: unknown;
+}
+
+export interface DistributorKappaRow {
+  IdGrandezzaForo: number;
+  Refrigerante: string;
+  TEvap: number;
+  Kappa: number;
+}
+
+export interface DistributorComplete {
+  models: DistributorModel[];
+  dimensions: DistributorDimension[];
+  kappa: DistributorKappaRow[];
+}
+
+export interface PumpModelEntry {
+  IDPump: number;
+  Description: string;
+  ICurva: number;
+  Var01: number; Var02: number; Var03: number; Var04: number; Var05: number;
+  [extra: string]: unknown;
+}
+
+export interface PumpDataEntry {
+  IDPump: number;
+  PumpName: string;
+  PowerInput?: number;
+  FLA?: number;
+  SPL?: number;
+  [extra: string]: unknown;
+}
+
+export interface PumpCurveEntry {
+  id: number;
+  IDUNIT: number;
+  Description: string;
+  Pumphighpressure: string;
+  PumpStandard: string;
+  [extra: string]: unknown;
+}
+
+export interface PumpComplete {
+  pumpModels: PumpModelEntry[];
+  pumpData: PumpDataEntry[];
+  pumpCurves: PumpCurveEntry[];
+}
+
+export interface ShellTubeCondenserEntry {
+  IDCondensator: number;
+  Description: string;
+  Sector?: number;
+  PassagesNumber?: number;
+  TubesTotalNo?: number;
+  TubesLayout?: string;
+  ShellInsideDiameter?: number;
+  TubesLength?: number;
+  InsideTubeDiameter?: number;
+  ExternalTubeDiameter?: number;
+  [extra: string]: unknown;
+}
+
+export interface CollectionErrorEntry {
+  Campo0: string;
+  Campo1?: string;
+  Campo2?: string;
+  [extra: string]: unknown;
+}

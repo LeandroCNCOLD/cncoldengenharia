@@ -10,26 +10,42 @@ import { useEffect, useMemo, useState } from "react";
 import type {
   BomCatalog,
   CoilShape,
+  CollectionErrorEntry,
   Compressor,
+  CompressorBackupPolynomials,
+  CompressorCapacityPolynomial,
+  CompressorCurrentPolynomial,
   CompressorOutletTemperature,
+  CompressorPowerPolynomial,
   CompressorStandard,
   CorrectionPolynomial,
+  DistributorComplete,
   DistributorHoleSize,
   DistributorKappaMap,
+  DistributorKappaRow,
   EngineErrorMessage,
   Fan,
+  FanCompleteCurve,
   FanElectricalData,
   FinHeight,
   FinPitch,
   FinThickness,
   FinTreatment,
+  FluidsThermoPhysical,
+  GeometriesComplete,
   Geometry,
+  LiquidMixtureEntry,
   MaterialEntry,
   PowerSupply,
+  PumpComplete,
   PumpData,
   Refrigerant,
+  RefrigerantLimit,
   SecondaryFluid,
+  SecondaryFluidComplete,
+  ShellTubeCondenserEntry,
   ThermoPhysicalProperty,
+  TubeCatalogEntry,
   TubeThickness,
   UiLabelEntry,
   WarningEntry,
@@ -87,6 +103,24 @@ export interface CnCoilsCatalogsData {
   fanElectricalData: FanElectricalData[];
   pumpData: PumpData[];
   compressorOutletTemperature: CompressorOutletTemperature[];
+  // ── LOTE FINAL ──
+  compressorCapacityPolynomials: CompressorCapacityPolynomial[];
+  compressorPowerPolynomials: CompressorPowerPolynomial[];
+  compressorCurrentPolynomials: CompressorCurrentPolynomial[];
+  compressorBackupPolynomials: CompressorBackupPolynomials;
+  geometriesComplete: GeometriesComplete;
+  tubesCatalog: TubeCatalogEntry[];
+  fansComplete: FanCompleteCurve[];
+  fluidsThermoPhysical: FluidsThermoPhysical;
+  refrigerantsLimits: RefrigerantLimit[];
+  secondaryFluidsComplete: SecondaryFluidComplete[];
+  liquidMixtures: LiquidMixtureEntry[];
+  distributorComplete: DistributorComplete;
+  distributorKappaFull: DistributorKappaRow[];
+  pumpComplete: PumpComplete;
+  pumpCurves: import("../types/catalogs").PumpCurveEntry[];
+  shellTubeCondenser: ShellTubeCondenserEntry[];
+  collectionErrors: CollectionErrorEntry[];
 }
 
 export interface CnCoilsCatalogsState extends CnCoilsCatalogsData {
@@ -130,6 +164,30 @@ const EMPTY: CnCoilsCatalogsData = {
   fanElectricalData: [],
   pumpData: [],
   compressorOutletTemperature: [],
+  // ── LOTE FINAL ──
+  compressorCapacityPolynomials: [],
+  compressorPowerPolynomials: [],
+  compressorCurrentPolynomials: [],
+  compressorBackupPolynomials: { capacity: [], power: [] },
+  geometriesComplete: {
+    condensation: [], direct_expansion: [], evaporator_flooded: [],
+    cooling: [], heating: [], steam: [],
+  },
+  tubesCatalog: [],
+  fansComplete: [],
+  fluidsThermoPhysical: {
+    pureGases: [], gasMixtures: [], pureLiquids: [],
+    liquidMixtures: [], refrigerants: [], refrigerantMixtures: [],
+  },
+  refrigerantsLimits: [],
+  secondaryFluidsComplete: [],
+  liquidMixtures: [],
+  distributorComplete: { models: [], dimensions: [], kappa: [] },
+  distributorKappaFull: [],
+  pumpComplete: { pumpModels: [], pumpData: [], pumpCurves: [] },
+  pumpCurves: [],
+  shellTubeCondenser: [],
+  collectionErrors: [],
 };
 
 async function fetchJsonArray<T>(file: string): Promise<T[]> {
@@ -138,6 +196,12 @@ async function fetchJsonArray<T>(file: string): Promise<T[]> {
   const raw = (await res.json()) as unknown;
   if (!Array.isArray(raw)) throw new Error(`Conteúdo inválido em ${file}`);
   return raw as T[];
+}
+
+async function fetchJsonObject<T>(file: string): Promise<T> {
+  const res = await fetch(`${CATALOG_BASE}/${file}`, { cache: "no-cache" });
+  if (!res.ok) throw new Error(`HTTP ${res.status} em ${file}`);
+  return (await res.json()) as T;
 }
 
 // Cache em módulo — evita refetch entre páginas/componentes na mesma sessão.
@@ -192,11 +256,41 @@ export function useCnCoilsCatalogs(): CnCoilsCatalogsState {
           ["fanElectricalData", "fanElectricalData.json"],
           ["pumpData", "pumpData.json"],
           ["compressorOutletTemperature", "compressorOutletTemperature.json"],
+          // LOTE FINAL — arrays
+          ["compressorCapacityPolynomials", "compressorCapacityPolynomials.json"],
+          ["compressorPowerPolynomials", "compressorPowerPolynomials.json"],
+          ["compressorCurrentPolynomials", "compressorCurrentPolynomials.json"],
+          ["tubesCatalog", "tubesCatalog.json"],
+          ["fansComplete", "fansComplete.json"],
+          ["refrigerantsLimits", "refrigerantsLimits.json"],
+          ["secondaryFluidsComplete", "secondaryFluidsComplete.json"],
+          ["liquidMixtures", "liquidMixtures.json"],
+          ["distributorKappaFull", "distributorKappaFull.json"],
+          ["pumpCurves", "pumpCurves.json"],
+          ["shellTubeCondenser", "shellTubeCondenser.json"],
+          ["collectionErrors", "collectionErrors.json"],
         ] as const).map(([key, file]) =>
           (async () => {
             try {
               const arr = await fetchJsonArray<unknown>(file);
               (next as unknown as Record<string, unknown>)[key] = arr;
+            } catch (err) {
+              errs[file] = err instanceof Error ? err.message : String(err);
+            }
+          })(),
+        ),
+        // LOTE FINAL — objetos compostos
+        ...([
+          ["compressorBackupPolynomials", "compressorBackupPolynomials.json"],
+          ["geometriesComplete", "geometriesComplete.json"],
+          ["fluidsThermoPhysical", "fluidsThermoPhysical.json"],
+          ["distributorComplete", "distributorComplete.json"],
+          ["pumpComplete", "pumpComplete.json"],
+        ] as const).map(([key, file]) =>
+          (async () => {
+            try {
+              const obj = await fetchJsonObject<unknown>(file);
+              (next as unknown as Record<string, unknown>)[key] = obj;
             } catch (err) {
               errs[file] = err instanceof Error ? err.message : String(err);
             }
