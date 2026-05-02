@@ -335,7 +335,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   clearResult: () => set({ result: undefined, warnings: [] }),
   reset: () =>
     set({
-      physicalInputs: {},
+      physicalInputs: { ...DEFAULT_PHYSICAL_INPUTS },
       thermoInputs: {},
       selectedGeometry: undefined,
       result: undefined,
