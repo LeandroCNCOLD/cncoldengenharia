@@ -2,7 +2,7 @@
 
 export const ptBR = {
   module: {
-    title: "UNILAB Simulator",
+    title: "Cn Coils Simulator",
     subtitle:
       "Simulação termodinâmica de trocadores de calor com correções polinomiais UNILAB.",
     disclaimer:
