@@ -22,6 +22,7 @@ export type TemperatureApplication =
   | "LT"
   | "MT"
   | "HT"
+  | "AGRO"
   | "freezing"
   | "cooling"
   | "unknown";
