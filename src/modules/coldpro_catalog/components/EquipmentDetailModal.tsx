@@ -12,6 +12,12 @@ import {
 } from "../data/equipmentCatalog.types";
 import { useCatalogRevisionStore } from "../store/useCatalogRevisionStore";
 import { useCatalogValidationStore } from "../store/useCatalogValidationStore";
+import {
+  computeBlockCompleteness,
+  BLOCK_LABEL,
+  type BlockKey,
+  type CatalogCompleteness,
+} from "../services/blockCompletenessService";
 
 type Tab = "tech" | "validation" | "history";
 
@@ -85,6 +91,20 @@ export function EquipmentDetailModal({ equipment, onClose }: Props) {
   const lastReviewedBy = validationOverride?.reviewedBy ?? equipment?.lastReviewedBy;
   const validationNotes = validationOverride?.notes ?? equipment?.validationNotes;
 
+  const completeness: CatalogCompleteness | null = useMemo(
+    () => (equipment ? computeBlockCompleteness(equipment) : null),
+    [equipment],
+  );
+
+  const missingByBlock = useMemo(() => {
+    const map = new Map<BlockKey, Set<string>>();
+    if (!completeness) return map;
+    (Object.keys(completeness.byBlock) as BlockKey[]).forEach((k) => {
+      map.set(k, new Set(completeness.byBlock[k].missing));
+    });
+    return map;
+  }, [completeness]);
+
   const hasReheat = useMemo(() => {
     if (!equipment) return false;
     return (
@@ -94,7 +114,7 @@ export function EquipmentDetailModal({ equipment, onClose }: Props) {
     );
   }, [equipment]);
 
-  if (!equipment) return null;
+  if (!equipment || !completeness) return null;
   const ValidationIcon = VALIDATION_ICON[effectiveValidation];
 
   const handleMarkAnalyzed = () => {
@@ -172,6 +192,8 @@ export function EquipmentDetailModal({ equipment, onClose }: Props) {
         <div className="max-h-[70vh] overflow-y-auto px-6 py-5 text-sm">
           {tab === "tech" && (
             <div className="space-y-5">
+              <BlockStatusBar completeness={completeness} />
+
               <Section title="Identificação">
                 <Field label="Modelo" value={equipment.modelo} />
                 <Field label="Modelo único" value={equipment.modeloUnico} />
@@ -183,64 +205,101 @@ export function EquipmentDetailModal({ equipment, onClose }: Props) {
                 <Field label="Aplicação" value={equipment.application} />
               </Section>
 
-              <Section title="Compressor">
-                <Field label="Modelo" value={equipment.compressorModelo} />
+              <Section
+                title="Compressor"
+                block="compressor"
+                completeness={completeness}
+              >
+                <Field label="Modelo" value={equipment.compressorModelo} fieldKey="compressorModelo" missingSet={missingByBlock.get("compressor")} />
                 <Field label="Código" value={equipment.compressorCodigo} />
                 <Field label="Fabricante" value={equipment.fabricante} />
                 <Field label="Tipo" value={equipment.tipoCompressor} />
-                <Field label="Refrigerante" value={equipment.refrigerante} />
+                <Field label="Refrigerante" value={equipment.refrigerante} fieldKey="refrigerante" missingSet={missingByBlock.get("compressor")} />
                 <Field
                   label="Capacidade"
                   value={fmt(equipment.capacidadeCompressorKcalH ?? equipment.capacidadeFrigorificaKcalH, "kcal/h", 0)}
+                  fieldKey="capacidadeCompressorKcalH"
+                  missingSet={missingByBlock.get("compressor")}
                 />
-                <Field label="Potência" value={fmt(equipment.potenciaCompressorKw, "kW")} />
+                <Field label="Potência" value={fmt(equipment.potenciaCompressorKw, "kW")} fieldKey="potenciaCompressorKw" missingSet={missingByBlock.get("compressor")} />
+                <Field label="T evaporação" value={fmt(equipment.tempEvaporacaoC, "°C", 1)} fieldKey="tempEvaporacaoC" missingSet={missingByBlock.get("compressor")} />
+                <Field label="T condensação" value={fmt(equipment.tempCondensacaoC, "°C", 1)} fieldKey="tempCondensacaoC" missingSet={missingByBlock.get("compressor")} />
                 <Field label="Designação HP" value={equipment.designacaoHp} />
                 <Field label="COP" value={fmt(equipment.cop)} />
                 <Field label="GWP" value={fmt(equipment.gwp, "", 0)} />
               </Section>
 
-              <Section title="Condensador">
-                <Field label="Calor rejeitado" value={fmt(equipment.calorRejeitadoKcalH, "kcal/h", 0)} />
-                <Field label="Vazão de ar" value={fmt(equipment.vazaoArCondensadorM3H, "m³/h", 0)} />
-                <Field label="T condensação" value={fmt(equipment.tempCondensacaoC, "°C", 1)} />
-                <Field label="T ambiente" value={fmt(equipment.tempAmbienteC, "°C", 1)} />
-                <Field label="Rows" value={fmt(equipment.condensadorRows, "", 0)} />
-                <Field label="Tubos/row" value={fmt(equipment.condensadorTubesPorRow, "", 0)} />
-                <Field label="Circuitos" value={fmt(equipment.condensadorCircuitos, "", 0)} />
-                <Field label="Fin spacing" value={fmt(equipment.condensadorFinSpacingMm, "mm")} />
-                <Field label="Comprimento" value={fmt(equipment.condensadorLengthMm, "mm", 0)} />
-                <Field label="Ø tubo" value={fmt(equipment.condensadorTuboDiametroMm, "mm")} />
+              <Section
+                title="Condensador (aletado)"
+                block="condensador"
+                completeness={completeness}
+              >
+                <Field label="Calor rejeitado" value={fmt(equipment.calorRejeitadoKcalH, "kcal/h", 0)} fieldKey="calorRejeitadoKcalH" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Vazão de ar" value={fmt(equipment.vazaoArCondensadorM3H, "m³/h", 0)} fieldKey="vazaoArCondensadorM3H" missingSet={missingByBlock.get("condensador")} />
+                <Field label="T condensação" value={fmt(equipment.tempCondensacaoC, "°C", 1)} fieldKey="tempCondensacaoC" missingSet={missingByBlock.get("condensador")} />
+                <Field label="T ambiente" value={fmt(equipment.tempAmbienteC, "°C", 1)} fieldKey="tempAmbienteC" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Rows" value={fmt(equipment.condensadorRows, "", 0)} fieldKey="condensadorRows" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Tubos/row" value={fmt(equipment.condensadorTubesPorRow, "", 0)} fieldKey="condensadorTubesPorRow" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Circuitos" value={fmt(equipment.condensadorCircuitos, "", 0)} fieldKey="condensadorCircuitos" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Ø tubo externo" value={fmt(equipment.condensadorTuboDiametroMm, "mm")} fieldKey="condensadorTuboDiametroMm" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Ø tubo interno" value={fmt(equipment.condensadorTuboDiametroInternoMm, "mm")} fieldKey="condensadorTuboDiametroInternoMm" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Espessura parede" value={fmt(equipment.condensadorTuboEspessuraMm, "mm", 3)} />
+                <Field label="Pitch transverso" value={fmt(equipment.condensadorTubePitchTransverseMm, "mm")} fieldKey="condensadorTubePitchTransverseMm" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Pitch longitudinal" value={fmt(equipment.condensadorTubePitchLongitudinalMm, "mm")} fieldKey="condensadorTubePitchLongitudinalMm" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Passo aleta" value={fmt(equipment.condensadorFinSpacingMm, "mm")} fieldKey="condensadorFinSpacingMm" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Espessura aleta" value={fmt(equipment.condensadorFinThicknessMm, "mm", 3)} fieldKey="condensadorFinThicknessMm" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Largura serpentina" value={fmt(equipment.condensadorCoilWidthM, "m")} fieldKey="condensadorCoilWidthM" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Altura serpentina" value={fmt(equipment.condensadorCoilHeightM, "m")} fieldKey="condensadorCoilHeightM" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Profundidade" value={fmt(equipment.condensadorCoilDepthM, "m")} fieldKey="condensadorCoilDepthM" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Material tubo" value={equipment.condensadorTubeMaterial} fieldKey="condensadorTubeMaterial" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Material aleta" value={equipment.condensadorFinMaterial} fieldKey="condensadorFinMaterial" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Área de face" value={fmt(equipment.condensadorAreaFaceM2, "m²")} fieldKey="condensadorAreaFaceM2" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Área de troca" value={fmt(equipment.condensadorAreaTrocaM2, "m²")} fieldKey="condensadorAreaTrocaM2" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Volume interno" value={fmt(equipment.condensadorVolumeInternoL, "L")} fieldKey="condensadorVolumeInternoL" missingSet={missingByBlock.get("condensador")} />
+                <Field label="Comprimento (legacy)" value={fmt(equipment.condensadorLengthMm, "mm", 0)} />
               </Section>
 
-              <Section title="Evaporador">
+              <Section
+                title="Evaporador (aletado)"
+                block="evaporador"
+                completeness={completeness}
+              >
                 <Field label="Capacidade frigorífica" value={fmt(equipment.capacidadeFrigorificaKcalH, "kcal/h", 0)} />
-                <Field label="Vazão de ar" value={fmt(equipment.vazaoArEvaporadorM3H, "m³/h", 0)} />
-                <Field label="T evaporação" value={fmt(equipment.tempEvaporacaoC, "°C", 1)} />
+                <Field label="Vazão de ar" value={fmt(equipment.vazaoArEvaporadorM3H, "m³/h", 0)} fieldKey="vazaoArEvaporadorM3H" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="T evaporação" value={fmt(equipment.tempEvaporacaoC, "°C", 1)} fieldKey="tempEvaporacaoC" missingSet={missingByBlock.get("evaporador")} />
                 <Field label="T câmara" value={fmt(equipment.tempCamaraC, "°C", 1)} />
                 <Field label="Umidade câmara" value={fmt(equipment.umidadeCamaraPercent, "%", 0)} />
-                <Field label="Área superfície" value={fmt(equipment.evaporadorAreaSuperficieM2, "m²")} />
-                <Field label="Volume interno" value={fmt(equipment.evaporadorVolumeInternoL, "L")} />
-                <Field label="Rows" value={fmt(equipment.evaporadorRows, "", 0)} />
-                <Field label="Tubos/row" value={fmt(equipment.evaporadorTubesPorRow, "", 0)} />
-                <Field label="Circuitos" value={fmt(equipment.evaporadorCircuitos, "", 0)} />
-                <Field label="Fin spacing" value={fmt(equipment.evaporadorFinSpacingMm, "mm")} />
-                <Field label="Comprimento" value={fmt(equipment.evaporadorLengthMm, "mm", 0)} />
-                <Field label="Ø tubo externo" value={fmt(equipment.evaporadorTuboDiametroMm, "mm")} />
-                <Field label="Ø tubo interno" value={fmt(equipment.evaporadorTubeInnerDiameterMm, "mm")} />
-                <Field label="Pitch transverso" value={fmt(equipment.evaporadorTubePitchTransverseMm, "mm")} />
-                <Field label="Pitch longitudinal" value={fmt(equipment.evaporadorTubePitchLongitudinalMm, "mm")} />
-                <Field label="Altura aleta" value={fmt(equipment.evaporadorFinHeightMm, "mm")} />
-                <Field label="Espessura aleta" value={fmt(equipment.evaporadorFinThicknessMm, "mm", 3)} />
-                <Field label="Largura serpentina" value={fmt(equipment.evaporadorCoilWidthM, "m")} />
-                <Field label="Altura serpentina" value={fmt(equipment.evaporadorCoilHeightM, "m")} />
-                <Field label="Material tubo" value={equipment.evaporadorTubeMaterial} />
-                <Field label="Material aleta" value={equipment.evaporadorFinMaterial} />
-                <Field label="T ar entrada" value={fmt(equipment.evaporadorAirTemperatureInC, "°C", 1)} />
-                <Field label="UR ar entrada" value={fmt(equipment.evaporadorAirRelativeHumidityIn)} />
-                <Field label="Vazão mássica ar" value={fmt(equipment.evaporadorAirMassFlowKgS, "kg/s", 3)} />
+                <Field label="Rows" value={fmt(equipment.evaporadorRows, "", 0)} fieldKey="evaporadorRows" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Tubos/row" value={fmt(equipment.evaporadorTubesPorRow, "", 0)} fieldKey="evaporadorTubesPorRow" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Circuitos" value={fmt(equipment.evaporadorCircuitos, "", 0)} fieldKey="evaporadorCircuitos" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Ø tubo externo" value={fmt(equipment.evaporadorTuboDiametroMm, "mm")} fieldKey="evaporadorTuboDiametroMm" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Ø tubo interno" value={fmt(equipment.evaporadorTubeInnerDiameterMm, "mm")} fieldKey="evaporadorTubeInnerDiameterMm" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Espessura parede" value={fmt(equipment.evaporadorTuboEspessuraMm, "mm", 3)} fieldKey="evaporadorTuboEspessuraMm" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Pitch transverso" value={fmt(equipment.evaporadorTubePitchTransverseMm, "mm")} fieldKey="evaporadorTubePitchTransverseMm" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Pitch longitudinal" value={fmt(equipment.evaporadorTubePitchLongitudinalMm, "mm")} fieldKey="evaporadorTubePitchLongitudinalMm" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Passo aleta" value={fmt(equipment.evaporadorFinSpacingMm, "mm")} fieldKey="evaporadorFinSpacingMm" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Espessura aleta" value={fmt(equipment.evaporadorFinThicknessMm, "mm", 3)} fieldKey="evaporadorFinThicknessMm" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Altura aleta" value={fmt(equipment.evaporadorFinHeightMm, "mm")} fieldKey="evaporadorFinHeightMm" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Largura serpentina" value={fmt(equipment.evaporadorCoilWidthM, "m")} fieldKey="evaporadorCoilWidthM" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Altura serpentina" value={fmt(equipment.evaporadorCoilHeightM, "m")} fieldKey="evaporadorCoilHeightM" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Profundidade" value={fmt(equipment.evaporadorCoilDepthM, "m")} fieldKey="evaporadorCoilDepthM" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Material tubo" value={equipment.evaporadorTubeMaterial} fieldKey="evaporadorTubeMaterial" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Material aleta" value={equipment.evaporadorFinMaterial} fieldKey="evaporadorFinMaterial" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Área de face" value={fmt(equipment.evaporadorAreaFaceM2, "m²")} fieldKey="evaporadorAreaFaceM2" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Área de troca" value={fmt(equipment.evaporadorAreaTrocaM2, "m²")} fieldKey="evaporadorAreaTrocaM2" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Área superfície (legacy)" value={fmt(equipment.evaporadorAreaSuperficieM2, "m²")} />
+                <Field label="Volume interno" value={fmt(equipment.evaporadorVolumeInternoL, "L")} fieldKey="evaporadorVolumeInternoL" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="T ar entrada" value={fmt(equipment.evaporadorAirTemperatureInC, "°C", 1)} fieldKey="evaporadorAirTemperatureInC" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="UR ar entrada" value={fmt(equipment.evaporadorAirRelativeHumidityIn)} fieldKey="evaporadorAirRelativeHumidityIn" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Vazão mássica ar" value={fmt(equipment.evaporadorAirMassFlowKgS, "kg/s", 3)} fieldKey="evaporadorAirMassFlowKgS" missingSet={missingByBlock.get("evaporador")} />
+                <Field label="Comprimento (legacy)" value={fmt(equipment.evaporadorLengthMm, "mm", 0)} />
               </Section>
 
-              <Section title="Reaquecimento">
+              <Section
+                title="Reaquecimento (aletado)"
+                block="reheat"
+                completeness={completeness}
+              >
                 <div className="col-span-full mb-1">
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -249,33 +308,45 @@ export function EquipmentDetailModal({ equipment, onClose }: Props) {
                         : "bg-slate-100 text-slate-600"
                     }`}
                   >
-                    {hasReheat ? "Disponível" : "Não cadastrado"}
+                    {hasReheat ? "Algum dado cadastrado" : "Não cadastrado"}
                   </span>
                 </div>
-                <Field label="Q alvo" value={fmt(equipment.reheatQTargetW, "W", 0)} />
-                <Field label="T ar entrada" value={fmt(equipment.reheatTAirInC, "°C", 1)} />
-                <Field label="T ar saída" value={fmt(equipment.reheatTAirOutC, "°C", 1)} />
-                <Field label="Vazão mássica ar" value={fmt(equipment.reheatAirMassFlowKgS, "kg/s", 3)} />
-                <Field label="T condensação" value={fmt(equipment.reheatTCondensingC, "°C", 1)} />
-                <Field label="T gás quente" value={fmt(equipment.reheatTHotGasInC, "°C", 1)} />
-                <Field label="Ø tubo externo" value={fmt(equipment.reheatTubeOuterDiameterM, "m", 4)} />
-                <Field label="Espessura tubo" value={fmt(equipment.reheatTubeThicknessM, "m", 4)} />
-                <Field label="Fin spacing" value={fmt(equipment.reheatFinSpacingM, "m", 4)} />
-                <Field label="Espessura aleta" value={fmt(equipment.reheatFinThicknessM, "m", 4)} />
-                <Field label="Pitch transversal" value={fmt(equipment.reheatTubePitchTransversalM, "m", 4)} />
-                <Field label="Pitch longitudinal" value={fmt(equipment.reheatTubePitchLongitudinalM, "m", 4)} />
-                <Field label="Comprimento" value={fmt(equipment.reheatCoilLengthM, "m")} />
-                <Field label="Circuitos" value={fmt(equipment.reheatCircuits, "", 0)} />
+                <Field label="Q alvo" value={fmt(equipment.reheatQTargetW, "W", 0)} fieldKey="reheatQTargetW" missingSet={missingByBlock.get("reheat")} />
+                <Field label="T ar entrada" value={fmt(equipment.reheatTAirInC, "°C", 1)} fieldKey="reheatTAirInC" missingSet={missingByBlock.get("reheat")} />
+                <Field label="T ar saída" value={fmt(equipment.reheatTAirOutC, "°C", 1)} fieldKey="reheatTAirOutC" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Vazão mássica ar" value={fmt(equipment.reheatAirMassFlowKgS, "kg/s", 3)} fieldKey="reheatAirMassFlowKgS" missingSet={missingByBlock.get("reheat")} />
+                <Field label="T condensação" value={fmt(equipment.reheatTCondensingC, "°C", 1)} fieldKey="reheatTCondensingC" missingSet={missingByBlock.get("reheat")} />
+                <Field label="T gás quente" value={fmt(equipment.reheatTHotGasInC, "°C", 1)} fieldKey="reheatTHotGasInC" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Ø tubo externo" value={fmt(equipment.reheatTubeOuterDiameterM, "m", 4)} fieldKey="reheatTubeOuterDiameterM" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Espessura tubo" value={fmt(equipment.reheatTubeThicknessM, "m", 4)} fieldKey="reheatTubeThicknessM" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Passo aleta" value={fmt(equipment.reheatFinSpacingM, "m", 4)} fieldKey="reheatFinSpacingM" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Espessura aleta" value={fmt(equipment.reheatFinThicknessM, "m", 4)} fieldKey="reheatFinThicknessM" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Pitch transversal" value={fmt(equipment.reheatTubePitchTransversalM, "m", 4)} fieldKey="reheatTubePitchTransversalM" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Pitch longitudinal" value={fmt(equipment.reheatTubePitchLongitudinalM, "m", 4)} fieldKey="reheatTubePitchLongitudinalM" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Comprimento" value={fmt(equipment.reheatCoilLengthM, "m")} fieldKey="reheatCoilLengthM" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Circuitos" value={fmt(equipment.reheatCircuits, "", 0)} fieldKey="reheatCircuits" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Material tubo" value={equipment.reheatTubeMaterial} fieldKey="reheatTubeMaterial" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Material aleta" value={equipment.reheatFinMaterial} fieldKey="reheatFinMaterial" missingSet={missingByBlock.get("reheat")} />
+                <Field label="Largura serpentina" value={fmt(equipment.reheatCoilWidthM, "m")} />
+                <Field label="Altura serpentina" value={fmt(equipment.reheatCoilHeightM, "m")} />
+                <Field label="Profundidade" value={fmt(equipment.reheatCoilDepthM, "m")} />
+                <Field label="Área de face" value={fmt(equipment.reheatAreaFaceM2, "m²")} />
+                <Field label="Área de troca" value={fmt(equipment.reheatAreaTrocaM2, "m²")} />
+                <Field label="Volume interno" value={fmt(equipment.reheatVolumeInternoL, "L")} />
               </Section>
 
-              <Section title="Elétrica">
-                <Field label="Tensão" value={fmt(equipment.tensaoV, "V", 0)} />
-                <Field label="Fases" value={fmt(equipment.numeroFases, "", 0)} />
-                <Field label="Frequência" value={fmt(equipment.frequenciaHz, "Hz", 0)} />
+              <Section
+                title="Elétrica"
+                block="eletrica"
+                completeness={completeness}
+              >
+                <Field label="Tensão" value={fmt(equipment.tensaoV, "V", 0)} fieldKey="tensaoV" missingSet={missingByBlock.get("eletrica")} />
+                <Field label="Fases" value={fmt(equipment.numeroFases, "", 0)} fieldKey="numeroFases" missingSet={missingByBlock.get("eletrica")} />
+                <Field label="Frequência" value={fmt(equipment.frequenciaHz, "Hz", 0)} fieldKey="frequenciaHz" missingSet={missingByBlock.get("eletrica")} />
                 <Field label="Configuração" value={equipment.configuracaoEletrica} />
-                <Field label="Corrente nominal" value={fmt(equipment.correnteA, "A")} />
+                <Field label="Corrente nominal" value={fmt(equipment.correnteA, "A")} fieldKey="correnteA" missingSet={missingByBlock.get("eletrica")} />
                 <Field label="Corrente partida" value={fmt(equipment.correntePartidaA, "A")} />
-                <Field label="Potência total" value={fmt(equipment.potenciaEletricaKw, "kW")} />
+                <Field label="Potência total" value={fmt(equipment.potenciaEletricaKw, "kW")} fieldKey="potenciaEletricaKw" missingSet={missingByBlock.get("eletrica")} />
                 <Field label="Potência ventilador" value={fmt(equipment.potenciaVentiladorKw, "kW")} />
               </Section>
 
@@ -494,20 +565,66 @@ function TabButton({
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+  block,
+  completeness,
+}: {
+  title: string;
+  children: React.ReactNode;
+  block?: BlockKey;
+  completeness?: CatalogCompleteness;
+}) {
+  const detail = block && completeness ? completeness.byBlock[block] : undefined;
+  const showStatus = !!detail;
+  const isComplete = detail?.complete ?? false;
   return (
     <section>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-        {title}
-      </h3>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          {title}
+        </h3>
+        {showStatus && (
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+              isComplete
+                ? "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200"
+                : "bg-amber-50 text-amber-800 ring-1 ring-amber-200"
+            }`}
+            title={
+              isComplete
+                ? "Bloco completo — pode ser usado pelo simulador"
+                : `Faltam: ${detail!.missing.join(", ")}`
+            }
+          >
+            {isComplete ? "Completo" : `Incompleto · ${detail!.missing.length} pendência(s)`}
+          </span>
+        )}
+      </div>
       <dl className="grid grid-cols-1 gap-x-4 gap-y-2 rounded-lg border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-3">
         {children}
       </dl>
+      {showStatus && !isComplete && detail!.missing.length > 0 && (
+        <p className="mt-1 text-[11px] text-amber-700">
+          Pendente: {detail!.missing.join(", ")}
+        </p>
+      )}
     </section>
   );
 }
 
-function Field({ label, value }: { label: string; value: unknown }) {
+function Field({
+  label,
+  value,
+  fieldKey,
+  missingSet,
+}: {
+  label: string;
+  value: unknown;
+  fieldKey?: string;
+  missingSet?: Set<string>;
+}) {
   const display =
     value === undefined || value === null || value === ""
       ? NA
@@ -515,11 +632,28 @@ function Field({ label, value }: { label: string; value: unknown }) {
         ? value.toLocaleString("pt-BR", { maximumFractionDigits: 4 })
         : String(value);
   const isMissing = display === NA;
+  const isPendency = !!fieldKey && !!missingSet && missingSet.has(fieldKey);
   return (
     <div className="min-w-0">
-      <dt className="truncate text-[11px] uppercase tracking-wide text-slate-500">{label}</dt>
+      <dt className="truncate text-[11px] uppercase tracking-wide text-slate-500">
+        {label}
+        {isPendency && (
+          <span
+            className="ml-1 inline-block rounded-sm bg-amber-100 px-1 text-[9px] font-semibold uppercase text-amber-800"
+            title="Campo obrigatório para simulação automática"
+          >
+            req
+          </span>
+        )}
+      </dt>
       <dd
-        className={`mt-0.5 truncate text-sm ${isMissing ? "text-slate-400 italic" : "text-slate-900"}`}
+        className={`mt-0.5 truncate text-sm ${
+          isPendency
+            ? "text-amber-700 font-medium"
+            : isMissing
+              ? "text-slate-400 italic"
+              : "text-slate-900"
+        }`}
         title={display}
       >
         {display}
@@ -527,3 +661,62 @@ function Field({ label, value }: { label: string; value: unknown }) {
     </div>
   );
 }
+
+function BlockStatusBar({ completeness }: { completeness: CatalogCompleteness }) {
+  const blocks: BlockKey[] = ["compressor", "eletrica", "condensador", "evaporador", "reheat"];
+  return (
+    <section className="rounded-lg border border-slate-200 bg-white p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Status por bloco
+        </h3>
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+            completeness.simulacaoCompleta
+              ? "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200"
+              : "bg-amber-50 text-amber-800 ring-1 ring-amber-200"
+          }`}
+        >
+          {completeness.simulacaoCompleta
+            ? "Pronto para simulação automática"
+            : "Simulação automática indisponível"}
+        </span>
+      </div>
+      <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        {blocks.map((b) => {
+          const d = completeness.byBlock[b];
+          const ok = d.complete;
+          return (
+            <li
+              key={b}
+              className={`rounded-md border p-2 text-xs ${
+                ok
+                  ? "border-emerald-200 bg-emerald-50"
+                  : "border-amber-200 bg-amber-50"
+              }`}
+              title={ok ? "Completo" : `Faltam: ${d.missing.join(", ")}`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-medium text-slate-800">{BLOCK_LABEL[b]}</span>
+                <span
+                  className={`text-[10px] font-semibold uppercase ${
+                    ok ? "text-emerald-700" : "text-amber-800"
+                  }`}
+                >
+                  {ok ? "OK" : `${d.missing.length} pend.`}
+                </span>
+              </div>
+              {!ok && (
+                <p className="mt-1 line-clamp-2 text-[10px] text-amber-700" title={d.missing.join(", ")}>
+                  {d.missing.slice(0, 3).join(", ")}
+                  {d.missing.length > 3 ? `, +${d.missing.length - 3}` : ""}
+                </p>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+

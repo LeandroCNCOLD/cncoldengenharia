@@ -1,44 +1,24 @@
 import type { CatalogEquipmentRow } from "../data/equipmentCatalog.types";
 import type { ReheatCoilSizingInput } from "@/modules/coldpro_v2";
+import { computeBlockCompleteness } from "../services/blockCompletenessService";
 
 export interface ReheatAdapterResult {
   input: ReheatCoilSizingInput | null;
   warnings: string[];
 }
 
-const REQUIRED_FIELDS = [
-  "reheatQTargetW",
-  "reheatTAirInC",
-  "reheatTAirOutC",
-  "reheatAirMassFlowKgS",
-  "reheatTCondensingC",
-  "reheatTHotGasInC",
-  "reheatTubeOuterDiameterM",
-  "reheatTubeThicknessM",
-  "reheatFinSpacingM",
-  "reheatFinThicknessM",
-  "reheatTubePitchTransversalM",
-  "reheatTubePitchLongitudinalM",
-  "reheatCoilLengthM",
-  "reheatCircuits",
-] as const;
-
 /**
  * Converte CatalogEquipmentRow em ReheatCoilSizingInput.
- * Só converte quando TODOS os campos obrigatórios estão presentes.
- * Não inventa valores.
+ * Só converte quando o bloco "reheat" estiver 100% completo
+ * (segundo computeBlockCompleteness). Não inventa valores.
  */
 export function catalogToReheatCoilInput(row: CatalogEquipmentRow): ReheatAdapterResult {
   const warnings: string[] = [];
+  const status = computeBlockCompleteness(row);
 
-  const missing = REQUIRED_FIELDS.filter((k) => {
-    const v = row[k as keyof CatalogEquipmentRow];
-    return v === undefined || v === null;
-  });
-
-  if (missing.length > 0) {
+  if (!status.reheatCompleto) {
     warnings.push(
-      `Reaquecimento sem dados suficientes para ReheatCoilSizingInput (faltam: ${missing.join(", ")}).`,
+      `Reaquecimento (aletado) incompleto — campos faltantes: ${status.byBlock.reheat.missing.join(", ")}.`,
     );
     return { input: null, warnings };
   }
