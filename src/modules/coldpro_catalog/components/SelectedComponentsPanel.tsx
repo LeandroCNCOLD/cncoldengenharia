@@ -33,6 +33,8 @@ function SelectedItem({ label, item }: ItemProps) {
 interface Props {
   selectedCompressor?: CatalogEquipmentRow;
   selectedCondenser?: CatalogEquipmentRow;
+  selectedEvaporator?: CatalogEquipmentRow;
+  selectedReheatCoil?: CatalogEquipmentRow;
   onClear: () => void;
   onProceed?: () => void;
 }
@@ -40,10 +42,17 @@ interface Props {
 export function SelectedComponentsPanel({
   selectedCompressor,
   selectedCondenser,
+  selectedEvaporator,
+  selectedReheatCoil,
   onClear,
   onProceed,
 }: Props) {
-  const hasAny = !!(selectedCompressor || selectedCondenser);
+  const hasAny = !!(
+    selectedCompressor ||
+    selectedCondenser ||
+    selectedEvaporator ||
+    selectedReheatCoil
+  );
 
   return (
     <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-4">
@@ -62,6 +71,8 @@ export function SelectedComponentsPanel({
 
       <SelectedItem label="Compressor / Unidade" item={selectedCompressor} />
       <SelectedItem label="Condensador / Unidade" item={selectedCondenser} />
+      <SelectedItem label="Evaporador" item={selectedEvaporator} />
+      <SelectedItem label="Reaquecimento" item={selectedReheatCoil} />
 
       {onProceed && (
         <button
