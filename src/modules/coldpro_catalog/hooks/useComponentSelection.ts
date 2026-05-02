@@ -13,12 +13,10 @@ function hasEvaporatorData(row: CatalogEquipmentRow): boolean {
 }
 
 function hasReheatData(row: CatalogEquipmentRow): boolean {
-  // O catálogo atual não traz campos específicos de reaquecimento.
-  // Mantemos esta função como ponto único de extensão futura.
-  const raw = row.raw ?? {};
   return Boolean(
-    (raw as Record<string, unknown>).reheat_q_w ||
-      (raw as Record<string, unknown>).reaquecimentoKw,
+    row.reheatQTargetW ||
+      row.reheatTAirInC !== undefined ||
+      row.reheatCoilLengthM,
   );
 }
 
