@@ -29,11 +29,13 @@ export function GeometryCombobox({
   selectedId,
   onChange,
   disabled,
+  forcedTipo,
 }: GeometryComboboxProps) {
   const [open, setOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [tipo, setTipo] = useState<TipoSerpentina | "">("");
+  const [tipoState, setTipo] = useState<TipoSerpentina | "">("");
+  const tipo: TipoSerpentina | "" = forcedTipo ?? tipoState;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
