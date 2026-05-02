@@ -8,7 +8,10 @@ export type UnilabComponentType =
   | "condenser_shell_tube"
   | "heating_coil"
   | "cooling_coil"
-  | "defrost_steam_coil";
+  | "defrost_steam_coil"
+  | "recuperator"
+  | "shell_tube"
+  | "chiller_unit";
 
 export interface CoilGeometryCatalogItem {
   id: string;

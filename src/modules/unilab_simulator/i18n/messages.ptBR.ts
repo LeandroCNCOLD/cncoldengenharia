@@ -17,7 +17,7 @@ export const ptBR = {
       },
       condensers: {
         title: "Condensadores",
-        description: "A ar e casco-tubo.",
+        description: "A ar (aletado) e microcanal.",
       },
       heating: {
         title: "Baterias de Aquecimento",
@@ -25,11 +25,24 @@ export const ptBR = {
       },
       cooling: {
         title: "Baterias de Resfriamento",
-        description: "Resfriamento por água gelada.",
+        description: "Resfriamento por água gelada ou solução de glicol.",
       },
       defrost: {
-        title: "Serpentinas de Degelo / Vapor",
-        description: "Degelo ativo a vapor.",
+        title: "Serpentinas de Degelo",
+        description: "Degelo ativo a vapor ou resistência elétrica.",
+      },
+      recuperator: {
+        title: "Recuperador de Calor",
+        description: "Trocadores gás-gás (ar-ar) para recuperação de energia.",
+      },
+      shellTube: {
+        title: "Trocadores Casco-Tubo",
+        description: "Evaporadores e condensadores industriais (Shell & Tube).",
+      },
+      chiller: {
+        title: "Chiller / Unidade Completa",
+        description:
+          "Simulação do sistema completo (Evaporador + Condensador + Compressor).",
       },
     },
   },
