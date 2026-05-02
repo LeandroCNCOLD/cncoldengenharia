@@ -51,66 +51,66 @@ export function WorkspaceSidebar({
   const setEngineVersion = useUnilabSimulationStore((s) => s.setEngineVersion);
 
   return (
-    <aside className="flex h-full w-full flex-col gap-2 rounded border border-slate-300 bg-slate-50 p-2 text-xs shadow-sm">
+    <aside className="flex h-full w-full flex-col gap-1.5 rounded border border-slate-300 bg-slate-50 p-1.5 text-[10px] shadow-sm">
       {/* Cabeçalho com a aplicação */}
-      <div className="rounded bg-[#1E6FD9] px-3 py-2 text-center text-xs font-bold uppercase tracking-wider text-white">
+      <div className="rounded bg-[#1E6FD9] px-2 py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white">
         {cfg.shortLabel}
       </div>
 
       {/* Modo de Cálculo */}
       <div className="rounded border border-slate-300 bg-white">
-        <div className="border-b border-slate-200 bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700">
+        <div className="border-b border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
           Modo de Cálculo
         </div>
-        <div className="space-y-1 p-2">
-          <label className="flex items-center gap-2 text-[11px] text-slate-700">
+        <div className="flex flex-wrap gap-x-2 gap-y-0.5 p-1.5">
+          <label className="flex items-center gap-1 text-[10px] text-slate-700">
             <input
               type="radio"
               name="calcMode"
               checked={calcMode === "verify"}
               onChange={() => setCalcMode("verify")}
-              className="accent-[#1E6FD9]"
+              className="h-3 w-3 accent-[#1E6FD9]"
             />
             Verificar
           </label>
-          <label className="flex items-center gap-2 text-[11px] text-slate-700">
+          <label className="flex items-center gap-1 text-[10px] text-slate-700">
             <input
               type="radio"
               name="calcMode"
               checked={calcMode === "design"}
               onChange={() => setCalcMode("design")}
-              className="accent-[#1E6FD9]"
+              className="h-3 w-3 accent-[#1E6FD9]"
             />
             Desenho
           </label>
         </div>
       </div>
 
-      {/* Motor termodinâmico (V1 Etapa 5 / V2 Etapa 6 ASHRAE) */}
+      {/* Motor termodinâmico */}
       <div className="rounded border border-slate-300 bg-white">
-        <div className="border-b border-slate-200 bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700">
-          Motor Termodinâmico
+        <div className="border-b border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
+          Motor
         </div>
-        <div className="space-y-1 p-2">
-          <label className="flex items-center gap-2 text-[11px] text-slate-700">
+        <div className="space-y-0.5 p-1.5">
+          <label className="flex items-center gap-1 text-[10px] text-slate-700">
             <input
               type="radio"
               name="engineVersion"
               checked={engineVersion === "v1"}
               onChange={() => setEngineVersion("v1")}
-              className="accent-[#1E6FD9]"
+              className="h-3 w-3 accent-[#1E6FD9]"
             />
-            V1 — NTU-ε UNILAB
+            V1 NTU-ε
           </label>
-          <label className="flex items-center gap-2 text-[11px] text-slate-700">
+          <label className="flex items-center gap-1 text-[10px] text-slate-700">
             <input
               type="radio"
               name="engineVersion"
               checked={engineVersion === "v2"}
               onChange={() => setEngineVersion("v2")}
-              className="accent-[#1E6FD9]"
+              className="h-3 w-3 accent-[#1E6FD9]"
             />
-            V2 — ASHRAE Sens/Lat
+            V2 ASHRAE
           </label>
         </div>
       </div>
@@ -125,7 +125,7 @@ export function WorkspaceSidebar({
                 <button
                   type="button"
                   onClick={() => onSectionChange(s.id)}
-                  className={`block w-full border-b border-slate-100 px-3 py-1.5 text-left text-[11px] last:border-b-0 ${
+                  className={`block w-full border-b border-slate-100 px-2 py-1 text-left text-[10px] last:border-b-0 ${
                     active
                       ? "bg-[#1E6FD9] font-semibold text-white"
                       : "text-slate-700 hover:bg-slate-100"
@@ -141,11 +141,11 @@ export function WorkspaceSidebar({
 
       {/* Superfície de Troca */}
       <div className="rounded border border-slate-300 bg-white">
-        <div className="border-b border-slate-200 bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700">
+        <div className="border-b border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
           Superfície de Troca
         </div>
-        <div className="grid grid-cols-[60px_1fr] items-center gap-1 p-2">
-          <div className="rounded border border-slate-300 bg-white px-1.5 py-1 text-center text-[11px] text-slate-600">
+        <div className="grid grid-cols-[40px_1fr] items-center gap-1 p-1.5">
+          <div className="rounded border border-slate-300 bg-white px-1 py-0.5 text-center text-[10px] text-slate-600">
             m²
           </div>
           <input
@@ -156,52 +156,50 @@ export function WorkspaceSidebar({
                 : "---"
             }
             readOnly
-            className="w-full cursor-not-allowed rounded border border-slate-300 bg-emerald-50 px-2 py-1 text-right font-mono text-[11px] text-slate-800"
+            className="w-full cursor-not-allowed rounded border border-slate-300 bg-emerald-50 px-1.5 py-0.5 text-right font-mono text-[10px] text-slate-800"
           />
         </div>
-        <div className="px-2 pb-2">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-            Descrição do Projeto
-          </div>
+        <div className="px-1.5 pb-1.5">
           <input
             type="text"
-            placeholder="(opcional)"
-            className="mt-1 w-full rounded border border-slate-300 bg-white px-2 py-1 text-[11px] text-slate-900 focus:border-[#1E6FD9] focus:outline-none"
+            placeholder="Descrição (opcional)"
+            className="w-full rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] text-slate-900 focus:border-[#1E6FD9] focus:outline-none"
           />
-          <div className="mt-1 flex items-center gap-1.5 rounded bg-emerald-100 px-2 py-1 text-[10px] font-semibold text-emerald-800">
+          <div className="mt-1 flex items-center gap-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-800">
             ✓ Sem Avisos
           </div>
         </div>
       </div>
 
       {/* Botões */}
-      <div className="mt-auto flex flex-col gap-1.5">
+      <div className="mt-auto flex flex-col gap-1">
         <button
           type="button"
           onClick={onSimulate}
           disabled={!canSimulate}
-          className="inline-flex items-center justify-center gap-1.5 rounded bg-[#1E6FD9] px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#1759b3] disabled:cursor-not-allowed disabled:bg-slate-400"
+          className="inline-flex items-center justify-center gap-1 rounded bg-[#1E6FD9] px-2 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-[#1759b3] disabled:cursor-not-allowed disabled:bg-slate-400"
         >
-          <Calculator className="h-3.5 w-3.5" />
+          <Calculator className="h-3 w-3" />
           {isSimulating ? "Calculando…" : "Calcular"}
         </button>
-        <button
-          type="button"
-          disabled
-          className="inline-flex items-center justify-center gap-1.5 rounded border border-slate-300 bg-white px-3 py-2 text-xs text-slate-500 shadow-sm disabled:cursor-not-allowed"
-          title="Disponível na Etapa 5"
-        >
-          <Printer className="h-3.5 w-3.5" />
-          Imprimir
-        </button>
-        <button
-          type="button"
-          onClick={onReset}
-          className="inline-flex items-center justify-center gap-1.5 rounded border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 shadow-sm hover:bg-slate-100"
-        >
-          <RotateCcw className="h-3.5 w-3.5" />
-          Limpar
-        </button>
+        <div className="grid grid-cols-2 gap-1">
+          <button
+            type="button"
+            disabled
+            className="inline-flex items-center justify-center gap-1 rounded border border-slate-300 bg-white px-1 py-1 text-[10px] text-slate-500 shadow-sm disabled:cursor-not-allowed"
+          >
+            <Printer className="h-3 w-3" />
+            Imprimir
+          </button>
+          <button
+            type="button"
+            onClick={onReset}
+            className="inline-flex items-center justify-center gap-1 rounded border border-slate-300 bg-white px-1 py-1 text-[10px] text-slate-700 shadow-sm hover:bg-slate-100"
+          >
+            <RotateCcw className="h-3 w-3" />
+            Limpar
+          </button>
+        </div>
       </div>
     </aside>
   );
