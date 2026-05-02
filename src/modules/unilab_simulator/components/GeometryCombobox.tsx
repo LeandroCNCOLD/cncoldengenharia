@@ -13,6 +13,8 @@ interface GeometryComboboxProps {
   selectedId?: string;
   onChange: (geometry: CoilGeometryItem | undefined) => void;
   disabled?: boolean;
+  /** Quando definido, força o filtro de tipo (lock) e oculta a UI de troca. */
+  forcedTipo?: TipoSerpentina;
 }
 
 /**
