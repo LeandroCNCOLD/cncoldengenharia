@@ -104,6 +104,7 @@ export function UnilabWorkspacePage() {
     componentType,
   });
   const [sending, setSending] = useState(false);
+  const [schematicOpen, setSchematicOpen] = useState(false);
 
   const inputsValid =
     validatePhysicalInputs(physical).isValid &&
@@ -197,10 +198,16 @@ export function UnilabWorkspacePage() {
         />
 
         <div className="min-w-0 space-y-2 xl:contents">
-          {/* COLUNA CENTRAL — Lado Ventilador + esquema visual (fixos) */}
+          {/* COLUNA CENTRAL — Lado Ventilador (fixo). Esquema da serpentina abre em modal. */}
           <div className="min-w-0 space-y-2">
             <AirSidePanel result={result} />
-            <CoilSchematic />
+            <button
+              type="button"
+              onClick={() => setSchematicOpen(true)}
+              className="inline-flex w-full items-center justify-center gap-2 rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+            >
+              Ver desenho da serpentina
+            </button>
           </div>
 
           {/* COLUNA DIREITA — Lado Fluido FIXO */}
