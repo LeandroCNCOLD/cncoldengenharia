@@ -23,7 +23,7 @@ export function UnitSelect<U extends string>({
       onChange={(e) => onChange(e.target.value as U)}
       disabled={disabled}
       title={title}
-      className="w-full cursor-pointer rounded border border-slate-300 bg-white px-1 py-1 text-center text-[11px] text-slate-700 focus:border-[#1E6FD9] focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-100"
+      className="w-full cursor-pointer rounded border border-slate-300 bg-white px-0.5 py-0.5 text-center text-[10px] text-slate-700 focus:border-[#1E6FD9] focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-100"
     >
       {options.map((o) => (
         <option key={o.id} value={o.id}>
