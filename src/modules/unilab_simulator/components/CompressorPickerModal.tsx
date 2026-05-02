@@ -17,6 +17,18 @@ export interface CompressorItem {
   series?: string;
   type?: string;
   refrigerantCode?: string;
+  brand?: string;
+}
+
+/** Infere a marca do compressor a partir da série/modelo (catálogo não tem campo brand). */
+function inferBrand(series?: string, model?: string): string {
+  const s = `${series ?? ""} ${model ?? ""}`.toUpperCase();
+  if (/\bSH\b|ECOLINE|BITZER|\bSE\b|\b[24][A-Z]{2}-/.test(s)) return "Bitzer";
+  if (/^D|DKJ|DLJ|DLF|DKM|DLL|DLE|DKSJ|DANFOSS|MANEUROP|MT |MTZ|NTZ/.test(s)) return "Danfoss";
+  if (/^Z|COPELAND|SCROLL DIGITAL|\bCS\b/.test(s)) return "Copeland";
+  if (/EMBRACO|NE[A-Z]?\d|FF\d|EM[A-Z]?\d/.test(s)) return "Embraco";
+  if (/TECUMSEH|AE[A-Z]?\d|AJ[A-Z]?\d|AW[A-Z]?\d/.test(s)) return "Tecumseh";
+  return "Outros";
 }
 
 interface Props {
@@ -41,6 +53,7 @@ export function CompressorPickerModal({ open, onClose }: Props) {
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [seriesFilter, setSeriesFilter] = useState("");
+  const [brandFilter, setBrandFilter] = useState("");
   const [draftId, setDraftId] = useState<string | undefined>(selectedCompressorId);
   const [draftCount, setDraftCount] = useState<number>(compressorCount);
 
@@ -49,6 +62,7 @@ export function CompressorPickerModal({ open, onClose }: Props) {
     setQuery("");
     setTypeFilter("");
     setSeriesFilter("");
+    setBrandFilter("");
     setDraftId(selectedCompressorId);
     setDraftCount(compressorCount);
     setLoading(true);
@@ -60,14 +74,21 @@ export function CompressorPickerModal({ open, onClose }: Props) {
           .map((c) => {
             const o = c as Record<string, unknown>;
             const id = String(o.id ?? o.model ?? "");
+            const series = o.series ? String(o.series) : undefined;
+            const model = String(o.model ?? id);
+            const brand =
+              (o.brand ? String(o.brand) : undefined) ??
+              (o.manufacturer ? String(o.manufacturer) : undefined) ??
+              inferBrand(series, model);
             return {
               id,
-              model: String(o.model ?? id),
-              series: o.series ? String(o.series) : undefined,
+              model,
+              series,
               type: o.type ? String(o.type) : undefined,
               refrigerantCode: o.refrigerantCode
                 ? String(o.refrigerantCode)
                 : undefined,
+              brand,
             } as CompressorItem;
           })
           .filter((x) => x.id);
@@ -83,23 +104,34 @@ export function CompressorPickerModal({ open, onClose }: Props) {
     return Array.from(s).sort();
   }, [items]);
 
-  const seriesList = useMemo(() => {
+  const brands = useMemo(() => {
     const s = new Set<string>();
-    items.forEach((i) => i.series && s.add(i.series));
+    items.forEach((i) => i.brand && s.add(i.brand));
     return Array.from(s).sort();
   }, [items]);
+
+  const seriesList = useMemo(() => {
+    const s = new Set<string>();
+    items.forEach((i) => {
+      if (!i.series) return;
+      if (brandFilter && i.brand !== brandFilter) return;
+      s.add(i.series);
+    });
+    return Array.from(s).sort();
+  }, [items, brandFilter]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return items.filter((i) => {
+      if (brandFilter && i.brand !== brandFilter) return false;
       if (typeFilter && i.type !== typeFilter) return false;
       if (seriesFilter && i.series !== seriesFilter) return false;
       if (!q) return true;
-      return [i.model, i.id, i.series, i.type, i.refrigerantCode]
+      return [i.model, i.id, i.series, i.type, i.refrigerantCode, i.brand]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(q));
     });
-  }, [items, query, typeFilter, seriesFilter]);
+  }, [items, query, typeFilter, seriesFilter, brandFilter]);
 
   const draft = items.find((i) => i.id === draftId);
 
@@ -128,17 +160,30 @@ export function CompressorPickerModal({ open, onClose }: Props) {
 
         <div className="space-y-3">
           {/* Busca + filtros */}
-          <div className="grid grid-cols-4 gap-2">
-            <div className="relative col-span-2">
+          <div className="grid grid-cols-6 gap-2">
+            <div className="relative col-span-3">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 autoFocus
-                placeholder="Buscar por modelo, série, tipo…"
+                placeholder="Buscar por modelo, marca, série…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="pl-8"
               />
             </div>
+            <select
+              value={brandFilter}
+              onChange={(e) => {
+                setBrandFilter(e.target.value);
+                setSeriesFilter("");
+              }}
+              className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
+            >
+              <option value="">Todas as marcas</option>
+              {brands.map((b) => (
+                <option key={b} value={b}>{b}</option>
+              ))}
+            </select>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
@@ -173,7 +218,7 @@ export function CompressorPickerModal({ open, onClose }: Props) {
               <ul className="divide-y divide-slate-100 text-xs">
                 {filtered.slice(0, 200).map((c) => {
                   const active = c.id === draftId;
-                  const meta = [c.type, c.series, c.refrigerantCode]
+                  const meta = [c.brand, c.type, c.series, c.refrigerantCode]
                     .filter(Boolean)
                     .join(" • ");
                   return (
