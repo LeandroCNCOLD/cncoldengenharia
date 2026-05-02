@@ -66,7 +66,7 @@ function NoGeometryHint() {
 
 export function TubeModal({ open, onClose }: ModalProps) {
   const physical = useUnilabSimulationStore((s) => s.physicalInputs);
-  const selected = useUnilabSimulationStore((s) => s.selectedGeometry);
+  const selected = useUnilabSimulationStore((s) => s.selectedGeometry) as CoilGeometryItem | undefined;
   return (
     <Dialog open={open} onOpenChange={(o) => (!o ? onClose() : undefined)}>
       <DialogContent className="max-w-md">
@@ -115,7 +115,7 @@ export function TubeModal({ open, onClose }: ModalProps) {
 
 export function FinModal({ open, onClose }: ModalProps) {
   const physical = useUnilabSimulationStore((s) => s.physicalInputs);
-  const selected = useUnilabSimulationStore((s) => s.selectedGeometry);
+  const selected = useUnilabSimulationStore((s) => s.selectedGeometry) as CoilGeometryItem | undefined;
   return (
     <Dialog open={open} onOpenChange={(o) => (!o ? onClose() : undefined)}>
       <DialogContent className="max-w-md">
@@ -158,7 +158,7 @@ export function FinModal({ open, onClose }: ModalProps) {
 
 export function DistributorModal({ open, onClose }: ModalProps) {
   const physical = useUnilabSimulationStore((s) => s.physicalInputs);
-  const selected = useUnilabSimulationStore((s) => s.selectedGeometry);
+  const selected = useUnilabSimulationStore((s) => s.selectedGeometry) as CoilGeometryItem | undefined;
   return (
     <Dialog open={open} onOpenChange={(o) => (!o ? onClose() : undefined)}>
       <DialogContent className="max-w-md">
