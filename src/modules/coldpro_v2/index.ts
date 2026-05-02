@@ -48,6 +48,8 @@ export type {
   Fan,
   FanControlMode,
   FanSpec,
+  FanFamily,
+  FanDriveType,
   FitQuality,
   FourWayValveSpec,
   FrostFormationInput,

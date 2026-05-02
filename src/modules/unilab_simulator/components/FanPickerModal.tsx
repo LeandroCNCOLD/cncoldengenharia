@@ -12,11 +12,48 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 
+export type FanPickerFamily =
+  | "axial"
+  | "centrifugal_forward"
+  | "centrifugal_backward"
+  | "centrifugal_radial"
+  | "mixed_flow"
+  | "tangential"
+  | "ec_plug"
+  | "unknown";
+
+const FAMILY_LABELS: Record<FanPickerFamily, string> = {
+  axial: "Axial",
+  centrifugal_forward: "Centrífugo (frente)",
+  centrifugal_backward: "Centrífugo (trás)",
+  centrifugal_radial: "Centrífugo (radial)",
+  mixed_flow: "Fluxo misto",
+  tangential: "Tangencial",
+  ec_plug: "Plug EC",
+  unknown: "Não classificado",
+};
+
 export interface FanPickerItem {
   id: string;
   manufacturer?: string;
   model?: string;
   airflow_m3h?: number;
+  /** Família construtiva (axial, centrífugo, etc.). */
+  family?: FanPickerFamily;
+  /** Série/linha do fabricante (ex.: TLI, FN, RDH). */
+  series?: string;
+  /** Diâmetro do rotor (mm). */
+  diameter_mm?: number;
+  /** Rotação (rpm). */
+  rpm?: number;
+  /** Potência absorvida (W). */
+  motor_power_w?: number;
+  /** Corrente nominal (A). */
+  motor_current_a?: number;
+  /** Frequência (Hz). */
+  frequency_hz?: number;
+  /** Tensão (V). */
+  voltage_v?: number;
 }
 
 interface Props {
@@ -44,6 +81,7 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
 
   const [query, setQuery] = useState("");
   const [brand, setBrand] = useState<string>("");
+  const [familyFilter, setFamilyFilter] = useState<string>("");
   const [draftId, setDraftId] = useState<string | undefined>(selectedFanId);
   const [draftCount, setDraftCount] = useState<number>(fanCount);
   const [draftRole, setDraftRole] = useState<"blower" | "exhaust">(fanRole);
@@ -52,6 +90,7 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
     if (open) {
       setQuery("");
       setBrand("");
+      setFamilyFilter("");
       setDraftId(selectedFanId);
       setDraftCount(fanCount);
       setDraftRole(fanRole);
@@ -66,16 +105,27 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [fans]);
 
+  const families = useMemo(() => {
+    const set = new Set<FanPickerFamily>();
+    for (const f of fans) {
+      if (f.family) set.add(f.family);
+    }
+    return Array.from(set).sort((a, b) =>
+      FAMILY_LABELS[a].localeCompare(FAMILY_LABELS[b]),
+    );
+  }, [fans]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return fans.filter((f) => {
       if (brand && f.manufacturer !== brand) return false;
+      if (familyFilter && f.family !== familyFilter) return false;
       if (!q) return true;
-      return [f.manufacturer, f.model, f.id]
+      return [f.manufacturer, f.model, f.id, f.series]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(q));
     });
-  }, [fans, query, brand]);
+  }, [fans, query, brand, familyFilter]);
 
   const draft = fans.find((f) => f.id === draftId);
   const totalAirflow =
@@ -104,13 +154,13 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Busca + Filtro por marca */}
-          <div className="grid grid-cols-3 gap-2">
+          {/* Busca + Filtros (marca / família) */}
+          <div className="grid grid-cols-4 gap-2">
             <div className="relative col-span-2">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 autoFocus
-                placeholder="Buscar por modelo…"
+                placeholder="Buscar por modelo, série…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="pl-8"
@@ -128,10 +178,22 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
                 </option>
               ))}
             </select>
+            <select
+              value={familyFilter}
+              onChange={(e) => setFamilyFilter(e.target.value)}
+              className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none"
+            >
+              <option value="">Todas as famílias</option>
+              {families.map((f) => (
+                <option key={f} value={f}>
+                  {FAMILY_LABELS[f]}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Lista */}
-          <div className="max-h-64 overflow-auto rounded-lg border border-slate-200">
+          <div className="max-h-72 overflow-auto rounded-lg border border-slate-200">
             {filtered.length === 0 ? (
               <div className="p-4 text-center text-xs text-slate-500">
                 Nenhum ventilador encontrado.
@@ -140,26 +202,40 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
               <ul className="divide-y divide-slate-100 text-xs">
                 {filtered.map((f) => {
                   const active = f.id === draftId;
+                  const meta: string[] = [];
+                  if (f.family) meta.push(FAMILY_LABELS[f.family]);
+                  if (f.series) meta.push(f.series);
+                  if (f.diameter_mm) meta.push(`Ø${f.diameter_mm.toFixed(0)} mm`);
+                  if (f.rpm) meta.push(`${f.rpm.toFixed(0)} rpm`);
+                  if (f.motor_power_w) meta.push(`${f.motor_power_w.toFixed(0)} W`);
                   return (
                     <li key={f.id}>
                       <button
                         type="button"
                         onClick={() => setDraftId(f.id)}
-                        className={`flex w-full items-center justify-between px-3 py-2 text-left transition ${
+                        className={`flex w-full flex-col gap-0.5 px-3 py-2 text-left transition ${
                           active
                             ? "bg-[#1E6FD9]/10 text-[#1E6FD9]"
                             : "hover:bg-slate-50 text-slate-700"
                         }`}
                       >
-                        <span className="font-medium">
-                          {[f.manufacturer, f.model].filter(Boolean).join(" ") ||
-                            f.id}
-                        </span>
-                        <span className="text-slate-500">
-                          {f.airflow_m3h
-                            ? `${f.airflow_m3h.toFixed(0)} m³/h`
-                            : "—"}
-                        </span>
+                        <div className="flex w-full items-center justify-between">
+                          <span className="font-medium">
+                            {[f.manufacturer, f.model]
+                              .filter(Boolean)
+                              .join(" ") || f.id}
+                          </span>
+                          <span className="text-slate-500">
+                            {f.airflow_m3h
+                              ? `${f.airflow_m3h.toFixed(0)} m³/h`
+                              : "—"}
+                          </span>
+                        </div>
+                        {meta.length > 0 && (
+                          <div className="text-[10px] text-slate-500">
+                            {meta.join(" • ")}
+                          </div>
+                        )}
                       </button>
                     </li>
                   );

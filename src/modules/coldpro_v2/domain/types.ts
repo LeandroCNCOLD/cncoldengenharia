@@ -740,11 +740,48 @@ export interface CondenserSpec {
   max_cond_temp_c: number;
 }
 
+/** Família construtiva do ventilador. */
+export type FanFamily =
+  | "axial"
+  | "centrifugal_forward"
+  | "centrifugal_backward"
+  | "centrifugal_radial"
+  | "mixed_flow"
+  | "tangential"
+  | "ec_plug";
+
+/** Tipo de transmissão. */
+export type FanDriveType = "direct" | "belt";
+
 export interface FanSpec {
   airflow_m3_h: number;
   available_static_pressure_pa: number;
   /** "blower" = soprador, "exhaust" = exaustor. */
   mode?: "blower" | "exhaust";
+  /** Família construtiva (axial, centrífugo, etc.). */
+  family?: FanFamily;
+  /** Diâmetro nominal do rotor (mm). */
+  diameter_mm?: number;
+  /** Rotação nominal (rpm). */
+  rpm?: number;
+  /** Número de pás. */
+  blade_count?: number;
+  /** Potência absorvida do motor (W). */
+  motor_power_w?: number;
+  /** Corrente nominal (A). */
+  motor_current_a?: number;
+  /** Tensão nominal (V). */
+  voltage_v?: number;
+  /** Número de fases (1 ou 3). */
+  phases?: 1 | 3;
+  /** Frequência nominal (Hz). */
+  frequency_hz?: number;
+  /** Tipo de transmissão (direta ou correia). */
+  drive?: FanDriveType;
+  /** Nível de pressão sonora a 1 m (dB(A)). */
+  sound_pressure_db?: number;
+  /** Peso aproximado (kg). */
+  weight_kg?: number;
 }
 
 export interface ExpansionValveSpec {

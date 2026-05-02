@@ -47,6 +47,22 @@ interface FanCatalogItem {
   manufacturer?: string;
   model?: string;
   airflow_m3h?: number;
+  family?:
+    | "axial"
+    | "centrifugal_forward"
+    | "centrifugal_backward"
+    | "centrifugal_radial"
+    | "mixed_flow"
+    | "tangential"
+    | "ec_plug"
+    | "unknown";
+  series?: string;
+  diameter_mm?: number;
+  rpm?: number;
+  motor_power_w?: number;
+  motor_current_a?: number;
+  frequency_hz?: number;
+  voltage_v?: number;
   /** Reference to the original axial record (used for curve evaluation). */
   axial?: AxialFanRecord;
 }
@@ -100,6 +116,7 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
             manufacturer: fan.fanType === 0 ? "Axial T0" : "Axial T1",
             model: fan.model,
             airflow_m3h: Number.isFinite(mid) && mid > 0 ? mid : undefined,
+            family: "axial",
             axial: fan,
           };
         });
