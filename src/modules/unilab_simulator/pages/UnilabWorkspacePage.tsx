@@ -9,6 +9,7 @@ import { ResultPanel } from "../components/ResultPanel";
 import { AirSidePanel } from "../components/AirSidePanel";
 import { FluidSidePanel } from "../components/FluidSidePanel";
 import { GeometryBottomBar } from "../components/GeometryBottomBar";
+import { CircuitrySelector } from "../components/CircuitrySelector";
 import { CoilSchematicModal } from "../components/CoilSchematicModal";
 import { WorkspaceSidebar } from "../components/WorkspaceSidebar";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
@@ -225,8 +226,9 @@ export function UnilabWorkspacePage() {
       </div>
 
       {/* BARRA INFERIOR — Geometria, full width */}
-      <div className="mt-2">
+      <div className="mt-2 space-y-2">
         <GeometryBottomBar />
+        <CircuitrySelector />
       </div>
 
       <CoilSchematicModal
