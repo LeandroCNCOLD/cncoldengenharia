@@ -359,13 +359,12 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
 
         <Row
           label="Fator de Erro"
-          unitNode={<UnitText text="(m²·K)/W" />}
+          unitNode={<UnitText text="%" />}
           input={
             <NumberCell
-              value={foulingFactorAir}
-              onChange={setFoulingFactorAir}
-              min={0}
-              step={0.0001}
+              value={errorFactorPercent}
+              onChange={setErrorFactorPercent}
+              step={0.1}
             />
           }
           obtained="---"
