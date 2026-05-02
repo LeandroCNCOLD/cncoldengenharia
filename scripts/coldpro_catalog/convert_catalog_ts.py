@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 """
-Conversor da planilha CN COLD para src/modules/coldpro_catalog/data/equipmentCatalog.raw.ts
+Conversor da planilha CN COLD para
+src/modules/coldpro_catalog/data/equipmentCatalog.raw.ts
 
-Lê uma planilha XLSX (sheet "Sheet1" ou primeira aba) e gera o arquivo
-TypeScript com EQUIPMENT_CATALOG_RAW. Inclui os campos detalhados de
-geometria do evaporador e da serpentina de reaquecimento, populados
-APENAS quando as colunas correspondentes existirem na planilha — nunca
-inventa valores.
+Lê a aba "480 modelos" (header na linha 1) e gera o arquivo TypeScript
+EQUIPMENT_CATALOG_RAW. Inclui geometria de aletado (condensador,
+evaporador e reaquecimento) lendo as colunas reais da planilha.
+
+NUNCA inventa valores: se a célula estiver vazia ou contiver "-",
+o campo correspondente fica `undefined`.
 
 Uso:
     python convert_catalog_ts.py <input.xlsx> <output.ts>
-
-Mapeamento coluna -> campo TS é controlado por COLUMN_MAP. Ajuste se a
-planilha trouxer cabeçalhos diferentes; aliases adicionais são suportados.
 """
 from __future__ import annotations
 
@@ -25,147 +24,168 @@ from pathlib import Path
 import pandas as pd
 
 
-# Mapeamento canônico: chave = campo TS, valor = lista de cabeçalhos aceitos
-# (case/acentos/espacos sao normalizados). Cada item da lista e tratado como alias.
+# ---------------------------------------------------------------------------
+# Mapeamento por nome EXATO da coluna na planilha (após .strip())
+# Cada entrada: campo_ts -> [aliases possíveis]
+# A normalização compara ignorando acentos, case, espaços extras e símbolos.
+# ---------------------------------------------------------------------------
 COLUMN_MAP: dict[str, list[str]] = {
     # Identificação
-    "id": ["id", "modelo_unico", "modelo_codigo", "codigo"],
-    "modelo": ["modelo"],
-    "modeloUnico": ["modelo_unico", "modelounico"],
-    "modeloBaseReferencia": ["modelo_base_referencia", "modelo_base"],
-    # Classificação
-    "family": ["family", "familia", "tipo_equipamento"],
-    "application": ["application", "aplicacao", "linha_aplicacao"],
+    "id": ["MODELO_UNICO", "MODELO"],
+    "modelo": ["MODELO"],
+    "modeloUnico": ["MODELO_UNICO"],
+    "modeloCatalogoOriginal": ["MODELO_CATALOGO_ORIGINAL"],
+    "modeloBaseReferencia": ["MODELO_BASE_REFERENCIA"],
+    "statusCompressor": ["STATUS_COMPRESSOR"],
     # Fabricante / compressor
-    "fabricante": ["fabricante"],
-    "fabricanteOrigem": ["fabricante_origem"],
-    "compressorModelo": ["compressor_modelo", "modelo_compressor"],
-    "compressorCodigo": ["compressor_codigo", "codigo_compressor"],
-    "tipoCompressor": ["tipo_compressor"],
-    # Refrigerante
-    "refrigerante": ["refrigerante", "fluido"],
+    "fabricante": ["FABRICANTE"],
+    "fabricanteOrigem": ["FABRICANTE_ORIGEM"],
+    "compressorModelo": ["COMPRESSOR"],
+    "compressorCodigo": ["COMPRESSOR_CODIGO"],
+    "tipoCompressor": ["TIPO_COMPRESSOR"],
     # Elétrica
-    "tensaoV": ["tensao_v", "tensao", "voltagem"],
-    "numeroFases": ["numero_fases", "fases"],
-    "frequenciaHz": ["frequencia_hz", "frequencia"],
-    "configuracaoEletrica": ["configuracao_eletrica"],
+    "configuracaoEletrica": ["CONFIGURACAO_ELETRICA"],
+    "tensaoComercial": ['TENSÃO ELÉTRICA [v]'],
+    "tensaoV": ["TENSAO_V"],
+    "numeroFases": ["NUMERO_FASES"],
+    "frequenciaHz": ["FREQUENCIA_HZ"],
     # Comercial
-    "linha": ["linha"],
-    "designacaoHp": ["designacao_hp", "hp"],
-    "gabinete": ["gabinete"],
-    "tipoGabinete": ["tipo_gabinete"],
+    "linha": ["LINHA"],
+    "designacaoHp": ['DESIGNAÇÃO COMERCIAL EM "HP"'],
+    "gabinete": ["GABINETE"],
+    "tipoGabinete": ["TIPO DE GABINETE"],
+    # Refrigerante
+    "refrigerante": ["REFRIGERANTE"],
     # Capacidades
-    "capacidadeFrigorificaKcalH": ["capacidade_frigorifica_kcal_h", "capacidade_kcal_h"],
-    "capacidadeCompressorKcalH": ["capacidade_compressor_kcal_h"],
-    "calorRejeitadoKcalH": ["calor_rejeitado_kcal_h"],
-    # Potência e corrente
-    "potenciaEletricaKw": ["potencia_eletrica_kw", "potencia_kw"],
-    "potenciaCompressorKw": ["potencia_compressor_kw"],
-    "potenciaVentiladorKw": ["potencia_ventilador_kw"],
-    "correnteA": ["corrente_a", "corrente"],
-    "correntePartidaA": ["corrente_partida_a", "corrente_partida"],
+    "capacidadeFrigorificaKcalH": [
+        "CAPACIDADE FRIGORÍFICA (Kcal/h) [Capacidade do REAQUECIMENTO]",
+        "CAPACIDADE FRIGORÍFICA (Kcal/h) [Capacidade do evaporador]",
+    ],
+    "capacidadeCompressorKcalH": ["CAPACIDADE FRIGORÍFICA (Kcal/h) [Capacidade do compressor]"],
+    "calorRejeitadoKcalH": ["CALOR REJEITADO (Kcal/h) [Capacidade do condensador]"],
+    # Potência / corrente totais (circuito completo)
+    "potenciaEletricaKw": ["POTÊNCIA ELÉTRICA REQUERIDA TOTAL [CIRCUITO COMPLETO] (kW)", "POTÊNCIA ELÉTRICA REQUERIDA TOTAL (kW)"],
+    "potenciaCompressorKw": ["POTÊNCIA ELÉTRICA REQUERIDA COMPRESSOR (kW)"],
+    "potenciaVentiladorKw": ["POTÊNCIA ELÉTRICA REQUERIDA VENTILADOR (kW)"],
+    "correnteA": ["CORRENTE ELÉTRICA ESTIMADA [CIRCUITO COMPLETO] (A)", "CORRENTE ELÉTRICA ESTIMADA (A)"],
+    "correntePartidaA": ["CORRENTE ELÉTRICA DE PARTIDA [CIRCUITO COMPLETO] (A)", "CORRENTE ELÉTRICA DE PARTIDA (A)"],
     # Performance
-    "cop": ["cop"],
-    "gwp": ["gwp"],
-    # Condições
-    "tempEvaporacaoC": ["temp_evaporacao_c", "t_evap_c"],
-    "tempCondensacaoC": ["temp_condensacao_c", "t_cond_c"],
-    "tempAmbienteC": ["temp_ambiente_c", "t_amb_c"],
-    "tempCamaraC": ["temp_camara_c", "t_camara_c"],
-    "umidadeCamaraPercent": ["umidade_camara_percent", "umidade_camara"],
-    # Vazões de ar
-    "vazaoArEvaporadorM3H": ["vazao_ar_evaporador_m3_h", "vazao_ar_evap"],
-    "vazaoArCondensadorM3H": ["vazao_ar_condensador_m3_h", "vazao_ar_cond"],
+    "cop": ["COP global (kW/kW)", "COP (kW/kW)"],
+    "gwp": ["GWP-AR6"],
+    "odp": ["ODP-AR6"],
     # Degelo
-    "tipoDegelo": ["tipo_degelo"],
-    # Geometria condensador
-    "condensadorRows": ["condensador_rows"],
-    "condensadorTubesPorRow": ["condensador_tubes_por_row"],
-    "condensadorCircuitos": ["condensador_circuitos"],
-    "condensadorFinSpacingMm": ["condensador_fin_spacing_mm"],
-    "condensadorLengthMm": ["condensador_length_mm"],
-    "condensadorTuboDiametroMm": ["condensador_tubo_diametro_mm"],
-    # Geometria evaporador (básica)
-    "evaporadorRows": ["evaporador_rows"],
-    "evaporadorTubesPorRow": ["evaporador_tubes_por_row"],
-    "evaporadorCircuitos": ["evaporador_circuitos"],
-    "evaporadorFinSpacingMm": ["evaporador_fin_spacing_mm"],
-    "evaporadorLengthMm": ["evaporador_length_mm"],
-    "evaporadorTuboDiametroMm": ["evaporador_tubo_diametro_mm"],
-    "evaporadorVolumeInternoL": ["evaporador_volume_interno_l"],
-    "evaporadorAreaSuperficieM2": ["evaporador_area_superficie_m2"],
-    # Geometria evaporador (detalhada — para ProgressiveCoilInput)
-    "evaporadorTubeInnerDiameterMm": ["evaporador_tube_inner_diameter_mm"],
-    "evaporadorTubePitchTransverseMm": ["evaporador_tube_pitch_transverse_mm"],
-    "evaporadorTubePitchLongitudinalMm": ["evaporador_tube_pitch_longitudinal_mm"],
-    "evaporadorFinHeightMm": ["evaporador_fin_height_mm"],
-    "evaporadorFinThicknessMm": ["evaporador_fin_thickness_mm"],
-    "evaporadorCoilWidthM": ["evaporador_coil_width_m"],
-    "evaporadorCoilHeightM": ["evaporador_coil_height_m"],
-    "evaporadorTubeMaterial": ["evaporador_tube_material"],
-    "evaporadorFinMaterial": ["evaporador_fin_material"],
-    "evaporadorAirTemperatureInC": ["evaporador_air_temperature_in_c"],
-    "evaporadorAirRelativeHumidityIn": ["evaporador_air_relative_humidity_in"],
-    "evaporadorAirMassFlowKgS": ["evaporador_air_mass_flow_kg_s"],
+    "tipoDegelo": ["TIPO DE DEGELO"],
+    # ------------------------------------------------------------------
+    # CONDENSADOR (geometria + ventilador)
+    # ------------------------------------------------------------------
+    "condensadorRows": ["Condensador Rows"],
+    "condensadorTubesPorRow": ["Condensador tubes_per_row"],
+    "condensadorCircuitos": ["Condensador circuits"],
+    "condensadorFinSpacingMm": ["Condensador  fin_spacing_mm", "Condensador fin_spacing_mm"],
+    "condensadorLengthMm": ["Condensador  length_mm", "Condensador length_mm"],
+    "condensadorTuboDiametroIn": ["Ø Tubo_cond [in]"],
+    "condensadorTuboDiametroMm": ["Ø Tubo_cond [mm]"],
+    "condensadorTuboEspessuraMm": ["ESP. Tubo_cond [mm]"],
+    "condensadorGeometria": ["GEOMETRIA CONDENSADOR"],
+    "condensadorVolumeInternoL": ["VOLUME INTERNO CONDENSADOR [dm³ = L]"],
+    "ventiladorCondensador": ["VENTILADOR CONDENSADOR"],
+    "vazaoArCondensadorM3H": ["VAZÃO VENTILADOR CONDENSADOR (m³/h)"],
+    # ------------------------------------------------------------------
+    # EVAPORADOR (na planilha as colunas usam grafia "Eaporador" / "Evaporador")
+    # ------------------------------------------------------------------
+    "modeloEvaporador": ["MODELO EVAPORADOR (Circuito pincipal)", "MODELO EVAPORADOR (Circuito principal)"],
+    "evaporadorRows": ["EaporadorRows", "EvaporadorRows", "Evaporador Rows", "Eaporador Rows"],
+    "evaporadorTubesPorRow": ["Eaporadortubes_per_row", "Evaporadortubes_per_row", "Eaporador tubes_per_row", "Evaporador tubes_per_row"],
+    "evaporadorCircuitos": ["Eaporadorcircuits", "Evaporadorcircuits", "Eaporador circuits", "Evaporador circuits"],
+    "evaporadorFinSpacingMm": ["Eaporador fin_spacing_mm", "Evaporador fin_spacing_mm"],
+    "evaporadorLengthMm": ["Eaporador length_mm", "Evaporador length_mm"],
+    "evaporadorTuboDiametroIn": ["Ø Tubo_EVAP [in]"],
+    "evaporadorTuboDiametroMm": ["Ø Tubo_EVAP [mm]"],
+    "evaporadorTuboEspessuraMm": ["ESP. Tubo_EVAP [mm]"],
+    "evaporadorGeometria": ["Geometria evaporador", "Geometria Evaporador"],
+    "evaporadorVolumeInternoL": ["VOLUME INTERNO EVAPORADOR [dm³ = L]", "VOLUME INTERNO Eaporador[dm³ = L]", "VOLUME INTERNO Evaporador[dm³ = L]"],
+    "evaporadorAreaSuperficieM2": ["ÁREA DA SUPERFICIE DE TROCA EVAPORADOR [m²]", "ÁREA DA SUPERFICIE DE TROCA Eaporador[m²]", "ÁREA DA SUPERFICIE DE TROCA Evaporador[m²]"],
+    "evaporadorQuantidade": ["QUANTIDADE DE EVAPORADORES", "QUANTIDADE DE REAQUECIMENTOES"],
+    "ventiladorEvaporador": ["VENTILADOR EVAPORADOR", "VENTILADOR REAQUECIMENTO"],
+    "vazaoArEvaporadorM3H": ["VAZÃO VENTILADOR EVAPORADOR (m³/h)", "VAZÃO VENTILADOR Eaporador(m³/h)", "VAZÃO VENTILADOR Evaporador(m³/h)"],
+    # ------------------------------------------------------------------
+    # REAQUECIMENTO (geometria)
+    # ------------------------------------------------------------------
+    "reheatRows": ["REAQUECIMENTO Rows", "REAQUECIMENTOrows", "REAQUECIMENTORows"],
+    "reheatTubesPerRow": ["REAQUECIMENTO tubes_per_row"],
+    "reheatCircuits": ["REAQUECIMENTO circuits"],
+    "reheatFinSpacingMm": ["REAQUECIMENTO  fin_spacing_mm", "REAQUECIMENTO fin_spacing_mm"],
+    "reheatCoilLengthMm": ["REAQUECIMENTO  length_mm", "REAQUECIMENTO length_mm"],
+    "reheatGeometria": ["Geometria REAQUECIMENTO"],
+    # ------------------------------------------------------------------
+    # CONDIÇÕES DE OPERAÇÃO
+    # ------------------------------------------------------------------
+    "tempCamaraC": ["TEMPERATURA DA CÂMARA (°C)"],
+    "umidadeCamaraPercent": ["UMIDADE DA CÂMARA (%)"],
+    "tempEvaporacaoC": ["TEMPERATURA DE EVAPORAÇÃO  (°C)", "TEMPERATURA DE EVAPORAÇÃO (°C)"],
+    "tempCondensacaoC": ["TEMPERATURA DE CONDENSAÇÃO  (°C)", "TEMPERATURA DE CONDENSAÇÃO (°C)"],
+    "tempAmbienteC": ["TEMPERATURA EXTERNA  (°C)", "TEMPERATURA EXTERNA (°C)"],
+    "umidadeExternaPercent": ["UMIDADE EXTERNA (%)"],
+    "vazaoMassaKgH": ["VAZÃO EM MASSA (kg/h)"],
+    "vazaoMassaKgS": ["VAZÃO EM MASSA (kg/s)"],
+    "deltaEntalpiaKjKg": ["DIFERENÇA DE ENTALPIA (kJ/kg)"],
+    "superaquecimentoTotalK": ["SUPERAQUECIMENTO TOTAL (K)"],
+    "superaquecimentoUtilK": ["SUPERAQUECIMENTO ÚTIL (K)"],
+    "subresfriamentoK": ["SUBRESFRIAMENTO (K)"],
+    "subresfriamentoAdicionalK": ["SUBRESFRIAMENTO ADICIONAL (K)"],
+    "altitudeM": ["ALTITUDE (m)"],
     # Linhas
-    "linhaSucao": ["linha_sucao"],
-    "linhaDescarga": ["linha_descarga"],
-    "linhaLiquido": ["linha_liquido"],
-    # Térmicos
-    "superaquecimentoTotalK": ["superaquecimento_total_k"],
-    "superaquecimentoUtilK": ["superaquecimento_util_k"],
-    "subresfriamentoK": ["subresfriamento_k"],
-    "altitudeM": ["altitude_m"],
+    "linhaDescarga": ["LINHA DE DESCARGA"],
+    "velocidadeDescargaMs": ["VELOCIDADE LINHA DE DESCARGA [m/s] (ATÉ 15M)"],
+    "linhaLiquido": ["LINHA DE LIQUIDO"],
+    "velocidadeLiquidoMs": ["VELOCIDADE LINHA DE LIQUIDO [m/s] (ATÉ 15M)"],
+    "linhaSucao": ["LINHA DE SUCÇÃO"],
+    "velocidadeSucaoMs": ["VELOCIDADE LINHA DE SUCÇÃO [m/s] (ATÉ 15M)"],
+    "cargaFluidoKg": ["CARGA DE FLUÍDO [kg]"],
     # Água / dreno
-    "quantidadeAguaLH": ["quantidade_agua_l_h"],
-    "diametroDreno": ["diametro_dreno"],
-    # Reaquecimento (para ReheatCoilSizingInput)
-    "reheatQTargetW": ["reheat_q_target_w", "reaquecimento_q_w"],
-    "reheatTAirInC": ["reheat_t_air_in_c"],
-    "reheatTAirOutC": ["reheat_t_air_out_c"],
-    "reheatAirMassFlowKgS": ["reheat_air_mass_flow_kg_s"],
-    "reheatTCondensingC": ["reheat_t_condensing_c"],
-    "reheatTHotGasInC": ["reheat_t_hot_gas_in_c"],
-    "reheatTubeOuterDiameterM": ["reheat_tube_outer_diameter_m"],
-    "reheatTubeThicknessM": ["reheat_tube_thickness_m"],
-    "reheatFinSpacingM": ["reheat_fin_spacing_m"],
-    "reheatFinThicknessM": ["reheat_fin_thickness_m"],
-    "reheatTubePitchTransversalM": ["reheat_tube_pitch_transversal_m"],
-    "reheatTubePitchLongitudinalM": ["reheat_tube_pitch_longitudinal_m"],
-    "reheatCoilLengthM": ["reheat_coil_length_m"],
-    "reheatCircuits": ["reheat_circuits"],
+    "quantidadeAguaLH": ["QUANTIDADE DE ÁGUA PRODUZIDA [ L/h ]"],
+    "diametroDreno": ["DIÂMETRO DRENO"],
+    "quantidadeDrenos": ["QUANTIDADE DE DRENOS"],
+    # Correntes individuais
+    "correnteCompressorA": ["CORRENTE ELÉTRICA COMPRESSOR (A)"],
+    "correnteVentiladoresA": ["CORRENTE ELÉTRICA VENTILADORES (A)"],
+    "copCarnot": ["COP Carnot (K/K)"],
+    # Secundário (se aplicável)
+    "modeloCondensadorSecundario": ["MODELO CONDENSADOR (SECUNDÁRIO)"],
+    "ventiladorCondensadorSecundario": ["VENTILADOR CONDENSADOR SECUNDÁRIO"],
+    "vazaoArCondensadorSecundarioM3H": ["VAZÃO VENTILADOR CONDENSADOR SECUNDÁRIO (m³/h)"],
 }
 
+# Campos que devem ser convertidos para número (extraindo valor de strings com unidade)
 NUMERIC_FIELDS = {
     "tensaoV", "numeroFases", "frequenciaHz",
     "capacidadeFrigorificaKcalH", "capacidadeCompressorKcalH", "calorRejeitadoKcalH",
     "potenciaEletricaKw", "potenciaCompressorKw", "potenciaVentiladorKw",
-    "correnteA", "correntePartidaA", "cop", "gwp",
+    "correnteA", "correntePartidaA", "correnteCompressorA", "correnteVentiladoresA",
+    "cop", "copCarnot", "gwp", "odp",
     "tempEvaporacaoC", "tempCondensacaoC", "tempAmbienteC", "tempCamaraC",
-    "umidadeCamaraPercent", "vazaoArEvaporadorM3H", "vazaoArCondensadorM3H",
+    "umidadeCamaraPercent", "umidadeExternaPercent",
+    "vazaoArEvaporadorM3H", "vazaoArCondensadorM3H", "vazaoArCondensadorSecundarioM3H",
+    "vazaoMassaKgH", "vazaoMassaKgS", "deltaEntalpiaKjKg",
     "condensadorRows", "condensadorTubesPorRow", "condensadorCircuitos",
-    "condensadorFinSpacingMm", "condensadorLengthMm", "condensadorTuboDiametroMm",
+    "condensadorFinSpacingMm", "condensadorLengthMm",
+    "condensadorTuboDiametroMm", "condensadorTuboEspessuraMm",
+    "condensadorVolumeInternoL",
     "evaporadorRows", "evaporadorTubesPorRow", "evaporadorCircuitos",
-    "evaporadorFinSpacingMm", "evaporadorLengthMm", "evaporadorTuboDiametroMm",
+    "evaporadorFinSpacingMm", "evaporadorLengthMm",
+    "evaporadorTuboDiametroMm", "evaporadorTuboEspessuraMm",
     "evaporadorVolumeInternoL", "evaporadorAreaSuperficieM2",
-    "evaporadorTubeInnerDiameterMm", "evaporadorTubePitchTransverseMm",
-    "evaporadorTubePitchLongitudinalMm", "evaporadorFinHeightMm",
-    "evaporadorFinThicknessMm", "evaporadorCoilWidthM", "evaporadorCoilHeightM",
-    "evaporadorAirTemperatureInC", "evaporadorAirRelativeHumidityIn",
-    "evaporadorAirMassFlowKgS",
-    "superaquecimentoTotalK", "superaquecimentoUtilK", "subresfriamentoK", "altitudeM",
-    "quantidadeAguaLH",
-    "reheatQTargetW", "reheatTAirInC", "reheatTAirOutC", "reheatAirMassFlowKgS",
-    "reheatTCondensingC", "reheatTHotGasInC", "reheatTubeOuterDiameterM",
-    "reheatTubeThicknessM", "reheatFinSpacingM", "reheatFinThicknessM",
-    "reheatTubePitchTransversalM", "reheatTubePitchLongitudinalM",
-    "reheatCoilLengthM", "reheatCircuits",
+    "evaporadorQuantidade",
+    "reheatRows", "reheatTubesPerRow", "reheatCircuits",
+    "reheatFinSpacingMm", "reheatCoilLengthMm",
+    "superaquecimentoTotalK", "superaquecimentoUtilK",
+    "subresfriamentoK", "subresfriamentoAdicionalK", "altitudeM",
+    "velocidadeDescargaMs", "velocidadeLiquidoMs", "velocidadeSucaoMs",
+    "cargaFluidoKg", "quantidadeAguaLH", "quantidadeDrenos",
 }
 
-ENUM_VALUES = {
-    "evaporadorTubeMaterial": {"copper", "aluminum", "steel"},
-    "evaporadorFinMaterial": {"copper", "aluminum", "steel"},
-}
+# Strings que significam "não informado" e devem virar None
+EMPTY_TOKENS = {"", "-", "—", "n/a", "na", "nan", "null", "none"}
 
 
 def normalize_header(value: str) -> str:
@@ -189,21 +209,63 @@ def build_alias_index(df_columns: list[str]) -> dict[str, str]:
     return resolved
 
 
+_NUMBER_RE = re.compile(r"-?\d+(?:[.,]\d+)?")
+
+
+def extract_number(raw) -> float | None:
+    """Aceita números diretos ou strings tipo '2,10 mm', '600 mm', '3/8\"', '9,52'."""
+    if raw is None:
+        return None
+    if isinstance(raw, (int, float)):
+        if isinstance(raw, float) and pd.isna(raw):
+            return None
+        return float(raw)
+    s = str(raw).strip()
+    if s.lower() in EMPTY_TOKENS:
+        return None
+    # Procura primeiro número decimal (vírgula ou ponto)
+    m = _NUMBER_RE.search(s.replace("\xa0", " "))
+    if not m:
+        return None
+    token = m.group(0).replace(",", ".")
+    try:
+        return float(token)
+    except ValueError:
+        return None
+
+
 def coerce_value(field: str, raw):
     if raw is None or (isinstance(raw, float) and pd.isna(raw)):
         return None
     if field in NUMERIC_FIELDS:
-        try:
-            v = float(raw)
-            if pd.isna(v):
-                return None
-            return v
-        except (TypeError, ValueError):
-            return None
-    if field in ENUM_VALUES:
-        s = str(raw).strip().lower()
-        return s if s in ENUM_VALUES[field] else None
-    return str(raw).strip()
+        return extract_number(raw)
+    s = str(raw).strip()
+    if s.lower() in EMPTY_TOKENS:
+        return None
+    return s
+
+
+def detect_application(linha: str | None) -> str:
+    if not linha:
+        return "unknown"
+    u = linha.upper()
+    if "AGRO" in u:
+        return "AGRO"
+    if "HT" in u or "HIGH" in u:
+        return "HT"
+    if "MT" in u or "MEDIUM" in u:
+        return "MT"
+    if "LT" in u or "LOW" in u:
+        return "LT"
+    if "CLIMATIZ" in u:
+        return "HT"
+    return "unknown"
+
+
+def detect_family(modelo: str | None) -> str:
+    if not modelo:
+        return "unknown"
+    return "plugin"
 
 
 def ts_literal(value) -> str:
@@ -220,10 +282,9 @@ def ts_literal(value) -> str:
 
 def row_to_ts(row: dict[str, object]) -> str:
     lines = ["  {"]
-    for field in COLUMN_MAP.keys():
+    # Ordem: campos do COLUMN_MAP + family/application/refrigerante derivados
+    for field in row.keys():
         if field == "raw":
-            continue
-        if field not in row:
             continue
         v = row[field]
         if v is None:
@@ -248,8 +309,22 @@ def main(argv: list[str]) -> int:
         print(f"Arquivo de entrada não encontrado: {src}")
         return 1
 
-    df = pd.read_excel(src, sheet_name=0)
+    # Aba "480 modelos" — header REAL está na linha 1 (índice 1), não 0.
+    # A linha 0 traz apenas a célula mesclada "REAQUECIMENTO".
+    try:
+        df = pd.read_excel(src, sheet_name="480 modelos", header=1)
+    except ValueError:
+        df = pd.read_excel(src, sheet_name=0, header=1)
+
+    df.columns = [str(c).strip() for c in df.columns]
     aliases = build_alias_index(list(df.columns))
+
+    print(f"Colunas mapeadas: {len(aliases)}/{len(COLUMN_MAP)}")
+    missing = [k for k in COLUMN_MAP.keys() if k not in aliases]
+    if missing:
+        print(f"AVISO: campos sem coluna correspondente na planilha ({len(missing)}):")
+        for m in missing:
+            print(f"  - {m}  (aliases tentados: {COLUMN_MAP[m]})")
 
     rows_ts: list[str] = []
     skipped = 0
@@ -262,9 +337,12 @@ def main(argv: list[str]) -> int:
         record.setdefault("id", record.get("modelo"))
         record.setdefault("modelo", record.get("id"))
         record.setdefault("modeloUnico", record.get("id"))
-        record.setdefault("family", "unknown")
-        record.setdefault("application", "unknown")
-        record.setdefault("refrigerante", "unknown")
+
+        # Derivados
+        record["application"] = detect_application(record.get("linha"))
+        record["family"] = detect_family(record.get("modelo"))
+        if not record.get("refrigerante"):
+            record["refrigerante"] = "unknown"
 
         if not record.get("id") or not record.get("modelo"):
             skipped += 1
@@ -286,7 +364,6 @@ def main(argv: list[str]) -> int:
     dst.write_text(header + body + footer, encoding="utf-8")
 
     print(f"OK: {len(rows_ts)} linhas escritas em {dst}. Ignoradas: {skipped}.")
-    print(f"Colunas mapeadas ({len(aliases)}): {sorted(aliases.keys())}")
     return 0
 
 

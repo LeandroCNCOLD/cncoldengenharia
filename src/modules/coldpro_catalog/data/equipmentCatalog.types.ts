@@ -12,6 +12,7 @@ export type Refrigerant =
   | "R507A"
   | "R134a"
   | "R22"
+  | "R410A"
   | "R448A"
   | "R449A"
   | "R452A"
@@ -22,6 +23,7 @@ export type TemperatureApplication =
   | "LT"
   | "MT"
   | "HT"
+  | "AGRO"
   | "freezing"
   | "cooling"
   | "unknown";
@@ -31,6 +33,8 @@ export interface CatalogEquipmentRow {
   modelo: string;
   modeloUnico: string;
   modeloBaseReferencia?: string;
+  modeloCatalogoOriginal?: string;
+  statusCompressor?: string;
 
   family: EquipmentFamily;
   application: TemperatureApplication;
@@ -44,6 +48,7 @@ export interface CatalogEquipmentRow {
   refrigerante: Refrigerant;
 
   tensaoV?: number;
+  tensaoComercial?: string;
   numeroFases?: number;
   frequenciaHz?: number;
   configuracaoEletrica?: string;
@@ -64,7 +69,9 @@ export interface CatalogEquipmentRow {
   correntePartidaA?: number;
 
   cop?: number;
+  copCarnot?: number;
   gwp?: number;
+  odp?: number;
 
   tempEvaporacaoC?: number;
   tempCondensacaoC?: number;
@@ -84,6 +91,7 @@ export interface CatalogEquipmentRow {
   condensadorFinSpacingMm?: number;
   condensadorLengthMm?: number;
   condensadorTuboDiametroMm?: number;
+  condensadorTuboDiametroIn?: string;
   condensadorTuboDiametroInternoMm?: number;
   condensadorTuboEspessuraMm?: number;
   condensadorTubePitchTransverseMm?: number;
@@ -97,20 +105,27 @@ export interface CatalogEquipmentRow {
   condensadorAreaFaceM2?: number;
   condensadorAreaTrocaM2?: number;
   condensadorVolumeInternoL?: number;
+  condensadorGeometria?: string;
+  ventiladorCondensador?: string;
 
   // --- Evaporador (geometria básica + estendida) ---
+  modeloEvaporador?: string;
   evaporadorRows?: number;
   evaporadorTubesPorRow?: number;
   evaporadorCircuitos?: number;
   evaporadorFinSpacingMm?: number;
   evaporadorLengthMm?: number;
   evaporadorTuboDiametroMm?: number;
+  evaporadorTuboDiametroIn?: string;
   evaporadorVolumeInternoL?: number;
   evaporadorAreaSuperficieM2?: number;
   evaporadorAreaFaceM2?: number;
   evaporadorAreaTrocaM2?: number;
   evaporadorTuboEspessuraMm?: number;
   evaporadorCoilDepthM?: number;
+  evaporadorGeometria?: string;
+  evaporadorQuantidade?: number;
+  ventiladorEvaporador?: string;
 
   // --- Geometria detalhada do evaporador (para ProgressiveCoilInput) ---
   evaporadorTubeInnerDiameterMm?: number;
@@ -149,18 +164,44 @@ export interface CatalogEquipmentRow {
   reheatAreaFaceM2?: number;
   reheatAreaTrocaM2?: number;
   reheatVolumeInternoL?: number;
+  // Geometria do aletado de reaquecimento (em mm — direto da planilha)
+  reheatRows?: number;
+  reheatTubesPerRow?: number;
+  reheatFinSpacingMm?: number;
+  reheatCoilLengthMm?: number;
+  reheatGeometria?: string;
 
   linhaSucao?: string;
   linhaDescarga?: string;
   linhaLiquido?: string;
+  velocidadeDescargaMs?: number;
+  velocidadeLiquidoMs?: number;
+  velocidadeSucaoMs?: number;
 
   superaquecimentoTotalK?: number;
   superaquecimentoUtilK?: number;
   subresfriamentoK?: number;
+  subresfriamentoAdicionalK?: number;
   altitudeM?: number;
+
+  vazaoMassaKgH?: number;
+  vazaoMassaKgS?: number;
+  deltaEntalpiaKjKg?: number;
+  cargaFluidoKg?: number;
+  umidadeExternaPercent?: number;
+
+  // Correntes individuais
+  correnteCompressorA?: number;
+  correnteVentiladoresA?: number;
+
+  // Circuito secundário (quando existir)
+  modeloCondensadorSecundario?: string;
+  ventiladorCondensadorSecundario?: string;
+  vazaoArCondensadorSecundarioM3H?: number;
 
   quantidadeAguaLH?: number;
   diametroDreno?: string;
+  quantidadeDrenos?: number;
 
   // --- Status de validação e controle de revisão ---
   validationStatus?: "pending" | "analyzed" | "validated" | "rejected";
