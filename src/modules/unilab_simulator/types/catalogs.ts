@@ -164,3 +164,26 @@ export interface PowerSupply {
   Fasi: number;
   Frequnza: number; // sic — preservado
 }
+
+/**
+ * Catálogo unificado de Lista de Materiais (BOM) — consolidação das 15
+ * tabelas `Tbl_Ma*` originais do UNILAB. Cada array contém os registros
+ * crus (campos italianos preservados) usados pelo módulo de Orçamento.
+ */
+export interface BomCatalog {
+  collectors: Array<Record<string, unknown>>;
+  tubes: Array<Record<string, unknown>>;
+  bends: Array<Record<string, unknown>>;
+  distributors: Array<Record<string, unknown>>;
+  endCaps: Array<Record<string, unknown>>;
+  sheets: Array<Record<string, unknown>>;
+  nipples: Array<Record<string, unknown>>;
+  nodes: Array<Record<string, unknown>>;
+  fins: Array<Record<string, unknown>>;
+  capillaries: Array<Record<string, unknown>>;
+  plugs: Array<Record<string, unknown>>;
+  soldering: Array<Record<string, unknown>>;
+  groups: Array<Record<string, unknown>>;
+  elements: Array<Record<string, unknown>>;
+  frame: Array<Record<string, unknown>>;
+}

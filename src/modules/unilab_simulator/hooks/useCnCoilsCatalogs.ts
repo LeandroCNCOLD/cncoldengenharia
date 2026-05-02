@@ -8,6 +8,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type {
+  BomCatalog,
   CoilShape,
   Compressor,
   CompressorStandard,
@@ -64,6 +65,8 @@ export interface CnCoilsCatalogsData {
   coilShapes: CoilShape[];
   finTreatments: FinTreatment[];
   powerSupplies: PowerSupply[];
+  /** Lista de Materiais (BOM) — 15 grupos consolidados do UNILAB. */
+  bom: BomCatalog;
 }
 
 export interface CnCoilsCatalogsState extends CnCoilsCatalogsData {
@@ -92,6 +95,11 @@ const EMPTY: CnCoilsCatalogsData = {
   coilShapes: [],
   finTreatments: [],
   powerSupplies: [],
+  bom: {
+    collectors: [], tubes: [], bends: [], distributors: [], endCaps: [],
+    sheets: [], nipples: [], nodes: [], fins: [], capillaries: [],
+    plugs: [], soldering: [], groups: [], elements: [], frame: [],
+  },
 };
 
 async function fetchJsonArray<T>(file: string): Promise<T[]> {
@@ -122,8 +130,8 @@ export function useCnCoilsCatalogs(): CnCoilsCatalogsState {
         Object.entries(FILES) as Array<[keyof typeof FILES, string]>
       );
 
-      await Promise.all(
-        tasks.map(async ([key, file]) => {
+      await Promise.all([
+        ...tasks.map(async ([key, file]) => {
           try {
             const arr = await fetchJsonArray<unknown>(file);
             (next as unknown as Record<string, unknown>)[key] = arr;
@@ -131,7 +139,20 @@ export function useCnCoilsCatalogs(): CnCoilsCatalogsState {
             errs[file] = err instanceof Error ? err.message : String(err);
           }
         }),
-      );
+        (async () => {
+          try {
+            const res = await fetch(`${CATALOG_BASE}/bomComponents.json`, {
+              cache: "no-cache",
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const raw = (await res.json()) as Partial<BomCatalog>;
+            next.bom = { ...next.bom, ...raw };
+          } catch (err) {
+            errs["bomComponents.json"] =
+              err instanceof Error ? err.message : String(err);
+          }
+        })(),
+      ]);
 
       // Lista combinada ordenada
       next.refrigerants = [...next.refrigerantsPure, ...next.refrigerantsMixtures]

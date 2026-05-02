@@ -1,0 +1,1187 @@
+{
+  "R134a": [
+    {
+      "ID": 1,
+      "IdModello": 1,
+      "Modello": "2KC-05.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 2,
+      "IdModello": 2,
+      "Modello": "2JC-07.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 3,
+      "IdModello": 3,
+      "Modello": "2HC-1.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 4,
+      "IdModello": 4,
+      "Modello": "2HC-2.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 5,
+      "IdModello": 5,
+      "Modello": "2GC-2.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 6,
+      "IdModello": 6,
+      "Modello": "2FC-2.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 7,
+      "IdModello": 7,
+      "Modello": "2FC-3.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 8,
+      "IdModello": 8,
+      "Modello": "2EC-2.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 9,
+      "IdModello": 9,
+      "Modello": "2EC-3.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 10,
+      "IdModello": 10,
+      "Modello": "2DC-2.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 11,
+      "IdModello": 11,
+      "Modello": "2DC-3.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 12,
+      "IdModello": 12,
+      "Modello": "2CC-3.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 13,
+      "IdModello": 13,
+      "Modello": "2CC-4.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 14,
+      "IdModello": 14,
+      "Modello": "4FC-3.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 15,
+      "IdModello": 15,
+      "Modello": "4FC-5.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 16,
+      "IdModello": 16,
+      "Modello": "4EC-4.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 17,
+      "IdModello": 17,
+      "Modello": "4EC-6.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 18,
+      "IdModello": 18,
+      "Modello": "4DC-5.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 19,
+      "IdModello": 19,
+      "Modello": "4DC-7.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 20,
+      "IdModello": 20,
+      "Modello": "4CC-6.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 21,
+      "IdModello": 21,
+      "Modello": "4CC-9.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 22,
+      "IdModello": 22,
+      "Modello": "4VCS-6.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 23,
+      "IdModello": 23,
+      "Modello": "4VCS-10.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 24,
+      "IdModello": 24,
+      "Modello": "4TCS-8.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 25,
+      "IdModello": 25,
+      "Modello": "4TCS-12.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 26,
+      "IdModello": 26,
+      "Modello": "4PCS-10.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 27,
+      "IdModello": 27,
+      "Modello": "4PCS-15.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 28,
+      "IdModello": 28,
+      "Modello": "4NCS-12.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 29,
+      "IdModello": 29,
+      "Modello": "4NCS-20.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 30,
+      "IdModello": 30,
+      "Modello": "4JE-13.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 31,
+      "IdModello": 31,
+      "Modello": "4JE-22.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 32,
+      "IdModello": 32,
+      "Modello": "4HE-15.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 33,
+      "IdModello": 33,
+      "Modello": "4HE-25.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 34,
+      "IdModello": 34,
+      "Modello": "4GE-20.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 35,
+      "IdModello": 35,
+      "Modello": "4GE-30.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 36,
+      "IdModello": 36,
+      "Modello": "6JE-22.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 37,
+      "IdModello": 37,
+      "Modello": "6JE-33.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 38,
+      "IdModello": 38,
+      "Modello": "6HE-25.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 39,
+      "IdModello": 39,
+      "Modello": "6HE-35.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 40,
+      "IdModello": 40,
+      "Modello": "6GE-30.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 41,
+      "IdModello": 41,
+      "Modello": "6GE-40.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 42,
+      "IdModello": 42,
+      "Modello": "6FE-40.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": 5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 43,
+      "IdModello": 43,
+      "Modello": "6FE-50.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 44,
+      "IdModello": 44,
+      "Modello": "8GC-60.2Y",
+      "T Evap Min": -20,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 45,
+      "IdModello": 45,
+      "Modello": "8FC-70.2Y",
+      "T Evap Min": -20,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 46,
+      "IdModello": 1,
+      "Modello": "22EC-4.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 47,
+      "IdModello": 2,
+      "Modello": "22EC-6.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 48,
+      "IdModello": 3,
+      "Modello": "22DC-4.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 49,
+      "IdModello": 4,
+      "Modello": "22DC-6.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 50,
+      "IdModello": 5,
+      "Modello": "22CC-6.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 51,
+      "IdModello": 6,
+      "Modello": "22CC-8.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 52,
+      "IdModello": 7,
+      "Modello": "44FC-6.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 53,
+      "IdModello": 8,
+      "Modello": "44FC-10.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 54,
+      "IdModello": 9,
+      "Modello": "44EC-8.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 55,
+      "IdModello": 10,
+      "Modello": "44EC-12.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 56,
+      "IdModello": 11,
+      "Modello": "44DC-10.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 57,
+      "IdModello": 12,
+      "Modello": "44DC-14.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 58,
+      "IdModello": 13,
+      "Modello": "44CC-12.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 59,
+      "IdModello": 14,
+      "Modello": "44CC-18.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 60,
+      "IdModello": 15,
+      "Modello": "44VCS-12.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 61,
+      "IdModello": 16,
+      "Modello": "44VCS-20.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 62,
+      "IdModello": 17,
+      "Modello": "44TCS-16.Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 63,
+      "IdModello": 18,
+      "Modello": "44TCS-24.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 64,
+      "IdModello": 19,
+      "Modello": "44PCS-20.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 65,
+      "IdModello": 20,
+      "Modello": "44PCS-30.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 66,
+      "IdModello": 21,
+      "Modello": "44NCS-24.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 67,
+      "IdModello": 22,
+      "Modello": "44NCS-40.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 68,
+      "IdModello": 23,
+      "Modello": "44J-26.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 69,
+      "IdModello": 24,
+      "Modello": "44J-44.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 70,
+      "IdModello": 25,
+      "Modello": "44H-30.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 71,
+      "IdModello": 26,
+      "Modello": "44H-50.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 72,
+      "IdModello": 27,
+      "Modello": "44G-40.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 73,
+      "IdModello": 28,
+      "Modello": "44G-60.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 74,
+      "IdModello": 29,
+      "Modello": "66J-44.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 75,
+      "IdModello": 30,
+      "Modello": "66J-66.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 76,
+      "IdModello": 31,
+      "Modello": "66H-50.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 77,
+      "IdModello": 32,
+      "Modello": "66H-70.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 78,
+      "IdModello": 33,
+      "Modello": "66G-60.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 79,
+      "IdModello": 34,
+      "Modello": "66G-80.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 80,
+      "IdModello": 35,
+      "Modello": "66F-80.2Y",
+      "T Evap Min": -45,
+      "T Evap Max": -5.0,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    },
+    {
+      "ID": 81,
+      "IdModello": 36,
+      "Modello": "66F-100.2Y",
+      "T Evap Min": -40,
+      "T Evap Max": 7.5,
+      "T Cond Min": 20,
+      "T Cond Max": 55
+    }
+  ],
+  "R22": [
+    {
+      "ID": 1,
+      "IdModello": 1,
+      "Modello": "CSH6553-35Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 2,
+      "IdModello": 2,
+      "Modello": "CSH6553-50Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 3,
+      "IdModello": 3,
+      "Modello": "CSH6563-40Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 4,
+      "IdModello": 4,
+      "Modello": "CSH6563-60Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 5,
+      "IdModello": 5,
+      "Modello": "CSH6583-50Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 6,
+      "IdModello": 6,
+      "Modello": "CSH6593-60Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 7,
+      "IdModello": 7,
+      "Modello": "CSH7553-50Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 8,
+      "IdModello": 8,
+      "Modello": "CSH7553-70Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 9,
+      "IdModello": 9,
+      "Modello": "CSH7563-60Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 10,
+      "IdModello": 10,
+      "Modello": "CSH7563-80Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 11,
+      "IdModello": 11,
+      "Modello": "CSH7573-70Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 12,
+      "IdModello": 12,
+      "Modello": "CSH7573-90Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 13,
+      "IdModello": 13,
+      "Modello": "CSH7583-80Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 14,
+      "IdModello": 14,
+      "Modello": "CSH7583-90Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 15,
+      "IdModello": 15,
+      "Modello": "CSH7593-90Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 16,
+      "IdModello": 16,
+      "Modello": "CSH7593-100Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 17,
+      "IdModello": 17,
+      "Modello": "CSH8553-80Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 18,
+      "IdModello": 18,
+      "Modello": "CSH8553-110Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 19,
+      "IdModello": 19,
+      "Modello": "CSH8563-90Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 20,
+      "IdModello": 20,
+      "Modello": "CSH8563-125Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 21,
+      "IdModello": 21,
+      "Modello": "CSH8573-110Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 22,
+      "IdModello": 22,
+      "Modello": "CSH8573-140Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 23,
+      "IdModello": 23,
+      "Modello": "CSH8583-125Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 24,
+      "IdModello": 24,
+      "Modello": "CSH8583-140Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 25,
+      "IdModello": 25,
+      "Modello": "CSH8593-140Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 26,
+      "IdModello": 26,
+      "Modello": "CSH8593-160Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 27,
+      "IdModello": 27,
+      "Modello": "CSH9553-180Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 28,
+      "IdModello": 28,
+      "Modello": "CSH9563-160Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 29,
+      "IdModello": 29,
+      "Modello": "CSH9563-210Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 30,
+      "IdModello": 30,
+      "Modello": "CSH9573-180Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 31,
+      "IdModello": 31,
+      "Modello": "CSH9573-240Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 32,
+      "IdModello": 32,
+      "Modello": "CSH9583-210Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 33,
+      "IdModello": 33,
+      "Modello": "CSH9583-280Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 34,
+      "IdModello": 34,
+      "Modello": "CSH9593-240Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 35,
+      "IdModello": 35,
+      "Modello": "CSH9593-300Y",
+      "T Evap Min": -20,
+      "T Evap Max": 25.0,
+      "T Cond Min": 20,
+      "T Cond Max": 70
+    },
+    {
+      "ID": 36,
+      "IdModello": 36,
+      "Modello": "CSH95103-280Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    },
+    {
+      "ID": 37,
+      "IdModello": 37,
+      "Modello": "CSH95113-320Y",
+      "T Evap Min": -20,
+      "T Evap Max": 12.8,
+      "T Cond Min": 20,
+      "T Cond Max": 65
+    }
+  ],
+  "R407C": [
+    {
+      "ID": 1,
+      "IdModello": 1,
+      "Modello": "CSH6551-50",
+      "T Evap Min": -15,
+      "T Evap Max": 12.5,
+      "T Cond Min": 20,
+      "T Cond Max": 60
+    },
+    {
+      "ID": 2,
+      "IdModello": 2,
+      "Modello": "CSH6561-60",
+      "T Evap Min": -15,
+      "T Evap Max": 12.5,
+      "T Cond Min": 20,
+      "T Cond Max": 60
+    },
+    {
+      "ID": 3,
+      "IdModello": 3,
+      "Modello": "CSH7551-70",
+      "T Evap Min": -15,
+      "T Evap Max": 12.5,
+      "T Cond Min": 20,
+      "T Cond Max": 60
+    },
+    {
+      "ID": 4,
+      "IdModello": 4,
+      "Modello": "CSH7561-80",
+      "T Evap Min": -15,
+      "T Evap Max": 12.5,
+      "T Cond Min": 20,
+      "T Cond Max": 60
+    },
+    {
+      "ID": 5,
+      "IdModello": 5,
+      "Modello": "CSH7571-90",
+      "T Evap Min": -15,
+      "T Evap Max": 12.5,
+      "T Cond Min": 20,
+      "T Cond Max": 60
+    },
+    {
+      "ID": 6,
+      "IdModello": 6,
+      "Modello": "CSH8551-110",
+      "T Evap Min": -15,
+      "T Evap Max": 12.5,
+      "T Cond Min": 20,
+      "T Cond Max": 60
+    },
+    {
+      "ID": 7,
+      "IdModello": 7,
+      "Modello": "CSH8561-125",
+      "T Evap Min": -15,
+      "T Evap Max": 12.5,
+      "T Cond Min": 20,
+      "T Cond Max": 60
+    },
+    {
+      "ID": 8,
+      "IdModello": 8,
+      "Modello": "CSH8571-140",
+      "T Evap Min": -15,
+      "T Evap Max": 12.5,
+      "T Cond Min": 20,
+      "T Cond Max": 60
+    },
+    {
+      "ID": 9,
+      "IdModello": 9,
+      "Modello": "CSH9551-180",
+      "T Evap Min": -15,
+      "T Evap Max": 12.5,
+      "T Cond Min": 20,
+      "T Cond Max": 60
+    },
+    {
+      "ID": 10,
+      "IdModello": 10,
+      "Modello": "CSH9561-210",
+      "T Evap Min": -15,
+      "T Evap Max": 12.5,
+      "T Cond Min": 20,
+      "T Cond Max": 60
+    },
+    {
+      "ID": 11,
+      "IdModello": 11,
+      "Modello": "CSH9571-240",
+      "T Evap Min": -15,
+      "T Evap Max": 12.5,
+      "T Cond Min": 20,
+      "T Cond Max": 60
+    },
+    {
+      "ID": 12,
+      "IdModello": 12,
+      "Modello": "CSH9581-280",
+      "T Evap Min": -15,
+      "T Evap Max": 12.5,
+      "T Cond Min": 20,
+      "T Cond Max": 60
+    },
+    {
+      "ID": 13,
+      "IdModello": 13,
+      "Modello": "CSH9591-300",
+      "T Evap Min": -15,
+      "T Evap Max": 12.5,
+      "T Cond Min": 20,
+      "T Cond Max": 60
+    }
+  ]
+}
