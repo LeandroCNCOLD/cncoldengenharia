@@ -229,6 +229,7 @@ export function WorkspaceSidebar({
       <GeometryPickerModal
         open={activeModal === "geometry"}
         onClose={() => setActiveModal(null)}
+        componentType={componentType}
       />
       <TubeModal
         open={activeModal === "tube"}
