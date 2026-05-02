@@ -77,6 +77,14 @@ export function FluidSidePanel({ componentType, disabled, result }: FluidSidePan
   const [refrigerants, setRefrigerants] = useState<RefrigerantOption[]>([]);
   const [search, setSearch] = useState("");
 
+  // Unidades selecionáveis por linha
+  const [uMassFlow, setUMassFlow] = useState<MassFlowUnit>("kg_h");
+  const [uOpTemp, setUOpTemp] = useState<TempUnit>("C");
+  const [uSH, setUSH] = useState<DeltaTUnit>("K");
+  const [uSC, setUSC] = useState<DeltaTUnit>("K");
+  const [uPdrop, setUPdrop] = useState<PressureUnit>("kPa");
+  const [uVel, setUVel] = useState<VelocityUnit>("m_s");
+
   useEffect(() => {
     let cancelled = false;
     loadRefrigerants()
