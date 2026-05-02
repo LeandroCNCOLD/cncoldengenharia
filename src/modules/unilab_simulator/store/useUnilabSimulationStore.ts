@@ -179,6 +179,12 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   setSuperheat: (val) => set({ superheat_K: val }),
   setSubcooling: (val) => set({ subcooling_K: val }),
   setFoulingFactorFluid: (val) => set({ foulingFactorFluid: val }),
+  pairedTempC: null,
+  dischargeSuperheatK: null,
+  selectedCompressorId: undefined,
+  setPairedTempC: (val) => set({ pairedTempC: val }),
+  setDischargeSuperheatK: (val) => set({ dischargeSuperheatK: val }),
+  setSelectedCompressor: (id) => set({ selectedCompressorId: id }),
 
   // Etapa 3.6 — Custo da bateria
   materialPrices: { ...DEFAULT_MATERIAL_PRICES },
