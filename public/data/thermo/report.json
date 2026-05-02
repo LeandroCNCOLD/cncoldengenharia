@@ -1,0 +1,78 @@
+{
+  "generatedAt": "2026-05-02T09:04:13.978Z",
+  "inputs": [
+    {
+      "file": "EQUACOES_POLINOMIAIS_COMPLETO.xlsx",
+      "status": "missing",
+      "rows": 0
+    },
+    {
+      "file": "EQUACOES_POLINOMIAIS_VAPCYC_CD.xlsx",
+      "status": "missing",
+      "rows": 0
+    },
+    {
+      "file": "00_INDICE_MESTRE.csv",
+      "status": "missing",
+      "rows": 0
+    },
+    {
+      "file": "UNILAB_COILS6_COMPLETO.zip",
+      "status": "missing",
+      "rows": 0
+    },
+    {
+      "file": "VAPCYC_CD_COMPLETO.zip",
+      "status": "missing",
+      "rows": 0
+    },
+    {
+      "file": "thermalcalc_hybrid_package.zip",
+      "status": "missing",
+      "rows": 0
+    }
+  ],
+  "totals": {
+    "processedRows": 0,
+    "valid": {
+      "pureFluids": 0,
+      "mixtures": 0,
+      "materials": 0,
+      "tubes": 0,
+      "correlations": 0
+    },
+    "discarded": 6
+  },
+  "discarded": [
+    {
+      "source": "EQUACOES_POLINOMIAIS_COMPLETO.xlsx",
+      "category": "input",
+      "reason": "missing_input"
+    },
+    {
+      "source": "EQUACOES_POLINOMIAIS_VAPCYC_CD.xlsx",
+      "category": "input",
+      "reason": "missing_input"
+    },
+    {
+      "source": "00_INDICE_MESTRE.csv",
+      "category": "input",
+      "reason": "missing_input"
+    },
+    {
+      "source": "UNILAB_COILS6_COMPLETO.zip",
+      "category": "input",
+      "reason": "missing_input"
+    },
+    {
+      "source": "VAPCYC_CD_COMPLETO.zip",
+      "category": "input",
+      "reason": "missing_input"
+    },
+    {
+      "source": "thermalcalc_hybrid_package.zip",
+      "category": "input",
+      "reason": "missing_input"
+    }
+  ]
+}
