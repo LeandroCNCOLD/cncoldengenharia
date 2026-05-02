@@ -36,7 +36,7 @@ function fmt(n: number | undefined, digits = 2): string {
  *
  * Sem cálculo termodinâmico nesta etapa.
  */
-export function FluidSidePanel({ componentType, disabled }: FluidSidePanelProps) {
+export function FluidSidePanel({ componentType, disabled, result }: FluidSidePanelProps) {
   const cfg = getApplicationConfig(componentType);
 
   const fluid = useUnilabSimulationStore((s) => s.fluid);
