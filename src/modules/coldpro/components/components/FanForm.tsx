@@ -19,6 +19,7 @@ export function FanForm({ onSaved }: FanFormProps) {
   const addFan = useComponentStore((s) => s.addFan);
   const [name, setName] = useState("");
   const [role, setRole] = useState<FanRole>("evaporator_fan");
+  const [mode, setMode] = useState<"blower" | "exhaust">("exhaust");
   const [airflow, setAirflow] = useState<number | undefined>();
   const [pressure, setPressure] = useState<number | undefined>(50);
 
@@ -33,6 +34,7 @@ export function FanForm({ onSaved }: FanFormProps) {
     const spec: FanSpec = {
       airflow_m3_h: airflow!,
       available_static_pressure_pa: pressure!,
+      mode,
     };
     addFan(name.trim(), role, spec);
     onSaved();
