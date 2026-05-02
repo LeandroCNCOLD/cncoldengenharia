@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ArrowLeft, Play, Send, RotateCcw } from "lucide-react";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
@@ -20,6 +20,10 @@ import {
   toCondenserInput,
 } from "../adapters/toColdProAdapter";
 import { useComponentStore } from "@/modules/coldpro/stores/useComponentStore";
+import {
+  loadCoilGeometries,
+  type CoilGeometryItem,
+} from "../services/coilGeometryCatalogService";
 import type {
   UnilabComponentType,
   UnilabPhysicalInputs,
