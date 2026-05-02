@@ -146,7 +146,7 @@ export function FluidSidePanel({ componentType, disabled, result }: FluidSidePan
 
       <div className="space-y-1.5 p-2">
         {/* 1) Fluido — dropdown pesquisável + fallback manual */}
-        <div className="grid grid-cols-[160px_84px_1fr_88px] items-center gap-1.5">
+        <div className="grid grid-cols-[minmax(110px,1fr)_72px_minmax(60px,1fr)_80px] sm:grid-cols-[160px_84px_1fr_88px] items-center gap-1.5">
           <label className="truncate text-[11px] font-medium text-slate-700">
             Fluido
           </label>
@@ -362,7 +362,7 @@ function Row({
 }) {
   const isEmpty = obtained === "---" || obtained === "" || obtained === "—";
   return (
-    <div className="grid grid-cols-[160px_84px_1fr_88px] items-center gap-1.5">
+    <div className="grid grid-cols-[minmax(110px,1fr)_72px_minmax(60px,1fr)_80px] sm:grid-cols-[160px_84px_1fr_88px] items-center gap-1.5">
       <label className="truncate text-[11px] font-medium text-slate-700" title={label}>
         {label}
       </label>
