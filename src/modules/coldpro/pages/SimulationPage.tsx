@@ -176,8 +176,21 @@ export function SimulationPage() {
                 {selectedCondenser && selectedCondenser.id !== selectedCompressor?.id && (
                   <>Condensador: <strong>{selectedCondenser.modeloBaseReferencia ?? selectedCondenser.modelo}</strong>. </>
                 )}
+                {selectedEvaporator && (
+                  <>Evaporador: <strong>{selectedEvaporator.modeloBaseReferencia ?? selectedEvaporator.modelo}</strong>. </>
+                )}
+                {selectedReheatCoil && (
+                  <>Reaquecimento: <strong>{selectedReheatCoil.modeloBaseReferencia ?? selectedReheatCoil.modelo}</strong>. </>
+                )}
                 Os campos abaixo continuam editáveis.
               </p>
+              {catalogWarnings.length > 0 && (
+                <ul className="mt-2 list-disc space-y-0.5 pl-5 text-[11px] text-amber-700">
+                  {catalogWarnings.map((w, i) => (
+                    <li key={i}>{w}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           ) : (
             <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
