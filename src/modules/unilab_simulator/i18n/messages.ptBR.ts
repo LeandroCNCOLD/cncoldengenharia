@@ -2,11 +2,11 @@
 
 export const ptBR = {
   module: {
-    title: "Cn Coils Simulator",
+    title: "CN Coils Simulator",
     subtitle:
-      "Simulação termodinâmica de trocadores de calor com correções polinomiais UNILAB.",
+      "Simulação termodinâmica de trocadores de calor com correções polinomiais CN Coils.",
     disclaimer:
-      "Capacidade estimada por modelo termodinâmico com correções polinomiais. Os resultados não substituem a validação experimental ou o cálculo pelo software UNILAB original.",
+      "Capacidade estimada por modelo termodinâmico com correções polinomiais. Os resultados não substituem a validação experimental ou o cálculo pelo software CN Coils Simulator.",
   },
   dashboard: {
     intro: "Selecione um tipo de componente para iniciar a simulação.",
