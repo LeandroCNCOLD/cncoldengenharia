@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
-import type { UnilabComponentType } from "../types/unilab.types";
+import type {
+  UnilabComponentType,
+  UnilabSimulationResult,
+} from "../types/unilab.types";
 import { getApplicationConfig } from "../config/applicationConfig";
 import {
   loadRefrigerants,
@@ -16,6 +19,12 @@ interface FluidSidePanelProps {
   /** mantido por compatibilidade com a página; o painel usa loadRefrigerants() diretamente */
   refrigerants?: unknown;
   disabled?: boolean;
+  result?: UnilabSimulationResult;
+}
+
+function fmt(n: number | undefined, digits = 2): string {
+  if (n === undefined || !Number.isFinite(n)) return "---";
+  return n.toFixed(digits);
 }
 
 /**
