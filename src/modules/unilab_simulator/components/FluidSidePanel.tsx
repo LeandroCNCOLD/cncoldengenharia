@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
-import type { UnilabComponentType } from "../types/unilab.types";
+import type {
+  UnilabComponentType,
+  UnilabSimulationResult,
+} from "../types/unilab.types";
 import { getApplicationConfig } from "../config/applicationConfig";
 import {
   loadRefrigerants,
@@ -16,6 +19,12 @@ interface FluidSidePanelProps {
   /** mantido por compatibilidade com a página; o painel usa loadRefrigerants() diretamente */
   refrigerants?: unknown;
   disabled?: boolean;
+  result?: UnilabSimulationResult;
+}
+
+function fmt(n: number | undefined, digits = 2): string {
+  if (n === undefined || !Number.isFinite(n)) return "---";
+  return n.toFixed(digits);
 }
 
 /**
@@ -27,7 +36,7 @@ interface FluidSidePanelProps {
  *
  * Sem cálculo termodinâmico nesta etapa.
  */
-export function FluidSidePanel({ componentType, disabled }: FluidSidePanelProps) {
+export function FluidSidePanel({ componentType, disabled, result }: FluidSidePanelProps) {
   const cfg = getApplicationConfig(componentType);
 
   const fluid = useUnilabSimulationStore((s) => s.fluid);
@@ -268,7 +277,12 @@ export function FluidSidePanel({ componentType, disabled }: FluidSidePanelProps)
           Resultados do Lado Fluido
         </div>
         <div className="space-y-1.5">
-          <Row label="Queda de Pressão" unit="kPa" input={<DisabledInput />} obtained="---" />
+          <Row
+            label="Queda de Pressão"
+            unit="kPa"
+            input={<DisabledInput />}
+            obtained={fmt(result?.fluidPressureDropKpa, 2)}
+          />
           <Row
             label="Velocidade do Fluido"
             unit="m/s"
@@ -279,7 +293,13 @@ export function FluidSidePanel({ componentType, disabled }: FluidSidePanelProps)
             label="Fase do Fluido"
             unit="—"
             input={<DisabledInput />}
-            obtained="Aguardando cálculo"
+            obtained={
+              result?.regime === "WET"
+                ? "Mudança de fase (úmido)"
+                : result?.regime === "DRY"
+                  ? "Monofásico (seco)"
+                  : "Aguardando cálculo"
+            }
           />
         </div>
       </div>
@@ -306,6 +326,7 @@ function Row({
   input: React.ReactNode;
   obtained: string;
 }) {
+  const isEmpty = obtained === "---" || obtained === "" || obtained === "—";
   return (
     <div className="grid grid-cols-[160px_60px_1fr_88px] items-center gap-1.5">
       <label className="truncate text-[11px] font-medium text-slate-700" title={label}>
@@ -315,7 +336,11 @@ function Row({
         {unit}
       </div>
       <div>{input}</div>
-      <div className="rounded border border-slate-300 bg-slate-200 px-2 py-1 text-right font-mono text-[11px] text-slate-700">
+      <div
+        className={`rounded border border-emerald-300 bg-emerald-100 px-2 py-1 text-right font-mono text-[11px] ${
+          isEmpty ? "text-emerald-700/60" : "text-emerald-900 font-semibold"
+        }`}
+      >
         {obtained}
       </div>
     </div>

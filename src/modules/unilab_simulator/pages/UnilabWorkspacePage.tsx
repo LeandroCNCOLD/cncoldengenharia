@@ -15,6 +15,7 @@ import {
 } from "../components/WorkspaceSidebar";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { useUnilabSimulation } from "../hooks/useUnilabSimulation";
+import { useUnilabInputBridge } from "../hooks/useUnilabInputBridge";
 import {
   validatePhysicalInputs,
   validateThermoInputs,
@@ -56,6 +57,9 @@ export function UnilabWorkspacePage() {
   const isSimulating = useUnilabSimulationStore((s) => s.isSimulating);
   const reset = useUnilabSimulationStore((s) => s.reset);
   const setWarnings = useUnilabSimulationStore((s) => s.setWarnings);
+
+  // Espelha campos das Etapas 3/4 → thermoInputs/physicalInputs (motor)
+  useUnilabInputBridge(componentType);
 
   const [activeSection, setActiveSection] = useState<WorkspaceSection>("geometry");
 
@@ -197,7 +201,7 @@ export function UnilabWorkspacePage() {
               />
             )
           ) : (
-            <AirSidePanel />
+            <AirSidePanel result={result} />
           )}
         </div>
 
@@ -207,6 +211,7 @@ export function UnilabWorkspacePage() {
             componentType={componentType}
             refrigerants={catalogs.refrigerants}
             disabled={!catalogs.ready}
+            result={result}
           />
           <DatasetStatusPanel
             loading={catalogs.loading}

@@ -4,6 +4,16 @@ import {
   validateAirSideInputs,
   type PsychrometricValidationResult,
 } from "../services/psychrometrics";
+import type { UnilabSimulationResult } from "../types/unilab.types";
+
+interface AirSidePanelProps {
+  result?: UnilabSimulationResult;
+}
+
+function fmt(n: number | undefined, digits = 1): string {
+  if (n === undefined || !Number.isFinite(n)) return "---";
+  return n.toFixed(digits);
+}
 
 /**
  * AirSidePanel — replica o bloco "LADO VENTILAÇÃO" do Unilab Coils 9.0.
@@ -28,7 +38,7 @@ interface FanCatalogItem {
 
 const FANS_CATALOG_URL = "/data/catalogs/fans_clean.json";
 
-export function AirSidePanel() {
+export function AirSidePanel({ result }: AirSidePanelProps = {}) {
   const airFlow_m3h = useUnilabSimulationStore((s) => s.airFlow_m3h);
   const tempInDB_C = useUnilabSimulationStore((s) => s.tempInDB_C);
   const rhIn_pct = useUnilabSimulationStore((s) => s.rhIn_pct);
@@ -89,12 +99,16 @@ export function AirSidePanel() {
       </div>
 
       <div className="space-y-1.5 p-2">
-        {/* 1. CAPACIDADE — output (calculado depois) */}
+        {/* 1. CAPACIDADE — output do motor (W = kW × 1000) */}
         <Row
           label="Capacidade"
           unit="W"
           input={<DisabledInput />}
-          obtained="---"
+          obtained={
+            result?.totalCapacityKw !== undefined
+              ? (result.totalCapacityKw * 1000).toFixed(0)
+              : "---"
+          }
         />
 
         {/* 2. VENTILADOR — dropdown que preenche vazão */}
@@ -127,15 +141,15 @@ export function AirSidePanel() {
           obtained={airFlow_m3h > 0 ? airFlow_m3h.toFixed(1) : "---"}
         />
 
-        {/* 3. VELOCIDADE FRONTAL — calculada depois */}
+        {/* 3. VELOCIDADE FRONTAL — calculada pelo motor */}
         <Row
           label="Velocidade Frontal"
           unit="m/s"
           input={<DisabledInput />}
-          obtained="---"
+          obtained={fmt(result?.faceVelocityMs, 2)}
         />
 
-        {/* 4. FAN WORKING @ % — info do ventilador */}
+        {/* 4. FAN WORKING @ % — info do ventilador (futuro) */}
         <Row
           label="Fan working @"
           unit="%"
@@ -148,7 +162,7 @@ export function AirSidePanel() {
           label="Temperatura de Entrada DB"
           unit="°C"
           input={<NumberCell value={tempInDB_C} onChange={setTempInDB} />}
-          obtained="---"
+          obtained={fmt(tempInDB_C, 1)}
         />
         <Row
           label="Umidade Relativa de Entrada"
@@ -156,21 +170,21 @@ export function AirSidePanel() {
           input={
             <NumberCell value={rhIn_pct} onChange={setRhIn} min={0} max={100} />
           }
-          obtained="---"
+          obtained={fmt(rhIn_pct, 1)}
         />
 
-        {/* 6. TEMP. SAÍDA DB + UR SAÍDA (par — outputs) */}
+        {/* 6. TEMP. SAÍDA DB + UR SAÍDA (par — outputs do motor) */}
         <Row
           label="Temperatura de Saída DB"
           unit="°C"
           input={<DisabledInput />}
-          obtained="---"
+          obtained={fmt(result?.airOutletTempC, 1)}
         />
         <Row
           label="Umidade Relativa de Saída"
           unit="%"
           input={<DisabledInput />}
-          obtained="---"
+          obtained={fmt(result?.airOutletRhPercent, 1)}
         />
 
         {/* 7. FATOR DE ERRO (FOULING) */}
@@ -188,12 +202,12 @@ export function AirSidePanel() {
           obtained="---"
         />
 
-        {/* 8. QUEDA DE PRESSÃO — output */}
+        {/* 8. QUEDA DE PRESSÃO — output do motor */}
         <Row
           label="Queda de Pressão"
           unit="Pa"
           input={<DisabledInput />}
-          obtained="---"
+          obtained={fmt(result?.airPressureDropPa, 0)}
         />
       </div>
 
