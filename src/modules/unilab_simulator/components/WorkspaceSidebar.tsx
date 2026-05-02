@@ -116,27 +116,23 @@ export function WorkspaceSidebar({
         </div>
       </div>
 
-      {/* Seções (navegação do painel central) */}
+      {/* Configuradores (abrem em modal) */}
       <nav className="rounded border border-slate-300 bg-white">
+        <div className="border-b border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
+          Configurar
+        </div>
         <ul>
-          {SECTIONS.map((s) => {
-            const active = s.id === activeSection;
-            return (
-              <li key={s.id}>
-                <button
-                  type="button"
-                  onClick={() => onSectionChange(s.id)}
-                  className={`block w-full border-b border-slate-100 px-2 py-1 text-left text-[10px] last:border-b-0 ${
-                    active
-                      ? "bg-[#1E6FD9] font-semibold text-white"
-                      : "text-slate-700 hover:bg-slate-100"
-                  }`}
-                >
-                  {s.label}
-                </button>
-              </li>
-            );
-          })}
+          {MODAL_BUTTONS.map((m) => (
+            <li key={m.id}>
+              <button
+                type="button"
+                onClick={() => setActiveModal(m.id)}
+                className="block w-full border-b border-slate-100 px-2 py-1 text-left text-[10px] text-slate-700 last:border-b-0 hover:bg-slate-100"
+              >
+                {m.label}
+              </button>
+            </li>
+          ))}
         </ul>
       </nav>
 
