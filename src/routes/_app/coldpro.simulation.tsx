@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PlaceholderPage } from "@/modules/coldpro/pages/PlaceholderPage";
+import { SimulationPage } from "@/modules/coldpro/pages/SimulationPage";
 
 export const Route = createFileRoute("/_app/coldpro/simulation")({
-  component: () => <PlaceholderPage title="Equilíbrio do Sistema" />,
+  component: SimulationPage,
 });

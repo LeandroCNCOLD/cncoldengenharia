@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PlaceholderPage } from "@/modules/coldpro/pages/PlaceholderPage";
+import { OperatingMapPage } from "@/modules/coldpro/pages/OperatingMapPage";
 
 export const Route = createFileRoute("/_app/coldpro/map")({
-  component: () => <PlaceholderPage title="Mapa Operacional" />,
+  component: OperatingMapPage,
 });
