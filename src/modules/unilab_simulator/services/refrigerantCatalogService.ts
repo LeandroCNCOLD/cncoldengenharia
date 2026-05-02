@@ -5,6 +5,8 @@
 export interface RefrigerantOption {
   id: string;
   name?: string;
+  shortName?: string;
+  commercialName?: string;
   type?: string; // "pure" | "mixture" | livre, conforme catálogo
 }
 
@@ -38,15 +40,21 @@ function normalize(raw: unknown, defaultType?: string): RefrigerantOption[] {
         const o = item as Record<string, unknown>;
         const id = String(o.id ?? o.name ?? "").trim();
         if (!id) return null;
+        const isMixture = o.isMixture === true;
         return {
           id,
           name: typeof o.name === "string" ? o.name : id,
+          shortName: typeof o.shortName === "string" ? o.shortName : undefined,
+          commercialName:
+            typeof o.commercialName === "string" ? o.commercialName : undefined,
           type:
             typeof o.type === "string"
               ? o.type
               : typeof o.kind === "string"
                 ? (o.kind as string)
-                : defaultType,
+                : isMixture
+                  ? "mixture"
+                  : defaultType,
         };
       }
       return null;
