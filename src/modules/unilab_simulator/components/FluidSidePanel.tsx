@@ -89,7 +89,10 @@ export function FluidSidePanel({
   const setFoulingFactorFluid = useUnilabSimulationStore(
     (s) => s.setFoulingFactorFluid,
   );
-  const setPairedTempC = useUnilabSimulationStore((s) => s.setPairedTempC);
+  const errorFactorPercent = useUnilabSimulationStore((s) => s.errorFactorPercent);
+  const setErrorFactorPercent = useUnilabSimulationStore(
+    (s) => s.setErrorFactorPercent,
+  );
   const setDischargeSuperheatK = useUnilabSimulationStore((s) => s.setDischargeSuperheatK);
   const setSelectedCompressor = useUnilabSimulationStore((s) => s.setSelectedCompressor);
 
