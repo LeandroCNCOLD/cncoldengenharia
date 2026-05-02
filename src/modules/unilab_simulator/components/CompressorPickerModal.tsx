@@ -17,6 +17,18 @@ export interface CompressorItem {
   series?: string;
   type?: string;
   refrigerantCode?: string;
+  brand?: string;
+}
+
+/** Infere a marca do compressor a partir da série/modelo (catálogo não tem campo brand). */
+function inferBrand(series?: string, model?: string): string {
+  const s = `${series ?? ""} ${model ?? ""}`.toUpperCase();
+  if (/\bSH\b|ECOLINE|BITZER|\bSE\b|\b[24][A-Z]{2}-/.test(s)) return "Bitzer";
+  if (/^D|DKJ|DLJ|DLF|DKM|DLL|DLE|DKSJ|DANFOSS|MANEUROP|MT |MTZ|NTZ/.test(s)) return "Danfoss";
+  if (/^Z|COPELAND|SCROLL DIGITAL|\bCS\b/.test(s)) return "Copeland";
+  if (/EMBRACO|NE[A-Z]?\d|FF\d|EM[A-Z]?\d/.test(s)) return "Embraco";
+  if (/TECUMSEH|AE[A-Z]?\d|AJ[A-Z]?\d|AW[A-Z]?\d/.test(s)) return "Tecumseh";
+  return "Outros";
 }
 
 interface Props {
