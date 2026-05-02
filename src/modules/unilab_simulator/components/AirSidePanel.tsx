@@ -198,7 +198,7 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
               value={selectedFanId ?? ""}
               onChange={(e) => handleFanChange(e.target.value)}
               disabled={fans.length === 0}
-              className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
+              className="w-full rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] text-slate-900 focus:border-[#1E6FD9] focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
               title={
                 fans.length === 0
                   ? "Catálogo de ventiladores não disponível"
@@ -313,14 +313,14 @@ function Row({
 }) {
   const isEmpty = obtained === "---" || obtained === "";
   return (
-    <div className="grid grid-cols-[minmax(110px,1fr)_72px_minmax(60px,1fr)_80px] sm:grid-cols-[160px_84px_1fr_88px] items-center gap-1.5">
-      <label className="truncate text-[11px] font-medium text-slate-700" title={label}>
+    <div className="grid grid-cols-[minmax(96px,1fr)_60px_minmax(50px,1fr)_68px] sm:grid-cols-[140px_68px_1fr_74px] items-center gap-1">
+      <label className="truncate text-[10px] font-medium text-slate-700" title={label}>
         {label}
       </label>
       <div>{unitNode}</div>
       <div>{input}</div>
       <div
-        className={`rounded border border-emerald-300 bg-emerald-100 px-2 py-1 text-right font-mono text-[11px] ${
+        className={`rounded border border-emerald-300 bg-emerald-100 px-1.5 py-0.5 text-right font-mono text-[10px] ${
           isEmpty ? "text-emerald-700/60" : "text-emerald-900 font-semibold"
         }`}
       >
@@ -332,7 +332,7 @@ function Row({
 
 function UnitText({ text }: { text: string }) {
   return (
-    <div className="rounded border border-slate-300 bg-white px-1.5 py-1 text-center text-[11px] text-slate-600">
+    <div className="rounded border border-slate-300 bg-white px-1 py-0.5 text-center text-[10px] text-slate-600">
       {text}
     </div>
   );
@@ -362,7 +362,7 @@ function NumberCell({
         const n = parseFloat(e.target.value);
         onChange(Number.isFinite(n) ? n : 0);
       }}
-      className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-right text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9]"
+      className="w-full rounded border border-slate-300 bg-white px-1.5 py-0.5 text-right text-[10px] text-slate-900 focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9]"
     />
   );
 }
@@ -373,7 +373,7 @@ function DisabledInput() {
       type="text"
       value=""
       disabled
-      className="w-full cursor-not-allowed rounded border border-slate-200 bg-slate-100 px-2 py-1 text-xs"
+      className="w-full cursor-not-allowed rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px]"
     />
   );
 }
