@@ -23,6 +23,9 @@ export function GeometryPickerModal({ open, onClose, componentType }: Props) {
   const setSelectedGeometry = useUnilabSimulationStore(
     (s) => s.setSelectedGeometry,
   );
+  const setErrorFactorPercent = useUnilabSimulationStore(
+    (s) => s.setErrorFactorPercent,
+  );
 
   const [geometries, setGeometries] = useState<CoilGeometryItem[]>([]);
   const [loading, setLoading] = useState(false);
