@@ -12,6 +12,12 @@ import {
 } from "../data/equipmentCatalog.types";
 import { useCatalogRevisionStore } from "../store/useCatalogRevisionStore";
 import { useCatalogValidationStore } from "../store/useCatalogValidationStore";
+import {
+  computeBlockCompleteness,
+  BLOCK_LABEL,
+  type BlockKey,
+  type CatalogCompleteness,
+} from "../services/blockCompletenessService";
 
 type Tab = "tech" | "validation" | "history";
 
