@@ -47,6 +47,8 @@ export function WorkspaceSidebar({
   const cfg = getApplicationConfig(componentType);
   const calcMode = useUnilabSimulationStore((s) => s.calcMode);
   const setCalcMode = useUnilabSimulationStore((s) => s.setCalcMode);
+  const engineVersion = useUnilabSimulationStore((s) => s.engineVersion);
+  const setEngineVersion = useUnilabSimulationStore((s) => s.setEngineVersion);
 
   return (
     <aside className="flex h-full w-full flex-col gap-2 rounded border border-slate-300 bg-slate-50 p-2 text-xs shadow-sm">
