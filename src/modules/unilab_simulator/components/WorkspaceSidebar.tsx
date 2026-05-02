@@ -81,7 +81,10 @@ export function WorkspaceSidebar({
               type="radio"
               name="calcMode"
               checked={calcMode === "design"}
-              onChange={() => setCalcMode("design")}
+              onChange={() => {
+                setCalcMode("design");
+                onOpenSchematic?.();
+              }}
               className="h-3 w-3 accent-[#1E6FD9]"
             />
             Desenho
