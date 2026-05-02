@@ -6,6 +6,7 @@ import {
   loadCoilGeometries,
   type CoilGeometryItem,
 } from "../services/coilGeometryCatalogService";
+import { loadSecurityFactorMap } from "../services/securityFactorCatalog";
 import { tipoSerpentinaForComponent } from "../config/coilTypeFilter";
 import type { UnilabComponentType } from "../types/unilab.types";
 
