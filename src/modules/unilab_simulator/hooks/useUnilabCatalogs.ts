@@ -95,12 +95,50 @@ export function useUnilabCatalogs(): UseUnilabCatalogsReturn {
         [
           "finPitches",
           CATALOG_FILES.finPitches,
-          (raw) => ensureArray<FinPitchItem>(raw, CATALOG_FILES.finPitches),
+          (raw) => {
+            const arr = ensureArray<Record<string, unknown>>(raw, CATALOG_FILES.finPitches);
+            return arr.map((r): FinPitchItem => {
+              // Aceita tanto o shape novo (UNILAB IT) quanto o legado.
+              const pitch =
+                typeof r.PassoAletta === "number"
+                  ? r.PassoAletta
+                  : typeof r.pitchMm === "number"
+                    ? r.pitchMm
+                    : Number(r.PassoAletta ?? r.pitchMm ?? 0);
+              const id = String(r.PassiAletteID ?? r.id ?? pitch);
+              const fpi =
+                typeof r.FinsPerInch === "number" ? r.FinsPerInch : undefined;
+              return {
+                id,
+                pitchMm: pitch,
+                label:
+                  typeof r.label === "string"
+                    ? r.label
+                    : `${pitch} mm${fpi ? ` (${fpi} FPI)` : ""}`,
+              };
+            });
+          },
         ],
         [
           "finThicknesses",
           CATALOG_FILES.finThicknesses,
-          (raw) => ensureArray<FinThicknessItem>(raw, CATALOG_FILES.finThicknesses),
+          (raw) => {
+            const arr = ensureArray<Record<string, unknown>>(raw, CATALOG_FILES.finThicknesses);
+            return arr.map((r): FinThicknessItem => {
+              const thickness =
+                typeof r.SpessoreAletta === "number"
+                  ? r.SpessoreAletta
+                  : typeof r.thicknessMm === "number"
+                    ? r.thicknessMm
+                    : Number(r.SpessoreAletta ?? r.thicknessMm ?? 0);
+              const id = String(r.SpessoreAlettaID ?? r.id ?? thickness);
+              return {
+                id,
+                thicknessMm: thickness,
+                label: typeof r.label === "string" ? r.label : `${thickness} mm`,
+              };
+            });
+          },
         ],
         [
           "correctionCoefficients",
