@@ -9,7 +9,7 @@ import { ResultPanel } from "../components/ResultPanel";
 import { AirSidePanel } from "../components/AirSidePanel";
 import { FluidSidePanel } from "../components/FluidSidePanel";
 import { GeometryBottomBar } from "../components/GeometryBottomBar";
-import { CoilSchematic } from "../components/CoilSchematic";
+import { CoilSchematicModal } from "../components/CoilSchematicModal";
 import { WorkspaceSidebar } from "../components/WorkspaceSidebar";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { useUnilabSimulation } from "../hooks/useUnilabSimulation";
