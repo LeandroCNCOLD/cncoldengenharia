@@ -316,7 +316,27 @@ def main(argv: list[str]) -> int:
     except ValueError:
         df = pd.read_excel(src, sheet_name=0, header=1)
 
-    df.columns = [str(c).strip() for c in df.columns]
+    # Guarda nomes ORIGINAIS (com possíveis duplicatas) por índice posicional.
+    original_cols = [str(c).strip() for c in df.columns]
+    # Pandas renomeia duplicatas para "Nome.1" — desfaz isso para o alias.
+    df.columns = original_cols
+
+    # Override posicional: a planilha tem DUAS colunas chamadas "EaporadorRows".
+    # A 1ª (col 42) é mesmo do evaporador. A 2ª (col 47) é, na verdade, o
+    # número de fileiras do REAQUECIMENTO (confirmado pelo usuário). Renomeia
+    # a segunda para um nome único usado pelo alias `reheatRows`.
+    seen: dict[str, int] = {}
+    new_cols: list[str] = []
+    for c in original_cols:
+        seen[c] = seen.get(c, 0) + 1
+        if c == "EaporadorRows" and seen[c] == 2:
+            new_cols.append("REAQUECIMENTO Rows")  # alias de reheatRows
+        elif seen[c] > 1:
+            new_cols.append(f"{c}__dup{seen[c]}")
+        else:
+            new_cols.append(c)
+    df.columns = new_cols
+
     aliases = build_alias_index(list(df.columns))
 
     print(f"Colunas mapeadas: {len(aliases)}/{len(COLUMN_MAP)}")
