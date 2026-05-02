@@ -218,7 +218,7 @@ export function CompressorPickerModal({ open, onClose }: Props) {
               <ul className="divide-y divide-slate-100 text-xs">
                 {filtered.slice(0, 200).map((c) => {
                   const active = c.id === draftId;
-                  const meta = [c.type, c.series, c.refrigerantCode]
+                  const meta = [c.brand, c.type, c.series, c.refrigerantCode]
                     .filter(Boolean)
                     .join(" • ");
                   return (
