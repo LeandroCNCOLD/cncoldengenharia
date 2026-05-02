@@ -86,6 +86,35 @@ export function WorkspaceSidebar({
         </div>
       </div>
 
+      {/* Motor termodinâmico (V1 Etapa 5 / V2 Etapa 6 ASHRAE) */}
+      <div className="rounded border border-slate-300 bg-white">
+        <div className="border-b border-slate-200 bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-700">
+          Motor Termodinâmico
+        </div>
+        <div className="space-y-1 p-2">
+          <label className="flex items-center gap-2 text-[11px] text-slate-700">
+            <input
+              type="radio"
+              name="engineVersion"
+              checked={engineVersion === "v1"}
+              onChange={() => setEngineVersion("v1")}
+              className="accent-[#1E6FD9]"
+            />
+            V1 — NTU-ε UNILAB
+          </label>
+          <label className="flex items-center gap-2 text-[11px] text-slate-700">
+            <input
+              type="radio"
+              name="engineVersion"
+              checked={engineVersion === "v2"}
+              onChange={() => setEngineVersion("v2")}
+              className="accent-[#1E6FD9]"
+            />
+            V2 — ASHRAE Sens/Lat
+          </label>
+        </div>
+      </div>
+
       {/* Seções */}
       <nav className="rounded border border-slate-300 bg-white">
         <ul>
