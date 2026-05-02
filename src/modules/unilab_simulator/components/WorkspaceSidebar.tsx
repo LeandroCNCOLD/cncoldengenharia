@@ -4,22 +4,28 @@ import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { getApplicationConfig } from "../config/applicationConfig";
 import { formatBRL } from "../engine/costCalculator";
 import { MaterialCostConfigModal } from "./MaterialCostConfigModal";
+import { GeometryPickerModal } from "./GeometryPickerModal";
+import {
+  TubeModal,
+  FinModal,
+  DistributorModal,
+} from "./GeometryDerivedModals";
 import type { UnilabComponentType } from "../types/unilab.types";
 
-const SECTIONS = [
-  { id: "ventilacao", label: "Lado Ventilação" },
-  { id: "geometria", label: "Geometria" },
-  { id: "tubo", label: "Tubo" },
-  { id: "aleta", label: "Aleta" },
-  { id: "distribuidor", label: "Distribuidor" },
-] as const;
+type ModalKey = "geometry" | "tube" | "fin" | "distributor" | null;
 
-export type WorkspaceSection = (typeof SECTIONS)[number]["id"];
+const MODAL_BUTTONS: Array<{ id: Exclude<ModalKey, null>; label: string }> = [
+  { id: "geometry", label: "Geometria…" },
+  { id: "tube", label: "Tubo…" },
+  { id: "fin", label: "Aleta…" },
+  { id: "distributor", label: "Distribuidor…" },
+];
+
+// Mantido para compatibilidade externa: hoje só "ventilacao" é usado (fixo no centro).
+export type WorkspaceSection = "ventilacao";
 
 interface WorkspaceSidebarProps {
   componentType: UnilabComponentType;
-  activeSection: WorkspaceSection;
-  onSectionChange: (s: WorkspaceSection) => void;
   onSimulate: () => void;
   onReset: () => void;
   canSimulate: boolean;
@@ -29,8 +35,6 @@ interface WorkspaceSidebarProps {
 
 export function WorkspaceSidebar({
   componentType,
-  activeSection,
-  onSectionChange,
   onSimulate,
   onReset,
   canSimulate,
@@ -45,6 +49,7 @@ export function WorkspaceSidebar({
   const calculatedCost = useUnilabSimulationStore((s) => s.calculatedCost);
 
   const [costModalOpen, setCostModalOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState<ModalKey>(null);
 
   return (
     <aside className="flex h-full w-full flex-col gap-1.5 rounded border border-slate-300 bg-slate-50 p-1.5 text-[10px] shadow-sm">
