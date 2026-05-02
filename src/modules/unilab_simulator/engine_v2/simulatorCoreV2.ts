@@ -18,6 +18,7 @@ import {
   checkCondensation,
   enthalpy,
   humidityRatio,
+  saturationPressure,
   PSY_CONSTANTS,
 } from "./psychrometrics";
 import {
