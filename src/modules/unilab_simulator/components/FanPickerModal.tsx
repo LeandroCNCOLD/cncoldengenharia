@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, Fan as FanIcon } from "lucide-react";
+import { Search, Fan as FanIcon, Plus } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import {
   Dialog,
   DialogContent,
