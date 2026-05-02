@@ -330,6 +330,12 @@ export function UnilabWorkspacePage() {
         open={schematicOpen}
         onClose={() => setSchematicOpen(false)}
       />
+
+      <MachineImportModal
+        open={machineImportOpen}
+        onClose={() => setMachineImportOpen(false)}
+        componentType={componentType}
+      />
     </PageContainer>
   );
 }
