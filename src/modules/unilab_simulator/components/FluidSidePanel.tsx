@@ -105,7 +105,10 @@ export function FluidSidePanel({
           ),
         );
         setRefrigerants(sorted);
-        if (sorted.length > 0 && !sorted.some((r) => r.id === fluid)) {
+        // Só preenche o fluido padrão se o usuário ainda não tiver um
+        // selecionado (evita sobrescrever uma escolha válida ao recarregar
+        // a lista — bug do binding aparente).
+        if (sorted.length > 0 && !fluid) {
           setFluid(sorted[0].id);
         }
       })
