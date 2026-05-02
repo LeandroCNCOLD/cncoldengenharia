@@ -57,14 +57,16 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
   const rhIn_pct = useUnilabSimulationStore((s) => s.rhIn_pct);
   const foulingFactorAir = useUnilabSimulationStore((s) => s.foulingFactorAir);
   const selectedFanId = useUnilabSimulationStore((s) => s.selectedFanId);
+  const fanCount = useUnilabSimulationStore((s) => s.fanCount);
+  const fanRole = useUnilabSimulationStore((s) => s.fanRole);
   const calcMode = useUnilabSimulationStore((s) => s.calcMode);
   const targetCapacityW = useUnilabSimulationStore((s) => s.targetCapacityW);
   const setAirFlow = useUnilabSimulationStore((s) => s.setAirFlow);
   const setTempInDB = useUnilabSimulationStore((s) => s.setTempInDB);
   const setRhIn = useUnilabSimulationStore((s) => s.setRhIn);
   const setFoulingFactorAir = useUnilabSimulationStore((s) => s.setFoulingFactorAir);
-  const setSelectedFan = useUnilabSimulationStore((s) => s.setSelectedFan);
   const setTargetCapacityW = useUnilabSimulationStore((s) => s.setTargetCapacityW);
+  const [fanModalOpen, setFanModalOpen] = useState(false);
 
   const [fans, setFans] = useState<FanCatalogItem[]>([]);
 
