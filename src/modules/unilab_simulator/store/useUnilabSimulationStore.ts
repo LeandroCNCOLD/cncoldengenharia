@@ -94,6 +94,8 @@ interface UnilabSimulationStore {
   dischargeSuperheatK: number | null;
   /** Compressor selecionado (acopla o cálculo ao polinômio ASHRAE). */
   selectedCompressorId?: string;
+  /** Quantidade de compressores aplicados (multiplica vazão mássica/capacidade). */
+  compressorCount: number;
   setFluid: (val: string) => void;
   setFluidMassFlow: (val: number) => void;
   toggleMassFlowLock: () => void;
@@ -105,6 +107,7 @@ interface UnilabSimulationStore {
   setPairedTempC: (val: number | null) => void;
   setDischargeSuperheatK: (val: number | null) => void;
   setSelectedCompressor: (id: string | undefined) => void;
+  setCompressorCount: (n: number) => void;
 
   // Etapa 3.6 — Custo da bateria
   materialPrices: MaterialPrices;
