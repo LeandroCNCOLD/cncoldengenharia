@@ -114,6 +114,7 @@ const EMPTY: CnCoilsCatalogsData = {
   uiLabels: [],
   distributorKappa: {},
   distributorHoleSizes: [],
+  engineErrors: [],
 };
 
 async function fetchJsonArray<T>(file: string): Promise<T[]> {
