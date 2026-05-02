@@ -134,6 +134,48 @@ export const APPLICATION_CONFIGS: Record<UnilabComponentType, ApplicationConfig>
     showFluidPressureDrop: false,
     showFluidVelocity: false,
   },
+  recuperator: {
+    type: "recuperator",
+    label: "Recuperador de Calor (Ar-Ar)",
+    shortLabel: "Recuperador",
+    fluidKind: "water_glycol",
+    fluidPanelTitle: "LADO AR DE EXAUSTÃO",
+    fluidFields: [
+      { key: "fluidInletTemp", label: "Temp. Entrada Ar Exaustão", unit: "°C", required: true },
+      { key: "fluidOutletTemp", label: "Temp. Saída Ar Exaustão", unit: "°C", required: false },
+    ],
+    showFluidPressureDrop: true,
+    showFluidVelocity: false,
+  },
+  shell_tube: {
+    type: "shell_tube",
+    label: "Trocador Casco-Tubo (Shell & Tube)",
+    shortLabel: "Casco-Tubo",
+    fluidKind: "refrigerant",
+    fluidPanelTitle: "LADO FLUIDO",
+    fluidFields: [
+      { key: "fluidInletTemp", label: "Temp. Entrada Fluido", unit: "°C", required: true },
+      { key: "fluidOutletTemp", label: "Temp. Saída Fluido", unit: "°C", required: false },
+      { key: "fluidFlowMass", label: "Vazão Mássica", unit: "kg/h", required: true },
+    ],
+    showFluidPressureDrop: true,
+    showFluidVelocity: false,
+  },
+  chiller_unit: {
+    type: "chiller_unit",
+    label: "Chiller / Unidade Completa",
+    shortLabel: "Chiller",
+    fluidKind: "refrigerant",
+    fluidPanelTitle: "CICLO COMPLETO",
+    fluidFields: [
+      { key: "evaporatingTemp", label: "Temp. Evaporação", unit: "°C", required: true },
+      { key: "condensingTemp", label: "Temp. Condensação", unit: "°C", required: true },
+      { key: "superheat", label: "Sobreaquecimento", unit: "K", required: false },
+      { key: "subcooling", label: "Subresfriamento", unit: "K", required: false },
+    ],
+    showFluidPressureDrop: false,
+    showFluidVelocity: false,
+  },
 };
 
 export function getApplicationConfig(t: UnilabComponentType): ApplicationConfig {
