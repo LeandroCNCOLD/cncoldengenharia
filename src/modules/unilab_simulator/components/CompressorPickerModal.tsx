@@ -53,6 +53,7 @@ export function CompressorPickerModal({ open, onClose }: Props) {
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [seriesFilter, setSeriesFilter] = useState("");
+  const [brandFilter, setBrandFilter] = useState("");
   const [draftId, setDraftId] = useState<string | undefined>(selectedCompressorId);
   const [draftCount, setDraftCount] = useState<number>(compressorCount);
 
@@ -61,6 +62,7 @@ export function CompressorPickerModal({ open, onClose }: Props) {
     setQuery("");
     setTypeFilter("");
     setSeriesFilter("");
+    setBrandFilter("");
     setDraftId(selectedCompressorId);
     setDraftCount(compressorCount);
     setLoading(true);
@@ -72,14 +74,21 @@ export function CompressorPickerModal({ open, onClose }: Props) {
           .map((c) => {
             const o = c as Record<string, unknown>;
             const id = String(o.id ?? o.model ?? "");
+            const series = o.series ? String(o.series) : undefined;
+            const model = String(o.model ?? id);
+            const brand =
+              (o.brand ? String(o.brand) : undefined) ??
+              (o.manufacturer ? String(o.manufacturer) : undefined) ??
+              inferBrand(series, model);
             return {
               id,
-              model: String(o.model ?? id),
-              series: o.series ? String(o.series) : undefined,
+              model,
+              series,
               type: o.type ? String(o.type) : undefined,
               refrigerantCode: o.refrigerantCode
                 ? String(o.refrigerantCode)
                 : undefined,
+              brand,
             } as CompressorItem;
           })
           .filter((x) => x.id);
@@ -95,23 +104,34 @@ export function CompressorPickerModal({ open, onClose }: Props) {
     return Array.from(s).sort();
   }, [items]);
 
-  const seriesList = useMemo(() => {
+  const brands = useMemo(() => {
     const s = new Set<string>();
-    items.forEach((i) => i.series && s.add(i.series));
+    items.forEach((i) => i.brand && s.add(i.brand));
     return Array.from(s).sort();
   }, [items]);
+
+  const seriesList = useMemo(() => {
+    const s = new Set<string>();
+    items.forEach((i) => {
+      if (!i.series) return;
+      if (brandFilter && i.brand !== brandFilter) return;
+      s.add(i.series);
+    });
+    return Array.from(s).sort();
+  }, [items, brandFilter]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return items.filter((i) => {
+      if (brandFilter && i.brand !== brandFilter) return false;
       if (typeFilter && i.type !== typeFilter) return false;
       if (seriesFilter && i.series !== seriesFilter) return false;
       if (!q) return true;
-      return [i.model, i.id, i.series, i.type, i.refrigerantCode]
+      return [i.model, i.id, i.series, i.type, i.refrigerantCode, i.brand]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(q));
     });
-  }, [items, query, typeFilter, seriesFilter]);
+  }, [items, query, typeFilter, seriesFilter, brandFilter]);
 
   const draft = items.find((i) => i.id === draftId);
 
