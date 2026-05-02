@@ -154,35 +154,6 @@ export function UnilabWorkspacePage() {
     }
   };
 
-  const renderCentralPanel = () => {
-    if (activeSection === "geometria") {
-      if (catalogs.loading) return <SkeletonCard />;
-      return (
-        <GeometryForm
-          geometries={
-            enrichedGeometries.length > 0
-              ? enrichedGeometries
-              : catalogs.geometries
-          }
-          tubeMaterials={catalogs.tubeMaterials}
-          finPitches={catalogs.finPitches}
-          finThicknesses={catalogs.finThicknesses}
-          disabled={!catalogs.ready}
-        />
-      );
-    }
-    if (activeSection === "tubo") {
-      return <PlaceholderPanel title="Tubo" />;
-    }
-    if (activeSection === "aleta") {
-      return <PlaceholderPanel title="Aleta" />;
-    }
-    if (activeSection === "distribuidor") {
-      return <PlaceholderPanel title="Distribuidor" />;
-    }
-    return <AirSidePanel result={result} />;
-  };
-
   return (
     <PageContainer
       title={`UNILAB — ${componentLabel}`}
@@ -209,17 +180,15 @@ export function UnilabWorkspacePage() {
       }
     >
       {/*
-        Layout Etapa 3.5 — replica o configurador UNILAB:
-        - Esquerda: WorkspaceSidebar (menu fixo)
-        - Centro: painel dinâmico (Lado Ventilação por padrão; troca conforme menu)
-        - Direita: FluidSidePanel SEMPRE visível
-        - Rodapé: GeometryBottomBar SEMPRE visível, full width
+        Layout configurador CN COILS:
+        - Esquerda: WorkspaceSidebar (Geometria/Tubo/Aleta/Distribuidor abrem em modal)
+        - Centro: Lado Ventilação + Esquema da serpentina (SEMPRE fixos)
+        - Direita: FluidSidePanel + Resultado (SEMPRE fixos)
+        - Rodapé: GeometryBottomBar (SEMPRE fixo, full width)
       */}
       <div className="grid grid-cols-1 gap-2 md:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[190px_minmax(0,1fr)_minmax(0,1fr)] 2xl:grid-cols-[210px_minmax(0,1fr)_minmax(0,1fr)]">
         <WorkspaceSidebar
           componentType={componentType}
-          activeSection={activeSection}
-          onSectionChange={setActiveSection}
           onSimulate={handleSimulate}
           onReset={reset}
           canSimulate={canSimulate}
@@ -228,8 +197,11 @@ export function UnilabWorkspacePage() {
         />
 
         <div className="min-w-0 space-y-2 xl:contents">
-          {/* COLUNA CENTRAL — dinâmico */}
-          <div className="min-w-0 space-y-2">{renderCentralPanel()}</div>
+          {/* COLUNA CENTRAL — Lado Ventilador + esquema visual (fixos) */}
+          <div className="min-w-0 space-y-2">
+            <AirSidePanel result={result} />
+            <CoilSchematic />
+          </div>
 
           {/* COLUNA DIREITA — Lado Fluido FIXO */}
           <div className="min-w-0 space-y-2">
