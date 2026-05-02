@@ -122,13 +122,7 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
     foulingFactorAir,
   });
 
-  const handleFanChange = (id: string) => {
-    setSelectedFan(id || undefined);
-    const fan = fans.find((f) => f.id === id);
-    if (fan?.airflow_m3h && fan.airflow_m3h > 0) {
-      setAirFlow(fan.airflow_m3h);
-    }
-  };
+  // (Seleção de ventilador agora é feita via FanPickerModal — abaixo)
 
   // Static pressure at current airflow for the selected axial fan (Pa)
   const selectedFan = fans.find((f) => f.id === selectedFanId);
