@@ -264,7 +264,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
               s.physicalInputs.finThicknessMm,
             ),
             finPitchMm: pick(
-              finPitchFromCatalog ?? 2.5,
+              snapFinPitchToTool(finPitchFromCatalog ?? 2.5),
               s.physicalInputs.finPitchMm,
             ),
             finnedLengthMm: pick(1000, s.physicalInputs.finnedLengthMm),
