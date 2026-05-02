@@ -104,7 +104,7 @@ export function UnilabWorkspacePage() {
     validateThermoInputs(thermo).isValid;
   const canSimulate = catalogs.ready && inputsValid && !isSimulating;
 
-  const handleSimulate = () => {
+  const handleSimulate = async () => {
     const physCheck = validatePhysicalInputs(physical);
     const thermoCheck = validateThermoInputs(thermo);
     const errors = [...physCheck.errors, ...thermoCheck.errors];
@@ -112,7 +112,7 @@ export function UnilabWorkspacePage() {
       setWarnings(errors);
       return;
     }
-    run();
+    await run();
   };
 
   const handleSendToAssembly = () => {

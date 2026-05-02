@@ -107,6 +107,16 @@ export interface UnilabSimulationResult {
   ntu?: number;
   effectiveness?: number;
   correctionFactor: number;
+  unilabCorrection?: {
+    factor: number;
+    idCorr?: number;
+    serie?: string;
+    velocityRange_m_s?: {
+      min: number;
+      max: number;
+    };
+    clampedVelocity_m_s: number;
+  };
   warnings: string[];
 }
 

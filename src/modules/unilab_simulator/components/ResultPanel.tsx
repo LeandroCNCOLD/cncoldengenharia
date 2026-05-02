@@ -58,7 +58,70 @@ export function ResultPanel({ result, warnings }: ResultPanelProps) {
           {ptBR.module.disclaimer}
         </p>
       </div>
+      <UnilabCorrectionCard result={result} warnings={warnings} />
       {warnings.length > 0 && <WarningsList warnings={warnings} />}
+    </div>
+  );
+}
+
+function UnilabCorrectionCard({
+  result,
+  warnings,
+}: {
+  result: UnilabSimulationResult;
+  warnings: string[];
+}) {
+  const correction = result.unilabCorrection;
+  const correctionWarnings = warnings.filter((warning) =>
+    warning.toLowerCase().includes("coeficiente unilab") ||
+    warning.toLowerCase().includes("correção unilab") ||
+    warning.toLowerCase().includes("velocidade frontal fora da faixa"),
+  );
+
+  return (
+    <div className="rounded-lg border border-blue-100 bg-blue-50/50 p-4">
+      <h4 className="text-sm font-semibold text-blue-950">Correção UNILAB</h4>
+      {!correction || correction.idCorr === undefined ? (
+        <p className="mt-2 text-sm text-blue-900">
+          Correção UNILAB não encontrada. Foi usado fator 1.
+        </p>
+      ) : (
+        <dl className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <CorrectionItem label="Fator aplicado" value={fmt(correction.factor, 4)} />
+          <CorrectionItem label="Série" value={correction.serie ?? "—"} />
+          <CorrectionItem
+            label="Faixa válida de velocidade"
+            value={
+              correction.velocityRange_m_s
+                ? `${fmt(correction.velocityRange_m_s.min)} a ${fmt(correction.velocityRange_m_s.max)} m/s`
+                : "—"
+            }
+          />
+          <CorrectionItem
+            label="Velocidade usada"
+            value={`${fmt(correction.clampedVelocity_m_s)} m/s`}
+          />
+        </dl>
+      )}
+      {correctionWarnings.length > 0 && (
+        <div className="mt-3 rounded border border-amber-200 bg-amber-50 p-2">
+          <p className="text-xs font-semibold text-amber-900">Avisos</p>
+          <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs text-amber-800">
+            {correctionWarnings.map((warning, index) => (
+              <li key={index}>{warning}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CorrectionItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between rounded border border-blue-100 bg-white/70 px-3 py-2">
+      <dt className="text-xs text-blue-900">{label}</dt>
+      <dd className="text-sm font-semibold text-blue-950">{value}</dd>
     </div>
   );
 }
