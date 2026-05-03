@@ -101,7 +101,7 @@ export function emptyEditable(): GeometryEditableFields {
   };
 }
 
-function buildRaw(f: GeometryEditableFields): Record<string, unknown> {
+function buildRaw(f: GeometryEditableFields): Json {
   return {
     code: f.codigo,
     description: f.descricao,
