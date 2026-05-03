@@ -19,6 +19,7 @@ import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { useUnilabSimulation } from "../hooks/useUnilabSimulation";
 import { useUnilabSimulationV2 } from "../hooks/useUnilabSimulationV2";
 import { useUnilabInputBridge } from "../hooks/useUnilabInputBridge";
+import { saveLastInputs } from "../utils/lastInputsPersistence";
 import { loadUnilabHeatTransferCatalog } from "../services/unilabHeatTransferCatalog";
 import type { UnilabHeatTransferCatalog } from "../engine_v2/heatTransfer";
 import {
@@ -164,6 +165,11 @@ export function UnilabWorkspacePage() {
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [catalogs.ready, inputsValid, engineVersion, physical, thermo]);
+
+  // Persiste os últimos inputs após uma simulação bem-sucedida.
+  useEffect(() => {
+    if (result) saveLastInputs();
+  }, [result]);
 
   const handleGoalSeek = (targetKw: number) => {
     if (!Number.isFinite(targetKw) || targetKw <= 0) return;

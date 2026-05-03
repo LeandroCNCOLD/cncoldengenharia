@@ -358,7 +358,7 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
         />
 
         <Row
-          label="Fator de Erro"
+          label="Fator de Segurança"
           unitNode={<UnitText text="%" />}
           input={
             <NumberCell

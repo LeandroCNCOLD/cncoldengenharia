@@ -1,5 +1,5 @@
-import { Calculator, Printer, RotateCcw, Save, Settings2 } from "lucide-react";
-import { useState } from "react";
+import { Calculator, History, Printer, RotateCcw, Save, Settings2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { getApplicationConfig } from "../config/applicationConfig";
 import { formatBRL } from "../engine/costCalculator";
@@ -11,6 +11,11 @@ import {
   FinModal,
   DistributorModal,
 } from "./GeometryDerivedModals";
+import {
+  LAST_INPUTS_STORAGE_KEY,
+  hasSavedLastInputs,
+  restoreLastInputs,
+} from "../utils/lastInputsPersistence";
 import type { UnilabComponentType } from "../types/unilab.types";
 
 type ModalKey = "geometry" | "tube" | "fin" | "distributor" | null;
@@ -75,6 +80,38 @@ export function WorkspaceSidebar({
 
   const [costModalOpen, setCostModalOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalKey>(null);
+  const [hasSaved, setHasSaved] = useState<boolean>(false);
+
+  useEffect(() => {
+    setHasSaved(hasSavedLastInputs());
+  }, [result]);
+
+  // Avisos não-bloqueantes para campos opcionais.
+  const optionalAdvisories = useMemo(() => {
+    const list: string[] = [];
+    const p = physicalInputs;
+    if (!p?.circuits || p.circuits <= 0)
+      list.push("Circuitos não informados — usando estimativa automática");
+    if (!p?.tubeMaterialId)
+      list.push("Material do tubo não selecionado — usando cobre (padrão)");
+    if (!p?.tubePitchTransverseMm || p.tubePitchTransverseMm <= 0)
+      list.push("Passo transversal não informado — usando valor da geometria");
+    if (!p?.tubePitchLongitudinalMm || p.tubePitchLongitudinalMm <= 0)
+      list.push("Passo longitudinal não informado — usando valor da geometria");
+    if (!p?.finPitchMm || p.finPitchMm <= 0)
+      list.push("Passo de aleta não informado — usando 2,5 mm (padrão)");
+    if (!p?.finThicknessMm || p.finThicknessMm <= 0)
+      list.push("Espessura de aleta não informada — usando 0,12 mm (padrão)");
+    if (!selectedGeometry)
+      list.push("Geometria não selecionada — usando parâmetros manuais");
+    return list;
+  }, [physicalInputs, selectedGeometry]);
+
+  const handleRestoreLast = () => {
+    if (restoreLastInputs()) {
+      setHasSaved(true);
+    }
+  };
 
   const buildSnapshot = (): ReportSnapshot => ({
     componentLabel: cfg.shortLabel,
@@ -291,6 +328,33 @@ export function WorkspaceSidebar({
           <Calculator className="h-3 w-3" />
           {isSimulating ? "Calculando…" : "Calcular"}
         </button>
+
+        {/* Avisos não-bloqueantes — campos opcionais ausentes */}
+        {optionalAdvisories.length > 0 && (
+          <ul className="space-y-0.5 rounded border border-amber-200 bg-amber-50 px-1.5 py-1">
+            {optionalAdvisories.map((msg) => (
+              <li
+                key={msg}
+                className="flex items-start gap-1 text-[9.5px] leading-tight text-slate-600"
+              >
+                <span aria-hidden className="text-amber-500">⚠️</span>
+                <span>{msg}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {hasSaved && (
+          <button
+            type="button"
+            onClick={handleRestoreLast}
+            title="Restaurar últimos parâmetros salvos"
+            className="inline-flex items-center justify-center gap-1 rounded border border-slate-300 bg-white px-1 py-1 text-[10px] text-slate-700 shadow-sm hover:bg-slate-100"
+          >
+            <History className="h-3 w-3" />
+            Restaurar Última Simulação
+          </button>
+        )}
         <div className="grid grid-cols-3 gap-1">
           <button
             type="button"

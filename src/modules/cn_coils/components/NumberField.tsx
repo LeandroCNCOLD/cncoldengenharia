@@ -52,6 +52,17 @@ export function NumberField({
           const n = Number(raw);
           onChange(Number.isFinite(n) ? n : undefined);
         }}
+        onBlur={(e) => {
+          // Sanitiza zeros à esquerda e formato inválido
+          const raw = e.target.value.trim();
+          if (raw === "") return;
+          const v = parseFloat(raw);
+          if (Number.isFinite(v)) {
+            const normalized = v.toString();
+            if (normalized !== raw) e.target.value = normalized;
+            onChange(v);
+          }
+        }}
         className="w-full min-w-0 rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 shadow-sm focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
       />
     </div>
