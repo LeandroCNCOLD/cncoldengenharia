@@ -10,6 +10,10 @@ import {
   TrendingUp,
   Scale,
   Plus,
+  RotateCw,
+  Layers,
+  Target,
+  Activity,
 } from "lucide-react";
 import { PageContainer } from "../components/layout/PageContainer";
 import { useSessionStore } from "../stores/useSessionStore";
@@ -23,6 +27,46 @@ const QUICK_CARDS = [
     Icon: Snowflake,
     title: "CN COILS",
     description: "Simulação de evaporadores e condensadores com motor V2.",
+    available: true,
+  },
+  {
+    to: "/coldpro/cycle",
+    emoji: "♻️",
+    Icon: RotateCw,
+    title: "Ciclo de Refrigeração",
+    description: "CycleEngine completo: P-h, COP, incerteza, geada e otimização.",
+    available: true,
+  },
+  {
+    to: "/coldpro/assembly",
+    emoji: "🧩",
+    Icon: Layers,
+    title: "Arranjo de Serpentinas",
+    description: "Série, paralelo, V-bank e W-bank acoplados.",
+    available: true,
+  },
+  {
+    to: "/coldpro/frost",
+    emoji: "❄️",
+    Icon: Snowflake,
+    title: "Análise de Geada",
+    description: "Curva Q(t) de degradação e tempo até degelo.",
+    available: false,
+  },
+  {
+    to: "/coldpro/optimization",
+    emoji: "🎯",
+    Icon: Target,
+    title: "Otimização",
+    description: "Grid search multi-objetivo (COP, custo, ΔP).",
+    available: false,
+  },
+  {
+    to: "/coldpro/map",
+    emoji: "📊",
+    Icon: Map,
+    title: "Mapa Operacional",
+    description: "Curvas Q(Te) interativas para múltiplos Tc.",
     available: true,
   },
   {
@@ -42,22 +86,6 @@ const QUICK_CARDS = [
     available: true,
   },
   {
-    to: "/coldpro/montagem",
-    emoji: "🔧",
-    Icon: Wrench,
-    title: "Montagem",
-    description: "Plano de montagem e BOM do equipamento.",
-    available: false,
-  },
-  {
-    to: "/coldpro/map",
-    emoji: "📊",
-    Icon: Map,
-    title: "Mapa Operacional",
-    description: "Mapa multivariável de operação do equipamento.",
-    available: true,
-  },
-  {
     to: "/coldpro/export",
     emoji: "📄",
     Icon: Download,
@@ -70,6 +98,7 @@ const QUICK_CARDS = [
 const SECONDARY_CARDS = [
   { to: "/coldpro/curve", Icon: TrendingUp, title: "Curva de Desempenho" },
   { to: "/coldpro/simulation", Icon: Scale, title: "Equilíbrio do Sistema" },
+  { to: "/coldpro/montagem", Icon: Wrench, title: "Montagem (em breve)" },
 ] as const;
 
 const APP_VERSION = "2.0.0";
