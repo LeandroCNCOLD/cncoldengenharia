@@ -97,17 +97,27 @@ export function EquipmentTable({ rows, onSelect, selectedIds = [] }: Props) {
                 <td className="px-3 py-2 text-right">{fmt(row.tempEvaporacaoC, 1)}</td>
                 <td className="px-3 py-2 text-right">{fmt(row.tempCondensacaoC, 1)}</td>
                 <td className="px-3 py-2">
-                  <button
-                    type="button"
-                    onClick={() => onSelect(row)}
-                    className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
-                      isSelected
-                        ? "bg-[#1E6FD9] text-white"
-                        : "border border-[#1E6FD9] text-[#1E6FD9] hover:bg-[#1E6FD9]/10"
-                    }`}
-                  >
-                    {isSelected ? "✓ Selecionado" : "Selecionar"}
-                  </button>
+                  <div className="flex flex-col gap-1">
+                    <button
+                      type="button"
+                      onClick={() => onSelect(row)}
+                      className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
+                        isSelected
+                          ? "bg-[#1E6FD9] text-white"
+                          : "border border-[#1E6FD9] text-[#1E6FD9] hover:bg-[#1E6FD9]/10"
+                      }`}
+                    >
+                      {isSelected ? "✓ Selecionado" : "Selecionar"}
+                    </button>
+                    <Link
+                      to="/coldpro/test-bench/$equipmentId"
+                      params={{ equipmentId: row.id }}
+                      className="rounded-md border border-emerald-600 px-3 py-1.5 text-center text-xs font-medium text-emerald-700 transition hover:bg-emerald-50"
+                      title="Abrir bancada de testes desta máquina"
+                    >
+                      🔬 Testar Máquina
+                    </Link>
+                  </div>
                 </td>
               </tr>
             );
