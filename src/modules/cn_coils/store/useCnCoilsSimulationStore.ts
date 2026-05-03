@@ -224,6 +224,7 @@ export const useCnCoilsSimulationStore = create<CnCoilsSimulationStore>((set) =>
   pairedTempC: null,
   dischargeSuperheatK: null,
   selectedCompressorId: undefined,
+  compressorSpec: undefined,
   compressorCount: 1,
   setPairedTempC: (val) => set({ pairedTempC: val }),
   setDischargeSuperheatK: (val) => set({ dischargeSuperheatK: val }),
