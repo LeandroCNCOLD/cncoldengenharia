@@ -197,6 +197,9 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
     airTempC: thermo.airInletTempC,
   });
   warnings.push(...wcc.warnings);
+  if (wcc.uGlobalWm2K > 0) {
+    warnings.push("ΔP ar estimado por correlação Chang & Wang (1997).");
+  }
 
   const refrigerantProps = getRefrigerantProps(
     thermo.refrigerantId,
@@ -383,6 +386,27 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
     D_i_m: mmToM(physical.tubeInnerDiameterMm),
   });
   warnings.push(...dpFluid.warnings);
+  {
+    const Di_m_check = mmToM(physical.tubeInnerDiameterMm);
+    const A_check = (Math.PI * Di_m_check ** 2) / 4;
+    const massFlowPerCircuit = estimatedMassFlowKgS / Math.max(physical.circuits, 1);
+    const rho_check = refrigerantLiquidProps.rho_kg_m3;
+    const mu_check = refrigerantLiquidProps.mu_Pa_s;
+    const G_check = massFlowPerCircuit / A_check;
+    const Re_check = (G_check * Di_m_check) / mu_check;
+    const v_fluid_check = G_check / rho_check;
+
+    if (Re_check > 10000) {
+      warnings.push(
+        `Re=${Re_check.toFixed(0)} acima de 10.000 — extrapolação moderada`,
+      );
+    }
+    if (v_fluid_check > 5) {
+      warnings.push(
+        `Velocidade do fluido ${v_fluid_check.toFixed(2)} m/s fora da faixa típica (0,1–5 m/s)`,
+      );
+    }
+  }
 
   const rhOut = calculateRelativeHumidityFromHumidityRatio(tAirOutC, wOut, pAtm);
 

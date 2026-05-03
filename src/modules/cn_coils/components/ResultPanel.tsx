@@ -1,10 +1,11 @@
-import { AlertCircle, AlertTriangle, Info, Target } from "lucide-react";
+import { AlertCircle, AlertTriangle, ChevronDown, ChevronUp, Info, Target } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { CnCoilsSimulationResult } from "../types/cncoils.types";
 import type { StructuredWarning } from "../types/warnings";
 import { ptBR } from "../i18n/messages.ptBR";
 import { convertPower, type PowerUnit } from "@/utils/unitConversions";
 import { fmtBR } from "../utils/unitConversions";
+import { getSuggestionForWarning } from "../config/warningSuggestions";
 import {
   loadCnCoilsCoefficients,
   buildFanAudit,
@@ -166,49 +167,112 @@ function FanLibraryStatus({ audit }: { audit: FanAuditSummary }) {
   );
 }
 
-function WarningsList({ warnings }: { warnings: StructuredWarning[] }) {
-  const styles = {
-    error: {
-      box: "border-red-300 bg-red-50",
-      title: "text-red-800",
-      item: "text-red-700",
-      Icon: AlertCircle,
-    },
-    warning: {
-      box: "border-amber-300 bg-amber-50",
-      title: "text-amber-800",
-      item: "text-amber-800",
-      Icon: AlertTriangle,
-    },
-    info: {
-      box: "border-blue-300 bg-blue-50",
-      title: "text-blue-800",
-      item: "text-blue-700",
-      Icon: Info,
-    },
-  } as const;
+interface LeveledWarning {
+  text: string;
+  level?: "1" | "2" | "3" | string | null;
+}
 
-  const top = warnings.some((w) => w.severity === "error")
-    ? styles.error
-    : warnings.some((w) => w.severity === "warning")
-      ? styles.warning
-      : styles.info;
-  const TopIcon = top.Icon;
+function normalizeWarning(warning: StructuredWarning | string | LeveledWarning): LeveledWarning {
+  if (typeof warning === "string") return { text: warning, level: "2" };
+  if ("text" in warning) return warning;
+  return {
+    text: warning.message ?? warning.code,
+    level: warning.severity === "error" ? "3" : "2",
+  };
+}
+
+function WarningsList({ warnings }: { warnings: Array<StructuredWarning | string | LeveledWarning> }) {
+  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
+  const items = warnings.map(normalizeWarning);
+  const hasError = items.some((w) => w.level === "3");
+
+  const toggleExpand = (i: number) => {
+    setExpanded((prev) => ({ ...prev, [i]: !prev[i] }));
+  };
 
   return (
-    <div className={`rounded-lg border p-3 ${top.box}`}>
-      <div className={`mb-1 flex items-center gap-2 text-xs font-semibold ${top.title}`}>
-        <TopIcon className="h-3.5 w-3.5" />
-        Avisos
+    <div
+      className={`rounded-lg border p-3 ${
+        hasError ? "border-red-200 bg-red-50" : "border-amber-200 bg-amber-50"
+      }`}
+    >
+      <div
+        className={`mb-2 flex items-center gap-2 text-xs font-semibold ${
+          hasError ? "text-red-800" : "text-amber-800"
+        }`}
+      >
+        <AlertTriangle className="h-3.5 w-3.5" />
+        Avisos ({items.length})
       </div>
-      <ul className="space-y-1 text-xs">
-        {warnings.map((w, i) => {
-          const s = styles[(w.severity as keyof typeof styles) ?? "warning"] ?? styles.warning;
-          const Icon = s.Icon;
+      <ul className="space-y-2 text-xs">
+        {items.map((w, i) => {
+          const suggestion = getSuggestionForWarning(w.text);
+          const lvl = suggestion?.level ?? w.level ?? "2";
+          const Icon = lvl === "3" ? AlertCircle : lvl === "1" ? Info : AlertTriangle;
+          const cls =
+            lvl === "3" ? "text-red-700" : lvl === "1" ? "text-slate-600" : "text-amber-800";
+          const isExpanded = expanded[i] ?? false;
+
           return (
-            <li key={i} className={`flex items-start gap-1.5 ${s.item}`}>
-              <Icon className="mt-0.5 h-3 w-3 flex-shrink-0" />
-              <span>{w.message ?? w.code}</span>
+            <li key={i} className="rounded border border-current/10 bg-white/60 p-2">
+              <div className="flex items-start justify-between gap-1.5">
+                <div className={`flex items-start gap-1.5 ${cls}`}>
+                  <Icon className="mt-0.5 h-3 w-3 flex-shrink-0" />
+                  <span className="font-medium">{w.text}</span>
+                </div>
+                {suggestion && (
+                  <button
+                    type="button"
+                    onClick={() => toggleExpand(i)}
+                    className="ml-1 flex-shrink-0 rounded p-0.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                    title={isExpanded ? "Ocultar sugestões" : "Ver campos e sugestões"}
+                  >
+                    {isExpanded ? (
+                      <ChevronUp className="h-3.5 w-3.5" />
+                    ) : (
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {suggestion && isExpanded && (
+                <div className="mt-2 space-y-2 border-t border-current/10 pt-2">
+                  {suggestion.fields.length > 0 && (
+                    <div>
+                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                        Campos a revisar
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {suggestion.fields.map((field) => (
+                          <span
+                            key={field}
+                            className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-800"
+                          >
+                            {field}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {suggestion.actions.length > 0 && (
+                    <div>
+                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                        O que fazer
+                      </p>
+                      <ul className="space-y-1">
+                        {suggestion.actions.map((action, ai) => (
+                          <li key={ai} className="flex items-start gap-1.5 text-slate-700">
+                            <span className="mt-0.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400" />
+                            <span>{action}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
             </li>
           );
         })}
