@@ -2,6 +2,7 @@
 // simplificado, monofásico). Sem fallback silencioso para zero.
 
 import type { PressureDropFanItem } from "../types/unilab.types";
+import { getRefrigerantLiquidProps } from "../engine_v2/refrigerantProps";
 import { mmToM, safeDivide, KPA_TO_PA } from "./units";
 
 export interface AirPressureDropResult {
@@ -184,51 +185,112 @@ export interface FluidPressureDropResult {
   warnings: string[];
 }
 
-/**
- * Estimativa de perda de carga monofásica pelo modelo de Darcy-Weisbach:
- *   ΔP = f · (L/D) · (ρ·v²)/2
- * Para escoamento bifásico (evaporação/condensação) o usuário deve fornecer
- * o fator de atrito apropriado; valores padrão são para refrigerante líquido.
- */
+export interface ComputeFluidPressureDropParams {
+  refrigerant: string;
+  T_evap_C: number;
+  mass_flow_kg_s: number;
+  n_circuits: number;
+  L_tube_per_circuit_m: number;
+  D_i_m: number;
+  roughness_m?: number;
+}
+
+export function computeFluidPressureDrop(params: ComputeFluidPressureDropParams): {
+  dP_kPa: number;
+  warnings: string[];
+} {
+  const {
+    refrigerant,
+    T_evap_C,
+    mass_flow_kg_s,
+    n_circuits,
+    L_tube_per_circuit_m,
+    D_i_m,
+    roughness_m = 1.5e-6,
+  } = params;
+  const warnings: string[] = [];
+
+  if (
+    !Number.isFinite(mass_flow_kg_s) ||
+    !Number.isFinite(n_circuits) ||
+    !Number.isFinite(L_tube_per_circuit_m) ||
+    !Number.isFinite(D_i_m) ||
+    mass_flow_kg_s <= 0 ||
+    n_circuits <= 0 ||
+    L_tube_per_circuit_m <= 0 ||
+    D_i_m <= 0
+  ) {
+    return {
+      dP_kPa: NaN,
+      warnings: ["Parâmetros inválidos — não é possível calcular ΔP fluido."],
+    };
+  }
+
+  const props = getRefrigerantLiquidProps(refrigerant, T_evap_C);
+  warnings.push(...props.warnings);
+
+  const rho = props.rho_kg_m3;
+  const mu = props.mu_Pa_s;
+  const massFlowPerCircuit = mass_flow_kg_s / n_circuits;
+  const areaM2 = (Math.PI * D_i_m * D_i_m) / 4;
+  const velocity = massFlowPerCircuit / (rho * areaM2);
+  const reynolds = (rho * velocity * D_i_m) / mu;
+
+  if (!Number.isFinite(reynolds) || reynolds <= 0) {
+    return { dP_kPa: NaN, warnings: ["Reynolds do fluido inválido."] };
+  }
+
+  const churchillA = Math.pow(
+    2.457 *
+      Math.log(
+        1 /
+          (Math.pow(7 / reynolds, 0.9) +
+            0.27 * (roughness_m / D_i_m)),
+      ),
+    16,
+  );
+  const churchillB = Math.pow(37530 / reynolds, 16);
+  const darcyFriction =
+    8 *
+    Math.pow(
+      Math.pow(8 / reynolds, 12) +
+        1 / Math.pow(churchillA + churchillB, 1.5),
+      1 / 12,
+    );
+
+  const dpPa =
+    darcyFriction *
+    (L_tube_per_circuit_m / D_i_m) *
+    ((rho * velocity * velocity) / 2);
+  if (!Number.isFinite(dpPa) || dpPa < 0) {
+    return { dP_kPa: NaN, warnings: ["ΔP fluido calculado inválido."] };
+  }
+
+  if (reynolds < 2300) {
+    warnings.push(
+      `Re=${reynolds.toFixed(0)} — regime laminar no tubo do evaporador`,
+    );
+  }
+  const velocityForWarning = Number(velocity.toFixed(2));
+  if (velocityForWarning < 0.1 || velocityForWarning > 5) {
+    warnings.push(
+      `Velocidade do fluido ${velocity.toFixed(2)} m/s fora da faixa típica (0.1–5 m/s)`,
+    );
+  }
+
+  return { dP_kPa: dpPa / KPA_TO_PA, warnings };
+}
+
 export function calculateFluidPressureDrop(
   params: FluidPressureDropParams,
 ): FluidPressureDropResult {
-  const warnings: string[] = [];
-
-  if (!Number.isFinite(params.circuits) || params.circuits <= 0) {
-    return {
-      pressureDropKpa: NaN,
-      warnings: ["Número de circuitos inválido — não é possível estimar ΔP fluido."],
-    };
-  }
-  if (!Number.isFinite(params.tubeInnerDiameterMm) || params.tubeInnerDiameterMm <= 0) {
-    return {
-      pressureDropKpa: NaN,
-      warnings: ["Diâmetro interno do tubo ausente — não é possível estimar ΔP fluido."],
-    };
-  }
-  if (!Number.isFinite(params.tubeLengthM) || params.tubeLengthM <= 0) {
-    return {
-      pressureDropKpa: NaN,
-      warnings: ["Comprimento de tubo inválido — não é possível estimar ΔP fluido."],
-    };
-  }
-
-  const rho = params.fluidDensityKgM3 ?? 1200; // refrigerante líquido típico
-  const f = params.frictionFactor ?? 0.025; // tubo de cobre liso, regime turbulento moderado
-  const dM = mmToM(params.tubeInnerDiameterMm);
-  const areaM2 = (Math.PI * dM * dM) / 4;
-  const massFlowPerCircuit = safeDivide(params.estimatedMassFlowKgS, params.circuits);
-  const velocity = safeDivide(massFlowPerCircuit, rho * areaM2);
-
-  const dpPa = f * (params.tubeLengthM / dM) * (rho * velocity * velocity) / 2;
-  if (!Number.isFinite(dpPa) || dpPa < 0) {
-    return { pressureDropKpa: NaN, warnings: ["ΔP fluido calculado inválido."] };
-  }
-  if (params.fluidDensityKgM3 === undefined || params.frictionFactor === undefined) {
-    warnings.push(
-      "ΔP do fluido estimado com densidade/atrito típicos de refrigerante líquido — refine com propriedades reais.",
-    );
-  }
-  return { pressureDropKpa: dpPa / KPA_TO_PA, warnings };
+  const result = computeFluidPressureDrop({
+    refrigerant: "R404A",
+    T_evap_C: -10,
+    mass_flow_kg_s: params.estimatedMassFlowKgS,
+    n_circuits: params.circuits,
+    L_tube_per_circuit_m: params.tubeLengthM,
+    D_i_m: mmToM(params.tubeInnerDiameterMm),
+  });
+  return { pressureDropKpa: result.dP_kPa, warnings: result.warnings };
 }

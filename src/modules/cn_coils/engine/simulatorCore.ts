@@ -54,11 +54,12 @@ import { computeOverallU, dittusBoelter, shahTwoPhase } from "../engine_v2/heatT
 import { applyAirVelocityCorrection } from "./unilabCorrections";
 import {
   calculateAirPressureDrop,
-  calculateFluidPressureDrop,
+  computeFluidPressureDrop,
 } from "./pressureDrop";
 import { CP_DRY_AIR_KJ_KG_K, m3hToM3s, mmToM, safeDivide, clamp } from "./units";
 import { calcCoilEffectiveArea, calcFinEfficiency, calcEffectiveArea } from "./effectiveArea";
 import { getRefrigerantProps } from "../services/refrigerantProperties";
+import { getRefrigerantLiquidProps } from "../engine_v2/refrigerantProps";
 
 export interface RunSimulationParams {
   physical: CnCoilsPhysicalInputs;
@@ -349,18 +350,24 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
     : 1.0;
   const dpAirPaFinal = (Number.isFinite(dpAir.pressureDropPa) ? dpAir.pressureDropPa : 0) * airFrFactor;
 
-  // Vazão mássica do refrigerante: estimativa grosseira pela capacidade.
-  // Para fluido em mudança de fase usamos hfg padrão (R404A ~ 200 kJ/kg líq-vap).
-  // Sem propriedades reais o usuário deve confiar mais no fator UNILAB.
-  const estimatedMassFlowKgS = safeDivide(qFinalW / 1000, 200);
+  const refrigerantLiquidProps = getRefrigerantLiquidProps(
+    thermo.refrigerantId,
+    surfaceTempC,
+  );
+  const estimatedMassFlowKgS = safeDivide(
+    qFinalW / 1000,
+    Math.max(refrigerantLiquidProps.h_fg_kJkg, 1),
+  );
   // Comprimento total estimado de tubo: rows · comprimento aletado / circuitos
   const totalTubeLengthM =
     physical.rows * mmToM(physical.finnedLengthMm);
-  const dpFluid = calculateFluidPressureDrop({
-    estimatedMassFlowKgS,
-    circuits: physical.circuits,
-    tubeInnerDiameterMm: physical.tubeInnerDiameterMm,
-    tubeLengthM: totalTubeLengthM,
+  const dpFluid = computeFluidPressureDrop({
+    refrigerant: thermo.refrigerantId,
+    T_evap_C: surfaceTempC,
+    mass_flow_kg_s: estimatedMassFlowKgS,
+    n_circuits: physical.circuits,
+    L_tube_per_circuit_m: totalTubeLengthM,
+    D_i_m: mmToM(physical.tubeInnerDiameterMm),
   });
   warnings.push(...dpFluid.warnings);
 
@@ -380,7 +387,7 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
     latentCapacityKw: qLatentW / 1000,
     shf: clamp(shf, 0, 1),
     airPressureDropPa: dpAirPaFinal,
-    fluidPressureDropKpa: Number.isFinite(dpFluid.pressureDropKpa) ? dpFluid.pressureDropKpa : 0,
+    fluidPressureDropKpa: Number.isFinite(dpFluid.dP_kPa) ? dpFluid.dP_kPa : 0,
     airOutletTempC: tAirOutC,
     airOutletRhPercent: rhOut * 100,
     faceAreaM2,
