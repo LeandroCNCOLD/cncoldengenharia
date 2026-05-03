@@ -166,6 +166,11 @@ export function UnilabWorkspacePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [catalogs.ready, inputsValid, engineVersion, physical, thermo]);
 
+  // Persiste os últimos inputs após uma simulação bem-sucedida.
+  useEffect(() => {
+    if (result) saveLastInputs();
+  }, [result]);
+
   const handleGoalSeek = (targetKw: number) => {
     if (!Number.isFinite(targetKw) || targetKw <= 0) return;
     const physCheck = validatePhysicalInputs(physical);
