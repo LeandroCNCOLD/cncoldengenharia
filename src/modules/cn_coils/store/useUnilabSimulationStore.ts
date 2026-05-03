@@ -1,11 +1,11 @@
 import { create } from "zustand";
 import type {
   CoilGeometryCatalogItem,
-  StructuredWarning,
-  UnilabPhysicalInputs,
-  UnilabSimulationResult,
-  UnilabThermoInputs,
+  CnCoilsPhysicalInputs,
+  CnCoilsSimulationResult,
+  CnCoilsThermoInputs,
 } from "../types/unilab.types";
+import type { StructuredWarning } from "../types/warnings";
 import {
   DEFAULT_MATERIAL_PRICES,
   calculateBatteryCost,
@@ -23,7 +23,7 @@ export type CalcMode = "verify" | "design";
 
 /**
  * Inputs adicionais do Lado Fluido específicos por aplicação. Mantidos
- * separados de `UnilabThermoInputs` (consumido pelo motor existente) para
+ * separados de `CnCoilsThermoInputs` (consumido pelo motor existente) para
  * não alterar tipos do engine. O motor continua lendo o subset que conhece.
  */
 export interface FluidSideExtras {
@@ -35,19 +35,19 @@ export interface FluidSideExtras {
   steamPressureKpa?: number;
 }
 
-interface UnilabSimulationStore {
-  physicalInputs: Partial<UnilabPhysicalInputs>;
-  thermoInputs: Partial<UnilabThermoInputs>;
+interface CnCoilsSimulationStore {
+  physicalInputs: Partial<CnCoilsPhysicalInputs>;
+  thermoInputs: Partial<CnCoilsThermoInputs>;
   selectedGeometry?: CoilGeometryCatalogItem;
-  result?: UnilabSimulationResult;
-  warnings: Array<string | StructuredWarning>;
+  result?: CnCoilsSimulationResult;
+  warnings: StructuredWarning[];
   isSimulating: boolean;
 
   /**
    * Fator de Erro / margem de segurança (%). Auto-preenchido a partir do
    * SecurityFactor da geometria selecionada: errorFactor = (SF - 1) * 100.
    * Aplicado como multiplicador no resultado final: q' = q * (1 + ef/100).
-   * Editável pelo usuário.
+   * Valor 0 = sem margem (SF = 1.0). Editável pelo usuário.
    */
   errorFactorPercent: number;
   setErrorFactorPercent: (val: number) => void;
@@ -124,19 +124,16 @@ interface UnilabSimulationStore {
   calculatedCost: number;
   tubeMaterialKey: MaterialKey;
   finMaterialKey: MaterialKey;
-  /** BDI (%) — mão de obra, encargos, impostos, despesas indiretas e lucro. */
-  bdiPercent: number;
   setMaterialPrice: (material: MaterialKey, price: number) => void;
   setTubeMaterialKey: (key: MaterialKey) => void;
   setFinMaterialKey: (key: MaterialKey) => void;
-  setBdiPercent: (val: number) => void;
   recalculateCost: () => void;
 
-  setPhysicalInputs: (patch: Partial<UnilabPhysicalInputs>) => void;
-  setThermoInputs: (patch: Partial<UnilabThermoInputs>) => void;
+  setPhysicalInputs: (patch: Partial<CnCoilsPhysicalInputs>) => void;
+  setThermoInputs: (patch: Partial<CnCoilsThermoInputs>) => void;
   setSelectedGeometry: (geometry: CoilGeometryCatalogItem | undefined) => void;
-  setResult: (result: UnilabSimulationResult | undefined) => void;
-  setWarnings: (warnings: Array<string | StructuredWarning>) => void;
+  setResult: (result: CnCoilsSimulationResult | undefined) => void;
+  setWarnings: (warnings: StructuredWarning[]) => void;
   setIsSimulating: (value: boolean) => void;
   clearResult: () => void;
   reset: () => void;
@@ -145,7 +142,7 @@ interface UnilabSimulationStore {
 // Defaults sensatos para que o usuário possa simular sem necessariamente
 // abrir o modal de geometria. Todos os campos podem ser sobrescritos pela
 // UI (GeometryBottomBar, GeometryForm, picker do catálogo, importação).
-const DEFAULT_PHYSICAL_INPUTS: Partial<UnilabPhysicalInputs> = {
+const DEFAULT_PHYSICAL_INPUTS: Partial<CnCoilsPhysicalInputs> = {
   finnedHeightMm: 600,
   finnedLengthMm: 1200,
   rows: 4,
@@ -160,7 +157,7 @@ const DEFAULT_PHYSICAL_INPUTS: Partial<UnilabPhysicalInputs> = {
   tubeInnerDiameterMm: 8.92,
 };
 
-export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => ({
+export const useCnCoilsSimulationStore = create<CnCoilsSimulationStore>((set) => ({
   physicalInputs: { ...DEFAULT_PHYSICAL_INPUTS },
   thermoInputs: {},
   selectedGeometry: undefined,
@@ -230,7 +227,6 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   calculatedCost: 0,
   tubeMaterialKey: "copper_kg",
   finMaterialKey: "aluminum_kg",
-  bdiPercent: 0,
   setMaterialPrice: (material, price) =>
     set((s) => {
       const materialPrices = { ...s.materialPrices, [material]: price };
@@ -246,12 +242,6 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
     set((s) => {
       const cost = computeCostFromState({ ...s, finMaterialKey: key });
       return { finMaterialKey: key, calculatedCost: cost };
-    }),
-  setBdiPercent: (val) =>
-    set((s) => {
-      const bdiPercent = Number.isFinite(val) && val >= 0 ? val : 0;
-      const cost = computeCostFromState({ ...s, bdiPercent });
-      return { bdiPercent, calculatedCost: cost };
     }),
   recalculateCost: () =>
     set((s) => ({ calculatedCost: computeCostFromState(s) })),
@@ -391,7 +381,6 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       calculatedCost: 0,
       tubeMaterialKey: "copper_kg",
       finMaterialKey: "aluminum_kg",
-      bdiPercent: 0,
     }),
 }));
 
@@ -400,11 +389,10 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
  * Defensivo: retorna 0 quando faltam dados (evita NaN/Infinity).
  */
 function computeCostFromState(s: {
-  physicalInputs: Partial<UnilabPhysicalInputs>;
+  physicalInputs: Partial<CnCoilsPhysicalInputs>;
   materialPrices: MaterialPrices;
   tubeMaterialKey: MaterialKey;
   finMaterialKey: MaterialKey;
-  bdiPercent?: number;
 }): number {
   const p = s.physicalInputs;
   const tubesPerRow =
@@ -426,7 +414,6 @@ function computeCostFromState(s: {
     tubeMaterial: s.tubeMaterialKey,
     finMaterial: s.finMaterialKey,
     prices: s.materialPrices,
-    bdiPercent: s.bdiPercent ?? 0,
   });
   return result.totalCost;
 }

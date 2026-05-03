@@ -1,6 +1,6 @@
-import { Calculator, History, Printer, RotateCcw, Save, Settings2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { Calculator, Printer, RotateCcw, Save, Settings2 } from "lucide-react";
+import { useState } from "react";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import { getApplicationConfig } from "../config/applicationConfig";
 import { formatBRL } from "../engine/costCalculator";
 import { generateReportPdf, type ReportSnapshot } from "../engine/reportGenerator";
@@ -11,11 +11,6 @@ import {
   FinModal,
   DistributorModal,
 } from "./GeometryDerivedModals";
-import {
-  LAST_INPUTS_STORAGE_KEY,
-  hasSavedLastInputs,
-  restoreLastInputs,
-} from "../utils/lastInputsPersistence";
 import type { UnilabComponentType } from "../types/unilab.types";
 
 type ModalKey = "geometry" | "tube" | "fin" | "distributor" | null;
@@ -52,66 +47,34 @@ export function WorkspaceSidebar({
   disabledReason,
 }: WorkspaceSidebarProps) {
   const cfg = getApplicationConfig(componentType);
-  const calcMode = useUnilabSimulationStore((s) => s.calcMode);
-  const setCalcMode = useUnilabSimulationStore((s) => s.setCalcMode);
-  const engineVersion = useUnilabSimulationStore((s) => s.engineVersion);
-  const setEngineVersion = useUnilabSimulationStore((s) => s.setEngineVersion);
-  const calculatedCost = useUnilabSimulationStore((s) => s.calculatedCost);
-  const result = useUnilabSimulationStore((s) => s.result);
-  const warnings = useUnilabSimulationStore((s) => s.warnings);
-  const physicalInputs = useUnilabSimulationStore((s) => s.physicalInputs);
-  const selectedGeometry = useUnilabSimulationStore((s) => s.selectedGeometry);
-  const airFlow_m3h = useUnilabSimulationStore((s) => s.airFlow_m3h);
-  const tempInDB_C = useUnilabSimulationStore((s) => s.tempInDB_C);
-  const rhIn_pct = useUnilabSimulationStore((s) => s.rhIn_pct);
-  const foulingFactorAir = useUnilabSimulationStore((s) => s.foulingFactorAir);
-  const fanCount = useUnilabSimulationStore((s) => s.fanCount);
-  const fanRole = useUnilabSimulationStore((s) => s.fanRole);
-  const fluid = useUnilabSimulationStore((s) => s.fluid);
-  const fluidMassFlow_kg_h = useUnilabSimulationStore((s) => s.fluidMassFlow_kg_h);
-  const fluidOperatingTemp_C = useUnilabSimulationStore((s) => s.fluidOperatingTemp_C);
-  const superheat_K = useUnilabSimulationStore((s) => s.superheat_K);
-  const subcooling_K = useUnilabSimulationStore((s) => s.subcooling_K);
-  const foulingFactorFluid = useUnilabSimulationStore((s) => s.foulingFactorFluid);
-  const pairedTempC = useUnilabSimulationStore((s) => s.pairedTempC);
-  const dischargeSuperheatK = useUnilabSimulationStore((s) => s.dischargeSuperheatK);
-  const compressorCount = useUnilabSimulationStore((s) => s.compressorCount);
-  const selectedCompressorId = useUnilabSimulationStore((s) => s.selectedCompressorId);
+  const calcMode = useCnCoilsSimulationStore((s) => s.calcMode);
+  const setCalcMode = useCnCoilsSimulationStore((s) => s.setCalcMode);
+  const engineVersion = useCnCoilsSimulationStore((s) => s.engineVersion);
+  const setEngineVersion = useCnCoilsSimulationStore((s) => s.setEngineVersion);
+  const calculatedCost = useCnCoilsSimulationStore((s) => s.calculatedCost);
+  const result = useCnCoilsSimulationStore((s) => s.result);
+  const warnings = useCnCoilsSimulationStore((s) => s.warnings);
+  const physicalInputs = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const selectedGeometry = useCnCoilsSimulationStore((s) => s.selectedGeometry);
+  const airFlow_m3h = useCnCoilsSimulationStore((s) => s.airFlow_m3h);
+  const tempInDB_C = useCnCoilsSimulationStore((s) => s.tempInDB_C);
+  const rhIn_pct = useCnCoilsSimulationStore((s) => s.rhIn_pct);
+  const foulingFactorAir = useCnCoilsSimulationStore((s) => s.foulingFactorAir);
+  const fanCount = useCnCoilsSimulationStore((s) => s.fanCount);
+  const fanRole = useCnCoilsSimulationStore((s) => s.fanRole);
+  const fluid = useCnCoilsSimulationStore((s) => s.fluid);
+  const fluidMassFlow_kg_h = useCnCoilsSimulationStore((s) => s.fluidMassFlow_kg_h);
+  const fluidOperatingTemp_C = useCnCoilsSimulationStore((s) => s.fluidOperatingTemp_C);
+  const superheat_K = useCnCoilsSimulationStore((s) => s.superheat_K);
+  const subcooling_K = useCnCoilsSimulationStore((s) => s.subcooling_K);
+  const foulingFactorFluid = useCnCoilsSimulationStore((s) => s.foulingFactorFluid);
+  const pairedTempC = useCnCoilsSimulationStore((s) => s.pairedTempC);
+  const dischargeSuperheatK = useCnCoilsSimulationStore((s) => s.dischargeSuperheatK);
+  const compressorCount = useCnCoilsSimulationStore((s) => s.compressorCount);
+  const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
 
   const [costModalOpen, setCostModalOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalKey>(null);
-  const [hasSaved, setHasSaved] = useState<boolean>(false);
-
-  useEffect(() => {
-    setHasSaved(hasSavedLastInputs());
-  }, [result]);
-
-  // Avisos não-bloqueantes para campos opcionais.
-  const optionalAdvisories = useMemo(() => {
-    const list: string[] = [];
-    const p = physicalInputs;
-    if (!p?.circuits || p.circuits <= 0)
-      list.push("Circuitos não informados — usando estimativa automática");
-    if (!p?.tubeMaterialId)
-      list.push("Material do tubo não selecionado — usando cobre (padrão)");
-    if (!p?.tubePitchTransverseMm || p.tubePitchTransverseMm <= 0)
-      list.push("Passo transversal não informado — usando valor da geometria");
-    if (!p?.tubePitchLongitudinalMm || p.tubePitchLongitudinalMm <= 0)
-      list.push("Passo longitudinal não informado — usando valor da geometria");
-    if (!p?.finPitchMm || p.finPitchMm <= 0)
-      list.push("Passo de aleta não informado — usando 2,5 mm (padrão)");
-    if (!p?.finThicknessMm || p.finThicknessMm <= 0)
-      list.push("Espessura de aleta não informada — usando 0,12 mm (padrão)");
-    if (!selectedGeometry)
-      list.push("Geometria não selecionada — usando parâmetros manuais");
-    return list;
-  }, [physicalInputs, selectedGeometry]);
-
-  const handleRestoreLast = () => {
-    if (restoreLastInputs()) {
-      setHasSaved(true);
-    }
-  };
 
   const buildSnapshot = (): ReportSnapshot => ({
     componentLabel: cfg.shortLabel,
@@ -139,7 +102,7 @@ export function WorkspaceSidebar({
     },
     cost: calculatedCost,
     result,
-    warnings: warnings.map((w) => (typeof w === "string" ? w : w.message ?? w.code)),
+    warnings,
     meta: {
       project: "-",
       client: "",
@@ -328,33 +291,6 @@ export function WorkspaceSidebar({
           <Calculator className="h-3 w-3" />
           {isSimulating ? "Calculando…" : "Calcular"}
         </button>
-
-        {/* Avisos não-bloqueantes — campos opcionais ausentes */}
-        {optionalAdvisories.length > 0 && (
-          <ul className="space-y-0.5 rounded border border-amber-200 bg-amber-50 px-1.5 py-1">
-            {optionalAdvisories.map((msg) => (
-              <li
-                key={msg}
-                className="flex items-start gap-1 text-[9.5px] leading-tight text-slate-600"
-              >
-                <span aria-hidden className="text-amber-500">⚠️</span>
-                <span>{msg}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {hasSaved && (
-          <button
-            type="button"
-            onClick={handleRestoreLast}
-            title="Restaurar últimos parâmetros salvos"
-            className="inline-flex items-center justify-center gap-1 rounded border border-slate-300 bg-white px-1 py-1 text-[10px] text-slate-700 shadow-sm hover:bg-slate-100"
-          >
-            <History className="h-3 w-3" />
-            Restaurar Última Simulação
-          </button>
-        )}
         <div className="grid grid-cols-3 gap-1">
           <button
             type="button"

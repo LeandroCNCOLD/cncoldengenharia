@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, type LucideIcon } from "lucide-react";
 
-interface UnilabDashboardCardProps {
+interface CnCoilsDashboardCardProps {
   title: string;
   description: string;
   href: string;
@@ -11,7 +11,7 @@ interface UnilabDashboardCardProps {
   disabledHint?: string;
 }
 
-export function UnilabDashboardCard({
+export function CnCoilsDashboardCard({
   title,
   description,
   href,
@@ -19,7 +19,7 @@ export function UnilabDashboardCard({
   Icon,
   disabled,
   disabledHint,
-}: UnilabDashboardCardProps) {
+}: CnCoilsDashboardCardProps) {
   const content = (
     <div
       className={`group flex h-full flex-col justify-between rounded-xl border p-5 shadow-sm transition ${

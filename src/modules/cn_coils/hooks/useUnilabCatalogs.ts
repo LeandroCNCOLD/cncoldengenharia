@@ -27,7 +27,7 @@ const CATALOG_FILES = {
 
 export const REQUIRED_CATALOG_FILES = Object.values(CATALOG_FILES);
 
-export interface UnilabCatalogs {
+export interface CnCoilsCatalogs {
   geometries: CoilGeometryCatalogItem[];
   tubeMaterials: TubeMaterialItem[];
   finPitches: FinPitchItem[];
@@ -37,7 +37,7 @@ export interface UnilabCatalogs {
   pressureDropFan: PressureDropFanItem[];
 }
 
-const EMPTY_CATALOGS: UnilabCatalogs = {
+const EMPTY_CATALOGS: CnCoilsCatalogs = {
   geometries: [],
   tubeMaterials: [],
   finPitches: [],
@@ -62,10 +62,10 @@ function ensureArray<T>(value: unknown, file: string): T[] {
   return value as T[];
 }
 
-export interface UseUnilabCatalogsReturn extends UnilabCatalogs, CatalogLoadState {}
+export interface UseCnCoilsCatalogsReturn extends CnCoilsCatalogs, CatalogLoadState {}
 
-export function useUnilabCatalogs(): UseUnilabCatalogsReturn {
-  const [data, setData] = useState<UnilabCatalogs>(EMPTY_CATALOGS);
+export function useCnCoilsCatalogs(): UseCnCoilsCatalogsReturn {
+  const [data, setData] = useState<CnCoilsCatalogs>(EMPTY_CATALOGS);
   const [state, setState] = useState<CatalogLoadState>({
     loading: true,
     ready: false,
@@ -79,9 +79,9 @@ export function useUnilabCatalogs(): UseUnilabCatalogsReturn {
     (async () => {
       const errors: Record<string, string> = {};
       const missing: string[] = [];
-      const next: UnilabCatalogs = { ...EMPTY_CATALOGS };
+      const next: CnCoilsCatalogs = { ...EMPTY_CATALOGS };
 
-      const tasks: Array<[keyof UnilabCatalogs, string, (raw: unknown) => unknown]> = [
+      const tasks: Array<[keyof CnCoilsCatalogs, string, (raw: unknown) => unknown]> = [
         [
           "geometries",
           CATALOG_FILES.coilGeometries,

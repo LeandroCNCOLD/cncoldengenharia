@@ -1,3 +1,9 @@
+/**
+ * @deprecated Use simulatorCoreAdapter.ts que delega ao motor unificado.
+ * Este arquivo será removido na versão 2.0.
+ * Mantido apenas para compatibilidade com testes existentes.
+ */
+
 // Núcleo do simulador UNILAB.
 //
 // Fluxo:
@@ -19,9 +25,9 @@
 import type {
   AirVelocityCorrectionItem,
   PressureDropFanItem,
-  UnilabPhysicalInputs,
-  UnilabSimulationResult,
-  UnilabThermoInputs,
+  CnCoilsPhysicalInputs,
+  CnCoilsSimulationResult,
+  CnCoilsThermoInputs,
 } from "../types/unilab.types";
 import {
   validatePhysicalInputs,
@@ -51,10 +57,11 @@ import {
   calculateFluidPressureDrop,
 } from "./pressureDrop";
 import { CP_DRY_AIR_KJ_KG_K, m3hToM3s, mmToM, safeDivide, clamp } from "./units";
+import { calcCoilEffectiveArea, calcFinEfficiency, calcEffectiveArea } from "./effectiveArea";
 
 export interface RunSimulationParams {
-  physical: UnilabPhysicalInputs;
-  thermo: UnilabThermoInputs;
+  physical: CnCoilsPhysicalInputs;
+  thermo: CnCoilsThermoInputs;
   catalogs: {
     correctionCoefficients: AirVelocityCorrectionItem[];
     pressureDropFan: PressureDropFanItem[];
@@ -63,6 +70,20 @@ export interface RunSimulationParams {
   tubeMaterialConductivity: number;
   /** uBase opcional vindo da geometria do catálogo. */
   uBaseWm2K?: number;
+  /**
+   * Fator de correção da aleta (FatCorAl do catálogo Unilab).
+   * Multiplica Q_final para ajustar a capacidade pelo tipo de aleta.
+   * Valores típicos: Lisa=1.00, Ondulada=1.15, Persianada=0.95,
+   * Wavy=1.35, Serrilhada=1.45. Padrão: 1.0 (neutro).
+   */
+  finCorrectionFactor?: number;
+  /**
+   * Fator de atrito do ar (FattoreAttrAria do catálogo Unilab).
+   * Multiplica a queda de pressão do ar (dpAir) pelo tipo de aleta.
+   * Valores típicos: Lisa=1.00, Ondulada=1.25, Persianada=1.00,
+   * Wavy=1.45, Serrilhada=1.55. Padrão: 1.0 (neutro).
+   */
+  airFrictionFactor?: number;
 }
 
 export class SimulationError extends Error {
@@ -75,33 +96,39 @@ export class SimulationError extends Error {
   }
 }
 
-/**
- * Estimativa da área efetiva de troca de calor (lado ar) para uma serpentina
- * aletada. Usa a aproximação:
- *   A_eff ≈ A_face · rows · (1 + η_aleta · razão_aleta)
- * onde η_aleta·razão_aleta é capturado pelo fator empírico baseado no passo
- * de aleta (mais aletas → maior área externa). Para o nível de precisão deste
- * simulador (correção UNILAB cobre o resíduo), basta um fator linear.
- */
-function estimateEffectiveAreaM2(physical: UnilabPhysicalInputs, faceAreaM2: number): number {
-  // Quando passo variável estiver ativo, soma a contribuição fila a fila
-  // (cada fila com seu próprio passo de aleta).
-  if (physical.isVariableFinPitch && Array.isArray(physical.rowFinPitchesMm) && physical.rowFinPitchesMm.length > 0) {
-    let sum = 0;
-    for (let i = 0; i < physical.rows; i++) {
-      const pitchMm = physical.rowFinPitchesMm[i] ?? physical.rowFinPitchesMm[physical.rowFinPitchesMm.length - 1] ?? physical.finPitchMm;
-      const finPitchM = mmToM(Math.max(pitchMm, 0.1));
-      const finFactorPerRow = 1 + 0.1 / finPitchM;
-      sum += faceAreaM2 * finFactorPerRow;
-    }
-    return sum;
-  }
-  const finPitchM = mmToM(Math.max(physical.finPitchMm, 0.1));
-  const finFactorPerRow = 1 + 0.1 / finPitchM; // adimensional
-  return faceAreaM2 * physical.rows * finFactorPerRow;
+function computeGeometricArea(physical: CnCoilsPhysicalInputs, faceAreaM2: number, hAir: number) {
+  const D_o_m = mmToM(physical.tubeOuterDiameterMm);
+  const P_t_m = mmToM(physical.tubePitchTransverseMm);
+  const P_l_m = mmToM(physical.tubePitchLongitudinalMm);
+  const delta_f_m = mmToM(physical.finThicknessMm ?? 0.1);
+  const L_tube_m = mmToM(physical.finnedLengthMm);
+  const finnedHeightM = mmToM(physical.finnedHeightMm);
+  const N_tubes_per_row = physical.tubesPerRow ?? (P_t_m > 0 ? Math.max(1, Math.round(finnedHeightM / P_t_m)) : 16);
+
+  const F_p_m = physical.isVariableFinPitch && Array.isArray(physical.rowFinPitchesMm) && physical.rowFinPitchesMm.length > 0
+    ? mmToM(physical.rowFinPitchesMm.reduce((a, b) => a + b, 0) / physical.rowFinPitchesMm.length)
+    : mmToM(Math.max(physical.finPitchMm, 0.1));
+
+  const areas = calcCoilEffectiveArea({
+    N_rows: physical.rows,
+    N_tubes_per_row: N_tubes_per_row,
+    L_tube_m,
+    D_o_m,
+    P_t_m,
+    P_l_m,
+    F_p_m,
+    delta_f_m,
+  });
+
+  const k_fin = 200;
+  const r_o = D_o_m / 2;
+  const eta_fin = calcFinEfficiency(hAir, k_fin, delta_f_m, r_o, P_t_m, P_l_m);
+  const effectiveArea = calcEffectiveArea(areas, eta_fin);
+
+  return { areas, eta_fin, effectiveArea };
 }
 
-export function runSimulation(params: RunSimulationParams): UnilabSimulationResult {
+export function runSimulation(params: RunSimulationParams): CnCoilsSimulationResult {
   const { physical, thermo, catalogs } = params;
 
   // 1. Validações
@@ -201,8 +228,9 @@ export function runSimulation(params: RunSimulationParams): UnilabSimulationResu
   }
   const overall = { uWm2K: uGlobalWm2K };
 
-  // 7. Área efetiva de troca
-  const areaEffM2 = estimateEffectiveAreaM2(physical, faceAreaM2);
+  // 7. Área efetiva de troca (geométrica rigorosa)
+  const geoArea = computeGeometricArea(physical, faceAreaM2, wcc.hAirWm2K > 0 ? wcc.hAirWm2K : 50);
+  const areaEffM2 = geoArea.effectiveArea;
 
   // 8. NTU e efetividade crossflow
   // C_ar = m_ar · cp_ar (kJ/(s·K) → W/K convertendo cp para J/kg·K)
@@ -233,7 +261,12 @@ export function runSimulation(params: RunSimulationParams): UnilabSimulationResu
       correction.warnings,
     );
   }
-  const qFinalW = qBaseW * correction.factor;
+  const qFinalW_raw = qBaseW * correction.factor;
+
+  const finFactor = Number.isFinite(params.finCorrectionFactor) && params.finCorrectionFactor! > 0
+    ? params.finCorrectionFactor!
+    : 1.0;
+  const qFinalW = qFinalW_raw * finFactor;
 
   // LMTD informativo (sai como NaN-safe 0)
   const deltaT1 = Math.abs(thermo.airInletTempC - surfaceTempC);
@@ -278,6 +311,11 @@ export function runSimulation(params: RunSimulationParams): UnilabSimulationResu
   );
   warnings.push(...dpAir.warnings);
 
+  const airFrFactor = Number.isFinite(params.airFrictionFactor) && params.airFrictionFactor! > 0
+    ? params.airFrictionFactor!
+    : 1.0;
+  const dpAirPaFinal = (Number.isFinite(dpAir.pressureDropPa) ? dpAir.pressureDropPa : 0) * airFrFactor;
+
   // Vazão mássica do refrigerante: estimativa grosseira pela capacidade.
   // Para fluido em mudança de fase usamos hfg padrão (R404A ~ 200 kJ/kg líq-vap).
   // Sem propriedades reais o usuário deve confiar mais no fator UNILAB.
@@ -308,7 +346,7 @@ export function runSimulation(params: RunSimulationParams): UnilabSimulationResu
     sensibleCapacityKw: qSensibleW / 1000,
     latentCapacityKw: qLatentW / 1000,
     shf: clamp(shf, 0, 1),
-    airPressureDropPa: Number.isFinite(dpAir.pressureDropPa) ? dpAir.pressureDropPa : 0,
+    airPressureDropPa: dpAirPaFinal,
     fluidPressureDropKpa: Number.isFinite(dpFluid.pressureDropKpa) ? dpFluid.pressureDropKpa : 0,
     airOutletTempC: tAirOutC,
     airOutletRhPercent: rhOut * 100,
@@ -320,6 +358,13 @@ export function runSimulation(params: RunSimulationParams): UnilabSimulationResu
     ntu: ntu > 0 ? ntu : undefined,
     effectiveness: effectiveness > 0 ? effectiveness : undefined,
     correctionFactor: correction.factor,
+    A_fin_m2: geoArea.areas.A_fin_m2,
+    A_tube_bare_m2: geoArea.areas.A_tube_bare_m2,
+    A_total_m2: geoArea.areas.A_total_m2,
+    eta_fin: geoArea.eta_fin,
+    surface_ratio: geoArea.areas.surface_ratio,
+    finCorrectionFactor: finFactor,
+    airFrictionFactor: airFrFactor,
     warnings,
   };
 }

@@ -5,38 +5,30 @@ import { useCallback } from "react";
 import {
   runSimulationV2,
   SimulationV2Error,
-  UnilabCoefficientsMissingError,
 } from "../engine_v2/simulatorCoreV2";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
+import { getRefrigerantLiquidProps } from "../engine_v2/refrigerantProps";
 import type {
   TubeMaterialItem,
   UnilabComponentType,
+  CoilGeometryCatalogItem,
 } from "../types/unilab.types";
-import type { UnilabHeatTransferCatalog } from "../engine_v2/heatTransfer";
+import type { StructuredWarning } from "../types/warnings";
 
-export interface UseUnilabSimulationV2Params {
+export interface UseCnCoilsSimulationV2Params {
   tubeMaterials: TubeMaterialItem[];
-  htCatalog: UnilabHeatTransferCatalog;
+  geometries: CoilGeometryCatalogItem[];
   componentType: UnilabComponentType;
 }
 
-// Propriedades default para R404A líquido a -10 °C (placeholder até integrarmos
-// o catálogo termodinâmico de refrigerantes — Etapa 7). Valores literatura
-// (NIST REFPROP, R404A saturado).
-const DEFAULT_FLUID_PROPS = {
-  rho_kg_m3: 1180,
-  mu_Pa_s: 2.0e-4,
-  cp_J_kgK: 1450,
-  k_W_mK: 0.078,
-};
 
-export function useUnilabSimulationV2(params: UseUnilabSimulationV2Params) {
-  const setResult = useUnilabSimulationStore((s) => s.setResult);
-  const setWarnings = useUnilabSimulationStore((s) => s.setWarnings);
-  const setIsSimulating = useUnilabSimulationStore((s) => s.setIsSimulating);
+export function useCnCoilsSimulationV2(params: UseCnCoilsSimulationV2Params) {
+  const setResult = useCnCoilsSimulationStore((s) => s.setResult);
+  const setWarnings = useCnCoilsSimulationStore((s) => s.setWarnings);
+  const setIsSimulating = useCnCoilsSimulationStore((s) => s.setIsSimulating);
 
   const run = useCallback(() => {
-    const state = useUnilabSimulationStore.getState();
+    const state = useCnCoilsSimulationStore.getState();
     const { physicalInputs, thermoInputs } = state;
     setIsSimulating(true);
     try {
@@ -54,18 +46,32 @@ export function useUnilabSimulationV2(params: UseUnilabSimulationV2Params) {
 
       const fluidMassFlowKgS = (state.fluidMassFlow_kg_h || 0) / 3600;
 
+      const T_sat = thermo.evaporatingTempC ?? thermo.condensingTempC ?? state.fluidOperatingTemp_C ?? -10;
+      const fluidData = getRefrigerantLiquidProps(state.fluid ?? "REF_R404A", T_sat);
+      const fluidProps = {
+        rho_kg_m3: fluidData.rho_kg_m3,
+        mu_Pa_s: fluidData.mu_Pa_s,
+        cp_J_kgK: fluidData.cp_J_kgK,
+        k_W_mK: fluidData.k_W_mK,
+      };
+
+      const geometry = params.geometries.find((g) => g.id === physical.geometryId);
+      const geoRaw = geometry?.raw as Record<string, unknown> | undefined;
+      const finCorr = Number(geoRaw?.FatCorAl ?? geoRaw?.fin_correction_factor);
+
       const rawResult = runSimulationV2({
         physical,
         thermo,
         componentType: params.componentType,
-        htCatalog: params.htCatalog,
         tubeMaterialConductivity: tubeMat.conductivityWmK,
-        fluidProps: DEFAULT_FLUID_PROPS,
+        fluidProps,
         fluidMassFlowKgS,
         foulingExternal: state.foulingFactorAir,
         foulingInternal: state.foulingFactorFluid,
         superheatK: state.superheat_K,
         subcoolingK: state.subcooling_K,
+        finCorrectionFactor: Number.isFinite(finCorr) && finCorr > 0 ? finCorr : 1.0,
+        h_fg_kJkg: fluidData.h_fg_kJkg,
       });
       const k =
         1 +
@@ -77,18 +83,24 @@ export function useUnilabSimulationV2(params: UseUnilabSimulationV2Params) {
         sensibleCapacityKw: rawResult.sensibleCapacityKw * k,
         latentCapacityKw: rawResult.latentCapacityKw * k,
       };
+      const warnings: StructuredWarning[] = [
+        ...fluidData.warnings.map((msg) => ({ code: "FLUID_FALLBACK" as const, message: msg, severity: "warning" as const })),
+      ];
+      const engineWarnings: StructuredWarning[] = result.warnings.map((msg) => ({
+        code: "GENERAL_WARNING", message: msg, severity: "warning" as const,
+      }));
+      const allWarnings = [...engineWarnings, ...warnings];
+
       setResult(result);
-      setWarnings(result.warnings);
-      return { success: true as const, result };
+      setWarnings(allWarnings);
+      return { success: true as const, result, warnings: allWarnings };
     } catch (err) {
       const errors =
-        err instanceof UnilabCoefficientsMissingError
-          ? [err.message]
-          : err instanceof SimulationV2Error
-            ? err.errors
-            : [String(err)];
+        err instanceof SimulationV2Error
+          ? err.errors
+          : [String(err)];
       setResult(undefined);
-      setWarnings(errors);
+      setWarnings(errors.map((msg) => ({ code: "CALC_ERROR", message: msg, severity: "error" as const })));
       return { success: false as const, errors };
     } finally {
       setIsSimulating(false);

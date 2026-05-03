@@ -1,7 +1,7 @@
 import type {
-  UnilabPhysicalInputs,
-  UnilabSimulationResult,
-  UnilabThermoInputs,
+  CnCoilsPhysicalInputs,
+  CnCoilsSimulationResult,
+  CnCoilsThermoInputs,
   ValidationResult,
 } from "../types/unilab.types";
 import { ptBR } from "../i18n/messages.ptBR";
@@ -28,7 +28,7 @@ export function validateDatasets(state: {
 }
 
 export function validatePhysicalInputs(
-  inputs: Partial<UnilabPhysicalInputs>,
+  inputs: Partial<CnCoilsPhysicalInputs>,
 ): ValidationResult {
   const errors: string[] = [];
   const f = ptBR.workspace.fields;
@@ -55,7 +55,7 @@ export function validatePhysicalInputs(
 }
 
 export function validateThermoInputs(
-  inputs: Partial<UnilabThermoInputs>,
+  inputs: Partial<CnCoilsThermoInputs>,
 ): ValidationResult {
   const errors: string[] = [];
   const f = ptBR.workspace.fields;
@@ -84,8 +84,8 @@ export function validateThermoInputs(
 }
 
 export function validateCanSendToAssembly(
-  result: UnilabSimulationResult | undefined,
-  physical: Partial<UnilabPhysicalInputs>,
+  result: CnCoilsSimulationResult | undefined,
+  physical: Partial<CnCoilsPhysicalInputs>,
 ): ValidationResult {
   const errors: string[] = [];
   if (!result) {

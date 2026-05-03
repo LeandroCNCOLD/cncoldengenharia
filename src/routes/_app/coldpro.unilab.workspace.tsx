@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { UnilabWorkspacePage } from "@/modules/cn_coils/pages/UnilabWorkspacePage";
+import { CnCoilsWorkspacePage } from "@/modules/cn_coils/pages/UnilabWorkspacePage";
 
 const searchSchema = z.object({
   type: z
@@ -22,5 +22,5 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/_app/coldpro/unilab/workspace")({
   validateSearch: zodValidator(searchSchema),
-  component: UnilabWorkspacePage,
+  component: CnCoilsWorkspacePage,
 });

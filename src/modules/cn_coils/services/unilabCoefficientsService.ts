@@ -117,7 +117,7 @@ const URL = "/data/catalogs/unilabCoefficients.json";
 let _cache: UnilabCoefficientsBundle | null = null;
 let _inflight: Promise<UnilabCoefficientsBundle> | null = null;
 
-export async function loadUnilabCoefficients(): Promise<UnilabCoefficientsBundle> {
+export async function loadCnCoilsCoefficients(): Promise<UnilabCoefficientsBundle> {
   if (_cache) return _cache;
   if (_inflight) return _inflight;
   _inflight = (async () => {

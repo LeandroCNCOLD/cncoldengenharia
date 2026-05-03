@@ -2,15 +2,15 @@
 // Não altera nenhuma lógica de cálculo — apenas snapshot/restore dos campos
 // editáveis pelo usuário no formulário.
 
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 
 export const LAST_INPUTS_STORAGE_KEY = "cncoils_last_inputs";
 
 interface LastInputsSnapshot {
   v: 1;
   savedAt: string;
-  physicalInputs: ReturnType<typeof useUnilabSimulationStore.getState>["physicalInputs"];
-  thermoInputs: ReturnType<typeof useUnilabSimulationStore.getState>["thermoInputs"];
+  physicalInputs: ReturnType<typeof useCnCoilsSimulationStore.getState>["physicalInputs"];
+  thermoInputs: ReturnType<typeof useCnCoilsSimulationStore.getState>["thermoInputs"];
   airFlow_m3h: number;
   tempInDB_C: number;
   rhIn_pct: number;
@@ -28,7 +28,7 @@ function isBrowser(): boolean {
 export function saveLastInputs(): void {
   if (!isBrowser()) return;
   try {
-    const s = useUnilabSimulationStore.getState();
+    const s = useCnCoilsSimulationStore.getState();
     const snap: LastInputsSnapshot = {
       v: 1,
       savedAt: new Date().toISOString(),
@@ -65,7 +65,7 @@ export function restoreLastInputs(): boolean {
     if (!raw) return false;
     const snap = JSON.parse(raw) as Partial<LastInputsSnapshot>;
     if (!snap || snap.v !== 1) return false;
-    const s = useUnilabSimulationStore.getState();
+    const s = useCnCoilsSimulationStore.getState();
     if (snap.physicalInputs) s.setPhysicalInputs(snap.physicalInputs);
     if (snap.thermoInputs) s.setThermoInputs(snap.thermoInputs);
     if (Number.isFinite(snap.airFlow_m3h)) s.setAirFlow(snap.airFlow_m3h as number);

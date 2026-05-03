@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Calculator, Loader2, Send, Waves, Flame } from "lucide-react";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
-import { useUnilabCatalogs } from "../../hooks/useUnilabCatalogs";
+import { useCnCoilsCatalogs } from "../../hooks/useUnilabCatalogs";
 import { DatasetStatusPanel } from "../../components/DatasetStatusPanel";
 import { runSimulation, SimulationError } from "../../engine/simulatorCore";
 import {
@@ -11,13 +11,13 @@ import {
 } from "../../adapters/toColdProAdapter";
 import { useComponentStore } from "@/modules/coldpro/stores/useComponentStore";
 import type {
-  UnilabPhysicalInputs,
-  UnilabSimulationResult,
-  UnilabThermoInputs,
+  CnCoilsPhysicalInputs,
+  CnCoilsSimulationResult,
+  CnCoilsThermoInputs,
 } from "../../types/unilab.types";
 
 // ---------- Defaults físicos compactos para cada coil ----------
-const DEFAULT_PHYSICAL: UnilabPhysicalInputs = {
+const DEFAULT_PHYSICAL: CnCoilsPhysicalInputs = {
   componentType: "evaporator_dx",
   geometryId: "",
   finnedHeightMm: 600,
@@ -33,7 +33,7 @@ const DEFAULT_PHYSICAL: UnilabPhysicalInputs = {
   tubeInnerDiameterMm: 8.92,
 };
 
-const DEFAULT_HEATING_PHYSICAL: UnilabPhysicalInputs = {
+const DEFAULT_HEATING_PHYSICAL: CnCoilsPhysicalInputs = {
   ...DEFAULT_PHYSICAL,
   componentType: "heating_coil",
   rows: 2,
@@ -56,8 +56,8 @@ const DEFAULT_AIR: AirInlet = {
 };
 
 interface SystemResult {
-  evap?: UnilabSimulationResult;
-  heating?: UnilabSimulationResult;
+  evap?: CnCoilsSimulationResult;
+  heating?: CnCoilsSimulationResult;
   errors: string[];
 }
 
@@ -117,14 +117,14 @@ function CoilCard({
 
 export function DehumidificationSystemPage() {
   const navigate = useNavigate();
-  const catalogs = useUnilabCatalogs();
+  const catalogs = useCnCoilsCatalogs();
 
   // ---------- Inputs do AR (somente no evaporador, propagado via cascata) ----------
   const [airInlet, setAirInlet] = useState<AirInlet>(DEFAULT_AIR);
 
   // ---------- Geometrias e termodinâmica de cada coil ----------
-  const [evapPhys, setEvapPhys] = useState<UnilabPhysicalInputs>(DEFAULT_PHYSICAL);
-  const [heatPhys, setHeatPhys] = useState<UnilabPhysicalInputs>(DEFAULT_HEATING_PHYSICAL);
+  const [evapPhys, setEvapPhys] = useState<CnCoilsPhysicalInputs>(DEFAULT_PHYSICAL);
+  const [heatPhys, setHeatPhys] = useState<CnCoilsPhysicalInputs>(DEFAULT_HEATING_PHYSICAL);
 
   const [evapEvapTempC, setEvapEvapTempC] = useState(5);
   const [heatFluidTempInC, setHeatFluidTempInC] = useState(80);
@@ -188,7 +188,7 @@ export function DehumidificationSystemPage() {
       if (!evapTubeMat) throw new SimulationError("Material do tubo do evaporador inválido.", []);
       const evapGeom = catalogs.geometries.find((g) => g.id === evapPhys.geometryId);
 
-      const evapThermo: UnilabThermoInputs = {
+      const evapThermo: CnCoilsThermoInputs = {
         refrigerantId,
         airFlowM3H: airInlet.airFlowM3H,
         airInletTempC: airInlet.airInletTempC,
@@ -213,7 +213,7 @@ export function DehumidificationSystemPage() {
 
       const heatFluidMeanC = (heatFluidTempInC + heatFluidTempOutC) / 2;
 
-      const heatThermo: UnilabThermoInputs = {
+      const heatThermo: CnCoilsThermoInputs = {
         refrigerantId: "water",
         airFlowM3H: airInlet.airFlowM3H,
         airInletTempC: evapResult.airOutletTempC,           // CASCATA
@@ -252,7 +252,7 @@ export function DehumidificationSystemPage() {
       const store = useComponentStore.getState();
 
       // Spec do evaporador
-      const evapThermo: UnilabThermoInputs = {
+      const evapThermo: CnCoilsThermoInputs = {
         refrigerantId,
         airFlowM3H: airInlet.airFlowM3H,
         airInletTempC: airInlet.airInletTempC,
@@ -265,7 +265,7 @@ export function DehumidificationSystemPage() {
 
       // Spec do reaquecimento
       const heatFluidMeanC = (heatFluidTempInC + heatFluidTempOutC) / 2;
-      const heatThermo: UnilabThermoInputs = {
+      const heatThermo: CnCoilsThermoInputs = {
         refrigerantId: "water",
         airFlowM3H: airInlet.airFlowM3H,
         airInletTempC: systemResult.evap.airOutletTempC,

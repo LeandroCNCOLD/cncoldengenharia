@@ -1,14 +1,14 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import type {
-  UnilabPhysicalInputs,
-  UnilabSimulationResult,
+  CnCoilsPhysicalInputs,
+  CnCoilsSimulationResult,
 } from "../types/unilab.types";
 
 export interface ReportSnapshot {
   componentLabel: string;
   geometryName?: string;
-  physical: Partial<UnilabPhysicalInputs>;
+  physical: Partial<CnCoilsPhysicalInputs>;
   air: {
     flowM3h: number;
     tempInC: number;
@@ -30,8 +30,8 @@ export interface ReportSnapshot {
     compressorId?: string;
   };
   cost: number;
-  result?: UnilabSimulationResult;
-  warnings: string[];
+  result?: CnCoilsSimulationResult;
+  warnings: Array<{ code: string; message: string | null; severity: "warning" | "error" }>;
   meta: {
     project: string;
     client: string;
@@ -165,7 +165,7 @@ export function generateReportPdf(snap: ReportSnapshot): jsPDF {
       styles: { fontSize: 8, cellPadding: 1.2, textColor: [120, 53, 15] },
       headStyles: { fillColor: [251, 191, 36], textColor: 30, fontStyle: "bold" },
       head: [["Avisos"]],
-      body: snap.warnings.map((w) => [w]),
+      body: snap.warnings.map((w) => [w.message ?? w.code]),
     });
   }
 

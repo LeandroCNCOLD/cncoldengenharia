@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import type {
   CoilGeometryCatalogItem,
   FinPitchItem,
@@ -61,9 +61,9 @@ export function GeometryForm({
   finThicknesses,
   disabled,
 }: GeometryFormProps) {
-  const physical = useUnilabSimulationStore((s) => s.physicalInputs);
-  const setPhysical = useUnilabSimulationStore((s) => s.setPhysicalInputs);
-  const setSelectedGeometry = useUnilabSimulationStore((s) => s.setSelectedGeometry);
+  const physical = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const setPhysical = useCnCoilsSimulationStore((s) => s.setPhysicalInputs);
+  const setSelectedGeometry = useCnCoilsSimulationStore((s) => s.setSelectedGeometry);
   const f = ptBR.workspace.fields;
 
   const enriched = useMemo(() => geometries.map(asGeometryItem), [geometries]);

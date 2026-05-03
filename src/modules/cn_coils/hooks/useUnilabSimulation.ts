@@ -2,31 +2,55 @@
 // material do tubo no catálogo e chama runSimulation. Sem mocks.
 
 import { useCallback } from "react";
-import { runSimulation, SimulationError } from "../engine/simulatorCore";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { runSimulation, SimulationError } from "../engine/simulatorCoreAdapter";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import type {
   AirVelocityCorrectionItem,
   PressureDropFanItem,
   TubeMaterialItem,
   CoilGeometryCatalogItem,
 } from "../types/unilab.types";
+import type { StructuredWarning } from "../types/warnings";
 
-export interface UseUnilabSimulationParams {
+export type { StructuredWarning as SimulationWarning } from "../types/warnings";
+
+export interface UseCnCoilsSimulationParams {
   geometries: CoilGeometryCatalogItem[];
   tubeMaterials: TubeMaterialItem[];
   correctionCoefficients: AirVelocityCorrectionItem[];
   pressureDropFan: PressureDropFanItem[];
 }
 
-export function useUnilabSimulation(catalogs: UseUnilabSimulationParams) {
-  const setResult = useUnilabSimulationStore((s) => s.setResult);
-  const setWarnings = useUnilabSimulationStore((s) => s.setWarnings);
-  const setIsSimulating = useUnilabSimulationStore((s) => s.setIsSimulating);
-  const clearResult = useUnilabSimulationStore((s) => s.clearResult);
+function resolveUBase(geometry: { uBaseWm2K?: number | null; coil_type?: string } | null | undefined) {
+  const DEFAULT_U_BY_TYPE: Record<string, number> = {
+    condensation: 40,
+    direct_expansion: 35,
+    flooded_evaporator: 40,
+    cooling: 35,
+    heating: 30,
+    vapor: 50,
+  };
+  if (geometry?.uBaseWm2K && geometry.uBaseWm2K > 0) {
+    return { uBaseWm2K: geometry.uBaseWm2K, isEstimated: false, warning: null };
+  }
+  const coilType = geometry?.coil_type ?? "cooling";
+  const fallbackU = DEFAULT_U_BY_TYPE[coilType] ?? 35;
+  return {
+    uBaseWm2K: fallbackU,
+    isEstimated: true,
+    warning: `U_base não calibrado para esta geometria. Usando estimativa de ${fallbackU} W/m²K para "${coilType}". Resultado é ESTIMATIVA — não use para dimensionamento final.`,
+  };
+}
+
+export function useCnCoilsSimulation(catalogs: UseCnCoilsSimulationParams) {
+  const setResult = useCnCoilsSimulationStore((s) => s.setResult);
+  const setWarnings = useCnCoilsSimulationStore((s) => s.setWarnings);
+  const setIsSimulating = useCnCoilsSimulationStore((s) => s.setIsSimulating);
+  const clearResult = useCnCoilsSimulationStore((s) => s.clearResult);
 
   const run = useCallback(() => {
     const { physicalInputs, thermoInputs, errorFactorPercent } =
-      useUnilabSimulationStore.getState();
+      useCnCoilsSimulationStore.getState();
 
     setIsSimulating(true);
     try {
@@ -43,6 +67,11 @@ export function useUnilabSimulation(catalogs: UseUnilabSimulationParams) {
       }
 
       const geometry = catalogs.geometries.find((g) => g.id === physical.geometryId);
+      const { uBaseWm2K, isEstimated: uBaseIsEstimated, warning: uBaseWarning } = resolveUBase(geometry);
+      const geoRaw = geometry?.raw as Record<string, unknown> | undefined;
+      const finCorr = Number(geoRaw?.FatCorAl ?? geoRaw?.fin_correction_factor);
+      const airFr = Number(geoRaw?.FattoreAttrAria ?? geoRaw?.air_friction_factor);
+
       const rawResult = runSimulation({
         physical,
         thermo,
@@ -51,7 +80,9 @@ export function useUnilabSimulation(catalogs: UseUnilabSimulationParams) {
           pressureDropFan: catalogs.pressureDropFan,
         },
         tubeMaterialConductivity: tubeMat.conductivityWmK,
-        uBaseWm2K: geometry?.uBaseWm2K ?? 35,
+        uBaseWm2K,
+        finCorrectionFactor: Number.isFinite(finCorr) && finCorr > 0 ? finCorr : 1.0,
+        airFrictionFactor: Number.isFinite(airFr) && airFr > 0 ? airFr : 1.0,
       });
 
       const k = 1 + (Number.isFinite(errorFactorPercent) ? errorFactorPercent : 0) / 100;
@@ -62,19 +93,31 @@ export function useUnilabSimulation(catalogs: UseUnilabSimulationParams) {
         latentCapacityKw: rawResult.latentCapacityKw * k,
       };
 
+      const warnings: StructuredWarning[] = [
+        ...(uBaseIsEstimated ? [{ code: "U_BASE_ESTIMATED", message: uBaseWarning, severity: "warning" as const }] : []),
+      ];
+
+      const engineWarnings: StructuredWarning[] = result.warnings.map((msg) => ({
+        code: "GENERAL_WARNING", message: msg, severity: "warning" as const,
+      }));
+      const allWarnings = [...engineWarnings, ...warnings];
+
       setResult(result);
-      setWarnings(result.warnings);
-      return { success: true as const, result };
+      setWarnings(allWarnings);
+      return { success: true as const, result, warnings: allWarnings };
     } catch (err) {
       const errors =
         err instanceof SimulationError ? err.errors : [String(err)];
       setResult(undefined);
-      setWarnings(errors);
+      setWarnings(errors.map((msg) => ({ code: "CALC_ERROR", message: msg, severity: "error" as const })));
       return { success: false as const, errors };
     } finally {
       setIsSimulating(false);
     }
   }, [catalogs, setIsSimulating, setResult, setWarnings]);
 
-  return { run, clearResult };
+  return { run, clearResult } as {
+    run: () => { success: true; result: ReturnType<typeof runSimulation>; warnings: StructuredWarning[] } | { success: false; errors: string[] };
+    clearResult: () => void;
+  };
 }

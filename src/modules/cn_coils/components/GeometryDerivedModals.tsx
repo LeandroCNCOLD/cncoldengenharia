@@ -4,7 +4,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import type { CoilGeometryItem } from "../services/coilGeometryCatalogService";
 
 /**
@@ -65,8 +65,8 @@ function NoGeometryHint() {
 }
 
 export function TubeModal({ open, onClose }: ModalProps) {
-  const physical = useUnilabSimulationStore((s) => s.physicalInputs);
-  const selected = useUnilabSimulationStore((s) => s.selectedGeometry) as CoilGeometryItem | undefined;
+  const physical = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const selected = useCnCoilsSimulationStore((s) => s.selectedGeometry) as CoilGeometryItem | undefined;
   return (
     <Dialog open={open} onOpenChange={(o) => (!o ? onClose() : undefined)}>
       <DialogContent className="max-w-md">
@@ -114,8 +114,8 @@ export function TubeModal({ open, onClose }: ModalProps) {
 }
 
 export function FinModal({ open, onClose }: ModalProps) {
-  const physical = useUnilabSimulationStore((s) => s.physicalInputs);
-  const selected = useUnilabSimulationStore((s) => s.selectedGeometry) as CoilGeometryItem | undefined;
+  const physical = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const selected = useCnCoilsSimulationStore((s) => s.selectedGeometry) as CoilGeometryItem | undefined;
   return (
     <Dialog open={open} onOpenChange={(o) => (!o ? onClose() : undefined)}>
       <DialogContent className="max-w-md">
@@ -157,8 +157,8 @@ export function FinModal({ open, onClose }: ModalProps) {
 }
 
 export function DistributorModal({ open, onClose }: ModalProps) {
-  const physical = useUnilabSimulationStore((s) => s.physicalInputs);
-  const selected = useUnilabSimulationStore((s) => s.selectedGeometry) as CoilGeometryItem | undefined;
+  const physical = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const selected = useCnCoilsSimulationStore((s) => s.selectedGeometry) as CoilGeometryItem | undefined;
   return (
     <Dialog open={open} onOpenChange={(o) => (!o ? onClose() : undefined)}>
       <DialogContent className="max-w-md">

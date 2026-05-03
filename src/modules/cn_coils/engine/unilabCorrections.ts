@@ -20,15 +20,15 @@ export function applyAirVelocityCorrection(
 
   if (!item) {
     warnings.push(
-      `Sem coeficientes de correção UNILAB para a geometria ${geometryId}.`,
+      `Coeficientes de correção não encontrados para esta geometria. Usando valores neutros (1.0) — resultado é estimativa.`,
     );
-    return { factor: 0, warnings, vUsedMs: airVelocityMs };
+    return { factor: 1.0, warnings, vUsedMs: airVelocityMs };
   }
   if (!Array.isArray(item.coefficients) || item.coefficients.length === 0) {
     warnings.push(
-      `Coeficientes de correção UNILAB ausentes para ${geometryId}.`,
+      `Coeficientes de correção não encontrados para esta geometria. Usando valores neutros (1.0) — resultado é estimativa.`,
     );
-    return { factor: 0, warnings, vUsedMs: airVelocityMs };
+    return { factor: 1.0, warnings, vUsedMs: airVelocityMs };
   }
   if (item.coefficients.length > 8) {
     warnings.push(
@@ -64,9 +64,9 @@ export function applyAirVelocityCorrection(
 
   if (!Number.isFinite(factor) || factor <= 0) {
     warnings.push(
-      `Fator de correção UNILAB calculado inválido (${factor}). Bloqueando simulação.`,
+      `Fator calculado inválido (${factor}). Usando fator = 1.0.`,
     );
-    return { factor: 0, warnings, vUsedMs: v };
+    return { factor: 1.0, warnings, vUsedMs: v };
   }
   return { factor, warnings, vUsedMs: v };
 }

@@ -1,13 +1,20 @@
-// Loader do catálogo de coeficientes UNILAB para o motor V2.
-// Lê /data/catalogs/unilabHeatTransferCoefficients.json e devolve estrutura
-// validada. Sem fallback silencioso: se o arquivo não existir ou estiver vazio,
-// o consumidor (motor V2) deve lançar UnilabCoefficientsMissingError no
-// primeiro acesso a uma geometria.
+/**
+ * @deprecated Motor V2 agora calcula h_ar via Wang-Chi-Chang dinamicamente.
+ * Este loader não é mais necessário. Mantido para compatibilidade.
+ */
 
-import type {
-  UnilabHeatTransferCatalog,
-  UnilabHeatTransferCoeffEntry,
-} from "../engine_v2/heatTransfer";
+interface UnilabHeatTransferCoeffEntry {
+  geometryId: string;
+  h_air_polynomial: number[];
+  vMin?: number;
+  vMax?: number;
+  finEfficiency?: number;
+  areaCorrection?: number;
+}
+
+interface UnilabHeatTransferCatalog {
+  entries: UnilabHeatTransferCoeffEntry[];
+}
 
 const CATALOG_URL = "/data/catalogs/unilabHeatTransferCoefficients.json";
 

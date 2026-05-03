@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import {
   loadRefrigerants,
   type RefrigerantOption,
@@ -32,8 +32,8 @@ function isCommercial(r: RefrigerantOption): boolean {
 }
 
 export function RefrigerantPickerModal({ open, onClose }: Props) {
-  const fluid = useUnilabSimulationStore((s) => s.fluid);
-  const setFluid = useUnilabSimulationStore((s) => s.setFluid);
+  const fluid = useCnCoilsSimulationStore((s) => s.fluid);
+  const setFluid = useCnCoilsSimulationStore((s) => s.setFluid);
 
   const [items, setItems] = useState<RefrigerantOption[]>([]);
   const [loading, setLoading] = useState(false);

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 
 export interface CompressorItem {
   id: string;
@@ -43,10 +43,10 @@ interface Props {
  * (replicado pelo motor de cálculo).
  */
 export function CompressorPickerModal({ open, onClose }: Props) {
-  const selectedCompressorId = useUnilabSimulationStore((s) => s.selectedCompressorId);
-  const compressorCount = useUnilabSimulationStore((s) => s.compressorCount);
-  const setSelectedCompressor = useUnilabSimulationStore((s) => s.setSelectedCompressor);
-  const setCompressorCount = useUnilabSimulationStore((s) => s.setCompressorCount);
+  const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
+  const compressorCount = useCnCoilsSimulationStore((s) => s.compressorCount);
+  const setSelectedCompressor = useCnCoilsSimulationStore((s) => s.setSelectedCompressor);
+  const setCompressorCount = useCnCoilsSimulationStore((s) => s.setCompressorCount);
 
   const [items, setItems] = useState<CompressorItem[]>([]);
   const [loading, setLoading] = useState(false);

@@ -1,230 +1,23 @@
-import { AlertCircle, AlertTriangle, CheckCircle2, HelpCircle, Info, Target, X, XCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import type { StructuredWarning, UnilabSimulationResult } from "../types/unilab.types";
+import { AlertCircle, AlertTriangle, Info, Target } from "lucide-react";
+import { useEffect, useState } from "react";
+import type { CnCoilsSimulationResult } from "../types/unilab.types";
+import type { StructuredWarning } from "../types/warnings";
 import { ptBR } from "../i18n/messages.ptBR";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
-const METRIC_TOOLTIPS: Record<string, string> = {
-  [ptBR.workspace.result.totalCapacity]:
-    "Q_total = Q_s + Q_l. Calculada por NTU-ε com efetividade ε = 1 - exp(-NTU × (1-Cr)) / (1 - Cr×exp(-NTU×(1-Cr))) [Incropera et al., 7ª ed., Cap. 11]",
-  [ptBR.workspace.result.sensibleCapacity]:
-    "Calor trocado sem mudança de fase. Q_s = ṁ_ar × cp_ar × ΔT_ar",
-  [ptBR.workspace.result.latentCapacity]:
-    "Calor de condensação do vapor d'água. Q_l = ṁ_ar × (w_ent - w_sai) × h_fg",
-  [ptBR.workspace.result.shf]:
-    "Fração sensível da capacidade total. SHF = Q_s / (Q_s + Q_l). Típico: 0,75–0,95 para climatização",
-  [ptBR.workspace.result.regime]:
-    "Parâmetro calculado pelo motor de simulação Unilab.",
-  [ptBR.workspace.result.airOutletTemp]:
-    "Temperatura do ar após passar pela serpentina. Calculada por NTU-ε [Incropera et al., 7ª ed., Eq. 11.32]",
-  [ptBR.workspace.result.airOutletRh]:
-    "Umidade relativa do ar na saída. Calculada via psicrometria ASHRAE",
-  [ptBR.workspace.result.faceVelocity]:
-    "Velocidade do ar na face frontal da serpentina. Recomendado: 1,5–3,5 m/s para evaporadores",
-  [ptBR.workspace.result.correctionFactor]:
-    "Fator multiplicador aplicado ao U_base para condições reais. Inclui incrustação, geometria e regime de escoamento",
-  "Área Total Externa":
-    "Soma da área de aletas + área de tubo exposto. A_total = A_fin + A_tube_bare [ASHRAE HoF 2021, Cap. 4]",
-  "Área de Aletas":
-    "Área das aletas calculada geometricamente: A_fin = N_fins × 2 × (P_t × N_rows × P_l - N_rows × π × D_o²/4)",
-  "Área de Tubo":
-    "Área do tubo entre aletas: A_tube = N_tubes × π × D_o × L_exposed",
-  "Eficiência da Aleta":
-    "Razão entre o calor real trocado pela aleta e o máximo teórico. Alumínio típico: 85–95% [Schmidt, 1949; ASHRAE HoF 2021, Cap. 4]",
-  "Razão de Superfície":
-    "A_total_externa / A_interna. Indica o grau de compacidade da serpentina. Típico: 8–20×",
-  "Correlação":
-    "Correlação de transferência de calor aplicada: aletas lisas, persianadas ou onduladas [Wang et al. 2000; Chang & Wang 1997; Kim et al. 1997]",
-  "ΔP Ar":
-    "Perda de pressão do ar através da serpentina. Calculada por polinômio empírico calibrado com dados Unilab Coils 6.0. Afeta diretamente a seleção do ventilador [Unilab Coils 6.0 — Tbl_GeometrieCondensazione]",
-  "ΔP Fluido":
-    "Perda de pressão do fluido refrigerante nos tubos. Calculada por Darcy-Weisbach com fator de atrito turbulento ou laminar [Blasius 1913; Hagen-Poiseuille]",
-};
-
-function MetricLabel({ label, className }: { label: string; className?: string }) {
-  const tip = METRIC_TOOLTIPS[label] ?? "Parâmetro calculado pelo motor de simulação Unilab.";
-  const tooltipId = `tooltip-${label.replace(/\s+/g, "-").toLowerCase()}`;
-  return (
-    <span className={`inline-flex items-center gap-1 ${className ?? ""}`}>
-      <span>{label}</span>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            tabIndex={0}
-            aria-describedby={tooltipId}
-            aria-label={`Sobre ${label}`}
-            className="inline-flex items-center justify-center text-slate-400 hover:text-slate-600 focus:outline-none"
-          >
-            <HelpCircle
-              size={12}
-              className="text-slate-400 shrink-0"
-              aria-label={`Explicação: ${label}`}
-              role="img"
-            />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent
-          id={tooltipId}
-          role="tooltip"
-          side="top"
-          className="max-w-[280px] bg-slate-900 text-white"
-        >
-          {tip}
-        </TooltipContent>
-      </Tooltip>
-    </span>
-  );
-}
-import {
-  loadUnilabCoefficients,
+  loadCnCoilsCoefficients,
   buildFanAudit,
   type FanAuditSummary,
 } from "../services/unilabCoefficientsService";
 
 interface ResultPanelProps {
-  result: UnilabSimulationResult | undefined;
-  warnings: Array<string | StructuredWarning>;
+  result: CnCoilsSimulationResult | undefined;
+  warnings: StructuredWarning[];
   onGoalSeek?: (targetKw: number) => void;
 }
 
 function fmt(n: number | undefined, digits = 2): string {
   if (n === undefined || !Number.isFinite(n)) return "—";
   return n.toFixed(digits);
-}
-
-function isStructured(w: string | StructuredWarning): w is StructuredWarning {
-  return typeof w === "object" && w !== null && "severity" in w;
-}
-
-interface BannerWarning {
-  key: string;
-  message: string;
-  severity: "warning" | "error";
-}
-
-function toBannerWarnings(
-  warnings: Array<string | StructuredWarning>,
-): BannerWarning[] {
-  return warnings
-    .map((w, i): BannerWarning | null => {
-      if (isStructured(w)) {
-        return {
-          key: `${w.code}-${i}`,
-          message: w.message ?? w.code,
-          severity: w.severity,
-        };
-      }
-      return null;
-    })
-    .filter((w): w is BannerWarning => w !== null);
-}
-
-function WarningsBanner({
-  warnings,
-}: {
-  warnings: Array<string | StructuredWarning>;
-}) {
-  const initial = useMemo(() => toBannerWarnings(warnings), [warnings]);
-  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
-  const visible = initial.filter((w) => !dismissed.has(w.key));
-  if (visible.length === 0) return null;
-
-  return (
-    <div className="space-y-2">
-      {visible.map((w) => {
-        const isError = w.severity === "error";
-        return (
-          <div
-            key={w.key}
-            className={`flex items-start gap-2 rounded-md border-l-4 p-3 text-xs ${
-              isError
-                ? "border-l-red-500 border border-red-200 bg-red-50 text-red-900"
-                : "border-l-amber-400 border border-amber-200 bg-amber-50 text-slate-800"
-            }`}
-          >
-            <AlertTriangle
-              className={`mt-0.5 h-4 w-4 flex-shrink-0 ${
-                isError ? "text-red-600" : "text-amber-600"
-              }`}
-            />
-            <span className="flex-1">{w.message}</span>
-            <button
-              type="button"
-              onClick={() =>
-                setDismissed((d) => {
-                  const next = new Set(d);
-                  next.add(w.key);
-                  return next;
-                })
-              }
-              className="ml-1 rounded p-0.5 text-slate-500 hover:bg-black/5 hover:text-slate-900"
-              aria-label="Dispensar aviso"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function ConfidenceBadge({
-  warnings,
-}: {
-  warnings: Array<string | StructuredWarning>;
-}) {
-  const structured = warnings.filter(isStructured);
-  const hasError = structured.some((w) => w.severity === "error");
-  const hasWarning = structured.some((w) => w.severity === "warning");
-  if (hasError) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700">
-        <XCircle className="h-3 w-3" /> Dados insuficientes
-      </span>
-    );
-  }
-  if (hasWarning) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800">
-        <AlertTriangle className="h-3 w-3" /> Estimativa
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
-      <CheckCircle2 className="h-3 w-3" /> Alta confiança
-    </span>
-  );
-}
-
-function PressureDropBadge({ pa }: { pa: number }) {
-  if (!Number.isFinite(pa)) return null;
-  if (pa > 150) {
-    return (
-      <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-700">
-        Alto
-      </span>
-    );
-  }
-  if (pa >= 80) {
-    return (
-      <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
-        Moderado
-      </span>
-    );
-  }
-  return (
-    <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
-      Normal
-    </span>
-  );
 }
 
 export function ResultPanel({ result, warnings, onGoalSeek }: ResultPanelProps) {
@@ -235,7 +28,6 @@ export function ResultPanel({ result, warnings, onGoalSeek }: ResultPanelProps) 
   if (!result) {
     return (
       <div className="space-y-3">
-        <WarningsBanner warnings={warnings} />
         <div className="rounded-lg border-2 border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
           {r.empty}
         </div>
@@ -252,35 +44,19 @@ export function ResultPanel({ result, warnings, onGoalSeek }: ResultPanelProps) 
     { label: r.airOutletTemp, value: `${fmt(result.airOutletTempC)} °C` },
     { label: r.airOutletRh, value: `${fmt(result.airOutletRhPercent, 1)} %` },
     { label: r.faceVelocity, value: `${fmt(result.faceVelocityMs)} m/s` },
+    { label: r.airPressureDrop, value: `${fmt(result.airPressureDropPa, 0)} Pa` },
+    { label: r.fluidPressureDrop, value: `${fmt(result.fluidPressureDropKpa)} kPa` },
     { label: r.correctionFactor, value: fmt(result.correctionFactor, 4) },
   ];
 
-  const hasGeometry =
-    result.A_total_m2 !== undefined ||
-    result.A_fin_m2 !== undefined ||
-    result.A_tube_bare_m2 !== undefined ||
-    result.eta_fin !== undefined ||
-    result.surface_ratio !== undefined ||
-    result.correlation_used !== undefined;
-
   return (
-    <TooltipProvider delayDuration={150}>
-      <div className="space-y-3">
-        <WarningsBanner warnings={warnings} />
-
+    <div className="space-y-3">
       <div className="rounded-lg border border-slate-200 bg-white p-4">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold text-slate-800">
-            Resultado da Simulação
-          </h3>
-          <ConfidenceBadge warnings={warnings} />
-        </div>
-
         {/* Capacidade Total — bidirecional (Goal Seek) */}
         <div className="mb-3 rounded border border-emerald-200 bg-emerald-50 p-2">
           <div className="mb-1 flex items-center justify-between">
             <span className="text-xs font-semibold text-emerald-900">
-              <MetricLabel label={r.totalCapacity} />
+              {r.totalCapacity}
             </span>
             <span className="text-sm font-bold text-emerald-900">
               {fmt(result.totalCapacityKw)} kW
@@ -310,128 +86,23 @@ export function ResultPanel({ result, warnings, onGoalSeek }: ResultPanelProps) 
             </div>
           )}
         </div>
-
         <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {items.map((it) => (
             <div
               key={it.label}
               className="flex items-center justify-between rounded border border-slate-100 bg-slate-50 px-3 py-2"
             >
-              <dt className="text-xs text-slate-600">
-                <MetricLabel label={it.label} />
-              </dt>
+              <dt className="text-xs text-slate-600">{it.label}</dt>
               <dd className="text-sm font-semibold text-slate-900">{it.value}</dd>
             </div>
           ))}
         </dl>
-
-        {/* Seção: Perdas de Carga */}
-        <div className="mt-4">
-          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Perdas de Carga
-          </h4>
-          <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <div className="flex items-center justify-between rounded border border-slate-100 bg-slate-50 px-3 py-2">
-              <dt className="text-xs text-slate-600">
-                <MetricLabel label="ΔP Ar" />
-              </dt>
-              <dd className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                <span>{fmt(result.airPressureDropPa, 1)} Pa</span>
-                <PressureDropBadge pa={result.airPressureDropPa} />
-              </dd>
-            </div>
-            <div className="flex items-center justify-between rounded border border-slate-100 bg-slate-50 px-3 py-2">
-              <dt className="text-xs text-slate-600">
-                <MetricLabel label="ΔP Fluido" />
-              </dt>
-              <dd className="text-sm font-semibold text-slate-900">
-                {fmt(result.fluidPressureDropKpa, 2)} kPa
-              </dd>
-            </div>
-          </dl>
-        </div>
-
-        {/* Seção: Geometria da Serpentina */}
-        {hasGeometry && (
-          <div className="mt-4">
-            <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Geometria da Serpentina
-            </h4>
-            <dl className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <GeoCell
-                label="Área Total Externa"
-                value={
-                  result.A_total_m2 !== undefined
-                    ? `${result.A_total_m2.toFixed(3)} m²`
-                    : "—"
-                }
-              />
-              <GeoCell
-                label="Área de Aletas"
-                value={
-                  result.A_fin_m2 !== undefined
-                    ? `${result.A_fin_m2.toFixed(3)} m²`
-                    : "—"
-                }
-              />
-              <GeoCell
-                label="Área de Tubo"
-                value={
-                  result.A_tube_bare_m2 !== undefined
-                    ? `${result.A_tube_bare_m2.toFixed(3)} m²`
-                    : "—"
-                }
-              />
-              <GeoCell
-                label="Eficiência da Aleta"
-                value={
-                  result.eta_fin !== undefined
-                    ? `${(result.eta_fin * 100).toFixed(1)} %`
-                    : "—"
-                }
-              />
-              <GeoCell
-                label="Razão de Superfície"
-                value={
-                  result.surface_ratio !== undefined
-                    ? `${result.surface_ratio.toFixed(1)} ×`
-                    : "—"
-                }
-              />
-              {result.correlation_used && (
-                <div className="flex items-center justify-between rounded border border-slate-100 bg-slate-50 px-3 py-2">
-                  <dt className="text-xs text-slate-600">
-                    <MetricLabel label="Correlação" />
-                  </dt>
-                  <dd>
-                    <span className="rounded bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-800">
-                      {result.correlation_used}
-                    </span>
-                  </dd>
-                </div>
-              )}
-            </dl>
-          </div>
-        )}
-
         <p className="mt-3 text-[10px] leading-relaxed text-slate-400">
           {ptBR.module.disclaimer}
         </p>
       </div>
       {warnings.length > 0 && <WarningsList warnings={warnings} />}
       {fanAudit && <FanLibraryStatus audit={fanAudit} />}
-      </div>
-    </TooltipProvider>
-  );
-}
-
-function GeoCell({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between rounded border border-slate-100 bg-slate-50 px-3 py-2">
-      <dt className="text-xs text-slate-600">
-        <MetricLabel label={label} />
-      </dt>
-      <dd className="text-sm font-semibold text-slate-900">{value}</dd>
     </div>
   );
 }
@@ -440,7 +111,7 @@ function useFanAudit(): FanAuditSummary | null {
   const [audit, setAudit] = useState<FanAuditSummary | null>(null);
   useEffect(() => {
     let cancelled = false;
-    loadUnilabCoefficients()
+    loadCnCoilsCoefficients()
       .then((b) => {
         if (!cancelled) setAudit(buildFanAudit(b));
       })
@@ -458,7 +129,7 @@ function FanLibraryStatus({ audit }: { audit: FanAuditSummary }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-3 text-[11px] text-slate-600">
       <div className="mb-1 font-semibold text-slate-700">
-        Biblioteca de ventiladores UNILAB
+        Biblioteca de ventiladores CN Coils
       </div>
       <ul className="space-y-0.5">
         <li>
@@ -476,30 +147,14 @@ function FanLibraryStatus({ audit }: { audit: FanAuditSummary }) {
   );
 }
 
-interface LeveledWarning {
-  text: string;
-  level?: "1" | "2" | "3" | string | null;
-}
-
-function normalize(w: string | StructuredWarning): LeveledWarning {
-  if (typeof w === "string") return { text: w, level: "2" };
-  return {
-    text: w.message ?? w.code,
-    level: w.severity === "error" ? "3" : "2",
-  };
-}
-
-function WarningsList({
-  warnings,
-}: {
-  warnings: Array<string | StructuredWarning>;
-}) {
-  const items = warnings.map(normalize);
-  const hasError = items.some((w) => w.level === "3");
+function WarningsList({ warnings }: { warnings: StructuredWarning[] }) {
+  const hasError = warnings.some((w) => w.severity === "error");
   return (
     <div
       className={`rounded-lg border p-3 ${
-        hasError ? "border-red-200 bg-red-50" : "border-amber-200 bg-amber-50"
+        hasError
+          ? "border-red-200 bg-red-50"
+          : "border-amber-200 bg-amber-50"
       }`}
     >
       <div
@@ -511,19 +166,13 @@ function WarningsList({
         Avisos
       </div>
       <ul className="space-y-1 text-xs">
-        {items.map((w, i) => {
-          const lvl = w.level ?? "2";
-          const Icon = lvl === "3" ? AlertCircle : lvl === "1" ? Info : AlertTriangle;
-          const cls =
-            lvl === "3"
-              ? "text-red-700"
-              : lvl === "1"
-                ? "text-slate-600"
-                : "text-amber-800";
+        {warnings.map((w, i) => {
+          const Icon = w.severity === "error" ? AlertCircle : AlertTriangle;
+          const cls = w.severity === "error" ? "text-red-700" : "text-amber-800";
           return (
             <li key={i} className={`flex items-start gap-1.5 ${cls}`}>
               <Icon className="mt-0.5 h-3 w-3 flex-shrink-0" />
-              <span>{w.text}</span>
+              <span>{w.message ?? w.code}</span>
             </li>
           );
         })}

@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { X } from "lucide-react";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import {
   MATERIAL_LABELS,
   formatBRL,
@@ -24,22 +24,13 @@ const MATERIAL_KEYS: MaterialKey[] = [
  * Atualiza `materialPrices` no Zustand. O custo é recalculado a cada mudança.
  */
 export function MaterialCostConfigModal({ open, onClose }: MaterialCostConfigModalProps) {
-  const prices = useUnilabSimulationStore((s) => s.materialPrices);
-  const setPrice = useUnilabSimulationStore((s) => s.setMaterialPrice);
-  const tubeKey = useUnilabSimulationStore((s) => s.tubeMaterialKey);
-  const finKey = useUnilabSimulationStore((s) => s.finMaterialKey);
-  const setTubeKey = useUnilabSimulationStore((s) => s.setTubeMaterialKey);
-  const setFinKey = useUnilabSimulationStore((s) => s.setFinMaterialKey);
-  const cost = useUnilabSimulationStore((s) => s.calculatedCost);
-  const bdiPercent = useUnilabSimulationStore((s) => s.bdiPercent);
-  const setBdiPercent = useUnilabSimulationStore((s) => s.setBdiPercent);
-
-  // Custo direto reverso: total = direto * (1 + BDI/100)
-  const { directCost, bdiAmount } = useMemo(() => {
-    const factor = 1 + (bdiPercent || 0) / 100;
-    const direct = factor > 0 ? cost / factor : cost;
-    return { directCost: direct, bdiAmount: cost - direct };
-  }, [cost, bdiPercent]);
+  const prices = useCnCoilsSimulationStore((s) => s.materialPrices);
+  const setPrice = useCnCoilsSimulationStore((s) => s.setMaterialPrice);
+  const tubeKey = useCnCoilsSimulationStore((s) => s.tubeMaterialKey);
+  const finKey = useCnCoilsSimulationStore((s) => s.finMaterialKey);
+  const setTubeKey = useCnCoilsSimulationStore((s) => s.setTubeMaterialKey);
+  const setFinKey = useCnCoilsSimulationStore((s) => s.setFinMaterialKey);
+  const cost = useCnCoilsSimulationStore((s) => s.calculatedCost);
 
   useEffect(() => {
     if (!open) return;
@@ -119,58 +110,12 @@ export function MaterialCostConfigModal({ open, onClose }: MaterialCostConfigMod
             </div>
           </div>
 
-          {/* BDI — Mão de obra, encargos, despesas indiretas e lucro */}
-          <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
-            <div className="mb-2 flex items-center justify-between">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                BDI — Mão de obra & indiretos
-              </div>
-              <span className="text-[10px] text-slate-500">
-                Aplicado sobre o custo direto
-              </span>
-            </div>
-            <div className="grid grid-cols-[1fr_120px] items-center gap-2">
-              <label className="text-xs text-slate-700">
-                BDI (%)
-              </label>
-              <div className="flex items-center gap-1">
-                <input
-                  type="number"
-                  value={bdiPercent}
-                  step={0.5}
-                  min={0}
-                  onChange={(e) => {
-                    const n = parseFloat(e.target.value);
-                    setBdiPercent(Number.isFinite(n) ? n : 0);
-                  }}
-                  className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-right text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9]"
-                />
-                <span className="text-[11px] text-slate-500">%</span>
-              </div>
-            </div>
-          </div>
-
           <div className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
-              Composição do Custo
+              Custo Total Estimado
             </div>
-            <div className="mt-1 space-y-0.5 text-[11px] text-emerald-900">
-              <div className="flex justify-between">
-                <span>Custo direto (materiais)</span>
-                <span className="font-mono">{formatBRL(directCost)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>BDI ({bdiPercent.toFixed(1)}%)</span>
-                <span className="font-mono">{formatBRL(bdiAmount)}</span>
-              </div>
-            </div>
-            <div className="mt-1 flex items-center justify-between border-t border-emerald-200 pt-1">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
-                Total estimado
-              </span>
-              <span className="font-mono text-base font-bold text-emerald-900">
-                {formatBRL(cost)}
-              </span>
+            <div className="font-mono text-base font-bold text-emerald-900">
+              {formatBRL(cost)}
             </div>
           </div>
         </div>
