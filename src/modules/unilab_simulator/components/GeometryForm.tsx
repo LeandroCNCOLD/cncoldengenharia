@@ -170,6 +170,52 @@ export function GeometryForm({
           </div>
         </fieldset>
       )}
+      {/* Tipo de aleta + parâmetros condicionais */}
+      <div className="space-y-3">
+        <SelectField
+          label="Tipo de Aleta"
+          value={physical.finType ?? "plain"}
+          options={[
+            { value: "plain", label: "Lisa (Plain)" },
+            { value: "wavy", label: "Ondulada (Wavy)" },
+            { value: "louver", label: "Persianada (Louver)" },
+          ]}
+          onChange={(v) =>
+            setPhysical({
+              finType: (v ?? "plain") as "plain" | "wavy" | "louver",
+            })
+          }
+          disabled={disabled}
+        />
+        {physical.finType === "louver" && (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <NumberField
+              label="Passo do Louver (L_p)"
+              unit="mm"
+              value={physical.L_p ?? 1.4}
+              onChange={(v) => setPhysical({ L_p: v })}
+              disabled={disabled}
+            />
+            <NumberField
+              label="Ângulo do Louver (θ_L)"
+              unit="°"
+              value={physical.theta_L ?? 27}
+              onChange={(v) => setPhysical({ theta_L: v })}
+              disabled={disabled}
+            />
+          </div>
+        )}
+        {physical.finType === "wavy" && (
+          <NumberField
+            label="Amplitude da Ondulação (A_w)"
+            unit="mm"
+            value={physical.A_w ?? 1.5}
+            onChange={(v) => setPhysical({ A_w: v })}
+            disabled={disabled}
+          />
+        )}
+      </div>
+
       {/* Campos complementares manuais */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <NumberField
