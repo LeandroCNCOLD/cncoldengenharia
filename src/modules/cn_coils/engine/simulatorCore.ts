@@ -60,6 +60,7 @@ import { CP_DRY_AIR_KJ_KG_K, m3hToM3s, mmToM, safeDivide, clamp } from "./units"
 import { calcCoilEffectiveArea, calcFinEfficiency, calcEffectiveArea } from "./effectiveArea";
 import { getRefrigerantProps } from "../services/refrigerantProperties";
 import { getRefrigerantLiquidProps } from "../engine_v2/refrigerantProps";
+import { computeFluidVelocity } from "../utils/coilDerivedMetrics";
 
 export interface RunSimulationParams {
   physical: CnCoilsPhysicalInputs;
@@ -358,6 +359,14 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
     qFinalW / 1000,
     Math.max(refrigerantLiquidProps.h_fg_kJkg, 1),
   );
+  const fluidVelocityMs = computeFluidVelocity({
+    refrigerant: thermo.refrigerantId,
+    T_evap_C: surfaceTempC,
+    Q_total_W: qFinalW,
+    nCircuits: physical.circuits,
+    tubeID_m: mmToM(physical.tubeInnerDiameterMm),
+    massFlow_kg_s: estimatedMassFlowKgS,
+  });
   // Comprimento total estimado de tubo: rows · comprimento aletado / circuitos
   const totalTubeLengthM =
     physical.rows * mmToM(physical.finnedLengthMm);
@@ -393,6 +402,8 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
     faceAreaM2,
     faceVelocityMs,
     airMassFlowKgS,
+    fluidVelocityMs: Number.isFinite(fluidVelocityMs) ? fluidVelocityMs : undefined,
+    fluidMassFlowKgS: estimatedMassFlowKgS,
     regime,
     lmtdK: lmtdK > 0 ? lmtdK : undefined,
     ntu: ntu > 0 ? ntu : undefined,

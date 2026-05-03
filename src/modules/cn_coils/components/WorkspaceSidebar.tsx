@@ -1,5 +1,5 @@
 import { Calculator, Printer, RotateCcw, Save, Settings2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import { getApplicationConfig } from "../config/applicationConfig";
 import { formatBRL } from "../engine/costCalculator";
@@ -12,6 +12,16 @@ import {
   DistributorModal,
 } from "./GeometryDerivedModals";
 import type { UnilabComponentType } from "../types/unilab.types";
+import {
+  calcCoilDerivedDimensions,
+  calcCoilDimensions,
+  validateFanFit,
+} from "../utils/coilDerivedMetrics";
+import {
+  loadCnCoilsCoefficients,
+  listUsableAxialFans,
+  type AxialFanRecord,
+} from "../services/unilabCoefficientsService";
 
 type ModalKey = "geometry" | "tube" | "fin" | "distributor" | null;
 
@@ -62,6 +72,7 @@ export function WorkspaceSidebar({
   const foulingFactorAir = useCnCoilsSimulationStore((s) => s.foulingFactorAir);
   const fanCount = useCnCoilsSimulationStore((s) => s.fanCount);
   const fanRole = useCnCoilsSimulationStore((s) => s.fanRole);
+  const selectedFanId = useCnCoilsSimulationStore((s) => s.selectedFanId);
   const fluid = useCnCoilsSimulationStore((s) => s.fluid);
   const fluidMassFlow_kg_h = useCnCoilsSimulationStore((s) => s.fluidMassFlow_kg_h);
   const fluidOperatingTemp_C = useCnCoilsSimulationStore((s) => s.fluidOperatingTemp_C);
@@ -75,6 +86,54 @@ export function WorkspaceSidebar({
 
   const [costModalOpen, setCostModalOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalKey>(null);
+  const [fans, setFans] = useState<Array<{ id: string; diameter_mm?: number; axial?: AxialFanRecord }>>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadCnCoilsCoefficients()
+      .then((bundle) => {
+        if (cancelled) return;
+        setFans(
+          listUsableAxialFans(bundle).map((fan) => ({
+            id: `axial-${fan.fanType}-${fan.idFanModel}-${fan.source}`,
+            axial: fan,
+            diameter_mm: inferFanDiameterMm(fan.model),
+          })),
+        );
+      })
+      .catch(() => {
+        if (!cancelled) setFans([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const nTubesPerRow =
+    physicalInputs.tubesPerRow ??
+    (physicalInputs.finnedHeightMm && physicalInputs.tubePitchTransverseMm
+      ? Math.round(physicalInputs.finnedHeightMm / physicalInputs.tubePitchTransverseMm)
+      : 0);
+  const derived = calcCoilDerivedDimensions({
+    nTubesPerRow,
+    tubePitchTransverse_mm: physicalInputs.tubePitchTransverseMm ?? 0,
+    nRows: physicalInputs.rows ?? 0,
+    tubePitchLongitudinal_mm: physicalInputs.tubePitchLongitudinalMm ?? 0,
+    lengthMm: physicalInputs.finnedLengthMm ?? 0,
+    refrigerant: fluid,
+    T_evap_C: fluidOperatingTemp_C,
+    tubeID_m: (physicalInputs.tubeInnerDiameterMm ?? 0) / 1000,
+    nCircuits: physicalInputs.circuits ?? 0,
+  });
+  const selectedFan = fans.find((f) => f.id === selectedFanId);
+  const fanDiameterMm = selectedFan?.diameter_mm ?? 0;
+  const fanFit = validateFanFit({
+    fanD: fanDiameterMm,
+    altura_mm: derived.altura_mm,
+    largura_mm: derived.largura_mm,
+    nFans: fanCount,
+  });
+  const hasFanError = fanFit.fanWarnings.some((w) => w.level === "error");
 
   const buildSnapshot = (): ReportSnapshot => ({
     componentLabel: cfg.shortLabel,
@@ -261,6 +320,37 @@ export function WorkspaceSidebar({
         </div>
       </div>
 
+      <SidebarInfoCard title="Dimensões do Aletado">
+        <SidebarMetricLine label="Altura" value={`${derived.altura_mm.toFixed(0)} mm`} />
+        <SidebarMetricLine label="Largura" value={`${derived.largura_mm.toFixed(0)} mm`} />
+        <SidebarMetricLine label="Profund." value={`${derived.prof_mm.toFixed(0)} mm`} />
+      </SidebarInfoCard>
+
+      <SidebarInfoCard title="Volume e Carga">
+        <SidebarMetricLine label="Volume interno" value={`${derived.volumeInterno_L.toFixed(2)} L`} />
+        <SidebarMetricLine label="Carga refrig." value={`${derived.cargaRefrigerante_kg.toFixed(2)} kg`} />
+      </SidebarInfoCard>
+
+      <div className={`rounded border bg-white ${hasFanError ? "border-red-500 bg-red-50" : "border-emerald-500 bg-emerald-50"}`}>
+        <div className="border-b border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
+          Gabinete Sanitário
+        </div>
+        <div className="space-y-1 p-1.5 text-[10px] text-slate-700">
+          <div className="rounded bg-white/70 px-1.5 py-1 text-center font-mono font-semibold text-slate-900">
+            {derived.gabinete_largura_mm.toFixed(0)} × {derived.gabinete_altura_mm.toFixed(0)} × {derived.gabinete_prof_mm.toFixed(0)} mm
+          </div>
+          {fanFit.fanWarnings.map((w, i) => (
+            <div
+              key={`${w.level}-${i}`}
+              className={`rounded px-1.5 py-1 ${w.level === "error" ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800"}`}
+            >
+              {w.level === "error" ? "⚠️ " : "✅ "}
+              {w.msg}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Custo da bateria (Etapa 3.6) */}
       <div className="rounded border border-slate-300 bg-white">
         <div className="flex items-center justify-between border-b border-slate-200 bg-slate-100 px-1.5 py-0.5">
@@ -349,4 +439,39 @@ export function WorkspaceSidebar({
       />
     </aside>
   );
+}
+
+function SidebarInfoCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded border border-slate-300 bg-white">
+      <div className="border-b border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
+        {title}
+      </div>
+      <div className="space-y-1 p-1.5 text-[10px] text-slate-700">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function SidebarMetricLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-slate-500">{label}</span>
+      <span className="font-mono font-semibold text-slate-800">{value}</span>
+    </div>
+  );
+}
+
+function inferFanDiameterMm(model: string): number | undefined {
+  const match = model.match(/(?:^|[^0-9])(\d{3,4})(?:[^0-9]|$)/);
+  if (!match) return undefined;
+  const diameter = Number(match[1]);
+  return Number.isFinite(diameter) && diameter >= 200 ? diameter : undefined;
 }

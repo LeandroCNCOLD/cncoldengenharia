@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { CnCoilsSimulationResult } from "../types/unilab.types";
 import type { StructuredWarning } from "../types/warnings";
 import { ptBR } from "../i18n/messages.ptBR";
+import { convertPower, type PowerUnit } from "@/utils/unitConversions";
 import {
   loadCnCoilsCoefficients,
   buildFanAudit,
@@ -24,6 +25,7 @@ export function ResultPanel({ result, warnings, onGoalSeek }: ResultPanelProps) 
   const r = ptBR.workspace.result;
   const fanAudit = useFanAudit();
   const [targetKw, setTargetKw] = useState<string>("");
+  const [powerUnit, setPowerUnit] = useState<PowerUnit>("kW");
 
   if (!result) {
     return (
@@ -36,9 +38,13 @@ export function ResultPanel({ result, warnings, onGoalSeek }: ResultPanelProps) 
     );
   }
 
+  const powerDigits = powerUnit === "kW" || powerUnit === "TR" ? 2 : 0;
+  const formatPower = (kw: number) =>
+    `${fmt(convertPower(kw * 1000, powerUnit), powerDigits)} ${powerUnit}`;
+
   const items: Array<{ label: string; value: string }> = [
-    { label: r.sensibleCapacity, value: `${fmt(result.sensibleCapacityKw)} kW` },
-    { label: r.latentCapacity, value: `${fmt(result.latentCapacityKw)} kW` },
+    { label: r.sensibleCapacity, value: formatPower(result.sensibleCapacityKw) },
+    { label: r.latentCapacity, value: formatPower(result.latentCapacityKw) },
     { label: r.shf, value: fmt(result.shf, 3) },
     { label: r.regime, value: result.regime },
     { label: r.airOutletTemp, value: `${fmt(result.airOutletTempC)} °C` },
@@ -58,9 +64,22 @@ export function ResultPanel({ result, warnings, onGoalSeek }: ResultPanelProps) 
             <span className="text-xs font-semibold text-emerald-900">
               {r.totalCapacity}
             </span>
-            <span className="text-sm font-bold text-emerald-900">
-              {fmt(result.totalCapacityKw)} kW
-            </span>
+            <div className="flex items-center gap-2">
+              <select
+                value={powerUnit}
+                onChange={(e) => setPowerUnit(e.target.value as PowerUnit)}
+                className="rounded border border-emerald-300 bg-white px-1 py-0.5 text-[10px] text-emerald-900"
+              >
+                {(["W", "kW", "kcal/h", "BTU/h", "TR"] as PowerUnit[]).map((u) => (
+                  <option key={u} value={u}>
+                    {u}
+                  </option>
+                ))}
+              </select>
+              <span className="text-sm font-bold text-emerald-900">
+                {formatPower(result.totalCapacityKw)}
+              </span>
+            </div>
           </div>
           {onGoalSeek && (
             <div className="flex items-center gap-1.5">

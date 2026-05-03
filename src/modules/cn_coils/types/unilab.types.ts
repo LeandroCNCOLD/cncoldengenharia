@@ -128,6 +128,9 @@ export interface CnCoilsSimulationResult {
   faceAreaM2: number;
   faceVelocityMs: number;
   airMassFlowKgS: number;
+  fluidVelocityMs?: number;
+  fluidMassFlowKgS?: number;
+  fluidMassFlowKgH?: number;
   regime: "DRY" | "WET";
   lmtdK?: number;
   ntu?: number;

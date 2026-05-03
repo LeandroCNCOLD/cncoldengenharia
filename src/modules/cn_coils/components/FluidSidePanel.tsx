@@ -209,6 +209,18 @@ export function FluidSidePanel({
       `${pairedTempLabel} é obrigatória quando há compressor selecionado.`,
     );
   }
+  const fluidSafetyFactor = 1 + (Number.isFinite(errorFactorPercent) ? errorFactorPercent : 0) / 100;
+  const resultMassFlowKgH =
+    result?.fluidMassFlowKgS !== undefined ? result.fluidMassFlowKgS * 3600 : undefined;
+  const displayedMassFlowKgH =
+    resultMassFlowKgH !== undefined && resultMassFlowKgH > 0
+      ? resultMassFlowKgH * fluidSafetyFactor
+      : fluidMassFlow_kg_h * fluidSafetyFactor;
+  const displayedFluidDpKpa =
+    result?.fluidPressureDropKpa !== undefined
+      ? result.fluidPressureDropKpa * fluidSafetyFactor
+      : undefined;
+  const fluidVelocityMs = result?.fluidVelocityMs;
 
   return (
     <>
@@ -288,8 +300,8 @@ export function FluidSidePanel({
               <input
                 type="number"
                 value={
-                  Number.isFinite(fluidMassFlow_kg_h)
-                    ? massFlowConv.fromCanonical(fluidMassFlow_kg_h, uMassFlow)
+                  Number.isFinite(displayedMassFlowKgH)
+                    ? massFlowConv.fromCanonical(displayedMassFlowKgH, uMassFlow)
                     : 0
                 }
                 step="any"
@@ -480,7 +492,7 @@ export function FluidSidePanel({
             value={
               result?.fluidPressureDropKpa !== undefined
                 ? pressureConv
-                    .fromCanonical(result.fluidPressureDropKpa * 1000, uPdrop)
+                    .fromCanonical((displayedFluidDpKpa ?? 0) * 1000, uPdrop)
                     .toFixed(uPdrop === "Pa" ? 0 : 3)
                 : "---"
             }
@@ -512,11 +524,10 @@ export function FluidSidePanel({
                 .fluidVelocityMs !== undefined
                 ? velocityConv
                     .fromCanonical(
-                      (result as unknown as { fluidVelocityMs: number })
-                        .fluidVelocityMs,
+                      fluidVelocityMs ?? 0,
                       uVel,
                     )
-                    .toFixed(2)
+                    .toFixed(1)
                 : "---"
             }
           />

@@ -28,7 +28,7 @@ export function useCnCoilsSimulation(catalogs: UseCnCoilsSimulationParams) {
   const clearResult = useCnCoilsSimulationStore((s) => s.clearResult);
 
   const run = useCallback(() => {
-    const { physicalInputs, thermoInputs, errorFactorPercent } =
+    const { physicalInputs, thermoInputs } =
       useCnCoilsSimulationStore.getState();
 
     setIsSimulating(true);
@@ -62,13 +62,7 @@ export function useCnCoilsSimulation(catalogs: UseCnCoilsSimulationParams) {
         airFrictionFactor: Number.isFinite(airFr) && airFr > 0 ? airFr : 1.0,
       });
 
-      const k = 1 + (Number.isFinite(errorFactorPercent) ? errorFactorPercent : 0) / 100;
-      const result = {
-        ...rawResult,
-        totalCapacityKw: rawResult.totalCapacityKw * k,
-        sensibleCapacityKw: rawResult.sensibleCapacityKw * k,
-        latentCapacityKw: rawResult.latentCapacityKw * k,
-      };
+      const result = rawResult;
 
       const warnings: StructuredWarning[] = [];
 

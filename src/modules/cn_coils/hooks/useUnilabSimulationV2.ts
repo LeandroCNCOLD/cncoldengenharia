@@ -73,15 +73,8 @@ export function useCnCoilsSimulationV2(params: UseCnCoilsSimulationV2Params) {
         finCorrectionFactor: Number.isFinite(finCorr) && finCorr > 0 ? finCorr : 1.0,
         h_fg_kJkg: fluidData.h_fg_kJkg,
       });
-      const k =
-        1 +
-        (Number.isFinite(state.errorFactorPercent) ? state.errorFactorPercent : 0) /
-          100;
       const result = {
         ...rawResult,
-        totalCapacityKw: rawResult.totalCapacityKw * k,
-        sensibleCapacityKw: rawResult.sensibleCapacityKw * k,
-        latentCapacityKw: rawResult.latentCapacityKw * k,
       };
       const warnings: StructuredWarning[] = [
         ...fluidData.warnings.map((msg) => ({ code: "FLUID_FALLBACK" as const, message: msg, severity: "warning" as const })),

@@ -148,14 +148,24 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
   // Static pressure at current airflow for the selected axial fan (Pa)
   const selectedFan = fans.find((f) => f.id === selectedFanId);
   const fanStaticPressurePa = useMemo(() => {
-    if (!selectedFan?.axial || !(airFlow_m3h > 0)) return null;
-    return evaluateFanCurve(selectedFan.axial, airFlow_m3h);
-  }, [selectedFan, airFlow_m3h]);
+    const fromCurve =
+      selectedFan?.axial && airFlow_m3h > 0
+        ? evaluateFanCurve(selectedFan.axial, airFlow_m3h)
+        : null;
+    return fromCurve ?? result?.airPressureDropPa ?? null;
+  }, [selectedFan, airFlow_m3h, result?.airPressureDropPa]);
 
   // ---- valores convertidos para a unidade exibida ----
-  const totalCapW = result?.totalCapacityKw !== undefined ? result.totalCapacityKw * 1000 : undefined;
-  const sensCapW = result?.sensibleCapacityKw !== undefined ? result.sensibleCapacityKw * 1000 : undefined;
-  const latCapW = result?.latentCapacityKw !== undefined ? result.latentCapacityKw * 1000 : undefined;
+  const airSafetyFactor = 1 + (Number.isFinite(errorFactorPercent) ? errorFactorPercent : 0) / 100;
+  const totalCapW = result?.totalCapacityKw !== undefined ? result.totalCapacityKw * 1000 * airSafetyFactor : undefined;
+  const sensCapW = result?.sensibleCapacityKw !== undefined ? result.sensibleCapacityKw * 1000 * airSafetyFactor : undefined;
+  const latCapW = result?.latentCapacityKw !== undefined ? result.latentCapacityKw * 1000 * airSafetyFactor : undefined;
+  const displayedAirPressureDropPa = result?.airPressureDropPa !== undefined
+    ? result.airPressureDropPa * airSafetyFactor
+    : undefined;
+  const displayedFanStaticPressurePa = fanStaticPressurePa !== null && fanStaticPressurePa !== undefined
+    ? fanStaticPressurePa * airSafetyFactor
+    : undefined;
 
   const obtCapTotal = useMemo(
     () => (totalCapW === undefined ? "---" : capacityConv.fromCanonical(totalCapW, uCapTotal).toFixed(uCapTotal === "TR" || uCapTotal === "kW" ? 3 : 1)),
@@ -181,8 +191,8 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
       ? tempConv.fromCanonical(result.airOutletTempC, uTempOut).toFixed(1)
       : "---";
   const obtPdrop =
-    result?.airPressureDropPa !== undefined
-      ? pressureConv.fromCanonical(result.airPressureDropPa, uPdrop).toFixed(uPdrop === "Pa" ? 0 : 3)
+    displayedAirPressureDropPa !== undefined
+      ? pressureConv.fromCanonical(displayedAirPressureDropPa, uPdrop).toFixed(uPdrop === "Pa" ? 0 : 3)
       : "---";
 
   // Capacidade alvo (modo Desenho) — input editável na unidade selecionada
@@ -315,12 +325,14 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
 
         <Row
           label="Pressão estática (ventilador)"
-          unitNode={<UnitText text="Pa" />}
+          unitNode={<UnitSelect value={uPdrop} onChange={setUPdrop} options={PRESSURE_UNITS} />}
           input={<DisabledInput />}
           obtained={
-            fanStaticPressurePa === null || fanStaticPressurePa === undefined
+            displayedFanStaticPressurePa === null || displayedFanStaticPressurePa === undefined
               ? "---"
-              : fanStaticPressurePa.toFixed(0)
+              : pressureConv
+                  .fromCanonical(displayedFanStaticPressurePa, uPdrop)
+                  .toFixed(uPdrop === "Pa" ? 0 : 3)
           }
         />
 

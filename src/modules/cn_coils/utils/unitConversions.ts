@@ -137,3 +137,16 @@ export const deltaTConv = {
     return valueK;
   },
 };
+
+export type PowerDisplayUnit = "W" | "kW" | "kcal/h" | "BTU/h" | "TR";
+
+export function convertPower(W: number, unit: PowerDisplayUnit): number {
+  const factors: Record<PowerDisplayUnit, number> = {
+    W: 1,
+    kW: 0.001,
+    "kcal/h": 0.86,
+    "BTU/h": 3.412,
+    TR: 1 / 3517.2,
+  };
+  return W * factors[unit];
+}
