@@ -365,9 +365,10 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
               value={errorFactorPercent}
               onChange={setErrorFactorPercent}
               step={0.1}
+              placeholder="0 (sem margem)"
             />
           }
-          obtained="---"
+          obtained="0%=sem margem | 10%=+10%"
         />
 
         <Row
@@ -433,12 +434,14 @@ function NumberCell({
   min,
   max,
   step,
+  placeholder,
 }: {
   value: number;
   onChange: (v: number) => void;
   min?: number;
   max?: number;
   step?: number;
+  placeholder?: string;
 }) {
   return (
     <input
@@ -447,6 +450,7 @@ function NumberCell({
       min={min}
       max={max}
       step={step ?? "any"}
+      placeholder={placeholder}
       onChange={(e) => {
         const n = parseFloat(e.target.value);
         onChange(Number.isFinite(n) ? n : 0);

@@ -64,9 +64,9 @@ export function applyAirVelocityCorrection(
 
   if (!Number.isFinite(factor) || factor <= 0) {
     warnings.push(
-      `Fator de correção UNILAB calculado inválido (${factor}). Bloqueando simulação.`,
+      `Fator calculado inválido (${factor}). Usando fator = 1.0.`,
     );
-    return { factor: 0, warnings, vUsedMs: v };
+    return { factor: 1.0, warnings, vUsedMs: v };
   }
   return { factor, warnings, vUsedMs: v };
 }

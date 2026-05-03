@@ -494,7 +494,9 @@ export function FluidSidePanel({
             onChange={setErrorFactorPercent}
             step={0.1}
             disabled={disabled}
+            placeholder="0 (sem margem)"
           />
+          <span className="text-[10px] text-slate-400 mt-0.5">0% = sem margem | 10% = capacidade +10%</span>
         </FieldRow>
 
         {/* 8) Velocidade do Fluido (resultado) */}
@@ -579,6 +581,7 @@ function NumInput({
   max,
   step,
   disabled,
+  placeholder,
 }: {
   value: number;
   onChange: (v: number) => void;
@@ -586,6 +589,7 @@ function NumInput({
   max?: number;
   step?: number;
   disabled?: boolean;
+  placeholder?: string;
 }) {
   return (
     <input
@@ -595,6 +599,7 @@ function NumInput({
       max={max}
       step={step ?? "any"}
       disabled={disabled}
+      placeholder={placeholder}
       onChange={(e) => {
         const n = parseFloat(e.target.value);
         onChange(Number.isFinite(n) ? n : 0);
