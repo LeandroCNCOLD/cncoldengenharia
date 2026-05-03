@@ -10,24 +10,51 @@ export interface CorrectionResult {
   vUsedMs: number;
 }
 
+function selectCorrectionEntry(
+  entries: AirVelocityCorrectionItem[],
+  airVelocityMs: number,
+): AirVelocityCorrectionItem | undefined {
+  const inRange = entries.find(
+    (entry) =>
+      Number.isFinite(entry.vMin) &&
+      Number.isFinite(entry.vMax) &&
+      airVelocityMs >= entry.vMin &&
+      airVelocityMs <= entry.vMax,
+  );
+  if (inRange) return inRange;
+
+  return entries
+    .filter((entry) => Number.isFinite(entry.vMin) && Number.isFinite(entry.vMax))
+    .sort((a, b) => {
+      const distanceA =
+        airVelocityMs < a.vMin ? a.vMin - airVelocityMs : airVelocityMs - a.vMax;
+      const distanceB =
+        airVelocityMs < b.vMin ? b.vMin - airVelocityMs : airVelocityMs - b.vMax;
+      return distanceA - distanceB;
+    })[0] ?? entries[0];
+}
+
 export function applyAirVelocityCorrection(
   geometryId: string,
   airVelocityMs: number,
   catalog: AirVelocityCorrectionItem[],
 ): CorrectionResult {
   const warnings: string[] = [];
-  const item = catalog.find((c) => c.geometryId === geometryId);
+  let entries = catalog.filter((c) => c.geometryId === geometryId);
 
+  if (entries.length === 0) {
+    // O catálogo UNILAB original agrupa todas as geometrias ItipoB=1 sob
+    // geometryId "1". Esse é o fallback esperado, não uma condição de alerta.
+    entries = catalog.filter((c) => c.geometryId === "1");
+  }
+
+  const item = selectCorrectionEntry(entries, airVelocityMs);
   if (!item) {
-    warnings.push(
-      `Coeficientes de correção não encontrados para esta geometria. Usando valores neutros (1.0) — resultado é estimativa.`,
-    );
+    warnings.push("Catálogo de coeficientes UNILAB ausente ou vazio.");
     return { factor: 1.0, warnings, vUsedMs: airVelocityMs };
   }
   if (!Array.isArray(item.coefficients) || item.coefficients.length === 0) {
-    warnings.push(
-      `Coeficientes de correção não encontrados para esta geometria. Usando valores neutros (1.0) — resultado é estimativa.`,
-    );
+    warnings.push("Catálogo de coeficientes UNILAB ausente ou vazio.");
     return { factor: 1.0, warnings, vUsedMs: airVelocityMs };
   }
   if (item.coefficients.length > 8) {
@@ -50,8 +77,9 @@ export function applyAirVelocityCorrection(
     v = item.vMax;
   }
 
-  // Σ a_i · V^i, ignorando coeficientes com valor zero (escopo § 12).
-  const coeffs = item.coefficients.slice(0, 8);
+  // Σ a_i · V^i. O export UNILAB traz 7 coeficientes polinomiais e uma coluna
+  // extra final próxima de 1; usá-la como termo V^7 explode o fator.
+  const coeffs = item.coefficients.slice(0, 7);
   let factor = 0;
   let powerOfV = 1;
   for (let i = 0; i < coeffs.length; i++) {
