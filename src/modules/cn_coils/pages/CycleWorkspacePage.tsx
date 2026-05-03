@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useCycleSimulation } from "../hooks/useCycleSimulation";
 import { useFrostAnalysis } from "../hooks/useFrostAnalysis";
 import { useUncertaintyAnalysis } from "../hooks/useUncertaintyAnalysis";
