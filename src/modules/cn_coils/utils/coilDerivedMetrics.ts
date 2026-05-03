@@ -45,36 +45,52 @@ export function calcCoilDimensions(params: {
 }
 
 export function calcTubeLengthPerCircuitM(params: {
+  nTubesPerRow: number;
   nRows: number;
-  tubePitchLongitudinal_mm: number;
-  lengthMm: number;
+  nCircuits: number;
+  L_fin_m: number;
 }): number {
-  return params.nRows * (params.tubePitchLongitudinal_mm / 1000) + params.lengthMm / 1000;
+  if (
+    params.nTubesPerRow <= 0 ||
+    params.nRows <= 0 ||
+    params.nCircuits <= 0 ||
+    params.L_fin_m <= 0
+  ) {
+    return 0;
+  }
+  const tubesPerCircuitPerRow = params.nTubesPerRow / params.nCircuits;
+  return params.L_fin_m * params.nRows * tubesPerCircuitPerRow;
 }
 
 export function calcInternalTubeVolumeM3(params: {
   tubeID_m: number;
+  nTubesPerRow: number;
+  nRows: number;
   nCircuits: number;
-  L_per_circuit_m: number;
+  L_fin_m: number;
 }): number {
   const area = Math.PI * Math.pow(params.tubeID_m / 2, 2);
-  return area * params.L_per_circuit_m * params.nCircuits;
+  const L_per_circuit_m = calcTubeLengthPerCircuitM(params);
+  return area * L_per_circuit_m * params.nCircuits;
 }
 
 export function calcRefrigerantCharge(params: {
   refrigerant: string;
   T_evap_C: number;
   tubeID_m: number;
+  nTubesPerRow: number;
+  nRows: number;
   nCircuits: number;
-  L_per_circuit_m: number;
-  liquidFillFraction?: number;
-}): { kg: number; volume_L: number; warnings: string[] } {
+  L_fin_m: number;
+}): { kg: number; L: number; volume_L: number; L_per_circuit_m: number; warnings: string[] } {
   const props = getRefrigerantLiquidProps(params.refrigerant, params.T_evap_C);
   const volumeM3 = calcInternalTubeVolumeM3(params);
-  const fill = params.liquidFillFraction ?? 0.18;
+  const volumeL = volumeM3 * 1000;
   return {
-    kg: volumeM3 * props.rho_kg_m3 * fill,
-    volume_L: volumeM3 * 1000,
+    kg: volumeM3 * props.rho_kg_m3,
+    L: volumeL,
+    volume_L: volumeL,
+    L_per_circuit_m: calcTubeLengthPerCircuitM(params),
     warnings: props.warnings,
   };
 }
@@ -113,21 +129,21 @@ export function calcCoilDerivedDimensions(params: {
   const altura_mm = calcCoilHeight(params.nTubesPerRow, params.tubePitchTransverse_mm);
   const prof_mm = calcCoilDepth(params.nRows, params.tubePitchLongitudinal_mm);
   const largura_mm = params.lengthMm;
-  const L_per_circuit_m = calcTubeLengthPerCircuitM(params);
   const charge = calcRefrigerantCharge({
     refrigerant: params.refrigerant,
     T_evap_C: params.T_evap_C,
     tubeID_m: params.tubeID_m,
+    nTubesPerRow: params.nTubesPerRow,
+    nRows: params.nRows,
     nCircuits: params.nCircuits,
-    L_per_circuit_m,
-    liquidFillFraction: 0.55,
+    L_fin_m: params.lengthMm / 1000,
   });
 
   return {
     altura_mm,
     largura_mm,
     prof_mm,
-    L_per_circuit_m,
+    L_per_circuit_m: charge.L_per_circuit_m,
     volumeInterno_L: charge.volume_L,
     cargaRefrigerante_kg: charge.kg,
     gabinete_largura_mm: largura_mm + 160,
