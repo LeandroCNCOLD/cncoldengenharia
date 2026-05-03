@@ -94,10 +94,10 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
+      <nav className="min-h-0 flex-1 overflow-y-auto px-2 py-1">
         {NAV_GROUPS.map((group, gIdx) => (
-          <div key={group.label} className={gIdx === 0 ? "" : "pt-3"}>
-            <p className="px-2 pb-1 text-[9px] font-semibold uppercase tracking-widest text-slate-400/70">
+          <div key={group.label} className={gIdx === 0 ? "" : "pt-1.5"}>
+            <p className="px-2 pb-0.5 text-[9px] font-semibold uppercase tracking-widest text-slate-400/70">
               {group.label}
             </p>
             <ul className="space-y-0">
@@ -111,11 +111,11 @@ export function Sidebar() {
                       title={item.comingSoon ? "Em desenvolvimento" : undefined}
                       className={
                         active
-                          ? "flex items-center gap-2 rounded bg-[#1E6FD9] px-2 py-1 text-[11px] font-medium text-white"
-                          : "flex items-center gap-2 rounded px-2 py-1 text-[11px] text-slate-300 hover:bg-white/5 hover:text-white"
+                          ? "flex items-center gap-2 rounded bg-[#1E6FD9] px-2 py-0.5 text-[11px] font-medium text-white"
+                          : "flex items-center gap-2 rounded px-2 py-0.5 text-[11px] text-slate-300 hover:bg-white/5 hover:text-white"
                       }
                     >
-                      <Icon className="h-3.5 w-3.5 shrink-0" />
+                      <Icon className="h-3 w-3 shrink-0" />
                       <span className="truncate">{item.label}</span>
                       {item.comingSoon && (
                         <span className="ml-auto rounded bg-amber-500/20 px-1 py-px text-[8px] font-semibold uppercase tracking-wide text-amber-300">
