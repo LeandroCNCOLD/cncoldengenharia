@@ -54,6 +54,14 @@ export interface CostCalcInputs {
   tubeMaterial: MaterialKey;
   finMaterial: MaterialKey;
   prices: MaterialPrices;
+  /**
+   * BDI — Benefícios e Despesas Indiretas (%). Multiplicador aplicado sobre o
+   * custo direto de materiais (tubos + aletas) para incorporar mão de obra,
+   * encargos, impostos, despesas indiretas e lucro.
+   * Ex.: BDI = 25 → totalCost = directCost * 1.25.
+   * Padrão: 0 (sem BDI) para preservar compatibilidade.
+   */
+  bdiPercent?: number;
 }
 
 export interface CostCalcResult {
@@ -61,6 +69,13 @@ export interface CostCalcResult {
   finsWeightKg: number;
   tubesCost: number;
   finsCost: number;
+  /** Custo direto = tubesCost + finsCost (sem BDI). */
+  directCost: number;
+  /** Percentual de BDI aplicado (echo do input, default 0). */
+  bdiPercent: number;
+  /** Valor monetário do BDI = directCost * bdiPercent / 100. */
+  bdiAmount: number;
+  /** Custo total = directCost + bdiAmount. */
   totalCost: number;
 }
 
