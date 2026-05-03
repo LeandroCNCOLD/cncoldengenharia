@@ -5,6 +5,24 @@
 
 import type { CoilCycleInputs } from "../coil/coilCycleAdapter";
 import type { CompressorRecord } from "../compressor/compressorModel";
+import type {
+  ExpansionDeviceConfig,
+  ExpansionDeviceInput,
+  ExpansionDeviceResult,
+  ExpansionDeviceType,
+} from "../expansion/expansionTypes";
+
+export interface CycleExpansionDeviceConfig
+  extends Partial<
+    Omit<ExpansionDeviceInput, "evaporatingTempC" | "condensingTempC" | "refrigerantId">
+  > {
+  /** Formato legado usado antes do motor de expansão ativo. */
+  type?: Exclude<ExpansionDeviceType, "none">;
+  superheatTarget_K?: number;
+  capillaryLength_m?: number;
+  /** Configuração completa do novo módulo de expansão. */
+  device?: ExpansionDeviceConfig;
+}
 
 export interface CycleSystemConfig {
   id: string;
@@ -19,11 +37,7 @@ export interface CycleSystemConfig {
     CoilCycleInputs,
     "evaporatingTempC" | "condensingTempC" | "refrigerantMassFlowKgS" | "componentType" | "refrigerantId"
   >;
-  expansionDevice: {
-    type: "txv" | "eev" | "capillary" | "fixed_orifice";
-    superheatTarget_K: number;
-    capillaryLength_m?: number;
-  };
+  expansionDevice: CycleExpansionDeviceConfig;
   solver?: {
     Te_initial_C?: number;
     Tc_initial_C?: number;
@@ -85,5 +99,7 @@ export interface CycleResult {
     compressionRatio: number;
     mode: string;
   };
+  expansionDevice?: ExpansionDeviceResult;
+  inletQuality?: number;
   warnings: string[];
 }

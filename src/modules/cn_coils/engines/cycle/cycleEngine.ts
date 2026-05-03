@@ -6,10 +6,12 @@
  */
 import { evaluateCompressor } from "../compressor/compressorModel";
 import { runCoilForCycle } from "../coil/coilCycleAdapter";
+import { evaluateExpansionDevice } from "../expansion/expansionEngine";
 import { getRefrigerantSatProps } from "../refrigerant/refrigerantProperties";
 import type { CycleSystemConfig, CycleResult, CycleStatePoint } from "./cycleTypes";
 import { runAssemblySimulation } from "../assembly/coilAssembly";
 import type { CoilAssemblyConfig } from "../assembly/assemblyTypes";
+import type { CycleExpansionDeviceConfig } from "./cycleTypes";
 
 function buildStatePoint(
   T_C: number,
@@ -33,6 +35,21 @@ function pushUnique(target: string[], source: string[]): void {
   }
 }
 
+function normalizeExpansionConfig(device: CycleExpansionDeviceConfig) {
+  const full = device as {
+    mode?: "disabled" | "passive" | "active";
+    device?: import("../expansion/expansionTypes").ExpansionDeviceConfig;
+    subcoolingK?: number;
+    actualSuperheatK?: number;
+  };
+  return {
+    mode: full.mode ?? "disabled",
+    device: full.device,
+    subcoolingK: full.subcoolingK,
+    actualSuperheatK: full.actualSuperheatK,
+  };
+}
+
 export async function runCycleSimulation(config: CycleSystemConfig): Promise<CycleResult> {
   const warnings: string[] = [];
   const tol = config.solver?.tolerance ?? 0.01;
@@ -41,8 +58,12 @@ export async function runCycleSimulation(config: CycleSystemConfig): Promise<Cyc
 
   let Te = config.solver?.Te_initial_C ?? -10;
   let Tc = config.solver?.Tc_initial_C ?? 40;
-  const superheatK = config.expansionDevice.superheatTarget_K;
-  const subcoolingK = 5;
+  const expansionConfig = normalizeExpansionConfig(config.expansionDevice);
+  const superheatK =
+    (expansionConfig.device?.type === "txv" || expansionConfig.device?.type === "eev"
+      ? expansionConfig.device.superheatTargetK
+      : config.expansionDevice.superheatTarget_K) ?? 5;
+  const subcoolingK = expansionConfig.subcoolingK ?? 5;
 
   let converged = false;
   let iterations = 0;
@@ -51,6 +72,7 @@ export async function runCycleSimulation(config: CycleSystemConfig): Promise<Cyc
   let lastCompResult: Awaited<ReturnType<typeof evaluateCompressor>> | null = null;
   let lastEvapResult: Awaited<ReturnType<typeof runCoilForCycle>> | null = null;
   let lastCondResult: Awaited<ReturnType<typeof runCoilForCycle>> | null = null;
+  let lastExpansionResult: Awaited<ReturnType<typeof evaluateExpansionDevice>> | null = null;
 
   for (let iter = 0; iter < maxIter; iter++) {
     iterations = iter + 1;
@@ -75,7 +97,26 @@ export async function runCycleSimulation(config: CycleSystemConfig): Promise<Cyc
       break;
     }
 
-    const mDot = compResult.m_dot_kgS;
+    let mDot = compResult.m_dot_kgS;
+    const expansionMode = expansionConfig.mode;
+    const expansionDevice = expansionConfig.device;
+    const expansionSubcoolingK = expansionConfig.subcoolingK ?? subcoolingK;
+    const expansionActualSuperheatK = expansionConfig.actualSuperheatK ?? superheatK;
+    const expansionResult = await evaluateExpansionDevice({
+      mode: expansionMode,
+      device: expansionDevice,
+      evaporatingTempC: Te,
+      condensingTempC: Tc,
+      subcoolingK: expansionSubcoolingK,
+      actualSuperheatK: expansionActualSuperheatK,
+      refrigerantId: config.refrigerantId,
+    });
+    pushUnique(warnings, expansionResult.warnings);
+    lastExpansionResult = expansionResult;
+
+    if (expansionResult.mode === "active" && expansionResult.massFlowKgS !== null) {
+      mDot = Math.min(mDot, expansionResult.massFlowKgS);
+    }
 
     const evapResult = await runCoilForCycle({
       ...config.evaporator,
@@ -238,6 +279,8 @@ export async function runCycleSimulation(config: CycleSystemConfig): Promise<Cyc
       compressionRatio: lastCompResult?.compressionRatio ?? 0,
       mode: lastCompResult?.mode ?? "constant_efficiency",
     },
+    expansionDevice: lastExpansionResult ?? undefined,
+    inletQuality: lastExpansionResult?.inletQuality,
     warnings,
   };
 }
