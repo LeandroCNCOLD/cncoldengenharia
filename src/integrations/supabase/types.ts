@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      coil_geometry_overrides: {
+        Row: {
+          base_id: string | null
+          codigo: string
+          created_at: string
+          created_by: string | null
+          deleted: boolean
+          descricao: string
+          id: string
+          name: string
+          raw: Json
+          tipo_serpentina: string | null
+          updated_at: string
+        }
+        Insert: {
+          base_id?: string | null
+          codigo: string
+          created_at?: string
+          created_by?: string | null
+          deleted?: boolean
+          descricao: string
+          id?: string
+          name: string
+          raw?: Json
+          tipo_serpentina?: string | null
+          updated_at?: string
+        }
+        Update: {
+          base_id?: string | null
+          codigo?: string
+          created_at?: string
+          created_by?: string | null
+          deleted?: boolean
+          descricao?: string
+          id?: string
+          name?: string
+          raw?: Json
+          tipo_serpentina?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
