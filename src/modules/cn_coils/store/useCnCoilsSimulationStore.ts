@@ -104,6 +104,14 @@ interface CnCoilsSimulationStore {
   dischargeSuperheatK: number | null;
   /** Compressor selecionado (acopla o cálculo ao polinômio ASHRAE). */
   selectedCompressorId?: string;
+  /** Spec do compressor carregado do catálogo (passado ao motor). */
+  compressorSpec?: {
+    cooling_capacity_w: number;
+    power_w: number;
+    refrigerant: string;
+    evap_temp_c: number;
+    cond_temp_c: number;
+  };
   /** Quantidade de compressores aplicados (multiplica vazão mássica/capacidade). */
   compressorCount: number;
   setFluid: (val: string) => void;
