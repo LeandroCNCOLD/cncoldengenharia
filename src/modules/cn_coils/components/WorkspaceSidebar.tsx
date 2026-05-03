@@ -1,5 +1,5 @@
-import { Calculator, Printer, RotateCcw, Save, Settings2 } from "lucide-react";
-import { useState } from "react";
+import { Calculator, History, Printer, RotateCcw, Save, Settings2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import { getApplicationConfig } from "../config/applicationConfig";
 import { formatBRL } from "../engine/costCalculator";
@@ -11,6 +11,11 @@ import {
   FinModal,
   DistributorModal,
 } from "./GeometryDerivedModals";
+import {
+  LAST_INPUTS_STORAGE_KEY,
+  hasSavedLastInputs,
+  restoreLastInputs,
+} from "../utils/lastInputsPersistence";
 import type { UnilabComponentType } from "../types/unilab.types";
 
 type ModalKey = "geometry" | "tube" | "fin" | "distributor" | null;
