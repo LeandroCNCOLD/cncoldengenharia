@@ -230,6 +230,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
   calculatedCost: 0,
   tubeMaterialKey: "copper_kg",
   finMaterialKey: "aluminum_kg",
+  bdiPercent: 0,
   setMaterialPrice: (material, price) =>
     set((s) => {
       const materialPrices = { ...s.materialPrices, [material]: price };
@@ -245,6 +246,12 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
     set((s) => {
       const cost = computeCostFromState({ ...s, finMaterialKey: key });
       return { finMaterialKey: key, calculatedCost: cost };
+    }),
+  setBdiPercent: (val) =>
+    set((s) => {
+      const bdiPercent = Number.isFinite(val) && val >= 0 ? val : 0;
+      const cost = computeCostFromState({ ...s, bdiPercent });
+      return { bdiPercent, calculatedCost: cost };
     }),
   recalculateCost: () =>
     set((s) => ({ calculatedCost: computeCostFromState(s) })),
