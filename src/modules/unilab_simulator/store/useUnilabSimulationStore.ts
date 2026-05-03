@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type {
   CoilGeometryCatalogItem,
+  StructuredWarning,
   UnilabPhysicalInputs,
   UnilabSimulationResult,
   UnilabThermoInputs,
