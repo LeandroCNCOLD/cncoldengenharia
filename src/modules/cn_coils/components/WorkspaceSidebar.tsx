@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import { getApplicationConfig } from "../config/applicationConfig";
 import { formatBRL } from "../engine/costCalculator";
 import { generateReportPdf, type ReportSnapshot } from "../engine/reportGenerator";
@@ -18,7 +18,7 @@ import {
   FinModal,
   DistributorModal,
 } from "./GeometryDerivedModals";
-import type { UnilabComponentType } from "../types/unilab.types";
+import type { CnCoilsComponentType } from "../types/cncoils.types";
 import {
   calcCoilDerivedDimensions,
   calcCoilDimensions,
@@ -32,7 +32,7 @@ import {
   loadCnCoilsCoefficients,
   listUsableAxialFans,
   type AxialFanRecord,
-} from "../services/unilabCoefficientsService";
+} from "../services/cncoilsCoefficientsService";
 
 type ModalKey = "geometry" | "tube" | "fin" | "distributor" | null;
 
@@ -53,7 +53,7 @@ const MATERIAL_SHORT: Record<TubeMaterial | FinMaterial, string> = {
 export type WorkspaceSection = "ventilacao";
 
 interface WorkspaceSidebarProps {
-  componentType: UnilabComponentType;
+  componentType: CnCoilsComponentType;
   onSimulate: () => void;
   onReset: () => void;
   canSimulate: boolean;
@@ -210,7 +210,7 @@ export function WorkspaceSidebar({
     const name = window.prompt("Nome para salvar este projeto:", `Projeto ${new Date().toLocaleDateString("pt-BR")}`);
     if (!name) return;
     try {
-      const key = "unilab.savedProjects";
+      const key = "cncoils.savedProjects";
       const raw = localStorage.getItem(key);
       const list: Array<{ name: string; savedAt: string; snapshot: ReportSnapshot }> =
         raw ? JSON.parse(raw) : [];

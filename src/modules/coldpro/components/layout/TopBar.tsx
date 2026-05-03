@@ -30,10 +30,10 @@ function buildCrumbs(pathname: string): Crumb[] {
   const map: Array<{ test: (p: string) => boolean; crumbs: Crumb[] }> = [
     { test: (p) => p === "/coldpro" || p === "/coldpro/", crumbs: [{ label: "Dashboard" }] },
     {
-      test: (p) => p.startsWith("/coldpro/unilab/workspace"),
+      test: (p) => p.startsWith("/coldpro/cncoils/workspace"),
       crumbs: [{ label: "CN COILS" }, { label: "Workspace", isWorkspace: true }],
     },
-    { test: (p) => p.startsWith("/coldpro/unilab"), crumbs: [{ label: "CN COILS" }] },
+    { test: (p) => p.startsWith("/coldpro/cncoils"), crumbs: [{ label: "CN COILS" }] },
     { test: (p) => p.startsWith("/coldpro/components"), crumbs: [{ label: "Componentes" }] },
     { test: (p) => p.startsWith("/coldpro/catalog"), crumbs: [{ label: "Catálogo CN COLD" }] },
     { test: (p) => p.startsWith("/coldpro/assembly"), crumbs: [{ label: "Montagem" }] },

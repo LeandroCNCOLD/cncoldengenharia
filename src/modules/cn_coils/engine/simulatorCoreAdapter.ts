@@ -1,8 +1,8 @@
 /**
- * Adaptador unificado para os motores de simulação UNILAB.
+ * Adaptador unificado para os motores de simulação CN Coils.
  *
  * Estratégia de unificação progressiva:
- *   - V1 (simulatorCore.ts): Motor original com correção UNILAB + Wang-Chi-Chang
+ *   - V1 (simulatorCore.ts): Motor original com correção CN Coils + Wang-Chi-Chang
  *   - V2 (simulatorCoreV2.ts): Motor ASHRAE com psicrometria real + NTU-ε
  *   - coldpro_v2/engines: Motor V2+ com solver acoplado — interface incompatível,
  *     unificação adiada para versão 2.0.
@@ -22,7 +22,7 @@ import {
   type SimulationV2Inputs,
   type SimulationV2Result,
 } from "../engine_v2/simulatorCoreV2";
-import type { CnCoilsSimulationResult } from "../types/unilab.types";
+import type { CnCoilsSimulationResult } from "../types/cncoils.types";
 
 export type { RunSimulationParams } from "./simulatorCore";
 export type { SimulationV2Inputs, SimulationV2Result } from "../engine_v2/simulatorCoreV2";

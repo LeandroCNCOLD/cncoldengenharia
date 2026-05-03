@@ -18,7 +18,7 @@ import { useAuth } from "@/lib/auth";
 
 const QUICK_CARDS = [
   {
-    to: "/coldpro/unilab",
+    to: "/coldpro/cncoils",
     emoji: "🧊",
     Icon: Snowflake,
     title: "CN COILS",
@@ -198,7 +198,7 @@ export function DashboardPage() {
                   Selecionar
                 </button>
                 <Link
-                  to="/coldpro/unilab"
+                  to="/coldpro/cncoils"
                   className="inline-flex items-center gap-1 rounded-md bg-[#1E6FD9] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#1858b0]"
                 >
                   Retomar <ArrowRight className="h-3 w-3" />
@@ -208,7 +208,7 @@ export function DashboardPage() {
           ) : (
             <div className="rounded-md border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
               Nenhuma sessão ativa — inicie uma simulação em{" "}
-              <Link to="/coldpro/unilab" className="font-medium text-[#1E6FD9] hover:underline">
+              <Link to="/coldpro/cncoils" className="font-medium text-[#1E6FD9] hover:underline">
                 CN COILS
               </Link>
               .

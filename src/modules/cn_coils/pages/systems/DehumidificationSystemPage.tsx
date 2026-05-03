@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Calculator, Loader2, Send, Waves, Flame } from "lucide-react";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
-import { useCnCoilsCatalogs } from "../../hooks/useUnilabCatalogs";
+import { useCnCoilsCatalogs } from "../../hooks/useCnCoilsCatalogs";
 import { DatasetStatusPanel } from "../../components/DatasetStatusPanel";
 import { runSimulation, SimulationError } from "../../engine/simulatorCore";
 import {
@@ -14,7 +14,7 @@ import type {
   CnCoilsPhysicalInputs,
   CnCoilsSimulationResult,
   CnCoilsThermoInputs,
-} from "../../types/unilab.types";
+} from "../../types/cncoils.types";
 
 // ---------- Defaults físicos compactos para cada coil ----------
 const DEFAULT_PHYSICAL: CnCoilsPhysicalInputs = {
@@ -302,7 +302,7 @@ export function DehumidificationSystemPage() {
       actions={
         <div className="flex flex-wrap items-center gap-2">
           <Link
-            to="/coldpro/unilab"
+            to="/coldpro/cncoils"
             className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
           >
             <ArrowLeft className="h-4 w-4" />

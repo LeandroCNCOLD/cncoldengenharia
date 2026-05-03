@@ -4,11 +4,11 @@
  * Mantido apenas para compatibilidade com testes existentes.
  */
 
-// Motor termodinâmico V2 — UNILAB profissional (Etapa 6).
+// Motor termodinâmico V2 — CN Coils profissional (Etapa 6).
 //
 // Diferenças em relação ao V1 (engine/simulatorCore.ts):
 //   ✅ Psicrometria ASHRAE Hyland-Wexler (sem rho/cp constantes)
-//   ✅ U real: h_ar do catálogo UNILAB + Dittus-Boelter / Shah no fluido
+//   ✅ U real: h_ar do catálogo CN Coils + Dittus-Boelter / Shah no fluido
 //   ✅ Q sensível e Q latente separados via Δh e ΔT
 //   ✅ Detecção explícita de condensação (T_superfície < T_orvalho)
 //   ✅ Fase do fluido determinada por SH/SC e tipo de componente
@@ -37,16 +37,16 @@ import {
 } from "./heatTransfer";
 import { determineFluidPhase, type FluidPhase } from "./phaseLogic";
 import type {
-  UnilabComponentType,
+  CnCoilsComponentType,
   CnCoilsPhysicalInputs,
   CnCoilsSimulationResult,
   CnCoilsThermoInputs,
-} from "../types/unilab.types";
+} from "../types/cncoils.types";
 
 export interface SimulationV2Inputs {
   physical: CnCoilsPhysicalInputs;
   thermo: CnCoilsThermoInputs;
-  componentType: UnilabComponentType;
+  componentType: CnCoilsComponentType;
   tubeMaterialConductivity: number;
   /** Propriedades do fluido para Dittus-Boelter (líquido / monofásico). */
   fluidProps: FluidPropsSinglePhase;
@@ -72,7 +72,7 @@ export class SimulationV2Error extends Error {
 
 const MM_TO_M = 1e-3;
 
-function isCooling(componentType: UnilabComponentType): boolean {
+function isCooling(componentType: CnCoilsComponentType): boolean {
   return (
     componentType === "evaporator_dx" ||
     componentType === "evaporator_pumped" ||
@@ -82,7 +82,7 @@ function isCooling(componentType: UnilabComponentType): boolean {
 
 function getSurfaceTempC(
   thermo: CnCoilsThermoInputs,
-  componentType: UnilabComponentType,
+  componentType: CnCoilsComponentType,
 ): number {
   if (componentType === "condenser_air" || componentType === "condenser_shell_tube") {
     return thermo.condensingTempC ?? Number.NaN;
@@ -241,7 +241,7 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
   // 12. RH na saída — psat ASHRAE + relação W↔pw
   const RH_out_pct = computeRHpct(T_air_out_C, W_out, airIn.pAtm_Pa);
 
-  // Perda de carga — ar (correlação empírica Unilab Coils 6.0)
+  // Perda de carga — ar (correlação empírica CnCoils Coils 6.0)
   const V_face_m_s = faceVelocityMs;
   const N_rows = physical.rows;
   const fin_pitch_mm = physical.finPitchMm ?? 3.0;

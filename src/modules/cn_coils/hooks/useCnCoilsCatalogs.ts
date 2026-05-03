@@ -1,348 +1,228 @@
-// Hook centralizado que carrega TODOS os catálogos CN Coils a partir de
-// /public/data/catalogs/*.json. Sem mocks, sem fallback silencioso —
-// erros são reportados via `errors` para a UI exibir.
-//
-// Uso:
-//   const cat = useCnCoilsCatalogs();
-//   const geometriasFiltradas = cat.geometriesByType("evaporator_dx");
+// Lazy-load dos catálogos CN Coils via fetch().
+// Nunca importa JSON pelo bundle. Falhas viram erros expostos ao consumidor —
+// nunca substituídas por mocks ou defaults.
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type {
-  BomCatalog,
-  CoilShape,
-  CollectionErrorEntry,
-  Compressor,
-  CompressorBackupPolynomials,
-  CompressorCapacityPolynomial,
-  CompressorCurrentPolynomial,
-  CompressorOutletTemperature,
-  CompressorPowerPolynomial,
-  CompressorStandard,
-  CorrectionPolynomial,
-  DistributorComplete,
-  DistributorHoleSize,
-  DistributorKappaMap,
-  DistributorKappaRow,
-  EngineErrorMessage,
-  Fan,
-  FanCompleteCurve,
-  FanElectricalData,
-  FinHeight,
-  FinPitch,
-  FinThickness,
-  FinTreatment,
-  FluidsThermoPhysical,
-  GeometriesComplete,
-  Geometry,
-  LiquidMixtureEntry,
-  MaterialEntry,
-  PowerSupply,
-  PumpComplete,
-  PumpData,
-  Refrigerant,
-  RefrigerantLimit,
-  SecondaryFluid,
-  SecondaryFluidComplete,
-  ShellTubeCondenserEntry,
-  ThermoPhysicalProperty,
-  TubeCatalogEntry,
-  TubeThickness,
-  UiLabelEntry,
-  WarningEntry,
-} from "../types/catalogs";
+  AirVelocityCorrectionItem,
+  CatalogLoadState,
+  CoilGeometryCatalogItem,
+  FinPitchItem,
+  FinThicknessItem,
+  PressureDropFanItem,
+  RefrigerantItem,
+  TubeMaterialItem,
+} from "../types/cncoils.types";
 
-const CATALOG_BASE = "/data/catalogs";
-
-const FILES = {
+const CATALOG_FILES = {
+  coilGeometries: "coilGeometries.json",
+  tubeMaterials: "tubeMaterials.json",
+  finPitches: "finPitches.json",
+  finThicknesses: "finThicknesses.json",
   refrigerantsPure: "refrigerantsPure.json",
   refrigerantsMixtures: "refrigerantsMixtures.json",
-  secondaryFluids: "secondaryFluids.json",
-  compressors: "compressors.json",
-  compressorStandards: "compressorStandards.json",
-  fans: "fans.json",
-  geometries: "geometries.json",
-  finThicknesses: "finThicknesses.json",
-  tubeThicknesses: "tubeThicknesses.json",
-  finPitches: "finPitches.json",
-  finHeights: "finHeights.json",
-  materials: "materials.json",
-  frameMaterials: "frameMaterials.json",
-  coilShapes: "coilShapes.json",
-  finTreatments: "finTreatments.json",
-  powerSupplies: "powerSupplies.json",
+  coilCorrectionCoefficients: "coilCorrectionCoefficients.json",
+  pressureDropFan: "pressureDropFan.json",
 } as const;
 
-export interface CnCoilsCatalogsData {
-  refrigerantsPure: Refrigerant[];
-  refrigerantsMixtures: Refrigerant[];
-  /** Lista combinada (puros + misturas) ordenada alfabeticamente por shortName. */
-  refrigerants: Refrigerant[];
-  secondaryFluids: SecondaryFluid[];
-  compressors: Compressor[];
-  compressorStandards: CompressorStandard[];
-  fans: Fan[];
-  geometries: Geometry[];
-  finThicknesses: FinThickness[];
-  tubeThicknesses: TubeThickness[];
-  finPitches: FinPitch[];
-  finHeights: FinHeight[];
-  materials: MaterialEntry[];
-  frameMaterials: MaterialEntry[];
-  coilShapes: CoilShape[];
-  finTreatments: FinTreatment[];
-  powerSupplies: PowerSupply[];
-  /** Lista de Materiais (BOM) — 15 grupos consolidados do UNILAB. */
-  bom: BomCatalog;
-  warnings: WarningEntry[];
-  uiLabels: UiLabelEntry[];
-  distributorKappa: DistributorKappaMap;
-  distributorHoleSizes: DistributorHoleSize[];
-  engineErrors: EngineErrorMessage[];
-  thermoPhysicalProperties: ThermoPhysicalProperty[];
-  correctionPolynomials: CorrectionPolynomial[];
-  fanElectricalData: FanElectricalData[];
-  pumpData: PumpData[];
-  compressorOutletTemperature: CompressorOutletTemperature[];
-  // ── LOTE FINAL ──
-  compressorCapacityPolynomials: CompressorCapacityPolynomial[];
-  compressorPowerPolynomials: CompressorPowerPolynomial[];
-  compressorCurrentPolynomials: CompressorCurrentPolynomial[];
-  compressorBackupPolynomials: CompressorBackupPolynomials;
-  geometriesComplete: GeometriesComplete;
-  tubesCatalog: TubeCatalogEntry[];
-  fansComplete: FanCompleteCurve[];
-  fluidsThermoPhysical: FluidsThermoPhysical;
-  refrigerantsLimits: RefrigerantLimit[];
-  secondaryFluidsComplete: SecondaryFluidComplete[];
-  liquidMixtures: LiquidMixtureEntry[];
-  distributorComplete: DistributorComplete;
-  distributorKappaFull: DistributorKappaRow[];
-  pumpComplete: PumpComplete;
-  pumpCurves: import("../types/catalogs").PumpCurveEntry[];
-  shellTubeCondenser: ShellTubeCondenserEntry[];
-  collectionErrors: CollectionErrorEntry[];
+export const REQUIRED_CATALOG_FILES = Object.values(CATALOG_FILES);
+
+export interface CnCoilsCatalogs {
+  geometries: CoilGeometryCatalogItem[];
+  tubeMaterials: TubeMaterialItem[];
+  finPitches: FinPitchItem[];
+  finThicknesses: FinThicknessItem[];
+  refrigerants: RefrigerantItem[];
+  correctionCoefficients: AirVelocityCorrectionItem[];
+  pressureDropFan: PressureDropFanItem[];
 }
 
-export interface CnCoilsCatalogsState extends CnCoilsCatalogsData {
-  loading: boolean;
-  ready: boolean;
-  errors: Record<string, string>;
-  /** Filtra geometrias pelo `type` (ex.: "evaporator_dx"). Memoizado por chamada. */
-  geometriesByType: (type: string | undefined) => Geometry[];
-}
-
-const EMPTY: CnCoilsCatalogsData = {
-  refrigerantsPure: [],
-  refrigerantsMixtures: [],
-  refrigerants: [],
-  secondaryFluids: [],
-  compressors: [],
-  compressorStandards: [],
-  fans: [],
+const EMPTY_CATALOGS: CnCoilsCatalogs = {
   geometries: [],
-  finThicknesses: [],
-  tubeThicknesses: [],
+  tubeMaterials: [],
   finPitches: [],
-  finHeights: [],
-  materials: [],
-  frameMaterials: [],
-  coilShapes: [],
-  finTreatments: [],
-  powerSupplies: [],
-  bom: {
-    collectors: [], tubes: [], bends: [], distributors: [], endCaps: [],
-    sheets: [], nipples: [], nodes: [], fins: [], capillaries: [],
-    plugs: [], soldering: [], groups: [], elements: [], frame: [],
-  },
-  warnings: [],
-  uiLabels: [],
-  distributorKappa: {},
-  distributorHoleSizes: [],
-  engineErrors: [],
-  thermoPhysicalProperties: [],
-  correctionPolynomials: [],
-  fanElectricalData: [],
-  pumpData: [],
-  compressorOutletTemperature: [],
-  // ── LOTE FINAL ──
-  compressorCapacityPolynomials: [],
-  compressorPowerPolynomials: [],
-  compressorCurrentPolynomials: [],
-  compressorBackupPolynomials: { capacity: [], power: [] },
-  geometriesComplete: {
-    condensation: [], direct_expansion: [], evaporator_flooded: [],
-    cooling: [], heating: [], steam: [],
-  },
-  tubesCatalog: [],
-  fansComplete: [],
-  fluidsThermoPhysical: {
-    pureGases: [], gasMixtures: [], pureLiquids: [],
-    liquidMixtures: [], refrigerants: [], refrigerantMixtures: [],
-  },
-  refrigerantsLimits: [],
-  secondaryFluidsComplete: [],
-  liquidMixtures: [],
-  distributorComplete: { models: [], dimensions: [], kappa: [] },
-  distributorKappaFull: [],
-  pumpComplete: { pumpModels: [], pumpData: [], pumpCurves: [] },
-  pumpCurves: [],
-  shellTubeCondenser: [],
-  collectionErrors: [],
+  finThicknesses: [],
+  refrigerants: [],
+  correctionCoefficients: [],
+  pressureDropFan: [],
 };
 
-async function fetchJsonArray<T>(file: string): Promise<T[]> {
-  const res = await fetch(`${CATALOG_BASE}/${file}`, { cache: "no-cache" });
-  if (!res.ok) throw new Error(`HTTP ${res.status} em ${file}`);
-  const raw = (await res.json()) as unknown;
-  if (!Array.isArray(raw)) throw new Error(`Conteúdo inválido em ${file}`);
-  return raw as T[];
-}
-
-async function fetchJsonObject<T>(file: string): Promise<T> {
-  const res = await fetch(`${CATALOG_BASE}/${file}`, { cache: "no-cache" });
-  if (!res.ok) throw new Error(`HTTP ${res.status} em ${file}`);
+async function fetchJson<T>(file: string): Promise<T> {
+  const res = await fetch(`/data/catalogs/${file}`, { cache: "no-cache" });
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+  }
   return (await res.json()) as T;
 }
 
-// Cache em módulo — evita refetch entre páginas/componentes na mesma sessão.
-let cached: CnCoilsCatalogsData | null = null;
-let cachedErrors: Record<string, string> = {};
+function ensureArray<T>(value: unknown, file: string): T[] {
+  if (!Array.isArray(value)) {
+    throw new Error(`Conteúdo inválido em ${file}: esperado array.`);
+  }
+  return value as T[];
+}
 
-export function useCnCoilsCatalogs(): CnCoilsCatalogsState {
-  const [data, setData] = useState<CnCoilsCatalogsData>(cached ?? EMPTY);
-  const [errors, setErrors] = useState<Record<string, string>>(cachedErrors);
-  const [loading, setLoading] = useState(!cached);
+export interface UseCnCoilsCatalogsReturn extends CnCoilsCatalogs, CatalogLoadState {}
+
+export function useCnCoilsCatalogs(): UseCnCoilsCatalogsReturn {
+  const [data, setData] = useState<CnCoilsCatalogs>(EMPTY_CATALOGS);
+  const [state, setState] = useState<CatalogLoadState>({
+    loading: true,
+    ready: false,
+    errors: {},
+    missing: [],
+  });
 
   useEffect(() => {
-    if (cached) return;
     let cancelled = false;
+
     (async () => {
-      const next: CnCoilsCatalogsData = { ...EMPTY };
-      const errs: Record<string, string> = {};
+      const errors: Record<string, string> = {};
+      const missing: string[] = [];
+      const next: CnCoilsCatalogs = { ...EMPTY_CATALOGS };
 
-      const tasks: Array<[keyof typeof FILES, string]> = (
-        Object.entries(FILES) as Array<[keyof typeof FILES, string]>
-      );
-
-      await Promise.all([
-        ...tasks.map(async ([key, file]) => {
-          try {
-            const arr = await fetchJsonArray<unknown>(file);
-            (next as unknown as Record<string, unknown>)[key] = arr;
-          } catch (err) {
-            errs[file] = err instanceof Error ? err.message : String(err);
-          }
-        }),
-        (async () => {
-          try {
-            const res = await fetch(`${CATALOG_BASE}/bomComponents.json`, {
-              cache: "no-cache",
+      const tasks: Array<[keyof CnCoilsCatalogs, string, (raw: unknown) => unknown]> = [
+        [
+          "geometries",
+          CATALOG_FILES.coilGeometries,
+          (raw) => ensureArray<CoilGeometryCatalogItem>(raw, CATALOG_FILES.coilGeometries),
+        ],
+        [
+          "tubeMaterials",
+          CATALOG_FILES.tubeMaterials,
+          (raw) => ensureArray<TubeMaterialItem>(raw, CATALOG_FILES.tubeMaterials),
+        ],
+        [
+          "finPitches",
+          CATALOG_FILES.finPitches,
+          (raw) => {
+            const arr = ensureArray<Record<string, unknown>>(raw, CATALOG_FILES.finPitches);
+            return arr.map((r): FinPitchItem => {
+              // Aceita tanto o shape novo (CN Coils IT) quanto o legado.
+              const pitch =
+                typeof r.PassoAletta === "number"
+                  ? r.PassoAletta
+                  : typeof r.pitchMm === "number"
+                    ? r.pitchMm
+                    : Number(r.PassoAletta ?? r.pitchMm ?? 0);
+              const id = String(r.PassiAletteID ?? r.id ?? pitch);
+              const fpi =
+                typeof r.FinsPerInch === "number" ? r.FinsPerInch : undefined;
+              return {
+                id,
+                pitchMm: pitch,
+                label:
+                  typeof r.label === "string"
+                    ? r.label
+                    : `${pitch} mm${fpi ? ` (${fpi} FPI)` : ""}`,
+              };
             });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const raw = (await res.json()) as Partial<BomCatalog>;
-            next.bom = { ...next.bom, ...raw };
-          } catch (err) {
-            errs["bomComponents.json"] =
-              err instanceof Error ? err.message : String(err);
-          }
-        })(),
-        ...([
-          ["warnings", "warnings.json"],
-          ["uiLabels", "uiLabels.json"],
-          ["distributorHoleSizes", "distributorHoleSizes.json"],
-          ["engineErrors", "engineErrorMessages.json"],
-          ["thermoPhysicalProperties", "thermoPhysicalProperties.json"],
-          ["correctionPolynomials", "correctionPolynomials.json"],
-          ["fanElectricalData", "fanElectricalData.json"],
-          ["pumpData", "pumpData.json"],
-          ["compressorOutletTemperature", "compressorOutletTemperature.json"],
-          // LOTE FINAL — arrays
-          ["compressorCapacityPolynomials", "compressorCapacityPolynomials.json"],
-          ["compressorPowerPolynomials", "compressorPowerPolynomials.json"],
-          ["compressorCurrentPolynomials", "compressorCurrentPolynomials.json"],
-          ["tubesCatalog", "tubesCatalog.json"],
-          ["fansComplete", "fansComplete.json"],
-          ["refrigerantsLimits", "refrigerantsLimits.json"],
-          ["secondaryFluidsComplete", "secondaryFluidsComplete.json"],
-          ["liquidMixtures", "liquidMixtures.json"],
-          ["distributorKappaFull", "distributorKappaFull.json"],
-          ["pumpCurves", "pumpCurves.json"],
-          ["shellTubeCondenser", "shellTubeCondenser.json"],
-          ["collectionErrors", "collectionErrors.json"],
-        ] as const).map(([key, file]) =>
-          (async () => {
-            try {
-              const arr = await fetchJsonArray<unknown>(file);
-              (next as unknown as Record<string, unknown>)[key] = arr;
-            } catch (err) {
-              errs[file] = err instanceof Error ? err.message : String(err);
-            }
-          })(),
-        ),
-        // LOTE FINAL — objetos compostos
-        ...([
-          ["compressorBackupPolynomials", "compressorBackupPolynomials.json"],
-          ["geometriesComplete", "geometriesComplete.json"],
-          ["fluidsThermoPhysical", "fluidsThermoPhysical.json"],
-          ["distributorComplete", "distributorComplete.json"],
-          ["pumpComplete", "pumpComplete.json"],
-        ] as const).map(([key, file]) =>
-          (async () => {
-            try {
-              const obj = await fetchJsonObject<unknown>(file);
-              (next as unknown as Record<string, unknown>)[key] = obj;
-            } catch (err) {
-              errs[file] = err instanceof Error ? err.message : String(err);
-            }
-          })(),
-        ),
-        (async () => {
-          try {
-            const res = await fetch(`${CATALOG_BASE}/distributorKappa.json`, {
-              cache: "no-cache",
+          },
+        ],
+        [
+          "finThicknesses",
+          CATALOG_FILES.finThicknesses,
+          (raw) => {
+            const arr = ensureArray<Record<string, unknown>>(raw, CATALOG_FILES.finThicknesses);
+            return arr.map((r): FinThicknessItem => {
+              const thickness =
+                typeof r.SpessoreAletta === "number"
+                  ? r.SpessoreAletta
+                  : typeof r.thicknessMm === "number"
+                    ? r.thicknessMm
+                    : Number(r.SpessoreAletta ?? r.thicknessMm ?? 0);
+              const id = String(r.SpessoreAlettaID ?? r.id ?? thickness);
+              return {
+                id,
+                thicknessMm: thickness,
+                label: typeof r.label === "string" ? r.label : `${thickness} mm`,
+              };
             });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            next.distributorKappa = (await res.json()) as DistributorKappaMap;
-          } catch (err) {
-            errs["distributorKappa.json"] =
-              err instanceof Error ? err.message : String(err);
-          }
-        })(),
-      ]);
+          },
+        ],
+        [
+          "correctionCoefficients",
+          CATALOG_FILES.coilCorrectionCoefficients,
+          (raw) =>
+            ensureArray<AirVelocityCorrectionItem>(
+              raw,
+              CATALOG_FILES.coilCorrectionCoefficients,
+            ),
+        ],
+        [
+          "pressureDropFan",
+          CATALOG_FILES.pressureDropFan,
+          (raw) => ensureArray<PressureDropFanItem>(raw, CATALOG_FILES.pressureDropFan),
+        ],
+      ];
 
-      // Lista combinada ordenada
-      next.refrigerants = [...next.refrigerantsPure, ...next.refrigerantsMixtures]
-        .slice()
-        .sort((a, b) =>
-          (a.shortName ?? a.name ?? a.id).localeCompare(
-            b.shortName ?? b.name ?? b.id,
-          ),
+      // Carrega arrays simples
+      for (const [key, file, parse] of tasks) {
+        try {
+          const raw = await fetchJson<unknown>(file);
+          (next as unknown as Record<string, unknown>)[key] = parse(raw);
+        } catch (err) {
+          errors[file] = err instanceof Error ? err.message : String(err);
+          missing.push(file);
+        }
+      }
+
+      // Refrigerantes: combina puros + misturas em uma lista única, marcando kind
+      try {
+        const pure = await fetchJson<unknown>(CATALOG_FILES.refrigerantsPure);
+        const pureArr = ensureArray<Record<string, unknown>>(
+          pure,
+          CATALOG_FILES.refrigerantsPure,
         );
+        next.refrigerants.push(
+          ...pureArr.map((r) => ({
+            id: String(r.id ?? r.name ?? ""),
+            name: String(r.name ?? r.id ?? ""),
+            kind: "pure" as const,
+            raw: r,
+          })),
+        );
+      } catch (err) {
+        errors[CATALOG_FILES.refrigerantsPure] =
+          err instanceof Error ? err.message : String(err);
+        missing.push(CATALOG_FILES.refrigerantsPure);
+      }
+
+      try {
+        const mix = await fetchJson<unknown>(CATALOG_FILES.refrigerantsMixtures);
+        const mixArr = ensureArray<Record<string, unknown>>(
+          mix,
+          CATALOG_FILES.refrigerantsMixtures,
+        );
+        next.refrigerants.push(
+          ...mixArr.map((r) => ({
+            id: String(r.id ?? r.name ?? ""),
+            name: String(r.name ?? r.id ?? ""),
+            kind: "mixture" as const,
+            raw: r,
+          })),
+        );
+      } catch (err) {
+        errors[CATALOG_FILES.refrigerantsMixtures] =
+          err instanceof Error ? err.message : String(err);
+        missing.push(CATALOG_FILES.refrigerantsMixtures);
+      }
 
       if (cancelled) return;
-      cached = next;
-      cachedErrors = errs;
+
       setData(next);
-      setErrors(errs);
-      setLoading(false);
+      setState({
+        loading: false,
+        ready: missing.length === 0,
+        errors,
+        missing,
+      });
     })();
+
     return () => {
       cancelled = true;
     };
   }, []);
 
-  const geometriesByType = useMemo(() => {
-    return (type: string | undefined) => {
-      if (!type) return data.geometries;
-      return data.geometries.filter((g) => g.type === type);
-    };
-  }, [data.geometries]);
-
-  return {
-    ...data,
-    loading,
-    ready: !loading && Object.keys(errors).length === 0,
-    errors,
-    geometriesByType,
-  };
+  return { ...data, ...state };
 }

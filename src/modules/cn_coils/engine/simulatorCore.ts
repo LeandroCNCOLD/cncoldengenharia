@@ -4,7 +4,7 @@
  * Mantido apenas para compatibilidade com testes existentes.
  */
 
-// Núcleo do simulador UNILAB.
+// Núcleo do simulador CN Coils.
 //
 // Fluxo:
 //  1. Validar inputs físicos e termodinâmicos.
@@ -16,7 +16,7 @@
 //  7. Área efetiva de troca: face × rows × fator de aleta (passo de aleta).
 //  8. NTU + ε crossflow (Cr=0 em mudança de fase).
 //  9. Q_base = ε · C_min · ΔT_max  (ΔT entre ar e superfície).
-// 10. Q_final = Q_base · fator UNILAB.
+// 10. Q_final = Q_base · fator CN Coils.
 // 11. Sensível/latente conforme regime; SHF.
 // 12. Perdas de carga (ar via catálogo, fluido via Darcy-Weisbach).
 //
@@ -28,7 +28,7 @@ import type {
   CnCoilsPhysicalInputs,
   CnCoilsSimulationResult,
   CnCoilsThermoInputs,
-} from "../types/unilab.types";
+} from "../types/cncoils.types";
 import {
   validatePhysicalInputs,
   validateThermoInputs,
@@ -51,7 +51,7 @@ import {
 } from "./heatTransfer";
 import { calculateWangChiChang } from "./wangChiChang";
 import { computeOverallU, dittusBoelter, shahTwoPhase } from "../engine_v2/heatTransfer";
-import { applyAirVelocityCorrection } from "./unilabCorrections";
+import { applyAirVelocityCorrection } from "./cncoilsCorrections";
 import {
   calculateAirPressureDrop,
   computeFluidPressureDrop,
@@ -72,14 +72,14 @@ export interface RunSimulationParams {
   /** Condutividade do material do tubo selecionado [W/(m·K)]. */
   tubeMaterialConductivity: number;
   /**
-   * Fator de correção da aleta (FatCorAl do catálogo Unilab).
+   * Fator de correção da aleta (FatCorAl do catálogo CnCoils).
    * Multiplica Q_final para ajustar a capacidade pelo tipo de aleta.
    * Valores típicos: Lisa=1.00, Ondulada=1.15, Persianada=0.95,
    * Wavy=1.35, Serrilhada=1.45. Padrão: 1.0 (neutro).
    */
   finCorrectionFactor?: number;
   /**
-   * Fator de atrito do ar (FattoreAttrAria do catálogo Unilab).
+   * Fator de atrito do ar (FattoreAttrAria do catálogo CnCoils).
    * Multiplica a queda de pressão do ar (dpAir) pelo tipo de aleta.
    * Valores típicos: Lisa=1.00, Ondulada=1.25, Persianada=1.00,
    * Wavy=1.45, Serrilhada=1.55. Padrão: 1.0 (neutro).
@@ -136,7 +136,7 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
   const physCheck = validatePhysicalInputs(physical);
   const thermoCheck = validateThermoInputs(thermo);
   if (!physCheck.isValid || !thermoCheck.isValid) {
-    throw new SimulationError("Inputs inválidos para simulação UNILAB.", [
+    throw new SimulationError("Inputs inválidos para simulação CN Coils.", [
       ...physCheck.errors,
       ...thermoCheck.errors,
     ]);
@@ -275,7 +275,7 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
   // e ajustamos sinal final em sensible/latent.
   const qBaseW = effectiveness * cMinWk * Math.abs(deltaTMax);
 
-  // 10. Correção UNILAB
+  // 10. Correção CN Coils
   const correction = applyAirVelocityCorrection(
     physical.geometryId,
     faceVelocityMs,
@@ -284,7 +284,7 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
   warnings.push(...correction.warnings);
   if (correction.factor <= 0) {
     throw new SimulationError(
-      "Correção UNILAB não pôde ser aplicada.",
+      "Correção CN Coils não pôde ser aplicada.",
       correction.warnings,
     );
   }

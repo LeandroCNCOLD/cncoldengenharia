@@ -12,7 +12,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_D4",
@@ -27,7 +27,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_D5",
@@ -42,7 +42,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_D6",
@@ -57,7 +57,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_MD2M",
@@ -72,7 +72,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_MD3M",
@@ -87,7 +87,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_MD4M",
@@ -102,7 +102,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_MDM",
@@ -117,7 +117,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_MM",
@@ -132,7 +132,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R11",
@@ -147,7 +147,7 @@
     "maxTempC": 625.0,
     "maxPressKPa": 30000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R113",
@@ -162,7 +162,7 @@
     "maxTempC": 525.0,
     "maxPressKPa": 200000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R114",
@@ -177,7 +177,7 @@
     "maxTempC": 507.0,
     "maxPressKPa": 21000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R115",
@@ -192,7 +192,7 @@
     "maxTempC": 600.0,
     "maxPressKPa": 20000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R116",
@@ -207,7 +207,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 50000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R12",
@@ -222,7 +222,7 @@
     "maxTempC": 525.0,
     "maxPressKPa": 20000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R1216",
@@ -237,7 +237,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R123",
@@ -252,7 +252,7 @@
     "maxTempC": 600.0,
     "maxPressKPa": 40000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R1233zd_E_",
@@ -267,7 +267,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R1233zd_E_",
@@ -282,7 +282,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R1234yf",
@@ -297,7 +297,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R1234ze_E_",
@@ -312,7 +312,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R1234ze_Z_",
@@ -327,7 +327,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R124",
@@ -342,7 +342,7 @@
     "maxTempC": 470.0,
     "maxPressKPa": 40000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R125",
@@ -357,7 +357,7 @@
     "maxTempC": 1000.0,
     "maxPressKPa": 60000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R13",
@@ -372,7 +372,7 @@
     "maxTempC": 403.0,
     "maxPressKPa": 35000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R134a",
@@ -387,7 +387,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 100000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R14",
@@ -402,7 +402,7 @@
     "maxTempC": 623.0,
     "maxPressKPa": 51000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R141b",
@@ -417,7 +417,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 400000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R142b",
@@ -432,7 +432,7 @@
     "maxTempC": 470.0,
     "maxPressKPa": 60000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R143a",
@@ -447,7 +447,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 60000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R152a",
@@ -462,7 +462,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 60000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R161",
@@ -477,7 +477,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R21",
@@ -492,7 +492,7 @@
     "maxTempC": -1.0,
     "maxPressKPa": -1.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R218",
@@ -507,7 +507,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 30000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R22",
@@ -522,7 +522,7 @@
     "maxTempC": 550.0,
     "maxPressKPa": 60000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R227ea",
@@ -537,7 +537,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 60000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R23",
@@ -552,7 +552,7 @@
     "maxTempC": 475.0,
     "maxPressKPa": 120000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R236ea",
@@ -567,7 +567,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 60000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R236fa",
@@ -582,7 +582,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 60000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R245ca",
@@ -597,7 +597,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 60000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R245fa",
@@ -612,7 +612,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 200000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R32",
@@ -627,7 +627,7 @@
     "maxTempC": 435.0,
     "maxPressKPa": 70000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R365mfc",
@@ -642,7 +642,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R40",
@@ -657,7 +657,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R41",
@@ -672,7 +672,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_RC318",
@@ -687,7 +687,7 @@
     "maxTempC": 623.0,
     "maxPressKPa": 60000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_RE143a",
@@ -702,7 +702,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_RE245cb2",
@@ -717,7 +717,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_RE245fa2",
@@ -732,7 +732,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_RE347mcc__HFE_7000_",
@@ -747,7 +747,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_acetone",
@@ -762,7 +762,7 @@
     "maxTempC": -1.0,
     "maxPressKPa": -1.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_ammonia",
@@ -777,7 +777,7 @@
     "maxTempC": 700.0,
     "maxPressKPa": 1000000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_argon",
@@ -792,7 +792,7 @@
     "maxTempC": 2000.0,
     "maxPressKPa": 1000000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_benzene",
@@ -807,7 +807,7 @@
     "maxTempC": -1.0,
     "maxPressKPa": -1.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_butane",
@@ -822,7 +822,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 70000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_butene",
@@ -837,7 +837,7 @@
     "maxTempC": 525.0,
     "maxPressKPa": 70000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_carbon_dioxide",
@@ -852,7 +852,7 @@
     "maxTempC": 525.0,
     "maxPressKPa": 50000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_carbon_monoxide",
@@ -867,7 +867,7 @@
     "maxTempC": 525.0,
     "maxPressKPa": 50000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_carbonyl_sulfide",
@@ -882,7 +882,7 @@
     "maxTempC": 525.0,
     "maxPressKPa": 50000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_cis_butene",
@@ -897,7 +897,7 @@
     "maxTempC": 525.0,
     "maxPressKPa": 70000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_cyclohexane",
@@ -912,7 +912,7 @@
     "maxTempC": 525.0,
     "maxPressKPa": 50000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_cyclopentane",
@@ -927,7 +927,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_cyclopropane",
@@ -942,7 +942,7 @@
     "maxTempC": 700.0,
     "maxPressKPa": 80000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_decane",
@@ -957,7 +957,7 @@
     "maxTempC": 1000.0,
     "maxPressKPa": 800000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_deuterium",
@@ -972,7 +972,7 @@
     "maxTempC": -1.0,
     "maxPressKPa": -1.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_diethyl_ether",
@@ -987,7 +987,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_dimethyl_carbonate",
@@ -1002,7 +1002,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_dimethylether",
@@ -1017,7 +1017,7 @@
     "maxTempC": 1000.0,
     "maxPressKPa": 700000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_dodecane",
@@ -1032,7 +1032,7 @@
     "maxTempC": 525.0,
     "maxPressKPa": 70000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_ethane",
@@ -1047,7 +1047,7 @@
     "maxTempC": 625.0,
     "maxPressKPa": 70000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_ethanol",
@@ -1062,7 +1062,7 @@
     "maxTempC": 650.0,
     "maxPressKPa": 280000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_ethylbenzene",
@@ -1077,7 +1077,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_ethylene",
@@ -1092,7 +1092,7 @@
     "maxTempC": 450.0,
     "maxPressKPa": 300000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_fluorine",
@@ -1107,7 +1107,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 20000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_heavy_water",
@@ -1122,7 +1122,7 @@
     "maxTempC": -1.0,
     "maxPressKPa": -1.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_helium",
@@ -1137,7 +1137,7 @@
     "maxTempC": 1500.0,
     "maxPressKPa": 100000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_heptane",
@@ -1152,7 +1152,7 @@
     "maxTempC": 600.0,
     "maxPressKPa": 100000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_hexane",
@@ -1167,7 +1167,7 @@
     "maxTempC": 600.0,
     "maxPressKPa": 100000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_hydrogen__normal_",
@@ -1182,7 +1182,7 @@
     "maxTempC": -1.0,
     "maxPressKPa": -1.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_hydrogen_chloride",
@@ -1197,7 +1197,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_hydrogen_sulfide",
@@ -1212,7 +1212,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 20000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_isobutane",
@@ -1227,7 +1227,7 @@
     "maxTempC": 760.0,
     "maxPressKPa": 170000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_isobutene",
@@ -1242,7 +1242,7 @@
     "maxTempC": 760.0,
     "maxPressKPa": 170000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_isohexane",
@@ -1257,7 +1257,7 @@
     "maxTempC": 760.0,
     "maxPressKPa": 170000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_isooctane",
@@ -1272,7 +1272,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_isopentane",
@@ -1287,7 +1287,7 @@
     "maxTempC": 760.0,
     "maxPressKPa": 170000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_krypton",
@@ -1302,7 +1302,7 @@
     "maxTempC": 750.0,
     "maxPressKPa": 300000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_m_xylene",
@@ -1317,7 +1317,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_methane",
@@ -1332,7 +1332,7 @@
     "maxTempC": 1200.0,
     "maxPressKPa": 100000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_methanol",
@@ -1347,7 +1347,7 @@
     "maxTempC": 620.0,
     "maxPressKPa": 800000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_methyl_linoleate",
@@ -1362,7 +1362,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_methyl_linolenate",
@@ -1377,7 +1377,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_methyl_oleate",
@@ -1392,7 +1392,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_methyl_palmitate",
@@ -1407,7 +1407,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_methyl_stearate",
@@ -1422,7 +1422,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_methylcyclohexane",
@@ -1437,7 +1437,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_neon",
@@ -1452,7 +1452,7 @@
     "maxTempC": 700.0,
     "maxPressKPa": 700000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_neopentane",
@@ -1467,7 +1467,7 @@
     "maxTempC": 550.0,
     "maxPressKPa": 200000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_nitrogen",
@@ -1482,7 +1482,7 @@
     "maxTempC": 2000.0,
     "maxPressKPa": 50000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_nitrogen_trifluoride",
@@ -1497,7 +1497,7 @@
     "maxTempC": 550.0,
     "maxPressKPa": 200000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_nitrous_oxide",
@@ -1512,7 +1512,7 @@
     "maxTempC": 620.0,
     "maxPressKPa": 800000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_nonane",
@@ -1527,7 +1527,7 @@
     "maxTempC": 1000.0,
     "maxPressKPa": 800000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_o_xylene",
@@ -1542,7 +1542,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_octane",
@@ -1557,7 +1557,7 @@
     "maxTempC": 1000.0,
     "maxPressKPa": 500000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_orthohydrogen",
@@ -1572,7 +1572,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_oxygen",
@@ -1587,7 +1587,7 @@
     "maxTempC": 2000.0,
     "maxPressKPa": 82000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_p_xylene",
@@ -1602,7 +1602,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_parahydrogen",
@@ -1617,7 +1617,7 @@
     "maxTempC": 2000.0,
     "maxPressKPa": 82000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_pentane",
@@ -1632,7 +1632,7 @@
     "maxTempC": 600.0,
     "maxPressKPa": 100000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_perfluorobutane",
@@ -1647,7 +1647,7 @@
     "maxTempC": 525.0,
     "maxPressKPa": 70000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_perfluoropentane",
@@ -1662,7 +1662,7 @@
     "maxTempC": 525.0,
     "maxPressKPa": 70000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_propane",
@@ -1677,7 +1677,7 @@
     "maxTempC": 600.0,
     "maxPressKPa": 100000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_propylcyclohexane",
@@ -1692,7 +1692,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_propylene",
@@ -1707,7 +1707,7 @@
     "maxTempC": 600.0,
     "maxPressKPa": 100000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_propyne",
@@ -1722,7 +1722,7 @@
     "maxTempC": -1.0,
     "maxPressKPa": -1.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_sulfur_dioxide",
@@ -1737,7 +1737,7 @@
     "maxTempC": 623.0,
     "maxPressKPa": 60000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_sulfur_hexafluoride",
@@ -1752,7 +1752,7 @@
     "maxTempC": 623.0,
     "maxPressKPa": 60000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_toluene",
@@ -1767,7 +1767,7 @@
     "maxTempC": -1.0,
     "maxPressKPa": -1.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_trans_butene",
@@ -1782,7 +1782,7 @@
     "maxTempC": -1.0,
     "maxPressKPa": -1.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_trifluoroiodomethane",
@@ -1797,7 +1797,7 @@
     "maxTempC": -1.0,
     "maxPressKPa": -1.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_undecane",
@@ -1812,7 +1812,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_water",
@@ -1827,7 +1827,7 @@
     "maxTempC": 1350.0,
     "maxPressKPa": 1000000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_xenon",
@@ -1842,6 +1842,6 @@
     "maxTempC": 1300.0,
     "maxPressKPa": 300000.0,
     "isMixture": false,
-    "unilab": true
+    "cncoils": true
   }
 ]

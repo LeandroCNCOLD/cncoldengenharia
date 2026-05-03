@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { X } from "lucide-react";
-import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import {
   MATERIAL_LABELS,
   formatBRL,

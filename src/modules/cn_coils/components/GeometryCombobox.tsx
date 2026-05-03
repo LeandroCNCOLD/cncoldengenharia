@@ -18,7 +18,7 @@ interface GeometryComboboxProps {
 }
 
 /**
- * Combobox pesquisável + virtualizado para as 753 geometrias UNILAB.
+ * Combobox pesquisável + virtualizado para as 753 geometrias CN Coils.
  *
  * - Busca com debounce de 300ms
  * - Filtro por tipo_serpentina

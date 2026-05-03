@@ -3,7 +3,7 @@ import type {
   CnCoilsSimulationResult,
   CnCoilsThermoInputs,
   ValidationResult,
-} from "../types/unilab.types";
+} from "../types/cncoils.types";
 import { ptBR } from "../i18n/messages.ptBR";
 
 const m = ptBR.validation;

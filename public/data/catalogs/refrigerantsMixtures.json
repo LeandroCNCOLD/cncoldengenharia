@@ -12,7 +12,7 @@
     "maxTempC": -1.0,
     "maxPressKPa": -1.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_EKOFISK",
@@ -27,7 +27,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_GLFCOAST",
@@ -42,7 +42,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R401A",
@@ -57,7 +57,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R401B",
@@ -72,7 +72,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R401C",
@@ -87,7 +87,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R402A",
@@ -102,7 +102,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R402B",
@@ -117,7 +117,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R403A",
@@ -132,7 +132,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R403B",
@@ -147,7 +147,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R404A",
@@ -162,7 +162,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R405A",
@@ -177,7 +177,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R406A",
@@ -192,7 +192,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R407A",
@@ -207,7 +207,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R407B",
@@ -222,7 +222,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R407C",
@@ -237,7 +237,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R407D",
@@ -252,7 +252,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R407E",
@@ -267,7 +267,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R407F",
@@ -282,7 +282,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R408A",
@@ -297,7 +297,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R409A",
@@ -312,7 +312,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R409B",
@@ -327,7 +327,7 @@
     "maxTempC": 500.0,
     "maxPressKPa": 35000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R410A",
@@ -342,7 +342,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R410B",
@@ -357,7 +357,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R411A",
@@ -372,7 +372,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R411B",
@@ -387,7 +387,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R412A",
@@ -402,7 +402,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R413A",
@@ -417,7 +417,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R414A",
@@ -432,7 +432,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R414B",
@@ -447,7 +447,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R415A",
@@ -462,7 +462,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R415B",
@@ -477,7 +477,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R416A",
@@ -492,7 +492,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R417A",
@@ -507,7 +507,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R417B",
@@ -522,7 +522,7 @@
     "maxTempC": 0.0,
     "maxPressKPa": 0.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R417C",
@@ -537,7 +537,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R418A",
@@ -552,7 +552,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R419A",
@@ -567,7 +567,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R419B",
@@ -582,7 +582,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R420A",
@@ -597,7 +597,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R421A",
@@ -612,7 +612,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R421B",
@@ -627,7 +627,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R422A",
@@ -642,7 +642,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R422B",
@@ -657,7 +657,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R422C",
@@ -672,7 +672,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R422D",
@@ -687,7 +687,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R422E",
@@ -702,7 +702,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R423A",
@@ -717,7 +717,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R424A",
@@ -732,7 +732,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R425A",
@@ -747,7 +747,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R426A",
@@ -762,7 +762,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R427A",
@@ -777,7 +777,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R428A",
@@ -792,7 +792,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R429A",
@@ -807,7 +807,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R430A",
@@ -822,7 +822,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R431A",
@@ -837,7 +837,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R432A",
@@ -852,7 +852,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R433A",
@@ -867,7 +867,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R434A",
@@ -882,7 +882,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R435A",
@@ -897,7 +897,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R436A",
@@ -912,7 +912,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R436B",
@@ -927,7 +927,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R437A",
@@ -942,7 +942,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R438A",
@@ -957,7 +957,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R439A",
@@ -972,7 +972,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R440A",
@@ -987,7 +987,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R441A",
@@ -1002,7 +1002,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R442A",
@@ -1017,7 +1017,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R443A",
@@ -1032,7 +1032,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R444A",
@@ -1047,7 +1047,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R444B",
@@ -1062,7 +1062,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R445A",
@@ -1077,7 +1077,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R446A",
@@ -1092,7 +1092,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R447A",
@@ -1107,7 +1107,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R448A",
@@ -1122,7 +1122,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R449A",
@@ -1137,7 +1137,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R450A",
@@ -1152,7 +1152,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R452A",
@@ -1167,7 +1167,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R452B",
@@ -1182,7 +1182,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R452C",
@@ -1197,7 +1197,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R453A",
@@ -1212,7 +1212,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R454A",
@@ -1227,7 +1227,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R454B",
@@ -1242,7 +1242,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R454C",
@@ -1257,7 +1257,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R455A",
@@ -1272,7 +1272,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R470A",
@@ -1287,7 +1287,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R500",
@@ -1302,7 +1302,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R501",
@@ -1317,7 +1317,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R502",
@@ -1332,7 +1332,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R503",
@@ -1347,7 +1347,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R504",
@@ -1362,7 +1362,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R507A",
@@ -1377,7 +1377,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R507C",
@@ -1392,7 +1392,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R508A",
@@ -1407,7 +1407,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R508B",
@@ -1422,7 +1422,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R509A",
@@ -1437,7 +1437,7 @@
     "maxTempC": 425.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R510A",
@@ -1452,7 +1452,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R511A",
@@ -1467,7 +1467,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R512A",
@@ -1482,7 +1482,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R513A",
@@ -1497,7 +1497,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R515B",
@@ -1512,7 +1512,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_R516A",
@@ -1527,7 +1527,7 @@
     "maxTempC": 300.0,
     "maxPressKPa": 70000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   },
   {
     "id": "REF_SPECIALFLUID",
@@ -1542,6 +1542,6 @@
     "maxTempC": 200.0,
     "maxPressKPa": 2000.0,
     "isMixture": true,
-    "unilab": true
+    "cncoils": true
   }
 ]

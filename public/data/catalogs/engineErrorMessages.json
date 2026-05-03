@@ -2458,62 +2458,62 @@
     "condition": "Progetto.b_UsaEquazioniSpeciali = true and Progetto.n_TipoEquazioneSpeciale > 85",
     "translations": {
       "it": {
-        "message": "Utilizzo di equazioni di calcolo non UNILAB",
+        "message": "Utilizzo di equazioni di calcolo non CN Coils",
         "technical": null,
         "note": null
       },
       "en": {
-        "message": "Using equations not UNILAB",
+        "message": "Using equations not CN Coils",
         "technical": null,
         "note": null
       },
       "fr": {
-        "message": "Using equations not UNILAB",
+        "message": "Using equations not CN Coils",
         "technical": null,
         "note": null
       },
       "es": {
-        "message": "Using equations not UNILAB",
+        "message": "Using equations not CN Coils",
         "technical": null,
         "note": null
       },
       "de": {
-        "message": "Using equations not UNILAB",
+        "message": "Using equations not CN Coils",
         "technical": null,
         "note": null
       },
       "tr": {
-        "message": "Using equations not UNILAB",
+        "message": "Using equations not CN Coils",
         "technical": null,
         "note": null
       },
       "pl": {
-        "message": "Using equations not UNILAB",
+        "message": "Using equations not CN Coils",
         "technical": null,
         "note": null
       },
       "ru": {
-        "message": "Using equations not UNILAB",
+        "message": "Using equations not CN Coils",
         "technical": null,
         "note": null
       },
       "pt": {
-        "message": "Using equations not UNILAB",
+        "message": "Using equations not CN Coils",
         "technical": null,
         "note": null
       },
       "el": {
-        "message": "Γίνεται χρήση εξισώσεων όχι UNILAB",
+        "message": "Γίνεται χρήση εξισώσεων όχι CN Coils",
         "technical": null,
         "note": null
       },
       "zh": {
-        "message": "使用的方程式非來自UNILAB",
+        "message": "使用的方程式非來自CN Coils",
         "technical": null,
         "note": null
       },
       "ja": {
-        "message": "UNILABでない方程式の使用",
+        "message": "CN Coilsでない方程式の使用",
         "technical": null,
         "note": null
       }

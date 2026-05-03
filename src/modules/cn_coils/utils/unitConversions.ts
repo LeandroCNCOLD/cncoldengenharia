@@ -1,4 +1,4 @@
-// Conversões de unidades — replica o comportamento dos dropdowns do UNILAB.
+// Conversões de unidades — replica o comportamento dos dropdowns do CN Coils.
 // Cada grupo expõe a unidade canônica (SI) usada internamente pelo motor
 // e funções toCanonical(value, unit) e fromCanonical(valueSI, unit).
 

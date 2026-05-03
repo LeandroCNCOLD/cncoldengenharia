@@ -1,6 +1,6 @@
 import { AlertCircle, AlertTriangle, Info, Target } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { CnCoilsSimulationResult } from "../types/unilab.types";
+import type { CnCoilsSimulationResult } from "../types/cncoils.types";
 import type { StructuredWarning } from "../types/warnings";
 import { ptBR } from "../i18n/messages.ptBR";
 import { convertPower, type PowerUnit } from "@/utils/unitConversions";
@@ -9,7 +9,7 @@ import {
   loadCnCoilsCoefficients,
   buildFanAudit,
   type FanAuditSummary,
-} from "../services/unilabCoefficientsService";
+} from "../services/cncoilsCoefficientsService";
 
 interface ResultPanelProps {
   result: CnCoilsSimulationResult | undefined;

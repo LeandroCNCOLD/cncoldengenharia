@@ -1,13 +1,13 @@
-// Barrel público do módulo UNILAB Simulator.
-export { UnilabDashboardPage } from "./pages/UnilabDashboardPage";
-export { CnCoilsWorkspacePage } from "./pages/UnilabWorkspacePage";
-export { useCnCoilsCatalogs, REQUIRED_CATALOG_FILES } from "./hooks/useUnilabCatalogs";
-export { useCnCoilsSimulation } from "./hooks/useUnilabSimulation";
-export { useCnCoilsSimulationStore } from "./store/useUnilabSimulationStore";
+// Barrel público do módulo CN Coils Simulator.
+export { CnCoilsDashboardPage } from "./pages/CnCoilsDashboardPage";
+export { CnCoilsWorkspacePage } from "./pages/CnCoilsWorkspacePage";
+export { useCnCoilsCatalogs, REQUIRED_CATALOG_FILES } from "./hooks/useCnCoilsCatalogs";
+export { useCnCoilsSimulation } from "./hooks/useCnCoilsSimulation";
+export { useCnCoilsSimulationStore } from "./store/useCnCoilsSimulationStore";
 export { runSimulation, SimulationError } from "./engine/simulatorCore";
 export {
   toEvaporatorInput,
   toCondenserInput,
   validateBeforeAdapt,
 } from "./adapters/toColdProAdapter";
-export * from "./types/unilab.types";
+export * from "./types/cncoils.types";

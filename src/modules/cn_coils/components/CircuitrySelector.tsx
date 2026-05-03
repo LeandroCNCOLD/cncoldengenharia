@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { ArrowRight, ArrowRightLeft, ArrowDownUp, Info, Wand2 } from "lucide-react";
 import { toast } from "sonner";
-import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import { suggestOptimalCircuits } from "../engine/circuitOptimizer";
-import type { HeaderPosition } from "../types/unilab.types";
+import type { HeaderPosition } from "../types/cncoils.types";
 
 const POSITIONS: Array<{
   id: HeaderPosition;

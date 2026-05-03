@@ -1,5 +1,5 @@
-// Service de carregamento e consulta do catálogo de geometrias UNILAB.
-// Lê /public/data/catalogs/coilGeometries.json (gerado a partir do dataset UNILAB)
+// Service de carregamento e consulta do catálogo de geometrias CN Coils.
+// Lê /public/data/catalogs/coilGeometries.json (gerado a partir do dataset CN Coils)
 // e expõe um modelo enriquecido com os campos físicos exigidos pela tela.
 //
 // Regras:
@@ -8,7 +8,7 @@
 // - Cache em módulo (singleton in-memory) para evitar refetch quando vários
 //   componentes pedirem a lista na mesma sessão.
 
-import type { CoilGeometryCatalogItem } from "../types/unilab.types";
+import type { CoilGeometryCatalogItem } from "../types/cncoils.types";
 
 /** Tipos de serpentina aceitos no filtro da UI (pt-BR). */
 export const TIPO_SERPENTINA_VALUES = [
@@ -22,7 +22,7 @@ export const TIPO_SERPENTINA_VALUES = [
 
 export type TipoSerpentina = (typeof TIPO_SERPENTINA_VALUES)[number];
 
-/** Mapeia coil_type (catálogo UNILAB, em inglês) → tipo_serpentina (UI pt-BR). */
+/** Mapeia coil_type (catálogo CN Coils, em inglês) → tipo_serpentina (UI pt-BR). */
 const COIL_TYPE_TO_TIPO_SERPENTINA: Record<string, TipoSerpentina> = {
   condensation: "Condensação",
   direct_expansion: "Expansão Direta",
@@ -32,7 +32,7 @@ const COIL_TYPE_TO_TIPO_SERPENTINA: Record<string, TipoSerpentina> = {
   vapor: "Vapor",
 };
 
-/** Forma da aleta — código numérico do UNILAB (`fin_type`) → rótulo legível. */
+/** Forma da aleta — código numérico do CN Coils (`fin_type`) → rótulo legível. */
 const FIN_TYPE_LABEL: Record<number, string> = {
   1: "Lisa",
   2: "Ondulada",
@@ -95,7 +95,7 @@ let cache: CoilGeometryItem[] | null = null;
 let inflight: Promise<CoilGeometryItem[]> | null = null;
 
 /**
- * Mescla os fatores físicos do dataset UNILAB completo (geometriesComplete.json)
+ * Mescla os fatores físicos do dataset CN Coils completo (geometriesComplete.json)
  * dentro do raw das entradas de coilGeometries.json, indexando por Sigla.
  * Campos adicionados: fin_correction_factor, air_friction_factor,
  * internal_surface_ratio.
@@ -243,7 +243,7 @@ export async function loadCoilGeometries(): Promise<CoilGeometryItem[]> {
       const complete =
         typeof code === "string" ? completeIndex.get(code) : undefined;
       if (complete) {
-        // Mescla fatores físicos do dataset UNILAB completo no raw da entrada.
+        // Mescla fatores físicos do dataset CN Coils completo no raw da entrada.
         // Apenas adiciona se ainda não existir no raw atual.
         const merged: Record<string, unknown> = { ...entry.raw };
         if (merged["fin_correction_factor"] == null && complete["FatCorAl"] != null) {

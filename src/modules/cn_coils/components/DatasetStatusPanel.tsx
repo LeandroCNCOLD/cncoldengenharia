@@ -1,7 +1,7 @@
 import { CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
 import { ptBR } from "../i18n/messages.ptBR";
-import { REQUIRED_CATALOG_FILES } from "../hooks/useUnilabCatalogs";
-import type { CatalogLoadState } from "../types/unilab.types";
+import { REQUIRED_CATALOG_FILES } from "../hooks/useCnCoilsCatalogs";
+import type { CatalogLoadState } from "../types/cncoils.types";
 
 interface DatasetStatusPanelProps extends CatalogLoadState {
   compact?: boolean;

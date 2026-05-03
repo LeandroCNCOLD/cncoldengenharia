@@ -43,7 +43,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "Simulação",
     items: [
-      { to: "/coldpro/unilab", label: "CN COILS", Icon: Gauge },
+      { to: "/coldpro/cncoils", label: "CN COILS", Icon: Gauge },
       { to: "/coldpro/map", label: "Mapa Operacional", Icon: Map },
       { to: "/coldpro/curve", label: "Curva de Desempenho", Icon: TrendingUp },
       { to: "/coldpro/simulation", label: "Equilíbrio do Sistema", Icon: Scale },

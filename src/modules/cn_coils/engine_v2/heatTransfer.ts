@@ -15,7 +15,7 @@
 
 import type { FluidPhase } from "./phaseLogic";
 import { calculateWangChiChang } from "../engine/wangChiChang";
-import type { CnCoilsPhysicalInputs } from "../types/unilab.types";
+import type { CnCoilsPhysicalInputs } from "../types/cncoils.types";
 
 export interface AirSideHResult {
   h_air_Wm2K: number;

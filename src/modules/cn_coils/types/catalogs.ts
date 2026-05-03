@@ -1,5 +1,5 @@
 // Tipagens dos catálogos CN Coils carregados a partir de
-// /public/data/catalogs/*.json (gerados a partir do banco UNILAB original).
+// /public/data/catalogs/*.json (gerados a partir do banco CN Coils original).
 //
 // Estes tipos refletem EXATAMENTE o shape dos JSONs entregues pelo usuário —
 // não inventamos campos, não normalizamos unidades, não geramos defaults.
@@ -17,7 +17,7 @@ export interface Refrigerant {
   maxTempC?: number | null;
   maxPressKPa?: number | null;
   isMixture: boolean;
-  unilab: boolean;
+  cncoils: boolean;
 }
 
 export interface SecondaryFluid {
@@ -27,7 +27,7 @@ export interface SecondaryFluid {
   type: "liquid" | "liquid_mixture" | "gas";
   tipologia: number;
   guid?: string | null;
-  unilab: boolean;
+  cncoils: boolean;
   requiresPressure: boolean;
   raoult?: {
     pm1: number;
@@ -78,7 +78,7 @@ export interface Fan {
 }
 
 /**
- * Geometria UNILAB no formato cru (campos italianos preservados).
+ * Geometria CN Coils no formato cru (campos italianos preservados).
  * Cada item carrega as dimensões e fatores de correção que devem
  * ser aplicados aos campos da barra inferior ao selecionar uma geometria.
  */
@@ -167,7 +167,7 @@ export interface PowerSupply {
 
 /**
  * Catálogo unificado de Lista de Materiais (BOM) — consolidação das 15
- * tabelas `Tbl_Ma*` originais do UNILAB. Cada array contém os registros
+ * tabelas `Tbl_Ma*` originais do CN Coils. Cada array contém os registros
  * crus (campos italianos preservados) usados pelo módulo de Orçamento.
  */
 export interface BomCatalog {
@@ -320,7 +320,7 @@ export interface CompressorOutletTemperature {
 
 /**
  * Polinômio ASHRAE 10 termos para CAPACIDADE de compressores
- * (formato cru — preserva campos italianos/UNILAB).
+ * (formato cru — preserva campos italianos/CN Coils).
  */
 export interface CompressorCapacityPolynomial {
   IDCompressor: number;
@@ -399,7 +399,7 @@ export interface FanCompleteCurve {
 
 /**
  * Bloco de fluidos termofísicos completo (campos italianos preservados).
- * Cada subgrupo é uma lista de registros crus do banco UNILAB com todos
+ * Cada subgrupo é uma lista de registros crus do banco CN Coils com todos
  * os coeficientes (Pm, T, Cl/Pe, etc.) necessários para Cp, ρ, μ, k(T,p).
  */
 export interface FluidsThermoPhysical {
@@ -417,7 +417,7 @@ export interface RefrigerantLimit {
   DescriptionID: number | string;
   Mix: number;
   Fast?: number;
-  Unilab?: number;
+  CnCoils?: number;
   PortataSpecifica_Min?: number;
   PortataSpecifica_Max?: number;
   PortataSpecifica_Ok?: number;
@@ -432,7 +432,7 @@ export interface SecondaryFluidComplete {
   FileName: string;
   DescriptionID: number | string;
   GUIDFluido?: string;
-  Unilab?: number;
+  CnCoils?: number;
   Raoult_PM1?: number; Raoult_KA1?: number; Raoult_KB1?: number;
   Raoult_KC1?: number; Raoult_KD1?: number; Raoult_KE1?: number;
   [extra: string]: unknown;

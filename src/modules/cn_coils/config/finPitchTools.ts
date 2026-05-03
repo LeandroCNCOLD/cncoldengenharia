@@ -7,7 +7,7 @@ export const FIN_PITCH_TOOLS_MM: readonly number[] = [
 
 /**
  * Faz o "match" do passo do catálogo com o valor mais próximo da lista
- * de ferramentas disponíveis. Útil quando uma geometria do UNILAB traz
+ * de ferramentas disponíveis. Útil quando uma geometria do CN Coils traz
  * um passo (ex.: 2.13) que não existe na fábrica.
  */
 export function snapFinPitchToTool(pitchMm: number | undefined): number {

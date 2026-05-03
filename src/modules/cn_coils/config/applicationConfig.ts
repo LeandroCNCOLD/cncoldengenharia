@@ -1,12 +1,12 @@
-// Configuração por aplicação UNILAB.
+// Configuração por aplicação CN Coils.
 // Mapeia cada tipo de componente para os campos do Lado Fluido conforme o
-// software original (Unilab Coils 9.0): condensador mostra Temp. Condensação +
+// software original (CnCoils Coils 9.0): condensador mostra Temp. Condensação +
 // Subresfriamento, evaporador mostra Temp. Evaporação + Sobreaquecimento,
 // baterias hidrônicas mostram Temp. Entrada/Saída do fluido, etc.
 //
 // Esta é apenas configuração de UI — não há cálculo aqui.
 
-import type { UnilabComponentType } from "../types/unilab.types";
+import type { CnCoilsComponentType } from "../types/cncoils.types";
 
 export type FluidKind = "refrigerant" | "water_glycol" | "steam";
 
@@ -26,7 +26,7 @@ export interface FluidFieldDef {
 }
 
 export interface ApplicationConfig {
-  type: UnilabComponentType;
+  type: CnCoilsComponentType;
   label: string;
   shortLabel: string;
   fluidKind: FluidKind;
@@ -40,7 +40,7 @@ export interface ApplicationConfig {
   showFluidVelocity: boolean;
 }
 
-export const APPLICATION_CONFIGS: Record<UnilabComponentType, ApplicationConfig> = {
+export const APPLICATION_CONFIGS: Record<CnCoilsComponentType, ApplicationConfig> = {
   evaporator_dx: {
     type: "evaporator_dx",
     label: "Evaporador DX (Expansão Direta)",
@@ -178,6 +178,6 @@ export const APPLICATION_CONFIGS: Record<UnilabComponentType, ApplicationConfig>
   },
 };
 
-export function getApplicationConfig(t: UnilabComponentType): ApplicationConfig {
+export function getApplicationConfig(t: CnCoilsComponentType): ApplicationConfig {
   return APPLICATION_CONFIGS[t] ?? APPLICATION_CONFIGS.evaporator_dx;
 }

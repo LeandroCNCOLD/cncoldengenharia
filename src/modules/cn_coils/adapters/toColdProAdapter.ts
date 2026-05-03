@@ -1,5 +1,5 @@
-// Adapter UNILAB → ColdPro V2.
-// O simulador UNILAB termina aqui: gera ProgressiveCoilInput ou CondenserSpec
+// Adapter CN Coils → ColdPro V2.
+// O simulador CN Coils termina aqui: gera ProgressiveCoilInput ou CondenserSpec
 // e os entrega para `useComponentStore` via addCoil/addCondenser. Quem cuida
 // de equilíbrio, COP e matching é o ColdPro V2 — não duplicamos nada disso.
 
@@ -10,7 +10,7 @@ import type {
   CnCoilsSimulationResult,
   CnCoilsThermoInputs,
   ValidationResult,
-} from "../types/unilab.types";
+} from "../types/cncoils.types";
 import { mmToM } from "../engine/units";
 
 const COLDPRO_TUBE_MATERIALS = ["copper", "aluminum", "steel"] as const;

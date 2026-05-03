@@ -1,5 +1,5 @@
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
-import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import { FIN_PITCH_TOOLS_MM, snapFinPitchToTool } from "../config/finPitchTools";
 
 /**

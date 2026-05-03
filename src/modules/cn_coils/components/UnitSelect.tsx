@@ -1,4 +1,4 @@
-// Dropdown compacto de unidade (estilo UNILAB). Renderizado na coluna "unidade"
+// Dropdown compacto de unidade (estilo CN Coils). Renderizado na coluna "unidade"
 // das linhas dos painéis de Ventilação / Fluido.
 import type { UnitOption } from "../utils/unitConversions";
 

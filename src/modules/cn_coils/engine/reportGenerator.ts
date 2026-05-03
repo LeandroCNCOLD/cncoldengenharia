@@ -3,7 +3,7 @@ import autoTable from "jspdf-autotable";
 import type {
   CnCoilsPhysicalInputs,
   CnCoilsSimulationResult,
-} from "../types/unilab.types";
+} from "../types/cncoils.types";
 
 export interface ReportSnapshot {
   componentLabel: string;

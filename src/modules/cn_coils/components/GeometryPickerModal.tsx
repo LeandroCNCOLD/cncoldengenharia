@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { GeometryCombobox } from "./GeometryCombobox";
-import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import {
   loadCoilGeometries,
   type CoilGeometryItem,
 } from "../services/coilGeometryCatalogService";
 import { loadSecurityFactorMap } from "../services/securityFactorCatalog";
 import { tipoSerpentinaForComponent } from "../config/coilTypeFilter";
-import type { UnilabComponentType } from "../types/unilab.types";
+import type { CnCoilsComponentType } from "../types/cncoils.types";
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  componentType?: UnilabComponentType;
+  componentType?: CnCoilsComponentType;
 }
 
 export function GeometryPickerModal({ open, onClose, componentType }: Props) {

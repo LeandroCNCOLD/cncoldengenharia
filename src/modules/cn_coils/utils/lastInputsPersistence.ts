@@ -2,7 +2,7 @@
 // Não altera nenhuma lógica de cálculo — apenas snapshot/restore dos campos
 // editáveis pelo usuário no formulário.
 
-import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 
 export const LAST_INPUTS_STORAGE_KEY = "cncoils_last_inputs";
 

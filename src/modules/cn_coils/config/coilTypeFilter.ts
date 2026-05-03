@@ -1,11 +1,11 @@
-// Mapeia o tipo de componente do workspace UNILAB para o filtro de
+// Mapeia o tipo de componente do workspace CN Coils para o filtro de
 // tipo_serpentina (pt-BR) usado no catálogo de geometrias.
 
-import type { UnilabComponentType } from "../types/unilab.types";
+import type { CnCoilsComponentType } from "../types/cncoils.types";
 import type { TipoSerpentina } from "../services/coilGeometryCatalogService";
 
 export function tipoSerpentinaForComponent(
-  t: UnilabComponentType,
+  t: CnCoilsComponentType,
 ): TipoSerpentina | undefined {
   switch (t) {
     case "condenser_air":

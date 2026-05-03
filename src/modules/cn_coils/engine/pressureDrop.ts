@@ -1,7 +1,7 @@
-// Perda de carga lado ar (catálogo UNILAB) e lado fluido (Darcy-Weisbach
+// Perda de carga lado ar (catálogo CN Coils) e lado fluido (Darcy-Weisbach
 // simplificado, monofásico). Sem fallback silencioso para zero.
 
-import type { PressureDropFanItem } from "../types/unilab.types";
+import type { PressureDropFanItem } from "../types/cncoils.types";
 import { getRefrigerantLiquidProps } from "../engine_v2/refrigerantProps";
 import { mmToM, safeDivide, KPA_TO_PA } from "./units";
 

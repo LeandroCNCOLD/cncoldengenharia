@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Package, Check } from "lucide-react";
 import { toast } from "sonner";
-import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
-import type { UnilabComponentType } from "../types/unilab.types";
+import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
+import type { CnCoilsComponentType } from "../types/cncoils.types";
 
 /**
  * Definição completa de máquina importada de um catálogo (ex.: Samcode/CN Cold).
@@ -15,7 +15,7 @@ import type { UnilabComponentType } from "../types/unilab.types";
 interface MachineDefinition {
   id: string;
   name: string;
-  type: UnilabComponentType;
+  type: CnCoilsComponentType;
 
   // Geometria física
   physical: {
@@ -162,7 +162,7 @@ const MOCK_MACHINES: MachineDefinition[] = [
 interface Props {
   open: boolean;
   onClose: () => void;
-  componentType: UnilabComponentType;
+  componentType: CnCoilsComponentType;
 }
 
 /** Resolve um modelo de compressor para o ID presente no compressors.json. */

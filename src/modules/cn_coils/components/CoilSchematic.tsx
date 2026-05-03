@@ -1,4 +1,4 @@
-import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 
 /**
  * Esquema visual simples (SVG) da serpentina, baseado em:

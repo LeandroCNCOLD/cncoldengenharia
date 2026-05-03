@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import {
   validateAirSideInputs,
   type PsychrometricValidationResult,
 } from "../services/psychrometrics";
-import type { CnCoilsSimulationResult } from "../types/unilab.types";
+import type { CnCoilsSimulationResult } from "../types/cncoils.types";
 import { UnitSelect } from "./UnitSelect";
 import {
   AIRFLOW_UNITS,
@@ -39,7 +39,7 @@ import {
   listUsableAxialFans,
   evaluateFanCurve,
   type AxialFanRecord,
-} from "../services/unilabCoefficientsService";
+} from "../services/cncoilsCoefficientsService";
 import { FanPickerModal } from "./FanPickerModal";
 import { ChevronDown, X } from "lucide-react";
 

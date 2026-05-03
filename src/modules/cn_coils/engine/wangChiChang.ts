@@ -239,7 +239,7 @@ export function calcAirSideHeatTransfer(input: CoilGeometryInput): CorrelationRe
   }
 }
 
-export function mapUnilabFinType(code: number | null | undefined): FinType {
+export function mapCnCoilsFinType(code: number | null | undefined): FinType {
   if (code === 3) return "louver";
   if (code === 2) return "wavy";
   return "plain";

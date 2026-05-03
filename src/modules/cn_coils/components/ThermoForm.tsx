@@ -1,22 +1,22 @@
-import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import type {
   RefrigerantItem,
-  UnilabComponentType,
-} from "../types/unilab.types";
+  CnCoilsComponentType,
+} from "../types/cncoils.types";
 import { ptBR } from "../i18n/messages.ptBR";
 import { NumberField } from "./NumberField";
 import { SelectField } from "./SelectField";
 
 interface ThermoFormProps {
   refrigerants: RefrigerantItem[];
-  componentType: UnilabComponentType;
+  componentType: CnCoilsComponentType;
   disabled?: boolean;
 }
 
-function isCondenser(t: UnilabComponentType) {
+function isCondenser(t: CnCoilsComponentType) {
   return t === "condenser_air" || t === "condenser_shell_tube";
 }
-function isEvaporator(t: UnilabComponentType) {
+function isEvaporator(t: CnCoilsComponentType) {
   return t === "evaporator_dx" || t === "evaporator_pumped";
 }
 

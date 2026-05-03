@@ -96,7 +96,7 @@ describe("Caso 3: Gnielinski — água em tubo", () => {
   });
 });
 
-describe("Caso 4: Geometria do Ar — Unilab 173833_S_S", () => {
+describe("Caso 4: Geometria do Ar — CN Coils 173833_S_S", () => {
   it("deve calcular σ = 0.5360 e Dh = 0.004478 m", () => {
     const result = calculateAirGeometry({
       face_area_m2: 1.0,

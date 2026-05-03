@@ -1,0 +1,16 @@
+{
+  "_README": "Coeficientes CN Coils para o motor V2 (Etapa 6). Preencha 'entries' com um item por geometryId. h_air_polynomial é o polinômio h_ar(v) [W/(m²·K)] em função da velocidade frontal [m/s]. Sem este preenchimento, o motor V2 lança CnCoilsCoefficientsMissingError — por design, para nunca usar coeficientes inventados.",
+  "_schema": {
+    "entries": [
+      {
+        "geometryId": "<id da geometria conforme coilGeometries.json>",
+        "h_air_polynomial": [0, 0, 0],
+        "vMin": 0.5,
+        "vMax": 5.0,
+        "finEfficiency": 0.85,
+        "areaCorrection": 1.0
+      }
+    ]
+  },
+  "entries": []
+}

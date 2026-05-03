@@ -15,7 +15,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppColdproRouteImport } from './routes/_app/coldpro'
 import { Route as AppColdproIndexRouteImport } from './routes/_app/coldpro.index'
-import { Route as AppColdproUnilabRouteImport } from './routes/_app/coldpro.unilab'
 import { Route as AppColdproSimulationRouteImport } from './routes/_app/coldpro.simulation'
 import { Route as AppColdproRegistryRouteImport } from './routes/_app/coldpro.registry'
 import { Route as AppColdproRecordRouteImport } from './routes/_app/coldpro.record'
@@ -25,14 +24,15 @@ import { Route as AppColdproFichaTecnicaRouteImport } from './routes/_app/coldpr
 import { Route as AppColdproExportRouteImport } from './routes/_app/coldpro.export'
 import { Route as AppColdproCurveRouteImport } from './routes/_app/coldpro.curve'
 import { Route as AppColdproComponentsRouteImport } from './routes/_app/coldpro.components'
+import { Route as AppColdproCncoilsRouteImport } from './routes/_app/coldpro.cncoils'
 import { Route as AppColdproCatalogRouteImport } from './routes/_app/coldpro.catalog'
 import { Route as AppColdproAuditRouteImport } from './routes/_app/coldpro.audit'
 import { Route as AppColdproAssemblyRouteImport } from './routes/_app/coldpro.assembly'
-import { Route as AppColdproUnilabWorkspaceRouteImport } from './routes/_app/coldpro.unilab.workspace'
-import { Route as AppColdproUnilabSystemsHeatPumpRouteImport } from './routes/_app/coldpro.unilab.systems.heat-pump'
-import { Route as AppColdproUnilabSystemsDxCompleteRouteImport } from './routes/_app/coldpro.unilab.systems.dx-complete'
-import { Route as AppColdproUnilabSystemsDehumidificationRouteImport } from './routes/_app/coldpro.unilab.systems.dehumidification'
-import { Route as AppColdproUnilabSystemsColdRoomRouteImport } from './routes/_app/coldpro.unilab.systems.cold-room'
+import { Route as AppColdproCncoilsWorkspaceRouteImport } from './routes/_app/coldpro.cncoils.workspace'
+import { Route as AppColdproCncoilsSystemsHeatPumpRouteImport } from './routes/_app/coldpro.cncoils.systems.heat-pump'
+import { Route as AppColdproCncoilsSystemsDxCompleteRouteImport } from './routes/_app/coldpro.cncoils.systems.dx-complete'
+import { Route as AppColdproCncoilsSystemsDehumidificationRouteImport } from './routes/_app/coldpro.cncoils.systems.dehumidification'
+import { Route as AppColdproCncoilsSystemsColdRoomRouteImport } from './routes/_app/coldpro.cncoils.systems.cold-room'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -61,11 +61,6 @@ const AppColdproRoute = AppColdproRouteImport.update({
 const AppColdproIndexRoute = AppColdproIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AppColdproRoute,
-} as any)
-const AppColdproUnilabRoute = AppColdproUnilabRouteImport.update({
-  id: '/unilab',
-  path: '/unilab',
   getParentRoute: () => AppColdproRoute,
 } as any)
 const AppColdproSimulationRoute = AppColdproSimulationRouteImport.update({
@@ -113,6 +108,11 @@ const AppColdproComponentsRoute = AppColdproComponentsRouteImport.update({
   path: '/components',
   getParentRoute: () => AppColdproRoute,
 } as any)
+const AppColdproCncoilsRoute = AppColdproCncoilsRouteImport.update({
+  id: '/cncoils',
+  path: '/cncoils',
+  getParentRoute: () => AppColdproRoute,
+} as any)
 const AppColdproCatalogRoute = AppColdproCatalogRouteImport.update({
   id: '/catalog',
   path: '/catalog',
@@ -128,35 +128,35 @@ const AppColdproAssemblyRoute = AppColdproAssemblyRouteImport.update({
   path: '/assembly',
   getParentRoute: () => AppColdproRoute,
 } as any)
-const AppColdproUnilabWorkspaceRoute =
-  AppColdproUnilabWorkspaceRouteImport.update({
+const AppColdproCncoilsWorkspaceRoute =
+  AppColdproCncoilsWorkspaceRouteImport.update({
     id: '/workspace',
     path: '/workspace',
-    getParentRoute: () => AppColdproUnilabRoute,
+    getParentRoute: () => AppColdproCncoilsRoute,
   } as any)
-const AppColdproUnilabSystemsHeatPumpRoute =
-  AppColdproUnilabSystemsHeatPumpRouteImport.update({
+const AppColdproCncoilsSystemsHeatPumpRoute =
+  AppColdproCncoilsSystemsHeatPumpRouteImport.update({
     id: '/systems/heat-pump',
     path: '/systems/heat-pump',
-    getParentRoute: () => AppColdproUnilabRoute,
+    getParentRoute: () => AppColdproCncoilsRoute,
   } as any)
-const AppColdproUnilabSystemsDxCompleteRoute =
-  AppColdproUnilabSystemsDxCompleteRouteImport.update({
+const AppColdproCncoilsSystemsDxCompleteRoute =
+  AppColdproCncoilsSystemsDxCompleteRouteImport.update({
     id: '/systems/dx-complete',
     path: '/systems/dx-complete',
-    getParentRoute: () => AppColdproUnilabRoute,
+    getParentRoute: () => AppColdproCncoilsRoute,
   } as any)
-const AppColdproUnilabSystemsDehumidificationRoute =
-  AppColdproUnilabSystemsDehumidificationRouteImport.update({
+const AppColdproCncoilsSystemsDehumidificationRoute =
+  AppColdproCncoilsSystemsDehumidificationRouteImport.update({
     id: '/systems/dehumidification',
     path: '/systems/dehumidification',
-    getParentRoute: () => AppColdproUnilabRoute,
+    getParentRoute: () => AppColdproCncoilsRoute,
   } as any)
-const AppColdproUnilabSystemsColdRoomRoute =
-  AppColdproUnilabSystemsColdRoomRouteImport.update({
+const AppColdproCncoilsSystemsColdRoomRoute =
+  AppColdproCncoilsSystemsColdRoomRouteImport.update({
     id: '/systems/cold-room',
     path: '/systems/cold-room',
-    getParentRoute: () => AppColdproUnilabRoute,
+    getParentRoute: () => AppColdproCncoilsRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -167,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/coldpro/audit': typeof AppColdproAuditRoute
   '/coldpro/catalog': typeof AppColdproCatalogRoute
+  '/coldpro/cncoils': typeof AppColdproCncoilsRouteWithChildren
   '/coldpro/components': typeof AppColdproComponentsRoute
   '/coldpro/curve': typeof AppColdproCurveRoute
   '/coldpro/export': typeof AppColdproExportRoute
@@ -176,13 +177,12 @@ export interface FileRoutesByFullPath {
   '/coldpro/record': typeof AppColdproRecordRoute
   '/coldpro/registry': typeof AppColdproRegistryRoute
   '/coldpro/simulation': typeof AppColdproSimulationRoute
-  '/coldpro/unilab': typeof AppColdproUnilabRouteWithChildren
   '/coldpro/': typeof AppColdproIndexRoute
-  '/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
-  '/coldpro/unilab/systems/cold-room': typeof AppColdproUnilabSystemsColdRoomRoute
-  '/coldpro/unilab/systems/dehumidification': typeof AppColdproUnilabSystemsDehumidificationRoute
-  '/coldpro/unilab/systems/dx-complete': typeof AppColdproUnilabSystemsDxCompleteRoute
-  '/coldpro/unilab/systems/heat-pump': typeof AppColdproUnilabSystemsHeatPumpRoute
+  '/coldpro/cncoils/workspace': typeof AppColdproCncoilsWorkspaceRoute
+  '/coldpro/cncoils/systems/cold-room': typeof AppColdproCncoilsSystemsColdRoomRoute
+  '/coldpro/cncoils/systems/dehumidification': typeof AppColdproCncoilsSystemsDehumidificationRoute
+  '/coldpro/cncoils/systems/dx-complete': typeof AppColdproCncoilsSystemsDxCompleteRoute
+  '/coldpro/cncoils/systems/heat-pump': typeof AppColdproCncoilsSystemsHeatPumpRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -191,6 +191,7 @@ export interface FileRoutesByTo {
   '/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/coldpro/audit': typeof AppColdproAuditRoute
   '/coldpro/catalog': typeof AppColdproCatalogRoute
+  '/coldpro/cncoils': typeof AppColdproCncoilsRouteWithChildren
   '/coldpro/components': typeof AppColdproComponentsRoute
   '/coldpro/curve': typeof AppColdproCurveRoute
   '/coldpro/export': typeof AppColdproExportRoute
@@ -200,13 +201,12 @@ export interface FileRoutesByTo {
   '/coldpro/record': typeof AppColdproRecordRoute
   '/coldpro/registry': typeof AppColdproRegistryRoute
   '/coldpro/simulation': typeof AppColdproSimulationRoute
-  '/coldpro/unilab': typeof AppColdproUnilabRouteWithChildren
   '/coldpro': typeof AppColdproIndexRoute
-  '/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
-  '/coldpro/unilab/systems/cold-room': typeof AppColdproUnilabSystemsColdRoomRoute
-  '/coldpro/unilab/systems/dehumidification': typeof AppColdproUnilabSystemsDehumidificationRoute
-  '/coldpro/unilab/systems/dx-complete': typeof AppColdproUnilabSystemsDxCompleteRoute
-  '/coldpro/unilab/systems/heat-pump': typeof AppColdproUnilabSystemsHeatPumpRoute
+  '/coldpro/cncoils/workspace': typeof AppColdproCncoilsWorkspaceRoute
+  '/coldpro/cncoils/systems/cold-room': typeof AppColdproCncoilsSystemsColdRoomRoute
+  '/coldpro/cncoils/systems/dehumidification': typeof AppColdproCncoilsSystemsDehumidificationRoute
+  '/coldpro/cncoils/systems/dx-complete': typeof AppColdproCncoilsSystemsDxCompleteRoute
+  '/coldpro/cncoils/systems/heat-pump': typeof AppColdproCncoilsSystemsHeatPumpRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -218,6 +218,7 @@ export interface FileRoutesById {
   '/_app/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/_app/coldpro/audit': typeof AppColdproAuditRoute
   '/_app/coldpro/catalog': typeof AppColdproCatalogRoute
+  '/_app/coldpro/cncoils': typeof AppColdproCncoilsRouteWithChildren
   '/_app/coldpro/components': typeof AppColdproComponentsRoute
   '/_app/coldpro/curve': typeof AppColdproCurveRoute
   '/_app/coldpro/export': typeof AppColdproExportRoute
@@ -227,13 +228,12 @@ export interface FileRoutesById {
   '/_app/coldpro/record': typeof AppColdproRecordRoute
   '/_app/coldpro/registry': typeof AppColdproRegistryRoute
   '/_app/coldpro/simulation': typeof AppColdproSimulationRoute
-  '/_app/coldpro/unilab': typeof AppColdproUnilabRouteWithChildren
   '/_app/coldpro/': typeof AppColdproIndexRoute
-  '/_app/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
-  '/_app/coldpro/unilab/systems/cold-room': typeof AppColdproUnilabSystemsColdRoomRoute
-  '/_app/coldpro/unilab/systems/dehumidification': typeof AppColdproUnilabSystemsDehumidificationRoute
-  '/_app/coldpro/unilab/systems/dx-complete': typeof AppColdproUnilabSystemsDxCompleteRoute
-  '/_app/coldpro/unilab/systems/heat-pump': typeof AppColdproUnilabSystemsHeatPumpRoute
+  '/_app/coldpro/cncoils/workspace': typeof AppColdproCncoilsWorkspaceRoute
+  '/_app/coldpro/cncoils/systems/cold-room': typeof AppColdproCncoilsSystemsColdRoomRoute
+  '/_app/coldpro/cncoils/systems/dehumidification': typeof AppColdproCncoilsSystemsDehumidificationRoute
+  '/_app/coldpro/cncoils/systems/dx-complete': typeof AppColdproCncoilsSystemsDxCompleteRoute
+  '/_app/coldpro/cncoils/systems/heat-pump': typeof AppColdproCncoilsSystemsHeatPumpRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -245,6 +245,7 @@ export interface FileRouteTypes {
     | '/coldpro/assembly'
     | '/coldpro/audit'
     | '/coldpro/catalog'
+    | '/coldpro/cncoils'
     | '/coldpro/components'
     | '/coldpro/curve'
     | '/coldpro/export'
@@ -254,13 +255,12 @@ export interface FileRouteTypes {
     | '/coldpro/record'
     | '/coldpro/registry'
     | '/coldpro/simulation'
-    | '/coldpro/unilab'
     | '/coldpro/'
-    | '/coldpro/unilab/workspace'
-    | '/coldpro/unilab/systems/cold-room'
-    | '/coldpro/unilab/systems/dehumidification'
-    | '/coldpro/unilab/systems/dx-complete'
-    | '/coldpro/unilab/systems/heat-pump'
+    | '/coldpro/cncoils/workspace'
+    | '/coldpro/cncoils/systems/cold-room'
+    | '/coldpro/cncoils/systems/dehumidification'
+    | '/coldpro/cncoils/systems/dx-complete'
+    | '/coldpro/cncoils/systems/heat-pump'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -269,6 +269,7 @@ export interface FileRouteTypes {
     | '/coldpro/assembly'
     | '/coldpro/audit'
     | '/coldpro/catalog'
+    | '/coldpro/cncoils'
     | '/coldpro/components'
     | '/coldpro/curve'
     | '/coldpro/export'
@@ -278,13 +279,12 @@ export interface FileRouteTypes {
     | '/coldpro/record'
     | '/coldpro/registry'
     | '/coldpro/simulation'
-    | '/coldpro/unilab'
     | '/coldpro'
-    | '/coldpro/unilab/workspace'
-    | '/coldpro/unilab/systems/cold-room'
-    | '/coldpro/unilab/systems/dehumidification'
-    | '/coldpro/unilab/systems/dx-complete'
-    | '/coldpro/unilab/systems/heat-pump'
+    | '/coldpro/cncoils/workspace'
+    | '/coldpro/cncoils/systems/cold-room'
+    | '/coldpro/cncoils/systems/dehumidification'
+    | '/coldpro/cncoils/systems/dx-complete'
+    | '/coldpro/cncoils/systems/heat-pump'
   id:
     | '__root__'
     | '/'
@@ -295,6 +295,7 @@ export interface FileRouteTypes {
     | '/_app/coldpro/assembly'
     | '/_app/coldpro/audit'
     | '/_app/coldpro/catalog'
+    | '/_app/coldpro/cncoils'
     | '/_app/coldpro/components'
     | '/_app/coldpro/curve'
     | '/_app/coldpro/export'
@@ -304,13 +305,12 @@ export interface FileRouteTypes {
     | '/_app/coldpro/record'
     | '/_app/coldpro/registry'
     | '/_app/coldpro/simulation'
-    | '/_app/coldpro/unilab'
     | '/_app/coldpro/'
-    | '/_app/coldpro/unilab/workspace'
-    | '/_app/coldpro/unilab/systems/cold-room'
-    | '/_app/coldpro/unilab/systems/dehumidification'
-    | '/_app/coldpro/unilab/systems/dx-complete'
-    | '/_app/coldpro/unilab/systems/heat-pump'
+    | '/_app/coldpro/cncoils/workspace'
+    | '/_app/coldpro/cncoils/systems/cold-room'
+    | '/_app/coldpro/cncoils/systems/dehumidification'
+    | '/_app/coldpro/cncoils/systems/dx-complete'
+    | '/_app/coldpro/cncoils/systems/heat-pump'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -361,13 +361,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/coldpro/'
       preLoaderRoute: typeof AppColdproIndexRouteImport
-      parentRoute: typeof AppColdproRoute
-    }
-    '/_app/coldpro/unilab': {
-      id: '/_app/coldpro/unilab'
-      path: '/unilab'
-      fullPath: '/coldpro/unilab'
-      preLoaderRoute: typeof AppColdproUnilabRouteImport
       parentRoute: typeof AppColdproRoute
     }
     '/_app/coldpro/simulation': {
@@ -433,6 +426,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproComponentsRouteImport
       parentRoute: typeof AppColdproRoute
     }
+    '/_app/coldpro/cncoils': {
+      id: '/_app/coldpro/cncoils'
+      path: '/cncoils'
+      fullPath: '/coldpro/cncoils'
+      preLoaderRoute: typeof AppColdproCncoilsRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
     '/_app/coldpro/catalog': {
       id: '/_app/coldpro/catalog'
       path: '/catalog'
@@ -454,69 +454,70 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproAssemblyRouteImport
       parentRoute: typeof AppColdproRoute
     }
-    '/_app/coldpro/unilab/workspace': {
-      id: '/_app/coldpro/unilab/workspace'
+    '/_app/coldpro/cncoils/workspace': {
+      id: '/_app/coldpro/cncoils/workspace'
       path: '/workspace'
-      fullPath: '/coldpro/unilab/workspace'
-      preLoaderRoute: typeof AppColdproUnilabWorkspaceRouteImport
-      parentRoute: typeof AppColdproUnilabRoute
+      fullPath: '/coldpro/cncoils/workspace'
+      preLoaderRoute: typeof AppColdproCncoilsWorkspaceRouteImport
+      parentRoute: typeof AppColdproCncoilsRoute
     }
-    '/_app/coldpro/unilab/systems/heat-pump': {
-      id: '/_app/coldpro/unilab/systems/heat-pump'
+    '/_app/coldpro/cncoils/systems/heat-pump': {
+      id: '/_app/coldpro/cncoils/systems/heat-pump'
       path: '/systems/heat-pump'
-      fullPath: '/coldpro/unilab/systems/heat-pump'
-      preLoaderRoute: typeof AppColdproUnilabSystemsHeatPumpRouteImport
-      parentRoute: typeof AppColdproUnilabRoute
+      fullPath: '/coldpro/cncoils/systems/heat-pump'
+      preLoaderRoute: typeof AppColdproCncoilsSystemsHeatPumpRouteImport
+      parentRoute: typeof AppColdproCncoilsRoute
     }
-    '/_app/coldpro/unilab/systems/dx-complete': {
-      id: '/_app/coldpro/unilab/systems/dx-complete'
+    '/_app/coldpro/cncoils/systems/dx-complete': {
+      id: '/_app/coldpro/cncoils/systems/dx-complete'
       path: '/systems/dx-complete'
-      fullPath: '/coldpro/unilab/systems/dx-complete'
-      preLoaderRoute: typeof AppColdproUnilabSystemsDxCompleteRouteImport
-      parentRoute: typeof AppColdproUnilabRoute
+      fullPath: '/coldpro/cncoils/systems/dx-complete'
+      preLoaderRoute: typeof AppColdproCncoilsSystemsDxCompleteRouteImport
+      parentRoute: typeof AppColdproCncoilsRoute
     }
-    '/_app/coldpro/unilab/systems/dehumidification': {
-      id: '/_app/coldpro/unilab/systems/dehumidification'
+    '/_app/coldpro/cncoils/systems/dehumidification': {
+      id: '/_app/coldpro/cncoils/systems/dehumidification'
       path: '/systems/dehumidification'
-      fullPath: '/coldpro/unilab/systems/dehumidification'
-      preLoaderRoute: typeof AppColdproUnilabSystemsDehumidificationRouteImport
-      parentRoute: typeof AppColdproUnilabRoute
+      fullPath: '/coldpro/cncoils/systems/dehumidification'
+      preLoaderRoute: typeof AppColdproCncoilsSystemsDehumidificationRouteImport
+      parentRoute: typeof AppColdproCncoilsRoute
     }
-    '/_app/coldpro/unilab/systems/cold-room': {
-      id: '/_app/coldpro/unilab/systems/cold-room'
+    '/_app/coldpro/cncoils/systems/cold-room': {
+      id: '/_app/coldpro/cncoils/systems/cold-room'
       path: '/systems/cold-room'
-      fullPath: '/coldpro/unilab/systems/cold-room'
-      preLoaderRoute: typeof AppColdproUnilabSystemsColdRoomRouteImport
-      parentRoute: typeof AppColdproUnilabRoute
+      fullPath: '/coldpro/cncoils/systems/cold-room'
+      preLoaderRoute: typeof AppColdproCncoilsSystemsColdRoomRouteImport
+      parentRoute: typeof AppColdproCncoilsRoute
     }
   }
 }
 
-interface AppColdproUnilabRouteChildren {
-  AppColdproUnilabWorkspaceRoute: typeof AppColdproUnilabWorkspaceRoute
-  AppColdproUnilabSystemsColdRoomRoute: typeof AppColdproUnilabSystemsColdRoomRoute
-  AppColdproUnilabSystemsDehumidificationRoute: typeof AppColdproUnilabSystemsDehumidificationRoute
-  AppColdproUnilabSystemsDxCompleteRoute: typeof AppColdproUnilabSystemsDxCompleteRoute
-  AppColdproUnilabSystemsHeatPumpRoute: typeof AppColdproUnilabSystemsHeatPumpRoute
+interface AppColdproCncoilsRouteChildren {
+  AppColdproCncoilsWorkspaceRoute: typeof AppColdproCncoilsWorkspaceRoute
+  AppColdproCncoilsSystemsColdRoomRoute: typeof AppColdproCncoilsSystemsColdRoomRoute
+  AppColdproCncoilsSystemsDehumidificationRoute: typeof AppColdproCncoilsSystemsDehumidificationRoute
+  AppColdproCncoilsSystemsDxCompleteRoute: typeof AppColdproCncoilsSystemsDxCompleteRoute
+  AppColdproCncoilsSystemsHeatPumpRoute: typeof AppColdproCncoilsSystemsHeatPumpRoute
 }
 
-const AppColdproUnilabRouteChildren: AppColdproUnilabRouteChildren = {
-  AppColdproUnilabWorkspaceRoute: AppColdproUnilabWorkspaceRoute,
-  AppColdproUnilabSystemsColdRoomRoute: AppColdproUnilabSystemsColdRoomRoute,
-  AppColdproUnilabSystemsDehumidificationRoute:
-    AppColdproUnilabSystemsDehumidificationRoute,
-  AppColdproUnilabSystemsDxCompleteRoute:
-    AppColdproUnilabSystemsDxCompleteRoute,
-  AppColdproUnilabSystemsHeatPumpRoute: AppColdproUnilabSystemsHeatPumpRoute,
+const AppColdproCncoilsRouteChildren: AppColdproCncoilsRouteChildren = {
+  AppColdproCncoilsWorkspaceRoute: AppColdproCncoilsWorkspaceRoute,
+  AppColdproCncoilsSystemsColdRoomRoute: AppColdproCncoilsSystemsColdRoomRoute,
+  AppColdproCncoilsSystemsDehumidificationRoute:
+    AppColdproCncoilsSystemsDehumidificationRoute,
+  AppColdproCncoilsSystemsDxCompleteRoute:
+    AppColdproCncoilsSystemsDxCompleteRoute,
+  AppColdproCncoilsSystemsHeatPumpRoute: AppColdproCncoilsSystemsHeatPumpRoute,
 }
 
-const AppColdproUnilabRouteWithChildren =
-  AppColdproUnilabRoute._addFileChildren(AppColdproUnilabRouteChildren)
+const AppColdproCncoilsRouteWithChildren =
+  AppColdproCncoilsRoute._addFileChildren(AppColdproCncoilsRouteChildren)
 
 interface AppColdproRouteChildren {
   AppColdproAssemblyRoute: typeof AppColdproAssemblyRoute
   AppColdproAuditRoute: typeof AppColdproAuditRoute
   AppColdproCatalogRoute: typeof AppColdproCatalogRoute
+  AppColdproCncoilsRoute: typeof AppColdproCncoilsRouteWithChildren
   AppColdproComponentsRoute: typeof AppColdproComponentsRoute
   AppColdproCurveRoute: typeof AppColdproCurveRoute
   AppColdproExportRoute: typeof AppColdproExportRoute
@@ -526,7 +527,6 @@ interface AppColdproRouteChildren {
   AppColdproRecordRoute: typeof AppColdproRecordRoute
   AppColdproRegistryRoute: typeof AppColdproRegistryRoute
   AppColdproSimulationRoute: typeof AppColdproSimulationRoute
-  AppColdproUnilabRoute: typeof AppColdproUnilabRouteWithChildren
   AppColdproIndexRoute: typeof AppColdproIndexRoute
 }
 
@@ -534,6 +534,7 @@ const AppColdproRouteChildren: AppColdproRouteChildren = {
   AppColdproAssemblyRoute: AppColdproAssemblyRoute,
   AppColdproAuditRoute: AppColdproAuditRoute,
   AppColdproCatalogRoute: AppColdproCatalogRoute,
+  AppColdproCncoilsRoute: AppColdproCncoilsRouteWithChildren,
   AppColdproComponentsRoute: AppColdproComponentsRoute,
   AppColdproCurveRoute: AppColdproCurveRoute,
   AppColdproExportRoute: AppColdproExportRoute,
@@ -543,7 +544,6 @@ const AppColdproRouteChildren: AppColdproRouteChildren = {
   AppColdproRecordRoute: AppColdproRecordRoute,
   AppColdproRegistryRoute: AppColdproRegistryRoute,
   AppColdproSimulationRoute: AppColdproSimulationRoute,
-  AppColdproUnilabRoute: AppColdproUnilabRouteWithChildren,
   AppColdproIndexRoute: AppColdproIndexRoute,
 }
 

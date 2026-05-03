@@ -1,11 +1,11 @@
 import { useMemo } from "react";
-import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import type {
   CoilGeometryCatalogItem,
   FinPitchItem,
   FinThicknessItem,
   TubeMaterialItem,
-} from "../types/unilab.types";
+} from "../types/cncoils.types";
 import {
   diagnoseGeometry,
   getCoilGeometryById,

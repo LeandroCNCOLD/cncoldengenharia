@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { validatePhysicalInputs } from "../validators/simulationValidator";
-import type { CnCoilsPhysicalInputs } from "../types/unilab.types";
+import type { CnCoilsPhysicalInputs } from "../types/cncoils.types";
 
 const VALID_PHYSICAL_INPUTS: CnCoilsPhysicalInputs = {
   componentType: "evaporator_dx",

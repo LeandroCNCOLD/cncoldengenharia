@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Lock, Unlock, Zap, Search } from "lucide-react";
-import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import { CompressorPickerModal } from "./CompressorPickerModal";
 import { RefrigerantPickerModal } from "./RefrigerantPickerModal";
 import type {
-  UnilabComponentType,
+  CnCoilsComponentType,
   CnCoilsSimulationResult,
-} from "../types/unilab.types";
+} from "../types/cncoils.types";
 import { getApplicationConfig } from "../config/applicationConfig";
 import {
   loadRefrigerants,
@@ -33,7 +33,7 @@ import {
 } from "../utils/unitConversions";
 
 interface FluidSidePanelProps {
-  componentType: UnilabComponentType;
+  componentType: CnCoilsComponentType;
   refrigerants?: unknown;
   disabled?: boolean;
   result?: CnCoilsSimulationResult;
@@ -42,7 +42,7 @@ interface FluidSidePanelProps {
 /**
  * FluidSidePanel — Etapa 4 (LADO FLUIDO).
  *
- * Ordem exata da spec UNILAB:
+ * Ordem exata da spec CN Coils:
  *  1) Fluido (dropdown)
  *  2) Vazão (input + cadeado funcional)
  *  3) Temp. Condensação/Evaporação (label dinâmico)
