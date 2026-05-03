@@ -15,10 +15,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppColdproRouteImport } from './routes/_app/coldpro'
 import { Route as AppColdproIndexRouteImport } from './routes/_app/coldpro.index'
+import { Route as AppColdproSystemBalanceRouteImport } from './routes/_app/coldpro.system-balance'
 import { Route as AppColdproSimulationRouteImport } from './routes/_app/coldpro.simulation'
 import { Route as AppColdproRegistryRouteImport } from './routes/_app/coldpro.registry'
 import { Route as AppColdproRecordRouteImport } from './routes/_app/coldpro.record'
+import { Route as AppColdproPerformanceRouteImport } from './routes/_app/coldpro.performance'
 import { Route as AppColdproOptimizationRouteImport } from './routes/_app/coldpro.optimization'
+import { Route as AppColdproOperatingMapRouteImport } from './routes/_app/coldpro.operating-map'
 import { Route as AppColdproMontagemRouteImport } from './routes/_app/coldpro.montagem'
 import { Route as AppColdproMapRouteImport } from './routes/_app/coldpro.map'
 import { Route as AppColdproFrostRouteImport } from './routes/_app/coldpro.frost'
@@ -68,6 +71,11 @@ const AppColdproIndexRoute = AppColdproIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppColdproRoute,
 } as any)
+const AppColdproSystemBalanceRoute = AppColdproSystemBalanceRouteImport.update({
+  id: '/system-balance',
+  path: '/system-balance',
+  getParentRoute: () => AppColdproRoute,
+} as any)
 const AppColdproSimulationRoute = AppColdproSimulationRouteImport.update({
   id: '/simulation',
   path: '/simulation',
@@ -83,9 +91,19 @@ const AppColdproRecordRoute = AppColdproRecordRouteImport.update({
   path: '/record',
   getParentRoute: () => AppColdproRoute,
 } as any)
+const AppColdproPerformanceRoute = AppColdproPerformanceRouteImport.update({
+  id: '/performance',
+  path: '/performance',
+  getParentRoute: () => AppColdproRoute,
+} as any)
 const AppColdproOptimizationRoute = AppColdproOptimizationRouteImport.update({
   id: '/optimization',
   path: '/optimization',
+  getParentRoute: () => AppColdproRoute,
+} as any)
+const AppColdproOperatingMapRoute = AppColdproOperatingMapRouteImport.update({
+  id: '/operating-map',
+  path: '/operating-map',
   getParentRoute: () => AppColdproRoute,
 } as any)
 const AppColdproMontagemRoute = AppColdproMontagemRouteImport.update({
@@ -207,10 +225,13 @@ export interface FileRoutesByFullPath {
   '/coldpro/frost': typeof AppColdproFrostRoute
   '/coldpro/map': typeof AppColdproMapRoute
   '/coldpro/montagem': typeof AppColdproMontagemRoute
+  '/coldpro/operating-map': typeof AppColdproOperatingMapRoute
   '/coldpro/optimization': typeof AppColdproOptimizationRoute
+  '/coldpro/performance': typeof AppColdproPerformanceRoute
   '/coldpro/record': typeof AppColdproRecordRoute
   '/coldpro/registry': typeof AppColdproRegistryRoute
   '/coldpro/simulation': typeof AppColdproSimulationRoute
+  '/coldpro/system-balance': typeof AppColdproSystemBalanceRoute
   '/coldpro/': typeof AppColdproIndexRoute
   '/coldpro/cncoils/workspace': typeof AppColdproCncoilsWorkspaceRoute
   '/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
@@ -236,10 +257,13 @@ export interface FileRoutesByTo {
   '/coldpro/frost': typeof AppColdproFrostRoute
   '/coldpro/map': typeof AppColdproMapRoute
   '/coldpro/montagem': typeof AppColdproMontagemRoute
+  '/coldpro/operating-map': typeof AppColdproOperatingMapRoute
   '/coldpro/optimization': typeof AppColdproOptimizationRoute
+  '/coldpro/performance': typeof AppColdproPerformanceRoute
   '/coldpro/record': typeof AppColdproRecordRoute
   '/coldpro/registry': typeof AppColdproRegistryRoute
   '/coldpro/simulation': typeof AppColdproSimulationRoute
+  '/coldpro/system-balance': typeof AppColdproSystemBalanceRoute
   '/coldpro': typeof AppColdproIndexRoute
   '/coldpro/cncoils/workspace': typeof AppColdproCncoilsWorkspaceRoute
   '/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
@@ -268,10 +292,13 @@ export interface FileRoutesById {
   '/_app/coldpro/frost': typeof AppColdproFrostRoute
   '/_app/coldpro/map': typeof AppColdproMapRoute
   '/_app/coldpro/montagem': typeof AppColdproMontagemRoute
+  '/_app/coldpro/operating-map': typeof AppColdproOperatingMapRoute
   '/_app/coldpro/optimization': typeof AppColdproOptimizationRoute
+  '/_app/coldpro/performance': typeof AppColdproPerformanceRoute
   '/_app/coldpro/record': typeof AppColdproRecordRoute
   '/_app/coldpro/registry': typeof AppColdproRegistryRoute
   '/_app/coldpro/simulation': typeof AppColdproSimulationRoute
+  '/_app/coldpro/system-balance': typeof AppColdproSystemBalanceRoute
   '/_app/coldpro/': typeof AppColdproIndexRoute
   '/_app/coldpro/cncoils/workspace': typeof AppColdproCncoilsWorkspaceRoute
   '/_app/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
@@ -300,10 +327,13 @@ export interface FileRouteTypes {
     | '/coldpro/frost'
     | '/coldpro/map'
     | '/coldpro/montagem'
+    | '/coldpro/operating-map'
     | '/coldpro/optimization'
+    | '/coldpro/performance'
     | '/coldpro/record'
     | '/coldpro/registry'
     | '/coldpro/simulation'
+    | '/coldpro/system-balance'
     | '/coldpro/'
     | '/coldpro/cncoils/workspace'
     | '/coldpro/unilab/workspace'
@@ -329,10 +359,13 @@ export interface FileRouteTypes {
     | '/coldpro/frost'
     | '/coldpro/map'
     | '/coldpro/montagem'
+    | '/coldpro/operating-map'
     | '/coldpro/optimization'
+    | '/coldpro/performance'
     | '/coldpro/record'
     | '/coldpro/registry'
     | '/coldpro/simulation'
+    | '/coldpro/system-balance'
     | '/coldpro'
     | '/coldpro/cncoils/workspace'
     | '/coldpro/unilab/workspace'
@@ -360,10 +393,13 @@ export interface FileRouteTypes {
     | '/_app/coldpro/frost'
     | '/_app/coldpro/map'
     | '/_app/coldpro/montagem'
+    | '/_app/coldpro/operating-map'
     | '/_app/coldpro/optimization'
+    | '/_app/coldpro/performance'
     | '/_app/coldpro/record'
     | '/_app/coldpro/registry'
     | '/_app/coldpro/simulation'
+    | '/_app/coldpro/system-balance'
     | '/_app/coldpro/'
     | '/_app/coldpro/cncoils/workspace'
     | '/_app/coldpro/unilab/workspace'
@@ -424,6 +460,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproIndexRouteImport
       parentRoute: typeof AppColdproRoute
     }
+    '/_app/coldpro/system-balance': {
+      id: '/_app/coldpro/system-balance'
+      path: '/system-balance'
+      fullPath: '/coldpro/system-balance'
+      preLoaderRoute: typeof AppColdproSystemBalanceRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
     '/_app/coldpro/simulation': {
       id: '/_app/coldpro/simulation'
       path: '/simulation'
@@ -445,11 +488,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproRecordRouteImport
       parentRoute: typeof AppColdproRoute
     }
+    '/_app/coldpro/performance': {
+      id: '/_app/coldpro/performance'
+      path: '/performance'
+      fullPath: '/coldpro/performance'
+      preLoaderRoute: typeof AppColdproPerformanceRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
     '/_app/coldpro/optimization': {
       id: '/_app/coldpro/optimization'
       path: '/optimization'
       fullPath: '/coldpro/optimization'
       preLoaderRoute: typeof AppColdproOptimizationRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
+    '/_app/coldpro/operating-map': {
+      id: '/_app/coldpro/operating-map'
+      path: '/operating-map'
+      fullPath: '/coldpro/operating-map'
+      preLoaderRoute: typeof AppColdproOperatingMapRouteImport
       parentRoute: typeof AppColdproRoute
     }
     '/_app/coldpro/montagem': {
@@ -622,10 +679,13 @@ interface AppColdproRouteChildren {
   AppColdproFrostRoute: typeof AppColdproFrostRoute
   AppColdproMapRoute: typeof AppColdproMapRoute
   AppColdproMontagemRoute: typeof AppColdproMontagemRoute
+  AppColdproOperatingMapRoute: typeof AppColdproOperatingMapRoute
   AppColdproOptimizationRoute: typeof AppColdproOptimizationRoute
+  AppColdproPerformanceRoute: typeof AppColdproPerformanceRoute
   AppColdproRecordRoute: typeof AppColdproRecordRoute
   AppColdproRegistryRoute: typeof AppColdproRegistryRoute
   AppColdproSimulationRoute: typeof AppColdproSimulationRoute
+  AppColdproSystemBalanceRoute: typeof AppColdproSystemBalanceRoute
   AppColdproIndexRoute: typeof AppColdproIndexRoute
   AppColdproUnilabWorkspaceRoute: typeof AppColdproUnilabWorkspaceRoute
   AppColdproUnilabIndexRoute: typeof AppColdproUnilabIndexRoute
@@ -644,10 +704,13 @@ const AppColdproRouteChildren: AppColdproRouteChildren = {
   AppColdproFrostRoute: AppColdproFrostRoute,
   AppColdproMapRoute: AppColdproMapRoute,
   AppColdproMontagemRoute: AppColdproMontagemRoute,
+  AppColdproOperatingMapRoute: AppColdproOperatingMapRoute,
   AppColdproOptimizationRoute: AppColdproOptimizationRoute,
+  AppColdproPerformanceRoute: AppColdproPerformanceRoute,
   AppColdproRecordRoute: AppColdproRecordRoute,
   AppColdproRegistryRoute: AppColdproRegistryRoute,
   AppColdproSimulationRoute: AppColdproSimulationRoute,
+  AppColdproSystemBalanceRoute: AppColdproSystemBalanceRoute,
   AppColdproIndexRoute: AppColdproIndexRoute,
   AppColdproUnilabWorkspaceRoute: AppColdproUnilabWorkspaceRoute,
   AppColdproUnilabIndexRoute: AppColdproUnilabIndexRoute,
