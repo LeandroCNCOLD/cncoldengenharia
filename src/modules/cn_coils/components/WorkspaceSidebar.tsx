@@ -80,6 +80,38 @@ export function WorkspaceSidebar({
 
   const [costModalOpen, setCostModalOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalKey>(null);
+  const [hasSaved, setHasSaved] = useState<boolean>(false);
+
+  useEffect(() => {
+    setHasSaved(hasSavedLastInputs());
+  }, [result]);
+
+  // Avisos não-bloqueantes para campos opcionais.
+  const optionalAdvisories = useMemo(() => {
+    const list: string[] = [];
+    const p = physicalInputs;
+    if (!p?.circuits || p.circuits <= 0)
+      list.push("Circuitos não informados — usando estimativa automática");
+    if (!p?.tubeMaterialId)
+      list.push("Material do tubo não selecionado — usando cobre (padrão)");
+    if (!p?.tubePitchTransverseMm || p.tubePitchTransverseMm <= 0)
+      list.push("Passo transversal não informado — usando valor da geometria");
+    if (!p?.tubePitchLongitudinalMm || p.tubePitchLongitudinalMm <= 0)
+      list.push("Passo longitudinal não informado — usando valor da geometria");
+    if (!p?.finPitchMm || p.finPitchMm <= 0)
+      list.push("Passo de aleta não informado — usando 2,5 mm (padrão)");
+    if (!p?.finThicknessMm || p.finThicknessMm <= 0)
+      list.push("Espessura de aleta não informada — usando 0,12 mm (padrão)");
+    if (!selectedGeometry)
+      list.push("Geometria não selecionada — usando parâmetros manuais");
+    return list;
+  }, [physicalInputs, selectedGeometry]);
+
+  const handleRestoreLast = () => {
+    if (restoreLastInputs()) {
+      setHasSaved(true);
+    }
+  };
 
   const buildSnapshot = (): ReportSnapshot => ({
     componentLabel: cfg.shortLabel,
