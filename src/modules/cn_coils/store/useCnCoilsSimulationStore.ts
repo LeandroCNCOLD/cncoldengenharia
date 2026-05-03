@@ -104,6 +104,14 @@ interface CnCoilsSimulationStore {
   dischargeSuperheatK: number | null;
   /** Compressor selecionado (acopla o cálculo ao polinômio ASHRAE). */
   selectedCompressorId?: string;
+  /** Spec do compressor carregado do catálogo (passado ao motor). */
+  compressorSpec?: {
+    cooling_capacity_w: number;
+    power_w: number;
+    refrigerant: string;
+    evap_temp_c: number;
+    cond_temp_c: number;
+  };
   /** Quantidade de compressores aplicados (multiplica vazão mássica/capacidade). */
   compressorCount: number;
   setFluid: (val: string) => void;
@@ -216,10 +224,30 @@ export const useCnCoilsSimulationStore = create<CnCoilsSimulationStore>((set) =>
   pairedTempC: null,
   dischargeSuperheatK: null,
   selectedCompressorId: undefined,
+  compressorSpec: undefined,
   compressorCount: 1,
   setPairedTempC: (val) => set({ pairedTempC: val }),
   setDischargeSuperheatK: (val) => set({ dischargeSuperheatK: val }),
-  setSelectedCompressor: (id) => set({ selectedCompressorId: id }),
+  setSelectedCompressor: (id) => {
+    set({ selectedCompressorId: id });
+    if (id) {
+      void import("@/modules/coldpro_catalog/data/compressorCatalog.service").then(
+        ({ getCompressorById, toCompressorSpec }) =>
+          getCompressorById(id).then((row) => {
+            if (row) {
+              const state = useCnCoilsSimulationStore.getState();
+              const spec = toCompressorSpec(row, {
+                evap_temp_c: state.fluidOperatingTemp_C,
+                cond_temp_c: state.fluidOperatingTemp_C,
+              });
+              set({ compressorSpec: spec });
+            }
+          }),
+      );
+    } else {
+      set({ compressorSpec: undefined });
+    }
+  },
   setCompressorCount: (n) => set({ compressorCount: Math.max(1, Math.floor(n) || 1) }),
 
   // Etapa 3.6 — Custo da bateria

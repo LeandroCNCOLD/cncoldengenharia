@@ -10,6 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
+import { loadCompressorIndex } from "@/modules/coldpro_catalog/data/compressorCatalog.service";
+import type { CompressorIndexRow } from "@/modules/coldpro_catalog/data/compressorCatalog.types";
 
 export interface CompressorItem {
   id: string;
@@ -18,17 +20,20 @@ export interface CompressorItem {
   type?: string;
   refrigerantCode?: string;
   brand?: string;
+  nominalCapacityW?: number | null;
+  nominalPowerW?: number | null;
+  nominalHp?: number | null;
 }
 
-/** Infere a marca do compressor a partir da série/modelo (catálogo não tem campo brand). */
-function inferBrand(series?: string, model?: string): string {
-  const s = `${series ?? ""} ${model ?? ""}`.toUpperCase();
-  if (/\bSH\b|ECOLINE|BITZER|\bSE\b|\b[24][A-Z]{2}-/.test(s)) return "Bitzer";
-  if (/^D|DKJ|DLJ|DLF|DKM|DLL|DLE|DKSJ|DANFOSS|MANEUROP|MT |MTZ|NTZ/.test(s)) return "Danfoss";
-  if (/^Z|COPELAND|SCROLL DIGITAL|\bCS\b/.test(s)) return "Copeland";
-  if (/EMBRACO|NE[A-Z]?\d|FF\d|EM[A-Z]?\d/.test(s)) return "Embraco";
-  if (/TECUMSEH|AE[A-Z]?\d|AJ[A-Z]?\d|AW[A-Z]?\d/.test(s)) return "Tecumseh";
-  return "Outros";
+const applicationLabels: Record<string, string> = {
+  LT: "LT — Congelados",
+  MT: "MT — Resfriados",
+  HT: "HT — Climatizados",
+};
+
+function formatKw(w?: number | null): string {
+  if (w == null || !Number.isFinite(w)) return "—";
+  return `${(w / 1000).toFixed(2)} kW`;
 }
 
 interface Props {
@@ -66,69 +71,19 @@ export function CompressorPickerModal({ open, onClose }: Props) {
     setDraftId(selectedCompressorId);
     setDraftCount(compressorCount);
     setLoading(true);
-    Promise.all([
-      fetch("/data/catalogs/compressors.json", { cache: "no-cache" })
-        .then((r) => (r.ok ? r.json() : []))
-        .catch(() => []),
-      fetch("/data/equipment/compressors_bitzer.json", { cache: "force-cache" })
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null),
-    ])
-      .then(([cnList, bitzerPayload]) => {
-        const mapped: CompressorItem[] = [];
-
-        // CN Coils catalog (Copeland/Danfoss/etc.)
-        if (Array.isArray(cnList)) {
-          for (const c of cnList) {
-            const o = c as Record<string, unknown>;
-            const id = String(o.id ?? o.model ?? "");
-            if (!id) continue;
-            const series = o.series ? String(o.series) : undefined;
-            const model = String(o.model ?? id);
-            const brand =
-              (o.brand ? String(o.brand) : undefined) ??
-              (o.manufacturer ? String(o.manufacturer) : undefined) ??
-              inferBrand(series, model);
-            mapped.push({
-              id,
-              model,
-              series,
-              type: o.type ? String(o.type) : undefined,
-              refrigerantCode: o.refrigerantCode ? String(o.refrigerantCode) : undefined,
-              brand,
-            });
-          }
-        }
-
-        // Bitzer native catalog
-        const bitzerArr = (bitzerPayload as { compressors?: unknown[] } | null)?.compressors;
-        if (Array.isArray(bitzerArr)) {
-          // Deduplicate by model+refrigerant (catalog has variants per rpm)
-          const seen = new Set<string>();
-          for (const c of bitzerArr) {
-            const o = c as Record<string, unknown>;
-            const model = String(o.model ?? "");
-            const refrigerant = String(o.refrigerant ?? "");
-            if (!model) continue;
-            const key = `${model}__${refrigerant}`;
-            if (seen.has(key)) continue;
-            seen.add(key);
-            const id = String(o.id ?? `BITZER_${key}`);
-            // Derive series from Bitzer model prefix: digits + first letters
-            // e.g. "4KES-09" -> "K", "6FE-50" -> "F", "44NES-24" -> "N"
-            const seriesMatch = /^\d+([A-Z]+?)(?:[A-Z]?-|\d|$)/.exec(model);
-            const series = seriesMatch ? seriesMatch[1].charAt(0) : undefined;
-            mapped.push({
-              id,
-              model,
-              series,
-              type: "SemiHermetic",
-              refrigerantCode: refrigerant || undefined,
-              brand: "Bitzer",
-            });
-          }
-        }
-
+    loadCompressorIndex()
+      .then((index) => {
+        const mapped: CompressorItem[] = index.map((r: CompressorIndexRow) => ({
+          id: r.id,
+          model: r.model,
+          series: r.compressor_type ?? undefined,
+          type: r.application,
+          refrigerantCode: r.refrigerant,
+          brand: r.manufacturer,
+          nominalCapacityW: r.nominal_cooling_capacity_w,
+          nominalPowerW: r.nominal_power_w,
+          nominalHp: r.nominal_hp,
+        }));
         setItems(mapped);
       })
       .catch(() => setItems([]))
@@ -216,7 +171,7 @@ export function CompressorPickerModal({ open, onClose }: Props) {
               }}
               className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
             >
-              <option value="">Todas as marcas</option>
+              <option value="">Fabricante</option>
               {brands.map((b) => (
                 <option key={b} value={b}>{b}</option>
               ))}
@@ -226,9 +181,9 @@ export function CompressorPickerModal({ open, onClose }: Props) {
               onChange={(e) => setTypeFilter(e.target.value)}
               className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
             >
-              <option value="">Todos os tipos</option>
+              <option value="">Aplicação</option>
               {types.map((t) => (
-                <option key={t} value={t}>{t}</option>
+                <option key={t} value={t}>{applicationLabels[t] ?? t}</option>
               ))}
             </select>
             <select
@@ -236,7 +191,7 @@ export function CompressorPickerModal({ open, onClose }: Props) {
               onChange={(e) => setSeriesFilter(e.target.value)}
               className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
             >
-              <option value="">Todas as séries</option>
+              <option value="">Série</option>
               {seriesList.map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
@@ -246,7 +201,7 @@ export function CompressorPickerModal({ open, onClose }: Props) {
           {/* Lista */}
           <div className="max-h-72 overflow-auto rounded-lg border border-slate-200">
             {loading ? (
-              <div className="p-4 text-center text-xs text-slate-500">Carregando…</div>
+              <div className="p-4 text-center text-xs text-slate-500">Carregando 12.251 compressores…</div>
             ) : filtered.length === 0 ? (
               <div className="p-4 text-center text-xs text-slate-500">
                 Nenhum compressor encontrado ({items.length} no catálogo).
@@ -303,8 +258,15 @@ export function CompressorPickerModal({ open, onClose }: Props) {
               />
             </div>
             {draft && (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs">
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs space-y-0.5">
                 <div className="font-semibold text-amber-900">{draft.model}</div>
+                <div className="text-[10px] text-amber-800">
+                  {draft.brand} • {applicationLabels[draft.type ?? ""] ?? draft.type} • {draft.refrigerantCode}
+                </div>
+                <div className="text-[10px] text-amber-800">
+                  Q nom: {formatKw(draft.nominalCapacityW)} • W nom: {formatKw(draft.nominalPowerW)}
+                  {draft.nominalHp != null && ` • ${draft.nominalHp} HP`}
+                </div>
                 <div className="text-[10px] text-amber-800">
                   {draftCount}× compressor — capacidade total = unitária × {draftCount}
                 </div>
