@@ -303,7 +303,11 @@ export function FluidSidePanel({
                 type="number"
                 value={
                   Number.isFinite(displayedMassFlowKgH)
-                    ? massFlowConv.fromCanonical(displayedMassFlowKgH, uMassFlow)
+                    ? Number(
+                        massFlowConv
+                          .fromCanonical(displayedMassFlowKgH, uMassFlow)
+                          .toFixed(1),
+                      )
                     : 0
                 }
                 step="any"
