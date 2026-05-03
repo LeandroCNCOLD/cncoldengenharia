@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { useCycleSimulation } from "../hooks/useCycleSimulation";
 import { useFrostAnalysis } from "../hooks/useFrostAnalysis";
+import { useUncertaintyAnalysis } from "../hooks/useUncertaintyAnalysis";
 import { CyclePHDiagram } from "../components/CyclePHDiagram";
 import { FrostAnalysisPanel } from "../components/FrostAnalysisPanel";
 import { CycleResultPanel } from "../components/CycleResultPanel";
+import { UncertaintyPanel } from "../components/UncertaintyBadge";
+import type { CoilCycleInputs, CoilCycleResult } from "../engines/coil/coilCycleAdapter";
 import type { CycleSystemConfig } from "../engines/cycle/cycleTypes";
 
 const DEFAULT_CONFIG: CycleSystemConfig = {
@@ -86,6 +89,18 @@ export function CycleWorkspacePage() {
   const cycleResult = simState.status === "success" ? simState.result : null;
   const evaporatorExternalAreaM2 = estimateEvaporatorExternalAreaM2(config);
   const frostOperationTimeH = 6;
+  const uncertaintyInputs = cycleResult ? buildEvaporatorUncertaintyInputs(config, cycleResult.m_dot_kgS) : null;
+  const uncertaintyNominal = cycleResult ? buildEvaporatorNominalResult(cycleResult) : null;
+  const {
+    result: uncertaintyResult,
+    isLoading: uncertaintyLoading,
+  } = useUncertaintyAnalysis({
+    inputs: uncertaintyInputs,
+    nominalResult: uncertaintyNominal,
+    debounceMs: 1500,
+    enabled: !!uncertaintyNominal?.success,
+    config: { samples: 200 },
+  });
   const frostResult = useFrostAnalysis({
     cycleResult,
     refrigerantId: config.refrigerantId,
@@ -196,6 +211,30 @@ export function CycleWorkspacePage() {
           {simState.status === "success" ? (
             <div className="space-y-4">
               <CycleResultPanel result={simState.result} />
+              {(uncertaintyResult || uncertaintyLoading) && (
+                <details className="rounded-lg border border-gray-800 bg-white text-gray-900">
+                  <summary className="cursor-pointer select-none px-4 py-2 text-sm font-medium">
+                    Análise de Incerteza
+                    {uncertaintyLoading && (
+                      <span className="ml-2 animate-pulse text-xs text-gray-400">
+                        calculando...
+                      </span>
+                    )}
+                  </summary>
+                  <div className="px-4 pb-4 pt-2">
+                    {uncertaintyResult ? (
+                      <UncertaintyPanel
+                        result={uncertaintyResult}
+                        isLoading={uncertaintyLoading}
+                      />
+                    ) : (
+                      <div className="animate-pulse text-xs text-gray-400">
+                        Calculando intervalos de confiança...
+                      </div>
+                    )}
+                  </div>
+                </details>
+              )}
               {frostResult && cycleResult?.converged && (
                 <div className="rounded-lg border border-gray-800 bg-white p-4 text-gray-900">
                   <FrostAnalysisPanel
@@ -227,4 +266,40 @@ function estimateEvaporatorExternalAreaM2(config: CycleSystemConfig): number {
     Math.PI *
     (p.tubeExternalDiameterMm / 1000)
   );
+}
+
+function buildEvaporatorUncertaintyInputs(
+  config: CycleSystemConfig,
+  massFlowKgS: number,
+): CoilCycleInputs {
+  return {
+    ...config.evaporator,
+    refrigerantId: config.refrigerantId,
+    evaporatingTempC: config.solver?.Te_initial_C ?? -10,
+    condensingTempC: config.solver?.Tc_initial_C ?? 40,
+    refrigerantMassFlowKgS: massFlowKgS,
+    componentType: "evaporator",
+  };
+}
+
+function buildEvaporatorNominalResult(result: NonNullable<ReturnType<typeof getCycleResultTypeHack>>): CoilCycleResult {
+  return {
+    totalCapacityW: result.evaporatorResult.totalCapacityW,
+    sensibleCapacityW: result.evaporatorResult.sensibleCapacityW,
+    latentCapacityW: result.evaporatorResult.latentCapacityW,
+    airOutletTempC: result.evaporatorResult.airOutletTempC,
+    airOutletRH: result.evaporatorResult.airOutletRH,
+    airPressureDropPa: result.evaporatorResult.airPressureDropPa,
+    fluidPressureDropKPa: result.evaporatorResult.fluidPressureDropKPa,
+    overallU_WM2K: result.evaporatorResult.overallU_WM2K,
+    safetyFactor: result.evaporatorResult.safetyFactor,
+    refrigerantOutletTempC: result.Te_C,
+    inletQuality: result.statePoints.point4_valveOut.quality,
+    warnings: result.warnings,
+    success: true,
+  };
+}
+
+function getCycleResultTypeHack() {
+  return null as import("../engines/cycle/cycleTypes").CycleResult | null;
 }
