@@ -138,11 +138,11 @@ export function FinModal({ open, onClose }: ModalProps) {
             />
             <ReadField label="Forma" value={selected?.forma_aleta} />
             <ReadField
-              label="Fator de correção"
+              label="Fat. Correção Aleta"
               value={selected?.fator_correcao_aleta}
             />
             <ReadField
-              label="Fator de atrito (ar)"
+              label="Fat. Atrito Ar"
               value={selected?.fator_atrito_ar}
             />
             <ReadField
