@@ -1,3 +1,9 @@
+/**
+ * @deprecated Use simulatorCoreAdapter.ts que delega ao motor unificado.
+ * Este arquivo será removido na versão 2.0.
+ * Mantido apenas para compatibilidade com testes existentes.
+ */
+
 // Núcleo do simulador UNILAB.
 //
 // Fluxo:

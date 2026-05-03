@@ -2,7 +2,7 @@
 // material do tubo no catálogo e chama runSimulation. Sem mocks.
 
 import { useCallback } from "react";
-import { runSimulation, SimulationError } from "../engine/simulatorCore";
+import { runSimulation, SimulationError } from "../engine/simulatorCoreAdapter";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
 import type {
   AirVelocityCorrectionItem,
