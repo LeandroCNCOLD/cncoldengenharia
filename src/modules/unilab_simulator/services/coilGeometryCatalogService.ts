@@ -37,6 +37,9 @@ const FIN_TYPE_LABEL: Record<number, string> = {
   1: "Lisa",
   2: "Ondulada",
   3: "Persianada",
+  4: "Wavy",
+  5: "Serrilhada",
+  6: "Ondulada Esp.",
 };
 
 /** Tipo de bateria — código numérico (`tube_type`) → rótulo legível. */
@@ -155,7 +158,7 @@ function enrich(entry: RawGeometryEntry): CoilGeometryItem {
     null;
   const uBaseWm2K =
     uBaseFromCatalog ?? DEFAULT_U_BASE_BY_COIL_TYPE[coilType] ?? DEFAULT_U_BASE_FALLBACK;
-  const finType = readNum(raw, "fin_type");
+  const finType = readNum(raw, "fin_type") ?? readNum(raw, "TipoAletta");
   const tubeType = readNum(raw, "tube_type");
 
   // Coerções para o shape requerido pela base CoilGeometryCatalogItem.
@@ -190,9 +193,18 @@ function enrich(entry: RawGeometryEntry): CoilGeometryItem {
       finType !== null ? FIN_TYPE_LABEL[finType] ?? `Tipo ${finType}` : null,
     tipo_bateria:
       tubeType !== null ? TUBE_TYPE_LABEL[tubeType] ?? `Tipo ${tubeType}` : null,
-    fator_correcao_aleta: readNum(raw, "fin_correction_factor"),
-    fator_atrito_ar: readNum(raw, "air_friction_factor"),
-    razao_superficies_internas: readNum(raw, "internal_surface_ratio"),
+    fator_correcao_aleta:
+      readNum(raw, "fin_correction_factor") ??
+      readNum(raw, "FatCorAl") ??
+      null,
+    fator_atrito_ar:
+      readNum(raw, "air_friction_factor") ??
+      readNum(raw, "FattoreAttrAria") ??
+      null,
+    razao_superficies_internas:
+      readNum(raw, "internal_surface_ratio") ??
+      readNum(raw, "RappSuperficiInterne") ??
+      null,
     tubo_liso: readBool(raw, "smooth_tube") ?? (tubeType === 1 ? true : null),
     certificacao_ahri: readBool(raw, "ahri_certified"),
     certificacao_eurovent: readBool(raw, "eurovent_certified"),
