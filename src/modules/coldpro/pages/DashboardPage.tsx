@@ -127,17 +127,13 @@ export function DashboardPage() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {QUICK_CARDS.map((card) => {
               const Icon = card.Icon;
-              const Wrapper = card.available ? Link : "div";
-              return (
-                <Wrapper
-                  key={card.to}
-                  {...(card.available ? { to: card.to } : {})}
-                  className={`group relative flex flex-col gap-2 rounded-lg border bg-card p-4 shadow-sm transition ${
-                    card.available
-                      ? "border-border hover:-translate-y-0.5 hover:border-[#1E6FD9]/40 hover:shadow-md"
-                      : "cursor-not-allowed border-dashed border-border opacity-60"
-                  }`}
-                >
+              const cls = `group relative flex flex-col gap-2 rounded-lg border bg-card p-4 shadow-sm transition ${
+                card.available
+                  ? "border-border hover:-translate-y-0.5 hover:border-[#1E6FD9]/40 hover:shadow-md"
+                  : "cursor-not-allowed border-dashed border-border opacity-60"
+              }`;
+              const inner = (
+                <>
                   {!card.available && (
                     <span className="absolute right-3 top-3 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
                       Em breve
@@ -156,7 +152,16 @@ export function DashboardPage() {
                       Abrir <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
                     </span>
                   )}
-                </Wrapper>
+                </>
+              );
+              return card.available ? (
+                <Link key={card.to} to={card.to} className={cls}>
+                  {inner}
+                </Link>
+              ) : (
+                <div key={card.to} className={cls}>
+                  {inner}
+                </div>
               );
             })}
           </div>
