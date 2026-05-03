@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, useMatches } from "@tanstack/react-router";
-import { UnilabDashboardPage } from "@/modules/unilab_simulator/pages/UnilabDashboardPage";
+import { UnilabDashboardPage } from "@/modules/cn_coils/pages/UnilabDashboardPage";
 
 export const Route = createFileRoute("/_app/coldpro/unilab")({
   component: UnilabLayout,

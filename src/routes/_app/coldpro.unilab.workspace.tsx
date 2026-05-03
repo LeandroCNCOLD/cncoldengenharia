@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { UnilabWorkspacePage } from "@/modules/unilab_simulator/pages/UnilabWorkspacePage";
+import { UnilabWorkspacePage } from "@/modules/cn_coils/pages/UnilabWorkspacePage";
 
 const searchSchema = z.object({
   type: z
