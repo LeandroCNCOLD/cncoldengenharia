@@ -258,8 +258,15 @@ export function CompressorPickerModal({ open, onClose }: Props) {
               />
             </div>
             {draft && (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs">
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs space-y-0.5">
                 <div className="font-semibold text-amber-900">{draft.model}</div>
+                <div className="text-[10px] text-amber-800">
+                  {draft.brand} • {applicationLabels[draft.type ?? ""] ?? draft.type} • {draft.refrigerantCode}
+                </div>
+                <div className="text-[10px] text-amber-800">
+                  Q nom: {formatKw(draft.nominalCapacityW)} • W nom: {formatKw(draft.nominalPowerW)}
+                  {draft.nominalHp != null && ` • ${draft.nominalHp} HP`}
+                </div>
                 <div className="text-[10px] text-amber-800">
                   {draftCount}× compressor — capacidade total = unitária × {draftCount}
                 </div>
