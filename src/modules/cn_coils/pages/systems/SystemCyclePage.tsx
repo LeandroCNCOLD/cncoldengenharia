@@ -398,7 +398,7 @@ export function SystemCyclePage({ mode }: SystemCyclePageProps) {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="rounded-lg border border-gray-800 bg-white p-3">
-                  <CyclePHDiagram result={cycleResult} />
+                  <CyclePHDiagram result={cycleResult} refrigerantId={refrigerantId} />
                 </div>
                 <div className="rounded-lg border border-gray-800 bg-white p-3 text-gray-900">
                   <CycleResultPanel result={cycleResult} />
