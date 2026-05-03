@@ -391,6 +391,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
       calculatedCost: 0,
       tubeMaterialKey: "copper_kg",
       finMaterialKey: "aluminum_kg",
+      bdiPercent: 0,
     }),
 }));
 
