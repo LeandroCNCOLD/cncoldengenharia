@@ -67,9 +67,19 @@ export interface PressureDropFanItem {
 
 export type HeaderPosition = "LL" | "LR" | "RL" | "RR" | "TB" | "BT";
 
+export type FinType = "plain" | "wavy" | "louver";
+
 export interface UnilabPhysicalInputs {
   componentType: UnilabComponentType;
   geometryId: string;
+  /** Tipo de aleta — controla a correlação ar-side. */
+  finType?: FinType;
+  /** Passo do louver [mm] (apenas finType="louver"). */
+  L_p?: number;
+  /** Ângulo do louver [graus] (apenas finType="louver"). */
+  theta_L?: number;
+  /** Amplitude da ondulação [mm] (apenas finType="wavy"). */
+  A_w?: number;
   finnedHeightMm: number;
   finnedLengthMm: number;
   /** Nº de tubos por fila — entrada direta do usuário (CN COILS). */
@@ -124,7 +134,20 @@ export interface UnilabSimulationResult {
   ntu?: number;
   effectiveness?: number;
   correctionFactor: number;
-  warnings: string[];
+  warnings: Array<string | StructuredWarning>;
+  // Etapa 6 — geometria e correlação
+  A_fin_m2?: number;
+  A_tube_bare_m2?: number;
+  A_total_m2?: number;
+  eta_fin?: number;
+  surface_ratio?: number;
+  correlation_used?: string;
+}
+
+export interface StructuredWarning {
+  code: string;
+  message: string | null;
+  severity: "warning" | "error";
 }
 
 export interface ValidationResult {
