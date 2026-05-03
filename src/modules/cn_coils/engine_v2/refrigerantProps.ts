@@ -1,78 +1,97 @@
 import type { FluidPropsSinglePhase } from "./heatTransfer";
 
-interface RefrigerantTableEntry {
-  T_C: number;
-  rho_liq: number;
-  cp_liq: number;
-  mu_liq: number;
-  k_liq: number;
-  h_fg: number;
+export interface RefrigerantLiquidProps extends FluidPropsSinglePhase {
+  h_fg_kJkg: number;
+  warnings: string[];
 }
 
-const TABLES: Record<string, RefrigerantTableEntry[]> = {
-  R22: [
-    { T_C: -40, rho_liq: 1316, cp_liq: 1100, mu_liq: 2.8e-4, k_liq: 0.115, h_fg: 234 },
-    { T_C: -20, rho_liq: 1267, cp_liq: 1130, mu_liq: 2.3e-4, k_liq: 0.107, h_fg: 222 },
-    { T_C: -10, rho_liq: 1241, cp_liq: 1160, mu_liq: 2.1e-4, k_liq: 0.102, h_fg: 216 },
-    { T_C: 0,   rho_liq: 1213, cp_liq: 1190, mu_liq: 1.9e-4, k_liq: 0.097, h_fg: 209 },
-    { T_C: 10,  rho_liq: 1183, cp_liq: 1230, mu_liq: 1.7e-4, k_liq: 0.092, h_fg: 201 },
-    { T_C: 30,  rho_liq: 1116, cp_liq: 1340, mu_liq: 1.4e-4, k_liq: 0.080, h_fg: 182 },
-  ],
-  R134A: [
-    { T_C: -40, rho_liq: 1295, cp_liq: 1260, mu_liq: 4.2e-4, k_liq: 0.112, h_fg: 225 },
-    { T_C: -20, rho_liq: 1225, cp_liq: 1310, mu_liq: 3.2e-4, k_liq: 0.102, h_fg: 212 },
-    { T_C: -10, rho_liq: 1187, cp_liq: 1350, mu_liq: 2.8e-4, k_liq: 0.097, h_fg: 205 },
-    { T_C: 0,   rho_liq: 1147, cp_liq: 1400, mu_liq: 2.5e-4, k_liq: 0.092, h_fg: 197 },
-    { T_C: 10,  rho_liq: 1104, cp_liq: 1460, mu_liq: 2.2e-4, k_liq: 0.086, h_fg: 188 },
-    { T_C: 30,  rho_liq: 1009, cp_liq: 1620, mu_liq: 1.7e-4, k_liq: 0.074, h_fg: 167 },
-  ],
+// Format: [T_°C, rho kg/m³, mu µPa·s, cp J/(kg·K), k mW/(m·K), h_fg kJ/kg]
+const TABLES: Record<string, number[][]> = {
   R404A: [
-    { T_C: -40, rho_liq: 1218, cp_liq: 1280, mu_liq: 2.8e-4, k_liq: 0.097, h_fg: 200 },
-    { T_C: -20, rho_liq: 1155, cp_liq: 1330, mu_liq: 2.3e-4, k_liq: 0.088, h_fg: 188 },
-    { T_C: -10, rho_liq: 1120, cp_liq: 1370, mu_liq: 2.0e-4, k_liq: 0.083, h_fg: 181 },
-    { T_C: 0,   rho_liq: 1083, cp_liq: 1420, mu_liq: 1.8e-4, k_liq: 0.078, h_fg: 173 },
-    { T_C: 10,  rho_liq: 1043, cp_liq: 1480, mu_liq: 1.6e-4, k_liq: 0.073, h_fg: 164 },
-    { T_C: 30,  rho_liq: 950,  cp_liq: 1660, mu_liq: 1.2e-4, k_liq: 0.060, h_fg: 141 },
+    [-40, 1235, 310, 1340, 90.0, 218],
+    [-30, 1195, 275, 1370, 86.0, 208],
+    [-20, 1153, 245, 1400, 82.0, 197],
+    [-10, 1120, 200, 1370, 83.0, 185],
+    [  0, 1060, 194, 1490, 74.0, 172],
+    [ 10, 1008, 172, 1560, 70.0, 157],
+    [ 20,  950, 152, 1650, 65.0, 140],
+    [ 30,  883, 133, 1790, 60.0, 120],
+    [ 40,  800, 114, 2010, 54.0,  95],
   ],
   R410A: [
-    { T_C: -40, rho_liq: 1245, cp_liq: 1510, mu_liq: 2.8e-4, k_liq: 0.108, h_fg: 256 },
-    { T_C: -20, rho_liq: 1171, cp_liq: 1570, mu_liq: 2.2e-4, k_liq: 0.097, h_fg: 240 },
-    { T_C: -10, rho_liq: 1131, cp_liq: 1620, mu_liq: 1.9e-4, k_liq: 0.091, h_fg: 231 },
-    { T_C: 0,   rho_liq: 1088, cp_liq: 1680, mu_liq: 1.7e-4, k_liq: 0.085, h_fg: 221 },
-    { T_C: 10,  rho_liq: 1041, cp_liq: 1760, mu_liq: 1.5e-4, k_liq: 0.079, h_fg: 210 },
-    { T_C: 30,  rho_liq: 934,  cp_liq: 2010, mu_liq: 1.1e-4, k_liq: 0.065, h_fg: 182 },
+    [-40, 1280, 270, 1480, 106.0, 240],
+    [-30, 1240, 238, 1510, 101.0, 229],
+    [-20, 1196, 210, 1540,  96.0, 217],
+    [-10, 1149, 185, 1580,  91.0, 204],
+    [  0, 1088, 163, 1630,  86.0, 221],
+    [ 10, 1044, 143, 1700,  80.0, 189],
+    [ 20,  982, 124, 1800,  74.0, 172],
+    [ 30,  910, 106, 1950,  67.0, 153],
+    [ 40,  824,  88, 2200,  59.0, 131],
+  ],
+  R22: [
+    [-40, 1283, 350, 1100, 110.0, 234],
+    [-30, 1247, 305, 1115, 105.0, 224],
+    [-20, 1209, 268, 1130, 100.0, 213],
+    [-10, 1169, 236, 1150,  95.0, 201],
+    [  0, 1127, 208, 1175,  90.0, 187],
+    [ 10, 1082, 183, 1210,  85.0, 172],
+    [ 20, 1033, 161, 1255,  79.0, 155],
+    [ 30,  978, 140, 1320,  73.0, 135],
+    [ 40,  916, 120, 1420,  66.0, 111],
+  ],
+  R134A: [
+    [-40, 1294, 420, 1260,  97.0, 204],
+    [-30, 1261, 360, 1275,  93.0, 196],
+    [-20, 1226, 310, 1290,  89.0, 187],
+    [-10, 1189, 268, 1310,  85.0, 177],
+    [  0, 1150, 232, 1340,  81.0, 166],
+    [ 10, 1108, 200, 1380,  77.0, 154],
+    [ 20, 1063, 172, 1430,  72.0, 140],
+    [ 30, 1013, 147, 1500,  67.0, 124],
+    [ 40,  957, 124, 1600,  62.0, 105],
   ],
   R407C: [
-    { T_C: -40, rho_liq: 1223, cp_liq: 1330, mu_liq: 3.0e-4, k_liq: 0.103, h_fg: 218 },
-    { T_C: -20, rho_liq: 1154, cp_liq: 1390, mu_liq: 2.4e-4, k_liq: 0.093, h_fg: 204 },
-    { T_C: -10, rho_liq: 1117, cp_liq: 1430, mu_liq: 2.1e-4, k_liq: 0.088, h_fg: 196 },
-    { T_C: 0,   rho_liq: 1078, cp_liq: 1480, mu_liq: 1.9e-4, k_liq: 0.083, h_fg: 188 },
-    { T_C: 10,  rho_liq: 1036, cp_liq: 1550, mu_liq: 1.7e-4, k_liq: 0.077, h_fg: 178 },
-    { T_C: 30,  rho_liq: 940,  cp_liq: 1760, mu_liq: 1.2e-4, k_liq: 0.063, h_fg: 154 },
+    [-40, 1237, 340, 1380,  96.0, 228],
+    [-30, 1197, 298, 1400,  92.0, 218],
+    [-20, 1155, 262, 1430,  88.0, 207],
+    [-10, 1110, 230, 1465,  83.0, 195],
+    [  0, 1062, 202, 1510,  79.0, 181],
+    [ 10, 1010, 177, 1570,  74.0, 166],
+    [ 20,  952, 154, 1660,  68.0, 149],
+    [ 30,  886, 132, 1800,  62.0, 129],
+    [ 40,  808, 111, 2020,  55.0, 105],
   ],
   R507A: [
-    { T_C: -40, rho_liq: 1207, cp_liq: 1270, mu_liq: 2.7e-4, k_liq: 0.095, h_fg: 196 },
-    { T_C: -20, rho_liq: 1141, cp_liq: 1320, mu_liq: 2.2e-4, k_liq: 0.086, h_fg: 183 },
-    { T_C: -10, rho_liq: 1105, cp_liq: 1360, mu_liq: 1.9e-4, k_liq: 0.081, h_fg: 176 },
-    { T_C: 0,   rho_liq: 1067, cp_liq: 1410, mu_liq: 1.7e-4, k_liq: 0.076, h_fg: 168 },
-    { T_C: 10,  rho_liq: 1025, cp_liq: 1470, mu_liq: 1.5e-4, k_liq: 0.070, h_fg: 158 },
-    { T_C: 30,  rho_liq: 929,  cp_liq: 1660, mu_liq: 1.1e-4, k_liq: 0.057, h_fg: 135 },
+    [-40, 1230, 295, 1360,  90.0, 222],
+    [-30, 1191, 260, 1385,  86.0, 212],
+    [-20, 1150, 228, 1415,  82.0, 201],
+    [-10, 1107, 200, 1450,  78.0, 189],
+    [  0, 1060, 175, 1495,  74.0, 176],
+    [ 10, 1009, 153, 1555,  69.0, 161],
+    [ 20,  952, 132, 1640,  64.0, 144],
+    [ 30,  887, 113, 1780,  58.0, 124],
+    [ 40,  810,  95, 2000,  52.0,  99],
   ],
   R290: [
-    { T_C: -40, rho_liq: 567,  cp_liq: 2380, mu_liq: 1.8e-4, k_liq: 0.117, h_fg: 430 },
-    { T_C: -20, rho_liq: 540,  cp_liq: 2450, mu_liq: 1.5e-4, k_liq: 0.108, h_fg: 408 },
-    { T_C: -10, rho_liq: 525,  cp_liq: 2490, mu_liq: 1.4e-4, k_liq: 0.103, h_fg: 396 },
-    { T_C: 0,   rho_liq: 509,  cp_liq: 2540, mu_liq: 1.3e-4, k_liq: 0.098, h_fg: 383 },
-    { T_C: 10,  rho_liq: 491,  cp_liq: 2600, mu_liq: 1.2e-4, k_liq: 0.092, h_fg: 369 },
-    { T_C: 30,  rho_liq: 451,  cp_liq: 2760, mu_liq: 1.0e-4, k_liq: 0.079, h_fg: 337 },
+    [-40, 556, 210, 2300, 118.0, 420],
+    [-30, 540, 188, 2340, 112.0, 405],
+    [-20, 523, 168, 2390, 106.0, 389],
+    [-10, 505, 150, 2450, 100.0, 371],
+    [  0, 486, 133, 2520,  94.0, 352],
+    [ 10, 466, 118, 2620,  87.0, 330],
+    [ 20, 444, 104, 2750,  80.0, 306],
+    [ 30, 420,  90, 2940,  73.0, 278],
+    [ 40, 393,  77, 3230,  65.0, 246],
   ],
   R717: [
-    { T_C: -40, rho_liq: 690,  cp_liq: 4600, mu_liq: 2.5e-4, k_liq: 0.540, h_fg: 1388 },
-    { T_C: -20, rho_liq: 665,  cp_liq: 4700, mu_liq: 2.1e-4, k_liq: 0.510, h_fg: 1328 },
-    { T_C: -10, rho_liq: 651,  cp_liq: 4760, mu_liq: 1.9e-4, k_liq: 0.494, h_fg: 1296 },
-    { T_C: 0,   rho_liq: 638,  cp_liq: 4820, mu_liq: 1.7e-4, k_liq: 0.478, h_fg: 1262 },
-    { T_C: 10,  rho_liq: 624,  cp_liq: 4890, mu_liq: 1.5e-4, k_liq: 0.461, h_fg: 1226 },
-    { T_C: 30,  rho_liq: 595,  cp_liq: 5060, mu_liq: 1.2e-4, k_liq: 0.425, h_fg: 1148 },
+    [-40, 690, 255, 4380, 508.0, 1387],
+    [-30, 677, 225, 4430, 493.0, 1357],
+    [-20, 665, 199, 4480, 477.0, 1328],
+    [-10, 652, 175, 4540, 461.0, 1297],
+    [  0, 639, 154, 4600, 445.0, 1265],
+    [ 10, 625, 135, 4670, 428.0, 1231],
+    [ 20, 610, 118, 4760, 410.0, 1194],
   ],
 };
 
@@ -80,29 +99,17 @@ function normalizeId(id: string): string {
   return id.replace(/^REF_/i, "").replace(/-/g, "").toUpperCase();
 }
 
-function interpolate(table: RefrigerantTableEntry[], T: number): RefrigerantTableEntry {
-  if (T <= table[0].T_C) return table[0];
-  if (T >= table[table.length - 1].T_C) return table[table.length - 1];
+function interpolate(table: number[][], T: number, col: number): number {
+  if (T <= table[0][0]) return table[0][col];
+  if (T >= table[table.length - 1][0]) return table[table.length - 1][col];
   for (let i = 0; i < table.length - 1; i++) {
-    const a = table[i], b = table[i + 1];
-    if (T >= a.T_C && T <= b.T_C) {
-      const f = (T - a.T_C) / (b.T_C - a.T_C);
-      return {
-        T_C: T,
-        rho_liq: a.rho_liq + f * (b.rho_liq - a.rho_liq),
-        cp_liq:  a.cp_liq  + f * (b.cp_liq  - a.cp_liq),
-        mu_liq:  a.mu_liq  + f * (b.mu_liq  - a.mu_liq),
-        k_liq:   a.k_liq   + f * (b.k_liq   - a.k_liq),
-        h_fg:    a.h_fg    + f * (b.h_fg    - a.h_fg),
-      };
+    const T0 = table[i][0], T1 = table[i + 1][0];
+    if (T >= T0 && T <= T1) {
+      const f = (T - T0) / (T1 - T0);
+      return table[i][col] + f * (table[i + 1][col] - table[i][col]);
     }
   }
-  return table[table.length - 1];
-}
-
-export interface RefrigerantLiquidProps extends FluidPropsSinglePhase {
-  h_fg_kJkg: number;
-  warnings: string[];
+  return table[table.length - 1][col];
 }
 
 export function getRefrigerantLiquidProps(
@@ -115,19 +122,17 @@ export function getRefrigerantLiquidProps(
 
   if (!table) {
     warnings.push(
-      `Refrigerante "${refrigerantId}" não disponível nas tabelas NIST. Usando R404A como fallback.`,
+      `Refrigerante "${refrigerantId}" não encontrado nas tabelas NIST. Usando R404A como fallback.`,
     );
     table = TABLES.R404A;
   }
 
-  const entry = interpolate(table, T_sat_C);
-
   return {
-    rho_kg_m3: entry.rho_liq,
-    mu_Pa_s: entry.mu_liq,
-    cp_J_kgK: entry.cp_liq,
-    k_W_mK: entry.k_liq,
-    h_fg_kJkg: entry.h_fg,
+    rho_kg_m3: interpolate(table, T_sat_C, 1),
+    mu_Pa_s:   interpolate(table, T_sat_C, 2) * 1e-6,
+    cp_J_kgK:  interpolate(table, T_sat_C, 3),
+    k_W_mK:    interpolate(table, T_sat_C, 4) * 1e-3,
+    h_fg_kJkg: interpolate(table, T_sat_C, 5),
     warnings,
   };
 }
