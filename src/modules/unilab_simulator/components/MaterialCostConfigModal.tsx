@@ -31,6 +31,15 @@ export function MaterialCostConfigModal({ open, onClose }: MaterialCostConfigMod
   const setTubeKey = useUnilabSimulationStore((s) => s.setTubeMaterialKey);
   const setFinKey = useUnilabSimulationStore((s) => s.setFinMaterialKey);
   const cost = useUnilabSimulationStore((s) => s.calculatedCost);
+  const bdiPercent = useUnilabSimulationStore((s) => s.bdiPercent);
+  const setBdiPercent = useUnilabSimulationStore((s) => s.setBdiPercent);
+
+  // Custo direto reverso: total = direto * (1 + BDI/100)
+  const { directCost, bdiAmount } = useMemo(() => {
+    const factor = 1 + (bdiPercent || 0) / 100;
+    const direct = factor > 0 ? cost / factor : cost;
+    return { directCost: direct, bdiAmount: cost - direct };
+  }, [cost, bdiPercent]);
 
   useEffect(() => {
     if (!open) return;
