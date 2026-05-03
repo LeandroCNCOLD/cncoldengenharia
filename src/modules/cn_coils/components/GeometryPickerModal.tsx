@@ -170,6 +170,31 @@ export function GeometryPickerModal({ open, onClose, componentType }: Props) {
                 }}
               />
 
+              {selected && (
+                <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
+                  {selected.tipo_serpentina && (
+                    <span className="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-700">
+                      {selected.tipo_serpentina}
+                    </span>
+                  )}
+                  {selected.forma_aleta && (
+                    <span className="rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-blue-800">
+                      Aleta: {selected.forma_aleta}
+                    </span>
+                  )}
+                  {selected.fator_correcao_aleta != null && (
+                    <span className="rounded border border-slate-200 bg-white px-2 py-0.5 text-slate-600">
+                      Fat. Correção Aleta: {selected.fator_correcao_aleta.toFixed(4)}
+                    </span>
+                  )}
+                  {selected.fator_atrito_ar != null && (
+                    <span className="rounded border border-slate-200 bg-white px-2 py-0.5 text-slate-600">
+                      Fat. Atrito Ar: {selected.fator_atrito_ar.toFixed(4)}
+                    </span>
+                  )}
+                </div>
+              )}
+
               <div className="flex flex-wrap items-center gap-2 pt-1">
                 <Button
                   size="sm"
