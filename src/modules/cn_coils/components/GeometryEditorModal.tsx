@@ -184,8 +184,8 @@ export function GeometryEditorModal({
                 placeholder="Lisa / Ondulada / Persianada"
               />
             </Field>
-            <NumField label="Fator de correção" k="fator_correcao_aleta" v={fields.fator_correcao_aleta} setNum={setNum} />
-            <NumField label="Fator de atrito (ar)" k="fator_atrito_ar" v={fields.fator_atrito_ar} setNum={setNum} />
+            <NumField label="Fat. Correção Aleta" k="fator_correcao_aleta" v={fields.fator_correcao_aleta} setNum={setNum} />
+            <NumField label="Fat. Atrito Ar" k="fator_atrito_ar" v={fields.fator_atrito_ar} setNum={setNum} />
             <NumField label="Razão superfícies internas" k="razao_superficies_internas" v={fields.razao_superficies_internas} setNum={setNum} />
           </Section>
 
