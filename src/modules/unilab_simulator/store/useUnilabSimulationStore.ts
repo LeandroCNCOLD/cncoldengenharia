@@ -124,9 +124,12 @@ interface UnilabSimulationStore {
   calculatedCost: number;
   tubeMaterialKey: MaterialKey;
   finMaterialKey: MaterialKey;
+  /** BDI (%) — mão de obra, encargos, impostos, despesas indiretas e lucro. */
+  bdiPercent: number;
   setMaterialPrice: (material: MaterialKey, price: number) => void;
   setTubeMaterialKey: (key: MaterialKey) => void;
   setFinMaterialKey: (key: MaterialKey) => void;
+  setBdiPercent: (val: number) => void;
   recalculateCost: () => void;
 
   setPhysicalInputs: (patch: Partial<UnilabPhysicalInputs>) => void;
