@@ -39,9 +39,7 @@ type NavGroup = {
 const NAV_GROUPS: NavGroup[] = [
   {
     label: "Início",
-    items: [
-      { to: "/coldpro", label: "Dashboard", Icon: LayoutDashboard, exact: true },
-    ],
+    items: [{ to: "/coldpro", label: "Dashboard", Icon: LayoutDashboard, exact: true }],
   },
   {
     label: "Simulação",
