@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { calcCoilEffectiveArea, calcFinEfficiency, calcEffectiveArea } from "../engine/effectiveArea";
-import { calcAirSideHeatTransfer } from "../engine/wangChiChang";
+import { calcAirSideHeatTransfer, mihailovic2019 } from "../engine/wangChiChang";
 import { getRefrigerantProps } from "../services/refrigerantProperties";
 import { calcAirPressureDrop } from "../services/pressureDropService";
 
@@ -41,13 +41,13 @@ describe("calcFinEfficiency — Schmidt 1949", () => {
 });
 
 describe("calcAirSideHeatTransfer — Wang-Chi-Chang plain", () => {
-  it("computes physically reasonable h for plain fins", () => {
+  it("computes physically reasonable h for plain fins (D_o <= 12mm)", () => {
     const result = calcAirSideHeatTransfer({
       finType: "plain",
-      D_o: 0.0127,
-      P_t: 0.0315,
-      P_l: 0.027,
-      F_p: 0.005,
+      D_o: 0.0100,
+      P_t: 0.025,
+      P_l: 0.022,
+      F_p: 0.003,
       N: 3,
       V_face: 2.5,
       T_air_C: 25,
@@ -118,5 +118,40 @@ describe("calcAirPressureDrop — empirical polynomial", () => {
   it("zero velocity gives non-negative result", () => {
     const dp = calcAirPressureDrop(0, 3, 3.0);
     expect(dp).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe("mihailovic2019 — industrial evaporators (D_o > 12mm)", () => {
+  it("D_o 13.3mm returns h_ar between 30 and 80 W/m²K", () => {
+    const result = mihailovic2019({
+      finType: "plain",
+      D_o: 0.0133,
+      P_t: 0.038,
+      P_l: 0.033,
+      F_p: 0.007,
+      N: 4,
+      V_face: 2.5,
+      T_air_C: -5,
+    });
+    expect(result.h_air_W_m2K).toBeGreaterThan(30);
+    expect(result.h_air_W_m2K).toBeLessThan(80);
+    expect(result.correlation).toBe("Mihailovic-2019-industrial");
+  });
+});
+
+describe("calcAirSideHeatTransfer — diameter-based routing", () => {
+  it("Wang-Chi-Chang is NOT called for D_o > 12mm", () => {
+    const result = calcAirSideHeatTransfer({
+      finType: "plain",
+      D_o: 0.0133,
+      P_t: 0.038,
+      P_l: 0.033,
+      F_p: 0.007,
+      N: 4,
+      V_face: 2.5,
+      T_air_C: -5,
+    });
+    expect(result.correlation).not.toBe("Wang-Chi-Chang-2000-plain");
+    expect(result.h_air_W_m2K).toBeLessThan(100);
   });
 });

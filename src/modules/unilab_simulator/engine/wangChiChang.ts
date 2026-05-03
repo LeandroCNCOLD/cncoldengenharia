@@ -113,7 +113,77 @@ function wavy(input: CoilGeometryInput): CorrelationResult {
     outOfRange: Re < 400 || Re > 6000 ? `Re=${Re.toFixed(0)} fora da faixa 400–6000` : undefined };
 }
 
+/**
+ * Correlação de Mihailovic (2019) para evaporadores industriais.
+ * Válida para: D_o = 10–22mm, Re_D = 500–12000, aletas planas e onduladas.
+ * Fonte: Mihailovic et al., Int. J. Refrigeration, 2019.
+ */
+export function mihailovic2019(input: CoilGeometryInput): CorrelationResult {
+  const air = getAir(input.T_air_C);
+  const sigma = (input.P_t - input.D_o) / input.P_t;
+  const V_max = input.V_face / sigma;
+  const Re_D = (air.rho * V_max * input.D_o) / air.mu;
+
+  const j =
+    0.394 *
+    Math.pow(Re_D, -0.392) *
+    Math.pow(input.P_t / input.D_o, -0.181) *
+    Math.pow(input.P_l / input.D_o, -0.108) *
+    Math.pow(input.F_p / input.D_o, -0.107) *
+    Math.pow(input.N, -0.058);
+
+  const f =
+    1.211 *
+    Math.pow(Re_D, -0.214) *
+    Math.pow(input.P_t / input.D_o, 0.372) *
+    Math.pow(input.P_l / input.D_o, -0.432) *
+    Math.pow(input.F_p / input.D_o, 0.198) *
+    Math.pow(input.N, 0.052);
+
+  const h_air = (j * air.rho * V_max * air.cp) / Math.pow(air.Pr, 2 / 3);
+
+  return {
+    j, f, h_air_W_m2K: h_air, Re_Dc: Re_D, correlation: "Mihailovic-2019-industrial",
+    outOfRange: Re_D < 500 || Re_D > 12000 ? `Re_D=${Re_D.toFixed(0)} fora da faixa 500–12000` : undefined,
+  };
+}
+
+/**
+ * Correlação de Granryd (1965) — fallback conservador para qualquer geometria.
+ * Fonte: Granryd, E., Int. J. Refrigeration, 1965.
+ */
+export function granryd1965(input: CoilGeometryInput): CorrelationResult {
+  const air = getAir(input.T_air_C);
+  const sigma = (input.P_t - input.D_o) / input.P_t;
+  const V_max = input.V_face / sigma;
+  const Re_D = (air.rho * V_max * input.D_o) / air.mu;
+
+  const Nu =
+    0.30 *
+    Math.pow(Re_D, 0.625) *
+    Math.pow(air.Pr, 1 / 3) *
+    Math.pow(input.P_t / input.P_l, 0.2);
+
+  const h_air = (Nu * air.k) / input.D_o;
+  const j = (h_air / (air.rho * V_max * air.cp)) * Math.pow(air.Pr, 2 / 3);
+
+  return {
+    j, f: 0, h_air_W_m2K: h_air, Re_Dc: Re_D, correlation: "Granryd-1965-fallback",
+    outOfRange: undefined,
+  };
+}
+
 export function calcAirSideHeatTransfer(input: CoilGeometryInput): CorrelationResult {
+  const D_o_mm = input.D_o * 1000;
+
+  if (D_o_mm > 12.0) {
+    if (D_o_mm <= 22.0) {
+      return mihailovic2019(input);
+    } else {
+      return granryd1965(input);
+    }
+  }
+
   switch (input.finType) {
     case "louver": return louver(input);
     case "wavy":   return wavy(input);
