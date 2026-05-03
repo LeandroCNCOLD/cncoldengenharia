@@ -86,9 +86,36 @@ interface RawGeometryEntry {
 }
 
 const CATALOG_URL = "/data/catalogs/coilGeometries.json";
+const COMPLETE_URL = "/data/catalogs/geometriesComplete.json";
 
 let cache: CoilGeometryItem[] | null = null;
 let inflight: Promise<CoilGeometryItem[]> | null = null;
+
+/**
+ * Mescla os fatores físicos do dataset UNILAB completo (geometriesComplete.json)
+ * dentro do raw das entradas de coilGeometries.json, indexando por Sigla.
+ * Campos adicionados: fin_correction_factor, air_friction_factor,
+ * internal_surface_ratio.
+ */
+async function loadCompleteFactorIndex(): Promise<Map<string, Record<string, unknown>>> {
+  const res = await fetch(COMPLETE_URL, { cache: "no-cache" });
+  if (!res.ok) {
+    throw new Error(
+      `Falha ao carregar geometriesComplete.json (HTTP ${res.status}).`,
+    );
+  }
+  const data = (await res.json()) as Record<string, Array<Record<string, unknown>>>;
+  const index = new Map<string, Record<string, unknown>>();
+  for (const groupKey of Object.keys(data)) {
+    const arr = data[groupKey];
+    if (!Array.isArray(arr)) continue;
+    for (const g of arr) {
+      const sigla = g["Sigla"];
+      if (typeof sigla === "string") index.set(sigla, g);
+    }
+  }
+  return index;
+}
 
 /**
  * Lê um campo numérico do raw. Aceita number; retorna null para null/undefined/string vazia.
@@ -205,7 +232,10 @@ export async function loadCoilGeometries(): Promise<CoilGeometryItem[]> {
   if (inflight) return inflight;
 
   inflight = (async () => {
-    const res = await fetch(CATALOG_URL, { cache: "no-cache" });
+    const [res, completeIndex] = await Promise.all([
+      fetch(CATALOG_URL, { cache: "no-cache" }),
+      loadCompleteFactorIndex(),
+    ]);
     if (!res.ok) {
       throw new Error(
         `Falha ao carregar coilGeometries.json (HTTP ${res.status}).`,
@@ -215,7 +245,33 @@ export async function loadCoilGeometries(): Promise<CoilGeometryItem[]> {
     if (!Array.isArray(raw)) {
       throw new Error("Conteúdo inválido em coilGeometries.json: esperado array.");
     }
-    const items = (raw as RawGeometryEntry[]).map(enrich);
+    const items = (raw as RawGeometryEntry[]).map((entry) => {
+      const code = entry.raw?.["code"];
+      const complete =
+        typeof code === "string" ? completeIndex.get(code) : undefined;
+      if (complete) {
+        // Mescla fatores físicos do dataset UNILAB completo no raw da entrada.
+        // Apenas adiciona se ainda não existir no raw atual.
+        const merged: Record<string, unknown> = { ...entry.raw };
+        if (merged["fin_correction_factor"] == null && complete["FatCorAl"] != null) {
+          merged["fin_correction_factor"] = complete["FatCorAl"];
+        }
+        if (merged["air_friction_factor"] == null && complete["FattoreAttrAria"] != null) {
+          merged["air_friction_factor"] = complete["FattoreAttrAria"];
+        }
+        if (
+          merged["internal_surface_ratio"] == null &&
+          complete["RappSuperficiInterne"] != null
+        ) {
+          merged["internal_surface_ratio"] = complete["RappSuperficiInterne"];
+        }
+        if (merged["fin_type"] == null && complete["TipoAletta"] != null) {
+          merged["fin_type"] = complete["TipoAletta"];
+        }
+        return enrich({ ...entry, raw: merged });
+      }
+      return enrich(entry);
+    });
     cache = items;
     return items;
   })();
