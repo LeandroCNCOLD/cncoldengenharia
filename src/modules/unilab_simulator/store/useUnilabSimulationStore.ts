@@ -47,7 +47,7 @@ interface CnCoilsSimulationStore {
    * Fator de Erro / margem de segurança (%). Auto-preenchido a partir do
    * SecurityFactor da geometria selecionada: errorFactor = (SF - 1) * 100.
    * Aplicado como multiplicador no resultado final: q' = q * (1 + ef/100).
-   * Editável pelo usuário.
+   * Valor 0 = sem margem (SF = 1.0). Editável pelo usuário.
    */
   errorFactorPercent: number;
   setErrorFactorPercent: (val: number) => void;

@@ -84,12 +84,17 @@ export function GeometryPickerModal({ open, onClose, componentType }: Props) {
                 if (g) {
                   // Auto-preenche o Fator de Erro a partir do SecurityFactor
                   // do catálogo legado geometries.json (junção pelo código).
+                  // Fallback: raw.SecurityFactor da geometria, ou 1.0 (neutro = 0%).
                   loadSecurityFactorMap().then((map) => {
                     const sf = map.get(g.codigo) ?? map.get(g.id);
                     if (sf !== undefined && Number.isFinite(sf)) {
                       setErrorFactorPercent((sf - 1) * 100);
                     } else {
-                      setErrorFactorPercent(0);
+                      const rawSf = typeof g.raw === "object" && g.raw
+                        ? Number((g.raw as Record<string, unknown>)["SecurityFactor"])
+                        : NaN;
+                      const fallbackSf = Number.isFinite(rawSf) && rawSf > 0 ? rawSf : 1.0;
+                      setErrorFactorPercent((fallbackSf - 1) * 100);
                     }
                   });
                   onClose();
