@@ -403,6 +403,7 @@ function computeCostFromState(s: {
   materialPrices: MaterialPrices;
   tubeMaterialKey: MaterialKey;
   finMaterialKey: MaterialKey;
+  bdiPercent?: number;
 }): number {
   const p = s.physicalInputs;
   const tubesPerRow =
@@ -424,6 +425,7 @@ function computeCostFromState(s: {
     tubeMaterial: s.tubeMaterialKey,
     finMaterial: s.finMaterialKey,
     prices: s.materialPrices,
+    bdiPercent: s.bdiPercent ?? 0,
   });
   return result.totalCost;
 }
