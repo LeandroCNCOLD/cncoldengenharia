@@ -390,15 +390,12 @@ interface LeveledWarning {
   level?: "1" | "2" | "3" | string | null;
 }
 
-function normalize(w: string | LeveledWarning | StructuredWarning): LeveledWarning {
+function normalize(w: string | StructuredWarning): LeveledWarning {
   if (typeof w === "string") return { text: w, level: "2" };
-  if (isStructured(w)) {
-    return {
-      text: w.message ?? w.code,
-      level: w.severity === "error" ? "3" : "2",
-    };
-  }
-  return w;
+  return {
+    text: w.message ?? w.code,
+    level: w.severity === "error" ? "3" : "2",
+  };
 }
 
 function WarningsList({
