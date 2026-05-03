@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useCycleSimulation } from "../hooks/useCycleSimulation";
+import { useFrostAnalysis } from "../hooks/useFrostAnalysis";
 import { CyclePHDiagram } from "../components/CyclePHDiagram";
+import { FrostAnalysisPanel } from "../components/FrostAnalysisPanel";
 import { CycleResultPanel } from "../components/CycleResultPanel";
 import type { CycleSystemConfig } from "../engines/cycle/cycleTypes";
 
@@ -81,6 +83,21 @@ const DEFAULT_CONFIG: CycleSystemConfig = {
 export function CycleWorkspacePage() {
   const [config] = useState<CycleSystemConfig>(DEFAULT_CONFIG);
   const simState = useCycleSimulation(config);
+  const cycleResult = simState.status === "success" ? simState.result : null;
+  const evaporatorExternalAreaM2 = estimateEvaporatorExternalAreaM2(config);
+  const frostOperationTimeH = 6;
+  const frostResult = useFrostAnalysis({
+    cycleResult,
+    refrigerantId: config.refrigerantId,
+    airInletTempC: config.evaporator.airInletTempC,
+    airRelativeHumidity: config.evaporator.airRelativeHumidity,
+    airMassFlowKgS: (config.evaporator.airFlowM3H * 1.2) / 3600,
+    evaporatorExternalAreaM2,
+    config: {
+      operationTimeH: frostOperationTimeH,
+      defrostMethod: "electric",
+    },
+  });
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -177,7 +194,18 @@ export function CycleWorkspacePage() {
 
         <div className="w-80 overflow-y-auto border-l border-gray-800 p-4">
           {simState.status === "success" ? (
-            <CycleResultPanel result={simState.result} />
+            <div className="space-y-4">
+              <CycleResultPanel result={simState.result} />
+              {frostResult && cycleResult?.converged && (
+                <div className="rounded-lg border border-gray-800 bg-white p-4 text-gray-900">
+                  <FrostAnalysisPanel
+                    result={frostResult}
+                    nominalCapacityW={cycleResult.Q_evap_W}
+                    operationTimeH={frostOperationTimeH}
+                  />
+                </div>
+              )}
+            </div>
           ) : (
             <div className="mt-8 text-center text-sm text-gray-600">
               Aguardando resultado...
@@ -186,5 +214,17 @@ export function CycleWorkspacePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function estimateEvaporatorExternalAreaM2(config: CycleSystemConfig): number {
+  const p = config.evaporator.physical;
+  return (
+    p.rows *
+    (p.finnedLengthMm / 1000) *
+    (p.finnedHeightMm / 1000) *
+    p.tubesPerRow *
+    Math.PI *
+    (p.tubeExternalDiameterMm / 1000)
   );
 }
