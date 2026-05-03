@@ -20,6 +20,7 @@ import {
   TEMP_UNITS,
   VELOCITY_UNITS,
   deltaTConv,
+  fmtBR,
   massFlowConv,
   pressureConv,
   tempConv,
@@ -221,6 +222,7 @@ export function FluidSidePanel({
       ? result.fluidPressureDropKpa * fluidSafetyFactor
       : undefined;
   const fluidVelocityMs = result?.fluidVelocityMs;
+  const fluidDpDigits = uPdrop === "Pa" ? 0 : 3;
 
   return (
     <>
@@ -493,7 +495,10 @@ export function FluidSidePanel({
               result?.fluidPressureDropKpa !== undefined
                 ? pressureConv
                     .fromCanonical((displayedFluidDpKpa ?? 0) * 1000, uPdrop)
-                    .toFixed(uPdrop === "Pa" ? 0 : 3)
+                    .toLocaleString("pt-BR", {
+                      minimumFractionDigits: fluidDpDigits,
+                      maximumFractionDigits: fluidDpDigits,
+                    })
                 : "---"
             }
           />
@@ -527,7 +532,10 @@ export function FluidSidePanel({
                       fluidVelocityMs ?? 0,
                       uVel,
                     )
-                    .toFixed(1)
+                    .toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })
                 : "---"
             }
           />

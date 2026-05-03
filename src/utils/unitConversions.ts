@@ -10,3 +10,11 @@ export function convertPower(W: number, unit: PowerUnit): number {
   };
   return W * factors[unit];
 }
+
+export function fmtBR(n: number | undefined | null, digits = 2): string {
+  if (n === undefined || n === null || !Number.isFinite(n)) return "—";
+  return n.toLocaleString("pt-BR", {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
+}

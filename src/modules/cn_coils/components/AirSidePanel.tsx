@@ -22,6 +22,7 @@ import {
   type PressureUnit,
   type TempUnit,
   type VelocityUnit,
+  fmtBR,
 } from "../utils/unitConversions";
 
 interface AirSidePanelProps {
@@ -30,7 +31,7 @@ interface AirSidePanelProps {
 
 function fmt(n: number | undefined, digits = 1): string {
   if (n === undefined || !Number.isFinite(n)) return "---";
-  return n.toFixed(digits);
+  return fmtBR(n, digits).replace("—", "---");
 }
 
 import {
@@ -168,31 +169,31 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
     : undefined;
 
   const obtCapTotal = useMemo(
-    () => (totalCapW === undefined ? "---" : capacityConv.fromCanonical(totalCapW, uCapTotal).toFixed(uCapTotal === "TR" || uCapTotal === "kW" ? 3 : 1)),
+    () => (totalCapW === undefined ? "---" : fmtBR(capacityConv.fromCanonical(totalCapW, uCapTotal), uCapTotal === "TR" || uCapTotal === "kW" ? 3 : 1)),
     [totalCapW, uCapTotal],
   );
   const obtCapSens = useMemo(
-    () => (sensCapW === undefined ? "---" : capacityConv.fromCanonical(sensCapW, uCapSens).toFixed(uCapSens === "TR" || uCapSens === "kW" ? 3 : 1)),
+    () => (sensCapW === undefined ? "---" : fmtBR(capacityConv.fromCanonical(sensCapW, uCapSens), uCapSens === "TR" || uCapSens === "kW" ? 3 : 1)),
     [sensCapW, uCapSens],
   );
   const obtCapLat = useMemo(
-    () => (latCapW === undefined ? "---" : capacityConv.fromCanonical(latCapW, uCapLat).toFixed(uCapLat === "TR" || uCapLat === "kW" ? 3 : 1)),
+    () => (latCapW === undefined ? "---" : fmtBR(capacityConv.fromCanonical(latCapW, uCapLat), uCapLat === "TR" || uCapLat === "kW" ? 3 : 1)),
     [latCapW, uCapLat],
   );
   const obtAirFlow =
-    airFlow_m3h > 0 ? airFlowConv.fromCanonical(airFlow_m3h, uAirFlow).toFixed(1) : "---";
+    airFlow_m3h > 0 ? fmtBR(airFlowConv.fromCanonical(airFlow_m3h, uAirFlow), 1) : "---";
   const obtVel =
     result?.faceVelocityMs !== undefined
-      ? velocityConv.fromCanonical(result.faceVelocityMs, uVel).toFixed(2)
+      ? fmtBR(velocityConv.fromCanonical(result.faceVelocityMs, uVel), 2)
       : "---";
-  const obtTempIn = tempConv.fromCanonical(tempInDB_C, uTempIn).toFixed(1);
+  const obtTempIn = fmtBR(tempConv.fromCanonical(tempInDB_C, uTempIn), 1);
   const obtTempOut =
     result?.airOutletTempC !== undefined
-      ? tempConv.fromCanonical(result.airOutletTempC, uTempOut).toFixed(1)
+      ? fmtBR(tempConv.fromCanonical(result.airOutletTempC, uTempOut), 1)
       : "---";
   const obtPdrop =
     displayedAirPressureDropPa !== undefined
-      ? pressureConv.fromCanonical(displayedAirPressureDropPa, uPdrop).toFixed(uPdrop === "Pa" ? 0 : 3)
+      ? fmtBR(pressureConv.fromCanonical(displayedAirPressureDropPa, uPdrop), uPdrop === "Pa" ? 0 : 3)
       : "---";
 
   // Capacidade alvo (modo Desenho) — input editável na unidade selecionada
@@ -290,7 +291,7 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
           }
           obtained={
             selectedFan?.airflow_m3h
-              ? `${(selectedFan.airflow_m3h * fanCount).toFixed(0)} m³/h`
+              ? `${fmtBR(selectedFan.airflow_m3h * fanCount, 0)} m³/h`
               : "---"
           }
         />
@@ -332,7 +333,7 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
               ? "---"
               : pressureConv
                   .fromCanonical(displayedFanStaticPressurePa, uPdrop)
-                  .toFixed(uPdrop === "Pa" ? 0 : 3)
+                  .toLocaleString("pt-BR", { minimumFractionDigits: uPdrop === "Pa" ? 0 : 3, maximumFractionDigits: uPdrop === "Pa" ? 0 : 3 })
           }
         />
 

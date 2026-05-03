@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
+import { fmtBR } from "../utils/unitConversions";
 
 export type FanPickerFamily =
   | "axial"
@@ -227,7 +228,7 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
                           </span>
                           <span className="text-slate-500">
                             {f.airflow_m3h
-                              ? `${f.airflow_m3h.toFixed(0)} m³/h`
+                              ? `${fmtBR(f.airflow_m3h, 0)} m³/h`
                               : "—"}
                           </span>
                         </div>
@@ -299,7 +300,7 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
                 <span className="text-slate-600">Vazão unitária:</span>
                 <span className="font-semibold text-slate-900">
                   {draft.airflow_m3h
-                    ? `${draft.airflow_m3h.toFixed(0)} m³/h`
+                    ? `${fmtBR(draft.airflow_m3h, 0)} m³/h`
                     : "—"}
                 </span>
               </div>
@@ -308,7 +309,7 @@ export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
                   Vazão total ({draftCount}× {draftRole === "blower" ? "soprador" : "exaustor"}):
                 </span>
                 <span className="font-bold text-[#1E6FD9]">
-                  {totalAirflow ? `${totalAirflow.toFixed(0)} m³/h` : "—"}
+                  {totalAirflow ? `${fmtBR(totalAirflow, 0)} m³/h` : "—"}
                 </span>
               </div>
             </div>

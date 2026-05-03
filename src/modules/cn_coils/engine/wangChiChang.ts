@@ -257,6 +257,8 @@ export interface WangChiChangParams {
   tubePitchMm: number;
   numberOfRows: number;
   airFaceVelocityMs: number;
+  /** Temperatura do ar de entrada [°C] — padrão 20°C. Afeta rho, mu, Pr. */
+  airTempC?: number;
   Re?: number;
   Pr?: number;
   finConductivityWmK?: number;
@@ -300,7 +302,7 @@ export function calculateWangChiChang(p: WangChiChangParams): WangChiChangResult
     F_p: Fp,
     N,
     V_face: v,
-    T_air_C: 25,
+    T_air_C: p.airTempC ?? 20,
     Re: p.Re,
     Pr: p.Pr,
   });

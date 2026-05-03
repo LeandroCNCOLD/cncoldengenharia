@@ -194,6 +194,7 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
     tubePitchMm: physical.tubePitchTransverseMm,
     numberOfRows: physical.rows,
     airFaceVelocityMs: faceVelocityMs,
+    airTempC: thermo.airInletTempC,
   });
   warnings.push(...wcc.warnings);
 
@@ -367,15 +368,18 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
     tubeID_m: mmToM(physical.tubeInnerDiameterMm),
     massFlow_kg_s: estimatedMassFlowKgS,
   });
-  // Comprimento total estimado de tubo: rows · comprimento aletado / circuitos
-  const totalTubeLengthM =
-    physical.rows * mmToM(physical.finnedLengthMm);
+  // Comprimento por circuito: rows × L_fin × (tubesPerRow / circuits).
+  const tubesPerRow = physical.tubesPerRow ?? 1;
+  const circuits = Math.max(physical.circuits, 1);
+  const tubesPerCircuit = tubesPerRow / circuits;
+  const tubeLengthPerCircuitM =
+    physical.rows * mmToM(physical.finnedLengthMm) * tubesPerCircuit;
   const dpFluid = computeFluidPressureDrop({
     refrigerant: thermo.refrigerantId,
     T_evap_C: surfaceTempC,
     mass_flow_kg_s: estimatedMassFlowKgS,
     n_circuits: physical.circuits,
-    L_tube_per_circuit_m: totalTubeLengthM,
+    L_tube_per_circuit_m: tubeLengthPerCircuitM,
     D_i_m: mmToM(physical.tubeInnerDiameterMm),
   });
   warnings.push(...dpFluid.warnings);

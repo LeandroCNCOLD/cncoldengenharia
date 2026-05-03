@@ -150,3 +150,15 @@ export function convertPower(W: number, unit: PowerDisplayUnit): number {
   };
   return W * factors[unit];
 }
+
+/**
+ * Formata número com separador de milhar e decimal no padrão pt-BR.
+ * Substitui n.toFixed(digits) na UI para garantir "5.000,0" em vez de "5000.0".
+ */
+export function fmtBR(n: number | undefined | null, digits = 2): string {
+  if (n === undefined || n === null || !Number.isFinite(n)) return "—";
+  return n.toLocaleString("pt-BR", {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
+}

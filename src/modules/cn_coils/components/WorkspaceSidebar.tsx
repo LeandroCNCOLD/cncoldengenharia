@@ -27,6 +27,7 @@ import {
   type FinMaterial,
   type TubeMaterial,
 } from "../utils/coilDerivedMetrics";
+import { fmtBR } from "../utils/unitConversions";
 import {
   loadCnCoilsCoefficients,
   listUsableAxialFans,
@@ -329,7 +330,7 @@ export function WorkspaceSidebar({
             type="text"
             value={
               faceAreaM2 !== undefined && Number.isFinite(faceAreaM2)
-                ? faceAreaM2.toFixed(4)
+                ? fmtBR(faceAreaM2, 4)
                 : "---"
             }
             readOnly
@@ -344,14 +345,14 @@ export function WorkspaceSidebar({
       </div>
 
       <SidebarInfoCard title="Dimensões do Aletado">
-        <SidebarMetricLine label="Altura" value={`${derived.altura_mm.toFixed(0)} mm`} />
-        <SidebarMetricLine label="Largura" value={`${derived.largura_mm.toFixed(0)} mm`} />
-        <SidebarMetricLine label="Profund." value={`${derived.prof_mm.toFixed(0)} mm`} />
+        <SidebarMetricLine label="Altura" value={`${fmtBR(derived.altura_mm, 0)} mm`} />
+        <SidebarMetricLine label="Largura" value={`${fmtBR(derived.largura_mm, 0)} mm`} />
+        <SidebarMetricLine label="Profund." value={`${fmtBR(derived.prof_mm, 0)} mm`} />
       </SidebarInfoCard>
 
       <SidebarInfoCard title="Volume e Carga">
-        <SidebarMetricLine label="Volume interno" value={`${derived.volumeInterno_L.toFixed(2)} L`} />
-        <SidebarMetricLine label="Carga refrig." value={`${derived.cargaRefrigerante_kg.toFixed(2)} kg`} />
+        <SidebarMetricLine label="Volume interno" value={`${fmtBR(derived.volumeInterno_L, 2)} L`} />
+        <SidebarMetricLine label="Carga refrig." value={`${fmtBR(derived.cargaRefrigerante_kg, 2)} kg`} />
       </SidebarInfoCard>
 
       <SidebarInfoCard title="Peso do Aletado">
@@ -377,15 +378,15 @@ export function WorkspaceSidebar({
         <div className="my-1 border-t border-slate-200" />
         <SidebarMetricLine
           label={`Tubos ${MATERIAL_SHORT[tubeWeightMaterial]}`}
-          value={`${derived.pesoTubos_kg.toFixed(2)} kg`}
+          value={`${fmtBR(derived.pesoTubos_kg, 2)} kg`}
         />
         <SidebarMetricLine
           label={`Aletas ${MATERIAL_SHORT[finWeightMaterial]}`}
-          value={`${derived.pesoAletas_kg.toFixed(2)} kg`}
+          value={`${fmtBR(derived.pesoAletas_kg, 2)} kg`}
         />
         <div className="my-1 border-t border-slate-200" />
-        <SidebarMetricLine label="Peso seco" value={`${derived.pesoSeco_kg.toFixed(2)} kg`} />
-        <SidebarMetricLine label="Peso c/ fluido" value={`${derived.pesoComFluido_kg.toFixed(2)} kg`} />
+        <SidebarMetricLine label="Peso seco" value={`${fmtBR(derived.pesoSeco_kg, 2)} kg`} />
+        <SidebarMetricLine label="Peso c/ fluido" value={`${fmtBR(derived.pesoComFluido_kg, 2)} kg`} />
         {tubeWeightMaterial !== "copper" && (
           <div
             className="rounded border border-amber-300 bg-amber-50 px-1.5 py-1 text-[9px] font-semibold text-amber-800"
@@ -413,7 +414,7 @@ export function WorkspaceSidebar({
         </div>
         <div className="space-y-1 p-3 text-[10px] text-slate-700">
           <div className="rounded bg-white/70 px-1.5 py-1 text-center font-mono text-sm font-semibold text-foreground">
-            {derived.gabinete_largura_mm.toFixed(0)} × {derived.gabinete_altura_mm.toFixed(0)} × {derived.gabinete_prof_mm.toFixed(0)} mm
+            {fmtBR(derived.gabinete_largura_mm, 0)} × {fmtBR(derived.gabinete_altura_mm, 0)} × {fmtBR(derived.gabinete_prof_mm, 0)} mm
           </div>
           {fanFit.fanWarnings.map((w, i) => (
             <div

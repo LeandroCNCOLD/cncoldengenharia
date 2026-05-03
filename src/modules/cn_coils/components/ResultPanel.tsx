@@ -4,6 +4,7 @@ import type { CnCoilsSimulationResult } from "../types/unilab.types";
 import type { StructuredWarning } from "../types/warnings";
 import { ptBR } from "../i18n/messages.ptBR";
 import { convertPower, type PowerUnit } from "@/utils/unitConversions";
+import { fmtBR } from "../utils/unitConversions";
 import {
   loadCnCoilsCoefficients,
   buildFanAudit,
@@ -17,8 +18,7 @@ interface ResultPanelProps {
 }
 
 function fmt(n: number | undefined, digits = 2): string {
-  if (n === undefined || !Number.isFinite(n)) return "—";
-  return n.toFixed(digits);
+  return fmtBR(n, digits);
 }
 
 export function ResultPanel({ result, warnings, onGoalSeek }: ResultPanelProps) {
