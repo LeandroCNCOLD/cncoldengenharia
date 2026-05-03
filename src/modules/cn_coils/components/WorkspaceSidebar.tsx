@@ -455,11 +455,11 @@ function SidebarInfoCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded border border-slate-300 bg-white">
-      <div className="border-b border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
+    <div className="rounded border border-border bg-white">
+      <div className="border-b border-border bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         {title}
       </div>
-      <div className="space-y-1 p-1.5 text-[10px] text-slate-700">
+      <div className="space-y-1 p-3 text-[11px] text-foreground">
         {children}
       </div>
     </div>
@@ -469,8 +469,8 @@ function SidebarInfoCard({
 function SidebarMetricLine({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-slate-500">{label}</span>
-      <span className="font-mono font-semibold text-slate-800">{value}</span>
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-mono text-sm text-foreground">{value}</span>
     </div>
   );
 }
