@@ -102,7 +102,7 @@ export function WorkspaceSidebar({
     },
     cost: calculatedCost,
     result,
-    warnings,
+    warnings: warnings.map((w) => (typeof w === "string" ? w : w.message ?? w.code)),
     meta: {
       project: "-",
       client: "",
