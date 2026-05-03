@@ -102,10 +102,10 @@ export function emptyEditable(): GeometryEditableFields {
 }
 
 function buildRaw(f: GeometryEditableFields): Json {
-  return {
+  const obj: Record<string, number | string | null> = {
     code: f.codigo,
     description: f.descricao,
-    coil_type: f.tipo_serpentina ? TIPO_TO_COIL_TYPE[f.tipo_serpentina] : null,
+    coil_type: f.tipo_serpentina ? TIPO_TO_COIL_TYPE[f.tipo_serpentina] ?? null : null,
     tube_od_mm: f.diametro_externo_tubo_mm,
     tube_id_mm: f.diametro_interno_tubo_mm,
     tube_wall_mm: f.espessura_tubo_mm,
@@ -119,6 +119,7 @@ function buildRaw(f: GeometryEditableFields): Json {
     default_rows: f.defaultRows,
     default_circuits: f.defaultCircuits,
   };
+  return obj as Json;
 }
 
 export async function loadGeometryOverrides(): Promise<GeometryOverrideRow[]> {
