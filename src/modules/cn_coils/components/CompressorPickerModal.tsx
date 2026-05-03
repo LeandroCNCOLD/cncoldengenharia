@@ -171,7 +171,7 @@ export function CompressorPickerModal({ open, onClose }: Props) {
               }}
               className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
             >
-              <option value="">Todas as marcas</option>
+              <option value="">Fabricante</option>
               {brands.map((b) => (
                 <option key={b} value={b}>{b}</option>
               ))}
@@ -181,9 +181,9 @@ export function CompressorPickerModal({ open, onClose }: Props) {
               onChange={(e) => setTypeFilter(e.target.value)}
               className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
             >
-              <option value="">Todos os tipos</option>
+              <option value="">Aplicação</option>
               {types.map((t) => (
-                <option key={t} value={t}>{t}</option>
+                <option key={t} value={t}>{applicationLabels[t] ?? t}</option>
               ))}
             </select>
             <select
@@ -191,7 +191,7 @@ export function CompressorPickerModal({ open, onClose }: Props) {
               onChange={(e) => setSeriesFilter(e.target.value)}
               className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
             >
-              <option value="">Todas as séries</option>
+              <option value="">Série</option>
               {seriesList.map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
