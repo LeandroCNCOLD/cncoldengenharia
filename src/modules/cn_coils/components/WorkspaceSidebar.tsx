@@ -215,17 +215,22 @@ export function WorkspaceSidebar({
           Configurar
         </div>
         <ul>
-          {MODAL_BUTTONS.map((m) => (
-            <li key={m.id}>
-              <button
-                type="button"
-                onClick={() => setActiveModal(m.id)}
-                className="block w-full border-b border-slate-100 px-2 py-1 text-left text-[10px] text-slate-700 last:border-b-0 hover:bg-slate-100"
-              >
-                {m.label}
-              </button>
-            </li>
-          ))}
+          {MODAL_BUTTONS.map((m) => {
+            const geoLabel = m.id === "geometry" && selectedGeometry
+              ? `Geometria: ${(selectedGeometry as unknown as { codigo?: string }).codigo ?? selectedGeometry.id}`
+              : m.label;
+            return (
+              <li key={m.id}>
+                <button
+                  type="button"
+                  onClick={() => setActiveModal(m.id)}
+                  className="block w-full border-b border-slate-100 px-2 py-1 text-left text-[10px] text-slate-700 last:border-b-0 hover:bg-slate-100"
+                >
+                  {geoLabel}
+                </button>
+              </li>
+            );
+          })}
         </ul>
       </nav>
 
