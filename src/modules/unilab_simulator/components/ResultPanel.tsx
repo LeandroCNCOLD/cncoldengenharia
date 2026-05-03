@@ -1,7 +1,76 @@
-import { AlertCircle, AlertTriangle, CheckCircle2, Info, Target, X, XCircle } from "lucide-react";
+import { AlertCircle, AlertTriangle, CheckCircle2, HelpCircle, Info, Target, X, XCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { StructuredWarning, UnilabSimulationResult } from "../types/unilab.types";
 import { ptBR } from "../i18n/messages.ptBR";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+const METRIC_TOOLTIPS: Record<string, string> = {
+  [ptBR.workspace.result.totalCapacity]:
+    "Q_total = Q_s + Q_l. Calculada por NTU-ε com efetividade ε = 1 - exp(-NTU × (1-Cr)) / (1 - Cr×exp(-NTU×(1-Cr)))",
+  [ptBR.workspace.result.sensibleCapacity]:
+    "Calor trocado sem mudança de fase. Q_s = ṁ_ar × cp_ar × ΔT_ar",
+  [ptBR.workspace.result.latentCapacity]:
+    "Calor de condensação do vapor d'água. Q_l = ṁ_ar × (w_ent - w_sai) × h_fg",
+  [ptBR.workspace.result.shf]:
+    "Fração sensível da capacidade total. SHF = Q_s / (Q_s + Q_l). Típico: 0,75–0,95 para climatização",
+  [ptBR.workspace.result.airOutletTemp]:
+    "Temperatura do ar após passar pela serpentina. Calculada por NTU-ε (Incropera Eq. 11.32)",
+  [ptBR.workspace.result.airOutletRh]:
+    "Umidade relativa do ar na saída. Calculada via psicrometria ASHRAE",
+  [ptBR.workspace.result.faceVelocity]:
+    "Velocidade do ar na face frontal da serpentina. Recomendado: 1,5–3,5 m/s para evaporadores",
+  [ptBR.workspace.result.correctionFactor]:
+    "Fator multiplicador aplicado ao U_base para condições reais. Inclui incrustação, geometria e regime de escoamento",
+  "Área Total Externa":
+    "Soma da área de aletas + área de tubo exposto. A_total = A_fin + A_tube_bare (ASHRAE HoF 2021)",
+  "Área de Aletas":
+    "Área das aletas calculada geometricamente: A_fin = N_fins × 2 × (P_t × N_rows × P_l - N_rows × π × D_o²/4)",
+  "Área de Tubo":
+    "Área do tubo entre aletas: A_tube = N_tubes × π × D_o × L_exposed",
+  "Eficiência da Aleta":
+    "Razão entre o calor real trocado pela aleta e o máximo teórico. Calculada pelo método de Schmidt 1949. Alumínio típico: 85–95%",
+  "Razão de Superfície":
+    "A_total_externa / A_interna. Indica o grau de compacidade da serpentina. Típico: 8–20×",
+  "Correlação":
+    "Correlação de transferência de calor aplicada: Wang-Chi-Chang 2000 (aletas lisas), Chang-Wang 1997 (persianadas), Kim-Youn-Webb 1997 (onduladas)",
+  "ΔP Ar":
+    "Perda de pressão do ar através da serpentina. Calculada por polinômio empírico calibrado com dados Unilab Coils 6.0. Afeta diretamente a seleção do ventilador",
+  "ΔP Fluido":
+    "Perda de pressão do fluido refrigerante nos tubos. Calculada por Darcy-Weisbach com fator de atrito de Blasius (turbulento) ou Hagen-Poiseuille (laminar)",
+};
+
+function MetricLabel({ label, className }: { label: string; className?: string }) {
+  const tip = METRIC_TOOLTIPS[label];
+  return (
+    <span className={`inline-flex items-center gap-1 ${className ?? ""}`}>
+      <span>{label}</span>
+      {tip && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              aria-label={`Sobre ${label}`}
+              className="inline-flex items-center justify-center text-slate-400 hover:text-slate-600 focus:outline-none"
+            >
+              <HelpCircle className="h-3 w-3" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent
+            side="top"
+            className="max-w-[280px] bg-slate-900 text-white"
+          >
+            {tip}
+          </TooltipContent>
+        </Tooltip>
+      )}
+    </span>
+  );
+}
 import {
   loadUnilabCoefficients,
   buildFanAudit,
