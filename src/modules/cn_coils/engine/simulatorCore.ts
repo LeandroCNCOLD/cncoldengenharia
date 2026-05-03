@@ -332,6 +332,15 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
     physical.geometryId,
     faceVelocityMs,
     catalogs.pressureDropFan,
+    {
+      T_ar_C: (thermo.airInletTempC + tAirOutC) / 2,
+      N_rows: physical.rows,
+      D_c_m: mmToM(physical.tubeOuterDiameterMm) + 2 * mmToM(physical.finThicknessMm),
+      fin_pitch_m: mmToM(physical.finPitchMm),
+      fin_thickness_m: mmToM(physical.finThicknessMm),
+      tube_pitch_transv_m: mmToM(physical.tubePitchTransverseMm),
+      tube_pitch_longit_m: mmToM(physical.tubePitchLongitudinalMm),
+    },
   );
   warnings.push(...dpAir.warnings);
 
