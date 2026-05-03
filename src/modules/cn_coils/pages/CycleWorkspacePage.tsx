@@ -214,7 +214,17 @@ export function CycleWorkspacePage() {
             CycleEngine V2 · {refrigerantId}
           </p>
         </div>
-        <CycleStatusBar state={simState} result={cycleResult} />
+        <div className="flex items-center gap-3">
+          <CycleStatusBar state={simState} result={cycleResult} />
+          <Button
+            size="sm"
+            onClick={() => simState.trigger()}
+            disabled={simState.status === "running"}
+            className="bg-blue-600 text-white hover:bg-blue-700"
+          >
+            {simState.status === "running" ? "Calculando…" : "▶ Calcular"}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-12 gap-0 h-[calc(100vh-65px)]">
