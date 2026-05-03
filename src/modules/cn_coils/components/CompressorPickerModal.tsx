@@ -98,7 +98,11 @@ export function CompressorPickerModal({ open, onClose }: Props) {
         );
         setItems(mapped);
       })
-      .catch(() => setItems([]))
+      .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.error("[CompressorPicker] Falha ao carregar index.json:", e);
+        setItems([]);
+      })
       .finally(() => setLoading(false));
   }, [open, selectedCompressorId, compressorCount]);
 
