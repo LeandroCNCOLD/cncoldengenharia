@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ArrowLeft, Send, Package } from "lucide-react";
 import { toast } from "sonner";
@@ -99,10 +99,21 @@ export function CnCoilsWorkspacePage() {
   const [sending, setSending] = useState(false);
   const [schematicOpen, setSchematicOpen] = useState(false);
   const [machineImportOpen, setMachineImportOpen] = useState(false);
+  const lastAutoRunInputsRef = useRef("");
 
   const physCheck = validatePhysicalInputs(physical);
   const thermoCheck = validateThermoInputs(thermo);
   const inputsValid = physCheck.isValid && thermoCheck.isValid;
+  const validationWarnings = useMemo(
+    () =>
+      [...physCheck.errors, ...thermoCheck.errors].map((message) => ({
+        code: "VALIDATION_ERROR",
+        message,
+        severity: "warning" as const,
+      })),
+    [physCheck.errors, thermoCheck.errors],
+  );
+  const visibleWarnings = inputsValid ? warnings : validationWarnings;
   const canSimulate = catalogs.ready && inputsValid && !isSimulating;
   const disabledReason = !catalogs.ready
     ? "Carregando catálogos…"
@@ -130,13 +141,20 @@ export function CnCoilsWorkspacePage() {
   // botão "Calcular" a qualquer momento.
   useEffect(() => {
     if (!catalogs.ready || !inputsValid || isSimulating) return;
+    const inputKey = JSON.stringify({
+      engineVersion,
+      physical,
+      thermo,
+    });
+    if (lastAutoRunInputsRef.current === inputKey) return;
+    lastAutoRunInputsRef.current = inputKey;
     const t = setTimeout(() => {
       if (engineVersion === "v2") runV2();
       else run();
     }, 350);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [catalogs.ready, inputsValid, engineVersion, physical, thermo]);
+  }, [catalogs.ready, inputsValid, engineVersion, physical, thermo, isSimulating]);
 
   const handleGoalSeek = (targetKw: number) => {
     if (!Number.isFinite(targetKw) || targetKw <= 0) return;
@@ -329,7 +347,7 @@ export function CnCoilsWorkspacePage() {
               missing={catalogs.missing}
               compact
             />
-            <ResultPanel result={result} warnings={warnings} onGoalSeek={handleGoalSeek} />
+            <ResultPanel result={result} warnings={visibleWarnings} onGoalSeek={handleGoalSeek} />
           </div>
         </div>
       </div>

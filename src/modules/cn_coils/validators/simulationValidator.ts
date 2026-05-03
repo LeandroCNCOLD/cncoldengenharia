@@ -33,8 +33,13 @@ export function validatePhysicalInputs(
   const errors: string[] = [];
   const f = ptBR.workspace.fields;
 
-  // geometryId é opcional: o usuário pode parametrizar a geometria manualmente
-  // pelos campos numéricos sem necessariamente selecionar um item do catálogo.
+  if (!inputs.geometryId || inputs.geometryId.trim() === "") {
+    return {
+      isValid: false,
+      errors: ["Selecione uma geometria antes de calcular."],
+    };
+  }
+
   if (!isPositive(inputs.finnedHeightMm)) errors.push(m.requiredField(f.finnedHeight));
   if (!isPositive(inputs.finnedLengthMm)) errors.push(m.requiredField(f.finnedLength));
   if (!isPositive(inputs.rows)) errors.push(m.requiredField(f.rows));
