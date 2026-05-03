@@ -68,6 +68,10 @@ export function useCnCoilsSimulation(catalogs: UseCnCoilsSimulationParams) {
 
       const geometry = catalogs.geometries.find((g) => g.id === physical.geometryId);
       const { uBaseWm2K, isEstimated: uBaseIsEstimated, warning: uBaseWarning } = resolveUBase(geometry);
+      const geoRaw = geometry?.raw as Record<string, unknown> | undefined;
+      const finCorr = Number(geoRaw?.FatCorAl ?? geoRaw?.fin_correction_factor);
+      const airFr = Number(geoRaw?.FattoreAttrAria ?? geoRaw?.air_friction_factor);
+
       const rawResult = runSimulation({
         physical,
         thermo,
@@ -77,6 +81,8 @@ export function useCnCoilsSimulation(catalogs: UseCnCoilsSimulationParams) {
         },
         tubeMaterialConductivity: tubeMat.conductivityWmK,
         uBaseWm2K,
+        finCorrectionFactor: Number.isFinite(finCorr) && finCorr > 0 ? finCorr : 1.0,
+        airFrictionFactor: Number.isFinite(airFr) && airFr > 0 ? airFr : 1.0,
       });
 
       const k = 1 + (Number.isFinite(errorFactorPercent) ? errorFactorPercent : 0) / 100;

@@ -129,6 +129,8 @@ export interface CnCoilsSimulationResult {
   A_total_m2?: number;
   eta_fin?: number;
   surface_ratio?: number;
+  finCorrectionFactor?: number;
+  airFrictionFactor?: number;
   warnings: string[];
 }
 

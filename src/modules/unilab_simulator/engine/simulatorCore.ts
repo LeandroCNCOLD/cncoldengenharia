@@ -70,6 +70,20 @@ export interface RunSimulationParams {
   tubeMaterialConductivity: number;
   /** uBase opcional vindo da geometria do catálogo. */
   uBaseWm2K?: number;
+  /**
+   * Fator de correção da aleta (FatCorAl do catálogo Unilab).
+   * Multiplica Q_final para ajustar a capacidade pelo tipo de aleta.
+   * Valores típicos: Lisa=1.00, Ondulada=1.15, Persianada=0.95,
+   * Wavy=1.35, Serrilhada=1.45. Padrão: 1.0 (neutro).
+   */
+  finCorrectionFactor?: number;
+  /**
+   * Fator de atrito do ar (FattoreAttrAria do catálogo Unilab).
+   * Multiplica a queda de pressão do ar (dpAir) pelo tipo de aleta.
+   * Valores típicos: Lisa=1.00, Ondulada=1.25, Persianada=1.00,
+   * Wavy=1.45, Serrilhada=1.55. Padrão: 1.0 (neutro).
+   */
+  airFrictionFactor?: number;
 }
 
 export class SimulationError extends Error {
@@ -247,7 +261,12 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
       correction.warnings,
     );
   }
-  const qFinalW = qBaseW * correction.factor;
+  const qFinalW_raw = qBaseW * correction.factor;
+
+  const finFactor = Number.isFinite(params.finCorrectionFactor) && params.finCorrectionFactor! > 0
+    ? params.finCorrectionFactor!
+    : 1.0;
+  const qFinalW = qFinalW_raw * finFactor;
 
   // LMTD informativo (sai como NaN-safe 0)
   const deltaT1 = Math.abs(thermo.airInletTempC - surfaceTempC);
@@ -292,6 +311,11 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
   );
   warnings.push(...dpAir.warnings);
 
+  const airFrFactor = Number.isFinite(params.airFrictionFactor) && params.airFrictionFactor! > 0
+    ? params.airFrictionFactor!
+    : 1.0;
+  const dpAirPaFinal = (Number.isFinite(dpAir.pressureDropPa) ? dpAir.pressureDropPa : 0) * airFrFactor;
+
   // Vazão mássica do refrigerante: estimativa grosseira pela capacidade.
   // Para fluido em mudança de fase usamos hfg padrão (R404A ~ 200 kJ/kg líq-vap).
   // Sem propriedades reais o usuário deve confiar mais no fator UNILAB.
@@ -322,7 +346,7 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
     sensibleCapacityKw: qSensibleW / 1000,
     latentCapacityKw: qLatentW / 1000,
     shf: clamp(shf, 0, 1),
-    airPressureDropPa: Number.isFinite(dpAir.pressureDropPa) ? dpAir.pressureDropPa : 0,
+    airPressureDropPa: dpAirPaFinal,
     fluidPressureDropKpa: Number.isFinite(dpFluid.pressureDropKpa) ? dpFluid.pressureDropKpa : 0,
     airOutletTempC: tAirOutC,
     airOutletRhPercent: rhOut * 100,
@@ -339,6 +363,8 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
     A_total_m2: geoArea.areas.A_total_m2,
     eta_fin: geoArea.eta_fin,
     surface_ratio: geoArea.areas.surface_ratio,
+    finCorrectionFactor: finFactor,
+    airFrictionFactor: airFrFactor,
     warnings,
   };
 }

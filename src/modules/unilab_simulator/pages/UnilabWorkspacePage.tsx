@@ -167,6 +167,10 @@ export function CnCoilsWorkspacePage() {
     const geometry = catalogs.geometries.find((g) => g.id === phys.geometryId);
 
     // Busca binária em finnedLengthMm — apenas o comprimento aletado pode mudar.
+    const geoRaw = geometry?.raw as Record<string, unknown> | undefined;
+    const finCorr = Number(geoRaw?.FatCorAl ?? geoRaw?.fin_correction_factor);
+    const airFr = Number(geoRaw?.FattoreAttrAria ?? geoRaw?.air_friction_factor);
+
     const runAt = (lengthMm: number) =>
       runSimulation({
         physical: { ...phys, finnedLengthMm: lengthMm },
@@ -177,6 +181,8 @@ export function CnCoilsWorkspacePage() {
         },
         tubeMaterialConductivity: tubeMat.conductivityWmK,
         uBaseWm2K: geometry?.uBaseWm2K ?? 35,
+        finCorrectionFactor: Number.isFinite(finCorr) && finCorr > 0 ? finCorr : 1.0,
+        airFrictionFactor: Number.isFinite(airFr) && airFr > 0 ? airFr : 1.0,
       });
 
     try {
