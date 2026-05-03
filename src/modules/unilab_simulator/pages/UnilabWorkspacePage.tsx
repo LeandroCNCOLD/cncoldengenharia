@@ -68,7 +68,7 @@ export function UnilabWorkspacePage() {
     loadCoilGeometries().catch((err) => {
       if (cancelled) return;
       const msg = err instanceof Error ? err.message : String(err);
-      setWarnings([`Falha ao carregar coilGeometries.json: ${msg}`]);
+      setWarnings([{ code: "GENERAL_WARNING", message: `Falha ao carregar coilGeometries.json: ${msg}`, severity: "warning" }]);
     });
     return () => {
       cancelled = true;
@@ -126,7 +126,7 @@ export function UnilabWorkspacePage() {
     const thermoCheck = validateThermoInputs(thermo);
     const errors = [...physCheck.errors, ...thermoCheck.errors];
     if (errors.length > 0) {
-      setWarnings(errors);
+      setWarnings(errors.map((msg) => ({ code: "GEOMETRY_INCOMPLETE", message: msg, severity: "warning" as const })));
       return;
     }
     if (engineVersion === "v2") {
@@ -154,7 +154,7 @@ export function UnilabWorkspacePage() {
     const physCheck = validatePhysicalInputs(physical);
     const thermoCheck = validateThermoInputs(thermo);
     if (!physCheck.isValid || !thermoCheck.isValid) {
-      setWarnings([...physCheck.errors, ...thermoCheck.errors]);
+      setWarnings([...physCheck.errors, ...thermoCheck.errors].map((msg) => ({ code: "GEOMETRY_INCOMPLETE", message: msg, severity: "warning" as const })));
       return;
     }
     const phys = physical as UnilabPhysicalInputs;
@@ -222,7 +222,7 @@ export function UnilabWorkspacePage() {
       useUnilabSimulationStore.getState().setPhysicalInputs({ finnedLengthMm: finalLen });
       const finalRes = runAt(finalLen);
       useUnilabSimulationStore.getState().setResult(finalRes);
-      useUnilabSimulationStore.getState().setWarnings(finalRes.warnings);
+      useUnilabSimulationStore.getState().setWarnings(finalRes.warnings.map((msg) => ({ code: "GENERAL_WARNING", message: msg, severity: "warning" as const })));
       toast.success(
         `Para atingir ${targetKw} kW, o Comprimento Aletado foi ajustado para ${finalLen} mm.`,
       );
@@ -235,7 +235,7 @@ export function UnilabWorkspacePage() {
   const handleSendToAssembly = () => {
     const sendCheck = validateCanSendToAssembly(result, physical);
     if (!sendCheck.isValid) {
-      setWarnings(sendCheck.errors);
+      setWarnings(sendCheck.errors.map((msg) => ({ code: "GENERAL_WARNING", message: msg, severity: "warning" as const })));
       return;
     }
     setSending(true);
@@ -255,7 +255,7 @@ export function UnilabWorkspacePage() {
         navigate({ to: "/coldpro/components" });
       }
     } catch (err) {
-      setWarnings([err instanceof Error ? err.message : String(err)]);
+      setWarnings([{ code: "CALC_ERROR", message: err instanceof Error ? err.message : String(err), severity: "error" }]);
     } finally {
       setSending(false);
     }

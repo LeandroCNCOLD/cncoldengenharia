@@ -31,7 +31,7 @@ export interface ReportSnapshot {
   };
   cost: number;
   result?: UnilabSimulationResult;
-  warnings: string[];
+  warnings: Array<{ code: string; message: string | null; severity: "warning" | "error" }>;
   meta: {
     project: string;
     client: string;
@@ -165,7 +165,7 @@ export function generateReportPdf(snap: ReportSnapshot): jsPDF {
       styles: { fontSize: 8, cellPadding: 1.2, textColor: [120, 53, 15] },
       headStyles: { fillColor: [251, 191, 36], textColor: 30, fontStyle: "bold" },
       head: [["Avisos"]],
-      body: snap.warnings.map((w) => [w]),
+      body: snap.warnings.map((w) => [w.message ?? w.code]),
     });
   }
 

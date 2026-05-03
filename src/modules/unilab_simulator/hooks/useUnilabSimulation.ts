@@ -10,18 +10,15 @@ import type {
   TubeMaterialItem,
   CoilGeometryCatalogItem,
 } from "../types/unilab.types";
+import type { StructuredWarning } from "../types/warnings";
+
+export type { StructuredWarning as SimulationWarning } from "../types/warnings";
 
 export interface UseUnilabSimulationParams {
   geometries: CoilGeometryCatalogItem[];
   tubeMaterials: TubeMaterialItem[];
   correctionCoefficients: AirVelocityCorrectionItem[];
   pressureDropFan: PressureDropFanItem[];
-}
-
-export interface SimulationWarning {
-  code: string;
-  message: string | null;
-  severity: "warning" | "error";
 }
 
 function resolveUBase(geometry: { uBaseWm2K?: number | null; coil_type?: string } | null | undefined) {
@@ -90,18 +87,23 @@ export function useUnilabSimulation(catalogs: UseUnilabSimulationParams) {
         latentCapacityKw: rawResult.latentCapacityKw * k,
       };
 
-      const warnings: SimulationWarning[] = [
+      const warnings: StructuredWarning[] = [
         ...(uBaseIsEstimated ? [{ code: "U_BASE_ESTIMATED", message: uBaseWarning, severity: "warning" as const }] : []),
       ];
 
+      const engineWarnings: StructuredWarning[] = result.warnings.map((msg) => ({
+        code: "GENERAL_WARNING", message: msg, severity: "warning" as const,
+      }));
+      const allWarnings = [...engineWarnings, ...warnings];
+
       setResult(result);
-      setWarnings(result.warnings);
-      return { success: true as const, result, warnings };
+      setWarnings(allWarnings);
+      return { success: true as const, result, warnings: allWarnings };
     } catch (err) {
       const errors =
         err instanceof SimulationError ? err.errors : [String(err)];
       setResult(undefined);
-      setWarnings(errors);
+      setWarnings(errors.map((msg) => ({ code: "CALC_ERROR", message: msg, severity: "error" as const })));
       return { success: false as const, errors };
     } finally {
       setIsSimulating(false);
@@ -109,7 +111,7 @@ export function useUnilabSimulation(catalogs: UseUnilabSimulationParams) {
   }, [catalogs, setIsSimulating, setResult, setWarnings]);
 
   return { run, clearResult } as {
-    run: () => { success: true; result: ReturnType<typeof runSimulation>; warnings: SimulationWarning[] } | { success: false; errors: string[] };
+    run: () => { success: true; result: ReturnType<typeof runSimulation>; warnings: StructuredWarning[] } | { success: false; errors: string[] };
     clearResult: () => void;
   };
 }

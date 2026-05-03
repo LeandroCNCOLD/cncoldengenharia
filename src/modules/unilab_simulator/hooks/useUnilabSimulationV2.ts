@@ -14,7 +14,7 @@ import type {
   UnilabComponentType,
 } from "../types/unilab.types";
 import type { UnilabHeatTransferCatalog } from "../engine_v2/heatTransfer";
-import type { SimulationWarning } from "./useUnilabSimulation";
+import type { StructuredWarning } from "../types/warnings";
 
 export interface UseUnilabSimulationV2Params {
   tubeMaterials: TubeMaterialItem[];
@@ -83,13 +83,17 @@ export function useUnilabSimulationV2(params: UseUnilabSimulationV2Params) {
         sensibleCapacityKw: rawResult.sensibleCapacityKw * k,
         latentCapacityKw: rawResult.latentCapacityKw * k,
       };
-      const warnings: SimulationWarning[] = [
+      const warnings: StructuredWarning[] = [
         ...(fluidPropsIsFallback ? [{ code: "FLUID_FALLBACK", message: `Refrigerante "${refrigerantName}" não disponível na tabela. Usando R404A@-10°C como estimativa.`, severity: "warning" as const }] : []),
       ];
+      const engineWarnings: StructuredWarning[] = result.warnings.map((msg) => ({
+        code: "GENERAL_WARNING", message: msg, severity: "warning" as const,
+      }));
+      const allWarnings = [...engineWarnings, ...warnings];
 
       setResult(result);
-      setWarnings(result.warnings);
-      return { success: true as const, result, warnings };
+      setWarnings(allWarnings);
+      return { success: true as const, result, warnings: allWarnings };
     } catch (err) {
       const errors =
         err instanceof UnilabCoefficientsMissingError
@@ -98,7 +102,7 @@ export function useUnilabSimulationV2(params: UseUnilabSimulationV2Params) {
             ? err.errors
             : [String(err)];
       setResult(undefined);
-      setWarnings(errors);
+      setWarnings(errors.map((msg) => ({ code: "CALC_ERROR", message: msg, severity: "error" as const })));
       return { success: false as const, errors };
     } finally {
       setIsSimulating(false);

@@ -1,6 +1,7 @@
 import { AlertCircle, AlertTriangle, Info, Target } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { UnilabSimulationResult } from "../types/unilab.types";
+import type { StructuredWarning } from "../types/warnings";
 import { ptBR } from "../i18n/messages.ptBR";
 import {
   loadUnilabCoefficients,
@@ -10,7 +11,7 @@ import {
 
 interface ResultPanelProps {
   result: UnilabSimulationResult | undefined;
-  warnings: string[];
+  warnings: StructuredWarning[];
   onGoalSeek?: (targetKw: number) => void;
 }
 
@@ -146,18 +147,8 @@ function FanLibraryStatus({ audit }: { audit: FanAuditSummary }) {
   );
 }
 
-interface LeveledWarning {
-  text: string;
-  level?: "1" | "2" | "3" | string | null;
-}
-
-function normalize(w: string | LeveledWarning): LeveledWarning {
-  return typeof w === "string" ? { text: w, level: "2" } : w;
-}
-
-function WarningsList({ warnings }: { warnings: Array<string | LeveledWarning> }) {
-  const items = warnings.map(normalize);
-  const hasError = items.some((w) => w.level === "3");
+function WarningsList({ warnings }: { warnings: StructuredWarning[] }) {
+  const hasError = warnings.some((w) => w.severity === "error");
   return (
     <div
       className={`rounded-lg border p-3 ${
@@ -175,19 +166,13 @@ function WarningsList({ warnings }: { warnings: Array<string | LeveledWarning> }
         Avisos
       </div>
       <ul className="space-y-1 text-xs">
-        {items.map((w, i) => {
-          const lvl = w.level ?? "2";
-          const Icon = lvl === "3" ? AlertCircle : lvl === "1" ? Info : AlertTriangle;
-          const cls =
-            lvl === "3"
-              ? "text-red-700"
-              : lvl === "1"
-                ? "text-slate-600"
-                : "text-amber-800";
+        {warnings.map((w, i) => {
+          const Icon = w.severity === "error" ? AlertCircle : AlertTriangle;
+          const cls = w.severity === "error" ? "text-red-700" : "text-amber-800";
           return (
             <li key={i} className={`flex items-start gap-1.5 ${cls}`}>
               <Icon className="mt-0.5 h-3 w-3 flex-shrink-0" />
-              <span>{w.text}</span>
+              <span>{w.message ?? w.code}</span>
             </li>
           );
         })}
