@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AssemblyPage } from "@/modules/coldpro/pages/AssemblyPage";
+import { AssemblyWorkspacePage } from "@/modules/cn_coils/pages/AssemblyWorkspacePage";
 
 export const Route = createFileRoute("/_app/coldpro/assembly")({
-  component: AssemblyPage,
+  component: AssemblyWorkspacePage,
 });
