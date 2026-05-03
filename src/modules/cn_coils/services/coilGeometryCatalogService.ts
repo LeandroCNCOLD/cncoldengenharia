@@ -232,7 +232,10 @@ export async function loadCoilGeometries(): Promise<CoilGeometryItem[]> {
   if (inflight) return inflight;
 
   inflight = (async () => {
-    const res = await fetch(CATALOG_URL, { cache: "no-cache" });
+    const [res, completeIndex] = await Promise.all([
+      fetch(CATALOG_URL, { cache: "no-cache" }),
+      loadCompleteFactorIndex(),
+    ]);
     if (!res.ok) {
       throw new Error(
         `Falha ao carregar coilGeometries.json (HTTP ${res.status}).`,
@@ -242,7 +245,33 @@ export async function loadCoilGeometries(): Promise<CoilGeometryItem[]> {
     if (!Array.isArray(raw)) {
       throw new Error("Conteúdo inválido em coilGeometries.json: esperado array.");
     }
-    const items = (raw as RawGeometryEntry[]).map(enrich);
+    const items = (raw as RawGeometryEntry[]).map((entry) => {
+      const code = entry.raw?.["code"];
+      const complete =
+        typeof code === "string" ? completeIndex.get(code) : undefined;
+      if (complete) {
+        // Mescla fatores físicos do dataset UNILAB completo no raw da entrada.
+        // Apenas adiciona se ainda não existir no raw atual.
+        const merged: Record<string, unknown> = { ...entry.raw };
+        if (merged["fin_correction_factor"] == null && complete["FatCorAl"] != null) {
+          merged["fin_correction_factor"] = complete["FatCorAl"];
+        }
+        if (merged["air_friction_factor"] == null && complete["FattoreAttrAria"] != null) {
+          merged["air_friction_factor"] = complete["FattoreAttrAria"];
+        }
+        if (
+          merged["internal_surface_ratio"] == null &&
+          complete["RappSuperficiInterne"] != null
+        ) {
+          merged["internal_surface_ratio"] = complete["RappSuperficiInterne"];
+        }
+        if (merged["fin_type"] == null && complete["TipoAletta"] != null) {
+          merged["fin_type"] = complete["TipoAletta"];
+        }
+        return enrich({ ...entry, raw: merged });
+      }
+      return enrich(entry);
+    });
     cache = items;
     return items;
   })();
