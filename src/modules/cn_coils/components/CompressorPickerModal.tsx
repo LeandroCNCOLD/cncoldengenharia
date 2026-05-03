@@ -18,17 +18,14 @@ export interface CompressorItem {
   type?: string;
   refrigerantCode?: string;
   brand?: string;
-}
-
-/** Infere a marca do compressor a partir da série/modelo (catálogo não tem campo brand). */
-function inferBrand(series?: string, model?: string): string {
-  const s = `${series ?? ""} ${model ?? ""}`.toUpperCase();
-  if (/\bSH\b|ECOLINE|BITZER|\bSE\b|\b[24][A-Z]{2}-/.test(s)) return "Bitzer";
-  if (/^D|DKJ|DLJ|DLF|DKM|DLL|DLE|DKSJ|DANFOSS|MANEUROP|MT |MTZ|NTZ/.test(s)) return "Danfoss";
-  if (/^Z|COPELAND|SCROLL DIGITAL|\bCS\b/.test(s)) return "Copeland";
-  if (/EMBRACO|NE[A-Z]?\d|FF\d|EM[A-Z]?\d/.test(s)) return "Embraco";
-  if (/TECUMSEH|AE[A-Z]?\d|AJ[A-Z]?\d|AW[A-Z]?\d/.test(s)) return "Tecumseh";
-  return "Outros";
+  application?: string;
+  refrigerant?: string;
+  allRefrigerants: string[];
+  nominalHp: number | null;
+  nominalCapacityW: number | null;
+  nominalPowerW: number | null;
+  frequencyHz: number;
+  voltage: string | null;
 }
 
 interface Props {
@@ -66,32 +63,36 @@ export function CompressorPickerModal({ open, onClose }: Props) {
     setDraftId(selectedCompressorId);
     setDraftCount(compressorCount);
     setLoading(true);
-    fetch("/data/catalogs/compressors.json", { cache: "no-cache" })
+    fetch("/data/compressors/index.json", { cache: "no-cache" })
       .then((r) => (r.ok ? r.json() : []))
       .then((list: unknown) => {
         if (!Array.isArray(list)) return setItems([]);
-        const mapped = list
-          .map((c) => {
-            const o = c as Record<string, unknown>;
-            const id = String(o.id ?? o.model ?? "");
-            const series = o.series ? String(o.series) : undefined;
-            const model = String(o.model ?? id);
-            const brand =
-              (o.brand ? String(o.brand) : undefined) ??
-              (o.manufacturer ? String(o.manufacturer) : undefined) ??
-              inferBrand(series, model);
-            return {
-              id,
-              model,
-              series,
-              type: o.type ? String(o.type) : undefined,
-              refrigerantCode: o.refrigerantCode
-                ? String(o.refrigerantCode)
-                : undefined,
-              brand,
-            } as CompressorItem;
-          })
-          .filter((x) => x.id);
+        const mapped = (list as Array<Record<string, unknown>>)
+          .map((r) => ({
+            id: String(r.id ?? ""),
+            model: String(r.model ?? r.id ?? ""),
+            brand: String(r.manufacturer ?? ""),
+            series: String(r.compressor_type ?? ""),
+            type: String(r.application ?? ""),
+            application: String(r.application ?? ""),
+            refrigerant: String(r.refrigerant ?? ""),
+            refrigerantCode: String(r.refrigerant ?? ""),
+            allRefrigerants: Array.isArray(r.all_refrigerants)
+              ? (r.all_refrigerants as string[])
+              : [],
+            nominalHp:
+              typeof r.nominal_hp === "number" ? r.nominal_hp : null,
+            nominalCapacityW:
+              typeof r.nominal_cooling_capacity_w === "number"
+                ? r.nominal_cooling_capacity_w
+                : null,
+            nominalPowerW:
+              typeof r.nominal_power_w === "number" ? r.nominal_power_w : null,
+            frequencyHz:
+              typeof r.frequency_hz === "number" ? r.frequency_hz : 60,
+            voltage: r.voltage == null ? null : String(r.voltage),
+          }))
+          .filter((x) => x.id && x.model);
         setItems(mapped);
       })
       .catch(() => setItems([]))
@@ -104,21 +105,15 @@ export function CompressorPickerModal({ open, onClose }: Props) {
     return Array.from(s).sort();
   }, [items]);
 
-  const brands = useMemo(() => {
-    const s = new Set<string>();
-    items.forEach((i) => i.brand && s.add(i.brand));
-    return Array.from(s).sort();
-  }, [items]);
+  const uniqueBrands = useMemo(
+    () => Array.from(new Set(items.map((i) => i.brand).filter(Boolean))).sort(),
+    [items],
+  );
 
-  const seriesList = useMemo(() => {
-    const s = new Set<string>();
-    items.forEach((i) => {
-      if (!i.series) return;
-      if (brandFilter && i.brand !== brandFilter) return;
-      s.add(i.series);
-    });
-    return Array.from(s).sort();
-  }, [items, brandFilter]);
+  const uniqueSeries = useMemo(
+    () => Array.from(new Set(items.map((i) => i.series).filter(Boolean))).sort(),
+    [items],
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -127,7 +122,16 @@ export function CompressorPickerModal({ open, onClose }: Props) {
       if (typeFilter && i.type !== typeFilter) return false;
       if (seriesFilter && i.series !== seriesFilter) return false;
       if (!q) return true;
-      return [i.model, i.id, i.series, i.type, i.refrigerantCode, i.brand]
+      return [
+        i.model,
+        i.id,
+        i.series,
+        i.type,
+        i.refrigerantCode,
+        i.brand,
+        i.refrigerant,
+        ...i.allRefrigerants,
+      ]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(q));
     });
@@ -179,8 +183,8 @@ export function CompressorPickerModal({ open, onClose }: Props) {
               }}
               className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
             >
-              <option value="">Todas as marcas</option>
-              {brands.map((b) => (
+              <option value="">Fabricante</option>
+              {uniqueBrands.map((b) => (
                 <option key={b} value={b}>{b}</option>
               ))}
             </select>
@@ -189,7 +193,7 @@ export function CompressorPickerModal({ open, onClose }: Props) {
               onChange={(e) => setTypeFilter(e.target.value)}
               className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
             >
-              <option value="">Todos os tipos</option>
+              <option value="">Aplicação</option>
               {types.map((t) => (
                 <option key={t} value={t}>{t}</option>
               ))}
@@ -199,8 +203,8 @@ export function CompressorPickerModal({ open, onClose }: Props) {
               onChange={(e) => setSeriesFilter(e.target.value)}
               className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
             >
-              <option value="">Todas as séries</option>
-              {seriesList.map((s) => (
+              <option value="">Tipo/Série</option>
+              {uniqueSeries.map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
@@ -212,19 +216,24 @@ export function CompressorPickerModal({ open, onClose }: Props) {
               <div className="p-4 text-center text-xs text-slate-500">Carregando…</div>
             ) : filtered.length === 0 ? (
               <div className="p-4 text-center text-xs text-slate-500">
-                Nenhum compressor encontrado ({items.length} no catálogo).
+                Nenhum compressor encontrado ({items.length.toLocaleString("pt-BR")} no catálogo).
               </div>
             ) : (
+              <div>
+              <div className="border-b border-slate-100 px-3 py-1 text-[10px] text-slate-500">
+                {items.length.toLocaleString("pt-BR")} no catálogo · {filtered.length.toLocaleString("pt-BR")} filtrados
+              </div>
               <ul className="divide-y divide-slate-100 text-xs">
                 {filtered.slice(0, 200).map((c) => {
                   const active = c.id === draftId;
-                  const meta = [c.brand, c.type, c.series, c.refrigerantCode]
+                  const meta = [c.brand, c.application, c.series, c.refrigerant]
                     .filter(Boolean)
                     .join(" • ");
                   return (
                     <li key={c.id}>
                       <button
                         type="button"
+                        data-brand={c.brand}
                         onClick={() => setDraftId(c.id)}
                         className={`flex w-full flex-col gap-0.5 px-3 py-2 text-left transition ${
                           active
@@ -246,6 +255,7 @@ export function CompressorPickerModal({ open, onClose }: Props) {
                   </li>
                 )}
               </ul>
+              </div>
             )}
           </div>
 
@@ -268,7 +278,40 @@ export function CompressorPickerModal({ open, onClose }: Props) {
             {draft && (
               <div className="rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs">
                 <div className="font-semibold text-amber-900">{draft.model}</div>
-                <div className="text-[10px] text-amber-800">
+                <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px] text-amber-800">
+                  <Detail label="Fabricante" value={draft.brand || "—"} />
+                  <Detail label="Tipo" value={draft.series || "—"} />
+                  <Detail
+                    label="Capacidade"
+                    value={
+                      draft.nominalCapacityW
+                        ? `${(draft.nominalCapacityW / 1000).toFixed(1)} kW`
+                        : draft.nominalHp
+                          ? `${draft.nominalHp} HP`
+                          : "—"
+                    }
+                  />
+                  <Detail
+                    label="Potência"
+                    value={
+                      draft.nominalPowerW
+                        ? `${(draft.nominalPowerW / 1000).toFixed(2)} kW`
+                        : "—"
+                    }
+                  />
+                  <Detail label="Refrigerante" value={draft.refrigerant || "—"} />
+                  <Detail
+                    label="Todos"
+                    value={
+                      draft.allRefrigerants.length > 0
+                        ? draft.allRefrigerants.join(", ")
+                        : "—"
+                    }
+                  />
+                  <Detail label="Frequência" value={`${draft.frequencyHz} Hz`} />
+                  <Detail label="Tensão" value={draft.voltage ?? "—"} />
+                </div>
+                <div className="mt-1 text-[10px] text-amber-800">
                   {draftCount}× compressor — capacidade total = unitária × {draftCount}
                 </div>
               </div>
@@ -293,5 +336,14 @@ export function CompressorPickerModal({ open, onClose }: Props) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <span className="font-medium">{label}: </span>
+      <span className="break-words">{value}</span>
+    </div>
   );
 }
