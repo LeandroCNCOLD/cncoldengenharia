@@ -167,29 +167,46 @@ function FanLibraryStatus({ audit }: { audit: FanAuditSummary }) {
 }
 
 function WarningsList({ warnings }: { warnings: StructuredWarning[] }) {
-  const hasError = warnings.some((w) => w.severity === "error");
+  const styles = {
+    error: {
+      box: "border-red-300 bg-red-50",
+      title: "text-red-800",
+      item: "text-red-700",
+      Icon: AlertCircle,
+    },
+    warning: {
+      box: "border-amber-300 bg-amber-50",
+      title: "text-amber-800",
+      item: "text-amber-800",
+      Icon: AlertTriangle,
+    },
+    info: {
+      box: "border-blue-300 bg-blue-50",
+      title: "text-blue-800",
+      item: "text-blue-700",
+      Icon: Info,
+    },
+  } as const;
+
+  const top = warnings.some((w) => w.severity === "error")
+    ? styles.error
+    : warnings.some((w) => w.severity === "warning")
+      ? styles.warning
+      : styles.info;
+  const TopIcon = top.Icon;
+
   return (
-    <div
-      className={`rounded-lg border p-3 ${
-        hasError
-          ? "border-red-200 bg-red-50"
-          : "border-amber-200 bg-amber-50"
-      }`}
-    >
-      <div
-        className={`mb-1 flex items-center gap-2 text-xs font-semibold ${
-          hasError ? "text-red-800" : "text-amber-800"
-        }`}
-      >
-        <AlertTriangle className="h-3.5 w-3.5" />
+    <div className={`rounded-lg border p-3 ${top.box}`}>
+      <div className={`mb-1 flex items-center gap-2 text-xs font-semibold ${top.title}`}>
+        <TopIcon className="h-3.5 w-3.5" />
         Avisos
       </div>
       <ul className="space-y-1 text-xs">
         {warnings.map((w, i) => {
-          const Icon = w.severity === "error" ? AlertCircle : AlertTriangle;
-          const cls = w.severity === "error" ? "text-red-700" : "text-amber-800";
+          const s = styles[(w.severity as keyof typeof styles) ?? "warning"] ?? styles.warning;
+          const Icon = s.Icon;
           return (
-            <li key={i} className={`flex items-start gap-1.5 ${cls}`}>
+            <li key={i} className={`flex items-start gap-1.5 ${s.item}`}>
               <Icon className="mt-0.5 h-3 w-3 flex-shrink-0" />
               <span>{w.message ?? w.code}</span>
             </li>

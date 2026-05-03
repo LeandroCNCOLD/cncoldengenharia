@@ -201,7 +201,7 @@ export function WorkspaceSidebar({
 
 
   return (
-    <aside className="flex h-full w-full flex-col gap-1.5 rounded border border-slate-300 bg-slate-50 p-1.5 text-[10px] shadow-sm">
+    <aside className="flex h-full w-full min-w-[220px] flex-col gap-2 rounded border border-border bg-slate-50 p-2 text-[10px] shadow-sm">
       {/* Cabeçalho com a aplicação */}
       <div className="rounded bg-[#1E6FD9] px-2 py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white">
         {cfg.shortLabel}
@@ -331,12 +331,18 @@ export function WorkspaceSidebar({
         <SidebarMetricLine label="Carga refrig." value={`${derived.cargaRefrigerante_kg.toFixed(2)} kg`} />
       </SidebarInfoCard>
 
-      <div className={`rounded border bg-white ${hasFanError ? "border-red-500 bg-red-50" : "border-emerald-500 bg-emerald-50"}`}>
-        <div className="border-b border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
+      <div
+        className={`rounded border bg-white border-l-2 ${
+          hasFanError
+            ? "border-red-300 border-l-red-500"
+            : "border-emerald-300 border-l-emerald-500"
+        }`}
+      >
+        <div className="border-b border-border bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Gabinete Sanitário
         </div>
-        <div className="space-y-1 p-1.5 text-[10px] text-slate-700">
-          <div className="rounded bg-white/70 px-1.5 py-1 text-center font-mono font-semibold text-slate-900">
+        <div className="space-y-1 p-3 text-[10px] text-slate-700">
+          <div className="rounded bg-white/70 px-1.5 py-1 text-center font-mono text-sm font-semibold text-foreground">
             {derived.gabinete_largura_mm.toFixed(0)} × {derived.gabinete_altura_mm.toFixed(0)} × {derived.gabinete_prof_mm.toFixed(0)} mm
           </div>
           {fanFit.fanWarnings.map((w, i) => (
@@ -449,11 +455,11 @@ function SidebarInfoCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded border border-slate-300 bg-white">
-      <div className="border-b border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
+    <div className="rounded border border-border bg-white">
+      <div className="border-b border-border bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         {title}
       </div>
-      <div className="space-y-1 p-1.5 text-[10px] text-slate-700">
+      <div className="space-y-1 p-3 text-[11px] text-foreground">
         {children}
       </div>
     </div>
@@ -463,8 +469,8 @@ function SidebarInfoCard({
 function SidebarMetricLine({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-slate-500">{label}</span>
-      <span className="font-mono font-semibold text-slate-800">{value}</span>
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-mono text-sm text-foreground">{value}</span>
     </div>
   );
 }

@@ -281,7 +281,7 @@ export function CnCoilsWorkspacePage() {
         <div className="flex flex-wrap items-center gap-2">
           <Link
             to="/coldpro/unilab"
-            className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground hover:bg-accent"
           >
             <ArrowLeft className="h-4 w-4" />
             {ptBR.workspace.actions.backToDashboard}
@@ -306,14 +306,30 @@ export function CnCoilsWorkspacePage() {
         </div>
       }
     >
+      {/* Indicador de carregamento de catálogos — barra discreta no topo */}
+      {catalogs.loading && (
+        <div className="-mt-1 flex items-center gap-2 rounded border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
+          <svg
+            className="h-3.5 w-3.5 animate-spin"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" />
+            <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+          </svg>
+          Carregando catálogos…
+        </div>
+      )}
+
       {/*
         Layout configurador CN COILS:
-        - Esquerda: WorkspaceSidebar (Geometria/Tubo/Aleta/Distribuidor abrem em modal)
-        - Centro: Lado Ventilação + Esquema da serpentina (SEMPRE fixos)
-        - Direita: FluidSidePanel + Resultado (SEMPRE fixos)
-        - Rodapé: GeometryBottomBar (SEMPRE fixo, full width)
+        - Esquerda: WorkspaceSidebar
+        - Centro: Lado Ventilação
+        - Direita: FluidSidePanel + Resultado
+        - Rodapé: GeometryBottomBar (full width)
       */}
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[190px_minmax(0,1fr)_minmax(0,1fr)] 2xl:grid-cols-[210px_minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)] 2xl:grid-cols-[240px_minmax(0,1fr)_minmax(0,1fr)] rounded-md shadow-sm">
         <WorkspaceSidebar
           componentType={componentType}
           onSimulate={handleSimulate}
@@ -326,12 +342,12 @@ export function CnCoilsWorkspacePage() {
         />
 
         <div className="min-w-0 space-y-2 xl:contents">
-          {/* COLUNA CENTRAL — Lado Ventilador (fixo). Esquema da serpentina abre via "Desenho". */}
-          <div className="min-w-0 space-y-2">
+          {/* COLUNA CENTRAL — Lado Ventilador */}
+          <div className="min-w-0 space-y-2 xl:border-r xl:border-border xl:pr-2">
             <AirSidePanel result={result} />
           </div>
 
-          {/* COLUNA DIREITA — Lado Fluido FIXO */}
+          {/* COLUNA DIREITA — Lado Fluido + Resultado */}
           <div className="min-w-0 space-y-2">
             <FluidSidePanel
               componentType={componentType}
@@ -339,13 +355,15 @@ export function CnCoilsWorkspacePage() {
               disabled={!catalogs.ready}
               result={result}
             />
-            <DatasetStatusPanel
-              loading={catalogs.loading}
-              ready={catalogs.ready}
-              errors={catalogs.errors}
-              missing={catalogs.missing}
-              compact
-            />
+            {!catalogs.loading && !catalogs.ready && (
+              <DatasetStatusPanel
+                loading={catalogs.loading}
+                ready={catalogs.ready}
+                errors={catalogs.errors}
+                missing={catalogs.missing}
+                compact
+              />
+            )}
             <ResultPanel result={result} warnings={visibleWarnings} onGoalSeek={handleGoalSeek} />
           </div>
         </div>
