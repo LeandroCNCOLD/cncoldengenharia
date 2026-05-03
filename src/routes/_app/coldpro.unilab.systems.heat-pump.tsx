@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ComingSoonSystemPage } from "@/modules/unilab_simulator/pages/systems/ComingSoonSystemPage";
+import { ComingSoonSystemPage } from "@/modules/cn_coils/pages/systems/ComingSoonSystemPage";
 
 export const Route = createFileRoute(
   "/_app/coldpro/unilab/systems/heat-pump",

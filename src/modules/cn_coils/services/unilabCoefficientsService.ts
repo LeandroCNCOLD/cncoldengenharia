@@ -4,7 +4,7 @@
  * Reads the consolidated `/data/catalogs/unilabCoefficients.json` produced
  * from COEFF_COMPLETO_UNILAB_VAPCYC.zip. Does NOT touch:
  *   - src/modules/coldpro_v2 (intact)
- *   - src/modules/unilab_simulator/engine (intact, old engine)
+ *   - src/modules/cn_coils/engine (intact, old engine)
  *
  * Fan auditing rules (CN COILS):
  *   - Axial with X/Y curve → usable when at least one X and one Y are non-zero.
