@@ -404,7 +404,7 @@ function normalize(w: string | LeveledWarning | StructuredWarning): LeveledWarni
 function WarningsList({
   warnings,
 }: {
-  warnings: Array<string | LeveledWarning | StructuredWarning>;
+  warnings: Array<string | StructuredWarning>;
 }) {
   const items = warnings.map(normalize);
   const hasError = items.some((w) => w.level === "3");
