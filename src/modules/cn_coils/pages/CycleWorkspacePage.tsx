@@ -191,9 +191,18 @@ export function CycleWorkspacePage() {
     };
   }, [refrigerantId, te, tc, superheat, subcooling, expansionType, shTarget, capLength, capDiameter, orificeDiameter]);
 
-  const simState = useCycleSimulation(config);
+  const simState = useCycleSimulation(config, { mode: "manual" });
   const cycleResult: CycleResult | null =
     simState.status === "success" ? simState.result : null;
+
+  // Auto-run uma vez ao montar (com config padrão válida)
+  const didInitRef = useRef(false);
+  useEffect(() => {
+    if (didInitRef.current) return;
+    didInitRef.current = true;
+    simState.trigger();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
