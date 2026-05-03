@@ -8,20 +8,24 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { runCycleSimulation } from "../engines/cycle/cycleEngine";
 import type { CycleResult, CycleSystemConfig } from "../engines/cycle/cycleTypes";
 
-export type CycleSimulationState =
+export type CycleSimulationStatus =
   | { status: "idle" }
   | { status: "running" }
   | { status: "success"; result: CycleResult }
   | { status: "error"; message: string };
+
+export type CycleSimulationState = CycleSimulationStatus & {
+  trigger: () => void;
+};
 
 const SOLVER_TIMEOUT_MS = 30_000;
 
 export function useCycleSimulation(
   config: CycleSystemConfig | null,
   options: { mode?: "auto" | "manual" } = {},
-) {
+): CycleSimulationState {
   const mode = options.mode ?? "auto";
-  const [state, setState] = useState<CycleSimulationState>({ status: "idle" });
+  const [state, setState] = useState<CycleSimulationStatus>({ status: "idle" });
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const runIdRef = useRef(0);
 
@@ -65,9 +69,15 @@ export function useCycleSimulation(
     };
   }, [config, run, mode]);
 
-  const trigger = useCallback(() => {
-    if (config) void run(config);
-  }, [config, run]);
+  const configRef = useRef(config);
+  useEffect(() => {
+    configRef.current = config;
+  }, [config]);
 
-  return Object.assign(state, { trigger });
+  const trigger = useCallback(() => {
+    const cfg = configRef.current;
+    if (cfg) void run(cfg);
+  }, [run]);
+
+  return { ...state, trigger } as CycleSimulationState;
 }
