@@ -18,8 +18,10 @@ import { Route as AppColdproIndexRouteImport } from './routes/_app/coldpro.index
 import { Route as AppColdproSimulationRouteImport } from './routes/_app/coldpro.simulation'
 import { Route as AppColdproRegistryRouteImport } from './routes/_app/coldpro.registry'
 import { Route as AppColdproRecordRouteImport } from './routes/_app/coldpro.record'
+import { Route as AppColdproOptimizationRouteImport } from './routes/_app/coldpro.optimization'
 import { Route as AppColdproMontagemRouteImport } from './routes/_app/coldpro.montagem'
 import { Route as AppColdproMapRouteImport } from './routes/_app/coldpro.map'
+import { Route as AppColdproFrostRouteImport } from './routes/_app/coldpro.frost'
 import { Route as AppColdproFichaTecnicaRouteImport } from './routes/_app/coldpro.ficha-tecnica'
 import { Route as AppColdproExportRouteImport } from './routes/_app/coldpro.export'
 import { Route as AppColdproCycleRouteImport } from './routes/_app/coldpro.cycle'
@@ -79,6 +81,11 @@ const AppColdproRecordRoute = AppColdproRecordRouteImport.update({
   path: '/record',
   getParentRoute: () => AppColdproRoute,
 } as any)
+const AppColdproOptimizationRoute = AppColdproOptimizationRouteImport.update({
+  id: '/optimization',
+  path: '/optimization',
+  getParentRoute: () => AppColdproRoute,
+} as any)
 const AppColdproMontagemRoute = AppColdproMontagemRouteImport.update({
   id: '/montagem',
   path: '/montagem',
@@ -87,6 +94,11 @@ const AppColdproMontagemRoute = AppColdproMontagemRouteImport.update({
 const AppColdproMapRoute = AppColdproMapRouteImport.update({
   id: '/map',
   path: '/map',
+  getParentRoute: () => AppColdproRoute,
+} as any)
+const AppColdproFrostRoute = AppColdproFrostRouteImport.update({
+  id: '/frost',
+  path: '/frost',
   getParentRoute: () => AppColdproRoute,
 } as any)
 const AppColdproFichaTecnicaRoute = AppColdproFichaTecnicaRouteImport.update({
@@ -179,8 +191,10 @@ export interface FileRoutesByFullPath {
   '/coldpro/cycle': typeof AppColdproCycleRoute
   '/coldpro/export': typeof AppColdproExportRoute
   '/coldpro/ficha-tecnica': typeof AppColdproFichaTecnicaRoute
+  '/coldpro/frost': typeof AppColdproFrostRoute
   '/coldpro/map': typeof AppColdproMapRoute
   '/coldpro/montagem': typeof AppColdproMontagemRoute
+  '/coldpro/optimization': typeof AppColdproOptimizationRoute
   '/coldpro/record': typeof AppColdproRecordRoute
   '/coldpro/registry': typeof AppColdproRegistryRoute
   '/coldpro/simulation': typeof AppColdproSimulationRoute
@@ -204,8 +218,10 @@ export interface FileRoutesByTo {
   '/coldpro/cycle': typeof AppColdproCycleRoute
   '/coldpro/export': typeof AppColdproExportRoute
   '/coldpro/ficha-tecnica': typeof AppColdproFichaTecnicaRoute
+  '/coldpro/frost': typeof AppColdproFrostRoute
   '/coldpro/map': typeof AppColdproMapRoute
   '/coldpro/montagem': typeof AppColdproMontagemRoute
+  '/coldpro/optimization': typeof AppColdproOptimizationRoute
   '/coldpro/record': typeof AppColdproRecordRoute
   '/coldpro/registry': typeof AppColdproRegistryRoute
   '/coldpro/simulation': typeof AppColdproSimulationRoute
@@ -232,8 +248,10 @@ export interface FileRoutesById {
   '/_app/coldpro/cycle': typeof AppColdproCycleRoute
   '/_app/coldpro/export': typeof AppColdproExportRoute
   '/_app/coldpro/ficha-tecnica': typeof AppColdproFichaTecnicaRoute
+  '/_app/coldpro/frost': typeof AppColdproFrostRoute
   '/_app/coldpro/map': typeof AppColdproMapRoute
   '/_app/coldpro/montagem': typeof AppColdproMontagemRoute
+  '/_app/coldpro/optimization': typeof AppColdproOptimizationRoute
   '/_app/coldpro/record': typeof AppColdproRecordRoute
   '/_app/coldpro/registry': typeof AppColdproRegistryRoute
   '/_app/coldpro/simulation': typeof AppColdproSimulationRoute
@@ -260,8 +278,10 @@ export interface FileRouteTypes {
     | '/coldpro/cycle'
     | '/coldpro/export'
     | '/coldpro/ficha-tecnica'
+    | '/coldpro/frost'
     | '/coldpro/map'
     | '/coldpro/montagem'
+    | '/coldpro/optimization'
     | '/coldpro/record'
     | '/coldpro/registry'
     | '/coldpro/simulation'
@@ -285,8 +305,10 @@ export interface FileRouteTypes {
     | '/coldpro/cycle'
     | '/coldpro/export'
     | '/coldpro/ficha-tecnica'
+    | '/coldpro/frost'
     | '/coldpro/map'
     | '/coldpro/montagem'
+    | '/coldpro/optimization'
     | '/coldpro/record'
     | '/coldpro/registry'
     | '/coldpro/simulation'
@@ -312,8 +334,10 @@ export interface FileRouteTypes {
     | '/_app/coldpro/cycle'
     | '/_app/coldpro/export'
     | '/_app/coldpro/ficha-tecnica'
+    | '/_app/coldpro/frost'
     | '/_app/coldpro/map'
     | '/_app/coldpro/montagem'
+    | '/_app/coldpro/optimization'
     | '/_app/coldpro/record'
     | '/_app/coldpro/registry'
     | '/_app/coldpro/simulation'
@@ -396,6 +420,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproRecordRouteImport
       parentRoute: typeof AppColdproRoute
     }
+    '/_app/coldpro/optimization': {
+      id: '/_app/coldpro/optimization'
+      path: '/optimization'
+      fullPath: '/coldpro/optimization'
+      preLoaderRoute: typeof AppColdproOptimizationRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
     '/_app/coldpro/montagem': {
       id: '/_app/coldpro/montagem'
       path: '/montagem'
@@ -408,6 +439,13 @@ declare module '@tanstack/react-router' {
       path: '/map'
       fullPath: '/coldpro/map'
       preLoaderRoute: typeof AppColdproMapRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
+    '/_app/coldpro/frost': {
+      id: '/_app/coldpro/frost'
+      path: '/frost'
+      fullPath: '/coldpro/frost'
+      preLoaderRoute: typeof AppColdproFrostRouteImport
       parentRoute: typeof AppColdproRoute
     }
     '/_app/coldpro/ficha-tecnica': {
@@ -542,8 +580,10 @@ interface AppColdproRouteChildren {
   AppColdproCycleRoute: typeof AppColdproCycleRoute
   AppColdproExportRoute: typeof AppColdproExportRoute
   AppColdproFichaTecnicaRoute: typeof AppColdproFichaTecnicaRoute
+  AppColdproFrostRoute: typeof AppColdproFrostRoute
   AppColdproMapRoute: typeof AppColdproMapRoute
   AppColdproMontagemRoute: typeof AppColdproMontagemRoute
+  AppColdproOptimizationRoute: typeof AppColdproOptimizationRoute
   AppColdproRecordRoute: typeof AppColdproRecordRoute
   AppColdproRegistryRoute: typeof AppColdproRegistryRoute
   AppColdproSimulationRoute: typeof AppColdproSimulationRoute
@@ -560,8 +600,10 @@ const AppColdproRouteChildren: AppColdproRouteChildren = {
   AppColdproCycleRoute: AppColdproCycleRoute,
   AppColdproExportRoute: AppColdproExportRoute,
   AppColdproFichaTecnicaRoute: AppColdproFichaTecnicaRoute,
+  AppColdproFrostRoute: AppColdproFrostRoute,
   AppColdproMapRoute: AppColdproMapRoute,
   AppColdproMontagemRoute: AppColdproMontagemRoute,
+  AppColdproOptimizationRoute: AppColdproOptimizationRoute,
   AppColdproRecordRoute: AppColdproRecordRoute,
   AppColdproRegistryRoute: AppColdproRegistryRoute,
   AppColdproSimulationRoute: AppColdproSimulationRoute,
