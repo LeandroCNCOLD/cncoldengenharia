@@ -8,11 +8,13 @@ import {
   UnilabCoefficientsMissingError,
 } from "../engine_v2/simulatorCoreV2";
 import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { getRefrigerantProps } from "@/modules/unilab_simulator/services/refrigerantProperties";
 import type {
   TubeMaterialItem,
   UnilabComponentType,
 } from "../types/unilab.types";
 import type { UnilabHeatTransferCatalog } from "../engine_v2/heatTransfer";
+import type { SimulationWarning } from "./useUnilabSimulation";
 
 export interface UseUnilabSimulationV2Params {
   tubeMaterials: TubeMaterialItem[];
@@ -20,14 +22,12 @@ export interface UseUnilabSimulationV2Params {
   componentType: UnilabComponentType;
 }
 
-// Propriedades default para R404A líquido a -10 °C (placeholder até integrarmos
-// o catálogo termodinâmico de refrigerantes — Etapa 7). Valores literatura
-// (NIST REFPROP, R404A saturado).
-const DEFAULT_FLUID_PROPS = {
-  rho_kg_m3: 1180,
-  mu_Pa_s: 2.0e-4,
-  cp_J_kgK: 1450,
+const FALLBACK_FLUID_PROPS = {
+  rho_kg_m3: 1108,
+  mu_Pa_s: 2.18e-4,
+  cp_J_kgK: 1440,
   k_W_mK: 0.078,
+  Pr: 4.02,
 };
 
 export function useUnilabSimulationV2(params: UseUnilabSimulationV2Params) {
@@ -54,13 +54,19 @@ export function useUnilabSimulationV2(params: UseUnilabSimulationV2Params) {
 
       const fluidMassFlowKgS = (state.fluidMassFlow_kg_h || 0) / 3600;
 
+      const refrigerantName = (state.fluid ?? "REF_R404A").replace(/^REF_/, "");
+      const fluidTemp = state.fluidOperatingTemp_C ?? -10;
+      const fluidPropsResult = getRefrigerantProps(refrigerantName, fluidTemp, "liquid");
+      const fluidProps = fluidPropsResult ?? FALLBACK_FLUID_PROPS;
+      const fluidPropsIsFallback = !fluidPropsResult;
+
       const rawResult = runSimulationV2({
         physical,
         thermo,
         componentType: params.componentType,
         htCatalog: params.htCatalog,
         tubeMaterialConductivity: tubeMat.conductivityWmK,
-        fluidProps: DEFAULT_FLUID_PROPS,
+        fluidProps,
         fluidMassFlowKgS,
         foulingExternal: state.foulingFactorAir,
         foulingInternal: state.foulingFactorFluid,
@@ -77,9 +83,13 @@ export function useUnilabSimulationV2(params: UseUnilabSimulationV2Params) {
         sensibleCapacityKw: rawResult.sensibleCapacityKw * k,
         latentCapacityKw: rawResult.latentCapacityKw * k,
       };
+      const warnings: SimulationWarning[] = [
+        ...(fluidPropsIsFallback ? [{ code: "FLUID_FALLBACK", message: `Refrigerante "${refrigerantName}" não disponível na tabela. Usando R404A@-10°C como estimativa.`, severity: "warning" as const }] : []),
+      ];
+
       setResult(result);
       setWarnings(result.warnings);
-      return { success: true as const, result };
+      return { success: true as const, result, warnings };
     } catch (err) {
       const errors =
         err instanceof UnilabCoefficientsMissingError
