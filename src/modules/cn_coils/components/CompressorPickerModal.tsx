@@ -66,32 +66,69 @@ export function CompressorPickerModal({ open, onClose }: Props) {
     setDraftId(selectedCompressorId);
     setDraftCount(compressorCount);
     setLoading(true);
-    fetch("/data/catalogs/compressors.json", { cache: "no-cache" })
-      .then((r) => (r.ok ? r.json() : []))
-      .then((list: unknown) => {
-        if (!Array.isArray(list)) return setItems([]);
-        const mapped = list
-          .map((c) => {
+    Promise.all([
+      fetch("/data/catalogs/compressors.json", { cache: "no-cache" })
+        .then((r) => (r.ok ? r.json() : []))
+        .catch(() => []),
+      fetch("/data/equipment/compressors_bitzer.json", { cache: "force-cache" })
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+    ])
+      .then(([cnList, bitzerPayload]) => {
+        const mapped: CompressorItem[] = [];
+
+        // CN Coils catalog (Copeland/Danfoss/etc.)
+        if (Array.isArray(cnList)) {
+          for (const c of cnList) {
             const o = c as Record<string, unknown>;
             const id = String(o.id ?? o.model ?? "");
+            if (!id) continue;
             const series = o.series ? String(o.series) : undefined;
             const model = String(o.model ?? id);
             const brand =
               (o.brand ? String(o.brand) : undefined) ??
               (o.manufacturer ? String(o.manufacturer) : undefined) ??
               inferBrand(series, model);
-            return {
+            mapped.push({
               id,
               model,
               series,
               type: o.type ? String(o.type) : undefined,
-              refrigerantCode: o.refrigerantCode
-                ? String(o.refrigerantCode)
-                : undefined,
+              refrigerantCode: o.refrigerantCode ? String(o.refrigerantCode) : undefined,
               brand,
-            } as CompressorItem;
-          })
-          .filter((x) => x.id);
+            });
+          }
+        }
+
+        // Bitzer native catalog
+        const bitzerArr = (bitzerPayload as { compressors?: unknown[] } | null)?.compressors;
+        if (Array.isArray(bitzerArr)) {
+          // Deduplicate by model+refrigerant (catalog has variants per rpm)
+          const seen = new Set<string>();
+          for (const c of bitzerArr) {
+            const o = c as Record<string, unknown>;
+            const model = String(o.model ?? "");
+            const refrigerant = String(o.refrigerant ?? "");
+            if (!model) continue;
+            const key = `${model}__${refrigerant}`;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            const id = String(o.id ?? `BITZER_${key}`);
+            // Derive series from Bitzer model prefix: digits + first letters
+            // e.g. "4KES-09" -> "K", "6FE-50" -> "F", "44NES-24" -> "N"
+            const seriesMatch = /^\d+([A-Z]+?)(?:[A-Z]?-|\d|$)/.exec(model);
+            const series = seriesMatch ? seriesMatch[1].charAt(0) : undefined;
+            mapped.push({
+              id,
+              model,
+              series,
+              type: "SemiHermetic",
+              refrigerantCode: refrigerant || undefined,
+              brand: "Bitzer",
+            });
+          }
+        }
+
         setItems(mapped);
       })
       .catch(() => setItems([]))
