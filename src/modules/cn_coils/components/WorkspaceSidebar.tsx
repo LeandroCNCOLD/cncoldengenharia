@@ -328,6 +328,33 @@ export function WorkspaceSidebar({
           <Calculator className="h-3 w-3" />
           {isSimulating ? "Calculando…" : "Calcular"}
         </button>
+
+        {/* Avisos não-bloqueantes — campos opcionais ausentes */}
+        {optionalAdvisories.length > 0 && (
+          <ul className="space-y-0.5 rounded border border-amber-200 bg-amber-50 px-1.5 py-1">
+            {optionalAdvisories.map((msg) => (
+              <li
+                key={msg}
+                className="flex items-start gap-1 text-[9.5px] leading-tight text-slate-600"
+              >
+                <span aria-hidden className="text-amber-500">⚠️</span>
+                <span>{msg}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {hasSaved && (
+          <button
+            type="button"
+            onClick={handleRestoreLast}
+            title="Restaurar últimos parâmetros salvos"
+            className="inline-flex items-center justify-center gap-1 rounded border border-slate-300 bg-white px-1 py-1 text-[10px] text-slate-700 shadow-sm hover:bg-slate-100"
+          >
+            <History className="h-3 w-3" />
+            Restaurar Última Simulação
+          </button>
+        )}
         <div className="grid grid-cols-3 gap-1">
           <button
             type="button"
