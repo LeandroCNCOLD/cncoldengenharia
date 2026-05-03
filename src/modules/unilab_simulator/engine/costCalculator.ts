@@ -114,13 +114,22 @@ export function calculateBatteryCost(input: CostCalcInputs): CostCalcResult {
 
   const tubesCost = tubesWeightKg * input.prices[input.tubeMaterial];
   const finsCost = finsWeightKg * input.prices[input.finMaterial];
-  const totalCost = tubesCost + finsCost;
+  const directCost = tubesCost + finsCost;
+  const bdiPercent =
+    Number.isFinite(input.bdiPercent) && (input.bdiPercent as number) >= 0
+      ? (input.bdiPercent as number)
+      : 0;
+  const bdiAmount = directCost * (bdiPercent / 100);
+  const totalCost = directCost + bdiAmount;
 
   return {
     tubesWeightKg: Number.isFinite(tubesWeightKg) ? tubesWeightKg : 0,
     finsWeightKg: Number.isFinite(finsWeightKg) ? finsWeightKg : 0,
     tubesCost: Number.isFinite(tubesCost) ? tubesCost : 0,
     finsCost: Number.isFinite(finsCost) ? finsCost : 0,
+    directCost: Number.isFinite(directCost) ? directCost : 0,
+    bdiPercent,
+    bdiAmount: Number.isFinite(bdiAmount) ? bdiAmount : 0,
     totalCost: Number.isFinite(totalCost) ? totalCost : 0,
   };
 }
