@@ -54,6 +54,14 @@ export interface CostCalcInputs {
   tubeMaterial: MaterialKey;
   finMaterial: MaterialKey;
   prices: MaterialPrices;
+  /**
+   * BDI — Benefícios e Despesas Indiretas (%). Multiplicador aplicado sobre o
+   * custo direto de materiais (tubos + aletas) para incorporar mão de obra,
+   * encargos, impostos, despesas indiretas e lucro.
+   * Ex.: BDI = 25 → totalCost = directCost * 1.25.
+   * Padrão: 0 (sem BDI) para preservar compatibilidade.
+   */
+  bdiPercent?: number;
 }
 
 export interface CostCalcResult {
@@ -61,6 +69,13 @@ export interface CostCalcResult {
   finsWeightKg: number;
   tubesCost: number;
   finsCost: number;
+  /** Custo direto = tubesCost + finsCost (sem BDI). */
+  directCost: number;
+  /** Percentual de BDI aplicado (echo do input, default 0). */
+  bdiPercent: number;
+  /** Valor monetário do BDI = directCost * bdiPercent / 100. */
+  bdiAmount: number;
+  /** Custo total = directCost + bdiAmount. */
   totalCost: number;
 }
 
@@ -99,13 +114,22 @@ export function calculateBatteryCost(input: CostCalcInputs): CostCalcResult {
 
   const tubesCost = tubesWeightKg * input.prices[input.tubeMaterial];
   const finsCost = finsWeightKg * input.prices[input.finMaterial];
-  const totalCost = tubesCost + finsCost;
+  const directCost = tubesCost + finsCost;
+  const bdiPercent =
+    Number.isFinite(input.bdiPercent) && (input.bdiPercent as number) >= 0
+      ? (input.bdiPercent as number)
+      : 0;
+  const bdiAmount = directCost * (bdiPercent / 100);
+  const totalCost = directCost + bdiAmount;
 
   return {
     tubesWeightKg: Number.isFinite(tubesWeightKg) ? tubesWeightKg : 0,
     finsWeightKg: Number.isFinite(finsWeightKg) ? finsWeightKg : 0,
     tubesCost: Number.isFinite(tubesCost) ? tubesCost : 0,
     finsCost: Number.isFinite(finsCost) ? finsCost : 0,
+    directCost: Number.isFinite(directCost) ? directCost : 0,
+    bdiPercent,
+    bdiAmount: Number.isFinite(bdiAmount) ? bdiAmount : 0,
     totalCost: Number.isFinite(totalCost) ? totalCost : 0,
   };
 }
