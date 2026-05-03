@@ -118,7 +118,7 @@ export function GeometryPickerModal({ open, onClose, componentType }: Props) {
         await tombstoneBaseGeometry(selected.id, selected, user.id);
       }
       toast.success("Geometria excluída.");
-      setSelectedGeometry(null);
+      setSelectedGeometry(undefined);
       await refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Falha ao excluir.");
