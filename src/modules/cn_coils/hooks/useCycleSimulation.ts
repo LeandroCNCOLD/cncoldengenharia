@@ -1,6 +1,8 @@
 /**
  * Hook que gerencia o estado e execução do CycleEngine.
- * Debounce de 800ms para evitar chamadas excessivas durante digitação.
+ * Modo `auto`: debounce 800ms (legado).
+ * Modo `manual`: só roda ao chamar trigger().
+ * Timeout de segurança: 30s.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { runCycleSimulation } from "../engines/cycle/cycleEngine";
@@ -12,16 +14,39 @@ export type CycleSimulationState =
   | { status: "success"; result: CycleResult }
   | { status: "error"; message: string };
 
-export function useCycleSimulation(config: CycleSystemConfig | null) {
+const SOLVER_TIMEOUT_MS = 30_000;
+
+export function useCycleSimulation(
+  config: CycleSystemConfig | null,
+  options: { mode?: "auto" | "manual" } = {},
+) {
+  const mode = options.mode ?? "auto";
   const [state, setState] = useState<CycleSimulationState>({ status: "idle" });
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const runIdRef = useRef(0);
 
   const run = useCallback(async (cfg: CycleSystemConfig) => {
+    const myId = ++runIdRef.current;
     setState({ status: "running" });
     try {
-      const result = await runCycleSimulation(cfg);
+      const result = await Promise.race<CycleResult>([
+        runCycleSimulation(cfg),
+        new Promise<CycleResult>((_, reject) =>
+          setTimeout(
+            () =>
+              reject(
+                new Error(
+                  "Tempo limite excedido (30s). Verifique os parâmetros e tente novamente.",
+                ),
+              ),
+            SOLVER_TIMEOUT_MS,
+          ),
+        ),
+      ]);
+      if (myId !== runIdRef.current) return;
       setState({ status: "success", result });
     } catch (err) {
+      if (myId !== runIdRef.current) return;
       setState({
         status: "error",
         message:
@@ -31,13 +56,18 @@ export function useCycleSimulation(config: CycleSystemConfig | null) {
   }, []);
 
   useEffect(() => {
+    if (mode !== "auto") return;
     if (!config) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => run(config), 800);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
+  }, [config, run, mode]);
+
+  const trigger = useCallback(() => {
+    if (config) void run(config);
   }, [config, run]);
 
-  return state;
+  return Object.assign(state, { trigger });
 }
