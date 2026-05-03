@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useCycleSimulation } from "../hooks/useCycleSimulation";
 import { useFrostAnalysis } from "../hooks/useFrostAnalysis";
 import { useUncertaintyAnalysis } from "../hooks/useUncertaintyAnalysis";
@@ -191,9 +191,18 @@ export function CycleWorkspacePage() {
     };
   }, [refrigerantId, te, tc, superheat, subcooling, expansionType, shTarget, capLength, capDiameter, orificeDiameter]);
 
-  const simState = useCycleSimulation(config);
+  const simState = useCycleSimulation(config, { mode: "manual" });
   const cycleResult: CycleResult | null =
     simState.status === "success" ? simState.result : null;
+
+  // Auto-run uma vez ao montar (com config padrão válida)
+  const didInitRef = useRef(false);
+  useEffect(() => {
+    if (didInitRef.current) return;
+    didInitRef.current = true;
+    simState.trigger();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -205,7 +214,17 @@ export function CycleWorkspacePage() {
             CycleEngine V2 · {refrigerantId}
           </p>
         </div>
-        <CycleStatusBar state={simState} result={cycleResult} />
+        <div className="flex items-center gap-3">
+          <CycleStatusBar state={simState} result={cycleResult} />
+          <Button
+            size="sm"
+            onClick={() => simState.trigger()}
+            disabled={simState.status === "running"}
+            className="bg-blue-600 text-white hover:bg-blue-700"
+          >
+            {simState.status === "running" ? "Calculando…" : "▶ Calcular"}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-12 gap-0 h-[calc(100vh-65px)]">
