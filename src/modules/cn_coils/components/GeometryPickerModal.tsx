@@ -81,6 +81,16 @@ export function GeometryPickerModal({ open, onClose, componentType }: Props) {
   const geometries = mergeWithOverrides(base, overrides);
   const selected = geometries.find((g) => g.id === selectedId);
 
+  // Sempre que a lista mesclada mudar (após edição), sincroniza o store
+  // com a versão atualizada da geometria selecionada — assim os modais
+  // de Tubo/Aleta/Distribuidor refletem os novos valores imediatamente.
+  useEffect(() => {
+    if (selected) {
+      setSelectedGeometry(selected);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [overrides]);
+
   // Identifica override existente para a seleção atual.
   const overrideForSelected =
     selected && selected.id.startsWith("custom:")
