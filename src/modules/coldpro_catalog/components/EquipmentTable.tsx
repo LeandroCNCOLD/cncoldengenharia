@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import type { CatalogEquipmentRow, TemperatureApplication } from "../data/equipmentCatalog.types";
 import { EquipmentDetailModal } from "./EquipmentDetailModal";
 
