@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 
 export type FanPickerFamily =
   | "axial"
@@ -71,13 +71,13 @@ interface Props {
  * A vazão de ar do sistema = vazão_unitária × quantidade.
  */
 export function FanPickerModal({ open, onClose, fans, onConfirm }: Props) {
-  const selectedFanId = useUnilabSimulationStore((s) => s.selectedFanId);
-  const fanCount = useUnilabSimulationStore((s) => s.fanCount);
-  const fanRole = useUnilabSimulationStore((s) => s.fanRole);
-  const setSelectedFan = useUnilabSimulationStore((s) => s.setSelectedFan);
-  const setFanCount = useUnilabSimulationStore((s) => s.setFanCount);
-  const setFanRole = useUnilabSimulationStore((s) => s.setFanRole);
-  const setAirFlow = useUnilabSimulationStore((s) => s.setAirFlow);
+  const selectedFanId = useCnCoilsSimulationStore((s) => s.selectedFanId);
+  const fanCount = useCnCoilsSimulationStore((s) => s.fanCount);
+  const fanRole = useCnCoilsSimulationStore((s) => s.fanRole);
+  const setSelectedFan = useCnCoilsSimulationStore((s) => s.setSelectedFan);
+  const setFanCount = useCnCoilsSimulationStore((s) => s.setFanCount);
+  const setFanRole = useCnCoilsSimulationStore((s) => s.setFanRole);
+  const setAirFlow = useCnCoilsSimulationStore((s) => s.setAirFlow);
 
   const [query, setQuery] = useState("");
   const [brand, setBrand] = useState<string>("");

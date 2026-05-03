@@ -1,5 +1,5 @@
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import { FIN_PITCH_TOOLS_MM, snapFinPitchToTool } from "../config/finPitchTools";
 
 /**
@@ -11,8 +11,8 @@ import { FIN_PITCH_TOOLS_MM, snapFinPitchToTool } from "../config/finPitchTools"
  * - Alerta de tubos não aproveitados (resto da divisão por circuitos)
  */
 export function GeometryBottomBar() {
-  const physical = useUnilabSimulationStore((s) => s.physicalInputs);
-  const setPhysical = useUnilabSimulationStore((s) => s.setPhysicalInputs);
+  const physical = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const setPhysical = useCnCoilsSimulationStore((s) => s.setPhysicalInputs);
 
   const tubesPerRow = Math.max(0, Math.floor(physical.tubesPerRow ?? 0));
   const rows = Math.max(0, Math.floor(physical.rows ?? 0));

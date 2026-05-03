@@ -7,7 +7,7 @@ import {
   SimulationV2Error,
   UnilabCoefficientsMissingError,
 } from "../engine_v2/simulatorCoreV2";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import { getRefrigerantProps } from "@/modules/unilab_simulator/services/refrigerantProperties";
 import type {
   TubeMaterialItem,
@@ -16,7 +16,7 @@ import type {
 import type { UnilabHeatTransferCatalog } from "../engine_v2/heatTransfer";
 import type { StructuredWarning } from "../types/warnings";
 
-export interface UseUnilabSimulationV2Params {
+export interface UseCnCoilsSimulationV2Params {
   tubeMaterials: TubeMaterialItem[];
   htCatalog: UnilabHeatTransferCatalog;
   componentType: UnilabComponentType;
@@ -30,13 +30,13 @@ const FALLBACK_FLUID_PROPS = {
   Pr: 4.02,
 };
 
-export function useUnilabSimulationV2(params: UseUnilabSimulationV2Params) {
-  const setResult = useUnilabSimulationStore((s) => s.setResult);
-  const setWarnings = useUnilabSimulationStore((s) => s.setWarnings);
-  const setIsSimulating = useUnilabSimulationStore((s) => s.setIsSimulating);
+export function useCnCoilsSimulationV2(params: UseCnCoilsSimulationV2Params) {
+  const setResult = useCnCoilsSimulationStore((s) => s.setResult);
+  const setWarnings = useCnCoilsSimulationStore((s) => s.setWarnings);
+  const setIsSimulating = useCnCoilsSimulationStore((s) => s.setIsSimulating);
 
   const run = useCallback(() => {
-    const state = useUnilabSimulationStore.getState();
+    const state = useCnCoilsSimulationStore.getState();
     const { physicalInputs, thermoInputs } = state;
     setIsSimulating(true);
     try {

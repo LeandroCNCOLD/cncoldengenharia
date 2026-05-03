@@ -40,14 +40,14 @@ import {
 import { determineFluidPhase, type FluidPhase } from "./phaseLogic";
 import type {
   UnilabComponentType,
-  UnilabPhysicalInputs,
-  UnilabSimulationResult,
-  UnilabThermoInputs,
+  CnCoilsPhysicalInputs,
+  CnCoilsSimulationResult,
+  CnCoilsThermoInputs,
 } from "../types/unilab.types";
 
 export interface SimulationV2Inputs {
-  physical: UnilabPhysicalInputs;
-  thermo: UnilabThermoInputs;
+  physical: CnCoilsPhysicalInputs;
+  thermo: CnCoilsThermoInputs;
   componentType: UnilabComponentType;
   htCatalog: UnilabHeatTransferCatalog;
   tubeMaterialConductivity: number;
@@ -80,7 +80,7 @@ function isCooling(componentType: UnilabComponentType): boolean {
 }
 
 function getSurfaceTempC(
-  thermo: UnilabThermoInputs,
+  thermo: CnCoilsThermoInputs,
   componentType: UnilabComponentType,
 ): number {
   if (componentType === "condenser_air" || componentType === "condenser_shell_tube") {
@@ -89,7 +89,7 @@ function getSurfaceTempC(
   return thermo.evaporatingTempC ?? Number.NaN;
 }
 
-export interface SimulationV2Result extends UnilabSimulationResult {
+export interface SimulationV2Result extends CnCoilsSimulationResult {
   fluidPhase: FluidPhase;
   hasCondensation: boolean;
   U_Wm2K: number;

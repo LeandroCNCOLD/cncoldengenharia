@@ -6,7 +6,7 @@ import { runSimulation, SimulationError } from "../engine/simulatorCore";
 import { MachineImportModal } from "../components/MachineImportModal";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
 import { ptBR } from "../i18n/messages.ptBR";
-import { useUnilabCatalogs } from "../hooks/useUnilabCatalogs";
+import { useCnCoilsCatalogs } from "../hooks/useUnilabCatalogs";
 import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
 import { ResultPanel } from "../components/ResultPanel";
 import { AirSidePanel } from "../components/AirSidePanel";
@@ -15,10 +15,10 @@ import { GeometryBottomBar } from "../components/GeometryBottomBar";
 import { CircuitrySelector } from "../components/CircuitrySelector";
 import { CoilSchematicModal } from "../components/CoilSchematicModal";
 import { WorkspaceSidebar } from "../components/WorkspaceSidebar";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
-import { useUnilabSimulation } from "../hooks/useUnilabSimulation";
-import { useUnilabSimulationV2 } from "../hooks/useUnilabSimulationV2";
-import { useUnilabInputBridge } from "../hooks/useUnilabInputBridge";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulation } from "../hooks/useUnilabSimulation";
+import { useCnCoilsSimulationV2 } from "../hooks/useUnilabSimulationV2";
+import { useCnCoilsInputBridge } from "../hooks/useUnilabInputBridge";
 import { loadUnilabHeatTransferCatalog } from "../services/unilabHeatTransferCatalog";
 import type { UnilabHeatTransferCatalog } from "../engine_v2/heatTransfer";
 import {
@@ -35,15 +35,15 @@ import { loadCoilGeometries } from "../services/coilGeometryCatalogService";
 import { getApplicationConfig } from "../config/applicationConfig";
 import type {
   UnilabComponentType,
-  UnilabPhysicalInputs,
-  UnilabThermoInputs,
+  CnCoilsPhysicalInputs,
+  CnCoilsThermoInputs,
 } from "../types/unilab.types";
 
 function isCondenser(t: UnilabComponentType) {
   return t === "condenser_air" || t === "condenser_shell_tube";
 }
 
-export function UnilabWorkspacePage() {
+export function CnCoilsWorkspacePage() {
   const search = useSearch({ from: "/_app/coldpro/unilab/workspace" }) as {
     type?: UnilabComponentType;
   };
@@ -51,16 +51,16 @@ export function UnilabWorkspacePage() {
   const componentLabel = getApplicationConfig(componentType).label;
   const navigate = useNavigate();
 
-  const catalogs = useUnilabCatalogs();
-  const physical = useUnilabSimulationStore((s) => s.physicalInputs);
-  const thermo = useUnilabSimulationStore((s) => s.thermoInputs);
-  const result = useUnilabSimulationStore((s) => s.result);
-  const warnings = useUnilabSimulationStore((s) => s.warnings);
-  const isSimulating = useUnilabSimulationStore((s) => s.isSimulating);
-  const reset = useUnilabSimulationStore((s) => s.reset);
-  const setWarnings = useUnilabSimulationStore((s) => s.setWarnings);
+  const catalogs = useCnCoilsCatalogs();
+  const physical = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const thermo = useCnCoilsSimulationStore((s) => s.thermoInputs);
+  const result = useCnCoilsSimulationStore((s) => s.result);
+  const warnings = useCnCoilsSimulationStore((s) => s.warnings);
+  const isSimulating = useCnCoilsSimulationStore((s) => s.isSimulating);
+  const reset = useCnCoilsSimulationStore((s) => s.reset);
+  const setWarnings = useCnCoilsSimulationStore((s) => s.setWarnings);
 
-  useUnilabInputBridge(componentType);
+  useCnCoilsInputBridge(componentType);
 
   // Pré-aquece o cache do catálogo de geometrias (modal carrega sob demanda)
   useEffect(() => {
@@ -90,7 +90,7 @@ export function UnilabWorkspacePage() {
     ],
   );
 
-  const { run } = useUnilabSimulation(simulationDeps);
+  const { run } = useCnCoilsSimulation(simulationDeps);
 
   const [htCatalog, setHtCatalog] = useState<UnilabHeatTransferCatalog>({
     entries: [],
@@ -101,8 +101,8 @@ export function UnilabWorkspacePage() {
     });
   }, []);
 
-  const engineVersion = useUnilabSimulationStore((s) => s.engineVersion);
-  const { run: runV2 } = useUnilabSimulationV2({
+  const engineVersion = useCnCoilsSimulationStore((s) => s.engineVersion);
+  const { run: runV2 } = useCnCoilsSimulationV2({
     tubeMaterials: catalogs.tubeMaterials,
     htCatalog,
     componentType,
@@ -157,8 +157,8 @@ export function UnilabWorkspacePage() {
       setWarnings([...physCheck.errors, ...thermoCheck.errors].map((msg) => ({ code: "GEOMETRY_INCOMPLETE", message: msg, severity: "warning" as const })));
       return;
     }
-    const phys = physical as UnilabPhysicalInputs;
-    const therm = thermo as UnilabThermoInputs;
+    const phys = physical as CnCoilsPhysicalInputs;
+    const therm = thermo as CnCoilsThermoInputs;
     const tubeMat = catalogs.tubeMaterials.find((m) => m.id === phys.tubeMaterialId);
     if (!tubeMat) {
       toast.error("Material do tubo não encontrado.");
@@ -219,10 +219,10 @@ export function UnilabWorkspacePage() {
       }
       const finalLen = Math.round(mid);
       // Atualiza store + roda final
-      useUnilabSimulationStore.getState().setPhysicalInputs({ finnedLengthMm: finalLen });
+      useCnCoilsSimulationStore.getState().setPhysicalInputs({ finnedLengthMm: finalLen });
       const finalRes = runAt(finalLen);
-      useUnilabSimulationStore.getState().setResult(finalRes);
-      useUnilabSimulationStore.getState().setWarnings(finalRes.warnings.map((msg) => ({ code: "GENERAL_WARNING", message: msg, severity: "warning" as const })));
+      useCnCoilsSimulationStore.getState().setResult(finalRes);
+      useCnCoilsSimulationStore.getState().setWarnings(finalRes.warnings.map((msg) => ({ code: "GENERAL_WARNING", message: msg, severity: "warning" as const })));
       toast.success(
         `Para atingir ${targetKw} kW, o Comprimento Aletado foi ajustado para ${finalLen} mm.`,
       );
@@ -240,8 +240,8 @@ export function UnilabWorkspacePage() {
     }
     setSending(true);
     try {
-      const phys = physical as UnilabPhysicalInputs;
-      const therm = thermo as UnilabThermoInputs;
+      const phys = physical as CnCoilsPhysicalInputs;
+      const therm = thermo as CnCoilsThermoInputs;
       const ctx = { tubeMaterials: catalogs.tubeMaterials };
       const baseName = `UNILAB ${componentLabel} ${new Date().toLocaleString("pt-BR")}`;
 

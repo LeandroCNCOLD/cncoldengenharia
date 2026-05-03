@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { ArrowRight, ArrowRightLeft, ArrowDownUp, Info, Wand2 } from "lucide-react";
 import { toast } from "sonner";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import { suggestOptimalCircuits } from "../engine/circuitOptimizer";
 import type { HeaderPosition } from "../types/unilab.types";
 
@@ -32,10 +32,10 @@ const POSITIONS: Array<{
 ];
 
 export function CircuitrySelector() {
-  const physical = useUnilabSimulationStore((s) => s.physicalInputs);
-  const setPhysical = useUnilabSimulationStore((s) => s.setPhysicalInputs);
-  const fluid = useUnilabSimulationStore((s) => s.fluid);
-  const fluidMassFlowKgH = useUnilabSimulationStore(
+  const physical = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const setPhysical = useCnCoilsSimulationStore((s) => s.setPhysicalInputs);
+  const fluid = useCnCoilsSimulationStore((s) => s.fluid);
+  const fluidMassFlowKgH = useCnCoilsSimulationStore(
     (s) => s.fluidMassFlow_kg_h,
   );
 

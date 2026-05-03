@@ -67,7 +67,7 @@ export interface PressureDropFanItem {
 
 export type HeaderPosition = "LL" | "LR" | "RL" | "RR" | "TB" | "BT";
 
-export interface UnilabPhysicalInputs {
+export interface CnCoilsPhysicalInputs {
   componentType: UnilabComponentType;
   geometryId: string;
   finnedHeightMm: number;
@@ -95,7 +95,7 @@ export interface UnilabPhysicalInputs {
   rowFinPitchesMm?: number[];
 }
 
-export interface UnilabThermoInputs {
+export interface CnCoilsThermoInputs {
   refrigerantId: string;
   airFlowM3H: number;
   airInletTempC: number;
@@ -107,7 +107,7 @@ export interface UnilabThermoInputs {
   subcoolingK?: number;
 }
 
-export interface UnilabSimulationResult {
+export interface CnCoilsSimulationResult {
   totalCapacityKw: number;
   sensibleCapacityKw: number;
   latentCapacityKw: number;

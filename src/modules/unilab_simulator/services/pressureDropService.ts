@@ -1,6 +1,6 @@
 /**
  * Calcula perda de carga do ar usando polinômio empírico por número de filas.
- * Baseado em dados do catálogo Unilab Coils 6.0.
+ * Baseado em dados do catálogo CN Coils.
  * Fórmula: ΔP = (a0 + a1×V + a2×V²) × N_rows  [Pa]
  */
 export function calcAirPressureDrop(

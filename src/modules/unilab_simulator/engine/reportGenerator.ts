@@ -1,14 +1,14 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import type {
-  UnilabPhysicalInputs,
-  UnilabSimulationResult,
+  CnCoilsPhysicalInputs,
+  CnCoilsSimulationResult,
 } from "../types/unilab.types";
 
 export interface ReportSnapshot {
   componentLabel: string;
   geometryName?: string;
-  physical: Partial<UnilabPhysicalInputs>;
+  physical: Partial<CnCoilsPhysicalInputs>;
   air: {
     flowM3h: number;
     tempInC: number;
@@ -30,7 +30,7 @@ export interface ReportSnapshot {
     compressorId?: string;
   };
   cost: number;
-  result?: UnilabSimulationResult;
+  result?: CnCoilsSimulationResult;
   warnings: Array<{ code: string; message: string | null; severity: "warning" | "error" }>;
   meta: {
     project: string;

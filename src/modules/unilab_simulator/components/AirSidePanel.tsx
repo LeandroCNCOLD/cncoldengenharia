@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import {
   validateAirSideInputs,
   type PsychrometricValidationResult,
 } from "../services/psychrometrics";
-import type { UnilabSimulationResult } from "../types/unilab.types";
+import type { CnCoilsSimulationResult } from "../types/unilab.types";
 import { UnitSelect } from "./UnitSelect";
 import {
   AIRFLOW_UNITS,
@@ -25,7 +25,7 @@ import {
 } from "../utils/unitConversions";
 
 interface AirSidePanelProps {
-  result?: UnilabSimulationResult;
+  result?: CnCoilsSimulationResult;
 }
 
 function fmt(n: number | undefined, digits = 1): string {
@@ -34,7 +34,7 @@ function fmt(n: number | undefined, digits = 1): string {
 }
 
 import {
-  loadUnilabCoefficients,
+  loadCnCoilsCoefficients,
   listUsableAxialFans,
   evaluateFanCurve,
   type AxialFanRecord,
@@ -68,23 +68,23 @@ interface FanCatalogItem {
 }
 
 export function AirSidePanel({ result }: AirSidePanelProps = {}) {
-  const airFlow_m3h = useUnilabSimulationStore((s) => s.airFlow_m3h);
-  const tempInDB_C = useUnilabSimulationStore((s) => s.tempInDB_C);
-  const rhIn_pct = useUnilabSimulationStore((s) => s.rhIn_pct);
-  const foulingFactorAir = useUnilabSimulationStore((s) => s.foulingFactorAir);
-  const selectedFanId = useUnilabSimulationStore((s) => s.selectedFanId);
-  const fanCount = useUnilabSimulationStore((s) => s.fanCount);
-  const fanRole = useUnilabSimulationStore((s) => s.fanRole);
-  const calcMode = useUnilabSimulationStore((s) => s.calcMode);
-  const targetCapacityW = useUnilabSimulationStore((s) => s.targetCapacityW);
-  const setAirFlow = useUnilabSimulationStore((s) => s.setAirFlow);
-  const setTempInDB = useUnilabSimulationStore((s) => s.setTempInDB);
-  const setRhIn = useUnilabSimulationStore((s) => s.setRhIn);
-  const setFoulingFactorAir = useUnilabSimulationStore((s) => s.setFoulingFactorAir);
-  const errorFactorPercent = useUnilabSimulationStore((s) => s.errorFactorPercent);
-  const setErrorFactorPercent = useUnilabSimulationStore((s) => s.setErrorFactorPercent);
-  const setTargetCapacityW = useUnilabSimulationStore((s) => s.setTargetCapacityW);
-  const setSelectedFan = useUnilabSimulationStore((s) => s.setSelectedFan);
+  const airFlow_m3h = useCnCoilsSimulationStore((s) => s.airFlow_m3h);
+  const tempInDB_C = useCnCoilsSimulationStore((s) => s.tempInDB_C);
+  const rhIn_pct = useCnCoilsSimulationStore((s) => s.rhIn_pct);
+  const foulingFactorAir = useCnCoilsSimulationStore((s) => s.foulingFactorAir);
+  const selectedFanId = useCnCoilsSimulationStore((s) => s.selectedFanId);
+  const fanCount = useCnCoilsSimulationStore((s) => s.fanCount);
+  const fanRole = useCnCoilsSimulationStore((s) => s.fanRole);
+  const calcMode = useCnCoilsSimulationStore((s) => s.calcMode);
+  const targetCapacityW = useCnCoilsSimulationStore((s) => s.targetCapacityW);
+  const setAirFlow = useCnCoilsSimulationStore((s) => s.setAirFlow);
+  const setTempInDB = useCnCoilsSimulationStore((s) => s.setTempInDB);
+  const setRhIn = useCnCoilsSimulationStore((s) => s.setRhIn);
+  const setFoulingFactorAir = useCnCoilsSimulationStore((s) => s.setFoulingFactorAir);
+  const errorFactorPercent = useCnCoilsSimulationStore((s) => s.errorFactorPercent);
+  const setErrorFactorPercent = useCnCoilsSimulationStore((s) => s.setErrorFactorPercent);
+  const setTargetCapacityW = useCnCoilsSimulationStore((s) => s.setTargetCapacityW);
+  const setSelectedFan = useCnCoilsSimulationStore((s) => s.setSelectedFan);
   const [fanModalOpen, setFanModalOpen] = useState(false);
 
   const [fans, setFans] = useState<FanCatalogItem[]>([]);
@@ -102,7 +102,7 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
 
   useEffect(() => {
     let cancelled = false;
-    loadUnilabCoefficients()
+    loadCnCoilsCoefficients()
       .then((bundle) => {
         if (cancelled) return;
         const usable = listUsableAxialFans(bundle);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { GeometryCombobox } from "./GeometryCombobox";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import {
   loadCoilGeometries,
   type CoilGeometryItem,
@@ -17,13 +17,13 @@ interface Props {
 }
 
 export function GeometryPickerModal({ open, onClose, componentType }: Props) {
-  const selectedId = useUnilabSimulationStore(
+  const selectedId = useCnCoilsSimulationStore(
     (s) => s.selectedGeometry?.id ?? s.physicalInputs.geometryId,
   );
-  const setSelectedGeometry = useUnilabSimulationStore(
+  const setSelectedGeometry = useCnCoilsSimulationStore(
     (s) => s.setSelectedGeometry,
   );
-  const setErrorFactorPercent = useUnilabSimulationStore(
+  const setErrorFactorPercent = useCnCoilsSimulationStore(
     (s) => s.setErrorFactorPercent,
   );
 

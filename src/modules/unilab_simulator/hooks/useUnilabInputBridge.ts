@@ -8,7 +8,7 @@
 // evaporatingTempC ou condensingTempC.
 
 import { useEffect } from "react";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import type { UnilabComponentType } from "../types/unilab.types";
 
 const DEFAULT_ALTITUDE_M = 0;
@@ -21,16 +21,16 @@ function isEvaporatorType(t: UnilabComponentType): boolean {
   return t === "evaporator_dx" || t === "evaporator_pumped";
 }
 
-export function useUnilabInputBridge(componentType: UnilabComponentType) {
-  const airFlow_m3h = useUnilabSimulationStore((s) => s.airFlow_m3h);
-  const tempInDB_C = useUnilabSimulationStore((s) => s.tempInDB_C);
-  const rhIn_pct = useUnilabSimulationStore((s) => s.rhIn_pct);
-  const fluid = useUnilabSimulationStore((s) => s.fluid);
-  const fluidOperatingTemp_C = useUnilabSimulationStore((s) => s.fluidOperatingTemp_C);
-  const superheat_K = useUnilabSimulationStore((s) => s.superheat_K);
-  const subcooling_K = useUnilabSimulationStore((s) => s.subcooling_K);
-  const setThermoInputs = useUnilabSimulationStore((s) => s.setThermoInputs);
-  const setPhysicalInputs = useUnilabSimulationStore((s) => s.setPhysicalInputs);
+export function useCnCoilsInputBridge(componentType: UnilabComponentType) {
+  const airFlow_m3h = useCnCoilsSimulationStore((s) => s.airFlow_m3h);
+  const tempInDB_C = useCnCoilsSimulationStore((s) => s.tempInDB_C);
+  const rhIn_pct = useCnCoilsSimulationStore((s) => s.rhIn_pct);
+  const fluid = useCnCoilsSimulationStore((s) => s.fluid);
+  const fluidOperatingTemp_C = useCnCoilsSimulationStore((s) => s.fluidOperatingTemp_C);
+  const superheat_K = useCnCoilsSimulationStore((s) => s.superheat_K);
+  const subcooling_K = useCnCoilsSimulationStore((s) => s.subcooling_K);
+  const setThermoInputs = useCnCoilsSimulationStore((s) => s.setThermoInputs);
+  const setPhysicalInputs = useCnCoilsSimulationStore((s) => s.setPhysicalInputs);
 
   // componentType na parte física (motor exige)
   useEffect(() => {

@@ -3,7 +3,7 @@
 
 import { useCallback } from "react";
 import { runSimulation, SimulationError } from "../engine/simulatorCoreAdapter";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import type {
   AirVelocityCorrectionItem,
   PressureDropFanItem,
@@ -14,7 +14,7 @@ import type { StructuredWarning } from "../types/warnings";
 
 export type { StructuredWarning as SimulationWarning } from "../types/warnings";
 
-export interface UseUnilabSimulationParams {
+export interface UseCnCoilsSimulationParams {
   geometries: CoilGeometryCatalogItem[];
   tubeMaterials: TubeMaterialItem[];
   correctionCoefficients: AirVelocityCorrectionItem[];
@@ -42,15 +42,15 @@ function resolveUBase(geometry: { uBaseWm2K?: number | null; coil_type?: string 
   };
 }
 
-export function useUnilabSimulation(catalogs: UseUnilabSimulationParams) {
-  const setResult = useUnilabSimulationStore((s) => s.setResult);
-  const setWarnings = useUnilabSimulationStore((s) => s.setWarnings);
-  const setIsSimulating = useUnilabSimulationStore((s) => s.setIsSimulating);
-  const clearResult = useUnilabSimulationStore((s) => s.clearResult);
+export function useCnCoilsSimulation(catalogs: UseCnCoilsSimulationParams) {
+  const setResult = useCnCoilsSimulationStore((s) => s.setResult);
+  const setWarnings = useCnCoilsSimulationStore((s) => s.setWarnings);
+  const setIsSimulating = useCnCoilsSimulationStore((s) => s.setIsSimulating);
+  const clearResult = useCnCoilsSimulationStore((s) => s.clearResult);
 
   const run = useCallback(() => {
     const { physicalInputs, thermoInputs, errorFactorPercent } =
-      useUnilabSimulationStore.getState();
+      useCnCoilsSimulationStore.getState();
 
     setIsSimulating(true);
     try {

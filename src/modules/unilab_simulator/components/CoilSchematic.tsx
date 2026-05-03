@@ -1,4 +1,4 @@
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 
 /**
  * Esquema visual simples (SVG) da serpentina, baseado em:
@@ -10,8 +10,8 @@ import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
  * conforme o usuário muda valores na barra inferior ou seleciona geometria.
  */
 export function CoilSchematic() {
-  const physical = useUnilabSimulationStore((s) => s.physicalInputs);
-  const selected = useUnilabSimulationStore((s) => s.selectedGeometry);
+  const physical = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const selected = useCnCoilsSimulationStore((s) => s.selectedGeometry);
 
   const rows = Math.max(0, Math.min(20, Math.round(physical.rows ?? 0)));
   const tubesPerRow =

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Package, Check } from "lucide-react";
 import { toast } from "sonner";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import type { UnilabComponentType } from "../types/unilab.types";
 
 /**
@@ -183,22 +183,22 @@ async function resolveCompressorId(model: string): Promise<string | undefined> {
 }
 
 export function MachineImportModal({ open, onClose, componentType }: Props) {
-  const setPhysicalInputs = useUnilabSimulationStore((s) => s.setPhysicalInputs);
-  const setFluid = useUnilabSimulationStore((s) => s.setFluid);
-  const setAirFlow = useUnilabSimulationStore((s) => s.setAirFlow);
-  const setTempInDB = useUnilabSimulationStore((s) => s.setTempInDB);
-  const setRhIn = useUnilabSimulationStore((s) => s.setRhIn);
-  const setFanCount = useUnilabSimulationStore((s) => s.setFanCount);
-  const setFanRole = useUnilabSimulationStore((s) => s.setFanRole);
-  const setFluidOperatingTemp = useUnilabSimulationStore((s) => s.setFluidOperatingTemp);
-  const setPairedTempC = useUnilabSimulationStore((s) => s.setPairedTempC);
-  const setSuperheat = useUnilabSimulationStore((s) => s.setSuperheat);
-  const setSubcooling = useUnilabSimulationStore((s) => s.setSubcooling);
-  const setDischargeSuperheatK = useUnilabSimulationStore((s) => s.setDischargeSuperheatK);
-  const setFluidMassFlow = useUnilabSimulationStore((s) => s.setFluidMassFlow);
-  const setTargetCapacityW = useUnilabSimulationStore((s) => s.setTargetCapacityW);
-  const setSelectedCompressor = useUnilabSimulationStore((s) => s.setSelectedCompressor);
-  const setCompressorCount = useUnilabSimulationStore((s) => s.setCompressorCount);
+  const setPhysicalInputs = useCnCoilsSimulationStore((s) => s.setPhysicalInputs);
+  const setFluid = useCnCoilsSimulationStore((s) => s.setFluid);
+  const setAirFlow = useCnCoilsSimulationStore((s) => s.setAirFlow);
+  const setTempInDB = useCnCoilsSimulationStore((s) => s.setTempInDB);
+  const setRhIn = useCnCoilsSimulationStore((s) => s.setRhIn);
+  const setFanCount = useCnCoilsSimulationStore((s) => s.setFanCount);
+  const setFanRole = useCnCoilsSimulationStore((s) => s.setFanRole);
+  const setFluidOperatingTemp = useCnCoilsSimulationStore((s) => s.setFluidOperatingTemp);
+  const setPairedTempC = useCnCoilsSimulationStore((s) => s.setPairedTempC);
+  const setSuperheat = useCnCoilsSimulationStore((s) => s.setSuperheat);
+  const setSubcooling = useCnCoilsSimulationStore((s) => s.setSubcooling);
+  const setDischargeSuperheatK = useCnCoilsSimulationStore((s) => s.setDischargeSuperheatK);
+  const setFluidMassFlow = useCnCoilsSimulationStore((s) => s.setFluidMassFlow);
+  const setTargetCapacityW = useCnCoilsSimulationStore((s) => s.setTargetCapacityW);
+  const setSelectedCompressor = useCnCoilsSimulationStore((s) => s.setSelectedCompressor);
+  const setCompressorCount = useCnCoilsSimulationStore((s) => s.setCompressorCount);
 
   const [importing, setImporting] = useState<string | null>(null);
   const [machines, setMachines] = useState<MachineDefinition[]>([]);

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { X } from "lucide-react";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import {
   MATERIAL_LABELS,
   formatBRL,
@@ -24,13 +24,13 @@ const MATERIAL_KEYS: MaterialKey[] = [
  * Atualiza `materialPrices` no Zustand. O custo é recalculado a cada mudança.
  */
 export function MaterialCostConfigModal({ open, onClose }: MaterialCostConfigModalProps) {
-  const prices = useUnilabSimulationStore((s) => s.materialPrices);
-  const setPrice = useUnilabSimulationStore((s) => s.setMaterialPrice);
-  const tubeKey = useUnilabSimulationStore((s) => s.tubeMaterialKey);
-  const finKey = useUnilabSimulationStore((s) => s.finMaterialKey);
-  const setTubeKey = useUnilabSimulationStore((s) => s.setTubeMaterialKey);
-  const setFinKey = useUnilabSimulationStore((s) => s.setFinMaterialKey);
-  const cost = useUnilabSimulationStore((s) => s.calculatedCost);
+  const prices = useCnCoilsSimulationStore((s) => s.materialPrices);
+  const setPrice = useCnCoilsSimulationStore((s) => s.setMaterialPrice);
+  const tubeKey = useCnCoilsSimulationStore((s) => s.tubeMaterialKey);
+  const finKey = useCnCoilsSimulationStore((s) => s.finMaterialKey);
+  const setTubeKey = useCnCoilsSimulationStore((s) => s.setTubeMaterialKey);
+  const setFinKey = useCnCoilsSimulationStore((s) => s.setFinMaterialKey);
+  const cost = useCnCoilsSimulationStore((s) => s.calculatedCost);
 
   useEffect(() => {
     if (!open) return;

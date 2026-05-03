@@ -25,9 +25,9 @@
 import type {
   AirVelocityCorrectionItem,
   PressureDropFanItem,
-  UnilabPhysicalInputs,
-  UnilabSimulationResult,
-  UnilabThermoInputs,
+  CnCoilsPhysicalInputs,
+  CnCoilsSimulationResult,
+  CnCoilsThermoInputs,
 } from "../types/unilab.types";
 import {
   validatePhysicalInputs,
@@ -60,8 +60,8 @@ import { CP_DRY_AIR_KJ_KG_K, m3hToM3s, mmToM, safeDivide, clamp } from "./units"
 import { calcCoilEffectiveArea, calcFinEfficiency, calcEffectiveArea } from "./effectiveArea";
 
 export interface RunSimulationParams {
-  physical: UnilabPhysicalInputs;
-  thermo: UnilabThermoInputs;
+  physical: CnCoilsPhysicalInputs;
+  thermo: CnCoilsThermoInputs;
   catalogs: {
     correctionCoefficients: AirVelocityCorrectionItem[];
     pressureDropFan: PressureDropFanItem[];
@@ -82,7 +82,7 @@ export class SimulationError extends Error {
   }
 }
 
-function computeGeometricArea(physical: UnilabPhysicalInputs, faceAreaM2: number, hAir: number) {
+function computeGeometricArea(physical: CnCoilsPhysicalInputs, faceAreaM2: number, hAir: number) {
   const D_o_m = mmToM(physical.tubeOuterDiameterMm);
   const P_t_m = mmToM(physical.tubePitchTransverseMm);
   const P_l_m = mmToM(physical.tubePitchLongitudinalMm);
@@ -114,7 +114,7 @@ function computeGeometricArea(physical: UnilabPhysicalInputs, faceAreaM2: number
   return { areas, eta_fin, effectiveArea };
 }
 
-export function runSimulation(params: RunSimulationParams): UnilabSimulationResult {
+export function runSimulation(params: RunSimulationParams): CnCoilsSimulationResult {
   const { physical, thermo, catalogs } = params;
 
   // 1. Validações

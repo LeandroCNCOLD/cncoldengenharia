@@ -15,8 +15,8 @@ import {
 } from "lucide-react";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
 import { ptBR } from "../i18n/messages.ptBR";
-import { useUnilabCatalogs } from "../hooks/useUnilabCatalogs";
-import { UnilabDashboardCard } from "../components/UnilabDashboardCard";
+import { useCnCoilsCatalogs } from "../hooks/useUnilabCatalogs";
+import { CnCoilsDashboardCard } from "../components/UnilabDashboardCard";
 import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
 import type { UnilabComponentType } from "../types/unilab.types";
 
@@ -122,7 +122,7 @@ const SYSTEM_CARDS: SystemCardConfig[] = [
 ];
 
 export function UnilabDashboardPage() {
-  const catalogs = useUnilabCatalogs();
+  const catalogs = useCnCoilsCatalogs();
   const blocked = !catalogs.loading && !catalogs.ready;
 
   return (
@@ -149,7 +149,7 @@ export function UnilabDashboardPage() {
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {CARDS.map((card) => (
-              <UnilabDashboardCard
+              <CnCoilsDashboardCard
                 key={card.type}
                 title={card.title}
                 description={card.description}
@@ -175,7 +175,7 @@ export function UnilabDashboardPage() {
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {SYSTEM_CARDS.map((card) => (
-              <UnilabDashboardCard
+              <CnCoilsDashboardCard
                 key={card.id}
                 title={card.title}
                 description={card.description}

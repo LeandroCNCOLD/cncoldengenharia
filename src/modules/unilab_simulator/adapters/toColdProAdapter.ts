@@ -6,9 +6,9 @@
 import type { CondenserSpec, ProgressiveCoilInput, RollGeometry } from "@/modules/coldpro_v2";
 import type {
   TubeMaterialItem,
-  UnilabPhysicalInputs,
-  UnilabSimulationResult,
-  UnilabThermoInputs,
+  CnCoilsPhysicalInputs,
+  CnCoilsSimulationResult,
+  CnCoilsThermoInputs,
   ValidationResult,
 } from "../types/unilab.types";
 import { mmToM } from "../engine/units";
@@ -34,13 +34,13 @@ export interface ToColdProContext {
 }
 
 export function validateBeforeAdapt(
-  physical: Partial<UnilabPhysicalInputs>,
-  result: UnilabSimulationResult | undefined,
-  thermo: Partial<UnilabThermoInputs>,
+  physical: Partial<CnCoilsPhysicalInputs>,
+  result: CnCoilsSimulationResult | undefined,
+  thermo: Partial<CnCoilsThermoInputs>,
 ): ValidationResult {
   const errors: string[] = [];
   if (!result) errors.push("Resultado de simulação ausente.");
-  const required: (keyof UnilabPhysicalInputs)[] = [
+  const required: (keyof CnCoilsPhysicalInputs)[] = [
     "geometryId",
     "finnedHeightMm",
     "finnedLengthMm",
@@ -67,9 +67,9 @@ export function validateBeforeAdapt(
 }
 
 export function toEvaporatorInput(
-  physical: UnilabPhysicalInputs,
-  thermo: UnilabThermoInputs,
-  result: UnilabSimulationResult,
+  physical: CnCoilsPhysicalInputs,
+  thermo: CnCoilsThermoInputs,
+  result: CnCoilsSimulationResult,
   ctx: ToColdProContext,
 ): ProgressiveCoilInput {
   const material = mapMaterial(physical.tubeMaterialId, ctx.tubeMaterials);
@@ -114,8 +114,8 @@ export function toEvaporatorInput(
 }
 
 export function toCondenserInput(
-  thermo: UnilabThermoInputs,
-  result: UnilabSimulationResult,
+  thermo: CnCoilsThermoInputs,
+  result: CnCoilsSimulationResult,
 ): CondenserSpec {
   if (thermo.condensingTempC === undefined) {
     throw new Error(
@@ -135,9 +135,9 @@ export function toCondenserInput(
  * dimensionamento físico e perda de carga, não para psicrometria DX.
  */
 export function toReheatCoilInput(
-  physical: UnilabPhysicalInputs,
-  thermo: UnilabThermoInputs,
-  result: UnilabSimulationResult,
+  physical: CnCoilsPhysicalInputs,
+  thermo: CnCoilsThermoInputs,
+  result: CnCoilsSimulationResult,
   ctx: ToColdProContext,
   fluidMeanTempC: number,
 ): ProgressiveCoilInput {

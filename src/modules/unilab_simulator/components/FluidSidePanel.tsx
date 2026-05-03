@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Lock, Unlock, Zap, Search } from "lucide-react";
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import { CompressorPickerModal } from "./CompressorPickerModal";
 import { RefrigerantPickerModal } from "./RefrigerantPickerModal";
 import type {
   UnilabComponentType,
-  UnilabSimulationResult,
+  CnCoilsSimulationResult,
 } from "../types/unilab.types";
 import { getApplicationConfig } from "../config/applicationConfig";
 import {
@@ -35,7 +35,7 @@ interface FluidSidePanelProps {
   componentType: UnilabComponentType;
   refrigerants?: unknown;
   disabled?: boolean;
-  result?: UnilabSimulationResult;
+  result?: CnCoilsSimulationResult;
 }
 
 /**
@@ -66,42 +66,42 @@ export function FluidSidePanel({
   const isEvaporator =
     cfg.type === "evaporator_dx" || cfg.type === "evaporator_pumped";
 
-  const fluid = useUnilabSimulationStore((s) => s.fluid);
-  const fluidMassFlow_kg_h = useUnilabSimulationStore((s) => s.fluidMassFlow_kg_h);
-  const isMassFlowLocked = useUnilabSimulationStore((s) => s.isMassFlowLocked);
-  const fluidOperatingTemp_C = useUnilabSimulationStore(
+  const fluid = useCnCoilsSimulationStore((s) => s.fluid);
+  const fluidMassFlow_kg_h = useCnCoilsSimulationStore((s) => s.fluidMassFlow_kg_h);
+  const isMassFlowLocked = useCnCoilsSimulationStore((s) => s.isMassFlowLocked);
+  const fluidOperatingTemp_C = useCnCoilsSimulationStore(
     (s) => s.fluidOperatingTemp_C,
   );
-  const superheat_K = useUnilabSimulationStore((s) => s.superheat_K);
-  const subcooling_K = useUnilabSimulationStore((s) => s.subcooling_K);
-  const foulingFactorFluid = useUnilabSimulationStore((s) => s.foulingFactorFluid);
-  const pairedTempC = useUnilabSimulationStore((s) => s.pairedTempC);
-  const dischargeSuperheatK = useUnilabSimulationStore((s) => s.dischargeSuperheatK);
-  const selectedCompressorId = useUnilabSimulationStore((s) => s.selectedCompressorId);
-  const setFluid = useUnilabSimulationStore((s) => s.setFluid);
-  const setFluidMassFlow = useUnilabSimulationStore((s) => s.setFluidMassFlow);
-  const toggleMassFlowLock = useUnilabSimulationStore((s) => s.toggleMassFlowLock);
-  const setFluidOperatingTemp = useUnilabSimulationStore(
+  const superheat_K = useCnCoilsSimulationStore((s) => s.superheat_K);
+  const subcooling_K = useCnCoilsSimulationStore((s) => s.subcooling_K);
+  const foulingFactorFluid = useCnCoilsSimulationStore((s) => s.foulingFactorFluid);
+  const pairedTempC = useCnCoilsSimulationStore((s) => s.pairedTempC);
+  const dischargeSuperheatK = useCnCoilsSimulationStore((s) => s.dischargeSuperheatK);
+  const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
+  const setFluid = useCnCoilsSimulationStore((s) => s.setFluid);
+  const setFluidMassFlow = useCnCoilsSimulationStore((s) => s.setFluidMassFlow);
+  const toggleMassFlowLock = useCnCoilsSimulationStore((s) => s.toggleMassFlowLock);
+  const setFluidOperatingTemp = useCnCoilsSimulationStore(
     (s) => s.setFluidOperatingTemp,
   );
-  const setSuperheat = useUnilabSimulationStore((s) => s.setSuperheat);
-  const setSubcooling = useUnilabSimulationStore((s) => s.setSubcooling);
-  const setFoulingFactorFluid = useUnilabSimulationStore(
+  const setSuperheat = useCnCoilsSimulationStore((s) => s.setSuperheat);
+  const setSubcooling = useCnCoilsSimulationStore((s) => s.setSubcooling);
+  const setFoulingFactorFluid = useCnCoilsSimulationStore(
     (s) => s.setFoulingFactorFluid,
   );
-  const errorFactorPercent = useUnilabSimulationStore((s) => s.errorFactorPercent);
-  const setErrorFactorPercent = useUnilabSimulationStore(
+  const errorFactorPercent = useCnCoilsSimulationStore((s) => s.errorFactorPercent);
+  const setErrorFactorPercent = useCnCoilsSimulationStore(
     (s) => s.setErrorFactorPercent,
   );
-  const setPairedTempC = useUnilabSimulationStore((s) => s.setPairedTempC);
-  const setDischargeSuperheatK = useUnilabSimulationStore((s) => s.setDischargeSuperheatK);
-  const setSelectedCompressor = useUnilabSimulationStore((s) => s.setSelectedCompressor);
+  const setPairedTempC = useCnCoilsSimulationStore((s) => s.setPairedTempC);
+  const setDischargeSuperheatK = useCnCoilsSimulationStore((s) => s.setDischargeSuperheatK);
+  const setSelectedCompressor = useCnCoilsSimulationStore((s) => s.setSelectedCompressor);
 
   const [refrigerants, setRefrigerants] = useState<RefrigerantOption[]>([]);
   const [compressors, setCompressors] = useState<Array<{ id: string; label: string }>>([]);
   const [compressorModalOpen, setCompressorModalOpen] = useState(false);
   const [refrigerantModalOpen, setRefrigerantModalOpen] = useState(false);
-  const compressorCount = useUnilabSimulationStore((s) => s.compressorCount);
+  const compressorCount = useCnCoilsSimulationStore((s) => s.compressorCount);
 
   const [uMassFlow, setUMassFlow] = useState<MassFlowUnit>("kg_h");
   const [uOpTemp, setUOpTemp] = useState<TempUnit>("C");

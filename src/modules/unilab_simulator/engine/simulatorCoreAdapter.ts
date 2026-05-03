@@ -22,14 +22,14 @@ import {
   type SimulationV2Inputs,
   type SimulationV2Result,
 } from "../engine_v2/simulatorCoreV2";
-import type { UnilabSimulationResult } from "../types/unilab.types";
+import type { CnCoilsSimulationResult } from "../types/unilab.types";
 
 export type { RunSimulationParams } from "./simulatorCore";
 export type { SimulationV2Inputs, SimulationV2Result } from "../engine_v2/simulatorCoreV2";
 export { SimulationError } from "./simulatorCore";
 export { SimulationV2Error } from "../engine_v2/simulatorCoreV2";
 
-export function runSimulation(params: RunSimulationParams): UnilabSimulationResult {
+export function runSimulation(params: RunSimulationParams): CnCoilsSimulationResult {
   return runSimulationV1(params);
 }
 

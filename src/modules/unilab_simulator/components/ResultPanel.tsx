@@ -1,16 +1,16 @@
 import { AlertCircle, AlertTriangle, Info, Target } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { UnilabSimulationResult } from "../types/unilab.types";
+import type { CnCoilsSimulationResult } from "../types/unilab.types";
 import type { StructuredWarning } from "../types/warnings";
 import { ptBR } from "../i18n/messages.ptBR";
 import {
-  loadUnilabCoefficients,
+  loadCnCoilsCoefficients,
   buildFanAudit,
   type FanAuditSummary,
 } from "../services/unilabCoefficientsService";
 
 interface ResultPanelProps {
-  result: UnilabSimulationResult | undefined;
+  result: CnCoilsSimulationResult | undefined;
   warnings: StructuredWarning[];
   onGoalSeek?: (targetKw: number) => void;
 }
@@ -111,7 +111,7 @@ function useFanAudit(): FanAuditSummary | null {
   const [audit, setAudit] = useState<FanAuditSummary | null>(null);
   useEffect(() => {
     let cancelled = false;
-    loadUnilabCoefficients()
+    loadCnCoilsCoefficients()
       .then((b) => {
         if (!cancelled) setAudit(buildFanAudit(b));
       })
@@ -129,7 +129,7 @@ function FanLibraryStatus({ audit }: { audit: FanAuditSummary }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-3 text-[11px] text-slate-600">
       <div className="mb-1 font-semibold text-slate-700">
-        Biblioteca de ventiladores UNILAB
+        Biblioteca de ventiladores CN Coils
       </div>
       <ul className="space-y-0.5">
         <li>

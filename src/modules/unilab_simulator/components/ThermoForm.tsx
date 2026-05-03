@@ -1,4 +1,4 @@
-import { useUnilabSimulationStore } from "../store/useUnilabSimulationStore";
+import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import type {
   RefrigerantItem,
   UnilabComponentType,
@@ -21,8 +21,8 @@ function isEvaporator(t: UnilabComponentType) {
 }
 
 export function ThermoForm({ refrigerants, componentType, disabled }: ThermoFormProps) {
-  const thermo = useUnilabSimulationStore((s) => s.thermoInputs);
-  const setThermo = useUnilabSimulationStore((s) => s.setThermoInputs);
+  const thermo = useCnCoilsSimulationStore((s) => s.thermoInputs);
+  const setThermo = useCnCoilsSimulationStore((s) => s.setThermoInputs);
   const f = ptBR.workspace.fields;
 
   return (

@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import type {
   CoilGeometryCatalogItem,
-  UnilabPhysicalInputs,
-  UnilabSimulationResult,
-  UnilabThermoInputs,
+  CnCoilsPhysicalInputs,
+  CnCoilsSimulationResult,
+  CnCoilsThermoInputs,
 } from "../types/unilab.types";
 import type { StructuredWarning } from "../types/warnings";
 import {
@@ -23,7 +23,7 @@ export type CalcMode = "verify" | "design";
 
 /**
  * Inputs adicionais do Lado Fluido específicos por aplicação. Mantidos
- * separados de `UnilabThermoInputs` (consumido pelo motor existente) para
+ * separados de `CnCoilsThermoInputs` (consumido pelo motor existente) para
  * não alterar tipos do engine. O motor continua lendo o subset que conhece.
  */
 export interface FluidSideExtras {
@@ -35,11 +35,11 @@ export interface FluidSideExtras {
   steamPressureKpa?: number;
 }
 
-interface UnilabSimulationStore {
-  physicalInputs: Partial<UnilabPhysicalInputs>;
-  thermoInputs: Partial<UnilabThermoInputs>;
+interface CnCoilsSimulationStore {
+  physicalInputs: Partial<CnCoilsPhysicalInputs>;
+  thermoInputs: Partial<CnCoilsThermoInputs>;
   selectedGeometry?: CoilGeometryCatalogItem;
-  result?: UnilabSimulationResult;
+  result?: CnCoilsSimulationResult;
   warnings: StructuredWarning[];
   isSimulating: boolean;
 
@@ -129,10 +129,10 @@ interface UnilabSimulationStore {
   setFinMaterialKey: (key: MaterialKey) => void;
   recalculateCost: () => void;
 
-  setPhysicalInputs: (patch: Partial<UnilabPhysicalInputs>) => void;
-  setThermoInputs: (patch: Partial<UnilabThermoInputs>) => void;
+  setPhysicalInputs: (patch: Partial<CnCoilsPhysicalInputs>) => void;
+  setThermoInputs: (patch: Partial<CnCoilsThermoInputs>) => void;
   setSelectedGeometry: (geometry: CoilGeometryCatalogItem | undefined) => void;
-  setResult: (result: UnilabSimulationResult | undefined) => void;
+  setResult: (result: CnCoilsSimulationResult | undefined) => void;
   setWarnings: (warnings: StructuredWarning[]) => void;
   setIsSimulating: (value: boolean) => void;
   clearResult: () => void;
@@ -142,7 +142,7 @@ interface UnilabSimulationStore {
 // Defaults sensatos para que o usuário possa simular sem necessariamente
 // abrir o modal de geometria. Todos os campos podem ser sobrescritos pela
 // UI (GeometryBottomBar, GeometryForm, picker do catálogo, importação).
-const DEFAULT_PHYSICAL_INPUTS: Partial<UnilabPhysicalInputs> = {
+const DEFAULT_PHYSICAL_INPUTS: Partial<CnCoilsPhysicalInputs> = {
   finnedHeightMm: 600,
   finnedLengthMm: 1200,
   rows: 4,
@@ -157,7 +157,7 @@ const DEFAULT_PHYSICAL_INPUTS: Partial<UnilabPhysicalInputs> = {
   tubeInnerDiameterMm: 8.92,
 };
 
-export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => ({
+export const useCnCoilsSimulationStore = create<CnCoilsSimulationStore>((set) => ({
   physicalInputs: { ...DEFAULT_PHYSICAL_INPUTS },
   thermoInputs: {},
   selectedGeometry: undefined,
@@ -389,7 +389,7 @@ export const useUnilabSimulationStore = create<UnilabSimulationStore>((set) => (
  * Defensivo: retorna 0 quando faltam dados (evita NaN/Infinity).
  */
 function computeCostFromState(s: {
-  physicalInputs: Partial<UnilabPhysicalInputs>;
+  physicalInputs: Partial<CnCoilsPhysicalInputs>;
   materialPrices: MaterialPrices;
   tubeMaterialKey: MaterialKey;
   finMaterialKey: MaterialKey;
