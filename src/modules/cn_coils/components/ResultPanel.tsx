@@ -167,6 +167,7 @@ function FanLibraryStatus({ audit }: { audit: FanAuditSummary }) {
 }
 
 function WarningsList({ warnings }: { warnings: StructuredWarning[] }) {
+  const [showAll, setShowAll] = useState(false);
   const styles = {
     error: {
       box: "border-red-300 bg-red-50",
@@ -188,6 +189,22 @@ function WarningsList({ warnings }: { warnings: StructuredWarning[] }) {
     },
   } as const;
 
+  // Deduplicar por code (ou pelo message quando code é genérico)
+  const seen = new Map<string, { warning: StructuredWarning; count: number }>();
+  for (const w of warnings) {
+    const key = w.code && w.code !== "GENERAL_WARNING" ? w.code : (w.message ?? "");
+    const entry = seen.get(key);
+    if (entry) {
+      entry.count += 1;
+    } else {
+      seen.set(key, { warning: w, count: 1 });
+    }
+  }
+  const unique = Array.from(seen.values());
+  const MAX_DEFAULT = 5;
+  const visible = showAll ? unique : unique.slice(0, MAX_DEFAULT);
+  const hiddenCount = unique.length - visible.length;
+
   const top = warnings.some((w) => w.severity === "error")
     ? styles.error
     : warnings.some((w) => w.severity === "warning")
@@ -199,20 +216,48 @@ function WarningsList({ warnings }: { warnings: StructuredWarning[] }) {
     <div className={`rounded-lg border p-3 ${top.box}`}>
       <div className={`mb-1 flex items-center gap-2 text-xs font-semibold ${top.title}`}>
         <TopIcon className="h-3.5 w-3.5" />
-        Avisos
+        Avisos ({unique.length} {unique.length === 1 ? "tipo" : "tipos"} ·{" "}
+        {warnings.length} no total)
       </div>
       <ul className="space-y-1 text-xs">
-        {warnings.map((w, i) => {
+        {visible.map((entry, i) => {
+          const w = entry.warning;
           const s = styles[(w.severity as keyof typeof styles) ?? "warning"] ?? styles.warning;
           const Icon = s.Icon;
           return (
             <li key={i} className={`flex items-start gap-1.5 ${s.item}`}>
               <Icon className="mt-0.5 h-3 w-3 flex-shrink-0" />
-              <span>{w.message ?? w.code}</span>
+              <span>
+                {w.message ?? w.code}
+                {entry.count > 1 && (
+                  <span className="ml-1 rounded bg-black/10 px-1 py-0.5 text-[10px] font-mono">
+                    ×{entry.count}
+                  </span>
+                )}
+              </span>
             </li>
           );
         })}
       </ul>
+      {hiddenCount > 0 && (
+        <button
+          type="button"
+          onClick={() => setShowAll(true)}
+          className={`mt-2 text-[11px] font-medium underline ${top.title}`}
+        >
+          Ver todos os {unique.length} avisos
+        </button>
+      )}
+      {showAll && unique.length > MAX_DEFAULT && (
+        <button
+          type="button"
+          onClick={() => setShowAll(false)}
+          className={`mt-2 text-[11px] font-medium underline ${top.title}`}
+        >
+          Ocultar
+        </button>
+      )}
     </div>
   );
 }
+
