@@ -1,72 +1,102 @@
 import { Link } from "@tanstack/react-router";
 import {
-  Activity,
-  TrendingUp,
+  Snowflake,
+  Boxes,
+  Database as DatabaseIcon,
+  Wrench,
   Map,
-  FileText,
-  Database,
-  ShieldCheck,
-  Plus,
+  Download,
   ArrowRight,
+  TrendingUp,
+  Scale,
+  Plus,
 } from "lucide-react";
 import { PageContainer } from "../components/layout/PageContainer";
 import { useSessionStore } from "../stores/useSessionStore";
 import { useUserModeStore } from "../stores/useUserModeStore";
+import { useAuth } from "@/lib/auth";
 
-const MODULES = [
+const QUICK_CARDS = [
   {
-    to: "/coldpro/simulation",
-    label: "Equilíbrio do Sistema",
-    description: "Resolve o equilíbrio termodinâmico completo do sistema.",
-    Icon: Activity,
+    to: "/coldpro/unilab",
+    emoji: "🧊",
+    Icon: Snowflake,
+    title: "CN COILS",
+    description: "Simulação de evaporadores e condensadores com motor V2.",
+    available: true,
   },
   {
-    to: "/coldpro/curve",
-    label: "Curva de Desempenho",
-    description: "Gera a curva capacidade × temperatura do produto.",
-    Icon: TrendingUp,
+    to: "/coldpro/components",
+    emoji: "📦",
+    Icon: Boxes,
+    title: "Componentes",
+    description: "Biblioteca de compressores, ventiladores e serpentinas.",
+    available: true,
+  },
+  {
+    to: "/coldpro/catalog",
+    emoji: "📋",
+    Icon: DatabaseIcon,
+    title: "Catálogo CN COLD",
+    description: "Selecione equipamentos reais do catálogo CN COLD.",
+    available: true,
+  },
+  {
+    to: "/coldpro/montagem",
+    emoji: "🔧",
+    Icon: Wrench,
+    title: "Montagem",
+    description: "Plano de montagem e BOM do equipamento.",
+    available: false,
   },
   {
     to: "/coldpro/map",
-    label: "Mapa Operacional",
-    description: "Mapa multivariável de operação do equipamento.",
+    emoji: "📊",
     Icon: Map,
+    title: "Mapa Operacional",
+    description: "Mapa multivariável de operação do equipamento.",
+    available: true,
   },
   {
-    to: "/coldpro/record",
-    label: "Ficha Técnica",
-    description: "Ficha técnica final auditada do produto.",
-    Icon: FileText,
-  },
-  {
-    to: "/coldpro/registry",
-    label: "Registry de Produtos",
-    description: "Registro de produtos versionados e auditados.",
-    Icon: Database,
-  },
-  {
-    to: "/coldpro/audit",
-    label: "Auditoria CN COLD",
-    description: "Audita o catálogo CN COLD contra o motor.",
-    Icon: ShieldCheck,
+    to: "/coldpro/export",
+    emoji: "📄",
+    Icon: Download,
+    title: "Exportação",
+    description: "Exporte relatórios técnicos e fichas auditadas.",
+    available: true,
   },
 ] as const;
 
-function formatDateTime(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
-}
+const SECONDARY_CARDS = [
+  { to: "/coldpro/curve", Icon: TrendingUp, title: "Curva de Desempenho" },
+  { to: "/coldpro/simulation", Icon: Scale, title: "Equilíbrio do Sistema" },
+] as const;
+
+const APP_VERSION = "2.0.0";
 
 export function DashboardPage() {
+  const { user } = useAuth();
   const sessions = useSessionStore((s) => s.sessions);
   const activeSessionId = useSessionStore((s) => s.activeSessionId);
-  const createSession = useSessionStore((s) => s.createSession);
   const setActiveSession = useSessionStore((s) => s.setActiveSession);
+  const createSession = useSessionStore((s) => s.createSession);
   const mode = useUserModeStore((s) => s.mode);
 
-  const recent = [...sessions]
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, 5);
+  const activeSession =
+    sessions.find((s) => s.id === activeSessionId) ??
+    [...sessions].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+
+  const userName =
+    (user?.user_metadata?.full_name as string | undefined) ??
+    user?.email?.split("@")[0] ??
+    "Engenheiro";
+
+  const today = new Date().toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
 
   const handleNewSession = () => {
     const stamp = new Date().toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
@@ -75,8 +105,8 @@ export function DashboardPage() {
 
   return (
     <PageContainer
-      title="Dashboard ColdPro V2"
-      subtitle="Centro de operações técnicas — motor de cálculo CN COLD."
+      title={`Olá, ${userName} 👋 — Motor V2 CN COLD ativo`}
+      subtitle={`${today.charAt(0).toUpperCase()}${today.slice(1)} • Versão ${APP_VERSION}`}
       actions={
         <button
           type="button"
@@ -88,93 +118,133 @@ export function DashboardPage() {
         </button>
       }
     >
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-900">Sessões recentes</h2>
-            <span className="text-xs text-slate-400">{sessions.length} no total</span>
+      <div className="space-y-6">
+        {/* Acesso rápido */}
+        <section>
+          <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Acesso rápido
+          </h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {QUICK_CARDS.map((card) => {
+              const Icon = card.Icon;
+              const cls = `group relative flex flex-col gap-2 rounded-lg border bg-card p-4 shadow-sm transition ${
+                card.available
+                  ? "border-border hover:-translate-y-0.5 hover:border-[#1E6FD9]/40 hover:shadow-md"
+                  : "cursor-not-allowed border-dashed border-border opacity-60"
+              }`;
+              const inner = (
+                <>
+                  {!card.available && (
+                    <span className="absolute right-3 top-3 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
+                      Em breve
+                    </span>
+                  )}
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1E6FD9]/10 text-2xl">
+                      {card.emoji}
+                    </div>
+                    <Icon className="h-4 w-4 text-muted-foreground/50" />
+                  </div>
+                  <h3 className="text-base font-semibold text-foreground">{card.title}</h3>
+                  <p className="text-xs text-muted-foreground">{card.description}</p>
+                  {card.available && (
+                    <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-[#1E6FD9] group-hover:underline">
+                      Abrir <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5" />
+                    </span>
+                  )}
+                </>
+              );
+              return card.available ? (
+                <Link key={card.to} to={card.to} className={cls}>
+                  {inner}
+                </Link>
+              ) : (
+                <div key={card.to} className={cls}>
+                  {inner}
+                </div>
+              );
+            })}
           </div>
+        </section>
 
-          {recent.length === 0 ? (
-            <div className="mt-4 rounded-md border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
-              Nenhuma sessão ainda. Crie uma nova sessão para começar.
+        {/* Última sessão */}
+        <section className="rounded-lg border border-border bg-card p-5 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              Última sessão
+            </h2>
+            <span className="text-xs text-muted-foreground">{sessions.length} no total</span>
+          </div>
+          {activeSession ? (
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-foreground">
+                  {activeSession.name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Modo {activeSession.mode} •{" "}
+                  {new Date(activeSession.createdAt).toLocaleString("pt-BR", {
+                    dateStyle: "short",
+                    timeStyle: "short",
+                  })}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveSession(activeSession.id)}
+                  className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground hover:bg-accent"
+                >
+                  Selecionar
+                </button>
+                <Link
+                  to="/coldpro/unilab"
+                  className="inline-flex items-center gap-1 rounded-md bg-[#1E6FD9] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#1858b0]"
+                >
+                  Retomar <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
             </div>
           ) : (
-            <ul className="mt-4 divide-y divide-slate-100">
-              {recent.map((s) => {
-                const isActive = s.id === activeSessionId;
-                return (
-                  <li
-                    key={s.id}
-                    className="flex items-center justify-between gap-3 py-2.5 text-sm"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate font-medium text-slate-800">{s.name}</p>
-                      <p className="text-xs text-slate-500">
-                        {formatDateTime(s.createdAt)} · modo {s.mode}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setActiveSession(s.id)}
-                      className={`shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition ${
-                        isActive
-                          ? "bg-[#1E6FD9] text-white"
-                          : "border border-slate-300 text-slate-600 hover:bg-slate-50"
-                      }`}
-                    >
-                      {isActive ? "Ativa" : "Selecionar"}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="rounded-md border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
+              Nenhuma sessão ativa — inicie uma simulação em{" "}
+              <Link to="/coldpro/unilab" className="font-medium text-[#1E6FD9] hover:underline">
+                CN COILS
+              </Link>
+              .
+            </div>
           )}
         </section>
 
-        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-900">Status do motor</h2>
-          <dl className="mt-4 space-y-2 text-sm">
-            <div className="flex items-center justify-between">
-              <dt className="text-slate-500">Versão</dt>
-              <dd className="font-medium text-slate-800">ColdPro V2</dd>
-            </div>
-            <div className="flex items-center justify-between">
-              <dt className="text-slate-500">Modo atual</dt>
-              <dd className="font-medium capitalize text-slate-800">{mode}</dd>
-            </div>
-            <div className="flex items-center justify-between">
-              <dt className="text-slate-500">Sessões em memória</dt>
-              <dd className="font-medium text-slate-800">{sessions.length}</dd>
-            </div>
-          </dl>
-        </section>
-      </div>
-
-      <section className="mt-6">
-        <h2 className="mb-3 text-sm font-semibold text-slate-900">Módulos disponíveis</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {MODULES.map((m) => {
-            const Icon = m.Icon;
-            return (
-              <Link
-                key={m.to}
-                to={m.to}
-                className="group flex flex-col gap-2 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-[#1E6FD9]/40 hover:shadow-md"
-              >
-                <div className="flex items-center justify-between">
+        {/* Ferramentas avançadas */}
+        <section>
+          <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Ferramentas avançadas
+          </h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {SECONDARY_CARDS.map((card) => {
+              const Icon = card.Icon;
+              return (
+                <Link
+                  key={card.to}
+                  to={card.to}
+                  className="group flex items-center gap-3 rounded-lg border border-border bg-card p-3 shadow-sm transition hover:border-[#1E6FD9]/40 hover:shadow-md"
+                >
                   <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#1E6FD9]/10 text-[#1E6FD9]">
                     <Icon className="h-4 w-4" />
                   </div>
-                  <ArrowRight className="h-4 w-4 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-[#1E6FD9]" />
-                </div>
-                <h3 className="text-sm font-semibold text-slate-900">{m.label}</h3>
-                <p className="text-xs text-slate-500">{m.description}</p>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
+                  <span className="flex-1 text-sm font-medium text-foreground">{card.title}</span>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground/40 transition group-hover:translate-x-0.5 group-hover:text-[#1E6FD9]" />
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        <footer className="border-t border-border pt-3 text-center text-[11px] text-muted-foreground">
+          Motor V2 — CN COLD • Versão {APP_VERSION} • {new Date().getFullYear()}
+        </footer>
+      </div>
     </PageContainer>
   );
 }
