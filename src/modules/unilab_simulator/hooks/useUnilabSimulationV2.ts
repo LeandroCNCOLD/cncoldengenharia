@@ -5,20 +5,19 @@ import { useCallback } from "react";
 import {
   runSimulationV2,
   SimulationV2Error,
-  UnilabCoefficientsMissingError,
 } from "../engine_v2/simulatorCoreV2";
 import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import { getRefrigerantProps } from "@/modules/unilab_simulator/services/refrigerantProperties";
 import type {
   TubeMaterialItem,
   UnilabComponentType,
+  CoilGeometryCatalogItem,
 } from "../types/unilab.types";
-import type { UnilabHeatTransferCatalog } from "../engine_v2/heatTransfer";
 import type { StructuredWarning } from "../types/warnings";
 
 export interface UseCnCoilsSimulationV2Params {
   tubeMaterials: TubeMaterialItem[];
-  htCatalog: UnilabHeatTransferCatalog;
+  geometries: CoilGeometryCatalogItem[];
   componentType: UnilabComponentType;
 }
 
@@ -60,11 +59,14 @@ export function useCnCoilsSimulationV2(params: UseCnCoilsSimulationV2Params) {
       const fluidProps = fluidPropsResult ?? FALLBACK_FLUID_PROPS;
       const fluidPropsIsFallback = !fluidPropsResult;
 
+      const geometry = params.geometries.find((g) => g.id === physical.geometryId);
+      const geoRaw = geometry?.raw as Record<string, unknown> | undefined;
+      const finCorr = Number(geoRaw?.FatCorAl ?? geoRaw?.fin_correction_factor);
+
       const rawResult = runSimulationV2({
         physical,
         thermo,
         componentType: params.componentType,
-        htCatalog: params.htCatalog,
         tubeMaterialConductivity: tubeMat.conductivityWmK,
         fluidProps,
         fluidMassFlowKgS,
@@ -72,6 +74,7 @@ export function useCnCoilsSimulationV2(params: UseCnCoilsSimulationV2Params) {
         foulingInternal: state.foulingFactorFluid,
         superheatK: state.superheat_K,
         subcoolingK: state.subcooling_K,
+        finCorrectionFactor: Number.isFinite(finCorr) && finCorr > 0 ? finCorr : 1.0,
       });
       const k =
         1 +
@@ -96,11 +99,9 @@ export function useCnCoilsSimulationV2(params: UseCnCoilsSimulationV2Params) {
       return { success: true as const, result, warnings: allWarnings };
     } catch (err) {
       const errors =
-        err instanceof UnilabCoefficientsMissingError
-          ? [err.message]
-          : err instanceof SimulationV2Error
-            ? err.errors
-            : [String(err)];
+        err instanceof SimulationV2Error
+          ? err.errors
+          : [String(err)];
       setResult(undefined);
       setWarnings(errors.map((msg) => ({ code: "CALC_ERROR", message: msg, severity: "error" as const })));
       return { success: false as const, errors };

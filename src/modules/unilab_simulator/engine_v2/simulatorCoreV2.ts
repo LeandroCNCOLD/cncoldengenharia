@@ -33,9 +33,7 @@ import {
   dittusBoelter,
   overallU,
   shahTwoPhase,
-  UnilabCoefficientsMissingError,
   type FluidPropsSinglePhase,
-  type UnilabHeatTransferCatalog,
 } from "./heatTransfer";
 import { determineFluidPhase, type FluidPhase } from "./phaseLogic";
 import type {
@@ -49,7 +47,6 @@ export interface SimulationV2Inputs {
   physical: CnCoilsPhysicalInputs;
   thermo: CnCoilsThermoInputs;
   componentType: UnilabComponentType;
-  htCatalog: UnilabHeatTransferCatalog;
   tubeMaterialConductivity: number;
   /** Propriedades do fluido para Dittus-Boelter (líquido / monofásico). */
   fluidProps: FluidPropsSinglePhase;
@@ -60,6 +57,8 @@ export interface SimulationV2Inputs {
   foulingInternal?: number;
   superheatK?: number;
   subcoolingK?: number;
+  /** Fator de correção da aleta (FatCorAl). Padrão: 1.0. */
+  finCorrectionFactor?: number;
 }
 
 export class SimulationV2Error extends Error {
@@ -100,7 +99,7 @@ export interface SimulationV2Result extends CnCoilsSimulationResult {
 export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result {
   const errors: string[] = [];
   const warnings: string[] = [];
-  const { physical, thermo, componentType, htCatalog } = inputs;
+  const { physical, thermo, componentType } = inputs;
 
   if (!physical.geometryId) errors.push("Geometria não selecionada.");
   if (!(thermo.airFlowM3H > 0)) errors.push("Vazão de ar inválida.");
@@ -144,9 +143,15 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
     componentType,
   });
 
-  // 5. h_ar via catálogo UNILAB (sem fallback)
-  const airH = computeAirSideH(physical.geometryId, faceVelocityMs, htCatalog);
+  // 5. h_ar via Wang-Chi-Chang / Mihailovic / Granryd (calculado dinamicamente)
+  const airH = computeAirSideH(physical, faceVelocityMs);
   warnings.push(...airH.warnings);
+
+  // Aplicar FatCorAl (fator de correção da aleta por tipo)
+  const finFactor = Number.isFinite(inputs.finCorrectionFactor) && inputs.finCorrectionFactor! > 0
+    ? inputs.finCorrectionFactor!
+    : 1.0;
+  const h_air_corrected = airH.h_air_Wm2K * finFactor;
 
   // 6. h_fluido — Dittus-Boelter (monofásico) ou Shah (bifásico)
   const Di_m = physical.tubeInnerDiameterMm * MM_TO_M;
@@ -166,7 +171,7 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
 
   // 7. U global
   const U = overallU({
-    h_air_Wm2K: airH.h_air_Wm2K,
+    h_air_Wm2K: h_air_corrected,
     h_fluid_Wm2K: hFluid,
     tubeOuterDiameterM: Do_m,
     tubeInnerDiameterM: Di_m,
@@ -181,9 +186,8 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
   }
 
   // 8. Área efetiva (face × rows × finEfficiency × areaCorrection)
-  const entry = htCatalog.entries.find((e) => e.geometryId === physical.geometryId);
-  const finEff = entry?.finEfficiency ?? 0.85;
-  const areaCorr = entry?.areaCorrection ?? 1;
+  const finEff = 0.85;
+  const areaCorr = 1;
   // Estimativa: área externa ≈ face × rows × (π·Do/passo_long) × finEff × correção
   const tubeDensityPerRow = 1 / (physical.tubePitchLongitudinalMm * MM_TO_M);
   const areaPerRowPerM2Face = Math.PI * Do_m * tubeDensityPerRow;
@@ -273,7 +277,7 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
     fluidPhase,
     hasCondensation,
     U_Wm2K: U,
-    hAir_Wm2K: airH.h_air_Wm2K,
+    hAir_Wm2K: h_air_corrected,
     hFluid_Wm2K: hFluid,
   };
 
@@ -293,4 +297,3 @@ function computeRHpct(T_C: number, W: number, pAtm_Pa: number): number {
   return Math.min(100, Math.max(0, (pw / psat) * 100));
 }
 
-export { UnilabCoefficientsMissingError };

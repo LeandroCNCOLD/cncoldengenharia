@@ -19,8 +19,6 @@ import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import { useCnCoilsSimulation } from "../hooks/useUnilabSimulation";
 import { useCnCoilsSimulationV2 } from "../hooks/useUnilabSimulationV2";
 import { useCnCoilsInputBridge } from "../hooks/useUnilabInputBridge";
-import { loadUnilabHeatTransferCatalog } from "../services/unilabHeatTransferCatalog";
-import type { UnilabHeatTransferCatalog } from "../engine_v2/heatTransfer";
 import {
   validatePhysicalInputs,
   validateThermoInputs,
@@ -92,19 +90,10 @@ export function CnCoilsWorkspacePage() {
 
   const { run } = useCnCoilsSimulation(simulationDeps);
 
-  const [htCatalog, setHtCatalog] = useState<UnilabHeatTransferCatalog>({
-    entries: [],
-  });
-  useEffect(() => {
-    loadUnilabHeatTransferCatalog().then(setHtCatalog).catch(() => {
-      setHtCatalog({ entries: [] });
-    });
-  }, []);
-
   const engineVersion = useCnCoilsSimulationStore((s) => s.engineVersion);
   const { run: runV2 } = useCnCoilsSimulationV2({
     tubeMaterials: catalogs.tubeMaterials,
-    htCatalog,
+    geometries: catalogs.geometries,
     componentType,
   });
   const [sending, setSending] = useState(false);

@@ -1,8 +1,7 @@
 // Coeficientes de troca térmica reais para o motor V2.
 //
-// Lado AR  : correlação polinomial UNILAB (lida do JSON unilabHeatTransferCoefficients.json).
-//            Sem fallback "inventado": se o JSON não tem coeficientes para a
-//            geometria selecionada, lançamos UnilabCoefficientsMissingError.
+// Lado AR  : correlação Wang-Chi-Chang (2000) / Mihailovic (2019) / Granryd (1965)
+//            calculada dinamicamente a partir dos dados geométricos.
 //
 // Lado FLUIDO :
 //   - monofásico → Dittus-Boelter   Nu = 0.023 · Re^0.8 · Pr^n  (n=0.4 aquec, 0.3 resfr)
@@ -15,81 +14,40 @@
 //   1/U_o = 1/h_air + R_wall + (Do/Di)/h_fluid + R_fouling
 
 import type { FluidPhase } from "./phaseLogic";
+import { calculateWangChiChang } from "../engine/wangChiChang";
+import type { CnCoilsPhysicalInputs } from "../types/unilab.types";
 
-export class UnilabCoefficientsMissingError extends Error {
-  constructor(public readonly geometryId: string) {
-    super(
-      `Coeficientes UNILAB ausentes para a geometria "${geometryId}". ` +
-        `Preencha public/data/catalogs/unilabHeatTransferCoefficients.json antes de rodar o motor V2.`,
-    );
-    this.name = "UnilabCoefficientsMissingError";
-  }
-}
-
-/** Schema do JSON de coeficientes UNILAB (preenchido pelo usuário). */
-export interface UnilabHeatTransferCoeffEntry {
-  geometryId: string;
-  /**
-   * Polinômio para h_ar [W/(m²·K)] em função da velocidade frontal v [m/s]:
-   *   h_air(v) = c0 + c1·v + c2·v² + c3·v³ + ...
-   */
-  h_air_polynomial: number[];
-  /** Faixa de validade [m/s]. Fora da faixa → warning, mas não bloqueia. */
-  vMin?: number;
-  vMax?: number;
-  /** Fator de eficiência da aleta (η_aleta · A_aleta/A_total), adimensional. */
-  finEfficiency?: number;
-  /** Fator multiplicativo opcional sobre a área externa total. */
-  areaCorrection?: number;
-}
-
-export interface UnilabHeatTransferCatalog {
-  entries: UnilabHeatTransferCoeffEntry[];
-}
-
-/** Avalia o polinômio (ordem por índice). */
-function polyEval(coeffs: number[], x: number): number {
-  let acc = 0;
-  let xp = 1;
-  for (const c of coeffs) {
-    acc += c * xp;
-    xp *= x;
-  }
-  return acc;
-}
-
-export interface AirSideHCoeffResult {
+export interface AirSideHResult {
   h_air_Wm2K: number;
   warnings: string[];
 }
 
 export function computeAirSideH(
-  geometryId: string,
+  physical: CnCoilsPhysicalInputs,
   faceVelocityMs: number,
-  catalog: UnilabHeatTransferCatalog,
-): AirSideHCoeffResult {
-  const entry = catalog.entries.find((e) => e.geometryId === geometryId);
-  if (!entry || !entry.h_air_polynomial || entry.h_air_polynomial.length === 0) {
-    throw new UnilabCoefficientsMissingError(geometryId);
-  }
+): AirSideHResult {
   const warnings: string[] = [];
-  if (entry.vMin !== undefined && faceVelocityMs < entry.vMin) {
+
+  const wcc = calculateWangChiChang({
+    tubeOdMm: physical.tubeOuterDiameterMm,
+    finThicknessMm: physical.finThicknessMm,
+    finPitchMm: physical.finPitchMm,
+    rowPitchMm: physical.tubePitchLongitudinalMm,
+    tubePitchMm: physical.tubePitchTransverseMm,
+    numberOfRows: physical.rows,
+    airFaceVelocityMs: faceVelocityMs,
+  });
+
+  warnings.push(...wcc.warnings);
+
+  if (!Number.isFinite(wcc.hAirWm2K) || wcc.hAirWm2K <= 0) {
     warnings.push(
-      `Velocidade frontal ${faceVelocityMs.toFixed(2)} m/s abaixo da faixa válida (${entry.vMin}).`,
+      `Wang-Chi-Chang retornou h_ar inválido (${wcc.hAirWm2K}). Usando fallback = 25 W/(m²·K).`,
     );
+    return { h_air_Wm2K: 25, warnings };
   }
-  if (entry.vMax !== undefined && faceVelocityMs > entry.vMax) {
-    warnings.push(
-      `Velocidade frontal ${faceVelocityMs.toFixed(2)} m/s acima da faixa válida (${entry.vMax}).`,
-    );
-  }
-  const h = polyEval(entry.h_air_polynomial, faceVelocityMs);
-  if (!Number.isFinite(h) || h <= 0) {
-    throw new Error(
-      `h_air calculado inválido para ${geometryId} a v=${faceVelocityMs} m/s.`,
-    );
-  }
-  return { h_air_Wm2K: h, warnings };
+
+  return { h_air_Wm2K: wcc.hAirWm2K, warnings };
 }
 
 // ============================================================================
