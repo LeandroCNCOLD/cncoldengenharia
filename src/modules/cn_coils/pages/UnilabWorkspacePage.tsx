@@ -114,12 +114,28 @@ export function UnilabWorkspacePage() {
   const physCheck = validatePhysicalInputs(physical);
   const thermoCheck = validateThermoInputs(thermo);
   const inputsValid = physCheck.isValid && thermoCheck.isValid;
-  const canSimulate = catalogs.ready && inputsValid && !isSimulating;
+
+  // Condição mínima e robusta para habilitar o botão Calcular: precisamos
+  // apenas dos campos críticos (temperatura de ar, temperatura de operação
+  // do fluido) e que os catálogos tenham carregado. A validação completa
+  // continua disponível como dica (title/tooltip) mas não bloqueia o clique
+  // — assim o usuário consegue rodar mesmo se algum campo opcional falhar
+  // na validação estrita.
+  const hasAirTemp = Number.isFinite(thermo.airInletTempC as number);
+  const hasFluidTemp =
+    Number.isFinite(thermo.evaporatingTempC as number) ||
+    Number.isFinite(thermo.condensingTempC as number);
+  const canSimulate =
+    catalogs.ready && hasAirTemp && hasFluidTemp && !isSimulating;
   const disabledReason = !catalogs.ready
     ? "Carregando catálogos…"
-    : !inputsValid
-      ? `Preencha: ${[...physCheck.errors, ...thermoCheck.errors].join(" • ")}`
-      : undefined;
+    : !hasAirTemp
+      ? "Informe a temperatura de entrada do ar"
+      : !hasFluidTemp
+        ? "Informe a temperatura de operação do fluido"
+        : !inputsValid
+          ? `Avisos: ${[...physCheck.errors, ...thermoCheck.errors].join(" • ")}`
+          : undefined;
 
   const handleSimulate = () => {
     const physCheck = validatePhysicalInputs(physical);
