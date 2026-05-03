@@ -331,12 +331,18 @@ export function WorkspaceSidebar({
         <SidebarMetricLine label="Carga refrig." value={`${derived.cargaRefrigerante_kg.toFixed(2)} kg`} />
       </SidebarInfoCard>
 
-      <div className={`rounded border bg-white ${hasFanError ? "border-red-500 bg-red-50" : "border-emerald-500 bg-emerald-50"}`}>
-        <div className="border-b border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
+      <div
+        className={`rounded border bg-white border-l-2 ${
+          hasFanError
+            ? "border-red-300 border-l-red-500"
+            : "border-emerald-300 border-l-emerald-500"
+        }`}
+      >
+        <div className="border-b border-border bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Gabinete Sanitário
         </div>
-        <div className="space-y-1 p-1.5 text-[10px] text-slate-700">
-          <div className="rounded bg-white/70 px-1.5 py-1 text-center font-mono font-semibold text-slate-900">
+        <div className="space-y-1 p-3 text-[10px] text-slate-700">
+          <div className="rounded bg-white/70 px-1.5 py-1 text-center font-mono text-sm font-semibold text-foreground">
             {derived.gabinete_largura_mm.toFixed(0)} × {derived.gabinete_altura_mm.toFixed(0)} × {derived.gabinete_prof_mm.toFixed(0)} mm
           </div>
           {fanFit.fanWarnings.map((w, i) => (
