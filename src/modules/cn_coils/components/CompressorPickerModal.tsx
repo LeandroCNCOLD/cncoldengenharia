@@ -87,6 +87,15 @@ export function CompressorPickerModal({ open, onClose }: Props) {
           nominalPowerW: r.nominal_power_w,
           nominalHp: r.nominal_hp,
         }));
+        // eslint-disable-next-line no-console
+        console.log(
+          "[CompressorPicker] Total carregado:",
+          mapped.length,
+          "| Bitzer:",
+          mapped.filter((i) => i.brand === "Bitzer").length,
+          "| Copeland:",
+          mapped.filter((i) => i.brand === "Copeland").length,
+        );
         setItems(mapped);
       })
       .catch(() => setItems([]))
