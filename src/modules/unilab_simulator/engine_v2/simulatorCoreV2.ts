@@ -14,6 +14,7 @@ import {
   buildMoistAirState,
   type MoistAirState,
 } from "./airProperties";
+import { calcAirPressureDrop, calcFluidPressureDrop } from "@/modules/unilab_simulator/services/pressureDropService";
 import {
   checkCondensation,
   humidityRatio,
@@ -226,13 +227,32 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
   // 12. RH na saída — psat ASHRAE + relação W↔pw
   const RH_out_pct = computeRHpct(T_air_out_C, W_out, airIn.pAtm_Pa);
 
+  // Perda de carga — ar (correlação empírica Unilab Coils 6.0)
+  const V_face_m_s = faceVelocityMs;
+  const N_rows = physical.rows;
+  const fin_pitch_mm = physical.finPitchMm ?? 3.0;
+  const airDp = calcAirPressureDrop(V_face_m_s, N_rows, fin_pitch_mm);
+
+  // Perda de carga — fluido (Darcy-Weisbach)
+  const tubesPerRow = physical.tubesPerRow ?? Math.max(1, Math.round(finnedHeightM / (physical.tubePitchTransverseMm * MM_TO_M)));
+  const tubeLength_m = finnedLengthM;
+  const L_circuit_m = tubeLength_m * N_rows * (tubesPerRow / Math.max(1, physical.circuits));
+  const D_i_m = Di_m;
+  const tubeArea_m2 = Math.PI * D_i_m * D_i_m / 4;
+  const G_kg_m2s = tubeArea_m2 > 0 && physical.circuits > 0
+    ? inputs.fluidMassFlowKgS / (tubeArea_m2 * physical.circuits)
+    : 0;
+  const rho_kg_m3 = inputs.fluidProps.rho_kg_m3 ?? 1100;
+  const mu_Pa_s = inputs.fluidProps.mu_Pa_s ?? 2.2e-4;
+  const fluidDp = calcFluidPressureDrop(L_circuit_m, D_i_m, G_kg_m2s, rho_kg_m3, mu_Pa_s);
+
   const result: SimulationV2Result = {
     totalCapacityKw: Q_total_W / 1000,
     sensibleCapacityKw: Q_sens_W / 1000,
     latentCapacityKw: Q_lat_W / 1000,
     shf: Q_total_W > 0 ? Q_sens_W / Q_total_W : 1,
-    airPressureDropPa: 0, // delegado para correlação UNILAB no JSON (a preencher)
-    fluidPressureDropKpa: 0,
+    airPressureDropPa: airDp,
+    fluidPressureDropKpa: fluidDp,
     airOutletTempC: T_air_out_C,
     airOutletRhPercent: RH_out_pct,
     faceAreaM2,
