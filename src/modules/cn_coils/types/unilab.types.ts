@@ -20,6 +20,7 @@ export interface CoilGeometryCatalogItem {
   tubePitchLongitudinalMm: number;
   tubeOuterDiameterMm: number;
   tubeInnerDiameterMm?: number;
+  tubeMaterial?: "copper" | "aluminum" | "stainless_steel";
   defaultRows?: number;
   defaultCircuits?: number;
   uBaseWm2K?: number;

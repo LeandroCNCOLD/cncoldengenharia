@@ -186,8 +186,6 @@ export function DehumidificationSystemPage() {
       // 1. Evaporador
       const evapTubeMat = catalogs.tubeMaterials.find((m) => m.id === evapPhys.tubeMaterialId);
       if (!evapTubeMat) throw new SimulationError("Material do tubo do evaporador inválido.", []);
-      const evapGeom = catalogs.geometries.find((g) => g.id === evapPhys.geometryId);
-
       const evapThermo: CnCoilsThermoInputs = {
         refrigerantId,
         airFlowM3H: airInlet.airFlowM3H,
@@ -203,13 +201,11 @@ export function DehumidificationSystemPage() {
         thermo: evapThermo,
         catalogs: simulationDeps,
         tubeMaterialConductivity: evapTubeMat.conductivityWmK,
-        uBaseWm2K: evapGeom?.uBaseWm2K,
       });
 
       // 2. Cascata: saída do evaporador alimenta o aquecimento
       const heatTubeMat = catalogs.tubeMaterials.find((m) => m.id === heatPhys.tubeMaterialId);
       if (!heatTubeMat) throw new SimulationError("Material do tubo do aquecimento inválido.", []);
-      const heatGeom = catalogs.geometries.find((g) => g.id === heatPhys.geometryId);
 
       const heatFluidMeanC = (heatFluidTempInC + heatFluidTempOutC) / 2;
 
@@ -228,7 +224,6 @@ export function DehumidificationSystemPage() {
         thermo: heatThermo,
         catalogs: simulationDeps,
         tubeMaterialConductivity: heatTubeMat.conductivityWmK,
-        uBaseWm2K: heatGeom?.uBaseWm2K,
       });
 
       setSystemResult({ evap: evapResult, heating: heatResult, errors: [] });

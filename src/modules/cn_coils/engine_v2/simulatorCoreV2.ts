@@ -31,7 +31,7 @@ import {
   computeAirSideH,
   computeNtuEpsilon,
   dittusBoelter,
-  overallU,
+  computeOverallU,
   shahTwoPhase,
   type FluidPropsSinglePhase,
 } from "./heatTransfer";
@@ -171,16 +171,18 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
   const hFluid =
     fluidPhase === "bifasico" ? shahTwoPhase(hLiquid, 0.5, Pr_l) : hLiquid;
 
-  // 7. U global
-  const U = overallU({
-    h_air_Wm2K: h_air_corrected,
-    h_fluid_Wm2K: hFluid,
-    tubeOuterDiameterM: Do_m,
-    tubeInnerDiameterM: Di_m,
-    tubeWallConductivity_Wm_K: inputs.tubeMaterialConductivity,
-    foulingExternal_m2K_W: inputs.foulingExternal,
-    foulingInternal_m2K_W: inputs.foulingInternal,
+  // 7. U global por resistências em série, referenciado à área externa.
+  const overall = computeOverallU({
+    h_o: h_air_corrected,
+    h_i: hFluid,
+    r_o_m: Do_m / 2,
+    r_i_m: Di_m / 2,
+    k_tube_WmK: inputs.tubeMaterialConductivity,
   });
+  warnings.push(...overall.warnings);
+  const foulingExternal = inputs.foulingExternal ?? 0;
+  const foulingInternal = (inputs.foulingInternal ?? 0) * (Do_m / Di_m);
+  const U = 1 / (1 / overall.U_o + foulingExternal + foulingInternal);
   if (!Number.isFinite(U) || U <= 0) {
     throw new SimulationV2Error("U global não-finito.", [
       "Verifique condutividade do tubo e coeficientes h.",

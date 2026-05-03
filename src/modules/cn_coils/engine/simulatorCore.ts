@@ -12,7 +12,7 @@
 //  3. Psicrometria de entrada (W, h, ρ, ponto de orvalho).
 //  4. Área e velocidade de face.
 //  5. Regime DRY/WET (T_superfície vs ponto de orvalho).
-//  6. Coeficiente U (uBase + correção por velocidade + parede do tubo).
+//  6. Coeficiente U por resistências em série (lado ar + parede + fluido).
 //  7. Área efetiva de troca: face × rows × fator de aleta (passo de aleta).
 //  8. NTU + ε crossflow (Cr=0 em mudança de fase).
 //  9. Q_base = ε · C_min · ΔT_max  (ΔT entre ar e superfície).
@@ -49,8 +49,8 @@ import {
   calculateLMTD,
   calculateNTU,
 } from "./heatTransfer";
-import { calculateOverallU } from "./overallU";
 import { calculateWangChiChang } from "./wangChiChang";
+import { computeOverallU, dittusBoelter, shahTwoPhase } from "../engine_v2/heatTransfer";
 import { applyAirVelocityCorrection } from "./unilabCorrections";
 import {
   calculateAirPressureDrop,
@@ -58,6 +58,7 @@ import {
 } from "./pressureDrop";
 import { CP_DRY_AIR_KJ_KG_K, m3hToM3s, mmToM, safeDivide, clamp } from "./units";
 import { calcCoilEffectiveArea, calcFinEfficiency, calcEffectiveArea } from "./effectiveArea";
+import { getRefrigerantProps } from "../services/refrigerantProperties";
 
 export interface RunSimulationParams {
   physical: CnCoilsPhysicalInputs;
@@ -68,8 +69,6 @@ export interface RunSimulationParams {
   };
   /** Condutividade do material do tubo selecionado [W/(m·K)]. */
   tubeMaterialConductivity: number;
-  /** uBase opcional vindo da geometria do catálogo. */
-  uBaseWm2K?: number;
   /**
    * Fator de correção da aleta (FatCorAl do catálogo Unilab).
    * Multiplica Q_final para ajustar a capacidade pelo tipo de aleta.
@@ -180,6 +179,8 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
   }
   const isCooling = thermo.evaporatingTempC !== undefined;
   const regime: "DRY" | "WET" = isCooling && surfaceTempC < dewPoint ? "WET" : "DRY";
+  const cpAirJkgK = CP_DRY_AIR_KJ_KG_K * 1000;
+  const deltaTMax = thermo.airInletTempC - surfaceTempC;
 
   // 6. U dinâmico via Wang-Chi-Chang (2000) — padrão de indústria para
   //    aletas planas. Resposta dinâmica ao passo de aleta, nº filas e vazão.
@@ -194,34 +195,59 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
   });
   warnings.push(...wcc.warnings);
 
-  let uGlobalWm2K = wcc.uGlobalWm2K;
-
-  // Fallback / consistência: se Wang-Chi-Chang falhou, recai no método antigo
-  // (uBase + correção por velocidade + parede do tubo).
-  if (!Number.isFinite(uGlobalWm2K) || uGlobalWm2K <= 0) {
-    const overall = calculateOverallU({
-      airVelocityMs: faceVelocityMs,
-      tubeOuterDiameterMm: physical.tubeOuterDiameterMm,
-      tubeInnerDiameterMm: physical.tubeInnerDiameterMm,
-      tubeMaterialConductivity: params.tubeMaterialConductivity,
-      finPitchMm: physical.finPitchMm,
-      uBaseWm2K: params.uBaseWm2K,
-    });
-    warnings.push(...overall.warnings);
-    uGlobalWm2K = overall.uWm2K;
-  } else {
-    // Subtrai resistência da parede do tubo escolhido pelo usuário.
-    const dExtM = physical.tubeOuterDiameterMm / 1000;
-    const dIntM = physical.tubeInnerDiameterMm / 1000;
-    if (
-      params.tubeMaterialConductivity > 0 &&
-      dExtM > dIntM &&
-      dIntM > 0
-    ) {
-      const rWall = (dExtM - dIntM) / (2 * params.tubeMaterialConductivity);
-      uGlobalWm2K = 1 / (1 / uGlobalWm2K + rWall);
-    }
+  const refrigerantProps = getRefrigerantProps(
+    thermo.refrigerantId,
+    surfaceTempC,
+    "liquid",
+  );
+  if (!refrigerantProps) {
+    warnings.push(
+      `Propriedades do refrigerante ${thermo.refrigerantId} ausentes — h_i usará fallback de U apenas se inválido.`,
+    );
   }
+
+  const tubeInnerDiameterM = mmToM(physical.tubeInnerDiameterMm);
+  const tubeOuterRadiusM = mmToM(physical.tubeOuterDiameterMm) / 2;
+  const tubeInnerRadiusM = tubeInnerDiameterM / 2;
+  const fluidProps = refrigerantProps
+    ? {
+        rho_kg_m3: refrigerantProps.rho_kg_m3,
+        mu_Pa_s: refrigerantProps.mu_Pa_s,
+        cp_J_kgK: refrigerantProps.cp_J_kgK,
+        k_W_mK: refrigerantProps.k_W_mK,
+      }
+    : {
+        rho_kg_m3: 1120,
+        mu_Pa_s: 2.0e-4,
+        cp_J_kgK: 1370,
+        k_W_mK: 0.083,
+      };
+  const estimatedFluidMassFlowKgS = Math.max(
+    0.001,
+    airMassFlowKgS * cpAirJkgK * Math.abs(deltaTMax) / (200_000),
+  );
+  const hLiquidWm2K = dittusBoelter({
+    massFlowKgS: estimatedFluidMassFlowKgS,
+    tubeInnerDiameterM,
+    circuits: physical.circuits,
+    fluid: fluidProps,
+    heating: !isCooling,
+  });
+  const prLiquid =
+    refrigerantProps?.Pr ??
+    (fluidProps.cp_J_kgK * fluidProps.mu_Pa_s) / fluidProps.k_W_mK;
+  const hFluidWm2K = isCooling
+    ? shahTwoPhase(hLiquidWm2K, 0.5, prLiquid)
+    : hLiquidWm2K;
+  const overallUResult = computeOverallU({
+    h_o: wcc.hAirWm2K,
+    h_i: hFluidWm2K,
+    r_o_m: tubeOuterRadiusM,
+    r_i_m: tubeInnerRadiusM,
+    k_tube_WmK: params.tubeMaterialConductivity,
+  });
+  warnings.push(...overallUResult.warnings);
+  const uGlobalWm2K = overallUResult.U_o;
 
   if (uGlobalWm2K <= 0) {
     throw new SimulationError("Coeficiente U não pôde ser calculado.", warnings);
@@ -234,7 +260,6 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
 
   // 8. NTU e efetividade crossflow
   // C_ar = m_ar · cp_ar (kJ/(s·K) → W/K convertendo cp para J/kg·K)
-  const cpAirJkgK = CP_DRY_AIR_KJ_KG_K * 1000;
   const cAirWk = airMassFlowKgS * cpAirJkgK;
   // Fluido em mudança de fase → C_fluido = ∞ → Cr = 0
   const cMinWk = cAirWk;
@@ -243,7 +268,6 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
   const effectiveness = calculateCrossflowEffectiveness(ntu, cRatio);
 
   // 9. Q_base
-  const deltaTMax = thermo.airInletTempC - surfaceTempC;
   // Para condensador: surfaceTemp > airInlet → deltaTMax negativo. Usamos |·|
   // e ajustamos sinal final em sensible/latent.
   const qBaseW = effectiveness * cMinWk * Math.abs(deltaTMax);

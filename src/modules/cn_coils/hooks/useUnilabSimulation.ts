@@ -21,27 +21,6 @@ export interface UseCnCoilsSimulationParams {
   pressureDropFan: PressureDropFanItem[];
 }
 
-function resolveUBase(geometry: { uBaseWm2K?: number | null; coil_type?: string } | null | undefined) {
-  const DEFAULT_U_BY_TYPE: Record<string, number> = {
-    condensation: 40,
-    direct_expansion: 35,
-    flooded_evaporator: 40,
-    cooling: 35,
-    heating: 30,
-    vapor: 50,
-  };
-  if (geometry?.uBaseWm2K && geometry.uBaseWm2K > 0) {
-    return { uBaseWm2K: geometry.uBaseWm2K, isEstimated: false, warning: null };
-  }
-  const coilType = geometry?.coil_type ?? "cooling";
-  const fallbackU = DEFAULT_U_BY_TYPE[coilType] ?? 35;
-  return {
-    uBaseWm2K: fallbackU,
-    isEstimated: true,
-    warning: `U_base não calibrado para esta geometria. Usando estimativa de ${fallbackU} W/m²K para "${coilType}". Resultado é ESTIMATIVA — não use para dimensionamento final.`,
-  };
-}
-
 export function useCnCoilsSimulation(catalogs: UseCnCoilsSimulationParams) {
   const setResult = useCnCoilsSimulationStore((s) => s.setResult);
   const setWarnings = useCnCoilsSimulationStore((s) => s.setWarnings);
@@ -67,7 +46,6 @@ export function useCnCoilsSimulation(catalogs: UseCnCoilsSimulationParams) {
       }
 
       const geometry = catalogs.geometries.find((g) => g.id === physical.geometryId);
-      const { uBaseWm2K, isEstimated: uBaseIsEstimated, warning: uBaseWarning } = resolveUBase(geometry);
       const geoRaw = geometry?.raw as Record<string, unknown> | undefined;
       const finCorr = Number(geoRaw?.FatCorAl ?? geoRaw?.fin_correction_factor);
       const airFr = Number(geoRaw?.FattoreAttrAria ?? geoRaw?.air_friction_factor);
@@ -80,7 +58,6 @@ export function useCnCoilsSimulation(catalogs: UseCnCoilsSimulationParams) {
           pressureDropFan: catalogs.pressureDropFan,
         },
         tubeMaterialConductivity: tubeMat.conductivityWmK,
-        uBaseWm2K,
         finCorrectionFactor: Number.isFinite(finCorr) && finCorr > 0 ? finCorr : 1.0,
         airFrictionFactor: Number.isFinite(airFr) && airFr > 0 ? airFr : 1.0,
       });
@@ -93,9 +70,7 @@ export function useCnCoilsSimulation(catalogs: UseCnCoilsSimulationParams) {
         latentCapacityKw: rawResult.latentCapacityKw * k,
       };
 
-      const warnings: StructuredWarning[] = [
-        ...(uBaseIsEstimated ? [{ code: "U_BASE_ESTIMATED", message: uBaseWarning, severity: "warning" as const }] : []),
-      ];
+      const warnings: StructuredWarning[] = [];
 
       const engineWarnings: StructuredWarning[] = result.warnings.map((msg) => ({
         code: "GENERAL_WARNING", message: msg, severity: "warning" as const,

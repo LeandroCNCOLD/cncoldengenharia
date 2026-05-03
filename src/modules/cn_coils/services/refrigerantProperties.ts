@@ -81,7 +81,7 @@ export function getRefrigerantProps(
   T_C: number,
   phase: FluidPhase = "liquid"
 ): FluidProps | null {
-  const key = refrigerant.replace(/-/g, "").toUpperCase();
+  const key = refrigerant.replace(/^REF_/i, "").replace(/-/g, "").toUpperCase();
   const table = LIQUID_TABLES[key];
   if (!table) return null;
   const rho   = interpolate(table, T_C, 1);

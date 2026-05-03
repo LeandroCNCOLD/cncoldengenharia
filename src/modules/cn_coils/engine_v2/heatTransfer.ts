@@ -108,19 +108,87 @@ export interface OverallUInputs {
   foulingInternal_m2K_W?: number;
 }
 
+export const K_TUBE: Record<string, number> = {
+  copper: 385,
+  aluminum: 205,
+  stainless_steel: 16,
+};
+
+export interface ComputeOverallUParams {
+  h_o: number;
+  h_i: number;
+  r_o_m: number;
+  r_i_m: number;
+  k_tube_WmK?: number;
+}
+
+export interface ComputeOverallUResult {
+  U_o: number;
+  warnings: string[];
+}
+
+export function computeOverallU(params: ComputeOverallUParams): ComputeOverallUResult {
+  const { h_o, h_i, r_o_m, r_i_m, k_tube_WmK = K_TUBE.copper } = params;
+  const warnings: string[] = [];
+
+  if (
+    !Number.isFinite(h_o) ||
+    !Number.isFinite(h_i) ||
+    h_o <= 0 ||
+    h_i <= 0
+  ) {
+    warnings.push("h_o ou h_i inválido — usando U_base estimado de 35 W/m²K");
+    return { U_o: 35, warnings };
+  }
+
+  if (
+    !Number.isFinite(r_o_m) ||
+    !Number.isFinite(r_i_m) ||
+    !Number.isFinite(k_tube_WmK) ||
+    r_o_m <= 0 ||
+    r_i_m <= 0 ||
+    r_o_m <= r_i_m ||
+    k_tube_WmK <= 0
+  ) {
+    warnings.push("Geometria do tubo inválida — usando U_base estimado de 35 W/m²K");
+    return { U_o: 35, warnings };
+  }
+
+  const R_o = 1 / h_o;
+  const R_wall = (r_o_m * Math.log(r_o_m / r_i_m)) / k_tube_WmK;
+  const R_i = (r_o_m / r_i_m) * (1 / h_i);
+  const R_total = R_o + R_wall + R_i;
+  const U_o = 1 / R_total;
+
+  if (!Number.isFinite(U_o) || U_o <= 0) {
+    warnings.push("U_o calculado inválido — usando U_base estimado de 35 W/m²K");
+    return { U_o: 35, warnings };
+  }
+
+  if (U_o < 5 || U_o > 500) {
+    warnings.push(
+      `U_o calculado fora da faixa esperada (${U_o.toFixed(1)} W/m²K) — verifique h_o e h_i`,
+    );
+  }
+
+  return { U_o, warnings };
+}
+
 export function overallU(inputs: OverallUInputs): number {
   const Do = inputs.tubeOuterDiameterM;
   const Di = inputs.tubeInnerDiameterM;
-  const k = inputs.tubeWallConductivity_Wm_K;
-  if (Do <= 0 || Di <= 0 || k <= 0) return Number.NaN;
-
-  const R_air = 1 / inputs.h_air_Wm2K;
-  const R_wall = (Do * Math.log(Do / Di)) / (2 * k);
-  const R_fluid = (Do / Di) / inputs.h_fluid_Wm2K;
+  const base = computeOverallU({
+    h_o: inputs.h_air_Wm2K,
+    h_i: inputs.h_fluid_Wm2K,
+    r_o_m: Do / 2,
+    r_i_m: Di / 2,
+    k_tube_WmK: inputs.tubeWallConductivity_Wm_K,
+  });
   const R_fouling_e = inputs.foulingExternal_m2K_W ?? 0;
-  const R_fouling_i = (inputs.foulingInternal_m2K_W ?? 0) * (Do / Di);
+  const R_fouling_i =
+    Di > 0 ? (inputs.foulingInternal_m2K_W ?? 0) * (Do / Di) : 0;
 
-  const R_total = R_air + R_wall + R_fluid + R_fouling_e + R_fouling_i;
+  const R_total = 1 / base.U_o + R_fouling_e + R_fouling_i;
   return 1 / R_total;
 }
 

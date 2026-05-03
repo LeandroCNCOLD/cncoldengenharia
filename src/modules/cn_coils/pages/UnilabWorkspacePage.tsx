@@ -187,7 +187,6 @@ export function CnCoilsWorkspacePage() {
           pressureDropFan: catalogs.pressureDropFan,
         },
         tubeMaterialConductivity: tubeMat.conductivityWmK,
-        uBaseWm2K: geometry?.uBaseWm2K ?? 35,
         finCorrectionFactor: Number.isFinite(finCorr) && finCorr > 0 ? finCorr : 1.0,
         airFrictionFactor: Number.isFinite(airFr) && airFr > 0 ? airFr : 1.0,
       });
