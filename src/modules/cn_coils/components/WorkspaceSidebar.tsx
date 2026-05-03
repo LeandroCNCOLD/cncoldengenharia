@@ -329,11 +329,19 @@ export function WorkspaceSidebar({
       <SidebarInfoCard title="Volume e Carga">
         <SidebarMetricLine label="Volume interno" value={`${derived.volumeInterno_L.toFixed(2)} L`} />
         <SidebarMetricLine label="Carga refrig." value={`${derived.cargaRefrigerante_kg.toFixed(2)} kg`} />
+        <div className="my-1 border-t border-slate-200" />
+        <SidebarMetricLine label="Peso tubos (Cu)" value={`${derived.pesoTubos_kg.toFixed(2)} kg`} />
+        <SidebarMetricLine label="Peso aletas (Al)" value={`${derived.pesoAletas_kg.toFixed(2)} kg`} />
+        <SidebarMetricLine label="Peso seco" value={`${derived.pesoSeco_kg.toFixed(2)} kg`} />
+        <SidebarMetricLine
+          label="Peso c/ fluido"
+          value={`${derived.pesoComFluido_kg.toFixed(2)} kg`}
+        />
       </SidebarInfoCard>
 
       <div className={`rounded border bg-white ${hasFanError ? "border-red-500 bg-red-50" : "border-emerald-500 bg-emerald-50"}`}>
         <div className="border-b border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
-          Gabinete Sanitário
+          Gabinete
         </div>
         <div className="space-y-1 p-1.5 text-[10px] text-slate-700">
           <div className="rounded bg-white/70 px-1.5 py-1 text-center font-mono font-semibold text-slate-900">
