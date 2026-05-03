@@ -18,8 +18,8 @@ export interface CoilWeightInputs {
   tubePitchLongitudinal_m: number;
   finThickness_m?: number;
   finPitch_m?: number;
-  tubeMaterial?: "copper" | "aluminum" | "steel";
-  finMaterial?: "aluminum" | "copper";
+  tubeMaterial?: TubeMaterial;
+  finMaterial?: FinMaterial;
 }
 
 export interface CoilWeightResult {
@@ -28,13 +28,18 @@ export interface CoilWeightResult {
   m_total_dry_kg: number;
   n_fins: number;
   n_tubes: number;
+  tubeMaterial: TubeMaterial;
+  finMaterial: FinMaterial;
 }
 
-const DENSITY = {
+export const DENSITY_KG_M3 = {
   copper: 8960,
   aluminum: 2700,
   steel: 7850,
 } as const;
+
+export type TubeMaterial = keyof typeof DENSITY_KG_M3;
+export type FinMaterial = "aluminum" | "copper";
 
 export function calcCoilHeight(
   nTubesPerRow: number,
@@ -119,7 +124,7 @@ export function calcCoilWeight(inputs: CoilWeightInputs): CoilWeightResult {
 
   const n_tubes = nTubesPerRow * nRows;
   const A_wall = (Math.PI / 4) * (tubeOD_m ** 2 - tubeID_m ** 2);
-  const m_tubes_kg = A_wall * L_fin_m * n_tubes * DENSITY[tubeMaterial];
+  const m_tubes_kg = A_wall * L_fin_m * n_tubes * DENSITY_KG_M3[tubeMaterial];
 
   const n_fins = Math.floor(L_fin_m / finPitch_m);
   const W_fin = nTubesPerRow * tubePitchTransverse_m;
@@ -127,7 +132,7 @@ export function calcCoilWeight(inputs: CoilWeightInputs): CoilWeightResult {
   const A_fin_gross = W_fin * H_fin;
   const A_holes = n_tubes * (Math.PI / 4) * tubeOD_m ** 2;
   const A_fin_net = A_fin_gross - A_holes;
-  const m_fins_kg = A_fin_net * finThickness_m * n_fins * DENSITY[finMaterial];
+  const m_fins_kg = A_fin_net * finThickness_m * n_fins * DENSITY_KG_M3[finMaterial];
 
   return {
     m_tubes_kg: Math.round(m_tubes_kg * 100) / 100,
@@ -135,6 +140,8 @@ export function calcCoilWeight(inputs: CoilWeightInputs): CoilWeightResult {
     m_total_dry_kg: Math.round((m_tubes_kg + m_fins_kg) * 100) / 100,
     n_fins,
     n_tubes,
+    tubeMaterial,
+    finMaterial,
   };
 }
 
@@ -192,6 +199,8 @@ export function calcCoilDerivedDimensions(params: {
   T_evap_C: number;
   finThickness_m?: number;
   finPitch_m?: number;
+  tubeMaterial?: TubeMaterial;
+  finMaterial?: FinMaterial;
 }) {
   const altura_mm = calcCoilHeight(params.nTubesPerRow, params.tubePitchTransverse_mm);
   const prof_mm = calcCoilDepth(params.nRows, params.tubePitchLongitudinal_mm);
@@ -215,6 +224,8 @@ export function calcCoilDerivedDimensions(params: {
     tubePitchLongitudinal_m: params.tubePitchLongitudinal_mm / 1000,
     finThickness_m: params.finThickness_m,
     finPitch_m: params.finPitch_m,
+    tubeMaterial: params.tubeMaterial,
+    finMaterial: params.finMaterial,
   });
 
   return {
