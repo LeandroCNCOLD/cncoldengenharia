@@ -8,6 +8,8 @@ import { evaluateCompressor } from "../compressor/compressorModel";
 import { runCoilForCycle } from "../coil/coilCycleAdapter";
 import { getRefrigerantSatProps } from "../refrigerant/refrigerantProperties";
 import type { CycleSystemConfig, CycleResult, CycleStatePoint } from "./cycleTypes";
+import { runAssemblySimulation } from "../assembly/coilAssembly";
+import type { CoilAssemblyConfig } from "../assembly/assemblyTypes";
 
 function buildStatePoint(
   T_C: number,
@@ -237,5 +239,53 @@ export async function runCycleSimulation(config: CycleSystemConfig): Promise<Cyc
       mode: lastCompResult?.mode ?? "constant_efficiency",
     },
     warnings,
+  };
+}
+
+export interface CycleSystemConfigWithAssembly
+  extends Omit<CycleSystemConfig, "evaporator" | "condenser"> {
+  evaporatorAssembly: CoilAssemblyConfig;
+  condenserAssembly: CoilAssemblyConfig;
+}
+
+/**
+ * Versão do CycleEngine que suporta CoilAssembly (múltiplos trocadores).
+ * Usa runAssemblySimulation() no lugar de runCoilForCycle() direto.
+ */
+export async function runCycleSimulationWithAssembly(
+  config: CycleSystemConfigWithAssembly,
+): Promise<CycleResult> {
+  const [evapAssembly, condAssembly] = await Promise.all([
+    runAssemblySimulation(config.evaporatorAssembly),
+    runAssemblySimulation(config.condenserAssembly),
+  ]);
+
+  const baseConfig: CycleSystemConfig = {
+    ...config,
+    evaporator: {
+      ...config.evaporatorAssembly.coils[0].coilInputs,
+      airInletTempC: config.evaporatorAssembly.airInlet.tempC,
+      airRelativeHumidity: config.evaporatorAssembly.airInlet.relativeHumidity,
+      superheatK: config.evaporatorAssembly.refrigerant.superheatK,
+      subcoolingK: config.evaporatorAssembly.refrigerant.subcoolingK,
+    },
+    condenser: {
+      ...config.condenserAssembly.coils[0].coilInputs,
+      airInletTempC: config.condenserAssembly.airInlet.tempC,
+      airRelativeHumidity: config.condenserAssembly.airInlet.relativeHumidity,
+      superheatK: config.condenserAssembly.refrigerant.superheatK,
+      subcoolingK: config.condenserAssembly.refrigerant.subcoolingK,
+    },
+  };
+
+  const cycleResult = await runCycleSimulation(baseConfig);
+  const assemblyWarnings = [
+    ...evapAssembly.warnings,
+    ...condAssembly.warnings,
+  ].filter((warning) => !cycleResult.warnings.includes(warning));
+
+  return {
+    ...cycleResult,
+    warnings: [...cycleResult.warnings, ...assemblyWarnings],
   };
 }
