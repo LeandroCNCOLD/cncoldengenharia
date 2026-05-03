@@ -10,6 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
+import { loadCompressorIndex } from "@/modules/coldpro_catalog/data/compressorCatalog.service";
+import type { CompressorIndexRow } from "@/modules/coldpro_catalog/data/compressorCatalog.types";
 
 export interface CompressorItem {
   id: string;
@@ -18,17 +20,20 @@ export interface CompressorItem {
   type?: string;
   refrigerantCode?: string;
   brand?: string;
+  nominalCapacityW?: number | null;
+  nominalPowerW?: number | null;
+  nominalHp?: number | null;
 }
 
-/** Infere a marca do compressor a partir da série/modelo (catálogo não tem campo brand). */
-function inferBrand(series?: string, model?: string): string {
-  const s = `${series ?? ""} ${model ?? ""}`.toUpperCase();
-  if (/\bSH\b|ECOLINE|BITZER|\bSE\b|\b[24][A-Z]{2}-/.test(s)) return "Bitzer";
-  if (/^D|DKJ|DLJ|DLF|DKM|DLL|DLE|DKSJ|DANFOSS|MANEUROP|MT |MTZ|NTZ/.test(s)) return "Danfoss";
-  if (/^Z|COPELAND|SCROLL DIGITAL|\bCS\b/.test(s)) return "Copeland";
-  if (/EMBRACO|NE[A-Z]?\d|FF\d|EM[A-Z]?\d/.test(s)) return "Embraco";
-  if (/TECUMSEH|AE[A-Z]?\d|AJ[A-Z]?\d|AW[A-Z]?\d/.test(s)) return "Tecumseh";
-  return "Outros";
+const applicationLabels: Record<string, string> = {
+  LT: "LT — Congelados",
+  MT: "MT — Resfriados",
+  HT: "HT — Climatizados",
+};
+
+function formatKw(w?: number | null): string {
+  if (w == null || !Number.isFinite(w)) return "—";
+  return `${(w / 1000).toFixed(2)} kW`;
 }
 
 interface Props {
