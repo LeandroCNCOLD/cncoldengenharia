@@ -7,6 +7,7 @@
 // - deleted = true   → tombstone (esconde uma geometria do JSON)
 
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import type { CoilGeometryItem, TipoSerpentina } from "./coilGeometryCatalogService";
 
 export interface GeometryOverrideRow {
