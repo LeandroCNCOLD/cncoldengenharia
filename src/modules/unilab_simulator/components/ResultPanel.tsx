@@ -254,8 +254,9 @@ export function ResultPanel({ result, warnings, onGoalSeek }: ResultPanelProps) 
     result.correlation_used !== undefined;
 
   return (
-    <div className="space-y-3">
-      <WarningsBanner warnings={warnings} />
+    <TooltipProvider delayDuration={150}>
+      <div className="space-y-3">
+        <WarningsBanner warnings={warnings} />
 
       <div className="rounded-lg border border-slate-200 bg-white p-4">
         <div className="mb-3 flex items-center justify-between gap-2">
@@ -269,7 +270,7 @@ export function ResultPanel({ result, warnings, onGoalSeek }: ResultPanelProps) 
         <div className="mb-3 rounded border border-emerald-200 bg-emerald-50 p-2">
           <div className="mb-1 flex items-center justify-between">
             <span className="text-xs font-semibold text-emerald-900">
-              {r.totalCapacity}
+              <MetricLabel label={r.totalCapacity} />
             </span>
             <span className="text-sm font-bold text-emerald-900">
               {fmt(result.totalCapacityKw)} kW
@@ -306,7 +307,9 @@ export function ResultPanel({ result, warnings, onGoalSeek }: ResultPanelProps) 
               key={it.label}
               className="flex items-center justify-between rounded border border-slate-100 bg-slate-50 px-3 py-2"
             >
-              <dt className="text-xs text-slate-600">{it.label}</dt>
+              <dt className="text-xs text-slate-600">
+                <MetricLabel label={it.label} />
+              </dt>
               <dd className="text-sm font-semibold text-slate-900">{it.value}</dd>
             </div>
           ))}
@@ -319,14 +322,18 @@ export function ResultPanel({ result, warnings, onGoalSeek }: ResultPanelProps) 
           </h4>
           <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div className="flex items-center justify-between rounded border border-slate-100 bg-slate-50 px-3 py-2">
-              <dt className="text-xs text-slate-600">ΔP Ar</dt>
+              <dt className="text-xs text-slate-600">
+                <MetricLabel label="ΔP Ar" />
+              </dt>
               <dd className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                 <span>{fmt(result.airPressureDropPa, 1)} Pa</span>
                 <PressureDropBadge pa={result.airPressureDropPa} />
               </dd>
             </div>
             <div className="flex items-center justify-between rounded border border-slate-100 bg-slate-50 px-3 py-2">
-              <dt className="text-xs text-slate-600">ΔP Fluido</dt>
+              <dt className="text-xs text-slate-600">
+                <MetricLabel label="ΔP Fluido" />
+              </dt>
               <dd className="text-sm font-semibold text-slate-900">
                 {fmt(result.fluidPressureDropKpa, 2)} kPa
               </dd>
@@ -383,7 +390,9 @@ export function ResultPanel({ result, warnings, onGoalSeek }: ResultPanelProps) 
               />
               {result.correlation_used && (
                 <div className="flex items-center justify-between rounded border border-slate-100 bg-slate-50 px-3 py-2">
-                  <dt className="text-xs text-slate-600">Correlação</dt>
+                  <dt className="text-xs text-slate-600">
+                    <MetricLabel label="Correlação" />
+                  </dt>
                   <dd>
                     <span className="rounded bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-800">
                       {result.correlation_used}
@@ -401,14 +410,17 @@ export function ResultPanel({ result, warnings, onGoalSeek }: ResultPanelProps) 
       </div>
       {warnings.length > 0 && <WarningsList warnings={warnings} />}
       {fanAudit && <FanLibraryStatus audit={fanAudit} />}
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
 
 function GeoCell({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between rounded border border-slate-100 bg-slate-50 px-3 py-2">
-      <dt className="text-xs text-slate-600">{label}</dt>
+      <dt className="text-xs text-slate-600">
+        <MetricLabel label={label} />
+      </dt>
       <dd className="text-sm font-semibold text-slate-900">{value}</dd>
     </div>
   );
