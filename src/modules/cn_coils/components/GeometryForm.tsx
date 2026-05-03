@@ -161,8 +161,8 @@ export function GeometryForm({
             <ReadOnlyRow label="Espessura da aleta" value={selected.espessura_aleta_mm} unit="mm" />
             <ReadOnlyRow label="Forma da aleta" value={selected.forma_aleta} />
             <ReadOnlyRow label="Tipo de bateria" value={selected.tipo_bateria} />
-            <ReadOnlyRow label="Fator de correção (aleta)" value={selected.fator_correcao_aleta} />
-            <ReadOnlyRow label="Fator de atrito (ar)" value={selected.fator_atrito_ar} />
+            <ReadOnlyRow label="Fat. Correção Aleta" value={selected.fator_correcao_aleta} />
+            <ReadOnlyRow label="Fat. Atrito Ar" value={selected.fator_atrito_ar} />
             <ReadOnlyRow label="Razão sup. internas" value={selected.razao_superficies_internas} />
             <ReadOnlyRow label="Tubo liso" value={fmtBool(selected.tubo_liso)} />
             <ReadOnlyRow label="Certificação AHRI" value={fmtBool(selected.certificacao_ahri)} />
