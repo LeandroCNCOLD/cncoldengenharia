@@ -124,6 +124,11 @@ export interface UnilabSimulationResult {
   ntu?: number;
   effectiveness?: number;
   correctionFactor: number;
+  A_fin_m2?: number;
+  A_tube_bare_m2?: number;
+  A_total_m2?: number;
+  eta_fin?: number;
+  surface_ratio?: number;
   warnings: string[];
 }
 
