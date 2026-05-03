@@ -15,6 +15,9 @@ import {
   Gauge,
   Scale,
   RotateCw,
+  Layers,
+  Snowflake,
+  Target,
 } from "lucide-react";
 import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
@@ -47,6 +50,9 @@ const NAV_GROUPS: NavGroup[] = [
       { to: "/coldpro/cncoils", label: "CN COILS", Icon: Gauge },
       { to: "/coldpro/cycle", label: "Ciclo de Refrigeração", Icon: RotateCw },
       { to: "/coldpro/map", label: "Mapa Operacional", Icon: Map },
+      { to: "/coldpro/assembly", label: "Arranjo de Serpentinas", Icon: Layers },
+      { to: "/coldpro/frost", label: "Análise de Geada", Icon: Snowflake, comingSoon: true },
+      { to: "/coldpro/optimization", label: "Otimização", Icon: Target, comingSoon: true },
       { to: "/coldpro/curve", label: "Curva de Desempenho", Icon: TrendingUp },
       { to: "/coldpro/simulation", label: "Equilíbrio do Sistema", Icon: Scale },
     ],
