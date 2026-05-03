@@ -40,7 +40,7 @@ interface UnilabSimulationStore {
   thermoInputs: Partial<UnilabThermoInputs>;
   selectedGeometry?: CoilGeometryCatalogItem;
   result?: UnilabSimulationResult;
-  warnings: string[];
+  warnings: Array<string | StructuredWarning>;
   isSimulating: boolean;
 
   /**
@@ -133,7 +133,7 @@ interface UnilabSimulationStore {
   setThermoInputs: (patch: Partial<UnilabThermoInputs>) => void;
   setSelectedGeometry: (geometry: CoilGeometryCatalogItem | undefined) => void;
   setResult: (result: UnilabSimulationResult | undefined) => void;
-  setWarnings: (warnings: string[]) => void;
+  setWarnings: (warnings: Array<string | StructuredWarning>) => void;
   setIsSimulating: (value: boolean) => void;
   clearResult: () => void;
   reset: () => void;
