@@ -14,6 +14,7 @@ import {
   Database as DatabaseIcon,
   Gauge,
   Scale,
+  RotateCw,
 } from "lucide-react";
 import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Simulação",
     items: [
       { to: "/coldpro/cncoils", label: "CN COILS", Icon: Gauge },
+      { to: "/coldpro/cycle", label: "Ciclo de Refrigeração", Icon: RotateCw },
       { to: "/coldpro/map", label: "Mapa Operacional", Icon: Map },
       { to: "/coldpro/curve", label: "Curva de Desempenho", Icon: TrendingUp },
       { to: "/coldpro/simulation", label: "Equilíbrio do Sistema", Icon: Scale },
