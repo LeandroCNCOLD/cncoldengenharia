@@ -59,6 +59,8 @@ export interface SimulationV2Inputs {
   subcoolingK?: number;
   /** Fator de correção da aleta (FatCorAl). Padrão: 1.0. */
   finCorrectionFactor?: number;
+  /** Calor latente de vaporização [kJ/kg]. */
+  h_fg_kJkg?: number;
 }
 
 export class SimulationV2Error extends Error {

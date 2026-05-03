@@ -7,7 +7,7 @@ import {
   SimulationV2Error,
 } from "../engine_v2/simulatorCoreV2";
 import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
-import { getRefrigerantProps } from "@/modules/unilab_simulator/services/refrigerantProperties";
+import { getRefrigerantLiquidProps } from "../engine_v2/refrigerantProps";
 import type {
   TubeMaterialItem,
   UnilabComponentType,
@@ -21,13 +21,6 @@ export interface UseCnCoilsSimulationV2Params {
   componentType: UnilabComponentType;
 }
 
-const FALLBACK_FLUID_PROPS = {
-  rho_kg_m3: 1108,
-  mu_Pa_s: 2.18e-4,
-  cp_J_kgK: 1440,
-  k_W_mK: 0.078,
-  Pr: 4.02,
-};
 
 export function useCnCoilsSimulationV2(params: UseCnCoilsSimulationV2Params) {
   const setResult = useCnCoilsSimulationStore((s) => s.setResult);
@@ -53,11 +46,14 @@ export function useCnCoilsSimulationV2(params: UseCnCoilsSimulationV2Params) {
 
       const fluidMassFlowKgS = (state.fluidMassFlow_kg_h || 0) / 3600;
 
-      const refrigerantName = (state.fluid ?? "REF_R404A").replace(/^REF_/, "");
-      const fluidTemp = state.fluidOperatingTemp_C ?? -10;
-      const fluidPropsResult = getRefrigerantProps(refrigerantName, fluidTemp, "liquid");
-      const fluidProps = fluidPropsResult ?? FALLBACK_FLUID_PROPS;
-      const fluidPropsIsFallback = !fluidPropsResult;
+      const T_sat = thermo.evaporatingTempC ?? thermo.condensingTempC ?? state.fluidOperatingTemp_C ?? -10;
+      const fluidData = getRefrigerantLiquidProps(state.fluid ?? "REF_R404A", T_sat);
+      const fluidProps = {
+        rho_kg_m3: fluidData.rho_kg_m3,
+        mu_Pa_s: fluidData.mu_Pa_s,
+        cp_J_kgK: fluidData.cp_J_kgK,
+        k_W_mK: fluidData.k_W_mK,
+      };
 
       const geometry = params.geometries.find((g) => g.id === physical.geometryId);
       const geoRaw = geometry?.raw as Record<string, unknown> | undefined;
@@ -75,6 +71,7 @@ export function useCnCoilsSimulationV2(params: UseCnCoilsSimulationV2Params) {
         superheatK: state.superheat_K,
         subcoolingK: state.subcooling_K,
         finCorrectionFactor: Number.isFinite(finCorr) && finCorr > 0 ? finCorr : 1.0,
+        h_fg_kJkg: fluidData.h_fg_kJkg,
       });
       const k =
         1 +
@@ -87,7 +84,7 @@ export function useCnCoilsSimulationV2(params: UseCnCoilsSimulationV2Params) {
         latentCapacityKw: rawResult.latentCapacityKw * k,
       };
       const warnings: StructuredWarning[] = [
-        ...(fluidPropsIsFallback ? [{ code: "FLUID_FALLBACK", message: `Refrigerante "${refrigerantName}" não disponível na tabela. Usando R404A@-10°C como estimativa.`, severity: "warning" as const }] : []),
+        ...fluidData.warnings.map((msg) => ({ code: "FLUID_FALLBACK" as const, message: msg, severity: "warning" as const })),
       ];
       const engineWarnings: StructuredWarning[] = result.warnings.map((msg) => ({
         code: "GENERAL_WARNING", message: msg, severity: "warning" as const,
