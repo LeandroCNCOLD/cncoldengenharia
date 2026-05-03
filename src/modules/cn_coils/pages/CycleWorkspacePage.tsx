@@ -157,7 +157,7 @@ export function CycleWorkspacePage() {
 
   const config = useMemo<CycleSystemConfig>(() => {
     const exp: CycleSystemConfig["expansionDevice"] = (() => {
-      if (expansionType === "none") return { type: undefined as never };
+      if (expansionType === "none") return {};
       if (expansionType === "txv" || expansionType === "eev")
         return { type: expansionType, superheatTarget_K: shTarget };
       if (expansionType === "capillary")
