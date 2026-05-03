@@ -219,7 +219,26 @@ export const useCnCoilsSimulationStore = create<CnCoilsSimulationStore>((set) =>
   compressorCount: 1,
   setPairedTempC: (val) => set({ pairedTempC: val }),
   setDischargeSuperheatK: (val) => set({ dischargeSuperheatK: val }),
-  setSelectedCompressor: (id) => set({ selectedCompressorId: id }),
+  setSelectedCompressor: (id) => {
+    set({ selectedCompressorId: id });
+    if (id) {
+      void import("@/modules/coldpro_catalog/data/compressorCatalog.service").then(
+        ({ getCompressorById, toCompressorSpec }) =>
+          getCompressorById(id).then((row) => {
+            if (row) {
+              const state = useCnCoilsSimulationStore.getState();
+              const spec = toCompressorSpec(row, {
+                evap_temp_c: state.fluidOperatingTemp_C,
+                cond_temp_c: state.fluidOperatingTemp_C,
+              });
+              set({ compressorSpec: spec });
+            }
+          }),
+      );
+    } else {
+      set({ compressorSpec: undefined });
+    }
+  },
   setCompressorCount: (n) => set({ compressorCount: Math.max(1, Math.floor(n) || 1) }),
 
   // Etapa 3.6 — Custo da bateria
