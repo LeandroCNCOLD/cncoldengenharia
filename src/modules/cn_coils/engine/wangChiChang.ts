@@ -9,6 +9,8 @@ export interface CoilGeometryInput {
   N: number;         // Número de filas
   V_face: number;    // Velocidade de face [m/s]
   T_air_C: number;   // Temperatura média do ar [°C]
+  Re?: number;        // Override para testes/validação de faixa
+  Pr?: number;        // Override para testes/validação de faixa
   L_fin?: number;    // Comprimento da aleta [m]
   L_p?: number;      // Passo do louver [m] — obrigatório para louver
   theta_L?: number;  // Ângulo do louver [°] — obrigatório para louver
@@ -55,20 +57,66 @@ function getAir(T: number) {
   };
 }
 
+function reynoldsWarning(Re: number): string | undefined {
+  if (Re < 100 || Re > 15000) {
+    return `Re=${Re.toFixed(0)} muito fora da faixa — resultado extrapolado`;
+  }
+  if (Re > 10000) {
+    return `Re=${Re.toFixed(0)} acima de 10000 — extrapolação moderada`;
+  }
+  return undefined;
+}
+
+function gnielinskiNu(Re: number, Pr: number): number {
+  const f = Math.pow(0.790 * Math.log(Re) - 1.64, -2);
+  return (
+    ((f / 8) * (Re - 1000) * Pr) /
+    (1 + 12.7 * Math.sqrt(f / 8) * (Math.pow(Pr, 2 / 3) - 1))
+  );
+}
+
 // Wang-Chi-Chang 2000 — aletas PLANAS
 // Int. J. Heat Mass Transfer 43(15):2693–2700
 function plain(input: CoilGeometryInput): CorrelationResult {
   const air = getAir(input.T_air_C);
+  const Pr = input.Pr ?? air.Pr;
   const sigma = 1 - input.D_o / input.P_t;
   const V_max = input.V_face / sigma;
-  const Re = (air.rho * V_max * input.D_o) / air.mu;
+  const Re = input.Re ?? (air.rho * V_max * input.D_o) / air.mu;
+
+  if (Re < 300) {
+    const Nu = 3.66;
+    const h = (Nu * air.k) / input.D_o;
+    const j = (h / (air.rho * V_max * air.cp)) * Math.pow(Pr, 2 / 3);
+    const rangeWarning = reynoldsWarning(Re);
+    const laminarWarning = `Re=${Re.toFixed(0)} em regime laminar — usando Nu=3.66`;
+    return {
+      j,
+      f: 0,
+      h_air_W_m2K: h,
+      Re_Dc: Re,
+      correlation: "Laminar-Nu-3.66-fallback",
+      outOfRange: rangeWarning ? `${rangeWarning}; ${laminarWarning}` : laminarWarning,
+    };
+  }
+
   const j = 0.394 * Math.pow(Re,-0.392) * Math.pow(input.F_p/input.D_o,0.798)
     * Math.pow(input.P_t/input.P_l,-0.198) * Math.pow(input.N,-0.290) * Math.pow(input.P_l/input.D_o,-0.0978);
   const f = 0.764 * Math.pow(Re,-0.739) * Math.pow(input.F_p/input.D_o,-0.177)
     * Math.pow(input.P_t/input.P_l,0.058) * Math.pow(input.N,0.965) * Math.pow(input.P_l/input.D_o,0.708);
-  const h = (j * air.rho * V_max * air.cp) / Math.pow(air.Pr, 2/3);
+  let h = (j * air.rho * V_max * air.cp) / Math.pow(Pr, 2/3);
+  let outOfRange = reynoldsWarning(Re);
+
+  if (Re > 10000 && Number.isFinite(Pr) && Pr > 0) {
+    const nuLimit = gnielinskiNu(Re, Pr);
+    const hLimit = (nuLimit * air.k) / input.D_o;
+    if (Number.isFinite(hLimit) && hLimit > 0 && h > hLimit) {
+      h = hLimit;
+    }
+  }
+
   return { j, f, h_air_W_m2K: h, Re_Dc: Re, correlation: "Wang-Chi-Chang-2000-plain",
-    outOfRange: Re < 300 || Re > 7000 ? `Re=${Re.toFixed(0)} fora da faixa 300–7000` : undefined };
+    outOfRange };
 }
 
 // Chang-Wang 1997 — aletas PERSIANADAS (louver)
@@ -209,6 +257,8 @@ export interface WangChiChangParams {
   tubePitchMm: number;
   numberOfRows: number;
   airFaceVelocityMs: number;
+  Re?: number;
+  Pr?: number;
   finConductivityWmK?: number;
   hRefInternalWm2K?: number;
   areaRatioExtToInt?: number;
@@ -251,6 +301,8 @@ export function calculateWangChiChang(p: WangChiChangParams): WangChiChangResult
     N,
     V_face: v,
     T_air_C: 25,
+    Re: p.Re,
+    Pr: p.Pr,
   });
 
   if (!Number.isFinite(res.h_air_W_m2K) || res.h_air_W_m2K <= 0) {
