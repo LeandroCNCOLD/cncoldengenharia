@@ -48,7 +48,7 @@ interface FluidSidePanelProps {
  *  4) Sobreaquecimento (apenas evaporadores)
  *  5) Subresfriamento (apenas condensadores)
  *  6) Queda de Pressão (resultado)
- *  7) Fator de Erro (input)
+ *  7) Fator de Segurança (input)
  *  8) Velocidade do Fluido (resultado)
  *
  * Cadeado funcional:
@@ -487,8 +487,8 @@ export function FluidSidePanel({
           />
         </FieldRow>
 
-        {/* 7) Fator de Erro — auto-preenchido pelo SecurityFactor da geometria */}
-        <FieldRow label="Fator de Erro" unit={<UnitText text="%" />}>
+        {/* 7) Fator de Segurança — auto-preenchido pelo SecurityFactor da geometria */}
+        <FieldRow label="Fator de Segurança" unit={<UnitText text="%" />}>
           <NumInput
             value={errorFactorPercent}
             onChange={setErrorFactorPercent}
