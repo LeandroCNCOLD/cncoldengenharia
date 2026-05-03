@@ -31,6 +31,8 @@ import { Route as AppColdproCncoilsRouteImport } from './routes/_app/coldpro.cnc
 import { Route as AppColdproCatalogRouteImport } from './routes/_app/coldpro.catalog'
 import { Route as AppColdproAuditRouteImport } from './routes/_app/coldpro.audit'
 import { Route as AppColdproAssemblyRouteImport } from './routes/_app/coldpro.assembly'
+import { Route as AppColdproUnilabIndexRouteImport } from './routes/_app/coldpro.unilab.index'
+import { Route as AppColdproUnilabWorkspaceRouteImport } from './routes/_app/coldpro.unilab.workspace'
 import { Route as AppColdproCncoilsWorkspaceRouteImport } from './routes/_app/coldpro.cncoils.workspace'
 import { Route as AppColdproCncoilsSystemsHeatPumpRouteImport } from './routes/_app/coldpro.cncoils.systems.heat-pump'
 import { Route as AppColdproCncoilsSystemsDxCompleteRouteImport } from './routes/_app/coldpro.cncoils.systems.dx-complete'
@@ -146,6 +148,17 @@ const AppColdproAssemblyRoute = AppColdproAssemblyRouteImport.update({
   path: '/assembly',
   getParentRoute: () => AppColdproRoute,
 } as any)
+const AppColdproUnilabIndexRoute = AppColdproUnilabIndexRouteImport.update({
+  id: '/unilab/',
+  path: '/unilab/',
+  getParentRoute: () => AppColdproRoute,
+} as any)
+const AppColdproUnilabWorkspaceRoute =
+  AppColdproUnilabWorkspaceRouteImport.update({
+    id: '/unilab/workspace',
+    path: '/unilab/workspace',
+    getParentRoute: () => AppColdproRoute,
+  } as any)
 const AppColdproCncoilsWorkspaceRoute =
   AppColdproCncoilsWorkspaceRouteImport.update({
     id: '/workspace',
@@ -200,6 +213,8 @@ export interface FileRoutesByFullPath {
   '/coldpro/simulation': typeof AppColdproSimulationRoute
   '/coldpro/': typeof AppColdproIndexRoute
   '/coldpro/cncoils/workspace': typeof AppColdproCncoilsWorkspaceRoute
+  '/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
+  '/coldpro/unilab/': typeof AppColdproUnilabIndexRoute
   '/coldpro/cncoils/systems/cold-room': typeof AppColdproCncoilsSystemsColdRoomRoute
   '/coldpro/cncoils/systems/dehumidification': typeof AppColdproCncoilsSystemsDehumidificationRoute
   '/coldpro/cncoils/systems/dx-complete': typeof AppColdproCncoilsSystemsDxCompleteRoute
@@ -227,6 +242,8 @@ export interface FileRoutesByTo {
   '/coldpro/simulation': typeof AppColdproSimulationRoute
   '/coldpro': typeof AppColdproIndexRoute
   '/coldpro/cncoils/workspace': typeof AppColdproCncoilsWorkspaceRoute
+  '/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
+  '/coldpro/unilab': typeof AppColdproUnilabIndexRoute
   '/coldpro/cncoils/systems/cold-room': typeof AppColdproCncoilsSystemsColdRoomRoute
   '/coldpro/cncoils/systems/dehumidification': typeof AppColdproCncoilsSystemsDehumidificationRoute
   '/coldpro/cncoils/systems/dx-complete': typeof AppColdproCncoilsSystemsDxCompleteRoute
@@ -257,6 +274,8 @@ export interface FileRoutesById {
   '/_app/coldpro/simulation': typeof AppColdproSimulationRoute
   '/_app/coldpro/': typeof AppColdproIndexRoute
   '/_app/coldpro/cncoils/workspace': typeof AppColdproCncoilsWorkspaceRoute
+  '/_app/coldpro/unilab/workspace': typeof AppColdproUnilabWorkspaceRoute
+  '/_app/coldpro/unilab/': typeof AppColdproUnilabIndexRoute
   '/_app/coldpro/cncoils/systems/cold-room': typeof AppColdproCncoilsSystemsColdRoomRoute
   '/_app/coldpro/cncoils/systems/dehumidification': typeof AppColdproCncoilsSystemsDehumidificationRoute
   '/_app/coldpro/cncoils/systems/dx-complete': typeof AppColdproCncoilsSystemsDxCompleteRoute
@@ -287,6 +306,8 @@ export interface FileRouteTypes {
     | '/coldpro/simulation'
     | '/coldpro/'
     | '/coldpro/cncoils/workspace'
+    | '/coldpro/unilab/workspace'
+    | '/coldpro/unilab/'
     | '/coldpro/cncoils/systems/cold-room'
     | '/coldpro/cncoils/systems/dehumidification'
     | '/coldpro/cncoils/systems/dx-complete'
@@ -314,6 +335,8 @@ export interface FileRouteTypes {
     | '/coldpro/simulation'
     | '/coldpro'
     | '/coldpro/cncoils/workspace'
+    | '/coldpro/unilab/workspace'
+    | '/coldpro/unilab'
     | '/coldpro/cncoils/systems/cold-room'
     | '/coldpro/cncoils/systems/dehumidification'
     | '/coldpro/cncoils/systems/dx-complete'
@@ -343,6 +366,8 @@ export interface FileRouteTypes {
     | '/_app/coldpro/simulation'
     | '/_app/coldpro/'
     | '/_app/coldpro/cncoils/workspace'
+    | '/_app/coldpro/unilab/workspace'
+    | '/_app/coldpro/unilab/'
     | '/_app/coldpro/cncoils/systems/cold-room'
     | '/_app/coldpro/cncoils/systems/dehumidification'
     | '/_app/coldpro/cncoils/systems/dx-complete'
@@ -511,6 +536,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproAssemblyRouteImport
       parentRoute: typeof AppColdproRoute
     }
+    '/_app/coldpro/unilab/': {
+      id: '/_app/coldpro/unilab/'
+      path: '/unilab'
+      fullPath: '/coldpro/unilab/'
+      preLoaderRoute: typeof AppColdproUnilabIndexRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
+    '/_app/coldpro/unilab/workspace': {
+      id: '/_app/coldpro/unilab/workspace'
+      path: '/unilab/workspace'
+      fullPath: '/coldpro/unilab/workspace'
+      preLoaderRoute: typeof AppColdproUnilabWorkspaceRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
     '/_app/coldpro/cncoils/workspace': {
       id: '/_app/coldpro/cncoils/workspace'
       path: '/workspace'
@@ -588,6 +627,8 @@ interface AppColdproRouteChildren {
   AppColdproRegistryRoute: typeof AppColdproRegistryRoute
   AppColdproSimulationRoute: typeof AppColdproSimulationRoute
   AppColdproIndexRoute: typeof AppColdproIndexRoute
+  AppColdproUnilabWorkspaceRoute: typeof AppColdproUnilabWorkspaceRoute
+  AppColdproUnilabIndexRoute: typeof AppColdproUnilabIndexRoute
 }
 
 const AppColdproRouteChildren: AppColdproRouteChildren = {
@@ -608,6 +649,8 @@ const AppColdproRouteChildren: AppColdproRouteChildren = {
   AppColdproRegistryRoute: AppColdproRegistryRoute,
   AppColdproSimulationRoute: AppColdproSimulationRoute,
   AppColdproIndexRoute: AppColdproIndexRoute,
+  AppColdproUnilabWorkspaceRoute: AppColdproUnilabWorkspaceRoute,
+  AppColdproUnilabIndexRoute: AppColdproUnilabIndexRoute,
 }
 
 const AppColdproRouteWithChildren = AppColdproRoute._addFileChildren(
