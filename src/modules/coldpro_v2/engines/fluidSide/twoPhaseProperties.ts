@@ -1,3 +1,5 @@
+import { getRefrigerantSatProps } from "../../../cn_coils/engines/refrigerant/refrigerantProperties";
+
 export interface TwoPhasePropertiesInput {
   fluid: string;
   temperature_c: number;
@@ -56,5 +58,25 @@ export function calculateTwoPhaseProperties(input: TwoPhasePropertiesInput): Two
     prandtl_vapor,
     latent_heat_j_kg,
     warnings,
+  };
+}
+
+export async function calculateTwoPhasePropertiesReal(
+  input: TwoPhasePropertiesInput,
+): Promise<TwoPhaseProperties & { warnings: string[] }> {
+  const satProps = await getRefrigerantSatProps(input.fluid, input.temperature_c);
+  return {
+    density_liquid: satProps.liquid.rho_kgm3,
+    density_vapor: satProps.vapor.rho_kgm3,
+    viscosity_liquid: satProps.liquid.mu_Pas,
+    viscosity_vapor: satProps.vapor.mu_Pas,
+    conductivity_liquid: satProps.liquid.k_WmK,
+    conductivity_vapor: satProps.vapor.k_WmK,
+    cp_liquid: satProps.liquid.cp_kJkgK * 1000,
+    cp_vapor: satProps.vapor.cp_kJkgK * 1000,
+    prandtl_liquid: satProps.liquid.Pr,
+    prandtl_vapor: satProps.vapor.Pr,
+    latent_heat_j_kg: satProps.h_fg_kJkg * 1000,
+    warnings: satProps.warnings,
   };
 }
