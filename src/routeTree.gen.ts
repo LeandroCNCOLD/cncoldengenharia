@@ -20,6 +20,7 @@ import { Route as AppColdproSimulationRouteImport } from './routes/_app/coldpro.
 import { Route as AppColdproRegistryRouteImport } from './routes/_app/coldpro.registry'
 import { Route as AppColdproRecordRouteImport } from './routes/_app/coldpro.record'
 import { Route as AppColdproMapRouteImport } from './routes/_app/coldpro.map'
+import { Route as AppColdproFichaTecnicaRouteImport } from './routes/_app/coldpro.ficha-tecnica'
 import { Route as AppColdproExportRouteImport } from './routes/_app/coldpro.export'
 import { Route as AppColdproCurveRouteImport } from './routes/_app/coldpro.curve'
 import { Route as AppColdproComponentsRouteImport } from './routes/_app/coldpro.components'
@@ -84,6 +85,11 @@ const AppColdproRecordRoute = AppColdproRecordRouteImport.update({
 const AppColdproMapRoute = AppColdproMapRouteImport.update({
   id: '/map',
   path: '/map',
+  getParentRoute: () => AppColdproRoute,
+} as any)
+const AppColdproFichaTecnicaRoute = AppColdproFichaTecnicaRouteImport.update({
+  id: '/ficha-tecnica',
+  path: '/ficha-tecnica',
   getParentRoute: () => AppColdproRoute,
 } as any)
 const AppColdproExportRoute = AppColdproExportRouteImport.update({
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/coldpro/components': typeof AppColdproComponentsRoute
   '/coldpro/curve': typeof AppColdproCurveRoute
   '/coldpro/export': typeof AppColdproExportRoute
+  '/coldpro/ficha-tecnica': typeof AppColdproFichaTecnicaRoute
   '/coldpro/map': typeof AppColdproMapRoute
   '/coldpro/record': typeof AppColdproRecordRoute
   '/coldpro/registry': typeof AppColdproRegistryRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/coldpro/components': typeof AppColdproComponentsRoute
   '/coldpro/curve': typeof AppColdproCurveRoute
   '/coldpro/export': typeof AppColdproExportRoute
+  '/coldpro/ficha-tecnica': typeof AppColdproFichaTecnicaRoute
   '/coldpro/map': typeof AppColdproMapRoute
   '/coldpro/record': typeof AppColdproRecordRoute
   '/coldpro/registry': typeof AppColdproRegistryRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/_app/coldpro/components': typeof AppColdproComponentsRoute
   '/_app/coldpro/curve': typeof AppColdproCurveRoute
   '/_app/coldpro/export': typeof AppColdproExportRoute
+  '/_app/coldpro/ficha-tecnica': typeof AppColdproFichaTecnicaRoute
   '/_app/coldpro/map': typeof AppColdproMapRoute
   '/_app/coldpro/record': typeof AppColdproRecordRoute
   '/_app/coldpro/registry': typeof AppColdproRegistryRoute
@@ -230,6 +239,7 @@ export interface FileRouteTypes {
     | '/coldpro/components'
     | '/coldpro/curve'
     | '/coldpro/export'
+    | '/coldpro/ficha-tecnica'
     | '/coldpro/map'
     | '/coldpro/record'
     | '/coldpro/registry'
@@ -252,6 +262,7 @@ export interface FileRouteTypes {
     | '/coldpro/components'
     | '/coldpro/curve'
     | '/coldpro/export'
+    | '/coldpro/ficha-tecnica'
     | '/coldpro/map'
     | '/coldpro/record'
     | '/coldpro/registry'
@@ -276,6 +287,7 @@ export interface FileRouteTypes {
     | '/_app/coldpro/components'
     | '/_app/coldpro/curve'
     | '/_app/coldpro/export'
+    | '/_app/coldpro/ficha-tecnica'
     | '/_app/coldpro/map'
     | '/_app/coldpro/record'
     | '/_app/coldpro/registry'
@@ -372,6 +384,13 @@ declare module '@tanstack/react-router' {
       path: '/map'
       fullPath: '/coldpro/map'
       preLoaderRoute: typeof AppColdproMapRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
+    '/_app/coldpro/ficha-tecnica': {
+      id: '/_app/coldpro/ficha-tecnica'
+      path: '/ficha-tecnica'
+      fullPath: '/coldpro/ficha-tecnica'
+      preLoaderRoute: typeof AppColdproFichaTecnicaRouteImport
       parentRoute: typeof AppColdproRoute
     }
     '/_app/coldpro/export': {
@@ -482,6 +501,7 @@ interface AppColdproRouteChildren {
   AppColdproComponentsRoute: typeof AppColdproComponentsRoute
   AppColdproCurveRoute: typeof AppColdproCurveRoute
   AppColdproExportRoute: typeof AppColdproExportRoute
+  AppColdproFichaTecnicaRoute: typeof AppColdproFichaTecnicaRoute
   AppColdproMapRoute: typeof AppColdproMapRoute
   AppColdproRecordRoute: typeof AppColdproRecordRoute
   AppColdproRegistryRoute: typeof AppColdproRegistryRoute
@@ -497,6 +517,7 @@ const AppColdproRouteChildren: AppColdproRouteChildren = {
   AppColdproComponentsRoute: AppColdproComponentsRoute,
   AppColdproCurveRoute: AppColdproCurveRoute,
   AppColdproExportRoute: AppColdproExportRoute,
+  AppColdproFichaTecnicaRoute: AppColdproFichaTecnicaRoute,
   AppColdproMapRoute: AppColdproMapRoute,
   AppColdproRecordRoute: AppColdproRecordRoute,
   AppColdproRegistryRoute: AppColdproRegistryRoute,
