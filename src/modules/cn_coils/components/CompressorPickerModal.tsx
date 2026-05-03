@@ -76,7 +76,10 @@ export function CompressorPickerModal({ open, onClose }: Props) {
         const mapped: CompressorItem[] = index.map((r: CompressorIndexRow) => ({
           id: r.id,
           model: r.model,
-          series: r.compressor_type ?? undefined,
+          series:
+            r.compressor_type ??
+            /^\d+([A-Z]+?)(?:[A-Z]?-|\d|$)/.exec(r.model)?.[1]?.charAt(0) ??
+            undefined,
           type: r.application,
           refrigerantCode: r.refrigerant,
           brand: r.manufacturer,
