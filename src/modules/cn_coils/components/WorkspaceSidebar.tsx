@@ -201,7 +201,7 @@ export function WorkspaceSidebar({
 
 
   return (
-    <aside className="flex h-full w-full flex-col gap-1.5 rounded border border-slate-300 bg-slate-50 p-1.5 text-[10px] shadow-sm">
+    <aside className="flex h-full w-full min-w-[220px] flex-col gap-2 rounded border border-border bg-slate-50 p-2 text-[10px] shadow-sm">
       {/* Cabeçalho com a aplicação */}
       <div className="rounded bg-[#1E6FD9] px-2 py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white">
         {cfg.shortLabel}
