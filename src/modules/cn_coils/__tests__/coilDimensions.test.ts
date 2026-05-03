@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { calcCoilHeight, validateFanFit } from "../utils/coilDerivedMetrics";
+import {
+  calcCoilHeight,
+  calcCoilWeight,
+  validateFanFit,
+} from "../utils/coilDerivedMetrics";
 
 describe("coil dimensions helpers", () => {
   it("24 tubos × 31.75mm → altura = 762mm", () => {
@@ -41,5 +45,55 @@ describe("coil dimensions helpers", () => {
 
     expect(v.fitsWidthTotal).toBe(false);
     expect(v.warnings[0]).toContain("1400");
+  });
+
+  it("calcCoilWeight — cobre: peso seco ≈ 50.07 kg", () => {
+    const r = calcCoilWeight({
+      tubeOD_m: 0.0133,
+      tubeID_m: 0.0115,
+      nTubesPerRow: 24,
+      nRows: 4,
+      L_fin_m: 1.25,
+      tubePitchTransverse_m: 0.03175,
+      tubePitchLongitudinal_m: 0.0275,
+    });
+
+    expect(r.m_tubes_kg).toBeCloseTo(37.7, 0);
+    expect(r.m_fins_kg).toBeCloseTo(12.4, 0);
+    expect(r.m_total_dry_kg).toBeCloseTo(50.1, 0);
+    expect(r.n_fins).toBe(500);
+    expect(r.n_tubes).toBe(96);
+    expect(r.tubeMaterial).toBe("copper");
+  });
+
+  it("calcCoilWeight — alumínio: peso seco ≈ 23.73 kg (-52.6%)", () => {
+    const r = calcCoilWeight({
+      tubeOD_m: 0.0133,
+      tubeID_m: 0.0115,
+      nTubesPerRow: 24,
+      nRows: 4,
+      L_fin_m: 1.25,
+      tubePitchTransverse_m: 0.03175,
+      tubePitchLongitudinal_m: 0.0275,
+      tubeMaterial: "aluminum",
+    });
+
+    expect(r.m_tubes_kg).toBeCloseTo(11.36, 0);
+    expect(r.m_total_dry_kg).toBeCloseTo(23.73, 0);
+  });
+
+  it("calcCoilWeight — aço: peso seco ≈ 45.40 kg (-9.3%)", () => {
+    const r = calcCoilWeight({
+      tubeOD_m: 0.0133,
+      tubeID_m: 0.0115,
+      nTubesPerRow: 24,
+      nRows: 4,
+      L_fin_m: 1.25,
+      tubePitchTransverse_m: 0.03175,
+      tubePitchLongitudinal_m: 0.0275,
+      tubeMaterial: "steel",
+    });
+
+    expect(r.m_total_dry_kg).toBeCloseTo(45.40, 0);
   });
 });

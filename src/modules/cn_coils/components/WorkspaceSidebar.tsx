@@ -1,5 +1,12 @@
 import { Calculator, Printer, RotateCcw, Save, Settings2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useCnCoilsSimulationStore } from "../store/useUnilabSimulationStore";
 import { getApplicationConfig } from "../config/applicationConfig";
 import { formatBRL } from "../engine/costCalculator";
@@ -15,7 +22,10 @@ import type { UnilabComponentType } from "../types/unilab.types";
 import {
   calcCoilDerivedDimensions,
   calcCoilDimensions,
+  calcCoilWeight,
   validateFanFit,
+  type FinMaterial,
+  type TubeMaterial,
 } from "../utils/coilDerivedMetrics";
 import {
   loadCnCoilsCoefficients,
@@ -31,6 +41,12 @@ const MODAL_BUTTONS: Array<{ id: Exclude<ModalKey, null>; label: string }> = [
   { id: "fin", label: "Aleta…" },
   { id: "distributor", label: "Distribuidor…" },
 ];
+
+const MATERIAL_SHORT: Record<TubeMaterial | FinMaterial, string> = {
+  copper: "(Cu)",
+  aluminum: "(Al)",
+  steel: "(Fe)",
+};
 
 // Mantido para compatibilidade externa: hoje só "ventilacao" é usado (fixo no centro).
 export type WorkspaceSection = "ventilacao";
@@ -87,6 +103,8 @@ export function WorkspaceSidebar({
   const [costModalOpen, setCostModalOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalKey>(null);
   const [fans, setFans] = useState<Array<{ id: string; diameter_mm?: number; axial?: AxialFanRecord }>>([]);
+  const [tubeWeightMaterial, setTubeWeightMaterial] = useState<TubeMaterial>("copper");
+  const [finWeightMaterial, setFinWeightMaterial] = useState<FinMaterial>("aluminum");
 
   useEffect(() => {
     let cancelled = false;
@@ -123,7 +141,12 @@ export function WorkspaceSidebar({
     refrigerant: fluid,
     T_evap_C: fluidOperatingTemp_C,
     tubeID_m: (physicalInputs.tubeInnerDiameterMm ?? 0) / 1000,
+    tubeOD_m: (physicalInputs.tubeOuterDiameterMm ?? 0) / 1000,
     nCircuits: physicalInputs.circuits ?? 0,
+    finThickness_m: (physicalInputs.finThicknessMm ?? 0.13) / 1000,
+    finPitch_m: (physicalInputs.finPitchMm ?? 2.5) / 1000,
+    tubeMaterial: tubeWeightMaterial,
+    finMaterial: finWeightMaterial,
   });
   const selectedFan = fans.find((f) => f.id === selectedFanId);
   const fanDiameterMm = selectedFan?.diameter_mm ?? 0;
@@ -331,6 +354,53 @@ export function WorkspaceSidebar({
         <SidebarMetricLine label="Carga refrig." value={`${derived.cargaRefrigerante_kg.toFixed(2)} kg`} />
       </SidebarInfoCard>
 
+      <SidebarInfoCard title="Peso do Aletado">
+        <MaterialSelectRow
+          label="Material do tubo"
+          value={tubeWeightMaterial}
+          onChange={(value) => setTubeWeightMaterial(value as TubeMaterial)}
+          options={[
+            { value: "copper", label: "Cobre (Cu)" },
+            { value: "aluminum", label: "Alumínio (Al)" },
+            { value: "steel", label: "Aço (Fe)" },
+          ]}
+        />
+        <MaterialSelectRow
+          label="Material da aleta"
+          value={finWeightMaterial}
+          onChange={(value) => setFinWeightMaterial(value as FinMaterial)}
+          options={[
+            { value: "aluminum", label: "Alumínio (Al)" },
+            { value: "copper", label: "Cobre (Cu)" },
+          ]}
+        />
+        <div className="my-1 border-t border-slate-200" />
+        <SidebarMetricLine
+          label={`Tubos ${MATERIAL_SHORT[tubeWeightMaterial]}`}
+          value={`${derived.pesoTubos_kg.toFixed(2)} kg`}
+        />
+        <SidebarMetricLine
+          label={`Aletas ${MATERIAL_SHORT[finWeightMaterial]}`}
+          value={`${derived.pesoAletas_kg.toFixed(2)} kg`}
+        />
+        <div className="my-1 border-t border-slate-200" />
+        <SidebarMetricLine label="Peso seco" value={`${derived.pesoSeco_kg.toFixed(2)} kg`} />
+        <SidebarMetricLine label="Peso c/ fluido" value={`${derived.pesoComFluido_kg.toFixed(2)} kg`} />
+        {tubeWeightMaterial !== "copper" && (
+          <div
+            className="rounded border border-amber-300 bg-amber-50 px-1.5 py-1 text-[9px] font-semibold text-amber-800"
+            title="A resistência da parede de Al é 4.7×10⁻⁶ m²K/W vs 2.5×10⁻⁶ para Cu. Ambos são desprezíveis — Q_total não é afetado."
+          >
+            ⚠️ Impacto térmico desprezível
+          </div>
+        )}
+        {tubeWeightMaterial === "steel" && (
+          <div className="rounded border border-red-300 bg-red-50 px-1.5 py-1 text-[9px] font-semibold text-red-800">
+            ⚠️ Verificar compatibilidade com refrigerante
+          </div>
+        )}
+      </SidebarInfoCard>
+
       <div
         className={`rounded border bg-white border-l-2 ${
           hasFanError
@@ -339,7 +409,7 @@ export function WorkspaceSidebar({
         }`}
       >
         <div className="border-b border-border bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Gabinete Sanitário
+          Gabinete
         </div>
         <div className="space-y-1 p-3 text-[10px] text-slate-700">
           <div className="rounded bg-white/70 px-1.5 py-1 text-center font-mono text-sm font-semibold text-foreground">
@@ -471,6 +541,36 @@ function SidebarMetricLine({ label, value }: { label: string; value: string }) {
     <div className="flex items-center justify-between gap-2">
       <span className="text-muted-foreground">{label}</span>
       <span className="font-mono text-sm text-foreground">{value}</span>
+    </div>
+  );
+}
+
+function MaterialSelectRow<T extends string>({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: T;
+  onChange: (value: T) => void;
+  options: Array<{ value: T; label: string }>;
+}) {
+  return (
+    <div className="grid grid-cols-[1fr_105px] items-center gap-2">
+      <span className="text-slate-500">{label}</span>
+      <Select value={value} onValueChange={(next) => onChange(next as T)}>
+        <SelectTrigger className="h-7 rounded border-slate-300 px-2 py-1 text-[10px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

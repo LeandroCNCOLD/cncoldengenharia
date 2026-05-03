@@ -8,6 +8,39 @@ export interface FanFitValidation {
   fanWarnings: Array<{ level: "error" | "ok"; msg: string }>;
 }
 
+export interface CoilWeightInputs {
+  tubeOD_m: number;
+  tubeID_m: number;
+  nTubesPerRow: number;
+  nRows: number;
+  L_fin_m: number;
+  tubePitchTransverse_m: number;
+  tubePitchLongitudinal_m: number;
+  finThickness_m?: number;
+  finPitch_m?: number;
+  tubeMaterial?: TubeMaterial;
+  finMaterial?: FinMaterial;
+}
+
+export interface CoilWeightResult {
+  m_tubes_kg: number;
+  m_fins_kg: number;
+  m_total_dry_kg: number;
+  n_fins: number;
+  n_tubes: number;
+  tubeMaterial: TubeMaterial;
+  finMaterial: FinMaterial;
+}
+
+export const DENSITY_KG_M3 = {
+  copper: 8960,
+  aluminum: 2700,
+  steel: 7850,
+} as const;
+
+export type TubeMaterial = keyof typeof DENSITY_KG_M3;
+export type FinMaterial = "aluminum" | "copper";
+
 export function calcCoilHeight(
   nTubesPerRow: number,
   tubePitchTransverse_mm: number,
@@ -45,36 +78,90 @@ export function calcCoilDimensions(params: {
 }
 
 export function calcTubeLengthPerCircuitM(params: {
+  nTubesPerRow: number;
   nRows: number;
-  tubePitchLongitudinal_mm: number;
-  lengthMm: number;
+  nCircuits: number;
+  L_fin_m: number;
 }): number {
-  return params.nRows * (params.tubePitchLongitudinal_mm / 1000) + params.lengthMm / 1000;
+  if (
+    params.nTubesPerRow <= 0 ||
+    params.nRows <= 0 ||
+    params.nCircuits <= 0 ||
+    params.L_fin_m <= 0
+  ) {
+    return 0;
+  }
+  const tubesPerCircuitPerRow = params.nTubesPerRow / params.nCircuits;
+  return params.L_fin_m * params.nRows * tubesPerCircuitPerRow;
 }
 
 export function calcInternalTubeVolumeM3(params: {
   tubeID_m: number;
+  nTubesPerRow: number;
+  nRows: number;
   nCircuits: number;
-  L_per_circuit_m: number;
+  L_fin_m: number;
 }): number {
   const area = Math.PI * Math.pow(params.tubeID_m / 2, 2);
-  return area * params.L_per_circuit_m * params.nCircuits;
+  const L_per_circuit_m = calcTubeLengthPerCircuitM(params);
+  return area * L_per_circuit_m * params.nCircuits;
+}
+
+export function calcCoilWeight(inputs: CoilWeightInputs): CoilWeightResult {
+  const {
+    tubeOD_m,
+    tubeID_m,
+    nTubesPerRow,
+    nRows,
+    L_fin_m,
+    tubePitchTransverse_m,
+    tubePitchLongitudinal_m,
+    finThickness_m = 0.00013,
+    finPitch_m = 0.0025,
+    tubeMaterial = "copper",
+    finMaterial = "aluminum",
+  } = inputs;
+
+  const n_tubes = nTubesPerRow * nRows;
+  const A_wall = (Math.PI / 4) * (tubeOD_m ** 2 - tubeID_m ** 2);
+  const m_tubes_kg = A_wall * L_fin_m * n_tubes * DENSITY_KG_M3[tubeMaterial];
+
+  const n_fins = Math.floor(L_fin_m / finPitch_m);
+  const W_fin = nTubesPerRow * tubePitchTransverse_m;
+  const H_fin = nRows * tubePitchLongitudinal_m;
+  const A_fin_gross = W_fin * H_fin;
+  const A_holes = n_tubes * (Math.PI / 4) * tubeOD_m ** 2;
+  const A_fin_net = A_fin_gross - A_holes;
+  const m_fins_kg = A_fin_net * finThickness_m * n_fins * DENSITY_KG_M3[finMaterial];
+
+  return {
+    m_tubes_kg: Math.round(m_tubes_kg * 100) / 100,
+    m_fins_kg: Math.round(m_fins_kg * 100) / 100,
+    m_total_dry_kg: Math.round((m_tubes_kg + m_fins_kg) * 100) / 100,
+    n_fins,
+    n_tubes,
+    tubeMaterial,
+    finMaterial,
+  };
 }
 
 export function calcRefrigerantCharge(params: {
   refrigerant: string;
   T_evap_C: number;
   tubeID_m: number;
+  nTubesPerRow: number;
+  nRows: number;
   nCircuits: number;
-  L_per_circuit_m: number;
-  liquidFillFraction?: number;
-}): { kg: number; volume_L: number; warnings: string[] } {
+  L_fin_m: number;
+}): { kg: number; L: number; volume_L: number; L_per_circuit_m: number; warnings: string[] } {
   const props = getRefrigerantLiquidProps(params.refrigerant, params.T_evap_C);
   const volumeM3 = calcInternalTubeVolumeM3(params);
-  const fill = params.liquidFillFraction ?? 0.18;
+  const volumeL = volumeM3 * 1000;
   return {
-    kg: volumeM3 * props.rho_kg_m3 * fill,
-    volume_L: volumeM3 * 1000,
+    kg: volumeM3 * props.rho_kg_m3,
+    L: volumeL,
+    volume_L: volumeL,
+    L_per_circuit_m: calcTubeLengthPerCircuitM(params),
     warnings: props.warnings,
   };
 }
@@ -106,30 +193,54 @@ export function calcCoilDerivedDimensions(params: {
   tubePitchLongitudinal_mm: number;
   lengthMm: number;
   tubeID_m: number;
+  tubeOD_m?: number;
   nCircuits: number;
   refrigerant: string;
   T_evap_C: number;
+  finThickness_m?: number;
+  finPitch_m?: number;
+  tubeMaterial?: TubeMaterial;
+  finMaterial?: FinMaterial;
 }) {
   const altura_mm = calcCoilHeight(params.nTubesPerRow, params.tubePitchTransverse_mm);
   const prof_mm = calcCoilDepth(params.nRows, params.tubePitchLongitudinal_mm);
   const largura_mm = params.lengthMm;
-  const L_per_circuit_m = calcTubeLengthPerCircuitM(params);
   const charge = calcRefrigerantCharge({
     refrigerant: params.refrigerant,
     T_evap_C: params.T_evap_C,
     tubeID_m: params.tubeID_m,
+    nTubesPerRow: params.nTubesPerRow,
+    nRows: params.nRows,
     nCircuits: params.nCircuits,
-    L_per_circuit_m,
-    liquidFillFraction: 0.55,
+    L_fin_m: params.lengthMm / 1000,
+  });
+  const weight = calcCoilWeight({
+    tubeOD_m: params.tubeOD_m ?? 0,
+    tubeID_m: params.tubeID_m,
+    nTubesPerRow: params.nTubesPerRow,
+    nRows: params.nRows,
+    L_fin_m: params.lengthMm / 1000,
+    tubePitchTransverse_m: params.tubePitchTransverse_mm / 1000,
+    tubePitchLongitudinal_m: params.tubePitchLongitudinal_mm / 1000,
+    finThickness_m: params.finThickness_m,
+    finPitch_m: params.finPitch_m,
+    tubeMaterial: params.tubeMaterial,
+    finMaterial: params.finMaterial,
   });
 
   return {
     altura_mm,
     largura_mm,
     prof_mm,
-    L_per_circuit_m,
+    L_per_circuit_m: charge.L_per_circuit_m,
     volumeInterno_L: charge.volume_L,
     cargaRefrigerante_kg: charge.kg,
+    pesoTubos_kg: weight.m_tubes_kg,
+    pesoAletas_kg: weight.m_fins_kg,
+    pesoSeco_kg: weight.m_total_dry_kg,
+    pesoComFluido_kg: Math.round((weight.m_total_dry_kg + charge.kg) * 100) / 100,
+    n_fins: weight.n_fins,
+    n_tubes: weight.n_tubes,
     gabinete_largura_mm: largura_mm + 160,
     gabinete_altura_mm: altura_mm + 200,
     gabinete_prof_mm: prof_mm + 50,
