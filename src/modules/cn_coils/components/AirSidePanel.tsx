@@ -40,6 +40,7 @@ import {
   evaluateFanCurve,
   type AxialFanRecord,
 } from "../services/cncoilsCoefficientsService";
+import { findFanOperatingPointSimple } from "../engine/cycle/fanOperatingPoint";
 import { FanPickerModal } from "./FanPickerModal";
 import { ChevronDown, X } from "lucide-react";
 
@@ -155,6 +156,20 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
         : null;
     return fromCurve ?? result?.airPressureDropPa ?? null;
   }, [selectedFan, airFlow_m3h, result?.airPressureDropPa]);
+  const operatingPoint = useMemo(() => {
+    if (!selectedFan?.axial || !(fanCount > 0) || !(airFlow_m3h > 0)) return null;
+    const knownPressurePa = result?.airPressureDropPa ?? fanStaticPressurePa;
+    if (!(knownPressurePa && knownPressurePa > 0)) return null;
+    return findFanOperatingPointSimple(
+      selectedFan.axial,
+      fanCount,
+      airFlow_m3h,
+      knownPressurePa,
+    );
+  }, [selectedFan, fanCount, airFlow_m3h, result?.airPressureDropPa, fanStaticPressurePa]);
+  const operatingPointLabel = operatingPoint
+    ? `Q=${fmtBR(operatingPoint.airFlowM3H, 0)} m³/h | ΔP=${fmtBR(operatingPoint.staticPressurePa, 0)} Pa`
+    : "---";
 
   // ---- valores convertidos para a unidade exibida ----
   const airSafetyFactor = 1 + (Number.isFinite(errorFactorPercent) ? errorFactorPercent : 0) / 100;
@@ -336,6 +351,20 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
                   .toLocaleString("pt-BR", { minimumFractionDigits: uPdrop === "Pa" ? 0 : 3, maximumFractionDigits: uPdrop === "Pa" ? 0 : 3 })
           }
         />
+
+        <Row
+          label="Ponto de operação real"
+          unitNode={<UnitText text="Q×P" />}
+          input={<DisabledInput />}
+          obtained={operatingPointLabel}
+        />
+        {operatingPoint && (
+          <div className="rounded border border-blue-200 bg-blue-50 px-2 py-1 text-[10px] text-blue-800">
+            Diferença da seleção:{" "}
+            {fmtBR(((operatingPoint.airFlowM3H - airFlow_m3h) / airFlow_m3h) * 100, 1)}
+            % na vazão
+          </div>
+        )}
 
         {/* TEMP / RH ENTRADA */}
         <Row
