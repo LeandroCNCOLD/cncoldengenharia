@@ -22,7 +22,6 @@ import {
 import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
-import { UserModeSwitcher } from "../mode/UserModeSwitcher";
 
 type NavItem = {
   to: string;
@@ -40,9 +39,7 @@ type NavGroup = {
 const NAV_GROUPS: NavGroup[] = [
   {
     label: "Início",
-    items: [
-      { to: "/coldpro", label: "Dashboard", Icon: LayoutDashboard, exact: true },
-    ],
+    items: [{ to: "/coldpro", label: "Dashboard", Icon: LayoutDashboard, exact: true }],
   },
   {
     label: "Simulação",
@@ -94,10 +91,10 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="min-h-0 flex-1 overflow-y-auto px-2 py-1">
+      <nav className="min-h-0 flex-1 overflow-hidden px-2 py-0.5">
         {NAV_GROUPS.map((group, gIdx) => (
-          <div key={group.label} className={gIdx === 0 ? "" : "pt-1.5"}>
-            <p className="px-2 pb-0.5 text-[9px] font-semibold uppercase tracking-widest text-slate-400/70">
+          <div key={group.label} className={gIdx === 0 ? "" : "pt-1"}>
+            <p className="px-2 pb-px text-[8px] font-semibold uppercase leading-none tracking-widest text-slate-400/70">
               {group.label}
             </p>
             <ul className="space-y-0">
@@ -111,14 +108,14 @@ export function Sidebar() {
                       title={item.comingSoon ? "Em desenvolvimento" : undefined}
                       className={
                         active
-                          ? "flex items-center gap-2 rounded bg-[#1E6FD9] px-2 py-0.5 text-[11px] font-medium text-white"
-                          : "flex items-center gap-2 rounded px-2 py-0.5 text-[11px] text-slate-300 hover:bg-white/5 hover:text-white"
+                          ? "flex h-[17px] items-center gap-1.5 rounded bg-[#1E6FD9] px-2 text-[10px] font-medium leading-none text-white"
+                          : "flex h-[17px] items-center gap-1.5 rounded px-2 text-[10px] leading-none text-slate-300 hover:bg-white/5 hover:text-white"
                       }
                     >
-                      <Icon className="h-3 w-3 shrink-0" />
+                      <Icon className="h-2.5 w-2.5 shrink-0" />
                       <span className="truncate">{item.label}</span>
                       {item.comingSoon && (
-                        <span className="ml-auto rounded bg-amber-500/20 px-1 py-px text-[8px] font-semibold uppercase tracking-wide text-amber-300">
+                        <span className="ml-auto rounded bg-amber-500/20 px-0.5 py-px text-[7px] font-semibold uppercase leading-none tracking-wide text-amber-300">
                           Em breve
                         </span>
                       )}
@@ -131,10 +128,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="space-y-1.5 border-t border-white/10 px-3 py-2">
-        <p className="text-[9px] uppercase tracking-wider text-slate-400">Modo do usuário</p>
-        <UserModeSwitcher />
-
+      <div className="space-y-1 border-t border-white/10 px-3 py-1.5">
         <div>
           <p className="truncate text-[11px] font-medium text-slate-100">
             {user?.user_metadata?.full_name || user?.email}
