@@ -66,6 +66,14 @@ interface CnCoilsSimulationStore {
   targetCapacityW: number;
   setTargetCapacityW: (val: number) => void;
 
+  /**
+   * Unidade global selecionada para CAPACIDADE (Total/Sensível/Latente).
+   * Definida no Detalhado (Lado Ventilação) e replicada na aba Resultados,
+   * Relatórios, etc. Canonical interno do motor continua em W.
+   */
+  displayCapacityUnit: DisplayCapacityUnit;
+  setDisplayCapacityUnit: (u: DisplayCapacityUnit) => void;
+
   // Lado Ar / Ventilação (Etapa 3)
   airFlow_m3h: number;
   tempInDB_C: number;
