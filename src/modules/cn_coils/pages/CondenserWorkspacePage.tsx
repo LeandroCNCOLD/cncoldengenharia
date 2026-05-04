@@ -249,6 +249,7 @@ export function CondenserWorkspacePage() {
     store.setRhIn(airRH);
     store.setFluid(refrigerantId);
     store.setFluidOperatingTemp(tc);
+    store.setPairedTempC(te); // Te para condensador ("paired temp" = temp. evaporação)
     store.setSuperheat(superheat);
     store.setSubcooling(subcooling);
     store.setFluidMassFlow(massFlow);
@@ -257,7 +258,7 @@ export function CondenserWorkspacePage() {
   }, [
     airFlow, airRH, airTempIn, calcMode, circuits, engineMode,
     finPitch, geomHeight, geomWidth, massFlow, refrigerantId,
-    rows, subcooling, superheat, tc, tubeDiam, tubesPerRow,
+    rows, subcooling, superheat, tc, te, tubeDiam, tubesPerRow,
   ]);
 
   // ── Velocidade frontal ──
@@ -562,11 +563,12 @@ export function CondenserWorkspacePage() {
             </div>
             <Button
               size="sm"
-              variant="outline"
-              className="w-full h-8 text-xs"
+              variant={selectedCompressorRow ? "default" : "outline"}
+              className="w-full h-8 text-xs truncate"
               onClick={() => setCompressorPickerOpen(true)}
+              title={selectedCompressorRow ? selectedCompressorRow.model : "Selecionar compressor"}
             >
-              Selecionar compressor…
+              {selectedCompressorRow ? selectedCompressorRow.model : "Selecionar compressor…"}
             </Button>
             <div>
               <div className="flex items-center justify-between text-[10px] text-muted-foreground">
