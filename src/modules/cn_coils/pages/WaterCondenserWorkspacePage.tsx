@@ -30,7 +30,6 @@ import { CHART_COLORS } from "../constants/chartColors";
 import {
   calculateWaterCondenser,
   type WaterCondenserInputs,
-  type WaterCondenserResult,
 } from "../hooks/useWaterCondenserSimulation";
 import { useCoilEnvelopeStore } from "../store/useCoilEnvelopeStore";
 
