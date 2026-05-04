@@ -142,7 +142,7 @@ export default function TestBenchPage() {
         COPMotor,
         deviationPct,
         status,
-        bottleneck: status === "approved" ? "none" : "compressor",
+        bottleneck: status === "attention" || status === "rejected" ? "compressor" : "none",
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro desconhecido no cálculo termodinâmico");
