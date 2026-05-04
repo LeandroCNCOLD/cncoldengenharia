@@ -21,6 +21,7 @@ import {
   Snowflake,
   Target,
   Thermometer,
+  Wind,
   Waves,
   Zap,
 } from "lucide-react";
@@ -88,6 +89,14 @@ const NAV_GROUPS: NavGroup[] = [
       { to: "/coldpro/optimization", label: "Otimização", Icon: Target, comingSoon: true },
       { to: "/coldpro/curve", label: "Curva de Desempenho", Icon: TrendingUp },
       { to: "/coldpro/simulation", label: "Equilíbrio do Sistema", Icon: Scale },
+    ],
+  },
+  {
+    label: "Sistemas",
+    items: [
+      { to: "/coldpro/systems/cold-room", label: "Câmara Fria", Icon: Snowflake },
+      { to: "/coldpro/systems/dx-complete", label: "DX Completo", Icon: Wind },
+      { to: "/coldpro/systems/heat-pump", label: "Bomba de Calor", Icon: Thermometer },
     ],
   },
   {
