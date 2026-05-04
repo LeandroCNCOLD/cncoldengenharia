@@ -12,6 +12,7 @@ import { WorkspaceLayout } from "../components/WorkspaceLayout";
 import { WorkspaceHeader } from "../components/WorkspaceHeader";
 import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
 import { ResultCard } from "../components/ResultCard";
+import { ResultPanel } from "../components/ResultPanel";
 import { ActionBar } from "../components/ActionBar";
 import { CyclePHDiagram } from "../components/CyclePHDiagram";
 import { CoilEnvelopeTab } from "../components/CoilEnvelopeTab";
@@ -26,8 +27,23 @@ import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { EnrichedWarningsPanel } from "../components/EnrichedWarningsPanel";
 import { DrawingTab } from "../components/drawing/DrawingTab";
 import { WorkspaceAIChat } from "../components/WorkspaceAIChat";
+import { AirSidePanel } from "../components/AirSidePanel";
+import { FluidSidePanel } from "../components/FluidSidePanel";
+import { GeometryBottomBar } from "../components/GeometryBottomBar";
+import { WorkspaceSidebar } from "../components/WorkspaceSidebar";
+import { CircuitrySelector } from "../components/CircuitrySelector";
+import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
+import { useCnCoilsCatalogs } from "../hooks/useCnCoilsCatalogs";
+import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
+import { useCnCoilsSimulation } from "../hooks/useCnCoilsSimulation";
+import { useCnCoilsInputBridge } from "../hooks/useCnCoilsInputBridge";
+import {
+  validatePhysicalInputs,
+  validateThermoInputs,
+} from "../validators/simulationValidator";
 import { enrichWarnings } from "../utils/warningEnricher";
 import type { AIContext } from "../components/WorkspaceAIChat";
+import type { StructuredWarning } from "../types/warnings";
 
 import {
   Accordion,
@@ -563,13 +579,6 @@ export function EvaporatorUnifiedWorkspacePage() {
               finPitch={finPitch}
               circuits={circuits}
               refrigerantId={refrigerantId}
-              airFlow={airFlow}
-              airTempIn={airTempIn}
-              airRH={airRH}
-              te={te}
-              tc={tc}
-              superheat={superheat}
-              subcooling={subcooling}
             />
           )}
           </div>
@@ -643,6 +652,160 @@ function LoadingResults() {
   );
 }
 
+function DetailedWorkspaceTab({ onOpenAI }: { onOpenAI: () => void }) {
+  const catalogs = useCnCoilsCatalogs();
+  const physical = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const thermo = useCnCoilsSimulationStore((s) => s.thermoInputs);
+  const result = useCnCoilsSimulationStore((s) => s.result);
+  const warnings = useCnCoilsSimulationStore((s) => s.warnings);
+  const isSimulating = useCnCoilsSimulationStore((s) => s.isSimulating);
+  const reset = useCnCoilsSimulationStore((s) => s.reset);
+  const setWarnings = useCnCoilsSimulationStore((s) => s.setWarnings);
+
+  useCnCoilsInputBridge("evaporator_dx");
+
+  const simulationDeps = useMemo(
+    () => ({
+      geometries: catalogs.geometries,
+      tubeMaterials: catalogs.tubeMaterials,
+      correctionCoefficients: catalogs.correctionCoefficients,
+      pressureDropFan: catalogs.pressureDropFan,
+    }),
+    [
+      catalogs.geometries,
+      catalogs.tubeMaterials,
+      catalogs.correctionCoefficients,
+      catalogs.pressureDropFan,
+    ],
+  );
+  const { run } = useCnCoilsSimulation(simulationDeps);
+
+  const physCheck = validatePhysicalInputs(physical);
+  const thermoCheck = validateThermoInputs(thermo);
+  const inputsValid = physCheck.isValid && thermoCheck.isValid;
+  const validationWarnings = useMemo(
+    () =>
+      [...physCheck.errors, ...thermoCheck.errors].map((message) => ({
+        code: "VALIDATION_ERROR",
+        message,
+        severity: "warning" as const,
+      })),
+    [physCheck.errors, thermoCheck.errors],
+  );
+  const visibleWarnings: StructuredWarning[] = inputsValid ? warnings : validationWarnings;
+  const enrichedWarnings = useMemo(
+    () =>
+      enrichWarnings(
+        visibleWarnings
+          .map((warning) => warning.message)
+          .filter((message): message is string => typeof message === "string"),
+      ),
+    [visibleWarnings],
+  );
+  const canSimulate = catalogs.ready && inputsValid && !isSimulating;
+  const disabledReason = !catalogs.ready
+    ? "Carregando catálogos…"
+    : !inputsValid
+      ? `Preencha: ${[...physCheck.errors, ...thermoCheck.errors].join(" • ")}`
+      : undefined;
+
+  const handleSimulate = () => {
+    const latestPhysCheck = validatePhysicalInputs(useCnCoilsSimulationStore.getState().physicalInputs);
+    const latestThermoCheck = validateThermoInputs(useCnCoilsSimulationStore.getState().thermoInputs);
+    const errors = [...latestPhysCheck.errors, ...latestThermoCheck.errors];
+    if (errors.length > 0) {
+      setWarnings(
+        errors.map((message) => ({
+          code: "GEOMETRY_INCOMPLETE",
+          message,
+          severity: "warning" as const,
+        })),
+      );
+      return;
+    }
+    run();
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">
+            🏭 Fonte da Verdade — Detalhado
+          </h3>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5 h-7 text-xs border-primary/40 text-primary hover:bg-primary/10"
+            onClick={onOpenAI}
+          >
+            <Bot className="h-3.5 w-3.5" />
+            IA Especialista
+          </Button>
+        </div>
+        <EnrichedWarningsPanel warnings={enrichedWarnings} />
+      </div>
+
+      {catalogs.loading && (
+        <div className="flex items-center gap-2 rounded border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
+          <svg
+            className="h-3.5 w-3.5 animate-spin"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" />
+            <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+          </svg>
+          Carregando catálogos…
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-2 rounded-md shadow-sm md:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)]">
+        <WorkspaceSidebar
+          componentType="evaporator_dx"
+          onSimulate={handleSimulate}
+          onReset={reset}
+          canSimulate={canSimulate}
+          isSimulating={isSimulating}
+          faceAreaM2={result?.faceAreaM2}
+          disabledReason={disabledReason}
+        />
+
+        <div className="min-w-0 space-y-2 xl:contents">
+          <div className="min-w-0 space-y-2 xl:border-r xl:border-border xl:pr-2">
+            <AirSidePanel result={result} />
+          </div>
+
+          <div className="min-w-0 space-y-2">
+            <FluidSidePanel
+              componentType="evaporator_dx"
+              refrigerants={catalogs.refrigerants}
+              disabled={!catalogs.ready}
+              result={result}
+            />
+            {!catalogs.loading && !catalogs.ready && (
+              <DatasetStatusPanel
+                loading={catalogs.loading}
+                ready={catalogs.ready}
+                errors={catalogs.errors}
+                missing={catalogs.missing}
+                compact
+              />
+            )}
+            <ResultPanel result={result} warnings={visibleWarnings} onGoalSeek={() => {}} />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-2 space-y-2">
+        <GeometryBottomBar />
+        <CircuitrySelector />
+      </div>
+    </div>
+  );
+}
+
 // ── Tabs ────────────────────────────────────────────────────────────────────
 function UnifiedTabs({
   config,
@@ -661,13 +824,6 @@ function UnifiedTabs({
   finPitch,
   circuits,
   refrigerantId,
-  airFlow,
-  airTempIn,
-  airRH,
-  te,
-  tc,
-  superheat,
-  subcooling,
 }: {
   config: CycleSystemConfig;
   cycleResult: CycleResult | null;
@@ -685,13 +841,6 @@ function UnifiedTabs({
   finPitch: number;
   circuits: number;
   refrigerantId: string;
-  airFlow: number;
-  airTempIn: number;
-  airRH: number;
-  te: number;
-  tc: number;
-  superheat: number;
-  subcooling: number;
 }) {
   const enrichedWarnings = useMemo(
     () => (cycleResult ? enrichWarnings(cycleResult.warnings) : []),
@@ -830,71 +979,7 @@ function UnifiedTabs({
 
       {/* ── Aba Detalhado — PRIMEIRA, fonte da verdade ── */}
       <TabsContent value={WORKSPACE_TABS.DETAILED} className="mt-3">
-        <div className="space-y-4">
-          <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">
-                🏭 Fonte da Verdade — Dados Detalhados
-              </h3>
-              <AIButton tab="Detalhado" />
-            </div>
-            <EnrichedWarningsPanel warnings={enrichedWarnings} />
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <DetailedInfoCard title="Geometria">
-              <DetailedLine label="Altura" value={`${geomHeight} mm`} />
-              <DetailedLine label="Largura" value={`${geomWidth} mm`} />
-              <DetailedLine label="Profundidade" value={`${geomDepth} mm`} />
-              <DetailedLine label="Filas × Tubos/fila" value={`${rows} × ${tubesPerRow}`} />
-              <DetailedLine label="Circuitos" value={circuits} />
-              <DetailedLine label="Passo aleta" value={`${finPitch} mm`} />
-              <DetailedLine label="Ø tubo" value={`${tubeDiam} mm`} />
-            </DetailedInfoCard>
-
-            <DetailedInfoCard title="Ventilação / Ar">
-              <DetailedLine label="Vazão de ar" value={`${airFlow} m³/h`} />
-              <DetailedLine label="Vel. frontal" value={`${fmt(frontalVelocity, 2)} m/s`} />
-              <DetailedLine label="T entrada DB" value={`${airTempIn} °C`} />
-              <DetailedLine label="UR entrada" value={`${airRH} %`} />
-              <DetailedLine label="ΔP ar" value={cycleResult ? `${fmt(cycleResult.evaporatorResult.airPressureDropPa, 0)} Pa` : "---"} />
-              <DetailedLine label="T saída ar" value={cycleResult ? `${fmt(cycleResult.evaporatorResult.airOutletTempC, 1)} °C` : "---"} />
-            </DetailedInfoCard>
-
-            <DetailedInfoCard title="Fluido Refrigerante">
-              <DetailedLine label="Refrigerante" value={refrigerantId} />
-              <DetailedLine label="Te inicial" value={`${te} °C`} />
-              <DetailedLine label="Tc inicial" value={`${tc} °C`} />
-              <DetailedLine label="SH" value={`${superheat} K`} />
-              <DetailedLine label="SC" value={`${subcooling} K`} />
-              <DetailedLine label="Vazão mássica" value={cycleResult ? `${fmt(cycleResult.m_dot_kgS * 3600, 2)} kg/h` : "---"} />
-            </DetailedInfoCard>
-          </div>
-
-          {cycleResult ? (
-            <div className="space-y-3 rounded-lg border border-border bg-card p-3">
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Resultados do Ciclo de Refrigeração
-              </h4>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <ResultCard label="Q Evaporador" value={fmt(cycleResult.Q_evap_W / 1000, 2)} unit="kW" variant="success" />
-                <ResultCard label="Q Condensador" value={fmt(cycleResult.Q_cond_W / 1000, 2)} unit="kW" />
-                <ResultCard label="W Compressor" value={fmt(cycleResult.W_comp_W / 1000, 2)} unit="kW" />
-                <ResultCard label="COP" value={fmt(cycleResult.COP, 2)} variant="success" />
-                <ResultCard label="EER" value={fmt(cycleResult.EER, 2)} unit="BTU/W·h" />
-                <ResultCard label="Te equilíbrio" value={fmt(cycleResult.Te_C, 1)} unit="°C" />
-                <ResultCard label="Tc equilíbrio" value={fmt(cycleResult.Tc_C, 1)} unit="°C" />
-                <ResultCard label="T saída ar" value={fmt(cycleResult.evaporatorResult.airOutletTempC, 1)} unit="°C" />
-                <ResultCard label="UR saída" value={fmt(cycleResult.evaporatorResult.airOutletRH * 100, 1)} unit="%" />
-                <ResultCard label="ΔP ar" value={fmt(cycleResult.evaporatorResult.airPressureDropPa, 0)} unit="Pa" />
-                <ResultCard label="ΔP fluido" value={fmt(cycleResult.evaporatorResult.fluidPressureDropKPa, 2)} unit="kPa" />
-                <ResultCard label="U global" value={fmt(cycleResult.evaporatorResult.overallU_WM2K, 1)} unit="W/m²K" />
-              </div>
-            </div>
-          ) : (
-            <EmptyState />
-          )}
-        </div>
+        <DetailedWorkspaceTab onOpenAI={() => onOpenAI("Detalhado")} />
       </TabsContent>
 
       <TabsContent value={WORKSPACE_TABS.DESENHO} className="mt-3">
@@ -932,32 +1017,6 @@ function EmptyState() {
     <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 text-muted-foreground">
       <Calculator className="h-12 w-12 opacity-30" />
       <p className="text-sm">Configure os parâmetros e clique em <strong>Calcular</strong></p>
-    </div>
-  );
-}
-
-function DetailedInfoCard({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-lg border border-border bg-card p-3">
-      <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        {title}
-      </h4>
-      <div className="space-y-1 text-xs">{children}</div>
-    </div>
-  );
-}
-
-function DetailedLine({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div className="flex justify-between gap-3">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium">{value}</span>
     </div>
   );
 }
