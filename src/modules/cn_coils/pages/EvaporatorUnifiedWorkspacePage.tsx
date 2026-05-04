@@ -219,6 +219,7 @@ export function EvaporatorUnifiedWorkspacePage() {
   const [voltage, setVoltage] = useState(380);
   const pendingEvaporator = useCatalogPreloadStore((s) => s.pendingEvaporator);
   const clearCatalogPreload = useCatalogPreloadStore((s) => s.clearAll);
+  const { capacityUnit } = useUnitStore();
 
   // Velocidade frontal calculada (m/s)
   const frontalVelocity = useMemo(() => {
@@ -306,7 +307,7 @@ export function EvaporatorUnifiedWorkspacePage() {
       "SC (K)": subcooling,
     },
     results: cycleResult ? ({
-      "Capacidade total (kW)": (cycleResult.Q_evap_W / 1000).toFixed(2),
+      [`Capacidade total (${capacityUnit})`]: fmt(convertCapacity(cycleResult.Q_evap_W / 1000, capacityUnit), capacityUnit === 'kW' || capacityUnit === 'TR' ? 2 : 0),
       "COP": cycleResult.COP.toFixed(2),
       "Te equilíbrio (°C)": cycleResult.Te_C.toFixed(1),
       "Tc equilíbrio (°C)": cycleResult.Tc_C.toFixed(1),
@@ -318,38 +319,38 @@ export function EvaporatorUnifiedWorkspacePage() {
   const { isGenerating: isExportingPdf, exportPdf } = usePdfExport();
 
   const didInitRef = useRef(false);
+  // Recarrega dados do catálogo sempre que pendingEvaporator mudar (corrige bug da segunda visita)
   useEffect(() => {
-    if (didInitRef.current) return;
-    didInitRef.current = true;
-
-    if (pendingEvaporator) {
-      const inputs = catalogRowToEvaporatorInputs(pendingEvaporator);
-      if (inputs.geomHeight !== undefined) setGeomHeight(inputs.geomHeight);
-      if (inputs.geomWidth !== undefined) setGeomWidth(inputs.geomWidth);
-      if (inputs.geomDepth !== undefined) setGeomDepth(inputs.geomDepth);
-      if (inputs.finPitch !== undefined) setFinPitch(inputs.finPitch);
-      if (inputs.tubeDiam !== undefined) setTubeDiam(inputs.tubeDiam);
-      if (inputs.circuits !== undefined) setCircuits(inputs.circuits);
-      if (inputs.rows !== undefined) setRows(inputs.rows);
-      if (inputs.tubesPerRow !== undefined) setTubesPerRow(inputs.tubesPerRow);
-      if (inputs.airFlow !== undefined) setAirFlow(inputs.airFlow);
-      if (inputs.airTempIn !== undefined) setAirTempIn(inputs.airTempIn);
-      if (inputs.airRH !== undefined) setAirRH(inputs.airRH);
-      if (inputs.refrigerantId !== undefined) setRefrigerantId(inputs.refrigerantId);
-      if (inputs.te !== undefined) setTe(inputs.te);
-      if (inputs.tc !== undefined) setTc(inputs.tc);
-      if (inputs.superheat !== undefined) setSuperheat(inputs.superheat);
-      if (inputs.subcooling !== undefined) setSubcooling(inputs.subcooling);
-
-      clearCatalogPreload();
-      toast.success(`Dados carregados do catálogo: ${pendingEvaporator.modelo}`);
-      setTimeout(() => simState.trigger(), 0);
+    if (!pendingEvaporator) {
+      if (!didInitRef.current) {
+        didInitRef.current = true;
+        simState.trigger();
+      }
       return;
     }
-
-    simState.trigger();
+    didInitRef.current = true;
+    const inputs = catalogRowToEvaporatorInputs(pendingEvaporator);
+    if (inputs.geomHeight !== undefined) setGeomHeight(inputs.geomHeight);
+    if (inputs.geomWidth !== undefined) setGeomWidth(inputs.geomWidth);
+    if (inputs.geomDepth !== undefined) setGeomDepth(inputs.geomDepth);
+    if (inputs.finPitch !== undefined) setFinPitch(inputs.finPitch);
+    if (inputs.tubeDiam !== undefined) setTubeDiam(inputs.tubeDiam);
+    if (inputs.circuits !== undefined) setCircuits(inputs.circuits);
+    if (inputs.rows !== undefined) setRows(inputs.rows);
+    if (inputs.tubesPerRow !== undefined) setTubesPerRow(inputs.tubesPerRow);
+    if (inputs.airFlow !== undefined) setAirFlow(inputs.airFlow);
+    if (inputs.airTempIn !== undefined) setAirTempIn(inputs.airTempIn);
+    if (inputs.airRH !== undefined) setAirRH(inputs.airRH);
+    if (inputs.refrigerantId !== undefined) setRefrigerantId(inputs.refrigerantId);
+    if (inputs.te !== undefined) setTe(inputs.te);
+    if (inputs.tc !== undefined) setTc(inputs.tc);
+    if (inputs.superheat !== undefined) setSuperheat(inputs.superheat);
+    if (inputs.subcooling !== undefined) setSubcooling(inputs.subcooling);
+    clearCatalogPreload();
+    toast.success(`Dados carregados do catálogo: ${pendingEvaporator.modelo}`);
+    setTimeout(() => simState.trigger(), 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [pendingEvaporator]);
 
   useEffect(() => {
     const store = useCnCoilsSimulationStore.getState();
@@ -432,7 +433,7 @@ export function EvaporatorUnifiedWorkspacePage() {
           "Vazão de ar": `${airFlow.toLocaleString("pt-BR")} m³/h`,
         }}
         results={{
-          "Capacidade real": `${fmt(cycleResult.Q_evap_W / 1000, 2)} kW`,
+          [`Capacidade real (${capacityUnit})`]: `${fmt(convertCapacity(cycleResult.Q_evap_W / 1000, capacityUnit), capacityUnit === 'kW' || capacityUnit === 'TR' ? 2 : 0)} ${capacityUnit}`,
           COP: fmt(cycleResult.COP, 2),
           "Te eq": `${fmt(cycleResult.Te_C, 1)} °C`,
           "Tc eq": `${fmt(cycleResult.Tc_C, 1)} °C`,
@@ -1412,6 +1413,7 @@ function ResultsGrid({
   frontalVelocity: number;
   safetyFactor: number;
 }) {
+  const { capacityUnit } = useUnitStore();
   const evap = result.evaporatorResult;
   const Q_total_kW = evap.totalCapacityW / 1000;
   const Q_sens_kW = evap.sensibleCapacityW / 1000;
@@ -1426,14 +1428,19 @@ function ResultsGrid({
 
   // WB approx (simple psychrometric estimate)
   const Twb_out = evap.airOutletTempC - 1.5;
-
   const v_fluid = result.m_dot_kgS / 50; // rough placeholder
+
+  // Capacidade convertida para a unidade selecionada globalmente
+  const Q_total_disp = convertCapacity(Q_total_kW, capacityUnit);
+  const Q_sens_disp = convertCapacity(Q_sens_kW, capacityUnit);
+  const Q_lat_disp = convertCapacity(Q_lat_kW, capacityUnit);
+  const capDec = capacityUnit === "kW" || capacityUnit === "TR" ? 2 : 0;
 
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
-      <ResultCard label="Capacidade Total" value={fmt(Q_total_kW, 2)} unit="kW" hint={`${fmt(Q_total_kW * 860, 0)} kcal/h`} variant="success" />
-      <ResultCard label="Cap. Sensível" value={fmt(Q_sens_kW, 2)} unit="kW" />
-      <ResultCard label="Cap. Latente" value={fmt(Q_lat_kW, 2)} unit="kW" />
+      <ResultCard label="Capacidade Total" value={fmt(Q_total_disp, capDec)} unit={capacityUnit} variant="success" />
+      <ResultCard label="Cap. Sensível" value={fmt(Q_sens_disp, capDec)} unit={capacityUnit} />
+      <ResultCard label="Cap. Latente" value={fmt(Q_lat_disp, capDec)} unit={capacityUnit} />
       <ResultCard label="SHR" value={fmt(SHR, 3)} hint="Sensible Heat Ratio" />
       <ResultCard label="COP" value={fmt(result.COP, 2)} variant="success" />
       <ResultCard label="EER" value={fmt(EER, 2)} unit="BTU/W·h" />
@@ -1611,7 +1618,7 @@ function UncertaintyTab({ config, cycleResult }: { config: CycleSystemConfig; cy
     <div className="space-y-3 rounded-lg border border-border bg-card p-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">Bandas de incerteza nominais</h3>
-        <UncertaintyBadge band={result.totalCapacityW} format={(v) => fmt(v / 1000, 2)} unit="kW" />
+        <UncertaintyBadge band={result.totalCapacityW} format={(v) => fmt(convertCapacity(v / 1000, useUnitStore.getState().capacityUnit), useUnitStore.getState().capacityUnit === 'kW' || useUnitStore.getState().capacityUnit === 'TR' ? 2 : 0)} unit={useUnitStore.getState().capacityUnit} />
       </div>
       <UncertaintyPanel result={result} isLoading={false} />
     </div>
