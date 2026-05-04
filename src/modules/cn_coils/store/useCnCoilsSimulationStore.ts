@@ -196,6 +196,9 @@ export const useCnCoilsSimulationStore = create<CnCoilsSimulationStore>((set, ge
   targetCapacityW: 0,
   setTargetCapacityW: (val) => set({ targetCapacityW: val }),
 
+  displayCapacityUnit: "kcal_h",
+  setDisplayCapacityUnit: (u) => set({ displayCapacityUnit: u }),
+
   airFlow_m3h: 5000,
   tempInDB_C: 25,
   rhIn_pct: 60,
