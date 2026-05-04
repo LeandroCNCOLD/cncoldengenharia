@@ -13,12 +13,12 @@ import {
   Wrench,
   Database as DatabaseIcon,
   Gauge,
+  Settings,
 } from "lucide-react";
 import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useAuth } from "@/lib/auth";
-import { UserModeSwitcher } from "../mode/UserModeSwitcher";
 
 type NavItem = {
   to: string;
@@ -42,6 +42,10 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/coldpro/audit", label: "navigation.audit", Icon: ShieldCheck },
 ];
 
+const ADMIN_NAV_ITEMS: NavItem[] = [
+  { to: "/coldpro/settings", label: "navigation.settings", Icon: Settings },
+];
+
 export function Sidebar({ onClose: _onClose }: { onClose?: () => void } = {}) {
   const { t } = useTranslation();
   const { user, isAdmin, signOut } = useAuth();
@@ -59,7 +63,7 @@ export function Sidebar({ onClose: _onClose }: { onClose?: () => void } = {}) {
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         <ul className="space-y-0.5">
-          {NAV_ITEMS.map((item) => {
+          {[...NAV_ITEMS, ...(isAdmin ? ADMIN_NAV_ITEMS : [])].map((item) => {
             const Icon = item.Icon;
             return (
               <li key={item.to}>
@@ -85,10 +89,7 @@ export function Sidebar({ onClose: _onClose }: { onClose?: () => void } = {}) {
       </nav>
 
       <div className="space-y-2 border-t border-white/10 px-4 py-3">
-        <p className="text-[10px] uppercase tracking-wider text-slate-400">{t("navigation.userMode")}</p>
-        <UserModeSwitcher />
-
-        <div className="pt-2">
+        <div>
           <p className="truncate text-xs font-medium text-slate-100">
             {user?.user_metadata?.full_name || user?.email}
           </p>
