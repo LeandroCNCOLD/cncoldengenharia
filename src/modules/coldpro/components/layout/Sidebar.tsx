@@ -68,21 +68,7 @@ const NAV_GROUPS: NavGroup[] = [
       { to: "/coldpro/cncoils/workspace", label: "· Bat. Aquecimento", Icon: Flame, search: { type: "heating_coil" } },
       { to: "/coldpro/cncoils/component-library", label: "· Biblioteca", Icon: BookOpen },
       { to: "/coldpro/cncoils/project-completion", label: "· Conclusão", Icon: CheckCircle },
-      { to: "/coldpro/cycle", label: "Ciclo de Refrigeração", Icon: RotateCw },
-      { to: "/coldpro/map", label: "Mapa Operacional", Icon: Map },
       { to: "/coldpro/assembly", label: "Arranjo de Serpentinas", Icon: Layers },
-      { to: "/coldpro/frost", label: "Análise de Geada", Icon: Snowflake, comingSoon: true },
-      { to: "/coldpro/optimization", label: "Otimização", Icon: Target, comingSoon: true },
-      { to: "/coldpro/curve", label: "Curva de Desempenho", Icon: TrendingUp },
-      { to: "/coldpro/simulation", label: "Equilíbrio do Sistema", Icon: Scale },
-    ],
-  },
-  {
-    label: "Sistemas",
-    items: [
-      { to: "/coldpro/systems/cold-room", label: "Câmara Fria", Icon: Snowflake },
-      { to: "/coldpro/systems/dx-complete", label: "DX Completo", Icon: Wind },
-      { to: "/coldpro/systems/heat-pump", label: "Bomba de Calor", Icon: Thermometer },
     ],
   },
   {
@@ -90,16 +76,13 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/coldpro/components", label: "Componentes", Icon: Boxes },
       { to: "/coldpro/catalog", label: "Catálogo CN COLD", Icon: DatabaseIcon },
-      { to: "/coldpro/ficha-tecnica", label: "Ficha Técnica", Icon: FileText, comingSoon: true },
       { to: "/coldpro/registry", label: "Registry de Produtos", Icon: Database },
     ],
   },
   {
     label: "Produção",
     items: [
-      { to: "/coldpro/montagem", label: "Montagem", Icon: Wrench, comingSoon: true },
       { to: "/coldpro/export", label: "Exportação", Icon: Download },
-      { to: "/coldpro/audit", label: "Auditoria CN COLD", Icon: ShieldCheck, comingSoon: true },
     ],
   },
 ];
@@ -114,11 +97,23 @@ export function Sidebar({ onClose }: SidebarProps = {}) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const projectCount = useProjectStore((s) => s.projects.length);
 
-  const isActive = (item: NavItem) =>
-    item.exact ? pathname === item.to : pathname === item.to || pathname.startsWith(item.to + "/");
+  const isActive = (item: NavItem) => {
+    const pathMatch = item.exact
+      ? pathname === item.to
+      : pathname === item.to || pathname.startsWith(item.to + "/");
+    if (!pathMatch) return false;
+    if (item.search && typeof item.search === "object") {
+      if (typeof window === "undefined") return false;
+      const params = new URLSearchParams(window.location.search);
+      return Object.entries(item.search).every(
+        ([key, value]) => params.get(key) === String(value),
+      );
+    }
+    return true;
+  };
 
   return (
-    <aside className="flex h-full w-56 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
+    <aside className="flex h-full w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
       <div className="border-b border-sidebar-border p-4">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
@@ -163,11 +158,11 @@ export function Sidebar({ onClose }: SidebarProps = {}) {
                       onClick={onClose}
                       className={
                         active
-                          ? "flex h-[17px] items-center gap-1.5 rounded bg-sidebar-primary px-2 text-[10px] font-medium leading-none text-sidebar-primary-foreground"
-                          : "flex h-[17px] items-center gap-1.5 rounded px-2 text-[10px] leading-none text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                          ? "flex h-[22px] items-center gap-1.5 rounded bg-sidebar-primary px-2 text-[11px] font-medium leading-none text-sidebar-primary-foreground"
+                          : "flex h-[22px] items-center gap-1.5 rounded px-2 text-[11px] leading-none text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                       }
                     >
-                      <Icon className="h-2.5 w-2.5 shrink-0" />
+                      <Icon className="h-3 w-3 shrink-0" />
                       <span className="truncate">{item.label}</span>
                       {item.comingSoon && (
                         <span className="ml-auto rounded bg-amber-500/20 px-0.5 py-px text-[7px] font-semibold uppercase leading-none tracking-wide text-amber-300">
