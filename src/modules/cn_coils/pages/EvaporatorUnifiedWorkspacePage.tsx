@@ -637,6 +637,18 @@ export function EvaporatorUnifiedWorkspacePage() {
                 </SelectContent>
               </Select>
             </div>
+            {fanMode === "catalog" && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full h-8 text-xs"
+                onClick={() => setFanPickerOpen(true)}
+              >
+                {selectedFan
+                  ? `${[selectedFan.manufacturer, selectedFan.model].filter(Boolean).join(" ") || "Ventilador"} ✓`
+                  : "Selecionar ventilador…"}
+              </Button>
+            )}
             <div>
               <Label className="text-[10px] text-muted-foreground">Velocidade frontal (m/s)</Label>
               <Input readOnly value={fmt(frontalVelocity, 2)} className="h-8 text-xs bg-muted/40" />
