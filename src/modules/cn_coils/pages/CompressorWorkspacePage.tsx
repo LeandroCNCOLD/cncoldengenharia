@@ -414,6 +414,7 @@ export function CompressorWorkspacePage() {
         onClose={() => setPickerOpen(false)}
         onSelect={handleSelect}
       />
+      <WorkspaceAIPanel open={aiOpen} onClose={() => setAiOpen(false)} context={aiContext} />
     </WorkspaceLayout>
   );
 }
