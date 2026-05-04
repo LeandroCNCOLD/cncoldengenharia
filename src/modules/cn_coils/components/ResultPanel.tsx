@@ -1,10 +1,11 @@
-import { AlertCircle, AlertTriangle, Info, Target } from "lucide-react";
+import { AlertCircle, AlertTriangle, ChevronDown, ChevronUp, Info, Target } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { CnCoilsSimulationResult } from "../types/cncoils.types";
 import type { StructuredWarning } from "../types/warnings";
 import { ptBR } from "../i18n/messages.ptBR";
 import { convertPower, type PowerUnit } from "@/utils/unitConversions";
 import { fmtBR } from "../utils/unitConversions";
+import { getSuggestionForWarning } from "../config/warningSuggestions";
 import {
   loadCnCoilsCoefficients,
   buildFanAudit,
@@ -166,8 +167,12 @@ function FanLibraryStatus({ audit }: { audit: FanAuditSummary }) {
   );
 }
 
+// ── WarningsList: deduplicação + paginação (main) + sugestões contextuais expansíveis (Cursor) ──
+
 function WarningsList({ warnings }: { warnings: StructuredWarning[] }) {
   const [showAll, setShowAll] = useState(false);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
   const styles = {
     error: {
       box: "border-red-300 bg-red-50",
@@ -212,6 +217,10 @@ function WarningsList({ warnings }: { warnings: StructuredWarning[] }) {
       : styles.info;
   const TopIcon = top.Icon;
 
+  const toggleExpand = (key: string) => {
+    setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   return (
     <div className={`rounded-lg border p-3 ${top.box}`}>
       <div className={`mb-1 flex items-center gap-2 text-xs font-semibold ${top.title}`}>
@@ -219,22 +228,82 @@ function WarningsList({ warnings }: { warnings: StructuredWarning[] }) {
         Avisos ({unique.length} {unique.length === 1 ? "tipo" : "tipos"} ·{" "}
         {warnings.length} no total)
       </div>
-      <ul className="space-y-1 text-xs">
+      <ul className="space-y-1.5 text-xs">
         {visible.map((entry, i) => {
           const w = entry.warning;
           const s = styles[(w.severity as keyof typeof styles) ?? "warning"] ?? styles.warning;
           const Icon = s.Icon;
+          const msgText = w.message ?? w.code;
+          const suggestion = getSuggestionForWarning(msgText);
+          const key = `${w.code ?? ""}:${i}`;
+          const isExpanded = expanded[key] ?? false;
+
           return (
-            <li key={i} className={`flex items-start gap-1.5 ${s.item}`}>
-              <Icon className="mt-0.5 h-3 w-3 flex-shrink-0" />
-              <span>
-                {w.message ?? w.code}
-                {entry.count > 1 && (
-                  <span className="ml-1 rounded bg-black/10 px-1 py-0.5 text-[10px] font-mono">
-                    ×{entry.count}
+            <li key={i} className="rounded border border-current/10 bg-white/60 p-2">
+              <div className={`flex items-start justify-between gap-1.5 ${s.item}`}>
+                <div className="flex items-start gap-1.5 min-w-0">
+                  <Icon className="mt-0.5 h-3 w-3 flex-shrink-0" />
+                  <span className="font-medium">
+                    {msgText}
+                    {entry.count > 1 && (
+                      <span className="ml-1 rounded bg-black/10 px-1 py-0.5 text-[10px] font-mono">
+                        ×{entry.count}
+                      </span>
+                    )}
                   </span>
+                </div>
+                {suggestion && (
+                  <button
+                    type="button"
+                    onClick={() => toggleExpand(key)}
+                    className="ml-1 flex-shrink-0 rounded p-0.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                    title={isExpanded ? "Ocultar sugestões" : "Ver campos e sugestões"}
+                  >
+                    {isExpanded ? (
+                      <ChevronUp className="h-3.5 w-3.5" />
+                    ) : (
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    )}
+                  </button>
                 )}
-              </span>
+              </div>
+
+              {suggestion && isExpanded && (
+                <div className="mt-2 space-y-2 border-t border-current/10 pt-2">
+                  {suggestion.fields.length > 0 && (
+                    <div>
+                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                        Campos a revisar
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {suggestion.fields.map((field) => (
+                          <span
+                            key={field}
+                            className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-800"
+                          >
+                            {field}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {suggestion.actions.length > 0 && (
+                    <div>
+                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                        O que fazer
+                      </p>
+                      <ul className="space-y-1">
+                        {suggestion.actions.map((action, ai) => (
+                          <li key={ai} className="flex items-start gap-1.5 text-slate-700">
+                            <span className="mt-0.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400" />
+                            <span>{action}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
             </li>
           );
         })}
@@ -260,4 +329,3 @@ function WarningsList({ warnings }: { warnings: StructuredWarning[] }) {
     </div>
   );
 }
-

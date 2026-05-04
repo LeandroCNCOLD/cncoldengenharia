@@ -165,6 +165,31 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
     fluid: inputs.fluidProps,
     heating: !isCooling(componentType),
   });
+  {
+    const A_check = (Math.PI * Di_m ** 2) / 4;
+    const massFlowPerCircuit = inputs.fluidMassFlowKgS / Math.max(physical.circuits, 1);
+    const rho_check = inputs.fluidProps.rho_kg_m3;
+    const mu_check = inputs.fluidProps.mu_Pa_s;
+    const G_check = massFlowPerCircuit / A_check;
+    const Re_check = (G_check * Di_m) / mu_check;
+    const v_fluid_check = G_check / rho_check;
+
+    if (Re_check < 2300) {
+      warnings.push(
+        `Re=${Re_check.toFixed(0)} — regime laminar no tubo do evaporador`,
+      );
+    } else if (Re_check > 10000) {
+      warnings.push(
+        `Re=${Re_check.toFixed(0)} acima de 10.000 — extrapolação moderada`,
+      );
+    }
+
+    if (v_fluid_check < 0.1 || v_fluid_check > 5) {
+      warnings.push(
+        `Velocidade do fluido ${v_fluid_check.toFixed(2)} m/s fora da faixa típica (0,1–5 m/s)`,
+      );
+    }
+  }
   const Pr_l =
     (inputs.fluidProps.cp_J_kgK * inputs.fluidProps.mu_Pa_s) /
     inputs.fluidProps.k_W_mK;
