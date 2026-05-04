@@ -71,12 +71,16 @@ export function calculateHeatingCoil(
   const mDot_air = Math.max(0.001, (inputs.airFlowRate_m3h * rho_air) / 3600);
   const cp_air = 1006 + 1860 * W_in;
 
-  const A_ext =
+  const A_tube_ext =
     Math.PI *
     (inputs.tubeDiameter_mm / 1000) *
     inputs.tubeLength_m *
     inputs.tubeRows *
     inputs.tubesPerRow;
+  // Fator de aletamento: superfície externa total / superfície de tubo nu.
+  // Aproximação: ~5 (sem aletas) + 50/passo_mm (típico 15-25× para passo 2-4mm).
+  const finFactor = 5 + 50 / Math.max(1, inputs.finPitch_mm);
+  const A_ext = A_tube_ext * finFactor;
   const h_air = 45;
   const h_fluid = inputs.heatingFluid === "steam" ? 8000 : 4000;
   const U = 1 / (1 / h_air + 1 / h_fluid);
