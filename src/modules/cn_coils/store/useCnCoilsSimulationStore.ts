@@ -14,6 +14,7 @@ import {
 } from "../engine/costCalculator";
 import { runSimulation } from "../engine/simulatorCoreAdapter";
 import { snapFinPitchToTool } from "../config/finPitchTools";
+import type { CapacityUnit as DisplayCapacityUnit } from "../utils/unitConversions";
 
 /**
  * Modo de cálculo do CN Coils:
@@ -64,6 +65,14 @@ interface CnCoilsSimulationStore {
   // Capacidade alvo (modo Desenho) — em Watts (canonical)
   targetCapacityW: number;
   setTargetCapacityW: (val: number) => void;
+
+  /**
+   * Unidade global selecionada para CAPACIDADE (Total/Sensível/Latente).
+   * Definida no Detalhado (Lado Ventilação) e replicada na aba Resultados,
+   * Relatórios, etc. Canonical interno do motor continua em W.
+   */
+  displayCapacityUnit: DisplayCapacityUnit;
+  setDisplayCapacityUnit: (u: DisplayCapacityUnit) => void;
 
   // Lado Ar / Ventilação (Etapa 3)
   airFlow_m3h: number;
@@ -186,6 +195,9 @@ export const useCnCoilsSimulationStore = create<CnCoilsSimulationStore>((set, ge
 
   targetCapacityW: 0,
   setTargetCapacityW: (val) => set({ targetCapacityW: val }),
+
+  displayCapacityUnit: "kcal_h",
+  setDisplayCapacityUnit: (u) => set({ displayCapacityUnit: u }),
 
   airFlow_m3h: 5000,
   tempInDB_C: 25,
