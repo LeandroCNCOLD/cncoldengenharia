@@ -1423,15 +1423,34 @@ function ResultsGrid({
   safetyFactor: number;
 }) {
   const { capacityUnit } = useUnitStore();
+  const calcMode = useCnCoilsSimulationStore((s) => s.calcMode);
+  const targetCapacityW = useCnCoilsSimulationStore((s) => s.targetCapacityW);
+  const errorFactorPercent = useCnCoilsSimulationStore((s) => s.errorFactorPercent);
+  const airSafetyFactor = 1 + (Number.isFinite(errorFactorPercent) ? errorFactorPercent : 0) / 100;
+  const isDesign = calcMode === "design";
+
   const evap = result.evaporatorResult;
-  const Q_total_kW = evap.totalCapacityW / 1000;
-  const Q_sens_kW = evap.sensibleCapacityW / 1000;
-  const Q_lat_kW = evap.latentCapacityW / 1000;
+  // Aplica o mesmo fator de segurança usado no Lado Ventilação para coerência entre abas.
+  const totalCapacityW_eff = evap.totalCapacityW * airSafetyFactor;
+  const sensCapacityW_eff = evap.sensibleCapacityW * airSafetyFactor;
+  const latCapacityW_eff = evap.latentCapacityW * airSafetyFactor;
+
+  // Em modo Desenho, a Capacidade Total exibida é a definida no detalhamento (alvo).
+  const Q_total_kW = isDesign && targetCapacityW > 0
+    ? targetCapacityW / 1000
+    : totalCapacityW_eff / 1000;
+  // Mantém o SHR do cálculo para preservar a proporção sensível/latente.
   const SHR = evap.totalCapacityW > 0 ? evap.sensibleCapacityW / evap.totalCapacityW : 0;
+  const Q_sens_kW = isDesign && targetCapacityW > 0
+    ? (Q_total_kW * SHR)
+    : sensCapacityW_eff / 1000;
+  const Q_lat_kW = isDesign && targetCapacityW > 0
+    ? (Q_total_kW * (1 - SHR))
+    : latCapacityW_eff / 1000;
   const EER = result.COP * 3.412;
   const area = evaporatorAreaM2(config);
   const dT_LMTD = Math.max(1, config.evaporator.airInletTempC - result.Te_C);
-  const UA = evap.totalCapacityW / dT_LMTD;
+  const UA = (Q_total_kW * 1000) / dT_LMTD;
   const NTU = UA / Math.max(1, ((config.evaporator.airFlowM3H * 1.2) / 3600) * 1005);
   const effectiveness = 1 - Math.exp(-NTU);
 
