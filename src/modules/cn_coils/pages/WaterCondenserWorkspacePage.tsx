@@ -288,6 +288,7 @@ export function WaterCondenserWorkspacePage() {
           onShare={() => toast.info("Compartilhamento em breve")}
         />
       </div>
+      <WorkspaceAIPanel open={aiOpen} onClose={() => setAiOpen(false)} context={aiContext} />
     </WorkspaceLayout>
   );
 }

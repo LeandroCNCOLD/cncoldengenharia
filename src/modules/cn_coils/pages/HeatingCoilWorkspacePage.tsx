@@ -42,6 +42,8 @@ import {
   calculateMoistAirState,
   type HeatingCoilInputs,
 } from "../hooks/useHeatingCoilSimulation";
+import { WorkspaceAIButton, WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
+import type { AIContext } from "../components/WorkspaceAIChat";
 
 const fmt = (value: number, maximumFractionDigits = 2) =>
   value.toLocaleString("pt-BR", { maximumFractionDigits });
@@ -66,9 +68,33 @@ const DEFAULT_INPUTS: HeatingCoilInputs = {
 export function HeatingCoilWorkspacePage() {
   const [draft, setDraft] = useState<HeatingCoilInputs>(DEFAULT_INPUTS);
   const [inputs, setInputs] = useState<HeatingCoilInputs>(DEFAULT_INPUTS);
+  const [activeTab, setActiveTab] = useState("results");
+  const [aiOpen, setAiOpen] = useState(false);
   const result = useMemo(() => calculateHeatingCoil(inputs), [inputs]);
   const update = (patch: Partial<HeatingCoilInputs>) =>
     setDraft((current) => ({ ...current, ...patch }));
+
+  const aiContext: AIContext = useMemo(() => ({
+    componentType: "Bat. Aquecimento",
+    tabName: activeTab,
+    parameters: {
+      "Modo": inputs.mode,
+      "Tar entrada (°C)": inputs.Tair_in_C,
+      "UR entrada (%)": (inputs.RH_in * 100).toFixed(0),
+      "Vazão ar (m³/h)": inputs.airFlowRate_m3h,
+      "Fluido": inputs.heatingFluid,
+      "Tf entrada (°C)": inputs.Tf_in_C,
+      "Tf saída (°C)": inputs.Tf_out_C,
+    },
+    results: {
+      "Tar saída (°C)": result.Tair_out_C.toFixed(1),
+      "Q aquecimento (kW)": (result.Q_heating_W / 1000).toFixed(2),
+      "NTU": result.NTU.toFixed(2),
+      "Efetividade (%)": (result.epsilon * 100).toFixed(1),
+      "U (W/m²K)": result.U_Wm2K.toFixed(0),
+    },
+    warnings: [],
+  }), [activeTab, inputs, result]);
 
   const curve = useMemo(
     () =>
