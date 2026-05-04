@@ -1422,34 +1422,67 @@ function ResultsGrid({
   frontalVelocity: number;
   safetyFactor: number;
 }) {
-  const { capacityUnit } = useUnitStore();
+  // Unidade global definida no Detalhado (Lado Ventilação) — replica aqui.
+  const displayUnit = useCnCoilsSimulationStore((s) => s.displayCapacityUnit);
+  const errorFactorPercent = useCnCoilsSimulationStore((s) => s.errorFactorPercent);
+  const calcMode = useCnCoilsSimulationStore((s) => s.calcMode);
+  const targetCapacityW = useCnCoilsSimulationStore((s) => s.targetCapacityW);
+  // Resultado canônico do motor CN Coils (mesma fonte do Detalhado).
+  const cnResult = useCnCoilsSimulationStore((s) => s.result);
+
   const evap = result.evaporatorResult;
-  const Q_total_kW = evap.totalCapacityW / 1000;
-  const Q_sens_kW = evap.sensibleCapacityW / 1000;
-  const Q_lat_kW = evap.latentCapacityW / 1000;
-  const SHR = evap.totalCapacityW > 0 ? evap.sensibleCapacityW / evap.totalCapacityW : 0;
+  const airSafetyFactor = 1 + (Number.isFinite(errorFactorPercent) ? errorFactorPercent : 0) / 100;
+
+  // Prefer Detalhado (cnResult) → garante coerência com o que o usuário vê
+  // no Lado Ventilação. Fallback para o cycleResult quando ainda não houver.
+  const totalW_raw = cnResult?.totalCapacityKw !== undefined
+    ? cnResult.totalCapacityKw * 1000
+    : evap.totalCapacityW;
+  const sensW_raw = cnResult?.sensibleCapacityKw !== undefined
+    ? cnResult.sensibleCapacityKw * 1000
+    : evap.sensibleCapacityW;
+  const latW_raw = cnResult?.latentCapacityKw !== undefined
+    ? cnResult.latentCapacityKw * 1000
+    : evap.latentCapacityW;
+
+  const isDesign = calcMode === "design";
+  const Q_total_W = isDesign && targetCapacityW > 0
+    ? targetCapacityW
+    : totalW_raw * airSafetyFactor;
+  const SHR_calc = totalW_raw > 0 ? sensW_raw / totalW_raw : 0;
+  const Q_sens_W = isDesign && targetCapacityW > 0 ? Q_total_W * SHR_calc : sensW_raw * airSafetyFactor;
+  const Q_lat_W = isDesign && targetCapacityW > 0 ? Q_total_W * (1 - SHR_calc) : latW_raw * airSafetyFactor;
+
+  const SHR = Q_total_W > 0 ? Q_sens_W / Q_total_W : 0;
   const EER = result.COP * 3.412;
   const area = evaporatorAreaM2(config);
   const dT_LMTD = Math.max(1, config.evaporator.airInletTempC - result.Te_C);
-  const UA = evap.totalCapacityW / dT_LMTD;
+  const UA = Q_total_W / dT_LMTD;
   const NTU = UA / Math.max(1, ((config.evaporator.airFlowM3H * 1.2) / 3600) * 1005);
   const effectiveness = 1 - Math.exp(-NTU);
 
-  // WB approx (simple psychrometric estimate)
   const Twb_out = evap.airOutletTempC - 1.5;
-  const v_fluid = result.m_dot_kgS / 50; // rough placeholder
+  const v_fluid = result.m_dot_kgS / 50;
 
-  // Capacidade convertida para a unidade selecionada globalmente
-  const Q_total_disp = convertCapacity(Q_total_kW, capacityUnit);
-  const Q_sens_disp = convertCapacity(Q_sens_kW, capacityUnit);
-  const Q_lat_disp = convertCapacity(Q_lat_kW, capacityUnit);
-  const capDec = capacityUnit === "kW" || capacityUnit === "TR" ? 2 : 0;
+  // Conversão para a unidade selecionada globalmente no Detalhado.
+  const unitLabel = CAPACITY_UNITS.find((u) => u.id === displayUnit)?.label ?? displayUnit;
+  const capDec = displayUnit === "kW" || displayUnit === "TR" ? 2 : 0;
+  const Q_total_disp = capacityConv.fromCanonical(Q_total_W, displayUnit);
+  const Q_sens_disp = capacityConv.fromCanonical(Q_sens_W, displayUnit);
+  const Q_lat_disp = capacityConv.fromCanonical(Q_lat_W, displayUnit);
+
+  const sourceHint = cnResult ? "Detalhado · Lado Ventilação" : "Ciclo termodinâmico";
+  const totalHint = isDesign && targetCapacityW > 0
+    ? `Alvo (Desenho): ${fmt(capacityConv.fromCanonical(targetCapacityW, displayUnit), capDec)} ${unitLabel}`
+    : errorFactorPercent !== 0
+      ? `${sourceHint} · fator ${errorFactorPercent > 0 ? "+" : ""}${errorFactorPercent}%`
+      : sourceHint;
 
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
-      <ResultCard label="Capacidade Total" value={fmt(Q_total_disp, capDec)} unit={capacityUnit} variant="success" />
-      <ResultCard label="Cap. Sensível" value={fmt(Q_sens_disp, capDec)} unit={capacityUnit} />
-      <ResultCard label="Cap. Latente" value={fmt(Q_lat_disp, capDec)} unit={capacityUnit} />
+      <ResultCard label="Capacidade Total" value={fmt(Q_total_disp, capDec)} unit={unitLabel} variant="success" hint={totalHint} />
+      <ResultCard label="Cap. Sensível" value={fmt(Q_sens_disp, capDec)} unit={unitLabel} />
+      <ResultCard label="Cap. Latente" value={fmt(Q_lat_disp, capDec)} unit={unitLabel} />
       <ResultCard label="SHR" value={fmt(SHR, 3)} hint="Sensible Heat Ratio" />
       <ResultCard label="COP" value={fmt(result.COP, 2)} variant="success" />
       <ResultCard label="EER" value={fmt(EER, 2)} unit="BTU/W·h" />
