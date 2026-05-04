@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, AlertTriangle, CheckCircle2, XCircle, Play, Loader2 } from "lucide-react";
+import { ArrowLeft, AlertTriangle, CheckCircle2, Play, Loader2 } from "lucide-react";
 import { catalogRepository } from "../services/catalogRepository";
 import { buildCycleConfigFromCatalog } from "../utils/buildCycleConfigFromCatalog";
 import { useCycleSimulation } from "@/modules/cn_coils/hooks/useCycleSimulation";
