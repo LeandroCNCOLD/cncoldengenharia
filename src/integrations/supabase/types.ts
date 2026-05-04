@@ -56,12 +56,43 @@ export type Database = {
         }
         Relationships: []
       }
+      module_permissions: {
+        Row: {
+          can_edit: boolean
+          can_view: boolean
+          created_at: string
+          id: string
+          module_key: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+        }
+        Insert: {
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          module_key: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Update: {
+          can_edit?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          module_key?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
           email: string | null
           full_name: string | null
           id: string
+          is_active: boolean
           updated_at: string
         }
         Insert: {
@@ -69,6 +100,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          is_active?: boolean
           updated_at?: string
         }
         Update: {
@@ -76,7 +108,32 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          is_active?: boolean
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string
+          language: string
+          unit_system: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          language?: string
+          unit_system?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          language?: string
+          unit_system?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -115,7 +172,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "engenheiro"
+      app_role: "admin" | "engenheiro" | "gerente" | "visualizador"
       component_kind:
         | "evaporador"
         | "condensador"
@@ -341,7 +398,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "engenheiro"],
+      app_role: ["admin", "engenheiro", "gerente", "visualizador"],
       component_kind: [
         "evaporador",
         "condensador",
