@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { PlusCircle, X, Flame, Droplets } from "lucide-react";
+import { PlusCircle, X, Flame, Droplets, Zap, Snowflake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -536,7 +536,10 @@ export function CoilsInSeriesPanel({
           <p className="mb-2 text-xs font-medium">Selecionar tipo de coil:</p>
           {(["reheat_hot_water", "reheat_electric", "hot_gas_reheat", "precool_chilled_water"] as CoilType[]).map((type) => (
             <Button key={type} variant="ghost" size="sm" className="w-full justify-start text-xs" onClick={() => addCoil(type)}>
+              {type === "reheat_hot_water" && <Droplets className="mr-2 h-3 w-3 text-red-500" />}
+              {type === "reheat_electric" && <Zap className="mr-2 h-3 w-3 text-yellow-500" />}
               {type === "hot_gas_reheat" && <Flame className="mr-2 h-3 w-3 text-orange-500" />}
+              {type === "precool_chilled_water" && <Snowflake className="mr-2 h-3 w-3 text-sky-500" />}
               {coilTypeLabels[type]}
             </Button>
           ))}
