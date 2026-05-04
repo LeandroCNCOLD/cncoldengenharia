@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { PlusCircle, X, Flame, Droplets } from "lucide-react";
+import { PlusCircle, X, Flame, Droplets, Zap, Snowflake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
