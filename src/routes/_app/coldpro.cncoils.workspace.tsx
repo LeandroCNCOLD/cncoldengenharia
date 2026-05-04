@@ -61,7 +61,7 @@ function CnCoilsWorkspaceRoute() {
   const resolved =
     (search.type && TYPE_ALIASES[search.type as string]) ?? search.type;
 
-  if (resolved === "evaporator_dx" || resolved === "evaporator_pumped") return <CycleWorkspacePage />;
+  if (resolved === "evaporator_dx" || resolved === "evaporator_pumped") return <EvaporatorUnifiedWorkspacePage />;
   if (resolved === "condenser_air") return <CondenserWorkspacePage />;
   if (resolved === "compressor") return <CompressorWorkspacePage />;
   if (resolved === "evaporative_condenser") return <EvaporativeCondenserWorkspacePage />;
