@@ -166,7 +166,7 @@ export function EvaporativeCondenserWorkspacePage() {
               </TabsList>
 
               <TabsContent value="results" className="mt-3">
-                <ResultsGrid result={result} />
+                <ResultsGrid result={result} inputs={inputs} />
               </TabsContent>
 
               <TabsContent value="envelope" className="mt-3">
@@ -207,37 +207,58 @@ export function EvaporativeCondenserWorkspacePage() {
   );
 }
 
-function ResultsGrid({ result }: { result: EvaporativeCondenserResult }) {
+function ResultsGrid({
+  result,
+  inputs,
+}: {
+  result: EvaporativeCondenserResult;
+  inputs: EvaporativeCondenserInputs;
+}) {
+  const approach = result.approach_K ?? result.Tc_C - inputs.Twb_C;
+  const ntu = result.NTU ?? -Math.log(Math.max(1e-6, 1 - result.eta_rejection));
+  const tairOut = result.Tair_out_C ?? inputs.Tdb_C + 3;
+  const wIn = result.W_in_gkg ?? 12;
+  const mDotAir = result.mDot_air_kgs ?? 1.5;
+  const aExt =
+    result.A_ext_m2 ??
+    Math.PI *
+      (inputs.tubeDiameter_mm / 1000) *
+      inputs.tubeLength_m *
+      inputs.tubeRows *
+      inputs.tubesPerRow;
+
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
       <ResultCard label="Tc" value={fmt(result.Tc_C)} unit="°C" variant="success" />
       <ResultCard
         label="Approach (Tc−Twb)"
-        value={fmt(result.approach_K, 1)}
+        value={fmt(approach, 1)}
         unit="K"
-        variant={result.approach_K > 8 ? "danger" : result.approach_K > 5 ? "warning" : "success"}
+        variant={approach > 8 ? "danger" : approach > 5 ? "warning" : "success"}
       />
       <ResultCard label="Q rejeitado" value={fmt(result.Q_rejected_W / 1000)} unit="kW" />
-      <ResultCard label="UA" value={fmt(result.UA_WK / 1000, 1)} unit="kW/K" />
-      <ResultCard label="NTU" value={fmt(result.NTU, 2)} unit="" />
+      <ResultCard label="UA" value={fmt(result.UA_WK / 1000, 2)} unit="kW/K" />
+      <ResultCard label="NTU" value={fmt(ntu, 2)} unit="" />
       <ResultCard label="Eficiência" value={fmt(result.eta_rejection * 100, 1)} unit="%" />
-      <ResultCard label="T saída ar" value={fmt(result.Tair_out_C, 1)} unit="°C" />
-      <ResultCard label="W ar entrada" value={fmt(result.W_in_gkg, 1)} unit="g/kg" />
-      <ResultCard label="Vazão ar" value={fmt(result.mDot_air_kgs, 2)} unit="kg/s" />
+      <ResultCard label="T saída ar" value={fmt(tairOut, 1)} unit="°C" />
+      <ResultCard label="W ar entrada" value={fmt(wIn, 1)} unit="g/kg" />
+      <ResultCard label="Vazão ar" value={fmt(mDotAir, 2)} unit="kg/s" />
       <ResultCard label="Consumo água" value={fmt(result.waterMakeup_Lh, 1)} unit="L/h" />
       <ResultCard label="W ventiladores" value={fmt(result.W_fans_W, 0)} unit="W" />
-      <ResultCard label="Área tubos" value={fmt(result.A_ext_m2, 2)} unit="m²" />
+      <ResultCard label="Área tubos" value={fmt(aExt, 2)} unit="m²" />
     </div>
   );
 }
 
 function WaterDetail({ result }: { result: EvaporativeCondenserResult }) {
+  const blowdown = Math.max(0, result.waterMakeup_Lh - result.waterEvaporation_Lh);
+  const drift = result.waterMakeup_Lh * 0.001;
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <ResultCard label="Evaporação" value={fmt(result.waterEvaporation_Lh, 1)} unit="L/h" />
-        <ResultCard label="Purga (blowdown)" value={fmt(result.waterBlowdown_Lh ?? 0, 1)} unit="L/h" />
-        <ResultCard label="Drift (arraste)" value={fmt(result.waterDrift_Lh ?? 0, 2)} unit="L/h" />
+        <ResultCard label="Purga (blowdown)" value={fmt(blowdown, 1)} unit="L/h" />
+        <ResultCard label="Drift (arraste)" value={fmt(drift, 2)} unit="L/h" />
         <ResultCard label="Reposição total" value={fmt(result.waterMakeup_Lh, 1)} unit="L/h" variant="warning" />
       </div>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
