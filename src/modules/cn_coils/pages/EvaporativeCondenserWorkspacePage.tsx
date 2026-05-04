@@ -1,6 +1,16 @@
-import { useMemo, useState } from "react";
-import { Calculator, Droplets, Save } from "lucide-react";
-import { toast } from "sonner";
+/**
+ * EvaporativeCondenserWorkspacePage
+ *
+ * Workspace completo para condensadores evaporativos.
+ * Segue o padrão do EvaporatorUnifiedWorkspacePage:
+ *  - Sidebar esquerda com inputs organizados em Accordion + Sliders
+ *  - Área central com abas (Resultados, Consumo de Água, Envelope, Desenho, Relatório)
+ *  - WorkspaceAIPanel integrado
+ *  - Exportação PDF/CSV/Excel
+ */
+
+import { useCallback, useMemo, useState } from "react";
+import { Droplets, Save } from "lucide-react";
 import {
   CartesianGrid,
   Line,
@@ -10,38 +20,50 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ActionBar } from "../components/ActionBar";
-import { ResultCard } from "../components/ResultCard";
-import { WorkspaceHeader } from "../components/WorkspaceHeader";
-import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
-import { WorkspaceLayout } from "../components/WorkspaceLayout";
+import { DrawingTab } from "../components/drawing/DrawingTab";
 import { ProjectHeaderBar } from "../components/ProjectHeaderBar";
-import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
-import { CHART_COLORS } from "../constants/chartColors";
+import { ResultCard } from "../components/ResultCard";
+import { WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
+import { WorkspaceHeader } from "../components/WorkspaceHeader";
+import { WorkspaceLayout } from "../components/WorkspaceLayout";
 import { usePdfExport } from "../hooks/usePdfExport";
+import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import {
   calculateEvaporativeCondenser,
   type EvaporativeCondenserInputs,
   type EvaporativeCondenserResult,
 } from "../hooks/useEvaporativeCondenserSimulation";
-import { WorkspaceAIButton, WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
+import { useCoilEnvelopeStore } from "../store/useCoilEnvelopeStore";
 import type { AIContext } from "../components/WorkspaceAIChat";
 
-const fmt = (value: number, maximumFractionDigits = 2) =>
-  value.toLocaleString("pt-BR", { maximumFractionDigits });
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const fmtBR = (v: number, d = 2) => v.toLocaleString("pt-BR", { maximumFractionDigits: d });
 
+// ── Abas ─────────────────────────────────────────────────────────────────────
+const TABS = {
+  RESULTS: "results",
+  WATER: "water",
+  ENVELOPE: "envelope",
+  DRAWING: "drawing",
+  REPORT: "report",
+} as const;
+
+// ── Defaults ─────────────────────────────────────────────────────────────────
 const DEFAULT_INPUTS: EvaporativeCondenserInputs = {
-  Q_total_W: 25_000,
+  Q_total_W: 30_000,
   Twb_C: 24,
   Tdb_C: 35,
   altitude_m: 0,
@@ -53,173 +75,512 @@ const DEFAULT_INPUTS: EvaporativeCondenserInputs = {
   airVelocity_ms: 3,
 };
 
+// ── Componente principal ──────────────────────────────────────────────────────
 export function EvaporativeCondenserWorkspacePage() {
+  const setCondenserEnvelope = useCoilEnvelopeStore((s) => s.setCondenserEnvelope);
+
+  const [draft, setDraft] = useState<EvaporativeCondenserInputs>(DEFAULT_INPUTS);
   const [inputs, setInputs] = useState<EvaporativeCondenserInputs>(DEFAULT_INPUTS);
-  const { isGenerating: pdfGenerating, exportPdf } = usePdfExport();
-  const [activeTab, setActiveTab] = useState("results");
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [result, setResult] = useState<EvaporativeCondenserResult | null>(null);
+  const [activeTab, setActiveTab] = useState<string>(TABS.RESULTS);
   const [aiOpen, setAiOpen] = useState(false);
 
-  const result = useMemo(() => calculateEvaporativeCondenser(inputs), [inputs]);
-  const envelope = useMemo(
-    () =>
-      [18, 20, 22, 24, 26, 28].map((Twb_C) => {
-        const point = calculateEvaporativeCondenser({ ...inputs, Twb_C });
-        return {
-          Twb_C,
-          Tc_C: point.Tc_C,
-          Q_rejected_kW: point.Q_rejected_W / 1000,
-          waterMakeup_Lh: point.waterMakeup_Lh,
-        };
-      }),
-    [inputs],
-  );
+  const update = useCallback((patch: Partial<EvaporativeCondenserInputs>) => {
+    setDraft((prev) => ({ ...prev, ...patch }));
+  }, []);
 
-  const update = (patch: Partial<EvaporativeCondenserInputs>) =>
-    setInputs((current) => ({ ...current, ...patch }));
+  // ── Simulação ──
+  const handleSimulate = useCallback(() => {
+    setIsSimulating(true);
+    try {
+      const r = calculateEvaporativeCondenser(draft);
+      setInputs(draft);
+      setResult(r);
+      toast.success("Cálculo concluído com sucesso.");
+    } catch (err) {
+      toast.error(`Erro no cálculo: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setIsSimulating(false);
+    }
+  }, [draft]);
 
-  const handleExportPdf = () =>
+  const handleReset = useCallback(() => {
+    setDraft(DEFAULT_INPUTS);
+    setInputs(DEFAULT_INPUTS);
+    setResult(null);
+    toast.info("Parâmetros restaurados para os valores padrão.");
+  }, []);
+
+  // ── Envelope Twb × Tc ──
+  const envelope = useMemo(() => {
+    if (!result) return [];
+    return Array.from({ length: 13 }, (_, i) => {
+      const Twb = 18 + i;
+      const r = calculateEvaporativeCondenser({ ...inputs, Twb_C: Twb });
+      return {
+        Twb_C: Twb,
+        Tc_C: r.Tc_C,
+        Q_rejected_W: r.Q_rejected_W,
+        waterMakeup_Lh: r.waterMakeup_Lh,
+      };
+    });
+  }, [result, inputs]);
+
+  // ── Salvar envelope no store ──
+  const handleSaveEnvelope = useCallback(() => {
+    if (envelope.length === 0) {
+      toast.error("Execute o cálculo antes de salvar o envelope.");
+      return;
+    }
+    setCondenserEnvelope(
+      envelope.map((pt) => ({
+        Tc: pt.Tc_C,
+        Q_cond_W: pt.Q_rejected_W,
+        UA: 0,
+        LMTD: 0,
+        Tair_out: 0,
+      })),
+    );
+    toast.success("Envelope salvo no store de projeto.");
+  }, [envelope, setCondenserEnvelope]);
+
+  // ── Exportação CSV ──
+  const handleExportCsv = useCallback(() => {
+    if (!result) { toast.error("Execute o cálculo antes de exportar."); return; }
+    const rows = [
+      ["Parâmetro", "Valor"],
+      ["Tc (°C)", result.Tc_C.toFixed(2)],
+      ["Q rejeitado (W)", result.Q_rejected_W.toFixed(0)],
+      ["UA (W/K)", result.UA_WK.toFixed(1)],
+      ["Eficiência (%)", (result.eta_rejection * 100).toFixed(1)],
+      ["Consumo água (L/h)", result.waterMakeup_Lh.toFixed(1)],
+      ["W ventiladores (W)", result.W_fans_W.toFixed(0)],
+    ];
+    const csv = rows.map((r) => r.join(";")).join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    a.download = "cond_evaporativo.csv";
+    a.click();
+  }, [result]);
+
+  const handleExportExcel = handleExportCsv;
+
+  // ── Exportação PDF ──
+  const { isGenerating: isExportingPdf, exportPdf } = usePdfExport();
+  const handleExportPdf = useCallback(() => {
+    if (!result) { toast.error("Execute o cálculo antes de exportar o PDF."); return; }
     exportPdf(
       <WorkspacePdfReport
         componentType="evaporative_condenser"
         title="Condensador Evaporativo"
         inputs={{
-          "Q total": `${fmt(inputs.Q_total_W / 1000)} kW`,
-          "T bulbo úmido": `${fmt(inputs.Twb_C)} °C`,
-          "T bulbo seco": `${fmt(inputs.Tdb_C)} °C`,
+          "Q total (kW)": (inputs.Q_total_W / 1000).toFixed(1),
+          "Twb (°C)": inputs.Twb_C,
+          "Tdb (°C)": inputs.Tdb_C,
+          "Altitude (m)": inputs.altitude_m,
+          "Filas de tubos": inputs.tubeRows,
+          "Tubos por fila": inputs.tubesPerRow,
+          "Comprimento (m)": inputs.tubeLength_m,
+          "Ø tubo (mm)": inputs.tubeDiameter_mm,
+          "Vazão água (L/min)": inputs.waterFlowRate_Lmin,
+          "Vel. ar (m/s)": inputs.airVelocity_ms,
         }}
         results={{
-          Tc: `${fmt(result.Tc_C)} °C`,
-          "Q rejeitado": `${fmt(result.Q_rejected_W / 1000)} kW`,
-          "Consumo água": `${fmt(result.waterMakeup_Lh)} L/h`,
+          "Tc (°C)": result.Tc_C.toFixed(1),
+          "Approach (K)": (result.Tc_C - inputs.Twb_C).toFixed(1),
+          "Q rejeitado (kW)": (result.Q_rejected_W / 1000).toFixed(1),
+          "UA (kW/K)": (result.UA_WK / 1000).toFixed(2),
+          "NTU": result.NTU.toFixed(2),
+          "Eficiência (%)": (result.eta_rejection * 100).toFixed(1),
+          "Consumo água (L/h)": result.waterMakeup_Lh.toFixed(1),
+          "W ventiladores (W)": result.W_fans_W.toFixed(0),
         }}
       />,
-      `condensador-evaporativo-${new Date().toISOString().slice(0, 10)}.pdf`,
+      "condensador_evaporativo",
     );
+  }, [result, inputs, exportPdf]);
 
-  const handleSave = () => toast.success("Projeto salvo (em memória).");
-  const handleShare = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      toast.success("Link copiado.");
-    } catch {
-      toast.error("Não foi possível copiar.");
-    }
-  };
-  const handleExportCsv = () => toast.info("Exportação CSV em desenvolvimento.");
-  const handleExportExcel = () => toast.info("Exportação Excel em desenvolvimento.");
-  const handleReset = () => setInputs(DEFAULT_INPUTS);
+  const handleShare = useCallback(() => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Link copiado para a área de transferência.");
+  }, []);
 
-  const badges = [`Q: ${fmt(inputs.Q_total_W / 1000, 0)} kW`, `Twb: ${fmt(inputs.Twb_C, 0)}°C`];
-
+  // ── AI Context ──
   const aiContext: AIContext = useMemo(() => ({
-    componentType: "Cond. Evaporativo",
+    componentType: "Condensador Evaporativo",
     tabName: activeTab,
-    parameters: {
+    parameters: result ? {
       "Q total (kW)": (inputs.Q_total_W / 1000).toFixed(1),
-      "T bulbo úmido (°C)": inputs.Twb_C,
-      "T bulbo seco (°C)": inputs.Tdb_C,
-      "Vazão água (L/min)": inputs.waterFlowRate_Lmin,
-      "Velocidade ar (m/s)": inputs.airVelocity_ms,
-    },
+      "Twb (°C)": inputs.Twb_C,
+      "Tdb (°C)": inputs.Tdb_C,
+      "Vel. ar (m/s)": inputs.airVelocity_ms,
+    } : undefined,
     results: result ? {
       "Tc (°C)": result.Tc_C.toFixed(1),
-      "Q rejeitado (kW)": (result.Q_rejected_W / 1000).toFixed(2),
+      "Approach (K)": (result.Tc_C - inputs.Twb_C).toFixed(1),
+      "Q rejeitado (kW)": (result.Q_rejected_W / 1000).toFixed(1),
       "Consumo água (L/h)": result.waterMakeup_Lh.toFixed(1),
     } : undefined,
     warnings: [],
   }), [activeTab, inputs, result]);
 
-  const sidebar = (
-    <WorkspaceInputsSidebar
-      onCalculate={() => setInputs((current) => ({ ...current }))}
-      onReset={handleReset}
-    >
-      <Accordion type="multiple" defaultValue={["op", "geom", "fluid"]} className="w-full">
-        <AccordionItem value="op">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">Operação</AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            <NumberField label="Q total (W)" value={inputs.Q_total_W} onChange={(Q_total_W) => update({ Q_total_W })} />
-            <NumberField label="T bulbo úmido (°C)" value={inputs.Twb_C} onChange={(Twb_C) => update({ Twb_C })} />
-            <NumberField label="T bulbo seco (°C)" value={inputs.Tdb_C} onChange={(Tdb_C) => update({ Tdb_C })} />
-            <NumberField label="Altitude (m)" value={inputs.altitude_m} onChange={(altitude_m) => update({ altitude_m })} />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="geom">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">Geometria</AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            <NumberField label="Fileiras" value={inputs.tubeRows} onChange={(tubeRows) => update({ tubeRows })} />
-            <NumberField label="Tubos/fileira" value={inputs.tubesPerRow} onChange={(tubesPerRow) => update({ tubesPerRow })} />
-            <NumberField label="Comprimento tubo (m)" value={inputs.tubeLength_m} onChange={(tubeLength_m) => update({ tubeLength_m })} />
-            <NumberField label="Diâmetro tubo (mm)" value={inputs.tubeDiameter_mm} onChange={(tubeDiameter_mm) => update({ tubeDiameter_mm })} />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="fluid">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">Fluido / Ar</AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            <NumberField label="Vazão água (L/min)" value={inputs.waterFlowRate_Lmin} onChange={(waterFlowRate_Lmin) => update({ waterFlowRate_Lmin })} />
-            <NumberField label="Velocidade ar (m/s)" value={inputs.airVelocity_ms} onChange={(airVelocity_ms) => update({ airVelocity_ms })} />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </WorkspaceInputsSidebar>
-  );
+  // ── Badges ──
+  const badges = useMemo(() => {
+    const b: string[] = [];
+    if (result) b.push(`Tc ${result.Tc_C.toFixed(1)} °C`);
+    if (result) b.push(`${(result.Q_rejected_W / 1000).toFixed(1)} kW`);
+    return b;
+  }, [result]);
 
-  const header = (
-    <WorkspaceHeader
-      title="Condensador Evaporativo"
-      icon={<Droplets className="h-5 w-5" />}
-      badges={badges}
-      onSave={handleSave}
-      onShare={handleShare}
-      onExportPdf={handleExportPdf}
-      isExportingPdf={pdfGenerating}
-    />
+  // ── Sidebar ──
+  const sidebar = (
+    <div className="flex h-full flex-col gap-0">
+      <div className="flex-1 overflow-y-auto px-3 py-3">
+        <Accordion type="multiple" defaultValue={["load", "air", "geom", "water_spray"]} className="space-y-1">
+
+          {/* Carga Térmica */}
+          <AccordionItem value="load" className="rounded-lg border border-border bg-card">
+            <AccordionTrigger className="px-3 py-2 text-xs font-semibold hover:no-underline">
+              🔥 Carga Térmica
+            </AccordionTrigger>
+            <AccordionContent className="px-3 pb-3 pt-1 space-y-3">
+              <div className="space-y-1">
+                <Label className="text-[10px] text-muted-foreground">Q total (kW)</Label>
+                <Input
+                  type="number"
+                  value={draft.Q_total_W / 1000}
+                  onChange={(e) => update({ Q_total_W: Number(e.target.value) * 1000 })}
+                  className="h-7 text-xs"
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Condições do Ar */}
+          <AccordionItem value="air" className="rounded-lg border border-border bg-card">
+            <AccordionTrigger className="px-3 py-2 text-xs font-semibold hover:no-underline">
+              🌬️ Condições do Ar
+            </AccordionTrigger>
+            <AccordionContent className="px-3 pb-3 pt-1 space-y-3">
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <Label className="text-[10px] text-muted-foreground">Twb (°C)</Label>
+                  <span className="text-[10px] font-medium">{draft.Twb_C} °C</span>
+                </div>
+                <Slider min={10} max={35} step={0.5} value={[draft.Twb_C]}
+                  onValueChange={([v]) => update({ Twb_C: v })} className="h-4" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <Label className="text-[10px] text-muted-foreground">Tdb (°C)</Label>
+                  <span className="text-[10px] font-medium">{draft.Tdb_C} °C</span>
+                </div>
+                <Slider min={15} max={50} step={0.5} value={[draft.Tdb_C]}
+                  onValueChange={([v]) => update({ Tdb_C: v })} className="h-4" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <Label className="text-[10px] text-muted-foreground">Vel. ar (m/s)</Label>
+                  <span className="text-[10px] font-medium">{draft.airVelocity_ms} m/s</span>
+                </div>
+                <Slider min={1} max={6} step={0.1} value={[draft.airVelocity_ms]}
+                  onValueChange={([v]) => update({ airVelocity_ms: v })} className="h-4" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[10px] text-muted-foreground">Altitude (m)</Label>
+                <Input type="number" value={draft.altitude_m}
+                  onChange={(e) => update({ altitude_m: Number(e.target.value) })}
+                  className="h-7 text-xs" />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Geometria */}
+          <AccordionItem value="geom" className="rounded-lg border border-border bg-card">
+            <AccordionTrigger className="px-3 py-2 text-xs font-semibold hover:no-underline">
+              📐 Geometria dos Tubos
+            </AccordionTrigger>
+            <AccordionContent className="px-3 pb-3 pt-1 space-y-3">
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <Label className="text-[10px] text-muted-foreground">Filas de tubos</Label>
+                  <span className="text-[10px] font-medium">{draft.tubeRows}</span>
+                </div>
+                <Slider min={1} max={10} step={1} value={[draft.tubeRows]}
+                  onValueChange={([v]) => update({ tubeRows: v })} className="h-4" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <Label className="text-[10px] text-muted-foreground">Tubos por fila</Label>
+                  <span className="text-[10px] font-medium">{draft.tubesPerRow}</span>
+                </div>
+                <Slider min={4} max={60} step={1} value={[draft.tubesPerRow]}
+                  onValueChange={([v]) => update({ tubesPerRow: v })} className="h-4" />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <Label className="text-[10px] text-muted-foreground">Comprimento (m)</Label>
+                  <Input type="number" value={draft.tubeLength_m}
+                    onChange={(e) => update({ tubeLength_m: Number(e.target.value) })}
+                    className="h-7 text-xs" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] text-muted-foreground">Ø tubo (mm)</Label>
+                  <Input type="number" value={draft.tubeDiameter_mm}
+                    onChange={(e) => update({ tubeDiameter_mm: Number(e.target.value) })}
+                    className="h-7 text-xs" />
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Água de Aspersão */}
+          <AccordionItem value="water_spray" className="rounded-lg border border-border bg-card">
+            <AccordionTrigger className="px-3 py-2 text-xs font-semibold hover:no-underline">
+              💧 Água de Aspersão
+            </AccordionTrigger>
+            <AccordionContent className="px-3 pb-3 pt-1 space-y-3">
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <Label className="text-[10px] text-muted-foreground">Vazão (L/min)</Label>
+                  <span className="text-[10px] font-medium">{draft.waterFlowRate_Lmin}</span>
+                </div>
+                <Slider min={5} max={60} step={1} value={[draft.waterFlowRate_Lmin]}
+                  onValueChange={([v]) => update({ waterFlowRate_Lmin: v })} className="h-4" />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
+
+      {/* Botões de ação */}
+      <div className="border-t border-border px-3 py-3 space-y-2">
+        <Button
+          className="w-full h-9 text-sm font-semibold bg-blue-700 hover:bg-blue-800 text-white"
+          onClick={handleSimulate}
+          disabled={isSimulating}
+        >
+          {isSimulating ? "Calculando…" : "⚡ Calcular"}
+        </Button>
+        <Button variant="outline" className="w-full h-8 text-xs" onClick={handleReset} disabled={isSimulating}>
+          Restaurar Padrões
+        </Button>
+      </div>
+    </div>
   );
 
   return (
-    <WorkspaceLayout header={header} sidebar={sidebar}>
-      <ProjectHeaderBar workspaceType="component_workspace" />
-      <div className="flex h-full flex-col">
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {result ? (
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <TabsList className="flex flex-wrap justify-start">
-                  <TabsTrigger value="results">📋 Resultados</TabsTrigger>
-                  <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
-                  <TabsTrigger value="water">💧 Consumo de Água</TabsTrigger>
-                </TabsList>
-                <WorkspaceAIButton onClick={() => setAiOpen(true)} />
+    <WorkspaceLayout
+      header={
+        <WorkspaceHeader
+          title="Condensador Evaporativo"
+          icon={<Droplets className="h-4 w-4" />}
+          badges={badges}
+          onSave={() => toast.info("Salvar projeto em breve.")}
+          onShare={handleShare}
+          onExportPdf={handleExportPdf}
+          isExportingPdf={isExportingPdf}
+        />
+      }
+      sidebar={sidebar}
+    >
+      <div className="flex h-full flex-col gap-3 p-3">
+        <ProjectHeaderBar workspaceType="component_workspace" />
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+          <TabsList className="flex w-full overflow-x-auto whitespace-nowrap scrollbar-none pb-px h-auto">
+            <TabsTrigger value={TABS.RESULTS} className="shrink-0 text-xs font-semibold data-[state=active]:bg-blue-700 data-[state=active]:text-white">
+              📋 Resultados
+            </TabsTrigger>
+            <TabsTrigger value={TABS.WATER} className="shrink-0 text-xs">💧 Consumo de Água</TabsTrigger>
+            <TabsTrigger value={TABS.ENVELOPE} className="shrink-0 text-xs">📊 Envelope Twb×Tc</TabsTrigger>
+            <TabsTrigger value={TABS.DRAWING} className="shrink-0 text-xs">🏗️ Desenho</TabsTrigger>
+            <TabsTrigger value={TABS.REPORT} className="shrink-0 text-xs">📄 Relatório</TabsTrigger>
+          </TabsList>
+
+          {/* ── Resultados ── */}
+          <TabsContent value={TABS.RESULTS} className="mt-3 flex-1">
+            {result ? (
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+                <ResultCard label="Tc condensação" value={fmtBR(result.Tc_C, 1)} unit="°C" variant="success"
+                  hint="Temperatura de condensação estimada" />
+                <ResultCard label="Approach (Tc−Twb)" value={fmtBR(result.Tc_C - inputs.Twb_C, 1)} unit="K"
+                  variant={result.Tc_C - inputs.Twb_C > 8 ? "danger" : result.Tc_C - inputs.Twb_C > 5 ? "warning" : "success"} />
+                <ResultCard label="Q rejeitado" value={fmtBR(result.Q_rejected_W / 1000, 1)} unit="kW" />
+                <ResultCard label="UA" value={fmtBR(result.UA_WK / 1000, 2)} unit="kW/K" />
+                <ResultCard label="NTU" value={fmtBR(result.NTU, 2)} unit="" />
+                <ResultCard label="Eficiência" value={fmtBR(result.eta_rejection * 100, 1)} unit="%"
+                  variant={result.eta_rejection > 0.85 ? "success" : result.eta_rejection > 0.7 ? "warning" : "danger"} />
+                <ResultCard label="T saída ar" value={fmtBR(result.Tair_out_C, 1)} unit="°C" />
+                <ResultCard label="W ar entrada" value={fmtBR(result.W_in_gkg, 1)} unit="g/kg" />
+                <ResultCard label="Vazão ar" value={fmtBR(result.mDot_air_kgs, 2)} unit="kg/s" />
+                <ResultCard label="Consumo água" value={fmtBR(result.waterMakeup_Lh, 1)} unit="L/h" variant="warning"
+                  hint="Evaporação + purga + drift" />
+                <ResultCard label="W ventiladores" value={fmtBR(result.W_fans_W, 0)} unit="W" />
+                <ResultCard label="Área tubos" value={fmtBR(result.A_ext_m2, 2)} unit="m²" />
               </div>
+            ) : <EmptyState />}
+          </TabsContent>
 
-              <TabsContent value="results" className="mt-3">
-                <ResultsGrid result={result} inputs={inputs} />
-              </TabsContent>
-
-              <TabsContent value="envelope" className="mt-3">
+          {/* ── Consumo de Água ── */}
+          <TabsContent value={TABS.WATER} className="mt-3">
+            {result ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                  <ResultCard label="Evaporação" value={fmtBR(result.waterEvaporation_Lh, 1)} unit="L/h" />
+                  <ResultCard label="Purga (blowdown)" value={fmtBR(result.waterBlowdown_Lh, 1)} unit="L/h" />
+                  <ResultCard label="Drift (arraste)" value={fmtBR(result.waterDrift_Lh, 2)} unit="L/h" />
+                  <ResultCard label="Reposição total" value={fmtBR(result.waterMakeup_Lh, 1)} unit="L/h" variant="warning" />
+                </div>
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                  <ResultCard label="Mensal (720 h)" value={fmtBR((result.waterMakeup_Lh * 720) / 1000, 1)} unit="m³/mês" />
+                  <ResultCard label="Anual (8760 h)" value={fmtBR((result.waterMakeup_Lh * 8760) / 1000, 0)} unit="m³/ano" />
+                  <ResultCard label="CoC (ciclos conc.)" value="3" unit="ciclos" />
+                </div>
                 <div className="rounded-lg border border-border bg-card p-4">
-                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                    <h3 className="text-sm font-semibold">Envelope por bulbo úmido</h3>
-                    <Button size="sm" variant="outline">
-                      <Save className="mr-2 h-4 w-4" /> Salvar
-                    </Button>
+                  <h3 className="mb-3 text-sm font-semibold">Consumo de Água × Twb</h3>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={envelope}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="Twb_C" label={{ value: "Twb (°C)", position: "insideBottom", offset: -5 }} />
+                        <YAxis label={{ value: "Reposição (L/h)", angle: -90, position: "insideLeft" }} />
+                        <Tooltip formatter={(v: number) => fmtBR(v, 1)} />
+                        <Line type="monotone" dataKey="waterMakeup_Lh" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
                   </div>
-                  <Chart data={envelope} xKey="Twb_C" yKey="Q_rejected_kW" yLabel="Q rejeitado (kW)" />
                 </div>
-              </TabsContent>
+              </div>
+            ) : <EmptyState />}
+          </TabsContent>
 
-              <TabsContent value="water" className="mt-3 space-y-3">
-                <WaterDetail result={result} />
-                <div className="rounded-lg border border-border bg-card p-4">
-                  <h3 className="mb-3 text-sm font-semibold">Consumo × Twb</h3>
-                  <Chart data={envelope} xKey="Twb_C" yKey="waterMakeup_Lh" yLabel="Reposição (L/h)" />
+          {/* ── Envelope Twb×Tc ── */}
+          <TabsContent value={TABS.ENVELOPE} className="mt-3">
+            {result ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold">Envelope Twb × Tc</h3>
+                  <Button size="sm" variant="outline" onClick={handleSaveEnvelope}>
+                    <Save className="mr-1 h-3 w-3" /> Salvar no Projeto
+                  </Button>
                 </div>
-              </TabsContent>
-            </Tabs>
-          ) : (
-            <EmptyResults />
-          )}
-        </div>
+                <div className="rounded-lg border border-border bg-card p-4">
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={envelope}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="Twb_C" label={{ value: "Twb (°C)", position: "insideBottom", offset: -5 }} />
+                        <YAxis label={{ value: "Tc (°C)", angle: -90, position: "insideLeft" }} />
+                        <Tooltip formatter={(v: number) => fmtBR(v, 1)} />
+                        <Line type="monotone" dataKey="Tc_C" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                <div className="overflow-x-auto rounded-lg border border-border">
+                  <table className="w-full text-xs">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="px-3 py-2 text-left font-semibold">Twb (°C)</th>
+                        <th className="px-3 py-2 text-right font-semibold">Tc (°C)</th>
+                        <th className="px-3 py-2 text-right font-semibold">Q rej. (kW)</th>
+                        <th className="px-3 py-2 text-right font-semibold">Água (L/h)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {envelope.map((pt, i) => (
+                        <tr key={i} className={i % 2 === 0 ? "bg-background" : "bg-muted/20"}>
+                          <td className="px-3 py-1.5">{pt.Twb_C}</td>
+                          <td className="px-3 py-1.5 text-right">{fmtBR(pt.Tc_C, 1)}</td>
+                          <td className="px-3 py-1.5 text-right">{fmtBR(pt.Q_rejected_W / 1000, 1)}</td>
+                          <td className="px-3 py-1.5 text-right">{fmtBR(pt.waterMakeup_Lh, 1)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : <EmptyState />}
+          </TabsContent>
+
+          {/* ── Desenho ── */}
+          <TabsContent value={TABS.DRAWING} className="mt-3">
+            <DrawingTab
+              heightMm={inputs.tubesPerRow * 25}
+              widthMm={inputs.tubeLength_m * 1000}
+              depthMm={inputs.tubeRows * 25}
+              rows={inputs.tubeRows}
+              tubesPerRow={inputs.tubesPerRow}
+              tubeOuterDiamMm={inputs.tubeDiameter_mm}
+              finPitchMm={3}
+              circuits={Math.max(1, Math.floor(inputs.tubesPerRow / 4))}
+              refrigerantId="R404A"
+              componentType="condenser"
+              projectName="Condensador Evaporativo"
+            />
+          </TabsContent>
+
+          {/* ── Relatório ── */}
+          <TabsContent value={TABS.REPORT} className="mt-3">
+            {result ? (
+              <div className="rounded-lg border border-border bg-card p-4 space-y-4">
+                <h3 className="text-sm font-semibold">Relatório Técnico — Condensador Evaporativo</h3>
+                <div className="grid grid-cols-2 gap-6 text-xs">
+                  <div>
+                    <h4 className="mb-2 font-semibold text-muted-foreground uppercase tracking-wide text-[10px]">Entradas</h4>
+                    <table className="w-full">
+                      <tbody className="divide-y divide-border">
+                        {[
+                          ["Q total", `${(inputs.Q_total_W / 1000).toFixed(1)} kW`],
+                          ["Twb", `${inputs.Twb_C} °C`],
+                          ["Tdb", `${inputs.Tdb_C} °C`],
+                          ["Altitude", `${inputs.altitude_m} m`],
+                          ["Filas de tubos", inputs.tubeRows],
+                          ["Tubos por fila", inputs.tubesPerRow],
+                          ["Comprimento", `${inputs.tubeLength_m} m`],
+                          ["Ø tubo", `${inputs.tubeDiameter_mm} mm`],
+                          ["Vazão água", `${inputs.waterFlowRate_Lmin} L/min`],
+                          ["Vel. ar", `${inputs.airVelocity_ms} m/s`],
+                        ].map(([k, v]) => (
+                          <tr key={String(k)}>
+                            <td className="py-1 text-muted-foreground">{k}</td>
+                            <td className="py-1 text-right font-medium">{v}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div>
+                    <h4 className="mb-2 font-semibold text-muted-foreground uppercase tracking-wide text-[10px]">Resultados</h4>
+                    <table className="w-full">
+                      <tbody className="divide-y divide-border">
+                        {[
+                          ["Tc", `${result.Tc_C.toFixed(1)} °C`],
+                          ["Approach (Tc−Twb)", `${(result.Tc_C - inputs.Twb_C).toFixed(1)} K`],
+                          ["Q rejeitado", `${(result.Q_rejected_W / 1000).toFixed(1)} kW`],
+                          ["UA", `${(result.UA_WK / 1000).toFixed(2)} kW/K`],
+                          ["NTU", result.NTU.toFixed(2)],
+                          ["Eficiência", `${(result.eta_rejection * 100).toFixed(1)} %`],
+                          ["T saída ar", `${result.Tair_out_C.toFixed(1)} °C`],
+                          ["Consumo água", `${result.waterMakeup_Lh.toFixed(1)} L/h`],
+                          ["W ventiladores", `${result.W_fans_W.toFixed(0)} W`],
+                          ["Área tubos", `${result.A_ext_m2.toFixed(2)} m²`],
+                        ].map(([k, v]) => (
+                          <tr key={String(k)}>
+                            <td className="py-1 text-muted-foreground">{k}</td>
+                            <td className="py-1 text-right font-medium">{v}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            ) : <EmptyState />}
+          </TabsContent>
+        </Tabs>
 
         <ActionBar
           onExportCsv={handleExportCsv}
@@ -227,132 +588,23 @@ export function EvaporativeCondenserWorkspacePage() {
           onExportPdf={handleExportPdf}
           onShare={handleShare}
           hasResults={!!result}
-          isExportingPdf={pdfGenerating}
+          isExportingPdf={isExportingPdf}
         />
       </div>
+
       <WorkspaceAIPanel open={aiOpen} onClose={() => setAiOpen(false)} context={aiContext} />
     </WorkspaceLayout>
   );
 }
 
-function ResultsGrid({
-  result,
-  inputs,
-}: {
-  result: EvaporativeCondenserResult;
-  inputs: EvaporativeCondenserInputs;
-}) {
-  const approach = result.approach_K ?? result.Tc_C - inputs.Twb_C;
-  const ntu = result.NTU ?? -Math.log(Math.max(1e-6, 1 - result.eta_rejection));
-  const tairOut = result.Tair_out_C ?? inputs.Tdb_C + 3;
-  const wIn = result.W_in_gkg ?? 12;
-  const mDotAir = result.mDot_air_kgs ?? 1.5;
-  const aExt =
-    result.A_ext_m2 ??
-    Math.PI *
-      (inputs.tubeDiameter_mm / 1000) *
-      inputs.tubeLength_m *
-      inputs.tubeRows *
-      inputs.tubesPerRow;
-
-  return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-      <ResultCard label="Tc" value={fmt(result.Tc_C)} unit="°C" variant="success" />
-      <ResultCard
-        label="Approach (Tc−Twb)"
-        value={fmt(approach, 1)}
-        unit="K"
-        variant={approach > 8 ? "danger" : approach > 5 ? "warning" : "success"}
-      />
-      <ResultCard label="Q rejeitado" value={fmt(result.Q_rejected_W / 1000)} unit="kW" />
-      <ResultCard label="UA" value={fmt(result.UA_WK / 1000, 2)} unit="kW/K" />
-      <ResultCard label="NTU" value={fmt(ntu, 2)} unit="" />
-      <ResultCard label="Eficiência" value={fmt(result.eta_rejection * 100, 1)} unit="%" />
-      <ResultCard label="T saída ar" value={fmt(tairOut, 1)} unit="°C" />
-      <ResultCard label="W ar entrada" value={fmt(wIn, 1)} unit="g/kg" />
-      <ResultCard label="Vazão ar" value={fmt(mDotAir, 2)} unit="kg/s" />
-      <ResultCard label="Consumo água" value={fmt(result.waterMakeup_Lh, 1)} unit="L/h" />
-      <ResultCard label="W ventiladores" value={fmt(result.W_fans_W, 0)} unit="W" />
-      <ResultCard label="Área tubos" value={fmt(aExt, 2)} unit="m²" />
-    </div>
-  );
-}
-
-function WaterDetail({ result }: { result: EvaporativeCondenserResult }) {
-  const blowdown = Math.max(0, result.waterMakeup_Lh - result.waterEvaporation_Lh);
-  const drift = result.waterMakeup_Lh * 0.001;
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <ResultCard label="Evaporação" value={fmt(result.waterEvaporation_Lh, 1)} unit="L/h" />
-        <ResultCard label="Purga (blowdown)" value={fmt(blowdown, 1)} unit="L/h" />
-        <ResultCard label="Drift (arraste)" value={fmt(drift, 2)} unit="L/h" />
-        <ResultCard label="Reposição total" value={fmt(result.waterMakeup_Lh, 1)} unit="L/h" variant="warning" />
-      </div>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        <ResultCard label="Mensal (720h)" value={fmt((result.waterMakeup_Lh * 720) / 1000, 1)} unit="m³/mês" />
-        <ResultCard label="Anual (8760h)" value={fmt((result.waterMakeup_Lh * 8760) / 1000, 0)} unit="m³/ano" />
-        <ResultCard label="CoC (ciclos conc.)" value="3" unit="ciclos" />
-      </div>
-    </div>
-  );
-}
-
-function EmptyResults() {
+// ── EmptyState ────────────────────────────────────────────────────────────────
+function EmptyState() {
   return (
     <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-3 text-muted-foreground">
-      <Calculator className="h-12 w-12 opacity-30" />
+      <Droplets className="h-12 w-12 opacity-30" />
       <p className="text-sm">
         Configure os parâmetros e clique em <strong>Calcular</strong>
       </p>
-    </div>
-  );
-}
-
-function Chart({
-  data,
-  xKey,
-  yKey,
-  yLabel,
-}: {
-  data: Array<Record<string, number>>;
-  xKey: string;
-  yKey: string;
-  yLabel: string;
-}) {
-  return (
-    <div className="h-72">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey={xKey} />
-          <YAxis label={{ value: yLabel, angle: -90, position: "insideLeft" }} />
-          <Tooltip formatter={(value: number) => fmt(value)} />
-          <Line type="monotone" dataKey={yKey} stroke={CHART_COLORS.secondary} strokeWidth={2} dot={{ r: 3 }} />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
-function NumberField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <div className="space-y-1">
-      <Label className="text-[10px] text-muted-foreground">{label}</Label>
-      <Input
-        type="number"
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-        className="h-8 text-xs"
-      />
     </div>
   );
 }
