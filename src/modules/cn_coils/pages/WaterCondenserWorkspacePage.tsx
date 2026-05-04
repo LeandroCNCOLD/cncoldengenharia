@@ -37,7 +37,7 @@ const fmt = (value: number, maximumFractionDigits = 2) =>
   value.toLocaleString("pt-BR", { maximumFractionDigits });
 
 const DEFAULT_INPUTS: WaterCondenserInputs = {
-  Q_total_W: 20000,
+  Q_total_W: 30_000,
   Tw_in_C: 30,
   waterFlowRate_m3h: 3,
   tubeCount: 20,
@@ -45,6 +45,8 @@ const DEFAULT_INPUTS: WaterCondenserInputs = {
   tubeDiameter_mm: 19.05,
   passes: 2,
   refrigerant: "R404A",
+  superheat_K: 20,
+  subcooling_K: 5,
 };
 
 export function WaterCondenserWorkspacePage() {
@@ -181,27 +183,31 @@ export function WaterCondenserWorkspacePage() {
           <TabsContent value="results" className="mt-3">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               <ResultCard label="Tc" value={fmt(result.Tc_C)} unit="°C" variant={variant} />
-              <ResultCard label="T água saída" value={fmt(result.Tw_out_C)} unit="°C" />
-              <ResultCard label="LMTD" value={fmt(result.LMTD_K)} unit="K" />
-              <ResultCard label="U" value={fmt(result.U_Wm2K, 0)} unit="W/m²K" />
+              <ResultCard label="T água saída" value={fmt(result.Tw_out_C, 1)} unit="°C" />
+              <ResultCard label="LMTD" value={fmt(result.LMTD_K, 1)} unit="K" />
+              <ResultCard label="U global" value={fmt(result.U_Wm2K, 0)} unit="W/m²K" />
+              <ResultCard label="h água" value={fmt(result.h_water_Wm2K ?? 0, 0)} unit="W/m²K" />
+              <ResultCard label="h refrigerante" value={fmt(result.h_ref_Wm2K ?? 0, 0)} unit="W/m²K" />
+              <ResultCard label="v água" value={fmt(result.v_water_ms ?? 0, 2)} unit="m/s" />
+              <ResultCard label="Re água" value={fmt(result.Re_water ?? 0, 0)} unit="" hint={(result.Re_water ?? 0) > 2300 ? "Turbulento" : "Laminar"} />
               <ResultCard
                 label="Área necessária"
-                value={fmt(result.A_needed_m2)}
+                value={fmt(result.A_needed_m2, 2)}
                 unit="m²"
               />
               <ResultCard
                 label="Área disponível"
-                value={fmt(result.A_available_m2)}
+                value={fmt(result.A_available_m2, 2)}
                 unit="m²"
               />
               <ResultCard
-                label="Margem"
-                value={`${fmt(result.areaMargin * 100)}%`}
+                label="Margem de área"
+                value={`${fmt(result.areaMargin * 100, 1)}%`}
                 variant={variant}
                 hint={marginLabel}
               />
-              <ResultCard label="ΔP água" value={fmt(result.pressureDrop_kPa)} unit="kPa" />
-              <ResultCard label="Bomba" value={fmt(result.pumpPower_W)} unit="W" />
+              <ResultCard label="ΔP água" value={fmt(result.pressureDrop_kPa, 2)} unit="kPa" />
+              <ResultCard label="Pot. bomba" value={fmt(result.pumpPower_W, 0)} unit="W" />
             </div>
           </TabsContent>
 

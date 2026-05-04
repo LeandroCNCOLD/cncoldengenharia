@@ -227,16 +227,24 @@ export function HeatingCoilWorkspacePage() {
 
           <TabsContent value="results" className="mt-3">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              <ResultCard label="Tar saída" value={fmt(result.Tair_out_C)} unit="°C" variant="success" />
-              <ResultCard label="UR saída" value={`${fmt(result.RH_out * 100)}%`} />
+              <ResultCard label="Tar saída" value={fmt(result.Tair_out_C, 1)} unit="°C" variant="success" />
+              <ResultCard label="UR saída" value={`${fmt(result.RH_out * 100, 1)}%`} />
               <ResultCard
                 label="Q aquecimento"
-                value={fmt(result.Q_heating_W / 1000)}
+                value={fmt(result.Q_heating_W / 1000, 2)}
                 unit="kW"
                 variant="success"
               />
-              <ResultCard label="NTU" value={fmt(result.NTU)} />
-              <ResultCard label="Efetividade" value={`${fmt(result.epsilon * 100)}%`} />
+              <ResultCard label="NTU" value={fmt(result.NTU, 2)} />
+              <ResultCard label="Efetividade" value={`${fmt(result.epsilon * 100, 1)}%`} />
+              <ResultCard label="U global" value={fmt(result.U_Wm2K, 0)} unit="W/m²K" />
+              <ResultCard label="h ar" value={fmt(result.h_air_Wm2K ?? 0, 0)} unit="W/m²K" />
+              <ResultCard label="h fluido" value={fmt(result.h_fluid_Wm2K ?? 0, 0)} unit="W/m²K" />
+              <ResultCard label="Tf média" value={fmt(result.Tf_mean_C ?? 0, 1)} unit="°C" />
+              <ResultCard label="W entrada" value={fmt(result.W_in_gkg, 1)} unit="g/kg" />
+              <ResultCard label="h entrada" value={fmt(result.h_in_kJkg ?? 0, 1)} unit="kJ/kg" />
+              <ResultCard label="h saída" value={fmt(result.h_out_kJkg ?? 0, 1)} unit="kJ/kg" />
+              <ResultCard label="Vazão ar" value={fmt(result.mDot_air_kgs ?? 0, 3)} unit="kg/s" />
               <ResultCard label="ΔP ar" value={fmt(result.pressureDrop_Pa, 0)} unit="Pa" />
             </div>
           </TabsContent>

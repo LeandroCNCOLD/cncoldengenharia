@@ -211,27 +211,40 @@ function ResultsGrid({ result }: { result: EvaporativeCondenserResult }) {
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
       <ResultCard label="Tc" value={fmt(result.Tc_C)} unit="°C" variant="success" />
+      <ResultCard
+        label="Approach (Tc−Twb)"
+        value={fmt(result.approach_K, 1)}
+        unit="K"
+        variant={result.approach_K > 8 ? "danger" : result.approach_K > 5 ? "warning" : "success"}
+      />
       <ResultCard label="Q rejeitado" value={fmt(result.Q_rejected_W / 1000)} unit="kW" />
-      <ResultCard label="UA" value={fmt(result.UA_WK)} unit="W/K" />
-      <ResultCard label="Eficiência" value={fmt(result.eta_rejection * 100)} unit="%" />
-      <ResultCard label="Consumo água" value={fmt(result.waterMakeup_Lh)} unit="L/h" />
-      <ResultCard label="W ventiladores" value={fmt(result.W_fans_W)} unit="W" />
+      <ResultCard label="UA" value={fmt(result.UA_WK / 1000, 1)} unit="kW/K" />
+      <ResultCard label="NTU" value={fmt(result.NTU, 2)} unit="" />
+      <ResultCard label="Eficiência" value={fmt(result.eta_rejection * 100, 1)} unit="%" />
+      <ResultCard label="T saída ar" value={fmt(result.Tair_out_C, 1)} unit="°C" />
+      <ResultCard label="W ar entrada" value={fmt(result.W_in_gkg, 1)} unit="g/kg" />
+      <ResultCard label="Vazão ar" value={fmt(result.mDot_air_kgs, 2)} unit="kg/s" />
+      <ResultCard label="Consumo água" value={fmt(result.waterMakeup_Lh, 1)} unit="L/h" />
+      <ResultCard label="W ventiladores" value={fmt(result.W_fans_W, 0)} unit="W" />
+      <ResultCard label="Área tubos" value={fmt(result.A_ext_m2, 2)} unit="m²" />
     </div>
   );
 }
 
 function WaterDetail({ result }: { result: EvaporativeCondenserResult }) {
-  const purge = result.waterMakeup_Lh - result.waterEvaporation_Lh;
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-      <ResultCard label="Evaporação" value={fmt(result.waterEvaporation_Lh, 1)} unit="L/h" />
-      <ResultCard label="Purga (drift)" value={fmt(purge, 1)} unit="L/h" />
-      <ResultCard label="Reposição" value={fmt(result.waterMakeup_Lh, 1)} unit="L/h" />
-      <ResultCard
-        label="Mensal"
-        value={fmt((result.waterMakeup_Lh * 720) / 1000, 1)}
-        unit="m³/mês"
-      />
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <ResultCard label="Evaporação" value={fmt(result.waterEvaporation_Lh, 1)} unit="L/h" />
+        <ResultCard label="Purga (blowdown)" value={fmt(result.waterBlowdown_Lh ?? 0, 1)} unit="L/h" />
+        <ResultCard label="Drift (arraste)" value={fmt(result.waterDrift_Lh ?? 0, 2)} unit="L/h" />
+        <ResultCard label="Reposição total" value={fmt(result.waterMakeup_Lh, 1)} unit="L/h" variant="warning" />
+      </div>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+        <ResultCard label="Mensal (720h)" value={fmt((result.waterMakeup_Lh * 720) / 1000, 1)} unit="m³/mês" />
+        <ResultCard label="Anual (8760h)" value={fmt((result.waterMakeup_Lh * 8760) / 1000, 0)} unit="m³/ano" />
+        <ResultCard label="CoC (ciclos conc.)" value="3" unit="ciclos" />
+      </div>
     </div>
   );
 }
