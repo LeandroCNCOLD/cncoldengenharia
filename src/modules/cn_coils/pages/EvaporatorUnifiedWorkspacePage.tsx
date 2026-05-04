@@ -480,7 +480,10 @@ export function EvaporatorUnifiedWorkspacePage() {
     setCompressorMode("ari"); setFrequency(60); setVoltage(380);
   };
 
-  const handleSave = () => toast.success("Projeto salvo (em memória).");
+  const handleSave = () => {
+    toast.success("Projeto salvo (em memória).");
+    setNextStepOpen(true);
+  };
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
