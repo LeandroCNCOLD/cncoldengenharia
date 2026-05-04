@@ -158,11 +158,11 @@ export function Sidebar({ onClose }: SidebarProps = {}) {
                       onClick={onClose}
                       className={
                         active
-                          ? "flex h-[17px] items-center gap-1.5 rounded bg-sidebar-primary px-2 text-[10px] font-medium leading-none text-sidebar-primary-foreground"
-                          : "flex h-[17px] items-center gap-1.5 rounded px-2 text-[10px] leading-none text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                          ? "flex h-[22px] items-center gap-1.5 rounded bg-sidebar-primary px-2 text-[11px] font-medium leading-none text-sidebar-primary-foreground"
+                          : "flex h-[22px] items-center gap-1.5 rounded px-2 text-[11px] leading-none text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                       }
                     >
-                      <Icon className="h-2.5 w-2.5 shrink-0" />
+                      <Icon className="h-3 w-3 shrink-0" />
                       <span className="truncate">{item.label}</span>
                       {item.comingSoon && (
                         <span className="ml-auto rounded bg-amber-500/20 px-0.5 py-px text-[7px] font-semibold uppercase leading-none tracking-wide text-amber-300">
