@@ -34,6 +34,8 @@ import {
   type EvaporativeCondenserInputs,
   type EvaporativeCondenserResult,
 } from "../hooks/useEvaporativeCondenserSimulation";
+import { WorkspaceAIButton, WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
+import type { AIContext } from "../components/WorkspaceAIChat";
 
 const fmt = (value: number, maximumFractionDigits = 2) =>
   value.toLocaleString("pt-BR", { maximumFractionDigits });
@@ -54,6 +56,8 @@ const DEFAULT_INPUTS: EvaporativeCondenserInputs = {
 export function EvaporativeCondenserWorkspacePage() {
   const [inputs, setInputs] = useState<EvaporativeCondenserInputs>(DEFAULT_INPUTS);
   const { isGenerating: pdfGenerating, exportPdf } = usePdfExport();
+  const [activeTab, setActiveTab] = useState("results");
+  const [aiOpen, setAiOpen] = useState(false);
 
   const result = useMemo(() => calculateEvaporativeCondenser(inputs), [inputs]);
   const envelope = useMemo(
