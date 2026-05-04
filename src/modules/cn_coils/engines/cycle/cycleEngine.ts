@@ -35,9 +35,16 @@ function buildStatePoint(
   return { T_C, P_kPa, h_kJkg, s_kJkgK, quality, phase };
 }
 
+function normalizeWarning(warning: string): string {
+  return warning.replace(/\d+\.\d+/g, "X");
+}
+
 function pushUnique(target: string[], source: string[]): void {
   for (const warning of source) {
-    if (!target.includes(warning)) target.push(warning);
+    const normalized = normalizeWarning(warning);
+    if (!target.some((existing) => normalizeWarning(existing) === normalized)) {
+      target.push(warning);
+    }
   }
 }
 

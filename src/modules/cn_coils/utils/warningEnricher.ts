@@ -19,7 +19,7 @@ export interface EnrichedWarning {
 
 // ── Regras de enriquecimento ─────────────────────────────────────────────────
 interface EnrichRule {
-  match: RegExp | string;
+  match: RegExp | string | ((raw: string) => boolean);
   severity: WarningSeverity;
   title: string;
   explanation: string;
@@ -44,7 +44,14 @@ const ENRICH_RULES: EnrichRule[] = [
   },
   // ── Superaquecimento baixo ─────────────────────────────────────────────────
   {
-    match: /superheat.*[0-2][,.]?\d*\s*K|SH.*[0-2][,.]?\d*\s*K|superaquecimento.*baixo/i,
+    match: (raw: string) => {
+      const match = raw.match(/SH\s+real\s*\(\s*([\d.,]+)\s*K\)/i);
+      if (match) {
+        const value = Number.parseFloat(match[1].replace(",", "."));
+        return Number.isFinite(value) && value < 3;
+      }
+      return /superaquecimento.*baixo/i.test(raw);
+    },
     severity: "error",
     title: "Superaquecimento insuficiente",
     explanation:
@@ -195,7 +202,9 @@ export function enrichWarnings(rawWarnings: string[]): EnrichedWarning[] {
       const matches =
         typeof rule.match === "string"
           ? raw.toLowerCase().includes(rule.match.toLowerCase())
-          : rule.match.test(raw);
+          : typeof rule.match === "function"
+            ? rule.match(raw)
+            : rule.match.test(raw);
       if (matches) {
         return {
           raw,
