@@ -111,6 +111,24 @@ export function EvaporativeCondenserWorkspacePage() {
 
   const badges = [`Q: ${fmt(inputs.Q_total_W / 1000, 0)} kW`, `Twb: ${fmt(inputs.Twb_C, 0)}°C`];
 
+  const aiContext: AIContext = useMemo(() => ({
+    componentType: "Cond. Evaporativo",
+    tabName: activeTab,
+    parameters: {
+      "Q total (kW)": (inputs.Q_total_W / 1000).toFixed(1),
+      "T bulbo úmido (°C)": inputs.Twb_C,
+      "T bulbo seco (°C)": inputs.Tdb_C,
+      "Vazão água (L/min)": inputs.waterFlowRate_Lmin,
+      "Velocidade ar (m/s)": inputs.airVelocity_ms,
+    },
+    results: result ? {
+      "Tc (°C)": result.Tc_C.toFixed(1),
+      "Q rejeitado (kW)": (result.Q_rejected_W / 1000).toFixed(2),
+      "Consumo água (L/h)": result.waterMakeup_Lh.toFixed(1),
+    } : undefined,
+    warnings: [],
+  }), [activeTab, inputs, result]);
+
   const sidebar = (
     <WorkspaceInputsSidebar
       onCalculate={() => setInputs((current) => ({ ...current }))}
@@ -164,12 +182,15 @@ export function EvaporativeCondenserWorkspacePage() {
       <div className="flex h-full flex-col">
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {result ? (
-            <Tabs defaultValue="results" className="w-full">
-              <TabsList className="flex w-full flex-wrap justify-start">
-                <TabsTrigger value="results">📋 Resultados</TabsTrigger>
-                <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
-                <TabsTrigger value="water">💧 Consumo de Água</TabsTrigger>
-              </TabsList>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <TabsList className="flex flex-wrap justify-start">
+                  <TabsTrigger value="results">📋 Resultados</TabsTrigger>
+                  <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
+                  <TabsTrigger value="water">💧 Consumo de Água</TabsTrigger>
+                </TabsList>
+                <WorkspaceAIButton onClick={() => setAiOpen(true)} />
+              </div>
 
               <TabsContent value="results" className="mt-3">
                 <ResultsGrid result={result} inputs={inputs} />
