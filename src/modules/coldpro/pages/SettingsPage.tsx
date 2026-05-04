@@ -177,6 +177,13 @@ function UsersTab() {
       <CardContent>
         {loading ? (
           <p className="text-sm text-slate-500">Carregando...</p>
+        ) : error ? (
+          <div className="space-y-2">
+            <p className="text-sm text-red-600">{error}</p>
+            <Button size="sm" variant="outline" onClick={() => void load()}>
+              Tentar novamente
+            </Button>
+          </div>
         ) : (
           <Table>
             <TableHeader>
