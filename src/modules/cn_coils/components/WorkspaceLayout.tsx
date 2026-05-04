@@ -13,7 +13,7 @@ interface WorkspaceLayoutProps {
 
 /**
  * Layout padrão de workspace: header + (sidebar 320px | área de resultados).
- * Em mobile, a sidebar vira drawer acessível por um botão flutuante.
+ * Em mobile, a sidebar vira drawer lateral acessível por um botão flutuante.
  */
 export function WorkspaceLayout({ header, sidebar, children }: WorkspaceLayoutProps) {
   const isMobile = useIsMobile();
@@ -43,7 +43,8 @@ export function WorkspaceLayout({ header, sidebar, children }: WorkspaceLayoutPr
               <SlidersHorizontal className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="h-[85vh] overflow-y-auto p-0">
+          {/* Lateral sheet — easier to scroll than bottom sheet on mobile */}
+          <SheetContent side="left" className="w-[320px] max-w-[90vw] overflow-y-auto p-0 [&>button]:hidden">
             {sidebar}
           </SheetContent>
         </Sheet>

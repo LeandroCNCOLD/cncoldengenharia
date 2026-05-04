@@ -617,16 +617,16 @@ function ResultsView({
       </div>
 
       <Tabs defaultValue="ph" className="w-full">
-        <TabsList className="flex w-full flex-wrap justify-start">
-          <TabsTrigger value="ph">🔄 Ciclo P-H</TabsTrigger>
-          <TabsTrigger value="results">📋 Resultados</TabsTrigger>
-          <TabsTrigger value="envelope">📊 Envelope Q×Te</TabsTrigger>
-          <TabsTrigger value="frost-analysis">❄️ Geada</TabsTrigger>
-          <TabsTrigger value="map">📈 Mapa Operacional</TabsTrigger>
-          <TabsTrigger value="uncertainty">📐 Incerteza</TabsTrigger>
-          <TabsTrigger value="optimization">⚙️ Otimização</TabsTrigger>
-          <TabsTrigger value="series">🔗 Coils em Série</TabsTrigger>
-          <TabsTrigger value="frost">🧊 Geada Avançada</TabsTrigger>
+        <TabsList className="flex w-full overflow-x-auto whitespace-nowrap scrollbar-none pb-px">
+          <TabsTrigger value="ph" className="shrink-0">🔄 Ciclo P-H</TabsTrigger>
+          <TabsTrigger value="results" className="shrink-0">📋 Resultados</TabsTrigger>
+          <TabsTrigger value="envelope" className="shrink-0">📊 Envelope Q×Te</TabsTrigger>
+          <TabsTrigger value="frost-analysis" className="shrink-0">❄️ Geada</TabsTrigger>
+          <TabsTrigger value="map" className="shrink-0">📈 Mapa Operacional</TabsTrigger>
+          <TabsTrigger value="uncertainty" className="shrink-0">📐 Incerteza</TabsTrigger>
+          <TabsTrigger value="optimization" className="shrink-0">⚙️ Otimização</TabsTrigger>
+          <TabsTrigger value="series" className="shrink-0">🔗 Coils em Série</TabsTrigger>
+          <TabsTrigger value="frost" className="shrink-0">🧊 Geada Avançada</TabsTrigger>
         </TabsList>
 
         <TabsContent value="ph" className="mt-3">

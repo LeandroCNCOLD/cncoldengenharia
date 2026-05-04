@@ -1,4 +1,4 @@
-import { Bell, Settings, ChevronRight } from "lucide-react";
+import { Bell, Settings, ChevronRight, Menu } from "lucide-react";
 import { useRouterState } from "@tanstack/react-router";
 import { useUserModeStore } from "../../stores/useUserModeStore";
 import { useSessionStore } from "../../stores/useSessionStore";
@@ -19,6 +19,7 @@ const MODE_BADGE: Record<UserMode, string> = {
 
 interface TopBarProps {
   onToggleAI: () => void;
+  onToggleSidebar?: () => void;
 }
 
 interface Crumb {
@@ -51,7 +52,7 @@ function buildCrumbs(pathname: string): Crumb[] {
   return match ? match.crumbs : [{ label: "ColdPro V2" }];
 }
 
-export function TopBar({ onToggleAI }: TopBarProps) {
+export function TopBar({ onToggleAI, onToggleSidebar }: TopBarProps) {
   const mode = useUserModeStore((s) => s.mode);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const activeSession = useSessionStore((s) =>
@@ -63,40 +64,54 @@ export function TopBar({ onToggleAI }: TopBarProps) {
 
   return (
     <header className="flex h-11 shrink-0 items-center justify-between gap-2 border-b border-border bg-background px-3 sm:px-4">
-      <nav className="flex min-w-0 items-center gap-1 text-xs" aria-label="Breadcrumb">
-        <span className="hidden text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 sm:inline">
-          ColdPro V2
-        </span>
-        {crumbs.map((c, i) => {
-          const last = i === crumbs.length - 1;
-          return (
-            <span key={i} className="flex min-w-0 items-center gap-1">
-              <ChevronRight className="hidden h-3 w-3 text-muted-foreground/40 sm:inline" />
-              <span
-                className={
-                  last
-                    ? "truncate font-semibold text-foreground"
-                    : "truncate text-muted-foreground"
-                }
-              >
-                {c.label}
-              </span>
-            </span>
-          );
-        })}
-        {showSession && (
-          <span className="ml-2 hidden items-center gap-1 border-l border-border pl-2 sm:flex">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70">
-              Sessão
-            </span>
-            {activeSession ? (
-              <span className="truncate font-medium text-foreground">{activeSession.name}</span>
-            ) : (
-              <span className="truncate text-muted-foreground">Nenhuma ativa</span>
-            )}
-          </span>
+      <div className="flex min-w-0 items-center gap-2">
+        {/* Hamburger — only on mobile (<lg) */}
+        {onToggleSidebar && (
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            className="rounded p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground lg:hidden"
+            aria-label="Abrir menu"
+          >
+            <Menu className="h-4 w-4" />
+          </button>
         )}
-      </nav>
+
+        <nav className="flex min-w-0 items-center gap-1 text-xs" aria-label="Breadcrumb">
+          <span className="hidden text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 sm:inline">
+            ColdPro V2
+          </span>
+          {crumbs.map((c, i) => {
+            const last = i === crumbs.length - 1;
+            return (
+              <span key={i} className="flex min-w-0 items-center gap-1">
+                <ChevronRight className="hidden h-3 w-3 text-muted-foreground/40 sm:inline" />
+                <span
+                  className={
+                    last
+                      ? "truncate font-semibold text-foreground"
+                      : "truncate text-muted-foreground"
+                  }
+                >
+                  {c.label}
+                </span>
+              </span>
+            );
+          })}
+          {showSession && (
+            <span className="ml-2 hidden items-center gap-1 border-l border-border pl-2 sm:flex">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70">
+                Sessão
+              </span>
+              {activeSession ? (
+                <span className="truncate font-medium text-foreground">{activeSession.name}</span>
+              ) : (
+                <span className="truncate text-muted-foreground">Nenhuma ativa</span>
+              )}
+            </span>
+          )}
+        </nav>
+      </div>
 
       <div className="flex shrink-0 items-center gap-1.5">
         <span

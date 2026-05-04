@@ -24,6 +24,7 @@ import {
   Wind,
   Waves,
   Zap,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -123,7 +124,11 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+export function Sidebar({ onClose }: SidebarProps = {}) {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -139,16 +144,27 @@ export function Sidebar() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <Snowflake className="h-5 w-5 text-primary-foreground" />
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <div className="text-sm font-bold leading-tight text-sidebar-foreground">
               <span className="text-primary">CN</span>Cold
             </div>
             <div className="text-xs leading-tight text-sidebar-foreground/60">Engenharia</div>
           </div>
+          {/* Close button — only shown when onClose is provided (mobile drawer) */}
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded p-1 text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              aria-label="Fechar menu"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 
-      <nav className="min-h-0 flex-1 overflow-hidden px-2 py-0.5">
+      <nav className="min-h-0 flex-1 overflow-y-auto px-2 py-0.5">
         {NAV_GROUPS.map((group, gIdx) => (
           <div key={group.label} className={gIdx === 0 ? "" : "pt-1"}>
             <p className="px-2 pb-px text-[8px] font-semibold uppercase leading-none tracking-widest text-sidebar-foreground/50">
@@ -159,11 +175,12 @@ export function Sidebar() {
                 const Icon = item.Icon;
                 const active = isActive(item);
                 return (
-                  <li key={item.to}>
+                  <li key={`${item.to}-${item.label}`}>
                     <Link
                       to={item.to}
                       search={item.search as never}
                       title={item.comingSoon ? "Em desenvolvimento" : undefined}
+                      onClick={onClose}
                       className={
                         active
                           ? "flex h-[17px] items-center gap-1.5 rounded bg-sidebar-primary px-2 text-[10px] font-medium leading-none text-sidebar-primary-foreground"
