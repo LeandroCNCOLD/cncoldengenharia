@@ -1,7 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
-  Activity,
   TrendingUp,
   Map,
   FileText,
@@ -26,10 +25,10 @@ import {
   Waves,
   Zap,
 } from "lucide-react";
-import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/lib/auth";
+import { ThemeToggle } from "@/modules/cn_coils/components/ThemeToggle";
 import { useProjectStore } from "@/modules/cn_coils/store/useProjectStore";
 
 type NavItem = {
@@ -134,19 +133,25 @@ export function Sidebar() {
     item.exact ? pathname === item.to : pathname === item.to || pathname.startsWith(item.to + "/");
 
   return (
-    <aside className="flex h-full w-56 shrink-0 flex-col bg-[#0F2744] text-slate-100">
-      <div className="flex items-center gap-2 border-b border-white/10 px-3 py-2.5">
-        <CnLogo variant="dark" />
-        <div className="min-w-0">
-          <p className="text-xs font-semibold leading-tight">ColdPro V2</p>
-          <p className="text-[9px] uppercase tracking-wider text-slate-400">CN COLD</p>
+    <aside className="flex h-full w-56 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
+      <div className="border-b border-sidebar-border p-4">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+            <Snowflake className="h-5 w-5 text-primary-foreground" />
+          </div>
+          <div>
+            <div className="text-sm font-bold leading-tight text-sidebar-foreground">
+              <span className="text-primary">CN</span>Cold
+            </div>
+            <div className="text-xs leading-tight text-sidebar-foreground/60">Engenharia</div>
+          </div>
         </div>
       </div>
 
       <nav className="min-h-0 flex-1 overflow-hidden px-2 py-0.5">
         {NAV_GROUPS.map((group, gIdx) => (
           <div key={group.label} className={gIdx === 0 ? "" : "pt-1"}>
-            <p className="px-2 pb-px text-[8px] font-semibold uppercase leading-none tracking-widest text-slate-400/70">
+            <p className="px-2 pb-px text-[8px] font-semibold uppercase leading-none tracking-widest text-sidebar-foreground/50">
               {group.label}
             </p>
             <ul className="space-y-0">
@@ -161,8 +166,8 @@ export function Sidebar() {
                       title={item.comingSoon ? "Em desenvolvimento" : undefined}
                       className={
                         active
-                          ? "flex h-[17px] items-center gap-1.5 rounded bg-[#1E6FD9] px-2 text-[10px] font-medium leading-none text-white"
-                          : "flex h-[17px] items-center gap-1.5 rounded px-2 text-[10px] leading-none text-slate-300 hover:bg-white/5 hover:text-white"
+                          ? "flex h-[17px] items-center gap-1.5 rounded bg-sidebar-primary px-2 text-[10px] font-medium leading-none text-sidebar-primary-foreground"
+                          : "flex h-[17px] items-center gap-1.5 rounded px-2 text-[10px] leading-none text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                       }
                     >
                       <Icon className="h-2.5 w-2.5 shrink-0" />
@@ -186,12 +191,12 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="space-y-1 border-t border-white/10 px-3 py-1.5">
+      <div className="space-y-1 border-t border-sidebar-border px-3 py-1.5">
         <div>
-          <p className="truncate text-[11px] font-medium text-slate-100">
+          <p className="truncate text-[11px] font-medium text-sidebar-foreground">
             {user?.user_metadata?.full_name || user?.email}
           </p>
-          <p className="truncate text-[9px] text-slate-400">
+          <p className="truncate text-[9px] text-sidebar-foreground/60">
             {isAdmin ? "Administrador" : "Engenheiro"}
           </p>
         </div>
@@ -199,7 +204,7 @@ export function Sidebar() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 w-full justify-start gap-2 px-2 text-[11px] text-slate-300 hover:bg-white/10 hover:text-white"
+          className="h-7 w-full justify-start gap-2 px-2 text-[11px] text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           onClick={async () => {
             await signOut();
             navigate({ to: "/auth" });
@@ -209,7 +214,10 @@ export function Sidebar() {
           Sair
         </Button>
 
-        <p className="text-[9px] text-slate-500">Motor V2 — CN COLD</p>
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-[9px] text-sidebar-foreground/50">CNCold Engenharia</span>
+          <ThemeToggle />
+        </div>
       </div>
     </aside>
   );

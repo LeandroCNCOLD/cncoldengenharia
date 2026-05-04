@@ -22,6 +22,7 @@ import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
 import { GeometryBottomBar } from "../components/GeometryBottomBar";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { SaveProjectButton } from "../components/SaveProjectButton";
+import { CHART_COLORS } from "../constants/chartColors";
 import { useCnCoilsCatalogs } from "../hooks/useCnCoilsCatalogs";
 import { useCondenserEnvelopeGenerator } from "../hooks/useCondenserEnvelopeGenerator";
 import {
@@ -264,8 +265,8 @@ export function CondenserWorkspacePage() {
                             ]}
                             labelFormatter={(label) => `Tc ${fmt(Number(label), 1)} °C`}
                           />
-                          <Line yAxisId="left" dataKey="Q_cond_W" stroke="#2563eb" strokeWidth={2} name="Q_cond_W" />
-                          <Line yAxisId="right" dataKey="UA" stroke="#16a34a" strokeWidth={2} name="UA" />
+                          <Line yAxisId="left" dataKey="Q_cond_W" stroke={CHART_COLORS.primary} strokeWidth={2} name="Q_cond_W" />
+                          <Line yAxisId="right" dataKey="UA" stroke={CHART_COLORS.success} strokeWidth={2} name="UA" />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>

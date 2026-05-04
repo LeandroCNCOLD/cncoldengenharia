@@ -1,6 +1,7 @@
 /**
  * FrostAnalysisPanel - Painel de análise de gelo integrado ao CycleEngine.
  */
+import { CHART_COLORS } from "../constants/chartColors";
 import type { FrostAnalysisResult } from "../engines/frost/frostTypes";
 
 interface FrostAnalysisPanelProps {
@@ -58,7 +59,7 @@ function DegradationChart({
             y1={(f * chartH).toFixed(1)}
             x2={chartW}
             y2={(f * chartH).toFixed(1)}
-            stroke="#e5e7eb"
+            stroke={CHART_COLORS.grid}
             strokeWidth={1}
           />
         ))}
@@ -67,36 +68,36 @@ function DegradationChart({
           y1={nominalY}
           x2={chartW}
           y2={nominalY}
-          stroke="#6b7280"
+          stroke={CHART_COLORS.axis}
           strokeWidth={1}
           strokeDasharray="4 3"
         />
-        <text x={chartW + 4} y={nominalY} fontSize={9} fill="#6b7280" dominantBaseline="middle">
+        <text x={chartW + 4} y={nominalY} fontSize={9} fill={CHART_COLORS.axis} dominantBaseline="middle">
           Nominal
         </text>
-        <path d={pathD} fill="none" stroke="#3b82f6" strokeWidth={2} />
+        <path d={pathD} fill="none" stroke={CHART_COLORS.primary} strokeWidth={2} />
         <path
           d={`${pathD} L ${xScale(operationTimeH).toFixed(1)} ${chartH} L 0 ${chartH} Z`}
-          fill="#3b82f6"
+          fill={CHART_COLORS.primary}
           fillOpacity={0.08}
         />
-        <line x1={0} y1={chartH} x2={chartW} y2={chartH} stroke="#9ca3af" strokeWidth={1} />
+        <line x1={0} y1={chartH} x2={chartW} y2={chartH} stroke={CHART_COLORS.axis} strokeWidth={1} />
         {xTicks.map((t) => (
           <g key={t} transform={`translate(${xScale(t).toFixed(1)},${chartH})`}>
-            <line y2={4} stroke="#9ca3af" strokeWidth={1} />
-            <text y={14} fontSize={9} fill="#6b7280" textAnchor="middle">
+            <line y2={4} stroke={CHART_COLORS.axis} strokeWidth={1} />
+            <text y={14} fontSize={9} fill={CHART_COLORS.axis} textAnchor="middle">
               {fmtBR(t, 0)}h
             </text>
           </g>
         ))}
-        <line x1={0} y1={0} x2={0} y2={chartH} stroke="#9ca3af" strokeWidth={1} />
-        <text transform={`translate(-40,${chartH / 2}) rotate(-90)`} fontSize={9} fill="#6b7280" textAnchor="middle">
+        <line x1={0} y1={0} x2={0} y2={chartH} stroke={CHART_COLORS.axis} strokeWidth={1} />
+        <text transform={`translate(-40,${chartH / 2}) rotate(-90)`} fontSize={9} fill={CHART_COLORS.axis} textAnchor="middle">
           Q efetivo (kW)
         </text>
         {[0, 0.5, 1].map((f) => {
           const q = minCapacity + f * (maxCapacity - minCapacity);
           return (
-            <text key={f} x={-6} y={yScale(q).toFixed(1)} fontSize={9} fill="#6b7280" textAnchor="end" dominantBaseline="middle">
+            <text key={f} x={-6} y={yScale(q).toFixed(1)} fontSize={9} fill={CHART_COLORS.axis} textAnchor="end" dominantBaseline="middle">
               {fmtBR(q / 1000, 1)}
             </text>
           );

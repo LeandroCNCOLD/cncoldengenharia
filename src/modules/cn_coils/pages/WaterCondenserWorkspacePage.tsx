@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
+import { CHART_COLORS } from "../constants/chartColors";
 import {
   calculateWaterCondenser,
   type WaterCondenserInputs,
@@ -211,7 +212,7 @@ function Chart({
           <XAxis dataKey={xKey} label={{ value: xLabel, position: "insideBottom", offset: -5 }} />
           <YAxis label={{ value: yLabel, angle: -90, position: "insideLeft" }} />
           <Tooltip formatter={(value: number) => fmt(value)} />
-          <Line type="monotone" dataKey={yKey} stroke="#0284c7" strokeWidth={2} dot={{ r: 3 }} />
+          <Line type="monotone" dataKey={yKey} stroke={CHART_COLORS.primary} strokeWidth={2} dot={{ r: 3 }} />
         </LineChart>
       </ResponsiveContainer>
     </div>

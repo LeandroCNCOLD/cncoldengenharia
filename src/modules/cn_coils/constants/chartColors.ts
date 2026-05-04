@@ -1,0 +1,23 @@
+export const CHART_COLORS = {
+  primary: "#1a85e0",
+  secondary: "#00b4c4",
+  accent: "#f97316",
+  success: "#22c55e",
+  warning: "#eab308",
+  danger: "#ef4444",
+  purple: "#7c3aed",
+  tc35: "#3b82f6",
+  tc40: "#22c55e",
+  tc45: "#eab308",
+  tc50: "#f97316",
+  tc55: "#ef4444",
+  surface: "#f1f5f9",
+  cnBlue700: "#0d5aa8",
+  grid: "rgba(148, 163, 184, 0.2)",
+  axis: "#94a3b8",
+  tooltip: {
+    background: "#1e293b",
+    border: "#334155",
+    text: "#f1f5f9",
+  },
+} as const;

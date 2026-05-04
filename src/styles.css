@@ -5,13 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * CN Cold Engineering — Design System
+ * CNCold Engenharia — Design System
  *
- * Identidade alinhada à CN Cold (cncold.com.br):
- * azul profundo + azul royal + azul claro sobre fundo cinza-claro.
- * Layout SaaS interno: sidebar escura + conteúdo claro.
- * Tipografia: Sora (títulos) + Inter (corpo).
- * Todas as cores em oklch — semantic tokens apenas.
+ * Paleta azul/gelo da marca com suporte a modo claro/escuro.
+ * Os tokens semânticos abaixo são cores CSS completas porque o projeto usa
+ * Tailwind CSS v4 com @theme apontando direto para var(--token).
  */
 
 @theme inline {
@@ -71,100 +69,118 @@
 :root {
   --radius: 0.5rem;
 
-  /* Base — fundo cinza-claro técnico, texto azul escuro profundo */
-  --background: oklch(0.98 0.005 240);
-  --foreground: oklch(0.18 0.04 250);
+  --cn-blue-50: #e8f4fd;
+  --cn-blue-100: #c5e3f9;
+  --cn-blue-200: #9dcef4;
+  --cn-blue-300: #6ab4ee;
+  --cn-blue-400: #3d9de8;
+  --cn-blue-500: #1a85e0;
+  --cn-blue-600: #1470c4;
+  --cn-blue-700: #0d5aa8;
+  --cn-blue-800: #08458c;
+  --cn-blue-900: #042f6e;
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.04 250);
+  --cn-ice-50: #e8fafb;
+  --cn-ice-100: #c0f0f3;
+  --cn-ice-200: #8de3e9;
+  --cn-ice-300: #52d4de;
+  --cn-ice-400: #1ec4d0;
+  --cn-ice-500: #00b4c4;
+  --cn-ice-600: #009aaa;
+  --cn-ice-700: #007f8e;
+  --cn-ice-800: #006472;
+  --cn-ice-900: #004a56;
 
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.04 250);
+  --cn-orange-500: #f97316;
+  --cn-orange-600: #ea6c0a;
 
-  /* Primary — azul royal CN Cold (#1e5bd8) */
-  --primary: oklch(0.52 0.21 260);
-  --primary-foreground: oklch(0.98 0.005 240);
-  --primary-glow: oklch(0.65 0.18 250);
+  --cn-gray-50: #f8fafc;
+  --cn-gray-100: #f1f5f9;
+  --cn-gray-200: #e2e8f0;
+  --cn-gray-300: #cbd5e1;
+  --cn-gray-400: #94a3b8;
+  --cn-gray-500: #64748b;
+  --cn-gray-600: #475569;
+  --cn-gray-700: #334155;
+  --cn-gray-800: #1e293b;
+  --cn-gray-900: #0f172a;
 
-  /* Secondary — azul muito claro / cinza azulado */
-  --secondary: oklch(0.95 0.015 245);
-  --secondary-foreground: oklch(0.25 0.06 255);
-
-  --muted: oklch(0.95 0.01 240);
-  --muted-foreground: oklch(0.5 0.025 250);
-
-  /* Accent — azul claro brilhante (#3da9fc) */
-  --accent: oklch(0.72 0.14 235);
-  --accent-foreground: oklch(0.15 0.05 250);
-
-  --destructive: oklch(0.6 0.22 25);
-  --destructive-foreground: oklch(0.98 0.005 240);
-
-  --success: oklch(0.62 0.16 155);
-  --success-foreground: oklch(0.98 0.005 240);
-
-  --warning: oklch(0.72 0.16 75);
-  --warning-foreground: oklch(0.2 0.05 60);
-
-  --info: oklch(0.65 0.14 230);
-  --info-foreground: oklch(0.98 0.005 240);
-
-  --border: oklch(0.9 0.01 240);
-  --input: oklch(0.92 0.01 240);
-  --ring: oklch(0.52 0.21 260);
-
-  --chart-1: oklch(0.52 0.21 260);
-  --chart-2: oklch(0.72 0.14 235);
-  --chart-3: oklch(0.62 0.16 155);
-  --chart-4: oklch(0.72 0.16 75);
-  --chart-5: oklch(0.6 0.22 25);
-
-  /* Sidebar — azul profundo CN Cold (#0a2540) */
-  --sidebar: oklch(0.22 0.06 255);
-  --sidebar-foreground: oklch(0.95 0.01 240);
-  --sidebar-primary: oklch(0.65 0.18 250);
-  --sidebar-primary-foreground: oklch(0.98 0.005 240);
-  --sidebar-accent: oklch(0.28 0.07 255);
-  --sidebar-accent-foreground: oklch(0.98 0.005 240);
-  --sidebar-border: oklch(0.32 0.06 255);
-  --sidebar-ring: oklch(0.65 0.18 250);
+  --background: #ffffff;
+  --foreground: var(--cn-gray-900);
+  --card: #ffffff;
+  --card-foreground: var(--cn-gray-900);
+  --popover: #ffffff;
+  --popover-foreground: var(--cn-gray-900);
+  --primary: var(--cn-blue-500);
+  --primary-foreground: #ffffff;
+  --primary-glow: var(--cn-blue-300);
+  --secondary: var(--cn-ice-500);
+  --secondary-foreground: #ffffff;
+  --muted: var(--cn-gray-100);
+  --muted-foreground: var(--cn-gray-500);
+  --accent: var(--cn-blue-50);
+  --accent-foreground: var(--cn-blue-500);
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+  --warning: #eab308;
+  --warning-foreground: #422006;
+  --info: var(--cn-blue-500);
+  --info-foreground: #ffffff;
+  --border: var(--cn-gray-200);
+  --input: var(--cn-gray-200);
+  --ring: var(--cn-blue-500);
+  --chart-1: var(--cn-blue-500);
+  --chart-2: var(--cn-ice-500);
+  --chart-3: #22c55e;
+  --chart-4: #eab308;
+  --chart-5: var(--cn-orange-500);
+  --sidebar: var(--cn-gray-900);
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: var(--cn-blue-500);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--cn-gray-700);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: var(--cn-gray-800);
+  --sidebar-ring: var(--cn-blue-500);
 }
 
 .dark {
-  --background: oklch(0.15 0.04 255);
-  --foreground: oklch(0.96 0.01 240);
-  --card: oklch(0.2 0.05 255);
-  --card-foreground: oklch(0.96 0.01 240);
-  --popover: oklch(0.2 0.05 255);
-  --popover-foreground: oklch(0.96 0.01 240);
-  --primary: oklch(0.65 0.18 250);
-  --primary-foreground: oklch(0.15 0.04 255);
-  --primary-glow: oklch(0.72 0.14 235);
-  --secondary: oklch(0.25 0.05 255);
-  --secondary-foreground: oklch(0.96 0.01 240);
-  --muted: oklch(0.25 0.04 255);
-  --muted-foreground: oklch(0.7 0.02 240);
-  --accent: oklch(0.3 0.06 255);
-  --accent-foreground: oklch(0.96 0.01 240);
-  --destructive: oklch(0.65 0.22 25);
-  --destructive-foreground: oklch(0.98 0.005 240);
-  --success: oklch(0.65 0.16 155);
-  --success-foreground: oklch(0.98 0.005 240);
-  --warning: oklch(0.75 0.16 75);
-  --warning-foreground: oklch(0.15 0.05 60);
-  --info: oklch(0.7 0.14 230);
-  --info-foreground: oklch(0.98 0.005 240);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.65 0.18 250);
-  --sidebar: oklch(0.18 0.05 255);
-  --sidebar-foreground: oklch(0.96 0.01 240);
-  --sidebar-primary: oklch(0.65 0.18 250);
-  --sidebar-primary-foreground: oklch(0.98 0.005 240);
-  --sidebar-accent: oklch(0.25 0.06 255);
-  --sidebar-accent-foreground: oklch(0.96 0.01 240);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.65 0.18 250);
+  --background: #0b1220;
+  --foreground: var(--cn-gray-100);
+  --card: var(--cn-gray-800);
+  --card-foreground: var(--cn-gray-100);
+  --popover: var(--cn-gray-800);
+  --popover-foreground: var(--cn-gray-100);
+  --primary: var(--cn-blue-400);
+  --primary-foreground: #0b1220;
+  --primary-glow: var(--cn-blue-300);
+  --secondary: var(--cn-ice-400);
+  --secondary-foreground: #0b1220;
+  --muted: #1b2738;
+  --muted-foreground: #8ca0bb;
+  --accent: #1b2738;
+  --accent-foreground: var(--cn-blue-400);
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: #22c55e;
+  --success-foreground: #04130a;
+  --warning: #eab308;
+  --warning-foreground: #1f1600;
+  --info: var(--cn-blue-400);
+  --info-foreground: #0b1220;
+  --border: var(--cn-gray-700);
+  --input: var(--cn-gray-700);
+  --ring: var(--cn-blue-400);
+  --sidebar: #080d17;
+  --sidebar-foreground: #e2e8f0;
+  --sidebar-primary: var(--cn-blue-400);
+  --sidebar-primary-foreground: #0b1220;
+  --sidebar-accent: #111827;
+  --sidebar-accent-foreground: #e2e8f0;
+  --sidebar-border: #111827;
+  --sidebar-ring: var(--cn-blue-400);
 }
 
 @layer base {

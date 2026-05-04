@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
+import { CHART_COLORS } from "../constants/chartColors";
 import {
   calculateHeatingCoil,
   calculateMoistAirState,
@@ -189,7 +190,7 @@ export function HeatingCoilWorkspacePage() {
                       <XAxis dataKey="T_C" type="number" name="T" unit="°C" />
                       <YAxis dataKey="W_gkg" type="number" name="W" unit=" g/kg" />
                       <Tooltip formatter={(value: number) => fmt(value)} />
-                      <Scatter data={psycho} fill="#2563eb" line={{ stroke: "#94a3b8" }} />
+                      <Scatter data={psycho} fill={CHART_COLORS.primary} line={{ stroke: CHART_COLORS.axis }} />
                     </ScatterChart>
                   </ResponsiveContainer>
                 </div>

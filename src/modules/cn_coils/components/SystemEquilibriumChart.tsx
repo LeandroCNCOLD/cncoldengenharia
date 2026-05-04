@@ -10,6 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CHART_COLORS } from "../constants/chartColors";
 import type {
   SystemCondenserEnvelopePoint,
   SystemEquilibriumResult,
@@ -74,7 +75,7 @@ export function SystemEquilibriumChart({
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={combined}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid stroke={CHART_COLORS.grid} strokeDasharray="3 3" />
                 <XAxis
                   dataKey="Te_C"
                   label={{ value: "Te (°C)", position: "insideBottom", offset: -5 }}
@@ -95,7 +96,7 @@ export function SystemEquilibriumChart({
                 <Line
                   type="monotone"
                   dataKey="Q_evap_kW"
-                  stroke="#2563eb"
+                  stroke={CHART_COLORS.primary}
                   strokeWidth={2}
                   name="Evaporador"
                   dot={{ r: 3 }}
@@ -103,7 +104,7 @@ export function SystemEquilibriumChart({
                 <Line
                   type="monotone"
                   dataKey="Q_comp_kW"
-                  stroke="#f97316"
+                  stroke={CHART_COLORS.accent}
                   strokeWidth={2}
                   name={`Compressor (Tc = ${fmt(result.Tc_eq_C, 1)} °C)`}
                   dot={{ r: 3 }}
@@ -113,8 +114,8 @@ export function SystemEquilibriumChart({
                   x={result.Te_eq_C}
                   y={result.Q_evap_W / 1000}
                   r={6}
-                  fill="#dc2626"
-                  stroke="#7f1d1d"
+                  fill={CHART_COLORS.danger}
+                  stroke={CHART_COLORS.danger}
                   label="Equilíbrio"
                 />
               </LineChart>
@@ -132,7 +133,7 @@ export function SystemEquilibriumChart({
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={result.convergencePath}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid stroke={CHART_COLORS.grid} strokeDasharray="3 3" />
                   <XAxis dataKey="iteration" />
                   <YAxis label={{ value: "Resíduo (°C)", angle: -90, position: "insideLeft" }} />
                   <Tooltip
@@ -145,7 +146,7 @@ export function SystemEquilibriumChart({
                   <Line
                     type="monotone"
                     dataKey="residual"
-                    stroke="#16a34a"
+                    stroke={CHART_COLORS.success}
                     strokeWidth={2}
                     dot={{ r: 3 }}
                   />

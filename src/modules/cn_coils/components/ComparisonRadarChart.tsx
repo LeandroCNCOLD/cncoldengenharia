@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CHART_COLORS } from "../constants/chartColors";
 import type { SavedProject } from "../store/useProjectStore";
 import { getProjectMetrics, normalize } from "../utils/projectComparison";
 
@@ -16,7 +17,7 @@ interface ComparisonRadarChartProps {
   projects: SavedProject[];
 }
 
-const COLORS = ["#2563eb", "#16a34a", "#f97316", "#7c3aed"];
+const COLORS = [CHART_COLORS.primary, CHART_COLORS.success, CHART_COLORS.accent, CHART_COLORS.purple];
 
 function normalizeMetric(values: number[], value: number, inverse = false) {
   const min = Math.min(...values);

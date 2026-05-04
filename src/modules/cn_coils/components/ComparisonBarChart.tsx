@@ -10,6 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CHART_COLORS } from "../constants/chartColors";
 import type { SavedProject } from "../store/useProjectStore";
 import { fmtBR, getProjectMetrics } from "../utils/projectComparison";
 
@@ -35,16 +36,16 @@ export function ComparisonBarChart({ projects }: ComparisonBarChartProps) {
   return (
     <div className="grid gap-4 xl:grid-cols-3">
       <MetricChart title="COP e EER normalizado" data={data}>
-        <Bar dataKey="COP" fill="#2563eb" />
-        <Bar dataKey="EER/3.412" fill="#16a34a" />
+        <Bar dataKey="COP" fill={CHART_COLORS.primary} />
+        <Bar dataKey="EER/3.412" fill={CHART_COLORS.success} />
       </MetricChart>
       <MetricChart title="Capacidade vs Potência (kW)" data={data}>
-        <Bar dataKey="Q_real_kW" fill="#2563eb" name="Q real" />
-        <Bar dataKey="W_comp_kW" fill="#f97316" name="W comp" />
+        <Bar dataKey="Q_real_kW" fill={CHART_COLORS.primary} name="Q real" />
+        <Bar dataKey="W_comp_kW" fill={CHART_COLORS.accent} name="W comp" />
       </MetricChart>
       <MetricChart title="Temperaturas de equilíbrio" data={data} includeZero>
-        <Bar dataKey="Te_eq" fill="#38bdf8" name="Te eq" />
-        <Bar dataKey="Tc_eq" fill="#ef4444" name="Tc eq" />
+        <Bar dataKey="Te_eq" fill={CHART_COLORS.secondary} name="Te eq" />
+        <Bar dataKey="Tc_eq" fill={CHART_COLORS.danger} name="Tc eq" />
       </MetricChart>
     </div>
   );
@@ -69,10 +70,10 @@ function MetricChart({
       <CardContent className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
+            <XAxis dataKey="name" tick={{ fontSize: 10, fill: CHART_COLORS.axis }} />
             <YAxis />
-            {includeZero && <ReferenceLine y={0} stroke="#64748b" />}
+            {includeZero && <ReferenceLine y={0} stroke={CHART_COLORS.axis} />}
             <Tooltip formatter={(value) => fmtBR(Number(value))} />
             <Legend />
             {children}

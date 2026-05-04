@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CHART_COLORS } from "../constants/chartColors";
 import { useFrostAnalysis } from "../hooks/useFrostAnalysis";
 import type { CycleResult, CycleStatePoint } from "../engines/cycle/cycleTypes";
 
@@ -235,14 +236,14 @@ export function FrostAnalysisTab({
                 />
                 <ReferenceLine
                   y={70}
-                  stroke="#dc2626"
+                  stroke={CHART_COLORS.danger}
                   strokeDasharray="4 4"
                   label="Limite 70%"
                 />
                 <Line
                   type="monotone"
                   dataKey="qPct"
-                  stroke="#2563eb"
+                  stroke={CHART_COLORS.primary}
                   strokeWidth={2}
                   dot={{ r: 3 }}
                   name="Capacidade"

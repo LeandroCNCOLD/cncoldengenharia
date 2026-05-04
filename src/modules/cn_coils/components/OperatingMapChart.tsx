@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { OperatingMapResult } from "../engines/operatingMap/operatingMapTypes";
+import { CHART_COLORS } from "../constants/chartColors";
 
 interface OperatingMapChartProps {
   result: OperatingMapResult;
@@ -51,28 +52,28 @@ export function OperatingMapChart({
     <svg width={width} height={height} className="w-full">
       <g transform={`translate(${PADDING.left},${PADDING.top})`}>
         {xTicks.map((t) => (
-          <line key={t} x1={toX(t)} y1={0} x2={toX(t)} y2={chartH} stroke="#e5e7eb" strokeWidth={1} />
+          <line key={t} x1={toX(t)} y1={0} x2={toX(t)} y2={chartH} stroke={CHART_COLORS.grid} strokeWidth={1} />
         ))}
         {yTicks.map((q) => (
-          <line key={q} x1={0} y1={toY(q)} x2={chartW} y2={toY(q)} stroke="#e5e7eb" strokeWidth={1} />
+          <line key={q} x1={0} y1={toY(q)} x2={chartW} y2={toY(q)} stroke={CHART_COLORS.grid} strokeWidth={1} />
         ))}
-        <line x1={0} y1={chartH} x2={chartW} y2={chartH} stroke="#374151" strokeWidth={1.5} />
-        <line x1={0} y1={0} x2={0} y2={chartH} stroke="#374151" strokeWidth={1.5} />
+        <line x1={0} y1={chartH} x2={chartW} y2={chartH} stroke={CHART_COLORS.axis} strokeWidth={1.5} />
+        <line x1={0} y1={0} x2={0} y2={chartH} stroke={CHART_COLORS.axis} strokeWidth={1.5} />
 
         {xTicks.map((t) => (
-          <text key={t} x={toX(t)} y={chartH + 18} textAnchor="middle" fontSize={11} fill="#6b7280">
+          <text key={t} x={toX(t)} y={chartH + 18} textAnchor="middle" fontSize={11} fill={CHART_COLORS.axis}>
             {t}°C
           </text>
         ))}
         {yTicks.map((q) => (
-          <text key={q} x={-8} y={toY(q) + 4} textAnchor="end" fontSize={11} fill="#6b7280">
+          <text key={q} x={-8} y={toY(q) + 4} textAnchor="end" fontSize={11} fill={CHART_COLORS.axis}>
             {fmtBR(q / 1000, 0)} kW
           </text>
         ))}
-        <text x={chartW / 2} y={chartH + 40} textAnchor="middle" fontSize={12} fill="#374151">
+        <text x={chartW / 2} y={chartH + 40} textAnchor="middle" fontSize={12} fill={CHART_COLORS.axis}>
           Temperatura de Evaporação (°C)
         </text>
-        <text x={-chartH / 2} y={-45} textAnchor="middle" fontSize={12} fill="#374151" transform="rotate(-90)">
+        <text x={-chartH / 2} y={-45} textAnchor="middle" fontSize={12} fill={CHART_COLORS.axis} transform="rotate(-90)">
           Capacidade (kW)
         </text>
 
@@ -99,11 +100,11 @@ export function OperatingMapChart({
               cx={toX(result.designPoint.evapTempC)}
               cy={toY(result.designPoint.capacityW)}
               r={6}
-              fill="#1d4ed8"
+              fill={CHART_COLORS.primary}
               stroke="white"
               strokeWidth={2}
             />
-            <text x={toX(result.designPoint.evapTempC) + 8} y={toY(result.designPoint.capacityW) - 8} fontSize={10} fill="#1d4ed8">
+            <text x={toX(result.designPoint.evapTempC) + 8} y={toY(result.designPoint.capacityW) - 8} fontSize={10} fill={CHART_COLORS.primary}>
               Projeto: {fmtBR(result.designPoint.capacityW / 1000, 1)} kW
             </text>
           </g>

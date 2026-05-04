@@ -9,6 +9,7 @@ import {
   YAxis,
 } from "recharts";
 import type { CompressorEnvelopePoint } from "../hooks/useCompressorEnvelopeGenerator";
+import { CHART_COLORS } from "../constants/chartColors";
 
 interface CompressorEnvelopeChartProps {
   points: CompressorEnvelopePoint[];
@@ -18,11 +19,11 @@ interface CompressorEnvelopeChartProps {
 }
 
 const COLORS: Record<number, string> = {
-  35: "#2563eb",
-  40: "#16a34a",
-  45: "#ca8a04",
-  50: "#ea580c",
-  55: "#dc2626",
+  35: CHART_COLORS.tc35,
+  40: CHART_COLORS.tc40,
+  45: CHART_COLORS.tc45,
+  50: CHART_COLORS.tc50,
+  55: CHART_COLORS.tc55,
 };
 
 const fmt = (value: number, maximumFractionDigits = 2) =>
@@ -66,7 +67,7 @@ export function CompressorEnvelopeChart({
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={capacityData}>
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
             <XAxis
               dataKey="Te_C"
               label={{ value: "Te (°C)", position: "insideBottom", offset: -5 }}
@@ -87,7 +88,7 @@ export function CompressorEnvelopeChart({
                 key={tc}
                 type="monotone"
                 dataKey={`Tc_${tc}`}
-                stroke={COLORS[tc] ?? "#64748b"}
+                stroke={COLORS[tc] ?? CHART_COLORS.axis}
                 strokeWidth={tc === nominalTc_C ? 3 : 2}
                 dot={(props) => {
                   const isNominal =
@@ -97,8 +98,8 @@ export function CompressorEnvelopeChart({
                       cx={props.cx}
                       cy={props.cy}
                       r={isNominal ? 6 : 3}
-                      fill={COLORS[tc] ?? "#64748b"}
-                      stroke={isNominal ? "#111827" : "none"}
+                      fill={COLORS[tc] ?? CHART_COLORS.axis}
+                      stroke={isNominal ? CHART_COLORS.danger : "none"}
                       strokeWidth={isNominal ? 2 : 0}
                     />
                   );
@@ -112,7 +113,7 @@ export function CompressorEnvelopeChart({
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={powerData}>
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} />
             <XAxis
               dataKey="Te_C"
               label={{ value: "Te (°C)", position: "insideBottom", offset: -5 }}
@@ -136,7 +137,7 @@ export function CompressorEnvelopeChart({
                 key={tc}
                 type="monotone"
                 dataKey={`Tc_${tc}`}
-                stroke={COLORS[tc] ?? "#64748b"}
+                stroke={COLORS[tc] ?? CHART_COLORS.axis}
                 strokeWidth={tc === nominalTc_C ? 3 : 2}
                 dot={{ r: 3 }}
               />

@@ -1,4 +1,5 @@
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
+import { CHART_COLORS } from "../constants/chartColors";
 
 /**
  * Esquema visual simples (SVG) da serpentina, baseado em:
@@ -60,8 +61,8 @@ export function CoilSchematic() {
             width={innerW + 16}
             height={innerH + 16}
             rx={4}
-            fill="#F1F5F9"
-            stroke="#94A3B8"
+            fill={CHART_COLORS.surface}
+            stroke={CHART_COLORS.axis}
             strokeDasharray="4 3"
           />
           {hasData ? (
@@ -72,8 +73,8 @@ export function CoilSchematic() {
                   cx={cx(i)}
                   cy={cy(j)}
                   r={r}
-                  fill="#1E6FD9"
-                  stroke="#0F4FB0"
+                  fill={CHART_COLORS.primary}
+                  stroke={CHART_COLORS.cnBlue700}
                   strokeWidth={0.5}
                 />
               )),

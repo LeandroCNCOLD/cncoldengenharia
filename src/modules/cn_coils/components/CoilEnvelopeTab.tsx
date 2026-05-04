@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCoilEnvelopeGenerator } from "../hooks/useCoilEnvelopeGenerator";
 import type { EnvelopePoint } from "../store/useCoilEnvelopeStore";
+import { CHART_COLORS } from "../constants/chartColors";
 
 interface CoilEnvelopeTabProps {
   equipmentId?: string;
@@ -88,7 +89,7 @@ export function CoilEnvelopeTab({ equipmentId = "manual" }: CoilEnvelopeTabProps
                 <ReferenceLine
                   yAxisId="left"
                   x={envelopePoints[4]?.Te}
-                  stroke="#f59e0b"
+                  stroke={CHART_COLORS.warning}
                   strokeDasharray="4 4"
                   label="Nominal"
                 />
@@ -96,7 +97,7 @@ export function CoilEnvelopeTab({ equipmentId = "manual" }: CoilEnvelopeTabProps
                   yAxisId="left"
                   type="monotone"
                   dataKey="Q_kcalh"
-                  stroke="#3b82f6"
+                  stroke={CHART_COLORS.primary}
                   strokeWidth={2}
                   dot={{ r: 4 }}
                   name="Q_kcalh"
@@ -105,7 +106,7 @@ export function CoilEnvelopeTab({ equipmentId = "manual" }: CoilEnvelopeTabProps
                   yAxisId="right"
                   type="monotone"
                   dataKey="COP"
-                  stroke="#10b981"
+                  stroke={CHART_COLORS.success}
                   strokeWidth={2}
                   dot={{ r: 4 }}
                   name="COP"

@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
+import { CHART_COLORS } from "../../constants/chartColors";
 import { CompressorPickerModal } from "../../components/CompressorPickerModal";
 import { ColdRoomPdfReport } from "../../components/pdf/ColdRoomPdfReport";
 import { DXSystemPdfReport } from "../../components/pdf/DXSystemPdfReport";
@@ -308,7 +309,7 @@ function HeatPumpLoadStep({
                 <XAxis dataKey="Tsource_C" />
                 <YAxis />
                 <Tooltip formatter={(value: number) => fmt(value)} />
-                <Line dataKey="COP" stroke="#2563eb" strokeWidth={2} />
+                <Line dataKey="COP" stroke={CHART_COLORS.primary} strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -353,7 +354,7 @@ function LoadLayout({
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip formatter={(value: number) => `${fmt(value)} W`} />
-                <Bar dataKey="value" fill="#2563eb" />
+                <Bar dataKey="value" fill={CHART_COLORS.primary} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

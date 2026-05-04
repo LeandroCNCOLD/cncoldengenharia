@@ -35,14 +35,14 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CN Cold Engineering" },
+      { title: "CNCold Engenharia" },
       {
         name: "description",
-        content:
-          "Plataforma técnica interna da CN Cold para gestão de componentes frigoríficos, ingestão de arquivos e catálogo técnico.",
+        content: "CNCold Engenharia — Simulação termodinâmica para refrigeração industrial",
       },
+      { name: "theme-color", content: "#1a85e0" },
       { name: "author", content: "CN Cold" },
-      { property: "og:title", content: "CN Cold Engineering" },
+      { property: "og:title", content: "CNCold Engenharia" },
       {
         property: "og:description",
         content: "Plataforma técnica interna da CN Cold.",
@@ -57,6 +57,7 @@ export const Route = createRootRoute({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
@@ -75,6 +76,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var t=localStorage.getItem('cncold-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(!t&&d)){document.documentElement.classList.add('dark')}}catch(e){}",
+          }}
+        />
         <HeadContent />
       </head>
       <body>

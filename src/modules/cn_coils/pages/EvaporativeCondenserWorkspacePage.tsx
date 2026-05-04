@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
+import { CHART_COLORS } from "../constants/chartColors";
 import {
   calculateEvaporativeCondenser,
   type EvaporativeCondenserInputs,
@@ -176,7 +177,7 @@ function Chart({ data, xKey, yKey, yLabel }: { data: Array<Record<string, number
           <XAxis dataKey={xKey} />
           <YAxis label={{ value: yLabel, angle: -90, position: "insideLeft" }} />
           <Tooltip formatter={(value: number) => fmt(value)} />
-          <Line type="monotone" dataKey={yKey} stroke="#0891b2" strokeWidth={2} dot={{ r: 3 }} />
+          <Line type="monotone" dataKey={yKey} stroke={CHART_COLORS.secondary} strokeWidth={2} dot={{ r: 3 }} />
         </LineChart>
       </ResponsiveContainer>
     </div>
