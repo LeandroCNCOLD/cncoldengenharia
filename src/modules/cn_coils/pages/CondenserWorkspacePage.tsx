@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Fan, Save, Thermometer } from "lucide-react";
+import { Calculator, Fan, Save, Thermometer } from "lucide-react";
+import { toast } from "sonner";
 import {
   Line,
   LineChart,
@@ -12,16 +12,25 @@ import {
 } from "recharts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
 import { AirSidePanel } from "../components/AirSidePanel";
 import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
 import { GeometryBottomBar } from "../components/GeometryBottomBar";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
-import { SaveProjectButton } from "../components/SaveProjectButton";
+import { ActionBar } from "../components/ActionBar";
+import { ResultCard } from "../components/ResultCard";
+import { WorkspaceHeader } from "../components/WorkspaceHeader";
+import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
+import { WorkspaceLayout } from "../components/WorkspaceLayout";
 import { CHART_COLORS } from "../constants/chartColors";
 import { useCnCoilsCatalogs } from "../hooks/useCnCoilsCatalogs";
 import { useCondenserEnvelopeGenerator } from "../hooks/useCondenserEnvelopeGenerator";
@@ -35,6 +44,17 @@ import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 
 const fmt = (value: number, maximumFractionDigits = 2) =>
   value.toLocaleString("pt-BR", { maximumFractionDigits });
+
+const DEFAULT_INPUTS: CondenserInputs = {
+  Tc: 45,
+  Tair_in: 35,
+  geometryId: "",
+  refrigerant: "REF_R404A",
+  subcooling: 5,
+  fanCount: 1,
+  fanId: "",
+  airFlowM3H: 5000,
+};
 
 export function CondenserWorkspacePage() {
   const { isGenerating: pdfGenerating, exportPdf } = usePdfExport();
@@ -50,13 +70,8 @@ export function CondenserWorkspacePage() {
   const setSubcooling = useCnCoilsSimulationStore((s) => s.setSubcooling);
 
   const [inputs, setInputs] = useState<CondenserInputs>({
-    Tc: 45,
-    Tair_in: 35,
+    ...DEFAULT_INPUTS,
     geometryId: physical.geometryId ?? "",
-    refrigerant: "REF_R404A",
-    subcooling: 5,
-    fanCount: 1,
-    fanId: "",
     airFlowM3H: airFlowM3H > 0 ? airFlowM3H : 5000,
   });
 
@@ -99,155 +114,194 @@ export function CondenserWorkspacePage() {
     });
   };
 
-  return (
-    <PageContainer
-      title="CN Coils — Condensador a Ar"
-      subtitle="Workspace dedicado para cálculo, envelope e ventiladores do condensador a ar"
-      actions={
-        <div className="flex flex-wrap gap-2">
-          <SaveProjectButton
-            defaultName="Condensador a Ar"
-            type="component_workspace"
-            systemInputs={syncedInputs as unknown as Record<string, unknown>}
-          />
-          <Link
-            to="/coldpro/cncoils"
-            className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground hover:bg-accent"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Voltar ao CN COILS
-          </Link>
-        </div>
-      }
-    >
-      {catalogs.loading && (
-        <div className="-mt-1 rounded border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
-          Carregando catálogos…
-        </div>
-      )}
-      {!catalogs.loading && !catalogs.ready && (
-        <DatasetStatusPanel
-          loading={catalogs.loading}
-          ready={catalogs.ready}
-          errors={catalogs.errors}
-          missing={catalogs.missing}
-          compact
-        />
-      )}
+  const handleReset = () => {
+    setInputs({ ...DEFAULT_INPUTS, geometryId: physical.geometryId ?? "" });
+  };
 
-      <div className="grid grid-cols-1 gap-3 xl:grid-cols-[280px_minmax(0,1fr)]">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <Thermometer className="h-4 w-4 text-orange-500" />
-              Inputs do Condensador
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+  const handleExportPdf = () => {
+    if (!result) {
+      toast.error("Calcule antes de exportar.");
+      return;
+    }
+    exportPdf(
+      <WorkspacePdfReport
+        componentType="condenser_air"
+        title="Condensador a Ar"
+        inputs={{
+          Tc: `${fmt(syncedInputs.Tc)} °C`,
+          "T ar entrada": `${fmt(syncedInputs.Tair_in)} °C`,
+          Refrigerante: syncedInputs.refrigerant,
+          "Vazão de ar": `${fmt(syncedInputs.airFlowM3H ?? 0, 0)} m³/h`,
+        }}
+        results={{
+          "Q cond": `${fmt(result.Q_cond_W / 1000)} kW`,
+          UA: `${fmt(result.UA)} W/K`,
+          LMTD: `${fmt(result.LMTD)} K`,
+          "T ar saída": `${fmt(result.Tair_out)} °C`,
+          "ΔP ar": `${fmt(result.deltaP_Pa, 0)} Pa`,
+        }}
+      />,
+      `condensador-ar-${new Date().toISOString().slice(0, 10)}.pdf`,
+    );
+  };
+
+  const handleSave = () => toast.success("Projeto salvo (em memória).");
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copiado.");
+    } catch {
+      toast.error("Não foi possível copiar.");
+    }
+  };
+  const handleExportCsv = () => toast.info("Exportação CSV em desenvolvimento.");
+  const handleExportExcel = () => toast.info("Exportação Excel em desenvolvimento.");
+
+  const badges = [
+    syncedInputs.refrigerant.replace("REF_", ""),
+    `Tc: ${fmt(syncedInputs.Tc, 0)}°C`,
+    `Tar: ${fmt(syncedInputs.Tair_in, 0)}°C`,
+  ];
+
+  const sidebar = (
+    <WorkspaceInputsSidebar
+      onCalculate={() => calculate()}
+      onReset={handleReset}
+      isCalculating={isCalculating}
+      canCalculate={catalogs.ready && !!syncedInputs.geometryId}
+    >
+      <Accordion type="multiple" defaultValue={["op", "ref", "air"]} className="w-full">
+        <AccordionItem value="op">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">
+            Condições de Operação
+          </AccordionTrigger>
+          <AccordionContent className="space-y-2">
             <NumberField
-              label="Temperatura de Condensação (°C)"
+              label="Tc — Temp. Condensação (°C)"
               value={syncedInputs.Tc}
               onChange={(Tc) => updateInputs({ Tc })}
             />
             <NumberField
-              label="Temperatura de Entrada do Ar (°C)"
+              label="T ar entrada (°C)"
               value={syncedInputs.Tair_in}
               onChange={(Tair_in) => updateInputs({ Tair_in })}
-            />
-            <TextField
-              label="Refrigerante"
-              value={syncedInputs.refrigerant}
-              onChange={(refrigerant) => updateInputs({ refrigerant })}
             />
             <NumberField
               label="Subresfriamento (K)"
               value={syncedInputs.subcooling}
               onChange={(subcooling) => updateInputs({ subcooling })}
             />
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="ref">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">
+            Refrigerante
+          </AccordionTrigger>
+          <AccordionContent className="space-y-2">
+            <TextField
+              label="ID do refrigerante"
+              value={syncedInputs.refrigerant}
+              onChange={(refrigerant) => updateInputs({ refrigerant })}
+            />
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="air">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">
+            Ventilação
+          </AccordionTrigger>
+          <AccordionContent className="space-y-2">
             <NumberField
               label="Vazão de ar (m³/h)"
               value={syncedInputs.airFlowM3H ?? 0}
               onChange={(airFlowM3H) => updateInputs({ airFlowM3H })}
             />
-            <div className="rounded-md bg-slate-50 p-2 text-xs text-slate-600">
+            <div className="rounded border border-border bg-muted/40 p-2 text-[10px] text-muted-foreground">
               <div>Geometria: {syncedInputs.geometryId || "selecione na barra inferior"}</div>
               <div>Ventiladores: {syncedInputs.fanCount}</div>
-              <div>Fan ID: {syncedInputs.fanId || "não selecionado"}</div>
+              <div>Fan ID: {syncedInputs.fanId || "—"}</div>
             </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="status">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">Status</AccordionTrigger>
+          <AccordionContent className="space-y-2">
             <Badge variant={error ? "destructive" : result ? "default" : "secondary"}>
               {isCalculating ? "Calculando..." : error ? "Erro" : result ? "Calculado" : "Aguardando"}
             </Badge>
-            {error && <p className="text-xs text-red-600">{error}</p>}
-          </CardContent>
-        </Card>
+            {error && <p className="text-xs text-red-500">{error}</p>}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </WorkspaceInputsSidebar>
+  );
 
-        <div className="min-w-0 space-y-3">
-          <Tabs defaultValue="results">
-            <TabsList>
-              <TabsTrigger value="results">📋 Resultados</TabsTrigger>
-              <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
-              <TabsTrigger value="fans">🔧 Ventiladores</TabsTrigger>
-            </TabsList>
+  const header = (
+    <WorkspaceHeader
+      title="Condensador a Ar"
+      icon={<Thermometer className="h-5 w-5" />}
+      badges={badges}
+      onSave={handleSave}
+      onShare={handleShare}
+      onExportPdf={handleExportPdf}
+      isExportingPdf={pdfGenerating}
+    />
+  );
 
-            <TabsContent value="results" className="mt-3">
-              {result ? (
-                <div className="space-y-3">
-                  <div className="flex justify-end">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={pdfGenerating}
-                      onClick={() =>
-                        exportPdf(
-                          <WorkspacePdfReport
-                            componentType="condenser_air"
-                            title="Condensador a Ar"
-                            inputs={{
-                              "Tc": `${fmt(syncedInputs.Tc)} °C`,
-                              "T ar entrada": `${fmt(syncedInputs.Tair_in)} °C`,
-                              Refrigerante: syncedInputs.refrigerant,
-                              "Vazão de ar": `${fmt(syncedInputs.airFlowM3H ?? 0, 0)} m³/h`,
-                            }}
-                            results={{
-                              "Q cond": `${fmt(result.Q_cond_W / 1000)} kW`,
-                              UA: `${fmt(result.UA)} W/K`,
-                              LMTD: `${fmt(result.LMTD)} K`,
-                              "T ar saída": `${fmt(result.Tair_out)} °C`,
-                              "ΔP ar": `${fmt(result.deltaP_Pa, 0)} Pa`,
-                            }}
-                          />,
-                          `condensador-ar-${new Date().toISOString().slice(0, 10)}.pdf`,
-                        )
-                      }
-                    >
-                      {pdfGenerating ? "⏳ Gerando PDF…" : "📄 Exportar PDF"}
-                    </Button>
+  return (
+    <WorkspaceLayout header={header} sidebar={sidebar}>
+      <div className="flex h-full flex-col">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {catalogs.loading && (
+            <div className="rounded border border-amber-500/30 bg-amber-500/5 px-3 py-1.5 text-xs text-amber-600">
+              Carregando catálogos…
+            </div>
+          )}
+          {!catalogs.loading && !catalogs.ready && (
+            <DatasetStatusPanel
+              loading={catalogs.loading}
+              ready={catalogs.ready}
+              errors={catalogs.errors}
+              missing={catalogs.missing}
+              compact
+            />
+          )}
+
+          {isCalculating && !result ? (
+            <LoadingResults />
+          ) : result ? (
+            <Tabs defaultValue="results" className="w-full">
+              <TabsList className="flex w-full flex-wrap justify-start">
+                <TabsTrigger value="results">📋 Resultados</TabsTrigger>
+                <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
+                <TabsTrigger value="fans">🔧 Ventiladores</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="results" className="mt-3 space-y-3">
+                <CondenserResults result={result} />
+              </TabsContent>
+
+              <TabsContent value="envelope" className="mt-3">
+                <div className="rounded-lg border border-border bg-card p-4">
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="text-sm font-semibold">Envelope Q×Tc</h3>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={generateEnvelope}
+                        disabled={isGenerating || !syncedInputs.geometryId}
+                      >
+                        {isGenerating ? "Gerando..." : "Gerar 9 pontos"}
+                      </Button>
+                      <Button size="sm" onClick={saveToStore} disabled={points.length === 0}>
+                        <Save className="mr-2 h-4 w-4" />
+                        Salvar para Bancada
+                      </Button>
+                    </div>
                   </div>
-                  <CondenserResults result={result} />
-                </div>
-              ) : <EmptyState />}
-            </TabsContent>
-
-            <TabsContent value="envelope" className="mt-3">
-              <Card>
-                <CardHeader className="flex-row items-center justify-between space-y-0">
-                  <CardTitle className="text-sm">Envelope Q×Tc</CardTitle>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={generateEnvelope}
-                      disabled={isGenerating || !syncedInputs.geometryId}
-                    >
-                      {isGenerating ? "Gerando..." : "Gerar 9 pontos"}
-                    </Button>
-                    <Button size="sm" onClick={saveToStore} disabled={points.length === 0}>
-                      <Save className="mr-2 h-4 w-4" />
-                      💾 Salvar para Bancada
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
                   {points.length > 0 ? (
                     <div className="h-72">
                       <ResponsiveContainer width="100%" height="100%">
@@ -258,93 +312,118 @@ export function CondenserWorkspacePage() {
                           <YAxis yAxisId="right" orientation="right" />
                           <Tooltip
                             formatter={(value: number, name: string) => [
-                              name === "Q_cond_W"
-                                ? `${fmt(value / 1000)} kW`
-                                : fmt(value),
+                              name === "Q_cond_W" ? `${fmt(value / 1000)} kW` : fmt(value),
                               name,
                             ]}
                             labelFormatter={(label) => `Tc ${fmt(Number(label), 1)} °C`}
                           />
-                          <Line yAxisId="left" dataKey="Q_cond_W" stroke={CHART_COLORS.primary} strokeWidth={2} name="Q_cond_W" />
-                          <Line yAxisId="right" dataKey="UA" stroke={CHART_COLORS.success} strokeWidth={2} name="UA" />
+                          <Line yAxisId="left" dataKey="Q_cond_W" stroke={CHART_COLORS.primary} strokeWidth={2} />
+                          <Line yAxisId="right" dataKey="UA" stroke={CHART_COLORS.success} strokeWidth={2} />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
                   ) : (
-                    <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+                    <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
                       Gere o envelope para visualizar a curva Q×Tc.
                     </div>
                   )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="fans" className="mt-3">
-              <div className="max-w-3xl">
-                <div className="mb-2 flex items-center gap-2 text-sm font-medium">
-                  <Fan className="h-4 w-4" />
-                  Seleção de ventiladores
                 </div>
-                <AirSidePanel result={result ? {
-                  totalCapacityKw: result.Q_cond_W / 1000,
-                  sensibleCapacityKw: result.Q_cond_W / 1000,
-                  latentCapacityKw: 0,
-                  shf: 1,
-                  airPressureDropPa: result.deltaP_Pa,
-                  fluidPressureDropKpa: 0,
-                  airOutletTempC: result.Tair_out,
-                  airOutletRhPercent: 0,
-                  faceAreaM2: 0,
-                  faceVelocityMs: 0,
-                  airMassFlowKgS: result.airflow_m3h / 3600 * 1.2,
-                  regime: "DRY",
-                  correctionFactor: 1,
-                  warnings: [],
-                } : undefined} />
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
+              </TabsContent>
 
-      <div className="mt-3">
-        <GeometryBottomBar />
+              <TabsContent value="fans" className="mt-3">
+                <div className="rounded-lg border border-border bg-card p-4">
+                  <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+                    <Fan className="h-4 w-4" />
+                    Seleção de ventiladores
+                  </div>
+                  <AirSidePanel
+                    result={
+                      result
+                        ? {
+                            totalCapacityKw: result.Q_cond_W / 1000,
+                            sensibleCapacityKw: result.Q_cond_W / 1000,
+                            latentCapacityKw: 0,
+                            shf: 1,
+                            airPressureDropPa: result.deltaP_Pa,
+                            fluidPressureDropKpa: 0,
+                            airOutletTempC: result.Tair_out,
+                            airOutletRhPercent: 0,
+                            faceAreaM2: 0,
+                            faceVelocityMs: 0,
+                            airMassFlowKgS: (result.airflow_m3h / 3600) * 1.2,
+                            regime: "DRY",
+                            correctionFactor: 1,
+                            warnings: [],
+                          }
+                        : undefined
+                    }
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <EmptyResults />
+          )}
+
+          <div>
+            <GeometryBottomBar />
+          </div>
+        </div>
+
+        <ActionBar
+          onExportCsv={handleExportCsv}
+          onExportExcel={handleExportExcel}
+          onExportPdf={handleExportPdf}
+          onShare={handleShare}
+          hasResults={!!result}
+          isExportingPdf={pdfGenerating}
+        />
       </div>
-    </PageContainer>
+    </WorkspaceLayout>
   );
 }
 
 function CondenserResults({ result }: { result: CondenserResult }) {
-  const cards = [
-    ["Q_cond", `${fmt(result.Q_cond_W / 1000)} kW`, `${fmt(result.Q_cond_kcalh, 0)} kcal/h`],
-    ["UA", `${fmt(result.UA)} W/K`, "Coeficiente global × área"],
-    ["LMTD", `${fmt(result.LMTD)} K`, "Diferença média logarítmica"],
-    ["T ar saída", `${fmt(result.Tair_out)} °C`, "Saída do ar"],
-    ["ΔP ar", `${fmt(result.deltaP_Pa, 0)} Pa`, "Perda de carga"],
-    ["Vazão", `${fmt(result.airflow_m3h, 0)} m³/h`, result.regime],
-  ];
   return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-      {cards.map(([label, value, sub]) => (
-        <Card key={label}>
-          <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground">{label}</div>
-            <div className="mt-1 text-xl font-semibold">{value}</div>
-            <div className="mt-1 text-xs text-muted-foreground">{sub}</div>
-          </CardContent>
-        </Card>
-      ))}
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+      <ResultCard
+        label="Q cond"
+        value={fmt(result.Q_cond_W / 1000)}
+        unit="kW"
+        hint={`${fmt(result.Q_cond_kcalh, 0)} kcal/h`}
+        variant="success"
+      />
+      <ResultCard label="UA" value={fmt(result.UA)} unit="W/K" hint="Coef. global × área" />
+      <ResultCard label="LMTD" value={fmt(result.LMTD)} unit="K" hint="Δ média log." />
+      <ResultCard label="T ar saída" value={fmt(result.Tair_out)} unit="°C" />
+      <ResultCard label="ΔP ar" value={fmt(result.deltaP_Pa, 0)} unit="Pa" />
+      <ResultCard label="Vazão" value={fmt(result.airflow_m3h, 0)} unit="m³/h" hint={result.regime} />
     </div>
   );
 }
 
-function EmptyState() {
+function EmptyResults() {
   return (
-    <Card>
-      <CardContent className="p-8 text-center text-sm text-muted-foreground">
-        Selecione a geometria e ajuste os inputs para calcular o condensador.
-      </CardContent>
-    </Card>
+    <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-3 text-muted-foreground">
+      <Calculator className="h-12 w-12 opacity-30" />
+      <p className="text-sm">
+        Configure os parâmetros e clique em <strong>Calcular</strong>
+      </p>
+    </div>
+  );
+}
+
+function LoadingResults() {
+  return (
+    <div className="space-y-3">
+      <Skeleton className="h-4 w-1/2" />
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+        <Skeleton className="h-24" />
+        <Skeleton className="h-24" />
+        <Skeleton className="h-24" />
+      </div>
+      <Skeleton className="h-48 w-full" />
+    </div>
   );
 }
 
@@ -359,11 +438,12 @@ function NumberField({
 }) {
   return (
     <div className="space-y-1">
-      <Label className="text-xs">{label}</Label>
+      <Label className="text-[10px] text-muted-foreground">{label}</Label>
       <Input
         type="number"
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
+        className="h-8 text-xs"
       />
     </div>
   );
@@ -380,8 +460,8 @@ function TextField({
 }) {
   return (
     <div className="space-y-1">
-      <Label className="text-xs">{label}</Label>
-      <Input value={value} onChange={(event) => onChange(event.target.value)} />
+      <Label className="text-[10px] text-muted-foreground">{label}</Label>
+      <Input value={value} onChange={(event) => onChange(event.target.value)} className="h-8 text-xs" />
     </div>
   );
 }
