@@ -39,6 +39,8 @@ import {
 import { useCycleSimulation } from "../hooks/useCycleSimulation";
 import { usePdfExport } from "../hooks/usePdfExport";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
+import { WorkspaceAIButton, WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
+import type { AIContext } from "../components/WorkspaceAIChat";
 
 const fmt = (value: number, maximumFractionDigits = 2) =>
   value.toLocaleString("pt-BR", { maximumFractionDigits });
@@ -62,6 +64,8 @@ export function CompressorWorkspacePage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [inputs, setInputs] = useState<CompressorWorkspaceInputs>(DEFAULT_INPUTS);
   const [selectedRow, setSelectedRow] = useState<CompressorCatalogRow | null>(null);
+  const [activeTab, setActiveTab] = useState("operation");
+  const [aiOpen, setAiOpen] = useState(false);
 
   useEffect(() => {
     if (!selectedCompressorId || selectedCompressorId === inputs.compressorId) return;
