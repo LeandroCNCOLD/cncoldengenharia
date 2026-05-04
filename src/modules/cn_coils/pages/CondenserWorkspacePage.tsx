@@ -196,6 +196,27 @@ export function CondenserWorkspacePage() {
     `Tar: ${fmt(syncedInputs.Tair_in, 0)}°C`,
   ];
 
+  const aiContext: AIContext = useMemo(() => ({
+    componentType: "Condensador a Ar",
+    tabName: activeTab,
+    refrigerant: syncedInputs.refrigerant,
+    parameters: {
+      "Tc (°C)": syncedInputs.Tc,
+      "T ar entrada (°C)": syncedInputs.Tair_in,
+      "Subresfriamento (K)": syncedInputs.subcooling,
+      "Vazão de ar (m³/h)": syncedInputs.airFlowM3H ?? 0,
+      "Ventiladores": syncedInputs.fanCount,
+    },
+    results: result ? {
+      "Q cond (kW)": (result.Q_cond_W / 1000).toFixed(2),
+      "UA (W/K)": result.UA.toFixed(0),
+      "LMTD (K)": result.LMTD.toFixed(1),
+      "T ar saída (°C)": result.Tair_out.toFixed(1),
+      "ΔP ar (Pa)": result.deltaP_Pa.toFixed(0),
+    } : undefined,
+    warnings: [],
+  }), [activeTab, syncedInputs, result]);
+
   const sidebar = (
     <WorkspaceInputsSidebar
       onCalculate={() => calculate()}
