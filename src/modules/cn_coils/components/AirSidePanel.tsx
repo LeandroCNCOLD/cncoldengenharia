@@ -39,6 +39,7 @@ import {
   listUsableAxialFans,
   evaluateFanCurve,
   type AxialFanRecord,
+  type FanFunction,
 } from "../services/cncoilsCoefficientsService";
 import { findFanOperatingPointSimple } from "../engine/cycle/fanOperatingPoint";
 import { FanPickerModal } from "./FanPickerModal";
@@ -58,7 +59,12 @@ interface FanCatalogItem {
     | "tangential"
     | "ec_plug"
     | "unknown";
+  /** Tipo: axial ou centrifugal */
+  fanCategory?: "axial" | "centrifugal";
+  /** Função: soprador, exaustor, livre, universal */
+  fanFunction?: FanFunction;
   series?: string;
+  seriesDescription?: string;
   diameter_mm?: number;
   rpm?: number;
   motor_power_w?: number;
@@ -118,10 +124,19 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
                 : fan.xMin;
           return {
             id: `axial-${fan.fanType}-${fan.idFanModel}-${fan.source}`,
-            manufacturer: fan.fanType === 0 ? "Axial T0" : "Axial T1",
+            manufacturer: fan.manufacturer ?? (fan.fanType === 0 ? "Axial T0" : "Axial T1"),
             model: fan.model,
             airflow_m3h: Number.isFinite(mid) && mid > 0 ? mid : undefined,
-            family: "axial",
+            family: "axial" as const,
+            fanCategory: (fan.fanCategory ?? "axial") as "axial" | "centrifugal",
+            fanFunction: fan.function as FanFunction | undefined,
+            series: fan.series,
+            seriesDescription: fan.seriesDescription,
+            rpm: fan.rpm,
+            motor_power_w: fan.powerW,
+            motor_current_a: fan.currentA,
+            frequency_hz: fan.frequency,
+            voltage_v: fan.voltage,
             axial: fan,
           };
         });
