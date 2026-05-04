@@ -97,17 +97,15 @@ export function calculateWaterCondenser(
 
   const Q = Math.max(0, Q_total_W);
 
-  // ── Propriedades da água (a ~35°C) ──────────────────────────────────────────
+  // ── Propriedades da água (a ~30°C) ──────────────────────────────────────────
   const cpWater = 4182;      // J/(kg·K)
-  const rhoWater = 993;      // kg/m³
-  const muWater = 7.2e-4;    // Pa·s
-  const kWater = 0.627;      // W/(m·K)
-  const PrWater = cpWater * muWater / kWater; // ≈ 4.8
+  const rhoWater = 995;      // kg/m³
+  const muWater = 8e-4;      // Pa·s
+  const kWater = 0.617;      // W/(m·K)
 
   // ── Geometria dos tubos ──────────────────────────────────────────────────────
   const D_ext = tubeDiameter_mm / 1000;
-  const wall_m = 0.0015; // espessura de parede típica 1,5mm
-  const D_int = Math.max(0.005, D_ext - 2 * wall_m);
+  const D_int = Math.max(0.005, D_ext - 0.002); // espessura de parede 1 mm
   const A_tube_int = Math.PI * D_int ** 2 / 4; // área seccional de 1 tubo
 
   // ── Vazão mássica de água ────────────────────────────────────────────────────
@@ -123,16 +121,14 @@ export function calculateWaterCondenser(
   // ── Coeficiente convectivo lado água (Dittus-Boelter) ───────────────────────
   const v_water = mDotWater / (rhoWater * A_tube_int * tubeCount);
   const Re_water = Math.max(1, rhoWater * v_water * D_int / muWater);
-  // Turbulento: Nu = 0,023 Re^0,8 Pr^0,4
+  // Turbulento: Nu = 0,023 Re^0,8 Pr^0,4 com Pr = cp·μ/k
   const Nu_water = Re_water > 2300
-    ? 0.023 * Math.pow(Re_water, 0.8) * Math.pow(PrWater, 0.4)
+    ? 0.023 * Math.pow(Re_water, 0.8) * Math.pow(cpWater * muWater / kWater, 0.4)
     : 3.66; // laminar
   const h_water = Nu_water * kWater / D_int;
 
-  // ── Coeficiente convectivo lado refrigerante (Shah 1979 simplificado) ────────
-  // h_cond ≈ 4000–8000 W/m²K para refrigerantes halogenados em condensação
-  // Estimativa: h_cond = 6000 W/m²K (conservador para R404A/R22/R134a)
-  const h_ref = 6000;
+  // ── Coeficiente convectivo lado refrigerante (estimativa simplificada) ──────
+  const h_ref = 3500;
 
   // ── Resistência da parede (aço inox: k=16 W/mK; cobre: k=380 W/mK) ──────────
   const k_wall = 380; // cobre
