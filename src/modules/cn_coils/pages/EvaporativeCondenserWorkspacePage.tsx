@@ -230,6 +230,7 @@ export function EvaporativeCondenserWorkspacePage() {
           isExportingPdf={pdfGenerating}
         />
       </div>
+      <WorkspaceAIPanel open={aiOpen} onClose={() => setAiOpen(false)} context={aiContext} />
     </WorkspaceLayout>
   );
 }
