@@ -205,7 +205,7 @@ export default function TestBenchPage() {
           {!hasRun && !error && (
             <Card>
               <CardContent className="p-6 text-center text-sm text-muted-foreground">
-                Clique em <strong>Executar testes</strong> para calcular o ciclo termodinâmico (CycleEngine V2)
+                Clique em <strong>Executar testes</strong> para validar por balanço de energia
                 a partir das condições nominais do catálogo.
               </CardContent>
             </Card>
@@ -235,7 +235,7 @@ export default function TestBenchPage() {
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">COP real</CardTitle></CardHeader>
+                  <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">COP motor</CardTitle></CardHeader>
                   <CardContent className="pt-1 text-lg font-semibold">
                     {fmt(result.COPMotor, 2)}
                     {COP_catalog !== undefined && (
@@ -248,7 +248,7 @@ export default function TestBenchPage() {
               </div>
 
               <Card>
-                <CardHeader><CardTitle className="text-base">Resultado do ciclo</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-base">Validação por balanço de energia</CardTitle></CardHeader>
                 <CardContent className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                   <div>
                     <p className="text-xs text-muted-foreground">Q evap (motor)</p>
