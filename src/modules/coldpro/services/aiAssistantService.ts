@@ -27,9 +27,10 @@ export async function askAssistant(
   messages: AIAssistantMessage[],
   context?: string,
 ): Promise<string> {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  if (!apiKey) {
-    return "IA Assistente não configurada. Defina VITE_OPENAI_API_KEY no ambiente.";
+  const apiUrl = import.meta.env.VITE_FRONTEND_FORGE_API_URL;
+  const apiKey = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
+  if (!apiUrl || !apiKey) {
+    return "IA Assistente não disponível neste ambiente.";
   }
 
   const chatMessages = [
@@ -40,7 +41,7 @@ export async function askAssistant(
     ...messages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
   ];
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+  const response = await fetch(`${apiUrl}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
