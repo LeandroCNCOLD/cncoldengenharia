@@ -209,6 +209,29 @@ export function EvaporatorUnifiedWorkspacePage() {
   const [airTempIn, setAirTempIn] = useState(25);
   const [airRH, setAirRH] = useState(60);
   const [fanMode, setFanMode] = useState<"manual" | "catalog">("manual");
+  const [fanPickerOpen, setFanPickerOpen] = useState(false);
+  const fullCatalogs = useCnCoilsFullCatalogs();
+  const selectedFanId = useCnCoilsSimulationStore((s) => s.selectedFanId);
+  const fanPickerItems = useMemo<FanPickerItem[]>(
+    () =>
+      (fullCatalogs.fans ?? []).map((f) => ({
+        id: String(f.id),
+        manufacturer: f.builder,
+        model: f.model,
+        series: f.series,
+        airflow_m3h: f.airflowM3h,
+        diameter_mm: f.diameterMm,
+        rpm: f.speedRpm,
+        motor_power_w: f.powerW,
+        motor_current_a: f.currentA,
+        voltage_v: f.voltageV,
+      })),
+    [fullCatalogs.fans],
+  );
+  const selectedFan = useMemo(
+    () => fanPickerItems.find((f) => f.id === selectedFanId),
+    [fanPickerItems, selectedFanId],
+  );
   const [staticPressure, setStaticPressure] = useState(0);
   const [safetyFactor, setSafetyFactor] = useState(0);
 
