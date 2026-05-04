@@ -25,6 +25,7 @@ import { ResultCard } from "../components/ResultCard";
 import { WorkspaceHeader } from "../components/WorkspaceHeader";
 import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
 import { WorkspaceLayout } from "../components/WorkspaceLayout";
+import { ProjectHeaderBar } from "../components/ProjectHeaderBar";
 import {
   CompressorPickerModal,
   type CompressorItem,
@@ -263,6 +264,7 @@ export function CompressorWorkspacePage() {
 
   return (
     <WorkspaceLayout header={header} sidebar={sidebar}>
+      <ProjectHeaderBar workspaceType="component_workspace" />
       <div className="flex h-full flex-col">
         <div className="flex items-center gap-2 border-b border-border bg-card/30 px-4 py-2">
           <Badge variant={inputs.compressorId ? "default" : "secondary"}>

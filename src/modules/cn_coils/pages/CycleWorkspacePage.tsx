@@ -19,6 +19,7 @@ import { CompressorPickerModal } from "../components/CompressorPickerModal";
 import { WorkspaceLayout } from "../components/WorkspaceLayout";
 import { WorkspaceHeader } from "../components/WorkspaceHeader";
 import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
+import { ProjectHeaderBar } from "../components/ProjectHeaderBar";
 import { ResultCard } from "../components/ResultCard";
 import { ActionBar } from "../components/ActionBar";
 import { usePdfExport } from "../hooks/usePdfExport";
@@ -476,6 +477,7 @@ export function CycleWorkspacePage() {
 
   return (
     <WorkspaceLayout header={header} sidebar={sidebar}>
+      <ProjectHeaderBar workspaceType="dx_complete" />
       <div className="flex h-full flex-col">
         <div className="flex items-center justify-between gap-3 border-b border-border bg-card/30 px-4 py-2">
           <CycleStatusBar state={simState} result={cycleResult} />

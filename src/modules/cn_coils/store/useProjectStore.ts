@@ -34,12 +34,23 @@ export interface SavedProjectSnapshot {
   attachments?: ProjectAttachment[];
 }
 
+export interface ProjectHeader {
+  clientName?: string;
+  projectCode?: string;
+  description?: string;
+  engineer?: string;
+  revision?: string;
+  status?: "draft" | "review" | "approved" | "released";
+  tags?: string[];
+}
+
 export interface SavedProject {
   id: string;
   name: string;
   type: SavedProjectType;
   createdAt: number;
   updatedAt: number;
+  header?: ProjectHeader;
   snapshot: SavedProjectSnapshot;
 }
 
@@ -52,6 +63,7 @@ interface ProjectStore {
     snapshot: SavedProjectSnapshot,
   ) => string;
   updateProject: (id: string, snapshot: Partial<SavedProjectSnapshot>) => void;
+  updateProjectHeader: (id: string, header: Partial<ProjectHeader>) => void;
   deleteProject: (id: string) => void;
   loadProject: (id: string) => SavedProject | null;
   setActiveProject: (id: string | null) => void;
@@ -126,6 +138,18 @@ export const useProjectStore = create<ProjectStore>()(
               ? {
                   ...project,
                   snapshot: sanitizeSnapshot({ ...project.snapshot, ...snapshot }),
+                  updatedAt: Date.now(),
+                }
+              : project,
+          ),
+        })),
+      updateProjectHeader: (id, header) =>
+        set((state) => ({
+          projects: state.projects.map((project) =>
+            project.id === id
+              ? {
+                  ...project,
+                  header: { ...project.header, ...header },
                   updatedAt: Date.now(),
                 }
               : project,

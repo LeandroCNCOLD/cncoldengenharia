@@ -25,6 +25,7 @@ import { ResultCard } from "../components/ResultCard";
 import { WorkspaceHeader } from "../components/WorkspaceHeader";
 import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
 import { WorkspaceLayout } from "../components/WorkspaceLayout";
+import { ProjectHeaderBar } from "../components/ProjectHeaderBar";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { CHART_COLORS } from "../constants/chartColors";
 import { usePdfExport } from "../hooks/usePdfExport";
@@ -155,6 +156,7 @@ export function EvaporativeCondenserWorkspacePage() {
 
   return (
     <WorkspaceLayout header={header} sidebar={sidebar}>
+      <ProjectHeaderBar workspaceType="component_workspace" />
       <div className="flex h-full flex-col">
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {result ? (
