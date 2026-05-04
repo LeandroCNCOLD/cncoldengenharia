@@ -48,6 +48,8 @@ import {
   type CapacityUnit,
 } from "../store/useUnitStore";
 import { enrichWarnings } from "../utils/warningEnricher";
+import { useCatalogPreloadStore } from "@/modules/coldpro_catalog/store/useCatalogPreloadStore";
+import { catalogRowToEvaporatorInputs } from "@/modules/coldpro_catalog/utils/catalogRowToWorkspaceInputs";
 import type { AIContext } from "../components/WorkspaceAIChat";
 import type { StructuredWarning } from "../types/warnings";
 import type { OperatingMapPoint } from "../engines/operatingMap/operatingMapTypes";
@@ -83,6 +85,7 @@ const REFRIGERANT_OPTIONS = ["R404A", "R22", "R134a", "R410A", "R507", "R448A", 
 type CalcMode = "verify" | "design";
 type EngineMode = "v1" | "v2";
 type CompressorMode = "ari" | "constant" | "manual";
+type FanMode = "manual" | "catalog";
 
 export const WORKSPACE_TABS = {
   DETAILED: "detalhado",
@@ -214,6 +217,8 @@ export function EvaporatorUnifiedWorkspacePage() {
   const [compressorMode, setCompressorMode] = useState<CompressorMode>("ari");
   const [frequency, setFrequency] = useState(60);
   const [voltage, setVoltage] = useState(380);
+  const pendingEvaporator = useCatalogPreloadStore((s) => s.pendingEvaporator);
+  const clearCatalogPreload = useCatalogPreloadStore((s) => s.clearAll);
 
   // Velocidade frontal calculada (m/s)
   const frontalVelocity = useMemo(() => {
@@ -316,9 +321,78 @@ export function EvaporatorUnifiedWorkspacePage() {
   useEffect(() => {
     if (didInitRef.current) return;
     didInitRef.current = true;
+
+    if (pendingEvaporator) {
+      const inputs = catalogRowToEvaporatorInputs(pendingEvaporator);
+      if (inputs.geomHeight !== undefined) setGeomHeight(inputs.geomHeight);
+      if (inputs.geomWidth !== undefined) setGeomWidth(inputs.geomWidth);
+      if (inputs.geomDepth !== undefined) setGeomDepth(inputs.geomDepth);
+      if (inputs.finPitch !== undefined) setFinPitch(inputs.finPitch);
+      if (inputs.tubeDiam !== undefined) setTubeDiam(inputs.tubeDiam);
+      if (inputs.circuits !== undefined) setCircuits(inputs.circuits);
+      if (inputs.rows !== undefined) setRows(inputs.rows);
+      if (inputs.tubesPerRow !== undefined) setTubesPerRow(inputs.tubesPerRow);
+      if (inputs.airFlow !== undefined) setAirFlow(inputs.airFlow);
+      if (inputs.airTempIn !== undefined) setAirTempIn(inputs.airTempIn);
+      if (inputs.airRH !== undefined) setAirRH(inputs.airRH);
+      if (inputs.refrigerantId !== undefined) setRefrigerantId(inputs.refrigerantId);
+      if (inputs.te !== undefined) setTe(inputs.te);
+      if (inputs.tc !== undefined) setTc(inputs.tc);
+      if (inputs.superheat !== undefined) setSuperheat(inputs.superheat);
+      if (inputs.subcooling !== undefined) setSubcooling(inputs.subcooling);
+
+      clearCatalogPreload();
+      toast.success(`Dados carregados do catálogo: ${pendingEvaporator.modelo}`);
+      setTimeout(() => simState.trigger(), 0);
+      return;
+    }
+
     simState.trigger();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const store = useCnCoilsSimulationStore.getState();
+    store.setPhysicalInputs({
+      componentType: "evaporator_dx",
+      finnedHeightMm: geomHeight,
+      finnedLengthMm: geomWidth,
+      rows,
+      tubesPerRow,
+      circuits,
+      finPitchMm: finPitch,
+      tubeOuterDiameterMm: tubeDiam,
+      tubeInnerDiameterMm: Math.max(1, tubeDiam - 1),
+    });
+    store.setAirFlow(airFlow);
+    store.setTempInDB(airTempIn);
+    store.setRhIn(airRH);
+    store.setFluid(refrigerantId);
+    store.setFluidOperatingTemp(te);
+    store.setSuperheat(superheat);
+    store.setSubcooling(subcooling);
+    store.setFluidMassFlow(massFlow);
+    store.setCalcMode(calcMode);
+    store.setEngineVersion(engineMode);
+  }, [
+    airFlow,
+    airRH,
+    airTempIn,
+    calcMode,
+    circuits,
+    engineMode,
+    finPitch,
+    geomHeight,
+    geomWidth,
+    massFlow,
+    refrigerantId,
+    rows,
+    subcooling,
+    superheat,
+    te,
+    tubeDiam,
+    tubesPerRow,
+  ]);
 
   const handleReset = () => {
     setCalcMode("verify");
@@ -587,6 +661,44 @@ export function EvaporatorUnifiedWorkspacePage() {
               finPitch={finPitch}
               circuits={circuits}
               refrigerantId={refrigerantId}
+              airFlow={airFlow}
+              airTempIn={airTempIn}
+              airRH={airRH}
+              staticPressure={staticPressure}
+              fanMode={fanMode}
+              te={te}
+              tc={tc}
+              superheat={superheat}
+              subcooling={subcooling}
+              massFlow={massFlow}
+              calcMode={calcMode}
+              engineMode={engineMode}
+              compressorMode={compressorMode}
+              frequency={frequency}
+              setGeomHeight={setGeomHeight}
+              setGeomWidth={setGeomWidth}
+              setGeomDepth={setGeomDepth}
+              setFinPitch={setFinPitch}
+              setTubeDiam={setTubeDiam}
+              setCircuits={setCircuits}
+              setRows={setRows}
+              setTubesPerRow={setTubesPerRow}
+              setAirFlow={setAirFlow}
+              setAirTempIn={setAirTempIn}
+              setAirRH={setAirRH}
+              setStaticPressure={setStaticPressure}
+              setSafetyFactor={setSafetyFactor}
+              setFanMode={setFanMode}
+              setRefrigerantId={setRefrigerantId}
+              setTe={setTe}
+              setTc={setTc}
+              setSuperheat={setSuperheat}
+              setSubcooling={setSubcooling}
+              setMassFlow={setMassFlow}
+              setCalcMode={setCalcMode}
+              setEngineMode={setEngineMode}
+              setCompressorMode={setCompressorMode}
+              setFrequency={setFrequency}
             />
           )}
           </div>
@@ -660,7 +772,117 @@ function LoadingResults() {
   );
 }
 
-function DetailedWorkspaceTab({ onOpenAI }: { onOpenAI: () => void }) {
+type DetailedWorkspaceTabProps = {
+  geomHeight: number;
+  setGeomHeight: (value: number) => void;
+  geomWidth: number;
+  setGeomWidth: (value: number) => void;
+  geomDepth: number;
+  setGeomDepth: (value: number) => void;
+  finPitch: number;
+  setFinPitch: (value: number) => void;
+  tubeDiam: number;
+  setTubeDiam: (value: number) => void;
+  circuits: number;
+  setCircuits: (value: number) => void;
+  rows: number;
+  setRows: (value: number) => void;
+  tubesPerRow: number;
+  setTubesPerRow: (value: number) => void;
+  airFlow: number;
+  setAirFlow: (value: number) => void;
+  airTempIn: number;
+  setAirTempIn: (value: number) => void;
+  airRH: number;
+  setAirRH: (value: number) => void;
+  staticPressure: number;
+  setStaticPressure: (value: number) => void;
+  safetyFactor: number;
+  setSafetyFactor: (value: number) => void;
+  fanMode: "manual" | "catalog";
+  setFanMode: (value: "manual" | "catalog") => void;
+  refrigerantId: string;
+  setRefrigerantId: (value: string) => void;
+  te: number;
+  setTe: (value: number) => void;
+  tc: number;
+  setTc: (value: number) => void;
+  superheat: number;
+  setSuperheat: (value: number) => void;
+  subcooling: number;
+  setSubcooling: (value: number) => void;
+  massFlow: number;
+  setMassFlow: (value: number) => void;
+  calcMode: CalcMode;
+  setCalcMode: (value: CalcMode) => void;
+  engineMode: EngineMode;
+  setEngineMode: (value: EngineMode) => void;
+  compressorMode: CompressorMode;
+  setCompressorMode: (value: CompressorMode) => void;
+  frequency: number;
+  setFrequency: (value: number) => void;
+  cycleResult: CycleResult | null;
+  onCalculate: () => void;
+  onReset: () => void;
+  onOpenAI: () => void;
+  isCalculating: boolean;
+};
+
+function DetailedWorkspaceTab({
+  geomHeight,
+  setGeomHeight,
+  geomWidth,
+  setGeomWidth,
+  geomDepth,
+  setGeomDepth,
+  finPitch,
+  setFinPitch,
+  tubeDiam,
+  setTubeDiam,
+  circuits,
+  setCircuits,
+  rows,
+  setRows,
+  tubesPerRow,
+  setTubesPerRow,
+  airFlow,
+  setAirFlow,
+  airTempIn,
+  setAirTempIn,
+  airRH,
+  setAirRH,
+  staticPressure,
+  setStaticPressure,
+  safetyFactor,
+  setSafetyFactor,
+  fanMode,
+  setFanMode,
+  refrigerantId,
+  setRefrigerantId,
+  te,
+  setTe,
+  tc,
+  setTc,
+  superheat,
+  setSuperheat,
+  subcooling,
+  setSubcooling,
+  massFlow,
+  setMassFlow,
+  calcMode,
+  setCalcMode,
+  engineMode,
+  setEngineMode,
+  compressorMode,
+  setCompressorMode,
+  frequency,
+  setFrequency,
+  cycleResult,
+  onCalculate,
+  onReset,
+  onOpenAI,
+  isCalculating,
+}: DetailedWorkspaceTabProps) {
   const catalogs = useCnCoilsCatalogs();
   const physical = useCnCoilsSimulationStore((s) => s.physicalInputs);
   const thermo = useCnCoilsSimulationStore((s) => s.thermoInputs);
@@ -669,7 +891,6 @@ function DetailedWorkspaceTab({ onOpenAI }: { onOpenAI: () => void }) {
   const isSimulating = useCnCoilsSimulationStore((s) => s.isSimulating);
   const reset = useCnCoilsSimulationStore((s) => s.reset);
   const setWarnings = useCnCoilsSimulationStore((s) => s.setWarnings);
-
   useCnCoilsInputBridge("evaporator_dx");
 
   const simulationDeps = useMemo(
@@ -732,6 +953,7 @@ function DetailedWorkspaceTab({ onOpenAI }: { onOpenAI: () => void }) {
       return;
     }
     run();
+    setTimeout(onCalculate, 0);
   };
 
   return (
@@ -851,6 +1073,44 @@ function UnifiedTabs({
   finPitch,
   circuits,
   refrigerantId,
+  airFlow,
+  airTempIn,
+  airRH,
+  staticPressure,
+  fanMode,
+  te,
+  tc,
+  superheat,
+  subcooling,
+  massFlow,
+  calcMode,
+  engineMode,
+  compressorMode,
+  frequency,
+  setGeomHeight,
+  setGeomWidth,
+  setGeomDepth,
+  setFinPitch,
+  setTubeDiam,
+  setCircuits,
+  setRows,
+  setTubesPerRow,
+  setAirFlow,
+  setAirTempIn,
+  setAirRH,
+  setStaticPressure,
+  setSafetyFactor,
+  setFanMode,
+  setRefrigerantId,
+  setTe,
+  setTc,
+  setSuperheat,
+  setSubcooling,
+  setMassFlow,
+  setCalcMode,
+  setEngineMode,
+  setCompressorMode,
+  setFrequency,
 }: {
   config: CycleSystemConfig;
   cycleResult: CycleResult | null;
@@ -868,6 +1128,44 @@ function UnifiedTabs({
   finPitch: number;
   circuits: number;
   refrigerantId: string;
+  airFlow: number;
+  airTempIn: number;
+  airRH: number;
+  staticPressure: number;
+  fanMode: "manual" | "catalog";
+  te: number;
+  tc: number;
+  superheat: number;
+  subcooling: number;
+  massFlow: number;
+  calcMode: CalcMode;
+  engineMode: EngineMode;
+  compressorMode: CompressorMode;
+  frequency: number;
+  setGeomHeight: (value: number) => void;
+  setGeomWidth: (value: number) => void;
+  setGeomDepth: (value: number) => void;
+  setFinPitch: (value: number) => void;
+  setTubeDiam: (value: number) => void;
+  setCircuits: (value: number) => void;
+  setRows: (value: number) => void;
+  setTubesPerRow: (value: number) => void;
+  setAirFlow: (value: number) => void;
+  setAirTempIn: (value: number) => void;
+  setAirRH: (value: number) => void;
+  setStaticPressure: (value: number) => void;
+  setSafetyFactor: (value: number) => void;
+  setFanMode: (value: "manual" | "catalog") => void;
+  setRefrigerantId: (value: string) => void;
+  setTe: (value: number) => void;
+  setTc: (value: number) => void;
+  setSuperheat: (value: number) => void;
+  setSubcooling: (value: number) => void;
+  setMassFlow: (value: number) => void;
+  setCalcMode: (value: CalcMode) => void;
+  setEngineMode: (value: EngineMode) => void;
+  setCompressorMode: (value: CompressorMode) => void;
+  setFrequency: (value: number) => void;
 }) {
   const enrichedWarnings = useMemo(
     () => (cycleResult ? enrichWarnings(cycleResult.warnings) : []),
@@ -1006,7 +1304,61 @@ function UnifiedTabs({
 
       {/* ── Aba Detalhado — PRIMEIRA, fonte da verdade ── */}
       <TabsContent value={WORKSPACE_TABS.DETAILED} className="mt-3">
-        <DetailedWorkspaceTab onOpenAI={() => onOpenAI("Detalhado")} />
+        <DetailedWorkspaceTab
+          geomHeight={geomHeight}
+          setGeomHeight={setGeomHeight}
+          geomWidth={geomWidth}
+          setGeomWidth={setGeomWidth}
+          geomDepth={geomDepth}
+          setGeomDepth={setGeomDepth}
+          finPitch={finPitch}
+          setFinPitch={setFinPitch}
+          tubeDiam={tubeDiam}
+          setTubeDiam={setTubeDiam}
+          circuits={circuits}
+          setCircuits={setCircuits}
+          rows={rows}
+          setRows={setRows}
+          tubesPerRow={tubesPerRow}
+          setTubesPerRow={setTubesPerRow}
+          airFlow={airFlow}
+          setAirFlow={setAirFlow}
+          airTempIn={airTempIn}
+          setAirTempIn={setAirTempIn}
+          airRH={airRH}
+          setAirRH={setAirRH}
+          staticPressure={staticPressure}
+          setStaticPressure={setStaticPressure}
+          safetyFactor={safetyFactor}
+          setSafetyFactor={setSafetyFactor}
+          fanMode={fanMode}
+          setFanMode={setFanMode}
+          refrigerantId={refrigerantId}
+          setRefrigerantId={setRefrigerantId}
+          te={te}
+          setTe={setTe}
+          tc={tc}
+          setTc={setTc}
+          superheat={superheat}
+          setSuperheat={setSuperheat}
+          subcooling={subcooling}
+          setSubcooling={setSubcooling}
+          massFlow={massFlow}
+          setMassFlow={setMassFlow}
+          calcMode={calcMode}
+          setCalcMode={setCalcMode}
+          engineMode={engineMode}
+          setEngineMode={setEngineMode}
+          compressorMode={compressorMode}
+          setCompressorMode={setCompressorMode}
+          frequency={frequency}
+          setFrequency={setFrequency}
+          cycleResult={cycleResult}
+          onCalculate={() => onOpenAI("Detalhado")}
+          onReset={() => {}}
+          onOpenAI={() => onOpenAI("Detalhado")}
+          isCalculating={false}
+        />
       </TabsContent>
 
       <TabsContent value={WORKSPACE_TABS.DESENHO} className="mt-3">
