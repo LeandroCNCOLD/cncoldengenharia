@@ -50,6 +50,7 @@ import { CyclePHDiagram } from "../components/CyclePHDiagram";
 import { CoilEnvelopeTab } from "../components/CoilEnvelopeTab";
 import { OperatingMapChart } from "../components/OperatingMapChart";
 import { CompressorPickerModal } from "../components/CompressorPickerModal";
+import { PostSaveNextStepDialog } from "../components/PostSaveNextStepDialog";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { DrawingTab } from "../components/drawing/DrawingTab";
 import { WorkspaceAIChat } from "../components/WorkspaceAIChat";
