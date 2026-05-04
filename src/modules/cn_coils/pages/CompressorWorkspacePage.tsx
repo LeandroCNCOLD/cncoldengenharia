@@ -324,13 +324,16 @@ export function CompressorWorkspacePage() {
                 </div>
               )}
 
-              <Tabs defaultValue="operation" className="w-full">
-                <TabsList className="flex w-full flex-wrap justify-start">
-                  <TabsTrigger value="operation">📋 Ponto de Operação</TabsTrigger>
-                  <TabsTrigger value="envelope">📊 Envelope Capacidade</TabsTrigger>
-                  <TabsTrigger value="capacity">📈 Curva Tc fixo</TabsTrigger>
-                  <TabsTrigger value="electric">⚡ Dados Elétricos</TabsTrigger>
-                </TabsList>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <TabsList className="flex flex-wrap justify-start">
+                    <TabsTrigger value="operation">📋 Ponto de Operação</TabsTrigger>
+                    <TabsTrigger value="envelope">📊 Envelope Capacidade</TabsTrigger>
+                    <TabsTrigger value="capacity">📈 Curva Tc fixo</TabsTrigger>
+                    <TabsTrigger value="electric">⚡ Dados Elétricos</TabsTrigger>
+                  </TabsList>
+                  <WorkspaceAIButton onClick={() => setAiOpen(true)} />
+                </div>
 
                 <TabsContent value="operation" className="mt-3">
                   <div className="rounded-lg border border-border bg-card p-4">
