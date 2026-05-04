@@ -63,6 +63,7 @@ export function CompressorWorkspacePage() {
   const { isGenerating: pdfGenerating, exportPdf } = usePdfExport();
   const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [nextStepOpen, setNextStepOpen] = useState(false);
   const [inputs, setInputs] = useState<CompressorWorkspaceInputs>(DEFAULT_INPUTS);
   const [selectedRow, setSelectedRow] = useState<CompressorCatalogRow | null>(null);
   const [activeTab, setActiveTab] = useState("operation");
