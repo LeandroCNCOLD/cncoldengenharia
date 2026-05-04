@@ -1,0 +1,236 @@
+[
+  {
+    "IdCoeffSotto": 0,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1,
+    "Serie": "Nessuna"
+  },
+  {
+    "IdCoeffSotto": 1,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.95,
+    "Serie": "1-0,95"
+  },
+  {
+    "IdCoeffSotto": 2,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.9,
+    "Serie": "1-0,9"
+  },
+  {
+    "IdCoeffSotto": 3,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.85,
+    "Serie": "1-0,85"
+  },
+  {
+    "IdCoeffSotto": 4,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.8,
+    "Serie": "1-0,8"
+  },
+  {
+    "IdCoeffSotto": 5,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.75,
+    "Serie": "1-0,75"
+  },
+  {
+    "IdCoeffSotto": 6,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.7,
+    "Serie": "1-0,7"
+  },
+  {
+    "IdCoeffSotto": 7,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.65,
+    "Serie": "1-0,65"
+  },
+  {
+    "IdCoeffSotto": 8,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.6,
+    "Serie": "1-0,6"
+  },
+  {
+    "IdCoeffSotto": 9,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.55,
+    "Serie": "1-0,55"
+  },
+  {
+    "IdCoeffSotto": 10,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.5,
+    "Serie": "1-0,5"
+  },
+  {
+    "IdCoeffSotto": 11,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.45,
+    "Serie": "1-0,45"
+  },
+  {
+    "IdCoeffSotto": 12,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.4,
+    "Serie": "1-0,4"
+  },
+  {
+    "IdCoeffSotto": 13,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.35,
+    "Serie": "1-0,35"
+  },
+  {
+    "IdCoeffSotto": 14,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.3,
+    "Serie": "1-0,3"
+  },
+  {
+    "IdCoeffSotto": 15,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.25,
+    "Serie": "1-0,25"
+  },
+  {
+    "IdCoeffSotto": 16,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.2,
+    "Serie": "1-0,2"
+  },
+  {
+    "IdCoeffSotto": 17,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.15,
+    "Serie": "1-0,15"
+  },
+  {
+    "IdCoeffSotto": 18,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.1,
+    "Serie": "1-0,1"
+  },
+  {
+    "IdCoeffSotto": 19,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 0.05,
+    "Serie": "1-0,05"
+  },
+  {
+    "IdCoeffSotto": 20,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.05,
+    "Serie": "1-1,05"
+  },
+  {
+    "IdCoeffSotto": 21,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.1,
+    "Serie": "1-1,10"
+  },
+  {
+    "IdCoeffSotto": 22,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.15,
+    "Serie": "1-1,15"
+  },
+  {
+    "IdCoeffSotto": 23,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.2,
+    "Serie": "1-1,20"
+  },
+  {
+    "IdCoeffSotto": 24,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.25,
+    "Serie": "1-1,25"
+  },
+  {
+    "IdCoeffSotto": 25,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.3,
+    "Serie": "1-1,30"
+  },
+  {
+    "IdCoeffSotto": 26,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.35,
+    "Serie": "1-1,35"
+  },
+  {
+    "IdCoeffSotto": 27,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.4,
+    "Serie": "1-1,40"
+  },
+  {
+    "IdCoeffSotto": 28,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.45,
+    "Serie": "1-1,45"
+  },
+  {
+    "IdCoeffSotto": 29,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.5,
+    "Serie": "1-1,50"
+  },
+  {
+    "IdCoeffSotto": 30,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.55,
+    "Serie": "1-1,55"
+  },
+  {
+    "IdCoeffSotto": 31,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.6,
+    "Serie": "1-1,60"
+  },
+  {
+    "IdCoeffSotto": 32,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.65,
+    "Serie": "1-1,65"
+  },
+  {
+    "IdCoeffSotto": 33,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.7,
+    "Serie": "1-1,70"
+  },
+  {
+    "IdCoeffSotto": 34,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.75,
+    "Serie": "1-1,75"
+  },
+  {
+    "IdCoeffSotto": 35,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.8,
+    "Serie": "1-1,80"
+  },
+  {
+    "IdCoeffSotto": 36,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.85,
+    "Serie": "1-1,85"
+  },
+  {
+    "IdCoeffSotto": 37,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.9,
+    "Serie": "1-1,90"
+  },
+  {
+    "IdCoeffSotto": 38,
+    "FatCoeflattub": 1,
+    "SecurityFactor": 1.95,
+    "Serie": "1-1,95"
+  }
+]
