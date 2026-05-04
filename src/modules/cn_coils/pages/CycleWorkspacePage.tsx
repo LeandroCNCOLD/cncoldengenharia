@@ -2,10 +2,13 @@ import { useState } from "react";
 import { useCycleSimulation } from "../hooks/useCycleSimulation";
 import { useFrostAnalysis } from "../hooks/useFrostAnalysis";
 import { useUncertaintyAnalysis } from "../hooks/useUncertaintyAnalysis";
+import { CoilEnvelopeTab } from "../components/CoilEnvelopeTab";
+import { CoilsInSeriesPanel } from "../components/CoilsInSeriesPanel";
 import { CyclePHDiagram } from "../components/CyclePHDiagram";
 import { FrostAnalysisPanel } from "../components/FrostAnalysisPanel";
 import { CycleResultPanel } from "../components/CycleResultPanel";
 import { UncertaintyPanel } from "../components/UncertaintyBadge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { CoilCycleInputs, CoilCycleResult } from "../engines/coil/coilCycleAdapter";
 import type { CycleSystemConfig } from "../engines/cycle/cycleTypes";
 
@@ -139,119 +142,141 @@ export function CycleWorkspacePage() {
         </div>
       </div>
 
-      <div className="flex h-[calc(100vh-65px)]">
-        <div className="flex-1 overflow-auto p-6">
-          {simState.status === "success" ? (
-            <div className="space-y-4">
-              <CyclePHDiagram
-                result={simState.result}
-                refrigerantId={config.refrigerantId}
-                width={620}
-                height={400}
-              />
-
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                {[
-                  {
-                    label: "Capacidade",
-                    value: `${(simState.result.Q_evap_W / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kW`,
-                    sub: "Refrigeração",
-                    color: "border-blue-500",
-                  },
-                  {
-                    label: "COP",
-                    value: simState.result.COP.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-                    sub: `EER: ${simState.result.EER.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-                    color: "border-green-500",
-                  },
-                  {
-                    label: "Te / Tc",
-                    value: `${simState.result.Te_C.toLocaleString("pt-BR", { minimumFractionDigits: 1 })} / ${simState.result.Tc_C.toLocaleString("pt-BR", { minimumFractionDigits: 1 })} °C`,
-                    sub: "Equilíbrio",
-                    color: "border-orange-500",
-                  },
-                  {
-                    label: "Compressor",
-                    value: `${(simState.result.W_comp_W / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kW`,
-                    sub: simState.result.compressorResult.mode,
-                    color: "border-purple-500",
-                  },
-                ].map((card) => (
-                  <div
-                    key={card.label}
-                    className={`rounded-xl border-l-4 bg-gray-900 p-4 ${card.color}`}
-                  >
-                    <div className="mb-1 text-xs text-gray-500">{card.label}</div>
-                    <div className="text-lg font-bold text-white">{card.value}</div>
-                    <div className="mt-1 text-xs text-gray-500">{card.sub}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : simState.status === "running" ? (
-            <div className="flex h-64 items-center justify-center">
-              <div className="space-y-3 text-center">
-                <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-                <p className="text-sm text-gray-400">Executando solver de ciclo...</p>
-              </div>
-            </div>
-          ) : simState.status === "error" ? (
-            <div className="rounded-xl border border-red-800 bg-red-950/30 p-6 text-center">
-              <p className="font-semibold text-red-400">Erro no CycleEngine</p>
-              <p className="mt-2 text-sm text-red-300">{simState.message}</p>
-            </div>
-          ) : (
-            <div className="flex h-64 items-center justify-center text-gray-600">
-              Configure o sistema para iniciar a simulação
-            </div>
-          )}
+      <Tabs defaultValue="cycle" className="h-[calc(100vh-65px)]">
+        <div className="border-b border-gray-800 px-6 py-2">
+          <TabsList>
+            <TabsTrigger value="cycle">Ciclo</TabsTrigger>
+            <TabsTrigger value="envelope">Envelope Q×Te</TabsTrigger>
+          </TabsList>
         </div>
 
-        <div className="w-80 overflow-y-auto border-l border-gray-800 p-4">
-          {simState.status === "success" ? (
-            <div className="space-y-4">
-              <CycleResultPanel result={simState.result} />
-              {(uncertaintyResult || uncertaintyLoading) && (
-                <details className="rounded-lg border border-gray-800 bg-white text-gray-900">
-                  <summary className="cursor-pointer select-none px-4 py-2 text-sm font-medium">
-                    Análise de Incerteza
-                    {uncertaintyLoading && (
-                      <span className="ml-2 animate-pulse text-xs text-gray-400">
-                        calculando...
-                      </span>
-                    )}
-                  </summary>
-                  <div className="px-4 pb-4 pt-2">
-                    {uncertaintyResult ? (
-                      <UncertaintyPanel
-                        result={uncertaintyResult}
-                        isLoading={uncertaintyLoading}
-                      />
-                    ) : (
-                      <div className="animate-pulse text-xs text-gray-400">
-                        Calculando intervalos de confiança...
-                      </div>
-                    )}
-                  </div>
-                </details>
-              )}
-              {frostResult && cycleResult?.converged && (
-                <div className="rounded-lg border border-gray-800 bg-white p-4 text-gray-900">
-                  <FrostAnalysisPanel
-                    result={frostResult}
-                    nominalCapacityW={cycleResult.Q_evap_W}
-                    operationTimeH={frostOperationTimeH}
+        <TabsContent value="cycle" className="m-0 h-[calc(100%-53px)]">
+          <div className="flex h-full">
+            <div className="flex-1 overflow-auto p-6">
+              {simState.status === "success" ? (
+                <div className="space-y-4">
+                  <CyclePHDiagram
+                    result={simState.result}
+                    refrigerantId={config.refrigerantId}
+                    width={620}
+                    height={400}
                   />
+
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                    {[
+                      {
+                        label: "Capacidade",
+                        value: `${(simState.result.Q_evap_W / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kW`,
+                        sub: "Refrigeração",
+                        color: "border-blue-500",
+                      },
+                      {
+                        label: "COP",
+                        value: simState.result.COP.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                        sub: `EER: ${simState.result.EER.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                        color: "border-green-500",
+                      },
+                      {
+                        label: "Te / Tc",
+                        value: `${simState.result.Te_C.toLocaleString("pt-BR", { minimumFractionDigits: 1 })} / ${simState.result.Tc_C.toLocaleString("pt-BR", { minimumFractionDigits: 1 })} °C`,
+                        sub: "Equilíbrio",
+                        color: "border-orange-500",
+                      },
+                      {
+                        label: "Compressor",
+                        value: `${(simState.result.W_comp_W / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kW`,
+                        sub: simState.result.compressorResult.mode,
+                        color: "border-purple-500",
+                      },
+                    ].map((card) => (
+                      <div
+                        key={card.label}
+                        className={`rounded-xl border-l-4 bg-gray-900 p-4 ${card.color}`}
+                      >
+                        <div className="mb-1 text-xs text-gray-500">{card.label}</div>
+                        <div className="text-lg font-bold text-white">{card.value}</div>
+                        <div className="mt-1 text-xs text-gray-500">{card.sub}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : simState.status === "running" ? (
+                <div className="flex h-64 items-center justify-center">
+                  <div className="space-y-3 text-center">
+                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+                    <p className="text-sm text-gray-400">Executando solver de ciclo...</p>
+                  </div>
+                </div>
+              ) : simState.status === "error" ? (
+                <div className="rounded-xl border border-red-800 bg-red-950/30 p-6 text-center">
+                  <p className="font-semibold text-red-400">Erro no CycleEngine</p>
+                  <p className="mt-2 text-sm text-red-300">{simState.message}</p>
+                </div>
+              ) : (
+                <div className="flex h-64 items-center justify-center text-gray-600">
+                  Configure o sistema para iniciar a simulação
                 </div>
               )}
             </div>
-          ) : (
-            <div className="mt-8 text-center text-sm text-gray-600">
-              Aguardando resultado...
+
+            <div className="w-80 overflow-y-auto border-l border-gray-800 p-4">
+              {simState.status === "success" ? (
+                <div className="space-y-4">
+                  <CoilsInSeriesPanel
+                    primaryCoilResult={{
+                      deltaP_Pa: simState.result.evaporatorResult.airPressureDropPa,
+                      Q_kcalh: simState.result.evaporatorResult.totalCapacityW * 0.86,
+                      T_ar_saida: simState.result.evaporatorResult.airOutletTempC,
+                    }}
+                  />
+                  <CycleResultPanel result={simState.result} />
+                  {(uncertaintyResult || uncertaintyLoading) && (
+                    <details className="rounded-lg border border-gray-800 bg-white text-gray-900">
+                      <summary className="cursor-pointer select-none px-4 py-2 text-sm font-medium">
+                        Análise de Incerteza
+                        {uncertaintyLoading && (
+                          <span className="ml-2 animate-pulse text-xs text-gray-400">
+                            calculando...
+                          </span>
+                        )}
+                      </summary>
+                      <div className="px-4 pb-4 pt-2">
+                        {uncertaintyResult ? (
+                          <UncertaintyPanel
+                            result={uncertaintyResult}
+                            isLoading={uncertaintyLoading}
+                          />
+                        ) : (
+                          <div className="animate-pulse text-xs text-gray-400">
+                            Calculando intervalos de confiança...
+                          </div>
+                        )}
+                      </div>
+                    </details>
+                  )}
+                  {frostResult && cycleResult?.converged && (
+                    <div className="rounded-lg border border-gray-800 bg-white p-4 text-gray-900">
+                      <FrostAnalysisPanel
+                        result={frostResult}
+                        nominalCapacityW={cycleResult.Q_evap_W}
+                        operationTimeH={frostOperationTimeH}
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="mt-8 text-center text-sm text-gray-600">
+                  Aguardando resultado...
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="envelope" className="m-0 h-[calc(100%-53px)] overflow-auto bg-white text-slate-900">
+          <CoilEnvelopeTab equipmentId={config.id} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

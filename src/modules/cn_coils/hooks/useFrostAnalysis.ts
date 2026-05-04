@@ -6,6 +6,18 @@ import type {
 } from "../engines/frost/frostTypes";
 import type { CycleResult } from "../engines/cycle/cycleTypes";
 
+export interface FrostAnalysisWithEnvelopeFields extends FrostAnalysisResult {
+  frostPoint_C: number;
+  massRate_kgh: number;
+  degradationCurve: FrostAnalysisResult["degradationCurve"] & Array<{
+    t_h: number;
+    Q_kcalh: number;
+    thickness_mm: number;
+  }>;
+  recommendedDefrostInterval_h: number;
+  residualCapacityPct: number;
+}
+
 interface UseFrostAnalysisOptions {
   cycleResult: CycleResult | null;
   refrigerantId?: string;
@@ -32,7 +44,7 @@ export function useFrostAnalysis({
   airMassFlowKgS,
   evaporatorExternalAreaM2,
   config = {},
-}: UseFrostAnalysisOptions): FrostAnalysisResult | null {
+}: UseFrostAnalysisOptions): FrostAnalysisWithEnvelopeFields | null {
   return useMemo(() => {
     if (!cycleResult || !cycleResult.converged) return null;
     if (evaporatorExternalAreaM2 <= 0) return null;
@@ -40,7 +52,7 @@ export function useFrostAnalysis({
     const mergedConfig: FrostAnalysisConfig = { ...DEFAULT_CONFIG, ...config };
 
     try {
-      return calculateFrostAnalysis({
+      const result = calculateFrostAnalysis({
         airInletTempC,
         airRelativeHumidity,
         airMassFlowKgS,
@@ -51,6 +63,31 @@ export function useFrostAnalysis({
         refrigerantId,
         config: mergedConfig,
       });
+      const rhPct = airRelativeHumidity <= 1 ? airRelativeHumidity * 100 : airRelativeHumidity;
+      const frostPoint_C = airInletTempC - (100 - rhPct) / 5 - 2;
+      const massRate_kgh =
+        mergedConfig.operationTimeH > 0
+          ? result.frostAtEndOfCycle.frost_mass_kg / mergedConfig.operationTimeH
+          : 0;
+      const degradationCurve = result.degradationCurve.map((point) =>
+        Object.assign(point, {
+          t_h: point.timeH,
+          Q_kcalh: point.effectiveCapacityW * 0.86,
+          thickness_mm: point.frostThicknessMm,
+        }),
+      ) as FrostAnalysisWithEnvelopeFields["degradationCurve"];
+      return {
+        ...result,
+        frostPoint_C,
+        massRate_kgh,
+        degradationCurve,
+        recommendedDefrostInterval_h:
+          result.estimatedTimeToDefrostH ?? mergedConfig.operationTimeH,
+        residualCapacityPct:
+          cycleResult.Q_evap_W > 0
+            ? (result.effectiveCapacityAtEndW / cycleResult.Q_evap_W) * 100
+            : 100,
+      };
     } catch {
       return null;
     }
