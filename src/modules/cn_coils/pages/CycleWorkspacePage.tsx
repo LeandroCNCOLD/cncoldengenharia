@@ -5,6 +5,7 @@ import { useUncertaintyAnalysis } from "../hooks/useUncertaintyAnalysis";
 import { useOperatingMap } from "../hooks/useOperatingMap";
 import { CoilEnvelopeTab } from "../components/CoilEnvelopeTab";
 import { CoilsInSeriesPanel } from "../components/CoilsInSeriesPanel";
+import { FrostAnalysisTab } from "../components/FrostAnalysisTab";
 import { CyclePHDiagram } from "../components/CyclePHDiagram";
 import { FrostAnalysisPanel } from "../components/FrostAnalysisPanel";
 import { CycleResultPanel } from "../components/CycleResultPanel";
@@ -540,11 +541,12 @@ function CycleAnalysisTabs({
       <TabsList className="bg-gray-900 border border-gray-800">
         <TabsTrigger value="results">Resultados</TabsTrigger>
         <TabsTrigger value="uncertainty">Incerteza</TabsTrigger>
-        <TabsTrigger value="frost">Geada</TabsTrigger>
         <TabsTrigger value="map">Mapa de Operação</TabsTrigger>
         <TabsTrigger value="optimization">Otimização</TabsTrigger>
         <TabsTrigger value="series">Coils em Série</TabsTrigger>
         <TabsTrigger value="envelope">Envelope Q×Te</TabsTrigger>
+        <TabsTrigger value="frost-analysis">❄️ Análise de Geada</TabsTrigger>
+        <TabsTrigger value="frost">Geada Avançada</TabsTrigger>
       </TabsList>
 
       <TabsContent value="results" className="mt-3">
@@ -583,6 +585,16 @@ function CycleAnalysisTabs({
         <div className="rounded-lg bg-white text-gray-900">
           <CoilEnvelopeTab equipmentId={config.id} />
         </div>
+      </TabsContent>
+
+      <TabsContent value="frost-analysis" className="mt-3">
+        <FrostAnalysisTab
+          Te={cycleResult.Te_C}
+          Tair_in={config.evaporator.airInletTempC}
+          RH={config.evaporator.airRelativeHumidity}
+          Q_nominal={cycleResult.Q_evap_W}
+          geometry={config.id}
+        />
       </TabsContent>
     </Tabs>
   );

@@ -39,11 +39,22 @@ export interface CoilEnvelope {
   version: 2;
 }
 
+export interface CondenserEnvelopePoint {
+  Tc: number;
+  Q_cond_W: number;
+  UA: number;
+  LMTD: number;
+  Tair_out: number;
+}
+
 interface CoilEnvelopeState {
   envelopes: Record<string, CoilEnvelope>;
+  condenserEnvelope: CondenserEnvelopePoint[] | null;
   saveEnvelope: (envelope: CoilEnvelope) => void;
   getEnvelope: (componentType: string) => CoilEnvelope | undefined;
   clearEnvelope: (componentType: string) => void;
+  setCondenserEnvelope: (points: CondenserEnvelopePoint[]) => void;
+  clearCondenserEnvelope: () => void;
   clearAll: () => void;
   hasAllEnvelopes: () => boolean;
 }
@@ -52,6 +63,7 @@ export const useCoilEnvelopeStore = create<CoilEnvelopeState>()(
   persist(
     (set, get) => ({
       envelopes: {},
+      condenserEnvelope: null,
       saveEnvelope: (envelope) =>
         set((state) => ({
           envelopes: { ...state.envelopes, [envelope.componentType]: envelope },
@@ -62,12 +74,14 @@ export const useCoilEnvelopeStore = create<CoilEnvelopeState>()(
           const { [componentType]: _, ...rest } = state.envelopes;
           return { envelopes: rest };
         }),
-      clearAll: () => set({ envelopes: {} }),
+      setCondenserEnvelope: (points) => set({ condenserEnvelope: points }),
+      clearCondenserEnvelope: () => set({ condenserEnvelope: null }),
+      clearAll: () => set({ envelopes: {}, condenserEnvelope: null }),
       hasAllEnvelopes: () => {
         const envelopes = get().envelopes;
         return Boolean(
           envelopes.evaporator_dx &&
-            envelopes.condenser_air &&
+            (envelopes.condenser_air || get().condenserEnvelope) &&
             envelopes.compressor,
         );
       },

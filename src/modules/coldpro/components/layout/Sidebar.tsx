@@ -18,6 +18,7 @@ import {
   Layers,
   Snowflake,
   Target,
+  Thermometer,
 } from "lucide-react";
 import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ type NavItem = {
   to: string;
   label: string;
   Icon: typeof LayoutDashboard;
+  search?: Record<string, string>;
   exact?: boolean;
   comingSoon?: boolean;
 };
@@ -45,6 +47,12 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Simulação",
     items: [
       { to: "/coldpro/cncoils", label: "CN COILS", Icon: Gauge },
+      {
+        to: "/coldpro/cncoils/workspace",
+        label: "Condensador a Ar",
+        Icon: Thermometer,
+        search: { type: "condenser_air" },
+      },
       { to: "/coldpro/cycle", label: "Ciclo de Refrigeração", Icon: RotateCw },
       { to: "/coldpro/map", label: "Mapa Operacional", Icon: Map },
       { to: "/coldpro/assembly", label: "Arranjo de Serpentinas", Icon: Layers },
@@ -105,6 +113,7 @@ export function Sidebar() {
                   <li key={item.to}>
                     <Link
                       to={item.to}
+                      search={item.search as never}
                       title={item.comingSoon ? "Em desenvolvimento" : undefined}
                       className={
                         active

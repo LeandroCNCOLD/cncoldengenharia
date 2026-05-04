@@ -93,7 +93,7 @@ export function CompressorPickerModal({ open, onClose }: Props) {
           brand: r.manufacturer,
           nominalCapacityW: r.nominal_cooling_capacity_w,
           nominalPowerW: r.nominal_power_w,
-          nominalHp: r.nominal_hp,
+          nominalHp: r.nominal_hp ?? null,
           frequencyHz: r.frequency_hz ?? 60,
           voltage: r.voltage ?? null,
         }));

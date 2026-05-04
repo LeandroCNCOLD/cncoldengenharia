@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { CnCoilsWorkspacePage } from "@/modules/cn_coils/pages/CnCoilsWorkspacePage";
+import { CondenserWorkspacePage } from "@/modules/cn_coils/pages/CondenserWorkspacePage";
 
 const searchSchema = z.object({
   type: z
@@ -22,5 +23,11 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/_app/coldpro/cncoils/workspace")({
   validateSearch: zodValidator(searchSchema),
-  component: CnCoilsWorkspacePage,
+  component: CnCoilsWorkspaceRoute,
 });
+
+function CnCoilsWorkspaceRoute() {
+  const search = Route.useSearch();
+  if (search.type === "condenser_air") return <CondenserWorkspacePage />;
+  return <CnCoilsWorkspacePage />;
+}
