@@ -67,7 +67,7 @@ const REFRIGERANT_GROUPS: Array<{ label: string; ids: string[] }> = [
 ];
 
 type CompressorMode = "bitzer" | "ari" | "constant";
-type CycleActiveTab = "ph" | "results" | "envelope" | "frost-analysis" | "map" | "uncertainty" | "optimization" | "series" | "frost" | "drawing";
+type CycleActiveTab = "ph" | "results" | "envelope" | "frost-analysis" | "map" | "uncertainty" | "optimization" | "series" | "frost" | "drawing" | "report";
 
 const DEFAULT_CONFIG: CycleSystemConfig = {
   id: "demo-01",
@@ -659,6 +659,7 @@ function ResultsView({
           <TabsTrigger value="series" className="shrink-0">🔗 Coils em Série</TabsTrigger>
           <TabsTrigger value="frost" className="shrink-0">🧊 Geada Avançada</TabsTrigger>
           <TabsTrigger value="drawing" className="shrink-0">🏗️ Desenho</TabsTrigger>
+          <TabsTrigger value="report" className="shrink-0">📄 Relatório</TabsTrigger>
         </TabsList>
 
         <TabsContent value="ph" className="mt-3">
@@ -715,6 +716,24 @@ function ResultsView({
                 deltaP_Pa: cycleResult.evaporatorResult.airPressureDropPa,
                 Q_kcalh: cycleResult.evaporatorResult.totalCapacityW * 0.86,
                 T_ar_saida: cycleResult.evaporatorResult.airOutletTempC,
+                RH_saida_pct: (cycleResult.evaporatorResult.airOutletRH ?? 0.9) * 100,
+              }}
+              hotGasSource={{
+                T_discharge_C: cycleResult.statePoints.point2_compOut.T_C,
+                h_discharge_kJkg: cycleResult.statePoints.point2_compOut.h_kJkg,
+                h_condOut_kJkg: cycleResult.statePoints.point3_condOut.h_kJkg,
+                m_dot_total_kgS: cycleResult.m_dot_kgS,
+                Tc_C: cycleResult.Tc_C,
+              }}
+              airFlowM3H={config.evaporator.airFlowM3H}
+              evaporatorGeometry={{
+                finnedHeightMm: config.evaporator.physical.finnedHeightMm,
+                finnedLengthMm: config.evaporator.physical.finnedLengthMm,
+                finPitchMm: config.evaporator.physical.finPitchMm,
+                tubeOuterDiameterMm: config.evaporator.physical.tubeExternalDiameterMm,
+                tubeInnerDiameterMm: Math.max(1, config.evaporator.physical.tubeExternalDiameterMm - 1),
+                tubePitchTransverseMm: config.evaporator.physical.tubePitchTransversalMm ?? 25,
+                tubePitchLongitudinalMm: config.evaporator.physical.tubePitchLongitudinalMm ?? 22,
               }}
             />
           </div>
@@ -737,6 +756,37 @@ function ResultsView({
             componentType="evaporator_dx"
             projectName={config.name}
           />
+        </TabsContent>
+        <TabsContent value="report" className="mt-3">
+          <div className="space-y-4 rounded-lg border border-border bg-card p-4">
+            <h3 className="text-sm font-semibold">Relatório Técnico — Ciclo Completo</h3>
+            <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-xs">
+              <div className="col-span-2 mb-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Dados de Entrada</div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">Refrigerante</span><span className="font-mono">{config.refrigerantId}</span></div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">Te inicial (°C)</span><span className="font-mono">{config.solver?.Te_initial_C ?? '-'}</span></div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">Tc inicial (°C)</span><span className="font-mono">{config.solver?.Tc_initial_C ?? '-'}</span></div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">SH (K)</span><span className="font-mono">{config.evaporator.superheatK ?? '-'}</span></div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">SC (K)</span><span className="font-mono">{config.condenser.subcoolingK ?? '-'}</span></div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">Vazão ar evap. (m³/h)</span><span className="font-mono">{config.evaporator.airFlowM3H.toLocaleString('pt-BR')}</span></div>
+              <div className="col-span-2 mb-2 mt-4 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Resultados do Ciclo</div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">Q evaporação (kW)</span><span className="font-mono font-semibold text-blue-600">{fmt(cycleResult.Q_evap_W / 1000, 2)}</span></div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">Q condensação (kW)</span><span className="font-mono font-semibold text-green-600">{fmt(cycleResult.Q_cond_W / 1000, 2)}</span></div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">W compressor (kW)</span><span className="font-mono">{fmt(cycleResult.W_comp_W / 1000, 2)}</span></div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">COP</span><span className="font-mono font-semibold">{fmt(cycleResult.COP, 3)}</span></div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">Te equilíbrio (°C)</span><span className="font-mono">{fmt(cycleResult.Te_C, 1)}</span></div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">Tc equilíbrio (°C)</span><span className="font-mono">{fmt(cycleResult.Tc_C, 1)}</span></div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">T ar saída evap. (°C)</span><span className="font-mono">{fmt(cycleResult.evaporatorResult.airOutletTempC, 1)}</span></div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">ΔP ar evap. (Pa)</span><span className="font-mono">{fmt(cycleResult.evaporatorResult.airPressureDropPa, 0)}</span></div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">U global evap. (W/m²K)</span><span className="font-mono">{fmt(cycleResult.evaporatorResult.overallU_WM2K, 1)}</span></div>
+              <div className="flex justify-between border-b border-border/40 py-1"><span className="text-muted-foreground">Razão de compressão</span><span className="font-mono">{fmt(cycleResult.compressorResult.compressionRatio, 2)}</span></div>
+            </div>
+            {cycleResult.warnings.length > 0 && (
+              <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+                <h4 className="mb-2 text-xs font-semibold text-amber-600">Avisos</h4>
+                <ul className="space-y-1">{cycleResult.warnings.map((w, i) => <li key={i} className="text-xs text-amber-700">• {w}</li>)}</ul>
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>

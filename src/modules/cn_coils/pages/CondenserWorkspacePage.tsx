@@ -67,7 +67,11 @@ import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import { useCnCoilsInputBridge } from "../hooks/useCnCoilsInputBridge";
 import { useCycleSimulation } from "../hooks/useCycleSimulation";
 import { useOperatingMap } from "../hooks/useOperatingMap";
-import type { CoilCycleInputs } from "../engines/coil/coilCycleAdapter";
+import { useUncertaintyAnalysis } from "../hooks/useUncertaintyAnalysis";
+import { OptimizationPanel } from "../components/OptimizationPanel";
+import { UncertaintyPanel, UncertaintyBadge } from "../components/UncertaintyBadge";
+import { useUnitStore, convertCapacity } from "../store/useUnitStore";
+import type { CoilCycleInputs, CoilCycleResult } from "../engines/coil/coilCycleAdapter";
 import type { OperatingMapConfig } from "../engines/operatingMap/operatingMapTypes";
 import { usePdfExport } from "../hooks/usePdfExport";
 import { useCondenserSimulation, type CondenserInputs } from "../hooks/useCondenserSimulation";
@@ -176,6 +180,8 @@ export const CONDENSER_TABS = {
   ENVELOPE: "envelope_q_tc",
   GEADA: "geada",
   MAPA_OPERACIONAL: "mapa_operacional",
+  INCERTEZA: "incerteza",
+  OTIMIZACAO: "otimizacao",
   DESENHO: "desenho",
   RELATORIO: "relatorio",
 } as const;
@@ -929,6 +935,8 @@ function CondenserTabs({
         <TabsTrigger value={CONDENSER_TABS.ENVELOPE} className="shrink-0 text-xs">📊 Envelope Q×Tc</TabsTrigger>
         <TabsTrigger value={CONDENSER_TABS.GEADA} className="shrink-0 text-xs">❄️ Geada</TabsTrigger>
         <TabsTrigger value={CONDENSER_TABS.MAPA_OPERACIONAL} className="shrink-0 text-xs">📈 Mapa Operacional</TabsTrigger>
+        <TabsTrigger value={CONDENSER_TABS.INCERTEZA} className="shrink-0 text-xs">📐 Incerteza</TabsTrigger>
+        <TabsTrigger value={CONDENSER_TABS.OTIMIZACAO} className="shrink-0 text-xs">⚙️ Otimização</TabsTrigger>
         <TabsTrigger value={CONDENSER_TABS.DESENHO} className="shrink-0 text-xs font-semibold data-[state=active]:bg-blue-700 data-[state=active]:text-white">🏗️ Desenho</TabsTrigger>
         <TabsTrigger value={CONDENSER_TABS.RELATORIO} className="shrink-0 text-xs">📄 Relatório</TabsTrigger>
       </TabsList>
@@ -1109,6 +1117,18 @@ function CondenserTabs({
         ) : <EmptyState />}
       </TabsContent>
 
+      {/* ── Aba Incerteza ── */}
+      <TabsContent value={CONDENSER_TABS.INCERTEZA} className="mt-3">
+        {cycleResult ? (
+          <CondenserUncertaintyTab config={config} cycleResult={cycleResult} />
+        ) : <EmptyState />}
+      </TabsContent>
+      {/* ── Aba Otimização ── */}
+      <TabsContent value={CONDENSER_TABS.OTIMIZACAO} className="mt-3">
+        {cycleResult ? (
+          <CondenserOptimizationTab config={config} cycleResult={cycleResult} />
+        ) : <EmptyState />}
+      </TabsContent>
       {/* ── Aba Desenho ── */}
       <TabsContent value={CONDENSER_TABS.DESENHO} className="mt-3">
         <DrawingTab
@@ -1200,6 +1220,103 @@ function CondenserResultsGrid({
 }
 
 // ── CondenserOperatingMapTab ─────────────────────────────────────────────────
+// ── CondenserUncertaintyTab ─────────────────────────────────────────────────
+function buildCondenserNominal(result: CycleResult): CoilCycleResult {
+  const cond = result.condenserResult;
+  return {
+    totalCapacityW: result.Q_cond_W,
+    sensibleCapacityW: result.Q_cond_W,
+    latentCapacityW: 0,
+    airOutletTempC: cond.airOutletTempC,
+    airOutletRH: 0,
+    airPressureDropPa: cond.airPressureDropPa,
+    fluidPressureDropKPa: cond.fluidPressureDropKPa,
+    overallU_WM2K: cond.overallU_WM2K,
+    safetyFactor: 1,
+    refrigerantOutletTempC: result.Tc_C,
+    inletQuality: 1,
+    warnings: result.warnings,
+    success: true,
+  };
+}
+function CondenserUncertaintyTab({
+  config,
+  cycleResult,
+}: {
+  config: CycleSystemConfig;
+  cycleResult: CycleResult;
+}) {
+  const inputs = useMemo(
+    () => buildCondenserCoilInputsLocal(config, cycleResult.m_dot_kgS),
+    [config, cycleResult.m_dot_kgS],
+  );
+  const nominal = useMemo(() => buildCondenserNominal(cycleResult), [cycleResult]);
+  const { result, isLoading } = useUncertaintyAnalysis({
+    inputs,
+    nominalResult: nominal,
+    debounceMs: 1500,
+    enabled: true,
+    config: { samples: 200 },
+  });
+  const capacityUnit = useUnitStore((s) => s.capacityUnit);
+  if (isLoading || !result) {
+    return (
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="animate-pulse text-sm text-muted-foreground">
+          Calculando intervalos de confiança…
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-3 rounded-lg border border-border bg-card p-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold">Bandas de incerteza — Condensador</h3>
+        <UncertaintyBadge
+          band={result.totalCapacityW}
+          format={(v) => fmt(convertCapacity(v / 1000, capacityUnit), capacityUnit === 'kW' || capacityUnit === 'TR' ? 2 : 0)}
+          unit={capacityUnit}
+        />
+      </div>
+      <UncertaintyPanel result={result} isLoading={false} />
+    </div>
+  );
+}
+// ── CondenserOptimizationTab ─────────────────────────────────────────────────
+function CondenserOptimizationTab({
+  config,
+  cycleResult,
+}: {
+  config: CycleSystemConfig;
+  cycleResult: CycleResult;
+}) {
+  const baseInputs = useMemo(
+    () => buildCondenserCoilInputsLocal(config, cycleResult.m_dot_kgS),
+    [config, cycleResult.m_dot_kgS],
+  );
+  return (
+    <div className="rounded-lg border border-border bg-card p-4">
+      <OptimizationPanel
+        baseInputs={baseInputs}
+        currentCapacityW={cycleResult.Q_cond_W}
+        onApplyGeometry={() => {}}
+      />
+    </div>
+  );
+}
+function buildCondenserCoilInputsLocal(
+  config: CycleSystemConfig,
+  mDot: number,
+): CoilCycleInputs {
+  return {
+    ...config.condenser,
+    refrigerantId: config.refrigerantId,
+    evaporatingTempC: config.solver?.Te_initial_C ?? -10,
+    condensingTempC: config.solver?.Tc_initial_C ?? 45,
+    refrigerantMassFlowKgS: mDot,
+    componentType: "condenser",
+  };
+}
 function buildCondenserCoilInputs(
   config: CycleSystemConfig,
   mDot: number,
