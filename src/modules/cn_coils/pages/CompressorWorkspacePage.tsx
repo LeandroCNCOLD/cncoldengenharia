@@ -436,6 +436,11 @@ export function CompressorWorkspacePage() {
         onSelect={handleSelect}
       />
       <WorkspaceAIPanel open={aiOpen} onClose={() => setAiOpen(false)} context={aiContext} />
+      <PostSaveNextStepDialog
+        open={nextStepOpen}
+        onOpenChange={setNextStepOpen}
+        next="simulation"
+      />
     </WorkspaceLayout>
   );
 }
