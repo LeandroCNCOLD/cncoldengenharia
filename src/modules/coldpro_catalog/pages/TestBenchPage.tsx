@@ -4,28 +4,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, AlertTriangle, CheckCircle2, XCircle, Play, Loader2 } from "lucide-react";
+import { ArrowLeft, AlertTriangle, CheckCircle2, Play, Loader2 } from "lucide-react";
 import { catalogRepository } from "../services/catalogRepository";
+import { buildCycleConfigFromCatalog } from "../utils/buildCycleConfigFromCatalog";
+import { useCycleSimulation } from "@/modules/cn_coils/hooks/useCycleSimulation";
 import { buildMotorComponentsFromCatalog } from "../adapters/sessionToMotorInputAdapter";
-import { runEquilibrium } from "@/modules/coldpro/services/coldproEngineService";
-import type { SystemEquilibriumResult, SystemComponentsInput } from "@/modules/coldpro_v2";
+import type { CycleSystemConfig } from "@/modules/cn_coils/engines/cycle/cycleTypes";
 
 const KCALH_PER_W = 1 / 1.163;
 
-function fmt(v: number | undefined, d = 2): string {
+function fmt(v: number | undefined | null, d = 2): string {
   if (v === undefined || v === null || Number.isNaN(v)) return "—";
   return v.toLocaleString("pt-BR", { maximumFractionDigits: d });
 }
 
-function bottleneckLabel(codes: string[]): string {
-  if (codes.length === 0) return "Nenhum";
-  const c = codes[0];
-  if (c.includes("compressor")) return "compressor";
-  if (c.includes("condenser")) return "condensador";
-  if (c.includes("evaporator")) return "evaporador";
-  if (c.includes("expansion")) return "válvula de expansão";
-  if (c.includes("fan")) return "ventilador";
-  return c;
+type BottleneckKind = "balanced" | "evaporator" | "compressor" | "condenser";
+
+function bottleneckLabel(kind: BottleneckKind): string {
+  switch (kind) {
+    case "balanced": return "Sistema balanceado";
+    case "evaporator": return "Evaporador";
+    case "compressor": return "Compressor";
+    case "condenser": return "Condensador";
+  }
 }
 
 export default function TestBenchPage() {
@@ -36,10 +37,14 @@ export default function TestBenchPage() {
     [equipmentId],
   );
 
-  const [result, setResult] = useState<SystemEquilibriumResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [running, setRunning] = useState(false);
+  const [config, setConfig] = useState<CycleSystemConfig | null>(null);
+  const [hasRun, setHasRun] = useState(false);
   const [adapterWarnings, setAdapterWarnings] = useState<string[]>([]);
+
+  const sim = useCycleSimulation(config, { mode: "auto" });
+  const running = sim.status === "running";
+  const error = sim.status === "error" ? sim.message : null;
+  const result = sim.status === "success" ? sim.result : null;
 
   if (!equipment) {
     return (
@@ -56,69 +61,61 @@ export default function TestBenchPage() {
     );
   }
 
-  const handleRun = () => {
-    setRunning(true);
-    setError(null);
+  const refrigerantId = equipment.refrigerante !== "unknown" ? equipment.refrigerante : "R404A";
+  const Te_C = equipment.tempEvaporacaoC ?? -10;
+  const Tc_C = equipment.tempCondensacaoC ?? 45;
+  const Q_catalog_W = equipment.capacidadeFrigorificaKcalH
+    ? equipment.capacidadeFrigorificaKcalH / KCALH_PER_W * 1 // kcal/h -> W via /0.86
+    : undefined;
+  const W_catalog_W = (equipment.potenciaCompressorKw ?? equipment.potenciaEletricaKw)
+    ? (equipment.potenciaCompressorKw ?? equipment.potenciaEletricaKw)! * 1000
+    : undefined;
+  const COP_catalog =
+    equipment.cop ??
+    (Q_catalog_W && W_catalog_W && W_catalog_W > 0 ? Q_catalog_W / W_catalog_W : undefined);
+
+  // Capture adapter warnings (non-blocking — only used to populate the Alerts tab).
+  const collectAdapterWarnings = () => {
     try {
       const motor = buildMotorComponentsFromCatalog({
         compressor: equipment,
         condenser: equipment,
         evaporator: equipment,
       });
-      setAdapterWarnings(motor.warnings);
-
-      if (!motor.compressor || !motor.condenser || !motor.evaporator) {
-        const missing: string[] = [];
-        if (!motor.compressor) missing.push("compressor");
-        if (!motor.condenser) missing.push("condensador");
-        if (!motor.evaporator) missing.push("evaporador");
-        setError(
-          `Dados insuficientes para simular sistema DX. Bloco(s) incompleto(s): ${missing.join(", ")}.`,
-        );
-        setResult(null);
-        return;
-      }
-
-      const input: SystemComponentsInput = {
-        compressor: motor.compressor,
-        condenser: motor.condenser,
-        evaporator: motor.evaporator,
-        evaporator_fan: motor.evaporator_fan,
-        condenser_fan: motor.condenser_fan,
-        system_conditions: {
-          ambient_temp_c: equipment.tempAmbienteC ?? 32,
-          required_airflow_m3_h:
-            equipment.vazaoArEvaporadorM3H ?? 5000,
-        },
-      };
-
-      const out = runEquilibrium(input);
-      if (!out.success) {
-        setError(out.error);
-        setResult(null);
-      } else {
-        setResult(out.data);
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setRunning(false);
+      setAdapterWarnings(motor.warnings ?? []);
+    } catch {
+      setAdapterWarnings([]);
     }
   };
 
-  const cop =
-    result && result.thermal_balance.compressor_power_w > 0
-      ? result.thermal_balance.q_evap_w / result.thermal_balance.compressor_power_w
-      : undefined;
+  const handleRun = () => {
+    setHasRun(true);
+    collectAdapterWarnings();
+    setConfig(
+      buildCycleConfigFromCatalog({
+        row: equipment,
+        refrigerantId,
+        Te_C,
+        Tc_C,
+        superheatK: 5,
+        subcoolingK: 5,
+      }),
+    );
+  };
 
-  const allAlerts = result
-    ? [
-        ...result.bottlenecks.map((b) => ({ kind: "bottleneck" as const, msg: b })),
-        ...result.warnings.map((w) => ({ kind: "warning" as const, msg: w })),
-        ...result.recommendations.map((r) => ({ kind: "info" as const, msg: r })),
-        ...adapterWarnings.map((w) => ({ kind: "adapter" as const, msg: w })),
-      ]
-    : adapterWarnings.map((w) => ({ kind: "adapter" as const, msg: w }));
+  // Bottleneck heuristic by motor vs catalog comparison.
+  let bottleneck: BottleneckKind = "balanced";
+  if (result) {
+    const Q_motor = result.Q_evap_W;
+    const COP_motor = result.COP;
+    if (Q_catalog_W && Q_motor < Q_catalog_W * 0.9) bottleneck = "evaporator";
+    else if (COP_catalog && COP_motor < COP_catalog * 0.85) bottleneck = "compressor";
+  }
+
+  const allAlerts = [
+    ...(result?.warnings ?? []).map((w) => ({ kind: "warning" as const, msg: w })),
+    ...adapterWarnings.map((w) => ({ kind: "adapter" as const, msg: w })),
+  ];
 
   return (
     <div className="space-y-4 p-4 lg:p-6">
@@ -138,8 +135,10 @@ export default function TestBenchPage() {
             {equipment.compressorModelo && (
               <Badge variant="outline" className="font-mono">{equipment.compressorModelo}</Badge>
             )}
-            <Badge variant="outline">{equipment.refrigerante}</Badge>
+            <Badge variant="outline">{refrigerantId}</Badge>
             <Badge variant="outline">{equipment.application}</Badge>
+            <Badge variant="outline">Te {fmt(Te_C, 1)} °C</Badge>
+            <Badge variant="outline">Tc {fmt(Tc_C, 1)} °C</Badge>
           </div>
         </div>
         <Button onClick={handleRun} disabled={running}>
@@ -164,10 +163,11 @@ export default function TestBenchPage() {
         </TabsList>
 
         <TabsContent value="dx" className="space-y-4">
-          {!result && !error && (
+          {!hasRun && !error && (
             <Card>
               <CardContent className="p-6 text-center text-sm text-muted-foreground">
-                Clique em <strong>Executar testes</strong> para calcular o equilíbrio do sistema DX.
+                Clique em <strong>Executar testes</strong> para calcular o ciclo termodinâmico (CycleEngine V2)
+                a partir das condições nominais do catálogo.
               </CardContent>
             </Card>
           )}
@@ -183,86 +183,69 @@ export default function TestBenchPage() {
                   <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">Status</CardTitle></CardHeader>
                   <CardContent className="pt-1">
                     <div className="flex items-center gap-2 text-lg font-semibold">
-                      {result.status === "approved" && <><CheckCircle2 className="h-5 w-5 text-emerald-600"/> Aprovado</>}
-                      {result.status === "warning" && <><AlertTriangle className="h-5 w-5 text-amber-600"/> Atenção</>}
-                      {result.status === "rejected" && <><XCircle className="h-5 w-5 text-destructive"/> Rejeitado</>}
+                      {bottleneck === "balanced"
+                        ? <><CheckCircle2 className="h-5 w-5 text-emerald-600"/> Balanceado</>
+                        : <><AlertTriangle className="h-5 w-5 text-amber-600"/> Atenção</>}
                     </div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">Gargalo</CardTitle></CardHeader>
-                  <CardContent className="pt-1 text-lg font-semibold capitalize">
-                    {bottleneckLabel(result.bottleneck_codes)}
+                  <CardContent className="pt-1 text-lg font-semibold">
+                    {bottleneckLabel(bottleneck)}
                   </CardContent>
                 </Card>
                 <Card>
                   <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">COP real</CardTitle></CardHeader>
                   <CardContent className="pt-1 text-lg font-semibold">
-                    {fmt(cop, 2)}
+                    {fmt(result.COP, 2)}
+                    {COP_catalog !== undefined && (
+                      <span className="ml-2 text-xs font-normal text-muted-foreground">
+                        catálogo {fmt(COP_catalog, 2)}
+                      </span>
+                    )}
                   </CardContent>
                 </Card>
               </div>
 
               <Card>
-                <CardHeader><CardTitle className="text-base">Balanço térmico</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-base">Resultado do ciclo</CardTitle></CardHeader>
                 <CardContent className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                   <div>
-                    <p className="text-xs text-muted-foreground">Q evap</p>
-                    <p className="font-mono">{fmt(result.thermal_balance.q_evap_w, 0)} W</p>
-                    <p className="text-xs text-muted-foreground">{fmt(result.thermal_balance.q_evap_w * KCALH_PER_W, 0)} kcal/h</p>
+                    <p className="text-xs text-muted-foreground">Q evap (motor)</p>
+                    <p className="font-mono">{fmt(result.Q_evap_W, 0)} W</p>
+                    <p className="text-xs text-muted-foreground">{fmt(result.Q_evap_W * KCALH_PER_W, 0)} kcal/h</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Q cond requerido</p>
-                    <p className="font-mono">{fmt(result.thermal_balance.q_cond_required_w, 0)} W</p>
+                    <p className="text-xs text-muted-foreground">Q evap (catálogo)</p>
+                    <p className="font-mono">{Q_catalog_W ? `${fmt(Q_catalog_W, 0)} W` : "—"}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Q cond disponível</p>
-                    <p className="font-mono">{fmt(result.thermal_balance.q_cond_available_w, 0)} W</p>
+                    <p className="text-xs text-muted-foreground">W compressor</p>
+                    <p className="font-mono">{fmt(result.W_comp_W, 0)} W</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Pot. compressor</p>
-                    <p className="font-mono">{fmt(result.thermal_balance.compressor_power_w, 0)} W</p>
-                  </div>
-                  <div className="md:col-span-4">
-                    <p className="text-xs text-muted-foreground">Erro de balanço</p>
-                    <p className="font-mono">{fmt(result.thermal_balance.balance_error_pct, 2)} %</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader><CardTitle className="text-base">Utilização dos componentes</CardTitle></CardHeader>
-                <CardContent className="grid grid-cols-2 gap-3 text-sm md:grid-cols-3">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Compressor</p>
-                    <p className="font-mono">{fmt(result.utilization.compressor_pct, 1)} %</p>
+                    <p className="text-xs text-muted-foreground">Q cond</p>
+                    <p className="font-mono">{fmt(result.Q_cond_W, 0)} W</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Evaporador</p>
-                    <p className="font-mono">{fmt(result.utilization.evaporator_pct, 1)} %</p>
+                    <p className="text-xs text-muted-foreground">Te equilíbrio</p>
+                    <p className="font-mono">{fmt(result.Te_C, 2)} °C</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Condensador</p>
-                    <p className="font-mono">{fmt(result.utilization.condenser_pct, 1)} %</p>
+                    <p className="text-xs text-muted-foreground">Tc equilíbrio</p>
+                    <p className="font-mono">{fmt(result.Tc_C, 2)} °C</p>
                   </div>
-                  {result.utilization.expansion_valve_pct !== undefined && (
-                    <div>
-                      <p className="text-xs text-muted-foreground">Válvula de expansão</p>
-                      <p className="font-mono">{fmt(result.utilization.expansion_valve_pct, 1)} %</p>
-                    </div>
-                  )}
-                  {result.utilization.evaporator_fan_pct !== undefined && (
-                    <div>
-                      <p className="text-xs text-muted-foreground">Vent. evaporador</p>
-                      <p className="font-mono">{fmt(result.utilization.evaporator_fan_pct, 1)} %</p>
-                    </div>
-                  )}
-                  {result.utilization.condenser_fan_pct !== undefined && (
-                    <div>
-                      <p className="text-xs text-muted-foreground">Vent. condensador</p>
-                      <p className="font-mono">{fmt(result.utilization.condenser_fan_pct, 1)} %</p>
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-xs text-muted-foreground">Convergência</p>
+                    <p className="font-mono">
+                      {result.converged ? "OK" : "Não"} ({result.iterations} it.)
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">EER</p>
+                    <p className="font-mono">{fmt(result.EER, 2)}</p>
+                  </div>
                 </CardContent>
               </Card>
             </>
@@ -275,7 +258,7 @@ export default function TestBenchPage() {
             <CardContent>
               {allAlerts.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Nenhum alerta. Execute os testes para listar gargalos, avisos e recomendações.
+                  Nenhum alerta. Execute os testes para listar avisos do motor e do mapeamento de dados.
                 </p>
               ) : (
                 <ul className="space-y-2 text-sm">
@@ -283,20 +266,13 @@ export default function TestBenchPage() {
                     <li
                       key={i}
                       className={`flex items-start gap-2 rounded-md border p-2 ${
-                        a.kind === "bottleneck"
-                          ? "border-destructive/40 bg-destructive/5"
-                          : a.kind === "warning"
-                            ? "border-amber-300 bg-amber-50"
-                            : a.kind === "adapter"
-                              ? "border-slate-300 bg-slate-50"
-                              : "border-sky-300 bg-sky-50"
+                        a.kind === "warning"
+                          ? "border-amber-300 bg-amber-50"
+                          : "border-slate-300 bg-slate-50"
                       }`}
                     >
                       <span className="mt-0.5 text-xs font-semibold uppercase">
-                        {a.kind === "bottleneck" && "Gargalo"}
-                        {a.kind === "warning" && "Aviso"}
-                        {a.kind === "info" && "Recom."}
-                        {a.kind === "adapter" && "Dados"}
+                        {a.kind === "warning" ? "Aviso" : "Dados"}
                       </span>
                       <span>{a.msg}</span>
                     </li>
