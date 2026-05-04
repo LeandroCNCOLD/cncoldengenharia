@@ -13,6 +13,8 @@ import { SystemEquilibriumResultsTab } from "@/modules/cn_coils/components/Syste
 import { coilEnvelopeToEquilibriumPoints, useSystemEquilibrium } from "@/modules/cn_coils/hooks/useSystemEquilibrium";
 import { useCoilEnvelopeStore } from "@/modules/cn_coils/store/useCoilEnvelopeStore";
 import { catalogRepository } from "../services/catalogRepository";
+import { useCatalogPreloadStore } from "../store/useCatalogPreloadStore";
+import { useCatalogSessionStore } from "../store/useCatalogSessionStore";
 
 function fmt(v: number | undefined | null, d = 2): string {
   if (v === undefined || v === null || Number.isNaN(v)) return "—";
@@ -27,6 +29,9 @@ export default function TestBenchPage() {
   const condenserEnvelope = useCoilEnvelopeStore((s) => s.envelopes.condenser_air ?? s.condenserEnvelope);
   const compressorEnvelope = useCoilEnvelopeStore((s) => s.compressorEnvelope);
   const compressorModel = useCoilEnvelopeStore((s) => s.compressorModel);
+  const { selectedEvaporator, selectedCondenser, selectedCompressor } = useCatalogSessionStore();
+  const { setPendingEvaporator, setPendingCondenser, setPendingCompressor } =
+    useCatalogPreloadStore();
 
   const [benchInputs, setBenchInputs] = useState({
     Tamb_C: 35,
@@ -62,11 +67,21 @@ export default function TestBenchPage() {
     });
   };
 
-  const goWorkspace = (type: "evaporator_dx" | "condenser_air" | "compressor") =>
+  const goWorkspace = (type: "evaporator_dx" | "condenser_air" | "compressor") => {
+    if (type === "evaporator_dx") {
+      setPendingEvaporator(selectedEvaporator ?? equipment);
+    }
+    if (type === "condenser_air") {
+      setPendingCondenser(selectedCondenser ?? equipment);
+    }
+    if (type === "compressor") {
+      setPendingCompressor(selectedCompressor ?? equipment);
+    }
     navigate({
       to: "/coldpro/cncoils/workspace",
       search: { type } as never,
     });
+  };
 
   return (
     <div className="space-y-4 p-4 lg:p-6">

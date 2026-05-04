@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { ChevronDown, FolderOpen, Pencil, Plus, Search } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -70,6 +71,7 @@ function emptyForm(): ProjectHeaderFormState {
 }
 
 export function ProjectHeaderBar({ workspaceType }: ProjectHeaderBarProps) {
+  const navigate = useNavigate();
   const {
     projects,
     activeProjectId,
@@ -79,6 +81,10 @@ export function ProjectHeaderBar({ workspaceType }: ProjectHeaderBarProps) {
   } = useProjectStore();
 
   const activeProject = projects.find((project) => project.id === activeProjectId) ?? null;
+  const recentProjects = useMemo(
+    () => [...projects].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 5),
+    [projects],
+  );
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [catalogSearch, setCatalogSearch] = useState("");
@@ -151,6 +157,10 @@ export function ProjectHeaderBar({ workspaceType }: ProjectHeaderBarProps) {
     setCatalogSearch("");
   }
 
+  function openCatalog() {
+    void navigate({ to: "/coldpro/catalog" });
+  }
+
   return (
     <>
       <div className="flex flex-wrap items-center gap-2 border-b border-border bg-muted/30 px-4 py-2 text-sm">
@@ -160,6 +170,7 @@ export function ProjectHeaderBar({ workspaceType }: ProjectHeaderBarProps) {
           <>
             <div className="min-w-[220px] flex-1">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <FolderOpen className="h-3.5 w-3.5 text-primary" />
                 {activeProject.header?.projectCode && (
                   <span className="font-mono text-xs text-muted-foreground">
                     {activeProject.header.projectCode} ·
@@ -168,11 +179,12 @@ export function ProjectHeaderBar({ workspaceType }: ProjectHeaderBarProps) {
                 <span className="truncate font-semibold text-foreground">
                   {activeProject.name}
                 </span>
-                {activeProject.header?.status && (
-                  <Badge variant={STATUS_VARIANTS[activeProject.header.status]} className="h-5 text-[10px]">
-                    {STATUS_LABELS[activeProject.header.status]}
-                  </Badge>
-                )}
+                <Badge
+                  variant={STATUS_VARIANTS[activeProject.header?.status ?? "draft"]}
+                  className="h-5 text-[10px]"
+                >
+                  {STATUS_LABELS[activeProject.header?.status ?? "draft"]}
+                </Badge>
               </div>
               <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
                 {activeProject.header?.clientName && (
@@ -189,6 +201,16 @@ export function ProjectHeaderBar({ workspaceType }: ProjectHeaderBarProps) {
                 </span>
               </div>
             </div>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 gap-1 text-xs"
+              title="Selecionar equipamento do catálogo CN Cold"
+              onClick={openCatalog}
+            >
+              <Search className="h-3.5 w-3.5" />
+              Catálogo
+            </Button>
             <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs" onClick={openEdit}>
               <Pencil className="h-3 w-3" />
               Editar
@@ -204,21 +226,34 @@ export function ProjectHeaderBar({ workspaceType }: ProjectHeaderBarProps) {
           </>
         ) : (
           <>
-            <span className="text-muted-foreground">Nenhum projeto ativo</span>
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <FolderOpen className="h-3.5 w-3.5" />
+              Nenhum projeto ativo
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 gap-1 text-xs"
+              title="Selecionar equipamento do catálogo CN Cold"
+              onClick={openCatalog}
+            >
+              <Search className="h-3.5 w-3.5" />
+              Catálogo
+            </Button>
             <Button size="sm" className="h-7 gap-1 text-xs" onClick={openNew}>
               <Plus className="h-3.5 w-3.5" />
               Novo Projeto
             </Button>
-            {projects.length > 0 && (
+            {recentProjects.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button size="sm" variant="outline" className="h-7 gap-1 text-xs">
-                    Abrir existente
+                    Abrir Projeto
                     <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="max-h-64 w-72 overflow-y-auto">
-                  {projects.slice(0, 20).map((project) => (
+                  {recentProjects.map((project) => (
                     <DropdownMenuItem
                       key={project.id}
                       onClick={() => setActiveProject(project.id)}
