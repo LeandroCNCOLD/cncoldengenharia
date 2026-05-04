@@ -68,21 +68,7 @@ const NAV_GROUPS: NavGroup[] = [
       { to: "/coldpro/cncoils/workspace", label: "· Bat. Aquecimento", Icon: Flame, search: { type: "heating_coil" } },
       { to: "/coldpro/cncoils/component-library", label: "· Biblioteca", Icon: BookOpen },
       { to: "/coldpro/cncoils/project-completion", label: "· Conclusão", Icon: CheckCircle },
-      { to: "/coldpro/cycle", label: "Ciclo de Refrigeração", Icon: RotateCw },
-      { to: "/coldpro/map", label: "Mapa Operacional", Icon: Map },
       { to: "/coldpro/assembly", label: "Arranjo de Serpentinas", Icon: Layers },
-      { to: "/coldpro/frost", label: "Análise de Geada", Icon: Snowflake, comingSoon: true },
-      { to: "/coldpro/optimization", label: "Otimização", Icon: Target, comingSoon: true },
-      { to: "/coldpro/curve", label: "Curva de Desempenho", Icon: TrendingUp },
-      { to: "/coldpro/simulation", label: "Equilíbrio do Sistema", Icon: Scale },
-    ],
-  },
-  {
-    label: "Sistemas",
-    items: [
-      { to: "/coldpro/systems/cold-room", label: "Câmara Fria", Icon: Snowflake },
-      { to: "/coldpro/systems/dx-complete", label: "DX Completo", Icon: Wind },
-      { to: "/coldpro/systems/heat-pump", label: "Bomba de Calor", Icon: Thermometer },
     ],
   },
   {
@@ -90,16 +76,13 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/coldpro/components", label: "Componentes", Icon: Boxes },
       { to: "/coldpro/catalog", label: "Catálogo CN COLD", Icon: DatabaseIcon },
-      { to: "/coldpro/ficha-tecnica", label: "Ficha Técnica", Icon: FileText, comingSoon: true },
       { to: "/coldpro/registry", label: "Registry de Produtos", Icon: Database },
     ],
   },
   {
     label: "Produção",
     items: [
-      { to: "/coldpro/montagem", label: "Montagem", Icon: Wrench, comingSoon: true },
       { to: "/coldpro/export", label: "Exportação", Icon: Download },
-      { to: "/coldpro/audit", label: "Auditoria CN COLD", Icon: ShieldCheck, comingSoon: true },
     ],
   },
 ];
