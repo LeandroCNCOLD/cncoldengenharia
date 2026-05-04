@@ -3,6 +3,7 @@ import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { CnCoilsWorkspacePage } from "@/modules/cn_coils/pages/CnCoilsWorkspacePage";
 import { CycleWorkspacePage } from "@/modules/cn_coils/pages/CycleWorkspacePage";
+import { EvaporatorUnifiedWorkspacePage } from "@/modules/cn_coils/pages/EvaporatorUnifiedWorkspacePage";
 import { CondenserWorkspacePage } from "@/modules/cn_coils/pages/CondenserWorkspacePage";
 import { CompressorWorkspacePage } from "@/modules/cn_coils/pages/CompressorWorkspacePage";
 import { EvaporativeCondenserWorkspacePage } from "@/modules/cn_coils/pages/EvaporativeCondenserWorkspacePage";
