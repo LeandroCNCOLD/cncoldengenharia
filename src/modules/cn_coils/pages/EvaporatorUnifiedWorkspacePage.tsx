@@ -52,7 +52,8 @@ import { CAPACITY_UNITS, capacityConv } from "../utils/unitConversions";
 import { enrichWarnings } from "../utils/warningEnricher";
 import { useCatalogPreloadStore } from "@/modules/coldpro_catalog/store/useCatalogPreloadStore";
 import { catalogRowToEvaporatorInputs } from "@/modules/coldpro_catalog/utils/catalogRowToWorkspaceInputs";
-import { loadCompressorIndex } from "@/modules/coldpro_catalog/data/compressorCatalog.service";
+import { loadCompressorIndex, getCompressorById } from "@/modules/coldpro_catalog/data/compressorCatalog.service";
+import type { CompressorCatalogRow } from "@/modules/coldpro_catalog/data/compressorCatalog.types";
 import { useProjectStore } from "../store/useProjectStore";
 import type { AIContext } from "../components/WorkspaceAIChat";
 import type { StructuredWarning } from "../types/warnings";
@@ -215,8 +216,21 @@ export function EvaporatorUnifiedWorkspacePage() {
   const [superheat, setSuperheat] = useState(5);
   const [subcooling, setSubcooling] = useState(5);
   const [massFlow, setMassFlow] = useState(0);
-  const [compressorPickerOpen, setCompressorPickerOpen] = useState(false);
-
+   const [compressorPickerOpen, setCompressorPickerOpen] = useState(false);
+  // ── Compressor selecionado do catálogo ──
+  const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
+  const [selectedCompressorRow, setSelectedCompressorRow] = useState<CompressorCatalogRow | null>(null);
+  useEffect(() => {
+    if (!selectedCompressorId) {
+      setSelectedCompressorRow(null);
+      return;
+    }
+    let cancelled = false;
+    void getCompressorById(selectedCompressorId).then((row) => {
+      if (!cancelled) setSelectedCompressorRow(row ?? null);
+    });
+    return () => { cancelled = true; };
+  }, [selectedCompressorId]);
   // ── Operação ──
   const [compressorMode, setCompressorMode] = useState<CompressorMode>("ari");
   const [frequency, setFrequency] = useState(60);
@@ -237,7 +251,25 @@ export function EvaporatorUnifiedWorkspacePage() {
     () => ({
       ...DEFAULT_CONFIG,
       refrigerantId,
-      compressor: { ...DEFAULT_CONFIG.compressor, refrigerant: refrigerantId },
+      compressor: selectedCompressorRow
+        ? {
+            id: selectedCompressorRow.id,
+            model: selectedCompressorRow.model,
+            manufacturer: selectedCompressorRow.manufacturer,
+            refrigerant: refrigerantId,
+            modelType: "constant_efficiency" as const,
+            constantEfficiency: {
+              eta_vol: 0.78,
+              eta_is: 0.68,
+              displacement_m3h:
+                selectedCompressorRow.nominal_displacement_cm3 && selectedCompressorRow.nominal_rpm
+                  ? (selectedCompressorRow.nominal_displacement_cm3 * selectedCompressorRow.nominal_rpm * 60) / 1e6
+                  : selectedCompressorRow.nominal_cooling_capacity_w
+                    ? Math.max(2, selectedCompressorRow.nominal_cooling_capacity_w / 2500)
+                    : 8,
+            },
+          }
+        : { ...DEFAULT_CONFIG.compressor, refrigerant: refrigerantId },
       evaporator: {
         ...DEFAULT_CONFIG.evaporator,
         physical: {
@@ -273,11 +305,11 @@ export function EvaporatorUnifiedWorkspacePage() {
       airRH,
       superheat,
       subcooling,
-      te,
+       te,
       tc,
+      selectedCompressorRow,
     ],
   );
-
   const simState = useCycleSimulation(config, { mode: "manual" });
   const cycleResult: CycleResult | null =
     simState.status === "success" ? simState.result : null;
