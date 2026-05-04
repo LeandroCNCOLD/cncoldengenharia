@@ -1466,9 +1466,9 @@ function ResultsGrid({
 
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
-      <ResultCard label="Capacidade Total" value={fmt(Q_total_disp, capDec)} unit={capacityUnit} variant="success" />
-      <ResultCard label="Cap. Sensível" value={fmt(Q_sens_disp, capDec)} unit={capacityUnit} />
-      <ResultCard label="Cap. Latente" value={fmt(Q_lat_disp, capDec)} unit={capacityUnit} />
+      <ResultCard label="Capacidade Total" value={fmt(Q_total_disp, capDec)} unit={capacityUnit} variant="success" hint={isDesign && targetCapacityW > 0 ? "Definida no detalhamento (Lado Ventilação)" : undefined} />
+      <ResultCard label="Cap. Sensível" value={fmt(Q_sens_disp, capDec)} unit={capacityUnit} hint={isDesign && targetCapacityW > 0 ? "Derivada do alvo × SHR" : undefined} />
+      <ResultCard label="Cap. Latente" value={fmt(Q_lat_disp, capDec)} unit={capacityUnit} hint={isDesign && targetCapacityW > 0 ? "Derivada do alvo × (1−SHR)" : undefined} />
       <ResultCard label="SHR" value={fmt(SHR, 3)} hint="Sensible Heat Ratio" />
       <ResultCard label="COP" value={fmt(result.COP, 2)} variant="success" />
       <ResultCard label="EER" value={fmt(EER, 2)} unit="BTU/W·h" />
