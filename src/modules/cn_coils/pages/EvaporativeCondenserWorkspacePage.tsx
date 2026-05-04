@@ -166,7 +166,7 @@ export function EvaporativeCondenserWorkspacePage() {
               </TabsList>
 
               <TabsContent value="results" className="mt-3">
-                <ResultsGrid result={result} />
+                <ResultsGrid result={result} inputs={inputs} />
               </TabsContent>
 
               <TabsContent value="envelope" className="mt-3">
