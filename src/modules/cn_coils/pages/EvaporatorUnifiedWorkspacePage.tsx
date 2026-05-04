@@ -42,9 +42,15 @@ import {
   validatePhysicalInputs,
   validateThermoInputs,
 } from "../validators/simulationValidator";
+import {
+  convertCapacity,
+  useUnitStore,
+  type CapacityUnit,
+} from "../store/useUnitStore";
 import { enrichWarnings } from "../utils/warningEnricher";
 import type { AIContext } from "../components/WorkspaceAIChat";
 import type { StructuredWarning } from "../types/warnings";
+import type { OperatingMapPoint } from "../engines/operatingMap/operatingMapTypes";
 
 import {
   Accordion,
