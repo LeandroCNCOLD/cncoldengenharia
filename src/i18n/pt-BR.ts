@@ -79,6 +79,7 @@ export const ptBR = {
     export: "Exportação",
     audit: "Auditoria CN COLD",
     settings: "Configurações",
+    library: "Biblioteca",
     engineV2: "Motor V2 — CN COLD",
   },
 

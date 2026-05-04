@@ -14,6 +14,7 @@ import {
   Database as DatabaseIcon,
   Gauge,
   Settings,
+  Library,
 } from "lucide-react";
 import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/coldpro/registry", label: "navigation.productRegistry", Icon: Database },
   { to: "/coldpro/export", label: "navigation.export", Icon: Download },
   { to: "/coldpro/audit", label: "navigation.audit", Icon: ShieldCheck },
+  { to: "/coldpro/library", label: "navigation.library", Icon: Library },
 ];
 
 const ADMIN_NAV_ITEMS: NavItem[] = [
