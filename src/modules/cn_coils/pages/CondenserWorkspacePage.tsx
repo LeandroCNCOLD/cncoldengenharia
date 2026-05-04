@@ -348,12 +348,15 @@ export function CondenserWorkspacePage() {
           {isCalculating && !result ? (
             <LoadingResults />
           ) : result ? (
-            <Tabs defaultValue="results" className="w-full">
-              <TabsList className="flex w-full flex-wrap justify-start">
-                <TabsTrigger value="results">📋 Resultados</TabsTrigger>
-                <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
-                <TabsTrigger value="fans">🔧 Ventiladores</TabsTrigger>
-              </TabsList>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <TabsList className="flex flex-wrap justify-start">
+                  <TabsTrigger value="results">📋 Resultados</TabsTrigger>
+                  <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
+                  <TabsTrigger value="fans">🔧 Ventiladores</TabsTrigger>
+                </TabsList>
+                <WorkspaceAIButton onClick={() => setAiOpen(true)} />
+              </div>
 
               <TabsContent value="results" className="mt-3 space-y-3">
                 <CondenserResults result={result} />
@@ -452,6 +455,7 @@ export function CondenserWorkspacePage() {
           isExportingPdf={pdfGenerating}
         />
       </div>
+      <WorkspaceAIPanel open={aiOpen} onClose={() => setAiOpen(false)} context={aiContext} />
     </WorkspaceLayout>
   );
 }
