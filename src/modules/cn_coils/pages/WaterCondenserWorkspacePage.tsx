@@ -33,6 +33,8 @@ import {
   type WaterCondenserInputs,
 } from "../hooks/useWaterCondenserSimulation";
 import { useCoilEnvelopeStore } from "../store/useCoilEnvelopeStore";
+import { WorkspaceAIButton, WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
+import type { AIContext } from "../components/WorkspaceAIChat";
 
 const fmt = (value: number, maximumFractionDigits = 2) =>
   value.toLocaleString("pt-BR", { maximumFractionDigits });
@@ -54,7 +56,30 @@ export function WaterCondenserWorkspacePage() {
   const setCondenserEnvelope = useCoilEnvelopeStore((s) => s.setCondenserEnvelope);
   const [inputs, setInputs] = useState<WaterCondenserInputs>(DEFAULT_INPUTS);
   const [draft, setDraft] = useState<WaterCondenserInputs>(DEFAULT_INPUTS);
+  const [activeTab, setActiveTab] = useState("results");
+  const [aiOpen, setAiOpen] = useState(false);
   const result = useMemo(() => calculateWaterCondenser(inputs), [inputs]);
+
+  const aiContext: AIContext = useMemo(() => ({
+    componentType: "Cond. a Água",
+    tabName: activeTab,
+    refrigerant: inputs.refrigerant,
+    parameters: {
+      "Q total (kW)": (inputs.Q_total_W / 1000).toFixed(1),
+      "T água entrada (°C)": inputs.Tw_in_C,
+      "Vazão água (m³/h)": inputs.waterFlowRate_m3h,
+      "Nº tubos": inputs.tubeCount,
+      "Passes": inputs.passes,
+    },
+    results: {
+      "Tc (°C)": result.Tc_C.toFixed(1),
+      "T água saída (°C)": result.Tw_out_C.toFixed(1),
+      "LMTD (K)": result.LMTD_K.toFixed(1),
+      "U (W/m²K)": result.U_Wm2K.toFixed(0),
+      "Margem área (%)": (result.areaMargin * 100).toFixed(1),
+    },
+    warnings: [],
+  }), [activeTab, inputs, result]);
 
   const envelope = useMemo(
     () =>
