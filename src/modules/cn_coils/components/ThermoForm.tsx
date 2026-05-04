@@ -6,6 +6,7 @@ import type {
 import { ptBR } from "../i18n/messages.ptBR";
 import { NumberField } from "./NumberField";
 import { SelectField } from "./SelectField";
+import { AirSidePanel } from "./AirSidePanel";
 
 interface ThermoFormProps {
   refrigerants: RefrigerantItem[];
@@ -40,13 +41,6 @@ export function ThermoForm({ refrigerants, componentType, disabled }: ThermoForm
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <NumberField
-          label={f.airFlow}
-          unit="m³/h"
-          value={thermo.airFlowM3H}
-          onChange={(v) => setThermo({ airFlowM3H: v })}
-          disabled={disabled}
-        />
-        <NumberField
           label={f.altitude}
           unit="m"
           value={thermo.altitudeM}
@@ -71,7 +65,9 @@ export function ThermoForm({ refrigerants, componentType, disabled }: ThermoForm
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <AirSidePanel disabled={disabled} />
+
+      <div className="grid grid-cols-2 gap-3">
         {isEvaporator(componentType) && (
           <>
             <NumberField

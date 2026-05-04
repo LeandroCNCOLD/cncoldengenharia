@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TechnicalField } from "../ui/TechnicalField";
 import { useComponentStore } from "../../stores/useComponentStore";
 import type { ReheatCoilSizingInput } from "@/modules/coldpro_v2";
+import { useTranslation } from "@/i18n/useTranslation";
 
 interface Props {
   onSaved: () => void;
@@ -24,6 +25,7 @@ const num = (v: string): number => {
 };
 
 export function ReheatCoilForm({ onSaved }: Props) {
+  const { t } = useTranslation();
   const addReheatCoil = useComponentStore((s) => s.addReheatCoil);
   const [name, setName] = useState("");
   const [qTarget, setQTarget] = useState(2000);
@@ -85,7 +87,7 @@ export function ReheatCoilForm({ onSaved }: Props) {
         value={name}
         onChange={(v) => setName(v)}
         type="text"
-        placeholder="Ex: Reheat 2kW"
+        placeholder={t("components.placeholders.reheat")}
         required
       />
 
@@ -231,7 +233,7 @@ export function ReheatCoilForm({ onSaved }: Props) {
             >
               {TUBE_MATERIALS.map((m) => (
                 <option key={m} value={m}>
-                  {m}
+                  {t(`components.materials.${m}`)}
                 </option>
               ))}
             </select>
@@ -247,7 +249,7 @@ export function ReheatCoilForm({ onSaved }: Props) {
             >
               {FIN_MATERIALS.map((m) => (
                 <option key={m} value={m}>
-                  {m}
+                  {t(`components.materials.${m}`)}
                 </option>
               ))}
             </select>

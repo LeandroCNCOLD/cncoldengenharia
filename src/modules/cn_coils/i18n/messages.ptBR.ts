@@ -6,7 +6,7 @@ export const ptBR = {
     subtitle:
       "Simulação termodinâmica de trocadores de calor com correções polinomiais CN COILS.",
     disclaimer:
-      "Capacidade estimada por modelo termodinâmico com correções polinomiais. Os resultados não substituem a validação experimental ou o cálculo pelo software CN COILS.",
+      "Capacidade estimada por modelo termodinâmico com correções polinomiais. Os resultados não substituem a validação experimental ou o cálculo original CN COILS.",
   },
   dashboard: {
     intro: "Selecione um tipo de componente para iniciar a simulação.",
@@ -17,7 +17,7 @@ export const ptBR = {
       },
       condensers: {
         title: "Condensadores",
-        description: "A ar (aletado) e microcanal.",
+        description: "A ar e casco-tubo.",
       },
       heating: {
         title: "Baterias de Aquecimento",
@@ -25,29 +25,28 @@ export const ptBR = {
       },
       cooling: {
         title: "Baterias de Resfriamento",
-        description: "Resfriamento por água gelada ou solução de glicol.",
+        description: "Resfriamento por água gelada.",
       },
       defrost: {
-        title: "Serpentinas de Degelo",
-        description: "Degelo ativo a vapor ou resistência elétrica.",
+        title: "Serpentinas de Degelo / Vapor",
+        description: "Degelo ativo a vapor.",
       },
       recuperator: {
-        title: "Recuperador de Calor",
-        description: "Trocadores gás-gás (ar-ar) para recuperação de energia.",
+        title: "Recuperadores de Calor",
+        description: "Troca de calor ar-ar ou fluido-fluido.",
       },
       shellTube: {
-        title: "Trocadores Casco-Tubo",
-        description: "Evaporadores e condensadores industriais (Shell & Tube).",
+        title: "Casco e Tubo",
+        description: "Trocadores de calor casco-tubo industriais.",
       },
       chiller: {
-        title: "Chiller / Unidade Completa",
-        description:
-          "Simulação do sistema completo (Evaporador + Condensador + Compressor).",
+        title: "Unidades Chiller",
+        description: "Resfriamento de água para sistemas centrais.",
       },
     },
   },
   workspace: {
-    title: "Workspace CN COILS",
+    title: "CN COILS",
     columns: {
       geometry: "Geometria",
       thermo: "Termodinâmica",
@@ -94,21 +93,21 @@ export const ptBR = {
       airOutletTemp: "Temp. saída do ar",
       airOutletRh: "UR saída do ar",
       faceVelocity: "Velocidade de face",
-      correctionFactor: "Fator CN Coils aplicado",
+      correctionFactor: "Fator CN COILS aplicado",
     },
   },
   datasets: {
-    title: "Status dos catálogos CN Coils",
+    title: "Status dos catálogos CN COILS",
     loading: "Carregando catálogos…",
     ready: "Todos os catálogos carregados.",
-    missingTitle: "Catálogos CN Coils ausentes",
+    missingTitle: "Catálogos CN COILS ausentes",
     missingHint:
       "A simulação fica bloqueada até que todos os catálogos obrigatórios sejam disponibilizados em /data/catalogs/.",
-    fileMissing: (file: string) => `Catálogo CN Coils não carregado: ${file}`,
+    fileMissing: (file: string) => `Catálogo CN COILS não carregado: ${file}`,
     fileLoaded: (file: string) => `Catálogo carregado: ${file}`,
   },
   validation: {
-    blockedNoDatasets: "Dados CN Coils não disponíveis para esta geometria.",
+    blockedNoDatasets: "Dados CN COILS não disponíveis para esta geometria.",
     geometryIncomplete: "Geometria incompleta para integração com ColdPro.",
     requiredField: (field: string) => `Campo obrigatório: ${field}`,
     invalidNumber: (field: string) => `Valor inválido em: ${field}`,

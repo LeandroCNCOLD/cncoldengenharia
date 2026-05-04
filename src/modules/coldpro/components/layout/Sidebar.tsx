@@ -1,6 +1,7 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
+  Activity,
   TrendingUp,
   Map,
   FileText,
@@ -9,208 +10,109 @@ import {
   ShieldCheck,
   LogOut,
   Boxes,
-  FolderOpen,
   Wrench,
   Database as DatabaseIcon,
   Gauge,
-  Scale,
-  RotateCw,
-  Layers,
-  Droplets,
-  Flame,
-  Snowflake,
-  Target,
-  Thermometer,
-  Wind,
-  Waves,
-  Zap,
-  X,
-  BookOpen,
-  CheckCircle,
 } from "lucide-react";
+import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/i18n/useTranslation";
 import { useAuth } from "@/lib/auth";
-import { ThemeToggle } from "@/modules/cn_coils/components/ThemeToggle";
-import { useProjectStore } from "@/modules/cn_coils/store/useProjectStore";
+import { UserModeSwitcher } from "../mode/UserModeSwitcher";
 
 type NavItem = {
   to: string;
   label: string;
   Icon: typeof LayoutDashboard;
-  search?: Record<string, string>;
   exact?: boolean;
-  comingSoon?: boolean;
-  badge?: "projects";
 };
 
-type NavGroup = {
-  label: string;
-  items: NavItem[];
-};
-
-const NAV_GROUPS: NavGroup[] = [
-  {
-    label: "Início",
-    items: [{ to: "/coldpro", label: "Dashboard", Icon: LayoutDashboard, exact: true }],
-  },
-  {
-    label: "Simulação",
-    items: [
-      { to: "/coldpro/projects", label: "Meus Projetos", Icon: FolderOpen, badge: "projects" },
-      { to: "/coldpro/compare", label: "Comparar", Icon: Scale },
-      { to: "/coldpro/cncoils", label: "CN COILS", Icon: Gauge },
-      { to: "/coldpro/cncoils/workspace", label: "· Evaporador DX", Icon: Snowflake, search: { type: "evaporator_dx" } },
-      { to: "/coldpro/cncoils/workspace", label: "· Condensador a Ar", Icon: Thermometer, search: { type: "condenser_air" } },
-      { to: "/coldpro/cncoils/workspace", label: "· Compressor", Icon: Zap, search: { type: "compressor" } },
-      { to: "/coldpro/cncoils/workspace", label: "· Cond. Evaporativo", Icon: Droplets, search: { type: "evaporative_condenser" } },
-      { to: "/coldpro/cncoils/workspace", label: "· Cond. a Água", Icon: Waves, search: { type: "water_condenser" } },
-      { to: "/coldpro/cncoils/workspace", label: "· Bat. Aquecimento", Icon: Flame, search: { type: "heating_coil" } },
-      { to: "/coldpro/cncoils/component-library", label: "· Biblioteca", Icon: BookOpen },
-      { to: "/coldpro/cncoils/project-completion", label: "· Conclusão", Icon: CheckCircle },
-      { to: "/coldpro/assembly", label: "Arranjo de Serpentinas", Icon: Layers },
-    ],
-  },
-  {
-    label: "Dados",
-    items: [
-      { to: "/coldpro/components", label: "Componentes", Icon: Boxes },
-      { to: "/coldpro/catalog", label: "Catálogo CN COLD", Icon: DatabaseIcon },
-      { to: "/coldpro/registry", label: "Registry de Produtos", Icon: Database },
-    ],
-  },
-  {
-    label: "Produção",
-    items: [
-      { to: "/coldpro/export", label: "Exportação", Icon: Download },
-    ],
-  },
+const NAV_ITEMS: NavItem[] = [
+  { to: "/coldpro", label: "common.dashboard", Icon: LayoutDashboard, exact: true },
+  { to: "/coldpro/catalog", label: "navigation.catalog", Icon: DatabaseIcon },
+  { to: "/coldpro/components", label: "navigation.components", Icon: Boxes },
+  { to: "/coldpro/assembly", label: "navigation.assembly", Icon: Wrench },
+  { to: "/coldpro/simulation", label: "navigation.systemEquilibrium", Icon: Activity },
+  { to: "/coldpro/curve", label: "navigation.performanceCurve", Icon: TrendingUp },
+  { to: "/coldpro/cncoils", label: "navigation.unilabSimulator", Icon: Gauge },
+  { to: "/coldpro/map", label: "navigation.operatingMap", Icon: Map },
+  { to: "/coldpro/record", label: "navigation.productRecord", Icon: FileText },
+  { to: "/coldpro/registry", label: "navigation.productRegistry", Icon: Database },
+  { to: "/coldpro/export", label: "navigation.export", Icon: Download },
+  { to: "/coldpro/audit", label: "navigation.audit", Icon: ShieldCheck },
 ];
 
-interface SidebarProps {
-  onClose?: () => void;
-}
-
-export function Sidebar({ onClose }: SidebarProps = {}) {
+export function Sidebar({ onClose: _onClose }: { onClose?: () => void } = {}) {
+  const { t } = useTranslation();
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const projectCount = useProjectStore((s) => s.projects.length);
-
-  const isActive = (item: NavItem) => {
-    const pathMatch = item.exact
-      ? pathname === item.to
-      : pathname === item.to || pathname.startsWith(item.to + "/");
-    if (!pathMatch) return false;
-    if (item.search && typeof item.search === "object") {
-      if (typeof window === "undefined") return false;
-      const params = new URLSearchParams(window.location.search);
-      return Object.entries(item.search).every(
-        ([key, value]) => params.get(key) === String(value),
-      );
-    }
-    return true;
-  };
 
   return (
-    <aside className="flex h-full w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
-      <div className="border-b border-sidebar-border p-4">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Snowflake className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-bold leading-tight text-sidebar-foreground">
-              <span className="text-primary">CN</span>Cold
-            </div>
-            <div className="text-xs leading-tight text-sidebar-foreground/60">Engenharia</div>
-          </div>
-          {/* Close button — only shown when onClose is provided (mobile drawer) */}
-          {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded p-1 text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-              aria-label="Fechar menu"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
+    <aside className="flex h-full w-64 shrink-0 flex-col bg-[#0F2744] text-slate-100">
+      <div className="flex items-center gap-3 border-b border-white/10 px-5 py-4">
+        <CnLogo variant="dark" />
+        <div className="min-w-0">
+          <p className="text-sm font-semibold leading-tight">{t("navigation.coldProV2")}</p>
+          <p className="text-[10px] uppercase tracking-wider text-slate-400">{t("navigation.cnCold")}</p>
         </div>
       </div>
 
-      <nav className="min-h-0 flex-1 overflow-y-auto px-2 py-0.5">
-        {NAV_GROUPS.map((group, gIdx) => (
-          <div key={group.label} className={gIdx === 0 ? "" : "pt-1"}>
-            <p className="px-2 pb-px text-[8px] font-semibold uppercase leading-none tracking-widest text-sidebar-foreground/50">
-              {group.label}
-            </p>
-            <ul className="space-y-0">
-              {group.items.map((item) => {
-                const Icon = item.Icon;
-                const active = isActive(item);
-                return (
-                  <li key={`${item.to}-${item.label}`}>
-                    <Link
-                      to={item.to}
-                      search={item.search as never}
-                      title={item.comingSoon ? "Em desenvolvimento" : undefined}
-                      onClick={onClose}
-                      className={
-                        active
-                          ? "flex h-[22px] items-center gap-1.5 rounded bg-sidebar-primary px-2 text-[11px] font-medium leading-none text-sidebar-primary-foreground"
-                          : "flex h-[22px] items-center gap-1.5 rounded px-2 text-[11px] leading-none text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                      }
-                    >
-                      <Icon className="h-3 w-3 shrink-0" />
-                      <span className="truncate">{item.label}</span>
-                      {item.comingSoon && (
-                        <span className="ml-auto rounded bg-amber-500/20 px-0.5 py-px text-[7px] font-semibold uppercase leading-none tracking-wide text-amber-300">
-                          Em breve
-                        </span>
-                      )}
-                      {item.badge === "projects" && projectCount > 0 && (
-                        <Badge variant="secondary" className="ml-auto h-3 px-1 text-[7px] leading-none">
-                          {projectCount}
-                        </Badge>
-                      )}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <ul className="space-y-0.5">
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.Icon;
+            return (
+              <li key={item.to}>
+                <Link
+                  to={item.to}
+                  activeOptions={{ exact: item.exact ?? false }}
+                  activeProps={{
+                    className:
+                      "flex items-center gap-2.5 rounded-md bg-[#1E6FD9] px-3 py-2 text-sm font-medium text-white",
+                  }}
+                  inactiveProps={{
+                    className:
+                      "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white",
+                  }}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{t(item.label)}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
 
-      <div className="space-y-1 border-t border-sidebar-border px-3 py-1.5">
-        <div>
-          <p className="truncate text-[11px] font-medium text-sidebar-foreground">
+      <div className="space-y-2 border-t border-white/10 px-4 py-3">
+        <p className="text-[10px] uppercase tracking-wider text-slate-400">{t("navigation.userMode")}</p>
+        <UserModeSwitcher />
+
+        <div className="pt-2">
+          <p className="truncate text-xs font-medium text-slate-100">
             {user?.user_metadata?.full_name || user?.email}
           </p>
-          <p className="truncate text-[9px] text-sidebar-foreground/60">
-            {isAdmin ? "Administrador" : "Engenheiro"}
+          <p className="truncate text-[10px] text-slate-400">
+            {isAdmin ? t("common.administrator") : t("common.engineer")}
           </p>
         </div>
 
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 w-full justify-start gap-2 px-2 text-[11px] text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className="w-full justify-start gap-2 text-slate-300 hover:bg-white/10 hover:text-white"
           onClick={async () => {
             await signOut();
             navigate({ to: "/auth" });
           }}
         >
-          <LogOut className="h-3.5 w-3.5" />
-          Sair
+          <LogOut className="h-4 w-4" />
+          {t("common.signOut")}
         </Button>
 
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-[9px] text-sidebar-foreground/50">CNCold Engenharia</span>
-          <ThemeToggle />
-        </div>
+        <p className="pt-1 text-[10px] text-slate-500">{t("navigation.engineV2")}</p>
       </div>
     </aside>
   );
 }
+

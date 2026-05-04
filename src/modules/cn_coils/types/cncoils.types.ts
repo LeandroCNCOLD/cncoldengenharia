@@ -109,6 +109,7 @@ export interface CnCoilsPhysicalInputs {
 export interface CnCoilsThermoInputs {
   refrigerantId: string;
   airFlowM3H: number;
+  selectedFanId?: string;
   airInletTempC: number;
   airInletRhPercent: number;
   altitudeM: number;
@@ -116,6 +117,19 @@ export interface CnCoilsThermoInputs {
   condensingTempC?: number;
   superheatK?: number;
   subcoolingK?: number;
+}
+
+export interface FanEvaluationResult {
+  fanId?: string;
+  model?: string;
+  type?: "axial" | "centrifugal";
+  method: "curve" | "polynomial" | "range_only" | "unavailable";
+  airflow_m3h: number;
+  pressure_Pa: number | null;
+  power_W?: number;
+  current_A?: number;
+  rpm?: number;
+  warning?: string;
 }
 
 export interface CnCoilsSimulationResult {
@@ -145,6 +159,17 @@ export interface CnCoilsSimulationResult {
   surface_ratio?: number;
   finCorrectionFactor?: number;
   airFrictionFactor?: number;
+  fanEvaluation?: FanEvaluationResult;
+  unilabCorrection?: {
+    factor: number;
+    idCorr?: number;
+    serie?: string;
+    velocityRange_m_s?: {
+      min: number;
+      max: number;
+    };
+    clampedVelocity_m_s: number;
+  };
   warnings: string[];
 }
 

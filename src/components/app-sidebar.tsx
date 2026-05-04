@@ -5,13 +5,15 @@ import { CnLogo } from "@/components/cn-logo";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/i18n/useTranslation";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
+  { labelKey: "common.dashboard", to: "/dashboard", icon: LayoutDashboard },
 ];
 
 export function AppSidebar() {
   const { user, isAdmin, signOut } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -23,7 +25,7 @@ export function AppSidebar() {
 
       <div className="px-5 py-4">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
-          ColdPro V2
+          {t("navigation.coldProV2")}
         </p>
       </div>
 
@@ -44,7 +46,7 @@ export function AppSidebar() {
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
-              <span className="truncate">{item.label}</span>
+              <span className="truncate">{t(item.labelKey)}</span>
             </Link>
           );
         })}
@@ -56,7 +58,7 @@ export function AppSidebar() {
             {user?.user_metadata?.full_name || user?.email}
           </p>
           <p className="truncate text-sidebar-foreground/60">
-            {isAdmin ? "Administrador" : "Engenheiro"}
+            {isAdmin ? t("common.administrator") : t("common.engineer")}
           </p>
         </div>
         <Button
@@ -69,7 +71,7 @@ export function AppSidebar() {
           }}
         >
           <LogOut className="h-4 w-4" />
-          Sair
+          {t("common.signOut")}
         </Button>
       </div>
     </aside>

@@ -16,6 +16,7 @@ import {
 import type { ReactNode } from "react";
 
 import { PageContainer } from "../components/layout/PageContainer";
+import { useTranslation } from "@/i18n/useTranslation";
 import { CompressorForm } from "../components/components/CompressorForm";
 import { CoilForm } from "../components/components/CoilForm";
 import { CondenserForm } from "../components/components/CondenserForm";
@@ -55,79 +56,80 @@ interface SavedItem {
 
 const TABS: {
   id: ComponentTab;
-  label: string;
+  labelKey: string;
   icon: ReactNode;
-  description: string;
+  descriptionKey: string;
 }[] = [
   {
     id: "compressor",
-    label: "Compressor",
+    labelKey: "components.tabs.compressor.label",
     icon: <Cpu className="h-4 w-4" />,
-    description: "Compressor frigorífico",
+    descriptionKey: "components.tabs.compressor.description",
   },
   {
     id: "coil",
-    label: "Serpentina",
+    labelKey: "components.tabs.coil.label",
     icon: <Wind className="h-4 w-4" />,
-    description: "Aletado progressivo (evap/cond/reheat)",
+    descriptionKey: "components.tabs.coil.description",
   },
   {
     id: "condenser",
-    label: "Condensador",
+    labelKey: "components.tabs.condenser.label",
     icon: <Thermometer className="h-4 w-4" />,
-    description: "Condensador a ar ou a água",
+    descriptionKey: "components.tabs.condenser.description",
   },
   {
     id: "fan",
-    label: "Ventilador",
+    labelKey: "components.tabs.fan.label",
     icon: <Fan className="h-4 w-4" />,
-    description: "Ventilador de evaporador ou condensador",
+    descriptionKey: "components.tabs.fan.description",
   },
   {
     id: "expansion_valve",
-    label: "Válvula Exp.",
+    labelKey: "components.tabs.expansionValve.label",
     icon: <Gauge className="h-4 w-4" />,
-    description: "Válvula de expansão",
+    descriptionKey: "components.tabs.expansionValve.description",
   },
   {
     id: "four_way_valve",
-    label: "Válvula 4 Vias",
+    labelKey: "components.tabs.fourWayValve.label",
     icon: <GitBranch className="h-4 w-4" />,
-    description: "Válvula 4 vias (reversão de ciclo)",
+    descriptionKey: "components.tabs.fourWayValve.description",
   },
   {
     id: "drip_tray",
-    label: "Serpentina Bandeja",
+    labelKey: "components.tabs.dripTray.label",
     icon: <Droplets className="h-4 w-4" />,
-    description: "Subresfriamento e degelo da bandeja",
+    descriptionKey: "components.tabs.dripTray.description",
   },
   {
     id: "defrost",
-    label: "Degelo",
+    labelKey: "components.tabs.defrost.label",
     icon: <Snowflake className="h-4 w-4" />,
-    description: "Configuração do ciclo de degelo",
+    descriptionKey: "components.tabs.defrost.description",
   },
   {
     id: "agro",
-    label: "AGRO / Desum.",
+    labelKey: "components.tabs.agro.label",
     icon: <Leaf className="h-4 w-4" />,
-    description: "Ciclo AGRO com controle de umidade",
+    descriptionKey: "components.tabs.agro.description",
   },
   {
     id: "reheat",
-    label: "Reaquecimento",
+    labelKey: "components.tabs.reheat.label",
     icon: <Zap className="h-4 w-4" />,
-    description: "Bateria de reaquecimento",
+    descriptionKey: "components.tabs.reheat.description",
   },
   {
     id: "frost",
-    label: "Formação de Gelo",
+    labelKey: "components.tabs.frost.label",
     icon: <CloudSnow className="h-4 w-4" />,
-    description: "Modelo de formação de gelo",
+    descriptionKey: "components.tabs.frost.description",
   },
 ];
 
 export function ComponentsPage() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<ComponentTab>("compressor");
   const [showForm, setShowForm] = useState(false);
   const store = useComponentStore();
@@ -226,12 +228,13 @@ export function ComponentsPage() {
   };
 
   const activeTabInfo = TABS.find((t) => t.id === activeTab)!;
+  const activeTabLabel = t(activeTabInfo.labelKey);
   const list = getList();
 
   return (
     <PageContainer
-      title="Componentes"
-      subtitle="Cadastre e dimensione componentes individuais antes de montar o equipamento."
+      title={t("components.title")}
+      subtitle={t("components.subtitle")}
       actions={
         <button
           type="button"
@@ -239,7 +242,7 @@ export function ComponentsPage() {
           className="flex items-center gap-2 rounded-lg bg-[#1E6FD9] px-4 py-2 text-sm text-white transition-colors hover:bg-[#1558b0]"
         >
           <Plus className="h-4 w-4" />
-          Novo {activeTabInfo.label}
+          {t("components.new")} {activeTabLabel}
         </button>
       }
     >
@@ -261,7 +264,7 @@ export function ComponentsPage() {
                   }`}
                 >
                   {tab.icon}
-                  <span className="truncate">{tab.label}</span>
+                  <span className="truncate">{t(tab.labelKey)}</span>
                 </button>
               </li>
             ))}
@@ -274,10 +277,10 @@ export function ComponentsPage() {
               <header className="mb-5 flex items-start justify-between gap-4 border-b border-slate-200 pb-4">
                 <div>
                   <h2 className="text-lg font-semibold text-slate-900">
-                    Novo {activeTabInfo.label}
+                    {t("components.new")} {activeTabLabel}
                   </h2>
                   <p className="mt-1 text-sm text-slate-500">
-                    {activeTabInfo.description}
+                    {t(activeTabInfo.descriptionKey)}
                   </p>
                 </div>
                 <button
@@ -285,7 +288,7 @@ export function ComponentsPage() {
                   onClick={() => setShowForm(false)}
                   className="text-sm text-slate-400 hover:text-slate-600"
                 >
-                  Cancelar
+                  {t("common.cancel")}
                 </button>
               </header>
               {renderForm()}
@@ -296,13 +299,13 @@ export function ComponentsPage() {
                 <>
                   <div>
                     <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                      Catálogo Bitzer (oficial)
+                      {t("components.bitzerCatalog")}
                     </h3>
                     <BitzerLibraryBrowser />
                   </div>
                   <div className="mt-6">
                     <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                      Catálogo geral (Copeland · Bristol · outros)
+                      {t("components.generalCatalog")}
                     </h3>
                     <CompressorLibraryBrowser />
                   </div>
@@ -313,8 +316,8 @@ export function ComponentsPage() {
               <div className="flex items-center justify-between">
                 <p className="text-sm text-slate-500">
                   {list.length}{" "}
-                  {activeTabInfo.label.toLowerCase()}
-                  {list.length !== 1 ? "s" : ""} cadastrado
+                  {activeTabLabel.toLowerCase()}
+                  {list.length !== 1 ? "s" : ""} {t("components.registered")}
                   {list.length !== 1 ? "s" : ""}
                 </p>
               </div>
@@ -338,14 +341,14 @@ export function ComponentsPage() {
                     {activeTabInfo.icon}
                   </div>
                   <p className="text-sm text-slate-500">
-                    Nenhum {activeTabInfo.label.toLowerCase()} cadastrado ainda.
+                    Nenhum {activeTabLabel.toLowerCase()} cadastrado ainda.
                   </p>
                   <button
                     type="button"
                     onClick={() => setShowForm(true)}
                     className="mt-3 text-sm text-[#1E6FD9] hover:underline"
                   >
-                    Cadastrar o primeiro
+                    {t("components.first")}
                   </button>
                 </div>
               )}

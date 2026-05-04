@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TechnicalField } from "../ui/TechnicalField";
 import { useComponentStore } from "../../stores/useComponentStore";
 import type { CompressorSpec } from "@/modules/coldpro_v2";
+import { useTranslation } from "@/i18n/useTranslation";
 
 interface CompressorFormProps {
   onSaved: () => void;
@@ -26,6 +27,7 @@ const num = (v: string): number | undefined => {
 };
 
 export function CompressorForm({ onSaved }: CompressorFormProps) {
+  const { t } = useTranslation();
   const addCompressor = useComponentStore((s) => s.addCompressor);
   const [name, setName] = useState("");
   const [refrigerant, setRefrigerant] = useState("R404A");
@@ -63,7 +65,7 @@ export function CompressorForm({ onSaved }: CompressorFormProps) {
         value={name}
         onChange={(v) => setName(v)}
         type="text"
-        placeholder="Ex: Bitzer 4FES-3Y"
+        placeholder={t("components.placeholders.compressor")}
         required
       />
 

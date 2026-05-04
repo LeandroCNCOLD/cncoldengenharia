@@ -34,6 +34,7 @@ import { Route as AppColdproCurveRouteImport } from './routes/_app/coldpro.curve
 import { Route as AppColdproComponentsRouteImport } from './routes/_app/coldpro.components'
 import { Route as AppColdproCompareRouteImport } from './routes/_app/coldpro.compare'
 import { Route as AppColdproCncoilsRouteImport } from './routes/_app/coldpro.cncoils'
+import { Route as AppColdproCnCoilsRouteImport } from './routes/_app/coldpro.cn-coils'
 import { Route as AppColdproCatalogRouteImport } from './routes/_app/coldpro.catalog'
 import { Route as AppColdproAuditRouteImport } from './routes/_app/coldpro.audit'
 import { Route as AppColdproAssemblyRouteImport } from './routes/_app/coldpro.assembly'
@@ -46,6 +47,7 @@ import { Route as AppColdproSystemsColdRoomRouteImport } from './routes/_app/col
 import { Route as AppColdproCncoilsWorkspaceRouteImport } from './routes/_app/coldpro.cncoils.workspace'
 import { Route as AppColdproCncoilsProjectCompletionRouteImport } from './routes/_app/coldpro.cncoils.project-completion'
 import { Route as AppColdproCncoilsComponentLibraryRouteImport } from './routes/_app/coldpro.cncoils.component-library'
+import { Route as AppColdproCnCoilsWorkspaceRouteImport } from './routes/_app/coldpro.cn-coils.workspace'
 import { Route as AppColdproCncoilsSystemsHeatPumpRouteImport } from './routes/_app/coldpro.cncoils.systems.heat-pump'
 import { Route as AppColdproCncoilsSystemsDxCompleteRouteImport } from './routes/_app/coldpro.cncoils.systems.dx-complete'
 import { Route as AppColdproCncoilsSystemsDehumidificationRouteImport } from './routes/_app/coldpro.cncoils.systems.dehumidification'
@@ -175,6 +177,11 @@ const AppColdproCncoilsRoute = AppColdproCncoilsRouteImport.update({
   path: '/cncoils',
   getParentRoute: () => AppColdproRoute,
 } as any)
+const AppColdproCnCoilsRoute = AppColdproCnCoilsRouteImport.update({
+  id: '/cn-coils',
+  path: '/cn-coils',
+  getParentRoute: () => AppColdproRoute,
+} as any)
 const AppColdproCatalogRoute = AppColdproCatalogRouteImport.update({
   id: '/catalog',
   path: '/catalog',
@@ -243,6 +250,12 @@ const AppColdproCncoilsComponentLibraryRoute =
     path: '/component-library',
     getParentRoute: () => AppColdproCncoilsRoute,
   } as any)
+const AppColdproCnCoilsWorkspaceRoute =
+  AppColdproCnCoilsWorkspaceRouteImport.update({
+    id: '/workspace',
+    path: '/workspace',
+    getParentRoute: () => AppColdproCnCoilsRoute,
+  } as any)
 const AppColdproCncoilsSystemsHeatPumpRoute =
   AppColdproCncoilsSystemsHeatPumpRouteImport.update({
     id: '/systems/heat-pump',
@@ -277,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/coldpro/audit': typeof AppColdproAuditRoute
   '/coldpro/catalog': typeof AppColdproCatalogRoute
+  '/coldpro/cn-coils': typeof AppColdproCnCoilsRouteWithChildren
   '/coldpro/cncoils': typeof AppColdproCncoilsRouteWithChildren
   '/coldpro/compare': typeof AppColdproCompareRoute
   '/coldpro/components': typeof AppColdproComponentsRoute
@@ -296,6 +310,7 @@ export interface FileRoutesByFullPath {
   '/coldpro/simulation': typeof AppColdproSimulationRoute
   '/coldpro/system-balance': typeof AppColdproSystemBalanceRoute
   '/coldpro/': typeof AppColdproIndexRoute
+  '/coldpro/cn-coils/workspace': typeof AppColdproCnCoilsWorkspaceRoute
   '/coldpro/cncoils/component-library': typeof AppColdproCncoilsComponentLibraryRoute
   '/coldpro/cncoils/project-completion': typeof AppColdproCncoilsProjectCompletionRoute
   '/coldpro/cncoils/workspace': typeof AppColdproCncoilsWorkspaceRoute
@@ -318,6 +333,7 @@ export interface FileRoutesByTo {
   '/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/coldpro/audit': typeof AppColdproAuditRoute
   '/coldpro/catalog': typeof AppColdproCatalogRoute
+  '/coldpro/cn-coils': typeof AppColdproCnCoilsRouteWithChildren
   '/coldpro/cncoils': typeof AppColdproCncoilsRouteWithChildren
   '/coldpro/compare': typeof AppColdproCompareRoute
   '/coldpro/components': typeof AppColdproComponentsRoute
@@ -337,6 +353,7 @@ export interface FileRoutesByTo {
   '/coldpro/simulation': typeof AppColdproSimulationRoute
   '/coldpro/system-balance': typeof AppColdproSystemBalanceRoute
   '/coldpro': typeof AppColdproIndexRoute
+  '/coldpro/cn-coils/workspace': typeof AppColdproCnCoilsWorkspaceRoute
   '/coldpro/cncoils/component-library': typeof AppColdproCncoilsComponentLibraryRoute
   '/coldpro/cncoils/project-completion': typeof AppColdproCncoilsProjectCompletionRoute
   '/coldpro/cncoils/workspace': typeof AppColdproCncoilsWorkspaceRoute
@@ -362,6 +379,7 @@ export interface FileRoutesById {
   '/_app/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/_app/coldpro/audit': typeof AppColdproAuditRoute
   '/_app/coldpro/catalog': typeof AppColdproCatalogRoute
+  '/_app/coldpro/cn-coils': typeof AppColdproCnCoilsRouteWithChildren
   '/_app/coldpro/cncoils': typeof AppColdproCncoilsRouteWithChildren
   '/_app/coldpro/compare': typeof AppColdproCompareRoute
   '/_app/coldpro/components': typeof AppColdproComponentsRoute
@@ -381,6 +399,7 @@ export interface FileRoutesById {
   '/_app/coldpro/simulation': typeof AppColdproSimulationRoute
   '/_app/coldpro/system-balance': typeof AppColdproSystemBalanceRoute
   '/_app/coldpro/': typeof AppColdproIndexRoute
+  '/_app/coldpro/cn-coils/workspace': typeof AppColdproCnCoilsWorkspaceRoute
   '/_app/coldpro/cncoils/component-library': typeof AppColdproCncoilsComponentLibraryRoute
   '/_app/coldpro/cncoils/project-completion': typeof AppColdproCncoilsProjectCompletionRoute
   '/_app/coldpro/cncoils/workspace': typeof AppColdproCncoilsWorkspaceRoute
@@ -406,6 +425,7 @@ export interface FileRouteTypes {
     | '/coldpro/assembly'
     | '/coldpro/audit'
     | '/coldpro/catalog'
+    | '/coldpro/cn-coils'
     | '/coldpro/cncoils'
     | '/coldpro/compare'
     | '/coldpro/components'
@@ -425,6 +445,7 @@ export interface FileRouteTypes {
     | '/coldpro/simulation'
     | '/coldpro/system-balance'
     | '/coldpro/'
+    | '/coldpro/cn-coils/workspace'
     | '/coldpro/cncoils/component-library'
     | '/coldpro/cncoils/project-completion'
     | '/coldpro/cncoils/workspace'
@@ -447,6 +468,7 @@ export interface FileRouteTypes {
     | '/coldpro/assembly'
     | '/coldpro/audit'
     | '/coldpro/catalog'
+    | '/coldpro/cn-coils'
     | '/coldpro/cncoils'
     | '/coldpro/compare'
     | '/coldpro/components'
@@ -466,6 +488,7 @@ export interface FileRouteTypes {
     | '/coldpro/simulation'
     | '/coldpro/system-balance'
     | '/coldpro'
+    | '/coldpro/cn-coils/workspace'
     | '/coldpro/cncoils/component-library'
     | '/coldpro/cncoils/project-completion'
     | '/coldpro/cncoils/workspace'
@@ -490,6 +513,7 @@ export interface FileRouteTypes {
     | '/_app/coldpro/assembly'
     | '/_app/coldpro/audit'
     | '/_app/coldpro/catalog'
+    | '/_app/coldpro/cn-coils'
     | '/_app/coldpro/cncoils'
     | '/_app/coldpro/compare'
     | '/_app/coldpro/components'
@@ -509,6 +533,7 @@ export interface FileRouteTypes {
     | '/_app/coldpro/simulation'
     | '/_app/coldpro/system-balance'
     | '/_app/coldpro/'
+    | '/_app/coldpro/cn-coils/workspace'
     | '/_app/coldpro/cncoils/component-library'
     | '/_app/coldpro/cncoils/project-completion'
     | '/_app/coldpro/cncoils/workspace'
@@ -708,6 +733,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproCncoilsRouteImport
       parentRoute: typeof AppColdproRoute
     }
+    '/_app/coldpro/cn-coils': {
+      id: '/_app/coldpro/cn-coils'
+      path: '/cn-coils'
+      fullPath: '/coldpro/cn-coils'
+      preLoaderRoute: typeof AppColdproCnCoilsRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
     '/_app/coldpro/catalog': {
       id: '/_app/coldpro/catalog'
       path: '/catalog'
@@ -792,6 +824,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproCncoilsComponentLibraryRouteImport
       parentRoute: typeof AppColdproCncoilsRoute
     }
+    '/_app/coldpro/cn-coils/workspace': {
+      id: '/_app/coldpro/cn-coils/workspace'
+      path: '/workspace'
+      fullPath: '/coldpro/cn-coils/workspace'
+      preLoaderRoute: typeof AppColdproCnCoilsWorkspaceRouteImport
+      parentRoute: typeof AppColdproCnCoilsRoute
+    }
     '/_app/coldpro/cncoils/systems/heat-pump': {
       id: '/_app/coldpro/cncoils/systems/heat-pump'
       path: '/systems/heat-pump'
@@ -822,6 +861,17 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AppColdproCnCoilsRouteChildren {
+  AppColdproCnCoilsWorkspaceRoute: typeof AppColdproCnCoilsWorkspaceRoute
+}
+
+const AppColdproCnCoilsRouteChildren: AppColdproCnCoilsRouteChildren = {
+  AppColdproCnCoilsWorkspaceRoute: AppColdproCnCoilsWorkspaceRoute,
+}
+
+const AppColdproCnCoilsRouteWithChildren =
+  AppColdproCnCoilsRoute._addFileChildren(AppColdproCnCoilsRouteChildren)
 
 interface AppColdproCncoilsRouteChildren {
   AppColdproCncoilsComponentLibraryRoute: typeof AppColdproCncoilsComponentLibraryRoute
@@ -854,6 +904,7 @@ interface AppColdproRouteChildren {
   AppColdproAssemblyRoute: typeof AppColdproAssemblyRoute
   AppColdproAuditRoute: typeof AppColdproAuditRoute
   AppColdproCatalogRoute: typeof AppColdproCatalogRoute
+  AppColdproCnCoilsRoute: typeof AppColdproCnCoilsRouteWithChildren
   AppColdproCncoilsRoute: typeof AppColdproCncoilsRouteWithChildren
   AppColdproCompareRoute: typeof AppColdproCompareRoute
   AppColdproComponentsRoute: typeof AppColdproComponentsRoute
@@ -885,6 +936,7 @@ const AppColdproRouteChildren: AppColdproRouteChildren = {
   AppColdproAssemblyRoute: AppColdproAssemblyRoute,
   AppColdproAuditRoute: AppColdproAuditRoute,
   AppColdproCatalogRoute: AppColdproCatalogRoute,
+  AppColdproCnCoilsRoute: AppColdproCnCoilsRouteWithChildren,
   AppColdproCncoilsRoute: AppColdproCncoilsRouteWithChildren,
   AppColdproCompareRoute: AppColdproCompareRoute,
   AppColdproComponentsRoute: AppColdproComponentsRoute,

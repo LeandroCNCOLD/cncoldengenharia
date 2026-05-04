@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TechnicalField } from "../ui/TechnicalField";
 import { RollEditor } from "./RollEditor";
 import { useComponentStore } from "../../stores/useComponentStore";
+import { useTranslation } from "@/i18n/useTranslation";
 import type {
   ProgressiveCoilInput,
   RollGeometry,
@@ -17,12 +18,17 @@ type CoilMaterial = "copper" | "aluminum" | "steel";
 const MATERIALS: CoilMaterial[] = ["copper", "aluminum", "steel"];
 const REFRIGERANTS = ["R404A", "R134a", "R410A", "R22", "R407C", "R448A"];
 
+function materialLabel(material: CoilMaterial, t: (path: string) => string): string {
+  return t(`components.materials.${material}`);
+}
+
 const num = (v: string): number => {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
 };
 
 export function CoilForm({ onSaved }: CoilFormProps) {
+  const { t } = useTranslation();
   const addCoil = useComponentStore((s) => s.addCoil);
   const [name, setName] = useState("");
   const [role, setRole] = useState<CoilRole>("evaporator");
@@ -86,7 +92,7 @@ export function CoilForm({ onSaved }: CoilFormProps) {
           value={name}
           onChange={(v) => setName(v)}
           type="text"
-          placeholder="Ex: Evap 600×800 2R"
+          placeholder={t("components.placeholders.coil")}
           required
         />
         <div>
@@ -187,7 +193,7 @@ export function CoilForm({ onSaved }: CoilFormProps) {
             >
               {MATERIALS.map((m) => (
                 <option key={m} value={m}>
-                  {m}
+                  {materialLabel(m, t)}
                 </option>
               ))}
             </select>
@@ -203,7 +209,7 @@ export function CoilForm({ onSaved }: CoilFormProps) {
             >
               {MATERIALS.map((m) => (
                 <option key={m} value={m}>
-                  {m}
+                  {materialLabel(m, t)}
                 </option>
               ))}
             </select>
@@ -213,7 +219,7 @@ export function CoilForm({ onSaved }: CoilFormProps) {
 
       <section>
         <h4 className="mb-3 text-sm font-semibold text-slate-700">
-          Configuração de rolls
+          {t("components.rollsConfig")}
         </h4>
         <RollEditor rolls={rolls} onChange={setRolls} />
       </section>

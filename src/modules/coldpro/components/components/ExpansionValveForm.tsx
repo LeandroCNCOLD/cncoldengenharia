@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "@/i18n/useTranslation";
 import { TechnicalField } from "../ui/TechnicalField";
 import { useComponentStore } from "../../stores/useComponentStore";
 import type { ExpansionValveSpec } from "@/modules/coldpro_v2";
@@ -14,6 +15,7 @@ const num = (v: string): number | undefined => {
 };
 
 export function ExpansionValveForm({ onSaved }: Props) {
+  const { t } = useTranslation();
   const addExpansionValve = useComponentStore((s) => s.addExpansionValve);
   const [name, setName] = useState("");
   const [cap, setCap] = useState<number | undefined>();
@@ -34,7 +36,7 @@ export function ExpansionValveForm({ onSaved }: Props) {
         value={name}
         onChange={(v) => setName(v)}
         type="text"
-        placeholder="Ex: TXV 5kW"
+        placeholder={t("components.placeholders.expansionValve")}
         required
       />
       <TechnicalField

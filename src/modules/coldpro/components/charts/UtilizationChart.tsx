@@ -10,6 +10,7 @@ import {
   Cell,
 } from "recharts";
 import type { ComponentUtilization } from "@/modules/coldpro_v2";
+import { useTranslation } from "@/i18n/useTranslation";
 
 interface UtilizationChartProps {
   utilization: ComponentUtilization;
@@ -22,17 +23,18 @@ function colorFor(value: number): string {
 }
 
 export function UtilizationChart({ utilization }: UtilizationChartProps) {
+  const { t } = useTranslation();
   const data: { name: string; value: number }[] = [
-    { name: "Compressor", value: utilization.compressor_pct },
-    { name: "Evaporador", value: utilization.evaporator_pct },
-    { name: "Condensador", value: utilization.condenser_pct },
+    { name: t("charts.compressor"), value: utilization.compressor_pct },
+    { name: t("charts.evaporator"), value: utilization.evaporator_pct },
+    { name: t("charts.condenser"), value: utilization.condenser_pct },
   ];
   if (utilization.evaporator_fan_pct !== undefined)
-    data.push({ name: "Vent. Evap.", value: utilization.evaporator_fan_pct });
+    data.push({ name: t("charts.evaporatorFan"), value: utilization.evaporator_fan_pct });
   if (utilization.condenser_fan_pct !== undefined)
-    data.push({ name: "Vent. Cond.", value: utilization.condenser_fan_pct });
+    data.push({ name: t("charts.condenserFan"), value: utilization.condenser_fan_pct });
   if (utilization.expansion_valve_pct !== undefined)
-    data.push({ name: "Válvula", value: utilization.expansion_valve_pct });
+    data.push({ name: t("charts.valve"), value: utilization.expansion_valve_pct });
 
   return (
     <ResponsiveContainer width="100%" height={220}>
@@ -41,7 +43,7 @@ export function UtilizationChart({ utilization }: UtilizationChartProps) {
         <XAxis dataKey="name" tick={{ fontSize: 11 }} />
         <YAxis unit="%" tick={{ fontSize: 11 }} domain={[0, 120]} />
         <Tooltip
-          formatter={(value) => [`${Number(value).toFixed(1)}%`, "Utilização"]}
+          formatter={(value) => [`${Number(value).toFixed(1)}%`, t("charts.utilization")]}
           contentStyle={{ fontSize: 12 }}
         />
         <ReferenceLine

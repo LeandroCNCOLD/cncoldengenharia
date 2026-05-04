@@ -1,114 +1,85 @@
-# Auditoria — Bibliotecas de Ventiladores (CN COILS)
+# Auditoria das bibliotecas de ventiladores CN COILS
 
-**Data:** 2026-05-02
-**Fonte:** `COEFF_COMPLETO_UNILAB_VAPCYC.zip`
-**Consolidado em:** `public/data/catalogs/unilabCoefficients.json` (+ `unilabCoefficients.report.json`)
-**Módulo:** `src/modules/unilab_simulator/` (rota atual: `/coldpro/unilab/workspace`)
+## 1. Arquivos verificados
 
-> `src/modules/coldpro_v2` e `src/modules/unilab_simulator/engine` **não foram alterados**.
+- `public/data/catalogs/unilabCoefficients.json`
+- `public/data/catalogs/unilabCoefficients.report.json`
 
----
+Ambos os arquivos existem e foram lidos diretamente durante a auditoria.
 
-## 1. Quais arquivos do ZIP foram instalados
+## 2. Totais encontrados
 
-Todos os 13 arquivos do ZIP foram inspecionados. As fontes principais foram consolidadas em **um único** JSON (`unilabCoefficients.json`) com o schema solicitado:
+| Grupo | Total |
+|---|---:|
+| `coilCorrections` | 114 |
+| `subcoolingCorrections` | 39 |
+| `fans.axial` | 1328 |
+| `fans.centrifugal` | 115 |
+| `correlations.coilDesigner` | 321 |
+| `correlations.heatExchanger` | 3285 |
 
-```jsonc
-{
-  "coilCorrections": [],          // 114 (placeholder removido)
-  "subcoolingCorrections": [],    // 39
-  "fans": {
-    "axial": [],                  // 1328
-    "centrifugal": []             // 115
-  },
-  "correlations": {
-    "coilDesigner": [],           // 321
-    "heatExchanger": []           // 3285
-  }
-}
-```
+## 3. Quantidade de axiais com curva X/Y válida
 
-| Origem (ZIP) | Destino (consolidado) | Registros |
-|---|---|---|
-| `coilCorrectionCoefficients_principal.json` | `coilCorrections` | 115 → **114** (1 placeholder removido) |
-| `coilSubcoolingCoefficients_principal.json` | `subcoolingCorrections` | 39 |
-| `fanAxial_type0_config1_principal.json` (curva X/Y) | `fans.axial` (`source: "curve"`) | 346 |
-| `fanAxial_type0_config2_principal.json` (polinômio) | `fans.axial` (`source: "polynomial"`) | 390 |
-| `fanAxial_type1_config1_principal.json` (curva X/Y) | `fans.axial` (`source: "curve"`) | 252 |
-| `fanAxial_type1_config2_principal.json` (polinômio) | `fans.axial` (`source: "polynomial"`) | 340 |
-| `fanCentrifugal_data_principal.json` | `fans.centrifugal` | 115 |
-| `vapcyc_coildesigner_correlations.json` | `correlations.coilDesigner` | 321 |
-| `vapcyc_hx_correlations.json` | `correlations.heatExchanger` | 3285 |
+- 580 ventiladores axiais possuem `curve.x[]` e `curve.y[]` com mesmo tamanho, mais de um ponto e valores não zerados.
 
-Arquivos do ZIP **não consolidados** (redundantes ou metadados):
-- `coilCorrectionCoefficients_backup.json`, `coilCorrectionCoefficients_fluids.json` — duplicatas do principal
-- `coilSubcoolingCoefficients_fluids.json` — duplicata
-- `fanCentrifugal_curves_principal.json` — pontos brutos (Vet1..Vet43); avaliação de curva centrífuga foi diferida nesta etapa
-- `index.json` — metadados
+## 4. Quantidade de axiais com polinômio válido
 
-## 2. Totais finais
+- 149 ventiladores axiais possuem `polynomial.coefficients[]` com pelo menos um coeficiente diferente de zero.
 
-| Categoria | Esperado | Obtido |
-|---|---|---|
-| `coilCorrections` | 114 | **114** ✅ |
-| `subcoolingCorrections` | 39 | **39** ✅ |
-| `fans.axial` | 1328 | **1328** ✅ |
-| `fans.centrifugal` | 115 | **115** ✅ |
-| `correlations.coilDesigner` | 321 | **321** ✅ |
-| `correlations.heatExchanger` | 3285 | **3285** ✅ |
+## 5. Quantidade de axiais sem curva utilizável
 
-## 3. Auditoria — ventiladores axiais com curva X/Y
+- 599 ventiladores axiais não possuem curva X/Y válida nem polinômio utilizável.
+- Esses registros não foram removidos do JSON.
+- Na avaliação, retornam warning e método seguro (`range_only` ou `unavailable`).
 
-- Total com curva: **598**
-- **Utilizáveis** (algum X≠0 e algum Y≠0): **580**
-- Inutilizáveis (curva totalmente zerada): 18
+## 6. Quantidade de centrífugos com range válido
 
-Critério aplicado em `isAxialCurveUsable()`:
-```ts
-fan.curve.x.some(v => v !== 0) && fan.curve.y.some(v => v !== 0)
-```
+- 115 ventiladores centrífugos possuem `capacityRange_m3h.max > 0` e `pressureRange_Pa.max > 0`.
+- O join por `CodVentRif` foi preservado no arquivo consolidado via `rawCurve`.
 
-## 4. Auditoria — ventiladores axiais com polinômio
+## 7. Limitações ainda existentes
 
-- Total com polinômio: **730**
-- **Utilizáveis** (algum Coeff_n ≠ 0): **149**
-- **Inutilizáveis** (polinômio zerado): **581**
+- As curvas centrífugas (`rawCurve` com `Vet1...Vet43`) ainda não são interpretadas nesta etapa.
+- Para centrífugos, a avaliação retorna:
+  - `pressure_Pa: null`
+  - `method: "range_only"`
+  - warning: `Curva centrífuga ainda não interpretada nesta etapa.`
+- Alguns ventiladores axiais possuem apenas faixa operacional ou dados zerados; nesses casos não há extrapolação nem cálculo inventado.
 
-Critério aplicado em `isAxialPolynomialUsable()`:
-```ts
-fan.polyCoefficients.some(c => c !== 0)
-```
+## 8. Correções feitas
 
-> Polinômios zerados foram **mantidos** no JSON (origem fiel ao ZIP) mas **rejeitados em runtime** por `evaluateFanCurve()`. O dropdown do AirSidePanel só lista ventiladores utilizáveis (`listUsableAxialFans()`).
+- Adicionadas funções ao service:
+  - `getFanById`
+  - `evaluateFanCurve`
+  - interpolação linear segura para curvas X/Y
+- Regras implementadas:
+  - curva X/Y válida tem prioridade
+  - polinômio só é usado quando há pelo menos um coeficiente não zero
+  - vazão fora da faixa é limitada com warning em português
+  - centrífugos não interpretam `rawCurve` nesta etapa
+  - ventilador inexistente retorna `method: "unavailable"`
+- Criado `AirSidePanel.tsx`:
+  - dropdown pesquisável com ventiladores reais
+  - exibição de modelo, tipo, faixa, potência, corrente e rotação
+  - seleção preenche vazão nominal estimada
+  - vazão permanece editável
+- Atualizado `ResultPanel.tsx` com card `Ventilador`.
 
-## 5. Quantidade de centrífugos com range válido
+## 9. Resultado dos testes
 
-- Total: 115
-- **Com range operacional válido** (`MinRound > 0` e `MaxRound > MinRound`): **115** ✅
+Testes executados contra `public/data/catalogs/unilabCoefficients.json`:
 
-Avaliação completa de curva centrífuga (interpolação dos pontos `Vet1..Vet43`) **não foi implementada** nesta etapa, conforme escopo.
+1. Axial com curva X/Y válida: OK (`method: "curve"`, pressão finita)
+2. Axial com vazão abaixo da faixa: OK (vazão limitada com warning)
+3. Axial com vazão acima da faixa: OK (vazão limitada com warning)
+4. Axial com polinômio zerado: OK (polinômio zerado não foi usado; curva válida teve prioridade)
+5. Axial sem curva utilizável: OK (`method: "range_only"` com warning)
+6. Centrífugo com range válido: OK (`method: "range_only"` com warning de curva ainda não interpretada)
+7. Ventilador inexistente: OK (`method: "unavailable"` com warning)
+8. Simulação sem ventilador selecionado: OK (UI informa vazão manual)
 
-## 6. Limitações ainda existentes
+Nenhum caso gerou `NaN`, `Infinity` ou erro de execução no teste do service.
 
-1. Centrífugos: avaliação só por range. Curva detalhada será necessária para correlacionar pressão estática × vazão.
-2. `coilDesigner`/`heatExchanger`: dados textuais armazenados; ainda não consumidos por nenhum motor.
-3. 18 axiais com curva e 581 axiais com polinômio são reportados mas não selecionáveis (dados zerados na fonte).
+## 10. Status final
 
-## 7. Correções feitas
-
-- Substituição da fonte inexistente `/data/catalogs/fans_clean.json` (404 silencioso) pela consolidada `/data/catalogs/unilabCoefficients.json` no `AirSidePanel`.
-- Dropdown de ventiladores agora filtra somente os **utilizáveis**.
-- Adicionado cálculo de pressão estática em runtime via `evaluateFanCurve()` (linear-piecewise para curva, polinômio de 4ª ordem para `Coeff1..Coeff5`).
-- Painel de resultado mostra status da biblioteca (utilizáveis vs zerados).
-
-## 8. Resultado dos testes
-
-- `npx tsc --noEmit`: **OK** (zero erros)
-- `npm run build`: **OK**
-- `coldpro_v2`: **intacto**
-- `engine` antigo: **intacto**
-- Rota `/coldpro/unilab/workspace`: continua funcionando
-
-## 9. Status final
-
-**OK** — biblioteca de ventiladores instalada, normalizada, auditada e avaliável via `evaluateFanCurve()`.
+OK
