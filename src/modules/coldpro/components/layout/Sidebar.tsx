@@ -56,6 +56,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Simulação",
     items: [
       { to: "/coldpro/projects", label: "Meus Projetos", Icon: FolderOpen, badge: "projects" },
+      { to: "/coldpro/compare", label: "Comparar", Icon: Scale },
       { to: "/coldpro/cncoils", label: "CN COILS", Icon: Gauge },
       {
         to: "/coldpro/cncoils/workspace",

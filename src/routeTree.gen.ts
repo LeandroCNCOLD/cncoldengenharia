@@ -31,6 +31,7 @@ import { Route as AppColdproExportRouteImport } from './routes/_app/coldpro.expo
 import { Route as AppColdproCycleRouteImport } from './routes/_app/coldpro.cycle'
 import { Route as AppColdproCurveRouteImport } from './routes/_app/coldpro.curve'
 import { Route as AppColdproComponentsRouteImport } from './routes/_app/coldpro.components'
+import { Route as AppColdproCompareRouteImport } from './routes/_app/coldpro.compare'
 import { Route as AppColdproCncoilsRouteImport } from './routes/_app/coldpro.cncoils'
 import { Route as AppColdproCatalogRouteImport } from './routes/_app/coldpro.catalog'
 import { Route as AppColdproAuditRouteImport } from './routes/_app/coldpro.audit'
@@ -156,6 +157,11 @@ const AppColdproComponentsRoute = AppColdproComponentsRouteImport.update({
   path: '/components',
   getParentRoute: () => AppColdproRoute,
 } as any)
+const AppColdproCompareRoute = AppColdproCompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
+  getParentRoute: () => AppColdproRoute,
+} as any)
 const AppColdproCncoilsRoute = AppColdproCncoilsRouteImport.update({
   id: '/cncoils',
   path: '/cncoils',
@@ -251,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/coldpro/audit': typeof AppColdproAuditRoute
   '/coldpro/catalog': typeof AppColdproCatalogRoute
   '/coldpro/cncoils': typeof AppColdproCncoilsRouteWithChildren
+  '/coldpro/compare': typeof AppColdproCompareRoute
   '/coldpro/components': typeof AppColdproComponentsRoute
   '/coldpro/curve': typeof AppColdproCurveRoute
   '/coldpro/cycle': typeof AppColdproCycleRoute
@@ -288,6 +295,7 @@ export interface FileRoutesByTo {
   '/coldpro/audit': typeof AppColdproAuditRoute
   '/coldpro/catalog': typeof AppColdproCatalogRoute
   '/coldpro/cncoils': typeof AppColdproCncoilsRouteWithChildren
+  '/coldpro/compare': typeof AppColdproCompareRoute
   '/coldpro/components': typeof AppColdproComponentsRoute
   '/coldpro/curve': typeof AppColdproCurveRoute
   '/coldpro/cycle': typeof AppColdproCycleRoute
@@ -328,6 +336,7 @@ export interface FileRoutesById {
   '/_app/coldpro/audit': typeof AppColdproAuditRoute
   '/_app/coldpro/catalog': typeof AppColdproCatalogRoute
   '/_app/coldpro/cncoils': typeof AppColdproCncoilsRouteWithChildren
+  '/_app/coldpro/compare': typeof AppColdproCompareRoute
   '/_app/coldpro/components': typeof AppColdproComponentsRoute
   '/_app/coldpro/curve': typeof AppColdproCurveRoute
   '/_app/coldpro/cycle': typeof AppColdproCycleRoute
@@ -368,6 +377,7 @@ export interface FileRouteTypes {
     | '/coldpro/audit'
     | '/coldpro/catalog'
     | '/coldpro/cncoils'
+    | '/coldpro/compare'
     | '/coldpro/components'
     | '/coldpro/curve'
     | '/coldpro/cycle'
@@ -405,6 +415,7 @@ export interface FileRouteTypes {
     | '/coldpro/audit'
     | '/coldpro/catalog'
     | '/coldpro/cncoils'
+    | '/coldpro/compare'
     | '/coldpro/components'
     | '/coldpro/curve'
     | '/coldpro/cycle'
@@ -444,6 +455,7 @@ export interface FileRouteTypes {
     | '/_app/coldpro/audit'
     | '/_app/coldpro/catalog'
     | '/_app/coldpro/cncoils'
+    | '/_app/coldpro/compare'
     | '/_app/coldpro/components'
     | '/_app/coldpro/curve'
     | '/_app/coldpro/cycle'
@@ -636,6 +648,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproComponentsRouteImport
       parentRoute: typeof AppColdproRoute
     }
+    '/_app/coldpro/compare': {
+      id: '/_app/coldpro/compare'
+      path: '/compare'
+      fullPath: '/coldpro/compare'
+      preLoaderRoute: typeof AppColdproCompareRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
     '/_app/coldpro/cncoils': {
       id: '/_app/coldpro/cncoils'
       path: '/cncoils'
@@ -770,6 +789,7 @@ interface AppColdproRouteChildren {
   AppColdproAuditRoute: typeof AppColdproAuditRoute
   AppColdproCatalogRoute: typeof AppColdproCatalogRoute
   AppColdproCncoilsRoute: typeof AppColdproCncoilsRouteWithChildren
+  AppColdproCompareRoute: typeof AppColdproCompareRoute
   AppColdproComponentsRoute: typeof AppColdproComponentsRoute
   AppColdproCurveRoute: typeof AppColdproCurveRoute
   AppColdproCycleRoute: typeof AppColdproCycleRoute
@@ -800,6 +820,7 @@ const AppColdproRouteChildren: AppColdproRouteChildren = {
   AppColdproAuditRoute: AppColdproAuditRoute,
   AppColdproCatalogRoute: AppColdproCatalogRoute,
   AppColdproCncoilsRoute: AppColdproCncoilsRouteWithChildren,
+  AppColdproCompareRoute: AppColdproCompareRoute,
   AppColdproComponentsRoute: AppColdproComponentsRoute,
   AppColdproCurveRoute: AppColdproCurveRoute,
   AppColdproCycleRoute: AppColdproCycleRoute,
