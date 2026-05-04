@@ -227,11 +227,24 @@ export function CondenserWorkspacePage() {
             Refrigerante
           </AccordionTrigger>
           <AccordionContent className="space-y-2">
-            <TextField
-              label="ID do refrigerante"
-              value={syncedInputs.refrigerant}
-              onChange={(refrigerant) => updateInputs({ refrigerant })}
-            />
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Refrigerante</Label>
+              <Select
+                value={syncedInputs.refrigerant}
+                onValueChange={(refrigerant) => updateInputs({ refrigerant })}
+              >
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {REFRIGERANT_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt} className="text-xs">
+                      {opt.replace("REF_", "")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </AccordionContent>
         </AccordionItem>
 
@@ -246,10 +259,18 @@ export function CondenserWorkspacePage() {
               onChange={(airFlowM3H) => updateInputs({ airFlowM3H })}
             />
             <div className="rounded border border-border bg-muted/40 p-2 text-[10px] text-muted-foreground">
-              <div>Geometria: {syncedInputs.geometryId || "selecione na barra inferior"}</div>
               <div>Ventiladores: {syncedInputs.fanCount}</div>
               <div>Fan ID: {syncedInputs.fanId || "—"}</div>
             </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="geometry">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">
+            Geometria
+          </AccordionTrigger>
+          <AccordionContent>
+            <GeometryBottomBar />
           </AccordionContent>
         </AccordionItem>
 
