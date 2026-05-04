@@ -309,6 +309,3 @@ function NumberField({
   );
 }
 
-function _unused(_: WaterCondenserResult) {
-  return null;
-}
