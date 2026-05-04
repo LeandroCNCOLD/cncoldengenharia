@@ -24,6 +24,7 @@ import { UncertaintyPanel, UncertaintyBadge } from "../components/UncertaintyBad
 import { CompressorPickerModal } from "../components/CompressorPickerModal";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { EnrichedWarningsPanel } from "../components/EnrichedWarningsPanel";
+import { DrawingTab } from "../components/drawing/DrawingTab";
 import { WorkspaceAIChat } from "../components/WorkspaceAIChat";
 import { enrichWarnings } from "../utils/warningEnricher";
 import type { AIContext } from "../components/WorkspaceAIChat";
@@ -540,6 +541,15 @@ export function EvaporatorUnifiedWorkspacePage() {
               onExportPdf={handleExportPdf}
               isExportingPdf={isExportingPdf}
               onOpenAI={openAI}
+              geomHeight={geomHeight}
+              geomWidth={geomWidth}
+              geomDepth={geomDepth}
+              rows={rows}
+              tubesPerRow={tubesPerRow}
+              tubeDiam={tubeDiam}
+              finPitch={finPitch}
+              circuits={circuits}
+              refrigerantId={refrigerantId}
             />
           )}
           </div>
@@ -622,6 +632,15 @@ function UnifiedTabs({
   onExportPdf,
   isExportingPdf,
   onOpenAI,
+  geomHeight,
+  geomWidth,
+  geomDepth,
+  rows,
+  tubesPerRow,
+  tubeDiam,
+  finPitch,
+  circuits,
+  refrigerantId,
 }: {
   config: CycleSystemConfig;
   cycleResult: CycleResult | null;
@@ -630,6 +649,15 @@ function UnifiedTabs({
   onExportPdf: () => void;
   isExportingPdf: boolean;
   onOpenAI: (tabName: string) => void;
+  geomHeight: number;
+  geomWidth: number;
+  geomDepth: number;
+  rows: number;
+  tubesPerRow: number;
+  tubeDiam: number;
+  finPitch: number;
+  circuits: number;
+  refrigerantId: string;
 }) {
   const enrichedWarnings = useMemo(
     () => (cycleResult ? enrichWarnings(cycleResult.warnings) : []),
@@ -674,6 +702,7 @@ function UnifiedTabs({
         <TabsTrigger value="uncertainty" className="shrink-0 text-xs">📐 Incerteza</TabsTrigger>
         <TabsTrigger value="optimization" className="shrink-0 text-xs">⚙️ Otimização</TabsTrigger>
         <TabsTrigger value="series" className="shrink-0 text-xs">🔗 Série</TabsTrigger>
+        <TabsTrigger value="drawing" className="shrink-0 text-xs font-semibold data-[state=active]:bg-blue-700 data-[state=active]:text-white">🏗️ Desenho</TabsTrigger>
         <TabsTrigger value="report" className="shrink-0 text-xs">📄 Relatório</TabsTrigger>
       </TabsList>
 
@@ -806,6 +835,21 @@ function UnifiedTabs({
         </div>
       </TabsContent>
 
+      <TabsContent value="drawing" className="mt-3">
+        <DrawingTab
+          heightMm={geomHeight}
+          widthMm={geomWidth}
+          depthMm={geomDepth}
+          rows={rows}
+          tubesPerRow={tubesPerRow}
+          tubeOuterDiamMm={tubeDiam}
+          finPitchMm={finPitch}
+          circuits={circuits}
+          refrigerantId={refrigerantId}
+          cycleResult={cycleResult}
+          projectName={`Evaporador DX — ${refrigerantId}`}
+        />
+      </TabsContent>
       <TabsContent value="report" className="mt-3">
         <ReportTab
           config={config}
