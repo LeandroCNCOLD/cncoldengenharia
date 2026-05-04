@@ -1,1 +1,4 @@
 project_id = "tqdrbfvtvmrtontibvzg"
+
+[functions.cn-coils-ai-chat]
+verify_jwt = false
