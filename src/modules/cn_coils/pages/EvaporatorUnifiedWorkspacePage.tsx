@@ -804,6 +804,12 @@ export function EvaporatorUnifiedWorkspacePage() {
         open={compressorPickerOpen}
         onClose={() => setCompressorPickerOpen(false)}
       />
+
+      <PostSaveNextStepDialog
+        open={nextStepOpen}
+        onOpenChange={setNextStepOpen}
+        next="condenser"
+      />
     </WorkspaceLayout>
   );
 }
