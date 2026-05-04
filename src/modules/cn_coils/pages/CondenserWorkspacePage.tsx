@@ -414,9 +414,6 @@ export function CondenserWorkspacePage() {
             <EmptyResults />
           )}
 
-          <div>
-            <GeometryBottomBar />
-          </div>
         </div>
 
         <ActionBar
