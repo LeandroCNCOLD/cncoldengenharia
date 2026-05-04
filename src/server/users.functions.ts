@@ -1,8 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { attachSupabaseAuth } from "@/integrations/supabase/attach-auth";
+import { requireAuthOrDev } from "./auth-or-dev";
+
 import type { Database } from "@/integrations/supabase/types";
 
 type AppRole = "admin" | "engenheiro" | "gerente" | "visualizador";
@@ -27,7 +27,7 @@ async function assertAdmin(userId: string) {
 }
 
 export const listUsers = createServerFn({ method: "GET" })
-  .middleware([attachSupabaseAuth, requireSupabaseAuth])
+  .middleware([requireAuthOrDev])
   .handler(async ({ context }) => {
     await assertAdmin(context.userId);
     const admin = getAdmin();
@@ -48,7 +48,7 @@ export const listUsers = createServerFn({ method: "GET" })
   });
 
 export const createUser = createServerFn({ method: "POST" })
-  .middleware([attachSupabaseAuth, requireSupabaseAuth])
+  .middleware([requireAuthOrDev])
   .inputValidator((d) =>
     z
       .object({
@@ -77,7 +77,7 @@ export const createUser = createServerFn({ method: "POST" })
   });
 
 export const updateUserRole = createServerFn({ method: "POST" })
-  .middleware([attachSupabaseAuth, requireSupabaseAuth])
+  .middleware([requireAuthOrDev])
   .inputValidator((d) =>
     z
       .object({
@@ -98,7 +98,7 @@ export const updateUserRole = createServerFn({ method: "POST" })
   });
 
 export const setUserActive = createServerFn({ method: "POST" })
-  .middleware([attachSupabaseAuth, requireSupabaseAuth])
+  .middleware([requireAuthOrDev])
   .inputValidator((d) =>
     z.object({ user_id: z.string().uuid(), is_active: z.boolean() }).parse(d),
   )
@@ -110,7 +110,7 @@ export const setUserActive = createServerFn({ method: "POST" })
   });
 
 export const deleteUser = createServerFn({ method: "POST" })
-  .middleware([attachSupabaseAuth, requireSupabaseAuth])
+  .middleware([requireAuthOrDev])
   .inputValidator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
@@ -121,7 +121,7 @@ export const deleteUser = createServerFn({ method: "POST" })
   });
 
 export const updateModulePermission = createServerFn({ method: "POST" })
-  .middleware([attachSupabaseAuth, requireSupabaseAuth])
+  .middleware([requireAuthOrDev])
   .inputValidator((d) =>
     z
       .object({
