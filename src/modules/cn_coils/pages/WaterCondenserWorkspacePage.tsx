@@ -200,12 +200,15 @@ export function WaterCondenserWorkspacePage() {
     >
       <ProjectHeaderBar workspaceType="component_workspace" />
       <div className="flex flex-col gap-4 p-4">
-        <Tabs defaultValue="results">
-          <TabsList>
-            <TabsTrigger value="results">📋 Resultados</TabsTrigger>
-            <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
-            <TabsTrigger value="sizing">📐 Dimensionamento</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <TabsList>
+              <TabsTrigger value="results">📋 Resultados</TabsTrigger>
+              <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
+              <TabsTrigger value="sizing">📐 Dimensionamento</TabsTrigger>
+            </TabsList>
+            <WorkspaceAIButton onClick={() => setAiOpen(true)} />
+          </div>
 
           <TabsContent value="results" className="mt-3">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
