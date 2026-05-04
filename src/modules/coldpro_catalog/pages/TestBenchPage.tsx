@@ -1,73 +1,39 @@
 import { useMemo, useState } from "react";
 import { Link, useParams, useNavigate } from "@tanstack/react-router";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Fan, Loader2, Play, Snowflake, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, AlertTriangle, CheckCircle2, Play, Loader2 } from "lucide-react";
-import { catalogRepository } from "../services/catalogRepository";
-import { buildMotorComponentsFromCatalog } from "../adapters/sessionToMotorInputAdapter";
-import { runCycleThermo } from "@/modules/cn_coils/engines/cycle/cycleEngine";
-import type { CycleThermoResult } from "@/modules/cn_coils/engines/cycle/cycleTypes";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EnvelopeStatusCard } from "@/modules/cn_coils/components/EnvelopeStatusCard";
+import { SystemEquilibriumChart } from "@/modules/cn_coils/components/SystemEquilibriumChart";
+import { SystemEquilibriumResultsTab } from "@/modules/cn_coils/components/SystemEquilibriumResultsTab";
+import { coilEnvelopeToEquilibriumPoints, useSystemEquilibrium } from "@/modules/cn_coils/hooks/useSystemEquilibrium";
 import { useCoilEnvelopeStore } from "@/modules/cn_coils/store/useCoilEnvelopeStore";
-
-const KCALH_PER_W = 1 / 1.163;
+import { catalogRepository } from "../services/catalogRepository";
 
 function fmt(v: number | undefined | null, d = 2): string {
   if (v === undefined || v === null || Number.isNaN(v)) return "—";
   return v.toLocaleString("pt-BR", { maximumFractionDigits: d });
 }
 
-type BottleneckKind = "none" | "compressor";
-type BenchStatus = "approved" | "attention" | "rejected" | "unavailable";
-
-interface EnergyBalanceResult {
-  thermo: CycleThermoResult;
-  mDotKgS: number;
-  QMotorW: number;
-  WCompW: number;
-  QCondW: number;
-  COPMotor: number;
-  deviationPct: number | null;
-  status: BenchStatus;
-  bottleneck: BottleneckKind;
-}
-
-function bottleneckLabel(kind: BottleneckKind): string {
-  switch (kind) {
-    case "none": return "Nenhum";
-    case "compressor": return "Compressor";
-  }
-}
-
-function statusLabel(status: BenchStatus): string {
-  switch (status) {
-    case "approved": return "Aprovado";
-    case "attention": return "Atenção";
-    case "rejected": return "Rejeitado";
-    case "unavailable": return "Sem referência";
-  }
-}
-
 export default function TestBenchPage() {
   const { equipmentId } = useParams({ from: "/_app/coldpro/test-bench/$equipmentId" });
   const navigate = useNavigate();
+  const equipment = useMemo(() => catalogRepository.getById(equipmentId), [equipmentId]);
   const evaporatorEnvelope = useCoilEnvelopeStore((s) => s.envelopes.evaporator_dx);
-  const condenserEnvelope = useCoilEnvelopeStore(
-    (s) => s.envelopes.condenser_air ?? s.condenserEnvelope,
-  );
+  const condenserEnvelope = useCoilEnvelopeStore((s) => s.envelopes.condenser_air ?? s.condenserEnvelope);
   const compressorEnvelope = useCoilEnvelopeStore((s) => s.compressorEnvelope);
   const compressorModel = useCoilEnvelopeStore((s) => s.compressorModel);
-  const equipment = useMemo(
-    () => catalogRepository.getById(equipmentId),
-    [equipmentId],
-  );
 
-  const [hasRun, setHasRun] = useState(false);
-  const [adapterWarnings, setAdapterWarnings] = useState<string[]>([]);
-  const [running, setRunning] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<EnergyBalanceResult | null>(null);
+  const [benchInputs, setBenchInputs] = useState({
+    Tamb_C: 35,
+    Tsuperheating_K: 7,
+    Tsubcooling_K: 5,
+  });
+  const { result, isCalculating, error, run } = useSystemEquilibrium();
 
   if (!equipment) {
     return (
@@ -84,85 +50,23 @@ export default function TestBenchPage() {
     );
   }
 
-  const refrigerantId = equipment.refrigerante !== "unknown" ? equipment.refrigerante : "R404A";
-  const Te_C = equipment.tempEvaporacaoC ?? -10;
-  const Tc_C = equipment.tempCondensacaoC ?? 45;
-  const Q_catalog_W = equipment.capacidadeFrigorificaKcalH
-    ? equipment.capacidadeFrigorificaKcalH / KCALH_PER_W * 1 // kcal/h -> W via /0.86
-    : undefined;
-  const W_catalog_W = (equipment.potenciaCompressorKw ?? equipment.potenciaEletricaKw)
-    ? (equipment.potenciaCompressorKw ?? equipment.potenciaEletricaKw)! * 1000
-    : undefined;
-  const COP_catalog =
-    equipment.cop ??
-    (Q_catalog_W && W_catalog_W && W_catalog_W > 0 ? Q_catalog_W / W_catalog_W : undefined);
-
-  // Capture adapter warnings (non-blocking — only used to populate the Alerts tab).
-  const collectAdapterWarnings = () => {
-    try {
-      const motor = buildMotorComponentsFromCatalog({
-        compressor: equipment,
-        condenser: equipment,
-        evaporator: equipment,
-      });
-      setAdapterWarnings(motor.warnings ?? []);
-    } catch {
-      setAdapterWarnings([]);
-    }
-  };
-
-  const handleRun = async () => {
-    setHasRun(true);
-    setRunning(true);
-    setError(null);
-    setResult(null);
-    collectAdapterWarnings();
-    try {
-      const thermo = await runCycleThermo({
-        refrigerantId,
-        Te_C,
-        Tc_C,
-        superheatK: 7,
-        subcoolingK: 5,
-      });
-      const mDotKgS = Q_catalog_W && thermo.qEvap_kJkg > 0
-        ? Q_catalog_W / (thermo.qEvap_kJkg * 1000)
-        : 0;
-      const COPMotor = thermo.COP;
-      const deviationPct = COP_catalog && COP_catalog > 0
-        ? Math.abs(COPMotor - COP_catalog) / COP_catalog * 100
-        : null;
-      const status: BenchStatus = deviationPct === null
-        ? "unavailable"
-        : deviationPct <= 5
-          ? "approved"
-          : deviationPct <= 15
-            ? "attention"
-            : "rejected";
-
-      setResult({
-        thermo,
-        mDotKgS,
-        QMotorW: mDotKgS * thermo.qEvap_kJkg * 1000,
-        WCompW: mDotKgS * thermo.wComp_kJkg * 1000,
-        QCondW: mDotKgS * thermo.qCond_kJkg * 1000,
-        COPMotor,
-        deviationPct,
-        status,
-        bottleneck: status === "attention" || status === "rejected" ? "compressor" : "none",
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro desconhecido no cálculo termodinâmico");
-    } finally {
-      setRunning(false);
-    }
-  };
-
-  const allAlerts = [
-    ...(result?.thermo.warnings ?? []).map((w) => ({ kind: "warning" as const, msg: w })),
-    ...adapterWarnings.map((w) => ({ kind: "adapter" as const, msg: w })),
-  ];
   const canRunTest = Boolean(evaporatorEnvelope && condenserEnvelope && compressorEnvelope);
+
+  const runIntegratedTest = () => {
+    if (!evaporatorEnvelope || !condenserEnvelope || !compressorEnvelope) return;
+    run({
+      ...benchInputs,
+      evaporatorEnvelope: coilEnvelopeToEquilibriumPoints(evaporatorEnvelope),
+      condenserEnvelope: Array.isArray(condenserEnvelope) ? condenserEnvelope : [],
+      compressorEnvelope,
+    });
+  };
+
+  const goWorkspace = (type: "evaporator_dx" | "condenser_air" | "compressor") =>
+    navigate({
+      to: "/coldpro/cncoils/workspace",
+      search: { type } as never,
+    });
 
   return (
     <div className="space-y-4 p-4 lg:p-6">
@@ -182,222 +86,172 @@ export default function TestBenchPage() {
             {equipment.compressorModelo && (
               <Badge variant="outline" className="font-mono">{equipment.compressorModelo}</Badge>
             )}
-            <Badge variant="outline">{refrigerantId}</Badge>
+            <Badge variant="outline">{equipment.refrigerante}</Badge>
             <Badge variant="outline">{equipment.application}</Badge>
-            <Badge variant="outline">Te {fmt(Te_C, 1)} °C</Badge>
-            <Badge variant="outline">Tc {fmt(Tc_C, 1)} °C</Badge>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            onClick={() =>
-              navigate({
-                to: "/coldpro/cncoils/workspace",
-                search: { type: "compressor" } as never,
-              })
-            }
-          >
-            → Simular Compressor
-          </Button>
-          <Button onClick={handleRun} disabled={running || !canRunTest}>
-            {running ? (
-              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Calculando…</>
-            ) : (
-              <><Play className="mr-2 h-4 w-4" /> Executar Teste Integrado</>
-            )}
-          </Button>
-        </div>
+        <Button onClick={runIntegratedTest} disabled={isCalculating || !canRunTest}>
+          {isCalculating ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Calculando equilíbrio…</>
+          ) : (
+            <><Play className="mr-2 h-4 w-4" /> Executar Teste Integrado</>
+          )}
+        </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Status dos envelopes da bancada</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-2 text-sm md:grid-cols-3">
-          <EnvelopeStatus
-            label="Evaporador"
-            ready={Boolean(evaporatorEnvelope)}
-            detail={evaporatorEnvelope ? "Envelope salvo" : "Aguardando simulação"}
-          />
-          <EnvelopeStatus
-            label="Condensador"
-            ready={Boolean(condenserEnvelope)}
-            detail={condenserEnvelope ? "Envelope salvo" : "Aguardando simulação"}
-          />
-          <EnvelopeStatus
-            label="Compressor"
-            ready={Boolean(compressorEnvelope)}
-            detail={
-              compressorEnvelope
-                ? `Envelope salvo${compressorModel ? ` (${compressorModel})` : ""}`
-                : "Aguardando simulação"
-            }
-          />
-        </CardContent>
-      </Card>
-
-      {!canRunTest && (
-        <Card className="border-amber-300 bg-amber-50">
-          <CardContent className="p-3 text-sm text-amber-900">
-            Salve os envelopes de evaporador, condensador e compressor para habilitar o teste integrado.
-          </CardContent>
-        </Card>
-      )}
-
-      <Tabs defaultValue="dx" className="w-full">
+      <Tabs defaultValue="config" className="w-full">
         <TabsList>
-          <TabsTrigger value="dx">Sistema DX</TabsTrigger>
-          <TabsTrigger value="alerts">
-            Alertas {allAlerts.length > 0 && (
-              <span className="ml-2 rounded-full bg-amber-100 px-1.5 text-[10px] text-amber-800">
-                {allAlerts.length}
-              </span>
-            )}
-          </TabsTrigger>
+          <TabsTrigger value="config">📋 Configuração</TabsTrigger>
+          <TabsTrigger value="results" disabled={!result}>📊 Resultados</TabsTrigger>
+          <TabsTrigger value="chart" disabled={!result}>📈 Gráfico Q×Te</TabsTrigger>
+          <TabsTrigger value="convergence" disabled={!result}>🔄 Convergência</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="dx" className="space-y-4">
-          {!hasRun && !error && (
-            <Card>
-              <CardContent className="p-6 text-center text-sm text-muted-foreground">
-                Clique em <strong>Executar testes</strong> para validar por balanço de energia
-                a partir das condições nominais do catálogo.
+        <TabsContent value="config" className="space-y-4">
+          <div className="grid gap-3 md:grid-cols-3">
+            <EnvelopeStatusCard
+              label="Evaporador"
+              icon={<Snowflake className="h-4 w-4" />}
+              saved={Boolean(evaporatorEnvelope)}
+              model={evaporatorEnvelope?.geometryId ?? evaporatorEnvelope?.equipmentId}
+              pointCount={evaporatorEnvelope?.envelope.length}
+              onReconfigure={() => goWorkspace("evaporator_dx")}
+            />
+            <EnvelopeStatusCard
+              label="Condensador"
+              icon={<Fan className="h-4 w-4" />}
+              saved={Boolean(condenserEnvelope)}
+              model="condenser_air"
+              pointCount={Array.isArray(condenserEnvelope) ? condenserEnvelope.length : undefined}
+              onReconfigure={() => goWorkspace("condenser_air")}
+            />
+            <EnvelopeStatusCard
+              label="Compressor"
+              icon={<Zap className="h-4 w-4" />}
+              saved={Boolean(compressorEnvelope)}
+              model={compressorModel}
+              pointCount={compressorEnvelope?.length}
+              onReconfigure={() => goWorkspace("compressor")}
+            />
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Inputs da bancada integrada</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3 md:grid-cols-3">
+              <NumberField
+                label="Temperatura ambiente (°C)"
+                value={benchInputs.Tamb_C}
+                onChange={(Tamb_C) => setBenchInputs((s) => ({ ...s, Tamb_C }))}
+              />
+              <NumberField
+                label="Superaquecimento (K)"
+                value={benchInputs.Tsuperheating_K}
+                onChange={(Tsuperheating_K) => setBenchInputs((s) => ({ ...s, Tsuperheating_K }))}
+              />
+              <NumberField
+                label="Subresfriamento (K)"
+                value={benchInputs.Tsubcooling_K}
+                onChange={(Tsubcooling_K) => setBenchInputs((s) => ({ ...s, Tsubcooling_K }))}
+              />
+            </CardContent>
+          </Card>
+
+          {!canRunTest && (
+            <Card className="border-amber-300 bg-amber-50">
+              <CardContent className="p-3 text-sm text-amber-900">
+                Salve os envelopes de evaporador, condensador e compressor para habilitar o teste integrado.
               </CardContent>
             </Card>
           )}
           {error && (
             <Card className="border-destructive/40 bg-destructive/5">
-              <CardContent className="p-4 text-sm text-destructive">{error}</CardContent>
+              <CardContent className="p-3 text-sm text-destructive">{error}</CardContent>
             </Card>
-          )}
-          {result && (
-            <>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <Card>
-                  <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">Status</CardTitle></CardHeader>
-                  <CardContent className="pt-1">
-                    <div className="flex items-center gap-2 text-lg font-semibold">
-                      {result.status === "approved"
-                        ? <><CheckCircle2 className="h-5 w-5 text-emerald-600"/> {statusLabel(result.status)}</>
-                        : <><AlertTriangle className="h-5 w-5 text-amber-600"/> {statusLabel(result.status)}</>}
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">Gargalo</CardTitle></CardHeader>
-                  <CardContent className="pt-1 text-lg font-semibold">
-                    {bottleneckLabel(result.bottleneck)}
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">COP motor</CardTitle></CardHeader>
-                  <CardContent className="pt-1 text-lg font-semibold">
-                    {fmt(result.COPMotor, 2)}
-                    {COP_catalog !== undefined && (
-                      <span className="ml-2 text-xs font-normal text-muted-foreground">
-                        catálogo {fmt(COP_catalog, 2)}
-                      </span>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Card>
-                <CardHeader><CardTitle className="text-base">Validação por balanço de energia</CardTitle></CardHeader>
-                <CardContent className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Q evap (motor)</p>
-                    <p className="font-mono">{fmt(result.QMotorW, 0)} W</p>
-                    <p className="text-xs text-muted-foreground">{fmt(result.QMotorW * KCALH_PER_W, 0)} kcal/h</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Q evap (catálogo)</p>
-                    <p className="font-mono">{Q_catalog_W ? `${fmt(Q_catalog_W, 0)} W` : "—"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">W compressor</p>
-                    <p className="font-mono">{fmt(result.WCompW, 0)} W</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Q cond</p>
-                    <p className="font-mono">{fmt(result.QCondW, 0)} W</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Te catálogo</p>
-                    <p className="font-mono">{fmt(result.thermo.Te_C, 2)} °C</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Tc catálogo</p>
-                    <p className="font-mono">{fmt(result.thermo.Tc_C, 2)} °C</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Desvio COP</p>
-                    <p className="font-mono">{result.deviationPct === null ? "—" : `${fmt(result.deviationPct, 1)}%`}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">EER</p>
-                    <p className="font-mono">{fmt(result.thermo.EER, 2)}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </>
           )}
         </TabsContent>
 
-        <TabsContent value="alerts">
-          <Card>
-            <CardHeader><CardTitle className="text-base">Alertas consolidados</CardTitle></CardHeader>
-            <CardContent>
-              {allAlerts.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  Nenhum alerta. Execute os testes para listar avisos do motor e do mapeamento de dados.
-                </p>
-              ) : (
-                <ul className="space-y-2 text-sm">
-                  {allAlerts.map((a, i) => (
-                    <li
-                      key={i}
-                      className={`flex items-start gap-2 rounded-md border p-2 ${
-                        a.kind === "warning"
-                          ? "border-amber-300 bg-amber-50"
-                          : "border-slate-300 bg-slate-50"
-                      }`}
-                    >
-                      <span className="mt-0.5 text-xs font-semibold uppercase">
-                        {a.kind === "warning" ? "Aviso" : "Dados"}
-                      </span>
-                      <span>{a.msg}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </CardContent>
-          </Card>
+        <TabsContent value="results">
+          {result ? (
+            <SystemEquilibriumResultsTab result={result} />
+          ) : (
+            <EmptyState message="Execute o teste integrado para visualizar os resultados." />
+          )}
+        </TabsContent>
+
+        <TabsContent value="chart">
+          {result && evaporatorEnvelope && compressorEnvelope ? (
+            <SystemEquilibriumChart
+              evaporatorEnvelope={coilEnvelopeToEquilibriumPoints(evaporatorEnvelope)}
+              compressorEnvelope={compressorEnvelope}
+              result={result}
+              nominalTc_C={result.Tc_eq_C}
+            />
+          ) : (
+            <EmptyState message="Gráfico disponível após executar o teste integrado." />
+          )}
+        </TabsContent>
+
+        <TabsContent value="convergence">
+          {result ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Trajetória de convergência</CardTitle>
+              </CardHeader>
+              <CardContent className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b text-left">
+                      <th className="py-2">Iteração</th>
+                      <th className="py-2">Te (°C)</th>
+                      <th className="py-2">Tc (°C)</th>
+                      <th className="py-2">Resíduo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {result.convergencePath.map((point) => (
+                      <tr key={point.iteration} className="border-b">
+                        <td className="py-2">{point.iteration}</td>
+                        <td className="py-2">{fmt(point.Te_C)}</td>
+                        <td className="py-2">{fmt(point.Tc_C)}</td>
+                        <td className="py-2">{fmt(point.residual)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+          ) : (
+            <EmptyState message="Convergência disponível após executar o teste integrado." />
+          )}
         </TabsContent>
       </Tabs>
     </div>
   );
 }
 
-function EnvelopeStatus({
+function NumberField({
   label,
-  ready,
-  detail,
+  value,
+  onChange,
 }: {
   label: string;
-  ready: boolean;
-  detail: string;
+  value: number;
+  onChange: (value: number) => void;
 }) {
   return (
-    <div className="rounded-md border p-3">
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-medium">{label}</span>
-        <Badge variant={ready ? "default" : "outline"}>
-          {ready ? "✅ Envelope salvo" : "⬜ Aguardando simulação"}
-        </Badge>
-      </div>
-      <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
+    <div className="space-y-1">
+      <Label className="text-xs">{label}</Label>
+      <Input type="number" value={value} onChange={(event) => onChange(Number(event.target.value))} />
     </div>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <Card>
+      <CardContent className="p-8 text-center text-sm text-muted-foreground">{message}</CardContent>
+    </Card>
   );
 }
