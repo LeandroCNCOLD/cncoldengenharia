@@ -14,6 +14,7 @@ import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
 import { ResultCard } from "../components/ResultCard";
 import { ResultPanel } from "../components/ResultPanel";
 import { ActionBar } from "../components/ActionBar";
+import { ProjectHeaderBar } from "../components/ProjectHeaderBar";
 import { CyclePHDiagram } from "../components/CyclePHDiagram";
 import { CoilEnvelopeTab } from "../components/CoilEnvelopeTab";
 import { CoilsInSeriesPanel } from "../components/CoilsInSeriesPanel";
@@ -551,6 +552,7 @@ export function EvaporatorUnifiedWorkspacePage() {
 
   return (
     <WorkspaceLayout header={header} sidebar={sidebar}>
+      <ProjectHeaderBar workspaceType="component_workspace" />
       <div className="flex h-full flex-col">
         <div className="flex flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto p-4">
@@ -728,40 +730,11 @@ function DetailedWorkspaceTab({ onOpenAI }: { onOpenAI: () => void }) {
 
   return (
     <div className="space-y-3">
-      <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3">
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">
-            🏭 Fonte da Verdade — Detalhado
-          </h3>
-          <Button
-            size="sm"
-            variant="outline"
-            className="gap-1.5 h-7 text-xs border-primary/40 text-primary hover:bg-primary/10"
-            onClick={onOpenAI}
-          >
-            <Bot className="h-3.5 w-3.5" />
-            IA Especialista
-          </Button>
-        </div>
-        <EnrichedWarningsPanel warnings={enrichedWarnings} />
-      </div>
-
-      {catalogs.loading && (
-        <div className="flex items-center gap-2 rounded border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
-          <svg
-            className="h-3.5 w-3.5 animate-spin"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" />
-            <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-          </svg>
-          Carregando catálogos…
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 gap-2 rounded-md shadow-sm md:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)]">
+      <section className="space-y-2">
+        <h3 className="text-sm font-semibold text-foreground">
+          Formulário principal / dados do ambiente
+        </h3>
+        <div className="grid grid-cols-1 gap-2 rounded-md shadow-sm md:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)]">
         <WorkspaceSidebar
           componentType="evaporator_dx"
           onSimulate={handleSimulate}
@@ -784,24 +757,72 @@ function DetailedWorkspaceTab({ onOpenAI }: { onOpenAI: () => void }) {
               disabled={!catalogs.ready}
               result={result}
             />
-            {!catalogs.loading && !catalogs.ready && (
-              <DatasetStatusPanel
-                loading={catalogs.loading}
-                ready={catalogs.ready}
-                errors={catalogs.errors}
-                missing={catalogs.missing}
-                compact
-              />
-            )}
-            <ResultPanel result={result} warnings={visibleWarnings} onGoalSeek={() => {}} />
           </div>
         </div>
-      </div>
+        </div>
+      </section>
 
-      <div className="mt-2 space-y-2">
+      <section className="mt-2 space-y-2">
+        <h3 className="text-sm font-semibold text-foreground">
+          Dados técnicos e premissas
+        </h3>
         <GeometryBottomBar />
         <CircuitrySelector />
-      </div>
+      </section>
+
+      <section className="rounded-lg border border-border bg-card p-3">
+        <h3 className="mb-3 text-sm font-semibold text-foreground">
+          Resultado do cálculo
+        </h3>
+        <ResultPanel result={result} warnings={[]} onGoalSeek={() => {}} />
+      </section>
+
+      <section className="rounded-lg border border-red-500/30 bg-red-500/5 p-3">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">
+            🏭 Fonte da Verdade — Avisos e validações
+          </h3>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5 h-7 text-xs border-primary/40 text-primary hover:bg-primary/10"
+            onClick={onOpenAI}
+          >
+            <Bot className="h-3.5 w-3.5" />
+            IA Especialista
+          </Button>
+        </div>
+        <EnrichedWarningsPanel warnings={enrichedWarnings} />
+      </section>
+
+      <section className="space-y-2">
+        <h3 className="text-sm font-semibold text-foreground">
+          Auditoria / logs / mensagens técnicas
+        </h3>
+        {catalogs.loading && (
+          <div className="flex items-center gap-2 rounded border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
+            <svg
+              className="h-3.5 w-3.5 animate-spin"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" />
+              <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+            </svg>
+            Carregando catálogos…
+          </div>
+        )}
+        {!catalogs.loading && !catalogs.ready && (
+          <DatasetStatusPanel
+            loading={catalogs.loading}
+            ready={catalogs.ready}
+            errors={catalogs.errors}
+            missing={catalogs.missing}
+            compact
+          />
+        )}
+      </section>
     </div>
   );
 }
