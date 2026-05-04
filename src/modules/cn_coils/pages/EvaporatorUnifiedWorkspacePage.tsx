@@ -1298,6 +1298,14 @@ function UnifiedTabs({
                 Q_kcalh: cycleResult.evaporatorResult.totalCapacityW * 0.86,
                 T_ar_saida: cycleResult.evaporatorResult.airOutletTempC,
               }}
+              hotGasSource={{
+                T_discharge_C: cycleResult.statePoints.point2_compOut.T_C,
+                h_discharge_kJkg: cycleResult.statePoints.point2_compOut.h_kJkg,
+                h_condOut_kJkg: cycleResult.statePoints.point3_condOut.h_kJkg,
+                m_dot_total_kgS: cycleResult.m_dot_kgS,
+                Tc_C: cycleResult.Tc_C,
+              }}
+              airFlowM3H={airFlow}
             />
           </div>
         ) : <EmptyState />}
