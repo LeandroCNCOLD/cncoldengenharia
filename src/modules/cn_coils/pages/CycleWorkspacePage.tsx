@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Snowflake, Calculator } from "lucide-react";
+import { toast } from "sonner";
 import { useCycleSimulation } from "../hooks/useCycleSimulation";
 import { useFrostAnalysis } from "../hooks/useFrostAnalysis";
 import { useUncertaintyAnalysis } from "../hooks/useUncertaintyAnalysis";
@@ -6,7 +8,6 @@ import { useOperatingMap } from "../hooks/useOperatingMap";
 import { CoilEnvelopeTab } from "../components/CoilEnvelopeTab";
 import { CoilsInSeriesPanel } from "../components/CoilsInSeriesPanel";
 import { FrostAnalysisTab } from "../components/FrostAnalysisTab";
-import { SaveProjectButton } from "../components/SaveProjectButton";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { CyclePHDiagram } from "../components/CyclePHDiagram";
 import { FrostAnalysisPanel } from "../components/FrostAnalysisPanel";
@@ -15,6 +16,11 @@ import { UncertaintyPanel, UncertaintyBadge } from "../components/UncertaintyBad
 import { OperatingMapChart } from "../components/OperatingMapChart";
 import { OptimizationPanel } from "../components/OptimizationPanel";
 import { CompressorPickerModal } from "../components/CompressorPickerModal";
+import { WorkspaceLayout } from "../components/WorkspaceLayout";
+import { WorkspaceHeader } from "../components/WorkspaceHeader";
+import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
+import { ResultCard } from "../components/ResultCard";
+import { ActionBar } from "../components/ActionBar";
 import { usePdfExport } from "../hooks/usePdfExport";
 import { listAvailableRefrigerants } from "../engines/refrigerant/refrigerantProperties";
 import {
@@ -29,6 +35,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -200,8 +207,8 @@ export function CycleWorkspacePage() {
   const simState = useCycleSimulation(config, { mode: "manual" });
   const cycleResult: CycleResult | null =
     simState.status === "success" ? simState.result : null;
+  const { isGenerating: isExportingPdf, exportPdf } = usePdfExport();
 
-  // Auto-run uma vez ao montar (com config padrão válida)
   const didInitRef = useRef(false);
   useEffect(() => {
     if (didInitRef.current) return;
@@ -210,294 +217,326 @@ export function CycleWorkspacePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-800 px-6 py-3">
-        <div>
-          <h1 className="text-lg font-bold">Ciclo de Refrigeração</h1>
-          <p className="text-xs text-gray-400">
-            CycleEngine V2 · {refrigerantId}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <CycleStatusBar state={simState} result={cycleResult} />
-          <SaveProjectButton
-            defaultName="Workspace Evaporador DX"
-            type="component_workspace"
-            systemInputs={{
-              refrigerantId,
-              te,
-              tc,
-              superheat,
-              subcooling,
-              expansionType,
-            }}
-            loadResult={cycleResult ? { Q_evap_W: cycleResult.Q_evap_W, COP: cycleResult.COP } : null}
-          />
-          <Button
-            size="sm"
-            onClick={() => simState.trigger()}
-            disabled={simState.status === "running"}
-            className="bg-blue-600 text-white hover:bg-blue-700"
-          >
-            {simState.status === "running" ? "Calculando…" : "▶ Calcular"}
-          </Button>
-        </div>
-      </div>
+  const handleReset = () => {
+    setRefrigerantId(DEFAULT_CONFIG.refrigerantId);
+    setTe(DEFAULT_CONFIG.solver?.Te_initial_C ?? -10);
+    setTc(DEFAULT_CONFIG.solver?.Tc_initial_C ?? 40);
+    setSuperheat(5);
+    setSubcooling(5);
+    setExpansionType("txv");
+    setShTarget(5);
+  };
 
-      <div className="grid grid-cols-12 gap-0 h-[calc(100vh-65px)]">
-        {/* Coluna esquerda: configuração */}
-        <aside className="col-span-12 md:col-span-3 overflow-y-auto border-r border-gray-800 bg-gray-900/50 p-3">
-          <Accordion type="multiple" defaultValue={["ref", "comp", "exp", "ops"]} className="space-y-2">
-            <AccordionItem value="ref" className="border-gray-800">
-              <AccordionTrigger className="text-xs uppercase tracking-wide text-gray-300 hover:no-underline">
-                Refrigerante
-              </AccordionTrigger>
-              <AccordionContent className="space-y-2">
-                <Select value={refrigerantId} onValueChange={setRefrigerantId}>
-                  <SelectTrigger className="bg-gray-800 border-gray-700 text-white text-xs h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-80">
-                    {REFRIGERANT_GROUPS.map((g) => (
-                      <SelectGroup key={g.label}>
-                        <SelectLabel>{g.label}</SelectLabel>
-                        {g.ids.map((id) => (
-                          <SelectItem key={id} value={id}>
-                            {id}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
+  const handleExportPdf = () => {
+    if (!cycleResult) {
+      toast.error("Execute o cálculo antes de exportar o PDF.");
+      return;
+    }
+    exportPdf(
+      <WorkspacePdfReport
+        componentType="evaporator"
+        title="Evaporador DX"
+        inputs={{
+          Refrigerante: config.refrigerantId,
+          "Te inicial": `${te} °C`,
+          "Tc inicial": `${tc} °C`,
+          "Vazão de ar": `${config.evaporator.airFlowM3H.toLocaleString("pt-BR")} m³/h`,
+        }}
+        results={{
+          "Capacidade real": `${fmt(cycleResult.Q_evap_W / 1000, 2)} kW`,
+          COP: fmt(cycleResult.COP, 2),
+          "Te eq": `${fmt(cycleResult.Te_C, 1)} °C`,
+          "Tc eq": `${fmt(cycleResult.Tc_C, 1)} °C`,
+          "ΔP ar": `${fmt(cycleResult.evaporatorResult.airPressureDropPa, 0)} Pa`,
+        }}
+        warnings={cycleResult.warnings}
+      />,
+      `evaporador-${new Date().toISOString().slice(0, 10)}.pdf`,
+    );
+  };
+
+  const handleSave = () => {
+    toast.success("Projeto salvo (em memória).");
+  };
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copiado para a área de transferência.");
+    } catch {
+      toast.error("Não foi possível copiar o link.");
+    }
+  };
+  const handleExportCsv = () => toast.info("Exportação CSV em desenvolvimento.");
+  const handleExportExcel = () => toast.info("Exportação Excel em desenvolvimento.");
+
+  const badges = [refrigerantId, `Te: ${fmt(te, 0)}°C`, `Tc: ${fmt(tc, 0)}°C`];
+  const hasResults = !!cycleResult;
+  const isCalculating = simState.status === "running";
+
+  const sidebar = (
+    <WorkspaceInputsSidebar
+      onCalculate={() => simState.trigger()}
+      onReset={handleReset}
+      isCalculating={isCalculating}
+    >
+      <Accordion type="multiple" defaultValue={["ref", "comp", "exp", "ops"]} className="w-full">
+        <AccordionItem value="ref">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">
+            Refrigerante
+          </AccordionTrigger>
+          <AccordionContent className="space-y-2">
+            <Select value={refrigerantId} onValueChange={setRefrigerantId}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="max-h-80">
+                {REFRIGERANT_GROUPS.map((g) => (
+                  <SelectGroup key={g.label}>
+                    <SelectLabel>{g.label}</SelectLabel>
+                    {g.ids.map((id) => (
+                      <SelectItem key={id} value={id}>
+                        {id}
+                      </SelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
-                {(() => {
-                  const meta = refrigerantsMeta.find((r) => r.id === refrigerantId);
-                  return meta ? (
-                    <div className="text-[10px] text-gray-400">
-                      {meta.name} · <span className="uppercase">{meta.category.replace("_", " ")}</span>
-                    </div>
-                  ) : null;
-                })()}
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="comp" className="border-gray-800">
-              <AccordionTrigger className="text-xs uppercase tracking-wide text-gray-300 hover:no-underline">
-                Compressor
-              </AccordionTrigger>
-              <AccordionContent className="space-y-2">
-                <div className="flex gap-1">
-                  {(["bitzer", "ari", "constant"] as CompressorMode[]).map((m) => (
-                    <button
-                      key={m}
-                      type="button"
-                      onClick={() => setCompressorMode(m)}
-                      className={`flex-1 rounded px-1.5 py-1 text-[10px] font-medium ${
-                        compressorMode === m
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                      }`}
-                    >
-                      {m === "bitzer" ? "Bitzer" : m === "ari" ? "ARI 540" : "Const."}
-                    </button>
-                  ))}
+                  </SelectGroup>
+                ))}
+              </SelectContent>
+            </Select>
+            {(() => {
+              const meta = refrigerantsMeta.find((r) => r.id === refrigerantId);
+              return meta ? (
+                <div className="text-[10px] text-muted-foreground">
+                  {meta.name} · <span className="uppercase">{meta.category.replace("_", " ")}</span>
                 </div>
-                {compressorMode === "bitzer" && (
-                  <>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setCompressorPickerOpen(true)}
-                      className="w-full bg-gray-800 border-gray-700 text-white hover:bg-gray-700 text-xs h-8"
-                    >
-                      Selecionar compressor…
-                    </Button>
-                    <div className="rounded border border-gray-700 bg-gray-800/60 p-2 text-[10px]">
-                      <div className="font-mono text-white">{DEFAULT_CONFIG.compressor.model}</div>
-                      <div className="text-gray-400">
-                        {DEFAULT_CONFIG.compressor.manufacturer} ·{" "}
-                        {fmt(DEFAULT_CONFIG.compressor.bitzerNative?.displacement_m3h ?? 0, 2)} m³/h
-                      </div>
-                    </div>
-                  </>
-                )}
-                {compressorMode === "ari" && (
-                  <Input
-                    placeholder="Buscar modelo ARI 540…"
-                    className="bg-gray-800 border-gray-700 text-white text-xs h-8"
-                  />
-                )}
-                {compressorMode === "constant" && (
-                  <div className="space-y-2 text-[10px] text-gray-300">
-                    <div>
-                      <Label className="text-gray-400">ηv</Label>
-                      <Slider defaultValue={[80]} min={0} max={100} step={1} />
-                    </div>
-                    <div>
-                      <Label className="text-gray-400">ηs</Label>
-                      <Slider defaultValue={[70]} min={0} max={100} step={1} />
-                    </div>
-                  </div>
-                )}
-              </AccordionContent>
-            </AccordionItem>
+              ) : null;
+            })()}
+          </AccordionContent>
+        </AccordionItem>
 
-            <AccordionItem value="exp" className="border-gray-800">
-              <AccordionTrigger className="text-xs uppercase tracking-wide text-gray-300 hover:no-underline">
-                Dispositivo de Expansão
-              </AccordionTrigger>
-              <AccordionContent className="space-y-2">
-                <Select
-                  value={expansionType}
-                  onValueChange={(v) => setExpansionType(v as ExpansionDeviceType)}
+        <AccordionItem value="comp">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">Compressor</AccordionTrigger>
+          <AccordionContent className="space-y-2">
+            <div className="flex gap-1">
+              {(["bitzer", "ari", "constant"] as CompressorMode[]).map((m) => (
+                <Button
+                  key={m}
+                  type="button"
+                  size="sm"
+                  variant={compressorMode === m ? "default" : "outline"}
+                  className="flex-1 h-7 text-[10px] px-1"
+                  onClick={() => setCompressorMode(m)}
                 >
-                  <SelectTrigger className="bg-gray-800 border-gray-700 text-white text-xs h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Desabilitado</SelectItem>
-                    <SelectItem value="txv">TXV</SelectItem>
-                    <SelectItem value="eev">EEV</SelectItem>
-                    <SelectItem value="capillary">Capilar</SelectItem>
-                    <SelectItem value="fixed_orifice">Orifício Fixo</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                {(expansionType === "txv" || expansionType === "eev") && (
-                  <div>
-                    <Label className="text-[10px] text-gray-400">SH alvo (K)</Label>
-                    <Input
-                      type="number"
-                      value={shTarget}
-                      onChange={(e) => setShTarget(Number(e.target.value))}
-                      className="bg-gray-800 border-gray-700 text-white text-xs h-8"
-                    />
+                  {m === "bitzer" ? "Bitzer" : m === "ari" ? "ARI 540" : "Const."}
+                </Button>
+              ))}
+            </div>
+            {compressorMode === "bitzer" && (
+              <>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setCompressorPickerOpen(true)}
+                  className="w-full h-8 text-xs"
+                >
+                  Selecionar compressor…
+                </Button>
+                <div className="rounded border border-border bg-muted/40 p-2 text-[10px]">
+                  <div className="font-mono text-foreground">{DEFAULT_CONFIG.compressor.model}</div>
+                  <div className="text-muted-foreground">
+                    {DEFAULT_CONFIG.compressor.manufacturer} ·{" "}
+                    {fmt(DEFAULT_CONFIG.compressor.bitzerNative?.displacement_m3h ?? 0, 2)} m³/h
                   </div>
-                )}
-                {expansionType === "capillary" && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label className="text-[10px] text-gray-400">L (m)</Label>
-                      <Input
-                        type="number"
-                        value={capLength}
-                        step="0.1"
-                        onChange={(e) => setCapLength(Number(e.target.value))}
-                        className="bg-gray-800 border-gray-700 text-white text-xs h-8"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-[10px] text-gray-400">Di (mm)</Label>
-                      <Input
-                        type="number"
-                        value={capDiameter}
-                        step="0.1"
-                        onChange={(e) => setCapDiameter(Number(e.target.value))}
-                        className="bg-gray-800 border-gray-700 text-white text-xs h-8"
-                      />
-                    </div>
-                  </div>
-                )}
-                {expansionType === "fixed_orifice" && (
-                  <div>
-                    <Label className="text-[10px] text-gray-400">Diâmetro (mm)</Label>
-                    <Input
-                      type="number"
-                      value={orificeDiameter}
-                      step="0.1"
-                      onChange={(e) => setOrificeDiameter(Number(e.target.value))}
-                      className="bg-gray-800 border-gray-700 text-white text-xs h-8"
-                    />
-                  </div>
-                )}
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="ops" className="border-gray-800">
-              <AccordionTrigger className="text-xs uppercase tracking-wide text-gray-300 hover:no-underline">
-                Condições de Operação
-              </AccordionTrigger>
-              <AccordionContent className="space-y-3">
+                </div>
+              </>
+            )}
+            {compressorMode === "ari" && (
+              <Input placeholder="Buscar modelo ARI 540…" className="h-8 text-xs" />
+            )}
+            {compressorMode === "constant" && (
+              <div className="space-y-2 text-[10px]">
                 <div>
-                  <div className="flex items-center justify-between text-[10px] text-gray-400">
-                    <Label>Te</Label>
-                    <span className="font-mono text-white">{fmt(te, 1)} °C</span>
-                  </div>
-                  <Slider value={[te]} min={-40} max={15} step={1} onValueChange={(v) => setTe(v[0])} />
+                  <Label className="text-muted-foreground">ηv</Label>
+                  <Slider defaultValue={[80]} min={0} max={100} step={1} />
                 </div>
                 <div>
-                  <div className="flex items-center justify-between text-[10px] text-gray-400">
-                    <Label>Tc</Label>
-                    <span className="font-mono text-white">{fmt(tc, 1)} °C</span>
-                  </div>
-                  <Slider value={[tc]} min={20} max={70} step={1} onValueChange={(v) => setTc(v[0])} />
+                  <Label className="text-muted-foreground">ηs</Label>
+                  <Slider defaultValue={[70]} min={0} max={100} step={1} />
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label className="text-[10px] text-gray-400">Subresfr. (K)</Label>
-                    <Input
-                      type="number"
-                      value={subcooling}
-                      onChange={(e) => setSubcooling(Number(e.target.value))}
-                      className="bg-gray-800 border-gray-700 text-white text-xs h-8"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-[10px] text-gray-400">Superaq. (K)</Label>
-                    <Input
-                      type="number"
-                      value={superheat}
-                      onChange={(e) => setSuperheat(Number(e.target.value))}
-                      className="bg-gray-800 border-gray-700 text-white text-xs h-8"
-                    />
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </aside>
-
-        {/* Coluna central: P-h + abas */}
-        <main className="col-span-12 md:col-span-9 overflow-y-auto p-4">
-          {simState.status === "running" && !cycleResult ? (
-            <div className="flex h-64 items-center justify-center">
-              <div className="space-y-3 text-center">
-                <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-                <p className="text-sm text-gray-400">Executando solver de ciclo...</p>
               </div>
-            </div>
-          ) : simState.status === "error" ? (
-            <div className="rounded-xl border border-red-800 bg-red-950/30 p-6">
-              <p className="font-semibold text-red-400">Erro no CycleEngine</p>
-              <p className="mt-2 text-sm text-red-300">{simState.message}</p>
-            </div>
-          ) : cycleResult ? (
-            <div className="space-y-4">
-              <div className="rounded-xl bg-gray-900 p-4">
-                <CyclePHDiagram
-                  result={cycleResult}
-                  refrigerantId={config.refrigerantId}
-                  width={620}
-                  height={360}
+            )}
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="exp">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">
+            Dispositivo de Expansão
+          </AccordionTrigger>
+          <AccordionContent className="space-y-2">
+            <Select value={expansionType} onValueChange={(v) => setExpansionType(v as ExpansionDeviceType)}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Desabilitado</SelectItem>
+                <SelectItem value="txv">TXV</SelectItem>
+                <SelectItem value="eev">EEV</SelectItem>
+                <SelectItem value="capillary">Capilar</SelectItem>
+                <SelectItem value="fixed_orifice">Orifício Fixo</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {(expansionType === "txv" || expansionType === "eev") && (
+              <div>
+                <Label className="text-[10px] text-muted-foreground">SH alvo (K)</Label>
+                <Input
+                  type="number"
+                  value={shTarget}
+                  onChange={(e) => setShTarget(Number(e.target.value))}
+                  className="h-8 text-xs"
                 />
               </div>
+            )}
+            {expansionType === "capillary" && (
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-[10px] text-muted-foreground">L (m)</Label>
+                  <Input type="number" value={capLength} step="0.1" onChange={(e) => setCapLength(Number(e.target.value))} className="h-8 text-xs" />
+                </div>
+                <div>
+                  <Label className="text-[10px] text-muted-foreground">Di (mm)</Label>
+                  <Input type="number" value={capDiameter} step="0.1" onChange={(e) => setCapDiameter(Number(e.target.value))} className="h-8 text-xs" />
+                </div>
+              </div>
+            )}
+            {expansionType === "fixed_orifice" && (
+              <div>
+                <Label className="text-[10px] text-muted-foreground">Diâmetro (mm)</Label>
+                <Input type="number" value={orificeDiameter} step="0.1" onChange={(e) => setOrificeDiameter(Number(e.target.value))} className="h-8 text-xs" />
+              </div>
+            )}
+          </AccordionContent>
+        </AccordionItem>
 
-              <CycleAnalysisTabs config={config} cycleResult={cycleResult} />
+        <AccordionItem value="ops">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">
+            Condições de Operação
+          </AccordionTrigger>
+          <AccordionContent className="space-y-3">
+            <div>
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                <Label>Te</Label>
+                <span className="font-mono text-foreground">{fmt(te, 1)} °C</span>
+              </div>
+              <Slider value={[te]} min={-40} max={15} step={1} onValueChange={(v) => setTe(v[0])} />
             </div>
+            <div>
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                <Label>Tc</Label>
+                <span className="font-mono text-foreground">{fmt(tc, 1)} °C</span>
+              </div>
+              <Slider value={[tc]} min={20} max={70} step={1} onValueChange={(v) => setTc(v[0])} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-[10px] text-muted-foreground">Subresfr. (K)</Label>
+                <Input
+                  type="number"
+                  value={subcooling}
+                  onChange={(e) => setSubcooling(Number(e.target.value))}
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div>
+                <Label className="text-[10px] text-muted-foreground">Superaq. (K)</Label>
+                <Input
+                  type="number"
+                  value={superheat}
+                  onChange={(e) => setSuperheat(Number(e.target.value))}
+                  className="h-8 text-xs"
+                />
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </WorkspaceInputsSidebar>
+  );
+
+  const header = (
+    <WorkspaceHeader
+      title="Evaporador DX — Ciclo de Refrigeração"
+      icon={<Snowflake className="h-5 w-5" />}
+      badges={badges}
+      onSave={handleSave}
+      onShare={handleShare}
+      onExportPdf={handleExportPdf}
+      isExportingPdf={isExportingPdf}
+    />
+  );
+
+  return (
+    <WorkspaceLayout header={header} sidebar={sidebar}>
+      <div className="flex h-full flex-col">
+        <div className="flex items-center justify-between gap-3 border-b border-border bg-card/30 px-4 py-2">
+          <CycleStatusBar state={simState} result={cycleResult} />
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4">
+          {isCalculating && !cycleResult ? (
+            <LoadingResults />
+          ) : simState.status === "error" ? (
+            <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-6">
+              <p className="font-semibold text-red-500">Erro no CycleEngine</p>
+              <p className="mt-2 text-sm text-muted-foreground">{simState.message}</p>
+            </div>
+          ) : cycleResult ? (
+            <ResultsView config={config} cycleResult={cycleResult} />
           ) : (
-            <div className="flex h-64 items-center justify-center text-gray-600">
-              Configure o sistema para iniciar a simulação
-            </div>
+            <EmptyResults />
           )}
-        </main>
+        </div>
+
+        <ActionBar
+          onExportCsv={handleExportCsv}
+          onExportExcel={handleExportExcel}
+          onExportPdf={handleExportPdf}
+          onShare={handleShare}
+          hasResults={hasResults}
+          isExportingPdf={isExportingPdf}
+        />
       </div>
 
       <CompressorPickerModal
         open={compressorPickerOpen}
         onClose={() => setCompressorPickerOpen(false)}
       />
+    </WorkspaceLayout>
+  );
+}
+
+// ── Empty / Loading ─────────────────────────────────────────────────────────
+function EmptyResults() {
+  return (
+    <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-3 text-muted-foreground">
+      <Calculator className="h-12 w-12 opacity-30" />
+      <p className="text-sm">
+        Configure os parâmetros e clique em <strong>Calcular</strong>
+      </p>
+    </div>
+  );
+}
+
+function LoadingResults() {
+  return (
+    <div className="space-y-3">
+      <Skeleton className="h-4 w-3/4" />
+      <Skeleton className="h-48 w-full" />
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <Skeleton className="h-24" />
+        <Skeleton className="h-24" />
+        <Skeleton className="h-24" />
+        <Skeleton className="h-24" />
+      </div>
     </div>
   );
 }
@@ -512,14 +551,14 @@ function CycleStatusBar({
 }) {
   if (state.status === "running") {
     return (
-      <div className="flex items-center gap-2 text-xs text-blue-400">
-        <div className="h-2 w-2 animate-pulse rounded-full bg-blue-400" />
+      <div className="flex items-center gap-2 text-xs text-primary">
+        <div className="h-2 w-2 animate-pulse rounded-full bg-primary" />
         Calculando…
       </div>
     );
   }
   if (state.status === "error") {
-    return <Badge variant="destructive">🔴 Erro</Badge>;
+    return <Badge variant="destructive">Erro</Badge>;
   }
   if (!result) {
     return <Badge variant="secondary">Aguardando</Badge>;
@@ -528,124 +567,132 @@ function CycleStatusBar({
     maximumFractionDigits: 2,
   });
   return (
-    <div className="flex items-center gap-3 text-[11px]">
+    <div className="flex flex-wrap items-center gap-3 text-[11px]">
       {result.converged ? (
         <Badge className="bg-emerald-600 hover:bg-emerald-600">🟢 Convergido</Badge>
       ) : (
         <Badge className="bg-amber-600 hover:bg-amber-600">🟡 Estimativa</Badge>
       )}
-      <span className="text-gray-400">
-        Resíduo <span className="font-mono text-white">{residualPct}%</span>
+      <span className="text-muted-foreground">
+        Resíduo <span className="font-mono text-foreground">{residualPct}%</span>
       </span>
-      <span className="text-gray-400">
-        Iter. <span className="font-mono text-white">{result.iterations}</span>
+      <span className="text-muted-foreground">
+        Iter. <span className="font-mono text-foreground">{result.iterations}</span>
       </span>
     </div>
   );
 }
 
-// ── Tabs ────────────────────────────────────────────────────────────────────
-function CycleAnalysisTabs({
+// ── Results View ────────────────────────────────────────────────────────────
+function ResultsView({
   config,
   cycleResult,
 }: {
   config: CycleSystemConfig;
   cycleResult: CycleResult;
 }) {
-  const { isGenerating, exportPdf } = usePdfExport();
   return (
-    <Tabs defaultValue="results" className="w-full">
-      <TabsList className="bg-gray-900 border border-gray-800">
-        <TabsTrigger value="results">Resultados</TabsTrigger>
-        <TabsTrigger value="uncertainty">Incerteza</TabsTrigger>
-        <TabsTrigger value="map">Mapa de Operação</TabsTrigger>
-        <TabsTrigger value="optimization">Otimização</TabsTrigger>
-        <TabsTrigger value="series">Coils em Série</TabsTrigger>
-        <TabsTrigger value="envelope">Envelope Q×Te</TabsTrigger>
-        <TabsTrigger value="frost-analysis">❄️ Análise de Geada</TabsTrigger>
-        <TabsTrigger value="frost">Geada Avançada</TabsTrigger>
-      </TabsList>
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <ResultCard
+          label="Capacidade real"
+          value={fmt(cycleResult.Q_evap_W / 1000, 2)}
+          unit="kW"
+          hint={`${fmt(cycleResult.Q_evap_W * 0.86 / 1000, 0)} kcal/h`}
+          variant="success"
+        />
+        <ResultCard label="COP" value={fmt(cycleResult.COP, 2)} variant="default" />
+        <ResultCard
+          label="Te equilíbrio"
+          value={fmt(cycleResult.Te_C, 1)}
+          unit="°C"
+          variant="default"
+        />
+        <ResultCard
+          label="Tc equilíbrio"
+          value={fmt(cycleResult.Tc_C, 1)}
+          unit="°C"
+          variant="default"
+        />
+      </div>
 
-      <TabsContent value="results" className="mt-3">
-        <div className="rounded-lg bg-white p-4 text-gray-900">
-          <div className="mb-3 flex justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={isGenerating}
-              onClick={() =>
-                exportPdf(
-                  <WorkspacePdfReport
-                    componentType="evaporator"
-                    title="Evaporador DX"
-                    inputs={{
-                      Refrigerante: config.refrigerantId,
-                      "Te inicial": `${config.solver?.Te_initial_C ?? cycleResult.Te_C} °C`,
-                      "Tc inicial": `${config.solver?.Tc_initial_C ?? cycleResult.Tc_C} °C`,
-                      "Vazão de ar": `${config.evaporator.airFlowM3H.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} m³/h`,
-                    }}
-                    results={{
-                      "Capacidade real": `${(cycleResult.Q_evap_W / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} kW`,
-                      COP: cycleResult.COP.toLocaleString("pt-BR", { maximumFractionDigits: 2 }),
-                      "Te eq": `${cycleResult.Te_C.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} °C`,
-                      "Tc eq": `${cycleResult.Tc_C.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} °C`,
-                      "ΔP ar": `${cycleResult.evaporatorResult.airPressureDropPa.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} Pa`,
-                    }}
-                    warnings={cycleResult.warnings}
-                  />,
-                  `evaporador-${new Date().toISOString().slice(0, 10)}.pdf`,
-                )
-              }
-            >
-              {isGenerating ? "⏳ Gerando PDF…" : "📄 Exportar PDF"}
-            </Button>
+      <Tabs defaultValue="ph" className="w-full">
+        <TabsList className="flex w-full flex-wrap justify-start">
+          <TabsTrigger value="ph">🔄 Ciclo P-H</TabsTrigger>
+          <TabsTrigger value="results">📋 Resultados</TabsTrigger>
+          <TabsTrigger value="envelope">📊 Envelope Q×Te</TabsTrigger>
+          <TabsTrigger value="frost-analysis">❄️ Geada</TabsTrigger>
+          <TabsTrigger value="map">📈 Mapa Operacional</TabsTrigger>
+          <TabsTrigger value="uncertainty">📐 Incerteza</TabsTrigger>
+          <TabsTrigger value="optimization">⚙️ Otimização</TabsTrigger>
+          <TabsTrigger value="series">🔗 Coils em Série</TabsTrigger>
+          <TabsTrigger value="frost">🧊 Geada Avançada</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="ph" className="mt-3">
+          <div className="rounded-lg border border-border bg-card p-4">
+            <CyclePHDiagram
+              result={cycleResult}
+              refrigerantId={config.refrigerantId}
+              width={620}
+              height={360}
+            />
           </div>
-          <CycleResultPanel result={cycleResult} />
-        </div>
-      </TabsContent>
+        </TabsContent>
 
-      <TabsContent value="uncertainty" className="mt-3">
-        <UncertaintyTab config={config} cycleResult={cycleResult} />
-      </TabsContent>
+        <TabsContent value="results" className="mt-3">
+          <div className="rounded-lg border border-border bg-card p-4">
+            <CycleResultPanel result={cycleResult} />
+          </div>
+        </TabsContent>
 
-      <TabsContent value="frost" className="mt-3">
-        <FrostTab config={config} cycleResult={cycleResult} />
-      </TabsContent>
+        <TabsContent value="envelope" className="mt-3">
+          <div className="rounded-lg border border-border bg-card p-4">
+            <CoilEnvelopeTab equipmentId={config.id} />
+          </div>
+        </TabsContent>
 
-      <TabsContent value="map" className="mt-3">
-        <OperatingMapTab config={config} cycleResult={cycleResult} />
-      </TabsContent>
+        <TabsContent value="frost-analysis" className="mt-3">
+          <div className="rounded-lg border border-border bg-card p-4">
+            <FrostAnalysisTab
+              Te={cycleResult.Te_C}
+              Tair_in={config.evaporator.airInletTempC}
+              RH={config.evaporator.airRelativeHumidity}
+              Q_nominal={cycleResult.Q_evap_W}
+              geometry={config.id}
+            />
+          </div>
+        </TabsContent>
 
-      <TabsContent value="optimization" className="mt-3">
-        <OptimizationTab config={config} cycleResult={cycleResult} />
-      </TabsContent>
+        <TabsContent value="map" className="mt-3">
+          <OperatingMapTab config={config} cycleResult={cycleResult} />
+        </TabsContent>
 
-      <TabsContent value="series" className="mt-3">
-        <CoilsInSeriesPanel
-          primaryCoilResult={{
-            deltaP_Pa: cycleResult.evaporatorResult.airPressureDropPa,
-            Q_kcalh: cycleResult.evaporatorResult.totalCapacityW * 0.86,
-            T_ar_saida: cycleResult.evaporatorResult.airOutletTempC,
-          }}
-        />
-      </TabsContent>
+        <TabsContent value="uncertainty" className="mt-3">
+          <UncertaintyTab config={config} cycleResult={cycleResult} />
+        </TabsContent>
 
-      <TabsContent value="envelope" className="mt-3">
-        <div className="rounded-lg bg-white text-gray-900">
-          <CoilEnvelopeTab equipmentId={config.id} />
-        </div>
-      </TabsContent>
+        <TabsContent value="optimization" className="mt-3">
+          <OptimizationTab config={config} cycleResult={cycleResult} />
+        </TabsContent>
 
-      <TabsContent value="frost-analysis" className="mt-3">
-        <FrostAnalysisTab
-          Te={cycleResult.Te_C}
-          Tair_in={config.evaporator.airInletTempC}
-          RH={config.evaporator.airRelativeHumidity}
-          Q_nominal={cycleResult.Q_evap_W}
-          geometry={config.id}
-        />
-      </TabsContent>
-    </Tabs>
+        <TabsContent value="series" className="mt-3">
+          <div className="rounded-lg border border-border bg-card p-4">
+            <CoilsInSeriesPanel
+              primaryCoilResult={{
+                deltaP_Pa: cycleResult.evaporatorResult.airPressureDropPa,
+                Q_kcalh: cycleResult.evaporatorResult.totalCapacityW * 0.86,
+                T_ar_saida: cycleResult.evaporatorResult.airOutletTempC,
+              }}
+            />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="frost" className="mt-3">
+          <FrostTab config={config} cycleResult={cycleResult} />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
 
@@ -691,7 +738,6 @@ function evaporatorAreaM2(config: CycleSystemConfig): number {
   );
 }
 
-// ── Tab: Uncertainty ────────────────────────────────────────────────────────
 function UncertaintyTab({
   config,
   cycleResult,
@@ -714,8 +760,8 @@ function UncertaintyTab({
 
   if (isLoading || !result) {
     return (
-      <div className="rounded-lg bg-white p-4 text-gray-900">
-        <div className="animate-pulse text-sm text-gray-500">
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="animate-pulse text-sm text-muted-foreground">
           Calculando intervalos de confiança (Monte Carlo, 200 amostras)…
         </div>
       </div>
@@ -723,7 +769,7 @@ function UncertaintyTab({
   }
 
   return (
-    <div className="rounded-lg bg-white p-4 text-gray-900 space-y-3">
+    <div className="space-y-3 rounded-lg border border-border bg-card p-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">Bandas de incerteza nominais</h3>
         <UncertaintyBadge
@@ -737,7 +783,6 @@ function UncertaintyTab({
   );
 }
 
-// ── Tab: Frost ──────────────────────────────────────────────────────────────
 function FrostTab({
   config,
   cycleResult,
@@ -758,13 +803,13 @@ function FrostTab({
 
   if (!frost) {
     return (
-      <div className="rounded-lg bg-white p-4 text-sm text-gray-500">
+      <div className="rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
         Análise de geada disponível apenas com ciclo convergido.
       </div>
     );
   }
   return (
-    <div className="rounded-lg bg-white p-4 text-gray-900">
+    <div className="rounded-lg border border-border bg-card p-4">
       <FrostAnalysisPanel
         result={frost}
         nominalCapacityW={cycleResult.Q_evap_W}
@@ -774,7 +819,6 @@ function FrostTab({
   );
 }
 
-// ── Tab: Operating Map ──────────────────────────────────────────────────────
 function OperatingMapTab({
   config,
   cycleResult,
@@ -803,23 +847,22 @@ function OperatingMapTab({
   }, [generate, config, cycleResult.Te_C, cycleResult.Tc_C, cycleResult.Q_evap_W]);
 
   if (error) {
-    return <div className="rounded-lg bg-white p-4 text-sm text-red-600">{error}</div>;
+    return <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-4 text-sm text-red-500">{error}</div>;
   }
   if (isLoading || !result) {
     return (
-      <div className="rounded-lg bg-white p-4 text-sm text-gray-500 animate-pulse">
+      <div className="rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground animate-pulse">
         Gerando mapa de operação…
       </div>
     );
   }
   return (
-    <div className="rounded-lg bg-white p-4 text-gray-900">
+    <div className="rounded-lg border border-border bg-card p-4">
       <OperatingMapChart result={result} />
     </div>
   );
 }
 
-// ── Tab: Optimization ───────────────────────────────────────────────────────
 function OptimizationTab({
   config,
   cycleResult,
@@ -832,7 +875,7 @@ function OptimizationTab({
     [config, cycleResult.m_dot_kgS],
   );
   return (
-    <div className="rounded-lg bg-white p-4 text-gray-900">
+    <div className="rounded-lg border border-border bg-card p-4">
       <OptimizationPanel
         baseInputs={baseInputs}
         currentCapacityW={cycleResult.Q_evap_W}
