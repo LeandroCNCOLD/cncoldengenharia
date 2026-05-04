@@ -127,13 +127,28 @@ function UsersTab() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
 
+  const [error, setError] = useState<string | null>(null);
+
   const load = async () => {
     setLoading(true);
+    setError(null);
     try {
       const data = await listUsers();
-      setUsers(data as UserRow[]);
+      setUsers(Array.isArray(data) ? (data as UserRow[]) : []);
     } catch (e) {
-      toast.error("Falha ao carregar usuários", { description: String(e) });
+      let msg = "Erro ao buscar usuários.";
+      if (e instanceof Response) {
+        try {
+          msg = (await e.text()) || `HTTP ${e.status}`;
+        } catch {
+          msg = `HTTP ${e.status}`;
+        }
+      } else if (e instanceof Error) {
+        msg = e.message;
+      }
+      setUsers([]);
+      setError(msg);
+      toast.error("Falha ao carregar usuários", { description: msg });
     } finally {
       setLoading(false);
     }
