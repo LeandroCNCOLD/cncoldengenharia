@@ -24,6 +24,8 @@ import { OperatingMapChart } from "../components/OperatingMapChart";
 import { OptimizationPanel } from "../components/OptimizationPanel";
 import { UncertaintyPanel, UncertaintyBadge } from "../components/UncertaintyBadge";
 import { CompressorPickerModal } from "../components/CompressorPickerModal";
+import { FanPickerModal, type FanPickerItem } from "../components/FanPickerModal";
+import { useCnCoilsCatalogs as useCnCoilsFullCatalogs } from "../hooks/useCnCoilsCatalogCollection";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { EnrichedWarningsPanel } from "../components/EnrichedWarningsPanel";
 import { DrawingTab } from "../components/drawing/DrawingTab";
@@ -207,6 +209,29 @@ export function EvaporatorUnifiedWorkspacePage() {
   const [airTempIn, setAirTempIn] = useState(25);
   const [airRH, setAirRH] = useState(60);
   const [fanMode, setFanMode] = useState<"manual" | "catalog">("manual");
+  const [fanPickerOpen, setFanPickerOpen] = useState(false);
+  const fullCatalogs = useCnCoilsFullCatalogs();
+  const selectedFanId = useCnCoilsSimulationStore((s) => s.selectedFanId);
+  const fanPickerItems = useMemo<FanPickerItem[]>(
+    () =>
+      (fullCatalogs.fans ?? []).map((f) => ({
+        id: String(f.id),
+        manufacturer: f.builder,
+        model: f.model,
+        series: f.series,
+        airflow_m3h: f.airflowM3h,
+        diameter_mm: f.diameterMm,
+        rpm: f.speedRpm,
+        motor_power_w: f.powerW,
+        motor_current_a: f.currentA,
+        voltage_v: f.voltageV,
+      })),
+    [fullCatalogs.fans],
+  );
+  const selectedFan = useMemo(
+    () => fanPickerItems.find((f) => f.id === selectedFanId),
+    [fanPickerItems, selectedFanId],
+  );
   const [staticPressure, setStaticPressure] = useState(0);
   const [safetyFactor, setSafetyFactor] = useState(0);
 
@@ -612,6 +637,18 @@ export function EvaporatorUnifiedWorkspacePage() {
                 </SelectContent>
               </Select>
             </div>
+            {fanMode === "catalog" && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full h-8 text-xs"
+                onClick={() => setFanPickerOpen(true)}
+              >
+                {selectedFan
+                  ? `${[selectedFan.manufacturer, selectedFan.model].filter(Boolean).join(" ") || "Ventilador"} ✓`
+                  : "Selecionar ventilador…"}
+              </Button>
+            )}
             <div>
               <Label className="text-[10px] text-muted-foreground">Velocidade frontal (m/s)</Label>
               <Input readOnly value={fmt(frontalVelocity, 2)} className="h-8 text-xs bg-muted/40" />
@@ -804,6 +841,15 @@ export function EvaporatorUnifiedWorkspacePage() {
       <CompressorPickerModal
         open={compressorPickerOpen}
         onClose={() => setCompressorPickerOpen(false)}
+      />
+
+      <FanPickerModal
+        open={fanPickerOpen}
+        onClose={() => setFanPickerOpen(false)}
+        fans={fanPickerItems}
+        onConfirm={(item) => {
+          toast.success(`Ventilador selecionado: ${[item.manufacturer, item.model].filter(Boolean).join(" ")}`);
+        }}
       />
 
       <PostSaveNextStepDialog
