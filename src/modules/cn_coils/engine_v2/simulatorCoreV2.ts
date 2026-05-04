@@ -260,32 +260,53 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
   });
 
   // 10. Q_total via efetividade
+  //
+  // Modelo ASHRAE wet-coil (regime úmido) vs. modelo seco (regime seco):
+  //   - Regime seco: Q = ε · Cmin · dTmax  (dTmax = T_ar - T_superfície)
+  //   - Regime úmido: Q = ε · m_ar · dh_max  (dh_max = h_in - h_sat_superfície)
+  //     O modelo úmido usa diferença de entalpia para capturar calor latente.
+  //     Ref: ASHRAE Fundamentals 2017, Cap. 23 (Coil Performance)
   const dTmax = thermo.airInletTempC - Tsurface;
-  const Qmax = nt.Cmin * Math.abs(dTmax);
-  let Q_total_W = nt.effectiveness * Qmax;
-
-  // 11. Sensível / latente
-  let T_air_out_C = thermo.airInletTempC - (isCooling(componentType) ? 1 : -1) *
-    (nt.effectiveness * Math.abs(dTmax));
+  let Q_total_W: number;
+  let T_air_out_C: number;
   let W_out = airIn.W_kg_kg;
-  let Q_sens_W = airMassFlowKgS * airIn.cp_J_kgK * (thermo.airInletTempC - T_air_out_C);
+  let Q_sens_W: number;
   let Q_lat_W = 0;
 
   if (hasCondensation) {
-    // Saturado à T_superfície (ASHRAE — modelo de "wet-coil" por entalpia)
+    // Modelo wet-coil ASHRAE: usar diferença de entalpia
+    // h_surface_sat = entalpia do ar saturado à temperatura da superfície
     const W_surface_sat = humidityRatio(Tsurface, 1, airIn.pAtm_Pa);
-    W_out = Math.min(airIn.W_kg_kg, W_surface_sat);
-    // h_out a partir do balanço:  Q_total = m_ar · (h_in - h_out)
-    const h_out = airIn.h_kJ_kg - Q_total_W / 1000 / airMassFlowKgS;
-    // Inverso da eq. (32): t = (h - 2501·W) / (1.006 + 1.86·W)
-    T_air_out_C = (h_out - 2501 * W_out) / (1.006 + 1.86 * W_out);
-    Q_sens_W = airMassFlowKgS * airIn.cp_J_kgK * (thermo.airInletTempC - T_air_out_C);
-    Q_lat_W = Q_total_W - Q_sens_W;
-    if (Q_lat_W < 0) {
-      // saneamento
-      Q_lat_W = 0;
-      Q_total_W = Q_sens_W;
+    const h_surface_sat_kJkg = 1.006 * Tsurface + W_surface_sat * (2501 + 1.86 * Tsurface);
+    // dh_max = h_in - h_surface_sat (motor de transferência de calor total)
+    const dh_max_kJkg = airIn.h_kJ_kg - h_surface_sat_kJkg;
+    // Q_total = ε · m_ar · dh_max (kW)
+    Q_total_W = nt.effectiveness * airMassFlowKgS * Math.abs(dh_max_kJkg) * 1000;
+    // h_out a partir do balanço de entalpia
+    const h_out_kJkg = airIn.h_kJ_kg - Q_total_W / 1000 / airMassFlowKgS;
+    // T_ar_out via NTU-ε (temperatura de saída do ar, regime seco)
+    // Usamos a temperatura de saída do modelo seco como aproximação de T_out
+    T_air_out_C = thermo.airInletTempC - (isCooling(componentType) ? 1 : -1) *
+      (nt.effectiveness * Math.abs(dTmax));
+    // W_out a partir de h_out e T_out (inverso da eq. ASHRAE 32)
+    // W = (h - 1.006·T) / (2501 + 1.86·T)
+    const W_out_from_enthalpy = (h_out_kJkg - 1.006 * T_air_out_C) / (2501 + 1.86 * T_air_out_C);
+    // Limitar: W_out ∈ [W_surface_sat, W_in]
+    W_out = Math.max(W_surface_sat, Math.min(airIn.W_kg_kg, W_out_from_enthalpy));
+    // Q_lat e Q_sens a partir de W_out
+    Q_lat_W = airMassFlowKgS * (airIn.W_kg_kg - W_out) * 2501 * 1000; // W
+    Q_sens_W = Q_total_W - Q_lat_W;
+    if (Q_sens_W < 0) {
+      Q_sens_W = 0;
+      Q_lat_W = Q_total_W;
     }
+  } else {
+    // Regime seco: modelo NTU-ε clássico com diferença de temperatura
+    const Qmax = nt.Cmin * Math.abs(dTmax);
+    Q_total_W = nt.effectiveness * Qmax;
+    T_air_out_C = thermo.airInletTempC - (isCooling(componentType) ? 1 : -1) *
+      (nt.effectiveness * Math.abs(dTmax));
+    Q_sens_W = airMassFlowKgS * airIn.cp_J_kgK * (thermo.airInletTempC - T_air_out_C);
   }
 
   // 12. RH na saída — psat ASHRAE + relação W↔pw

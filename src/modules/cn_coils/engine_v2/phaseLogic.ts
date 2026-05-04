@@ -32,7 +32,11 @@ export function determineFluidPhase(inputs: PhaseInputs): FluidPhase {
   switch (inputs.componentType) {
     case "evaporator_dx":
     case "evaporator_pumped":
-      if (sh > 0.1) return "superaquecido";
+      // Para o cálculo NTU-ε global, o fluido no evaporador é predominantemente bifásico.
+      // O SH é uma condição de saída (boundary condition), não uma fase global.
+      // Usar C_fluido = Infinity (mudança de fase) é consistente com o modelo NTU-ε
+      // e com o motor V1 (Cr = 0). A variável `sh` é mantida para uso futuro.
+      void sh;
       return "bifasico";
     case "condenser_air":
     case "condenser_shell_tube":
