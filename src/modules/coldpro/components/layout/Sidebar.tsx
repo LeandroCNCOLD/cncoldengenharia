@@ -97,11 +97,23 @@ export function Sidebar({ onClose }: SidebarProps = {}) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const projectCount = useProjectStore((s) => s.projects.length);
 
-  const isActive = (item: NavItem) =>
-    item.exact ? pathname === item.to : pathname === item.to || pathname.startsWith(item.to + "/");
+  const isActive = (item: NavItem) => {
+    const pathMatch = item.exact
+      ? pathname === item.to
+      : pathname === item.to || pathname.startsWith(item.to + "/");
+    if (!pathMatch) return false;
+    if (item.search && typeof item.search === "object") {
+      if (typeof window === "undefined") return false;
+      const params = new URLSearchParams(window.location.search);
+      return Object.entries(item.search).every(
+        ([key, value]) => params.get(key) === String(value),
+      );
+    }
+    return true;
+  };
 
   return (
-    <aside className="flex h-full w-56 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
+    <aside className="flex h-full w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
       <div className="border-b border-sidebar-border p-4">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
