@@ -212,6 +212,7 @@ export function CondenserWorkspacePage() {
 
   // ── Compressor ──
   const [compressorPickerOpen, setCompressorPickerOpen] = useState(false);
+  const [nextStepOpen, setNextStepOpen] = useState(false);
   const [compressorMode, setCompressorMode] = useState<CompressorMode>("ari");
   const [frequency, setFrequency] = useState(60);
   const [voltage, setVoltage] = useState(380);
