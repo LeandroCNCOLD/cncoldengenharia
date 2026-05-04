@@ -187,7 +187,7 @@ export function WaterCondenserWorkspacePage() {
               <ResultCard label="LMTD" value={fmt(result.LMTD_K, 1)} unit="K" />
               <ResultCard label="U global" value={fmt(result.U_Wm2K, 0)} unit="W/m²K" />
               <ResultCard label="h água" value={fmt(result.h_water_Wm2K ?? 0, 0)} unit="W/m²K" />
-              <ResultCard label="h refrigerante" value={fmt(result.h_ref_Wm2K ?? 0, 0)} unit="W/m²K" />
+              <ResultCard label="h refrigerante" value={fmt(result.h_ref_Wm2K ?? 3500, 0)} unit="W/m²K" />
               <ResultCard label="v água" value={fmt(result.v_water_ms ?? 0, 2)} unit="m/s" />
               <ResultCard label="Re água" value={fmt(result.Re_water ?? 0, 0)} unit="" hint={(result.Re_water ?? 0) > 2300 ? "Turbulento" : "Laminar"} />
               <ResultCard
