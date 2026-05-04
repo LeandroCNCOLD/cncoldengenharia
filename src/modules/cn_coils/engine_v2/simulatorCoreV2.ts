@@ -32,9 +32,16 @@ import {
   computeNtuEpsilon,
   dittusBoelter,
   computeOverallU,
-  shahTwoPhase,
+  jungDidion1989,
+  shahCondensation1979,
+  calcFluidPressureDropV2,
   type FluidPropsSinglePhase,
 } from "./heatTransfer";
+import {
+  applyCorrection,
+  validateCorrectionMultipliers,
+  type CorrectionMultipliers,
+} from "./refrigerantProps";
 import { determineFluidPhase, type FluidPhase } from "./phaseLogic";
 import type {
   CnCoilsComponentType,
@@ -61,6 +68,8 @@ export interface SimulationV2Inputs {
   finCorrectionFactor?: number;
   /** Calor latente de vaporização [kJ/kg]. */
   h_fg_kJkg?: number;
+  /** M6 — Multiplicadores de correção para calibração com dados experimentais. */
+  correctionMultipliers?: CorrectionMultipliers;
 }
 
 export class SimulationV2Error extends Error {
@@ -149,11 +158,16 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
   const airH = computeAirSideH(physical, faceVelocityMs);
   warnings.push(...airH.warnings);
 
-  // Aplicar FatCorAl (fator de correção da aleta por tipo)
+  // M6 — Validar e aplicar multiplicadores de correção
+  const cm = inputs.correctionMultipliers ?? {};
+  const cmWarnings = validateCorrectionMultipliers(cm);
+  warnings.push(...cmWarnings);
+
+  // Aplicar FatCorAl (fator de correção da aleta por tipo) + M6 multiplicador h_o
   const finFactor = Number.isFinite(inputs.finCorrectionFactor) && inputs.finCorrectionFactor! > 0
     ? inputs.finCorrectionFactor!
     : 1.0;
-  const h_air_corrected = airH.h_air_Wm2K * finFactor;
+  const h_air_corrected = applyCorrection(airH.h_air_Wm2K * finFactor, cm.airSideH);
 
   // 6. h_fluido — Dittus-Boelter (monofásico) ou Shah (bifásico)
   const Di_m = physical.tubeInnerDiameterMm * MM_TO_M;
@@ -193,16 +207,25 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
   const Pr_l =
     (inputs.fluidProps.cp_J_kgK * inputs.fluidProps.mu_Pa_s) /
     inputs.fluidProps.k_W_mK;
-  const hFluid =
-    fluidPhase === "bifasico" ? shahTwoPhase(hLiquid, 0.5, Pr_l) : hLiquid;
+  // M3 — Jung & Didion (1989) para evaporação de blends; Shah (1979) para condensação
+  const isCondenser = componentType === "condenser_air" || componentType === "condenser_shell_tube";
+  const hFluidRaw = fluidPhase === "bifasico"
+    ? (isCondenser
+        ? shahCondensation1979(hLiquid, 0.5, Pr_l)
+        : jungDidion1989(hLiquid, 0.5, Pr_l))
+    : hLiquid;
+  // M6 — Aplicar multiplicador h_i
+  const hFluid = applyCorrection(hFluidRaw, cm.fluidSideH);
 
   // 7. U global por resistências em série, referenciado à área externa.
+  // M2 — Eficiência de superfície η_o via método de Schmidt (já calculada em computeAirSideH)
   const overall = computeOverallU({
     h_o: h_air_corrected,
     h_i: hFluid,
     r_o_m: Do_m / 2,
     r_i_m: Di_m / 2,
     k_tube_WmK: inputs.tubeMaterialConductivity,
+    eta_surface: airH.eta_surface,
   });
   warnings.push(...overall.warnings);
   const foulingExternal = inputs.foulingExternal ?? 0;
@@ -214,9 +237,11 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
     ]);
   }
 
-  // 8. Área efetiva (face × rows × finEfficiency × areaCorrection)
-  const finEff = 0.85;
-  const areaCorr = 1;
+  // 8. Área efetiva (face × rows × η_o_Schmidt × areaCorrection)
+  // M2 — usa η_surface calculado pelo método de Schmidt em vez de 0.85 fixo
+  const finEff = airH.eta_surface; // Schmidt — varia com geometria e material
+  // M6 — Multiplicador de área
+  const areaCorr = applyCorrection(1.0, cm.heatTransferArea);
   // Estimativa: área externa ≈ face × rows × (π·Do/passo_long) × finEff × correção
   const tubeDensityPerRow = 1 / (physical.tubePitchLongitudinalMm * MM_TO_M);
   const areaPerRowPerM2Face = Math.PI * Do_m * tubeDensityPerRow;
@@ -270,9 +295,11 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
   const V_face_m_s = faceVelocityMs;
   const N_rows = physical.rows;
   const fin_pitch_mm = physical.finPitchMm ?? 3.0;
-  const airDp = calcAirPressureDrop(V_face_m_s, N_rows, fin_pitch_mm);
+  const airDpRaw = calcAirPressureDrop(V_face_m_s, N_rows, fin_pitch_mm);
+  // M6 — Multiplicador ΔP ar
+  const airDp = applyCorrection(airDpRaw, cm.airPressureDrop);
 
-  // Perda de carga — fluido (Darcy-Weisbach)
+  // Perda de carga — fluido (M4: Müller-Steinhagen & Heck para bifásico; Darcy-Weisbach para monofásico)
   const tubesPerRow = physical.tubesPerRow ?? Math.max(1, Math.round(finnedHeightM / (physical.tubePitchTransverseMm * MM_TO_M)));
   const tubeLength_m = finnedLengthM;
   const L_circuit_m = tubeLength_m * N_rows * (tubesPerRow / Math.max(1, physical.circuits));
@@ -283,7 +310,22 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
     : 0;
   const rho_kg_m3 = inputs.fluidProps.rho_kg_m3 ?? 1100;
   const mu_Pa_s = inputs.fluidProps.mu_Pa_s ?? 2.2e-4;
-  const fluidDp = calcFluidPressureDrop(L_circuit_m, D_i_m, G_kg_m2s, rho_kg_m3, mu_Pa_s);
+  // Propriedades do vapor para Müller-Steinhagen & Heck (estimativa: ρ_v ≈ ρ_l/10, μ_v ≈ μ_l/5)
+  const rho_vapor_kg_m3 = rho_kg_m3 / 10;
+  const mu_vapor_Pa_s = mu_Pa_s / 5;
+  const fluidDpRaw = calcFluidPressureDropV2({
+    L_circuit_m,
+    D_i_m,
+    G_kg_m2s,
+    rho_kg_m3,
+    mu_Pa_s,
+    fluidPhase,
+    rho_vapor_kg_m3,
+    mu_vapor_Pa_s,
+    quality_x: 0.5,
+  });
+  // M6 — Multiplicador ΔP fluido
+  const fluidDp = applyCorrection(fluidDpRaw, cm.fluidPressureDrop);
 
   const result: SimulationV2Result = {
     totalCapacityKw: Q_total_W / 1000,

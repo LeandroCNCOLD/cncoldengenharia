@@ -96,6 +96,8 @@ export interface CnCoilsPhysicalInputs {
   rowFinPitchesMm?: number[];
   /** Tipo de aleta para seleção de correlação (plain/wavy/louver). */
   finType?: string;
+  /** Condutividade térmica do material da aleta [W/(m·K)]. Alumínio ≈ 205, cobre ≈ 385. Padrão: 205. */
+  finMaterialConductivity?: number;
   /** Passo do louver [m] — usado pela correlação Chang-Wang 1997. */
   L_p?: number;
   /** Ângulo do louver [°] — usado pela correlação Chang-Wang 1997. */
