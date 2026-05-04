@@ -170,6 +170,29 @@ export function CompressorWorkspacePage() {
     `${fmt(inputs.frequency_Hz, 0)} Hz`,
   ];
 
+  const aiContext: AIContext = useMemo(() => ({
+    componentType: "Compressor",
+    tabName: activeTab,
+    refrigerant: inputs.refrigerant,
+    parameters: {
+      "Modelo": `${inputs.compressorBrand} ${inputs.compressorModel}` || "—",
+      "Te (°C)": inputs.Te_C,
+      "Tc (°C)": inputs.Tc_C,
+      "SH (K)": inputs.Tsuperheating_K,
+      "SC (K)": inputs.Tsubcooling_K,
+      "Tensão (V)": inputs.voltage_V,
+      "Frequência (Hz)": inputs.frequency_Hz,
+    },
+    results: result ? {
+      "Q evap (kW)": (result.Q_evap_W / 1000).toFixed(2),
+      "W comp (kW)": (result.W_comp_W / 1000).toFixed(2),
+      "COP": result.COP.toFixed(2),
+      "EER": result.EER.toFixed(2),
+      "Fluxo massa (kg/h)": (result.m_dot_kgS * 3600).toFixed(1),
+    } : undefined,
+    warnings: [],
+  }), [activeTab, inputs, result]);
+
   const sidebar = (
     <WorkspaceInputsSidebar
       onCalculate={() => cycle.trigger()}
