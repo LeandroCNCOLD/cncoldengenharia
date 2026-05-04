@@ -47,6 +47,7 @@ import {
   useUnitStore,
   type CapacityUnit,
 } from "../store/useUnitStore";
+import { CAPACITY_UNITS, capacityConv } from "../utils/unitConversions";
 import { enrichWarnings } from "../utils/warningEnricher";
 import { useCatalogPreloadStore } from "@/modules/coldpro_catalog/store/useCatalogPreloadStore";
 import { catalogRowToEvaporatorInputs } from "@/modules/coldpro_catalog/utils/catalogRowToWorkspaceInputs";
