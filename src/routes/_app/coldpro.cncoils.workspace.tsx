@@ -2,6 +2,7 @@ import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { CnCoilsWorkspacePage } from "@/modules/cn_coils/pages/CnCoilsWorkspacePage";
+import { CycleWorkspacePage } from "@/modules/cn_coils/pages/CycleWorkspacePage";
 import { CondenserWorkspacePage } from "@/modules/cn_coils/pages/CondenserWorkspacePage";
 import { CompressorWorkspacePage } from "@/modules/cn_coils/pages/CompressorWorkspacePage";
 import { EvaporativeCondenserWorkspacePage } from "@/modules/cn_coils/pages/EvaporativeCondenserWorkspacePage";
@@ -59,10 +60,12 @@ function CnCoilsWorkspaceRoute() {
   const resolved =
     (search.type && TYPE_ALIASES[search.type as string]) ?? search.type;
 
+  if (resolved === "evaporator_dx" || resolved === "evaporator_pumped") return <CycleWorkspacePage />;
   if (resolved === "condenser_air") return <CondenserWorkspacePage />;
   if (resolved === "compressor") return <CompressorWorkspacePage />;
   if (resolved === "evaporative_condenser") return <EvaporativeCondenserWorkspacePage />;
   if (resolved === "water_condenser") return <WaterCondenserWorkspacePage />;
   if (resolved === "heating_coil") return <HeatingCoilWorkspacePage />;
+  // Tipos sem workspace dedicado ainda (cooling_coil, defrost_steam_coil, recuperator, shell_tube, chiller_unit)
   return <CnCoilsWorkspacePage />;
 }
