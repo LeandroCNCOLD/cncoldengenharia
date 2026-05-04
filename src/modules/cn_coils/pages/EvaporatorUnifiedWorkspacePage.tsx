@@ -51,6 +51,8 @@ import { CAPACITY_UNITS, capacityConv } from "../utils/unitConversions";
 import { enrichWarnings } from "../utils/warningEnricher";
 import { useCatalogPreloadStore } from "@/modules/coldpro_catalog/store/useCatalogPreloadStore";
 import { catalogRowToEvaporatorInputs } from "@/modules/coldpro_catalog/utils/catalogRowToWorkspaceInputs";
+import { loadCompressorIndex } from "@/modules/coldpro_catalog/data/compressorCatalog.service";
+import { useProjectStore } from "../store/useProjectStore";
 import type { AIContext } from "../components/WorkspaceAIChat";
 import type { StructuredWarning } from "../types/warnings";
 import type { OperatingMapPoint } from "../engines/operatingMap/operatingMapTypes";
@@ -347,6 +349,42 @@ export function EvaporatorUnifiedWorkspacePage() {
     if (inputs.tc !== undefined) setTc(inputs.tc);
     if (inputs.superheat !== undefined) setSuperheat(inputs.superheat);
     if (inputs.subcooling !== undefined) setSubcooling(inputs.subcooling);
+    // Cria/ativa projeto com o nome do modelo do catálogo
+    try {
+      const ps = useProjectStore.getState();
+      const projectName = pendingEvaporator.modelo ?? pendingEvaporator.modeloUnico ?? "Projeto do catálogo";
+      const existing = ps.projects.find((p) => p.name === projectName);
+      const id = existing
+        ? existing.id
+        : ps.saveProject(projectName, "component_workspace", {});
+      ps.updateProjectHeader(id, {
+        projectCode: pendingEvaporator.modeloUnico ?? pendingEvaporator.modelo,
+        status: "draft",
+      });
+      ps.setActiveProject(id);
+    } catch (err) {
+      console.error("[EvapWorkspace] Falha ao criar projeto a partir do catálogo:", err);
+    }
+
+    // Tenta herdar compressor do catálogo
+    const compModel = pendingEvaporator.compressorModelo ?? pendingEvaporator.compressorCodigo;
+    if (compModel) {
+      void loadCompressorIndex()
+        .then((index) => {
+          const target = String(compModel).trim().toLowerCase();
+          const match =
+            index.find((r) => r.model?.toLowerCase() === target) ??
+            index.find((r) => r.model?.toLowerCase().includes(target));
+          if (match) {
+            useCnCoilsSimulationStore.getState().setSelectedCompressor(match.id);
+            toast.success(`Compressor herdado do catálogo: ${match.model}`);
+          } else {
+            toast.warning(`Compressor "${compModel}" não encontrado no índice.`);
+          }
+        })
+        .catch((e) => console.error("[EvapWorkspace] Falha ao herdar compressor:", e));
+    }
+
     clearCatalogPreload();
     toast.success(`Dados carregados do catálogo: ${pendingEvaporator.modelo}`);
     setTimeout(() => simState.trigger(), 0);
