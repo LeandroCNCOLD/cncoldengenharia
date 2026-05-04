@@ -98,6 +98,8 @@ export function CondenserWorkspacePage() {
     geometryId: physical.geometryId ?? "",
     airFlowM3H: airFlowM3H > 0 ? airFlowM3H : 5000,
   });
+  const [activeTab, setActiveTab] = useState("results");
+  const [aiOpen, setAiOpen] = useState(false);
 
   const syncedInputs = useMemo<CondenserInputs>(
     () => ({
