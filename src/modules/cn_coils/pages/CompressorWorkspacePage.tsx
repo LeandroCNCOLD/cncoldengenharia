@@ -1,22 +1,30 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Loader2, Play, Save, Zap } from "lucide-react";
+import { Calculator, Save, Zap } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
 import {
   getCompressorById,
-  loadCompressorIndex,
 } from "@/modules/coldpro_catalog/data/compressorCatalog.service";
 import type { CompressorCatalogRow } from "@/modules/coldpro_catalog/data/compressorCatalog.types";
 import { CompressorEnvelopeChart } from "../components/CompressorEnvelopeChart";
 import { CompressorOperatingPointTab } from "../components/CompressorOperatingPointTab";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
-import { SaveProjectButton } from "../components/SaveProjectButton";
+import { ActionBar } from "../components/ActionBar";
+import { ResultCard } from "../components/ResultCard";
+import { WorkspaceHeader } from "../components/WorkspaceHeader";
+import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
+import { WorkspaceLayout } from "../components/WorkspaceLayout";
 import {
   CompressorPickerModal,
   type CompressorItem,
@@ -48,7 +56,6 @@ const DEFAULT_INPUTS: CompressorWorkspaceInputs = {
 };
 
 export function CompressorWorkspacePage() {
-  const navigate = useNavigate();
   const { isGenerating: pdfGenerating, exportPdf } = usePdfExport();
   const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -109,59 +116,98 @@ export function CompressorWorkspacePage() {
     });
   };
 
-  return (
-    <PageContainer
-      title="Compressor"
-      subtitle="Workspace dedicado ao ponto de operação e envelope operacional"
-      actions={
-        <div className="flex flex-wrap gap-2">
-          <SaveProjectButton
-            defaultName={inputs.compressorModel || "Compressor"}
-            type="component_workspace"
-            systemInputs={inputs as unknown as Record<string, unknown>}
-          />
-          <Button variant="outline" onClick={() => navigate({ to: ".." })}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar
-          </Button>
-        </div>
-      }
-    >
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <Badge variant={inputs.compressorId ? "default" : "secondary"}>
-          {inputs.compressorId
-            ? `${inputs.compressorBrand} ${inputs.compressorModel}`
-            : "Nenhum compressor selecionado"}
-        </Badge>
-        <Badge variant="outline">{inputs.refrigerant}</Badge>
-        <Badge variant="outline">{fmt(inputs.frequency_Hz, 0)} Hz</Badge>
-      </div>
+  const handleReset = () => setInputs(DEFAULT_INPUTS);
 
-      <div className="grid grid-cols-1 gap-3 xl:grid-cols-[300px_minmax(0,1fr)]">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm">
-              <Zap className="h-4 w-4 text-amber-500" />
-              Seleção e Condições
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+  const handleExportPdf = () => {
+    if (!result) {
+      toast.error("Calcule antes de exportar.");
+      return;
+    }
+    exportPdf(
+      <WorkspacePdfReport
+        componentType="compressor"
+        title="Compressor"
+        inputs={{
+          Modelo: `${inputs.compressorBrand} ${inputs.compressorModel}`,
+          Refrigerante: inputs.refrigerant,
+          Te: `${fmt(inputs.Te_C)} °C`,
+          Tc: `${fmt(inputs.Tc_C)} °C`,
+          Tensão: `${fmt(inputs.voltage_V, 0)} V`,
+        }}
+        results={{
+          "Q evap": `${fmt(result.Q_evap_W / 1000)} kW`,
+          "W comp": `${fmt(result.W_comp_W / 1000)} kW`,
+          COP: fmt(result.COP),
+          EER: fmt(result.EER),
+          "Fluxo massa": `${fmt(result.m_dot_kgS * 3600)} kg/h`,
+        }}
+        warnings={result.warnings}
+      />,
+      `compressor-${new Date().toISOString().slice(0, 10)}.pdf`,
+    );
+  };
+
+  const handleSave = () => toast.success("Projeto salvo (em memória).");
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copiado.");
+    } catch {
+      toast.error("Não foi possível copiar.");
+    }
+  };
+  const handleExportCsv = () => toast.info("Exportação CSV em desenvolvimento.");
+  const handleExportExcel = () => toast.info("Exportação Excel em desenvolvimento.");
+
+  const badges = [
+    inputs.refrigerant,
+    inputs.compressorModel || "—",
+    `${fmt(inputs.frequency_Hz, 0)} Hz`,
+  ];
+
+  const sidebar = (
+    <WorkspaceInputsSidebar
+      onCalculate={() => cycle.trigger()}
+      onReset={handleReset}
+      isCalculating={isCalculating}
+      canCalculate={!!inputs.compressorId}
+    >
+      <Accordion type="multiple" defaultValue={["sel", "op", "elec"]} className="w-full">
+        <AccordionItem value="sel">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">
+            Seleção do Compressor
+          </AccordionTrigger>
+          <AccordionContent className="space-y-2">
             <Button
               variant="outline"
-              className="w-full justify-start"
+              size="sm"
+              className="w-full justify-start h-8 text-xs"
               onClick={() => setPickerOpen(true)}
             >
               {inputs.compressorId
                 ? `${inputs.compressorBrand} ${inputs.compressorModel}`
                 : "Selecionar compressor…"}
             </Button>
+            <TextField
+              label="Refrigerante"
+              value={inputs.refrigerant}
+              onChange={(refrigerant) => updateInputs({ refrigerant })}
+            />
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="op">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">
+            Condições de Operação
+          </AccordionTrigger>
+          <AccordionContent className="space-y-2">
             <NumberField
-              label="Temperatura de Evaporação (°C)"
+              label="Te — Evaporação (°C)"
               value={inputs.Te_C}
               onChange={(Te_C) => updateInputs({ Te_C })}
             />
             <NumberField
-              label="Temperatura de Condensação (°C)"
+              label="Tc — Condensação (°C)"
               value={inputs.Tc_C}
               onChange={(Tc_C) => updateInputs({ Tc_C })}
             />
@@ -175,11 +221,12 @@ export function CompressorWorkspacePage() {
               value={inputs.Tsubcooling_K}
               onChange={(Tsubcooling_K) => updateInputs({ Tsubcooling_K })}
             />
-            <TextField
-              label="Refrigerante"
-              value={inputs.refrigerant}
-              onChange={(refrigerant) => updateInputs({ refrigerant })}
-            />
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="elec">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">Elétrica</AccordionTrigger>
+          <AccordionContent className="space-y-2">
             <NumberField
               label="Tensão (V)"
               value={inputs.voltage_V}
@@ -190,138 +237,144 @@ export function CompressorWorkspacePage() {
               value={inputs.frequency_Hz}
               onChange={(frequency_Hz) => updateInputs({ frequency_Hz })}
             />
-            <Button
-              className="w-full"
-              disabled={isCalculating || !inputs.compressorId}
-              onClick={() => cycle.trigger()}
-            >
-              {isCalculating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Calculando…
-                </>
-              ) : (
-                <>
-                  <Play className="mr-2 h-4 w-4" />
-                  ▶ Calcular
-                </>
-              )}
-            </Button>
-            {cycle.status === "error" && (
-              <p className="rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-700">
-                {cycle.message}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+          </AccordionContent>
+        </AccordionItem>
 
-        <Tabs defaultValue="operation" className="min-w-0">
-          <TabsList>
-            <TabsTrigger value="operation">📋 Ponto de Operação</TabsTrigger>
-            <TabsTrigger value="envelope">📊 Envelope Operacional</TabsTrigger>
-            <TabsTrigger value="capacity">📈 Curva de Capacidade</TabsTrigger>
-            <TabsTrigger value="electric">⚡ Dados Elétricos</TabsTrigger>
-          </TabsList>
+        {cycle.status === "error" && (
+          <div className="mt-2 rounded border border-red-500/30 bg-red-500/5 p-2 text-xs text-red-500">
+            {cycle.message}
+          </div>
+        )}
+      </Accordion>
+    </WorkspaceInputsSidebar>
+  );
 
-          <TabsContent value="operation" className="mt-3">
-            <div className="space-y-3">
+  const header = (
+    <WorkspaceHeader
+      title="Compressor"
+      icon={<Zap className="h-5 w-5" />}
+      badges={badges}
+      onSave={handleSave}
+      onShare={handleShare}
+      onExportPdf={handleExportPdf}
+      isExportingPdf={pdfGenerating}
+    />
+  );
+
+  return (
+    <WorkspaceLayout header={header} sidebar={sidebar}>
+      <div className="flex h-full flex-col">
+        <div className="flex items-center gap-2 border-b border-border bg-card/30 px-4 py-2">
+          <Badge variant={inputs.compressorId ? "default" : "secondary"}>
+            {inputs.compressorId
+              ? `${inputs.compressorBrand} ${inputs.compressorModel}`
+              : "Nenhum compressor selecionado"}
+          </Badge>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {isCalculating && !result ? (
+            <LoadingResults />
+          ) : result || envelope.points.length > 0 ? (
+            <>
               {result && (
-                <div className="flex justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={pdfGenerating}
-                    onClick={() =>
-                      exportPdf(
-                        <WorkspacePdfReport
-                          componentType="compressor"
-                          title="Compressor"
-                          inputs={{
-                            Modelo: `${inputs.compressorBrand} ${inputs.compressorModel}`,
-                            Refrigerante: inputs.refrigerant,
-                            Te: `${fmt(inputs.Te_C)} °C`,
-                            Tc: `${fmt(inputs.Tc_C)} °C`,
-                            Tensão: `${fmt(inputs.voltage_V, 0)} V`,
-                          }}
-                          results={{
-                            "Q evap": `${fmt(result.Q_evap_W / 1000)} kW`,
-                            "W comp": `${fmt(result.W_comp_W / 1000)} kW`,
-                            COP: fmt(result.COP),
-                            EER: fmt(result.EER),
-                            "Fluxo massa": `${fmt(result.m_dot_kgS * 3600)} kg/h`,
-                          }}
-                          warnings={result.warnings}
-                        />,
-                        `compressor-${new Date().toISOString().slice(0, 10)}.pdf`,
-                      )
-                    }
-                  >
-                    {pdfGenerating ? "⏳ Gerando PDF…" : "📄 Exportar PDF"}
-                  </Button>
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                  <ResultCard
+                    label="Capacidade"
+                    value={fmt(result.Q_evap_W / 1000)}
+                    unit="kW"
+                    variant="success"
+                  />
+                  <ResultCard
+                    label="Potência"
+                    value={fmt(result.W_comp_W / 1000)}
+                    unit="kW"
+                  />
+                  <ResultCard label="COP" value={fmt(result.COP)} />
+                  <ResultCard label="EER" value={fmt(result.EER)} />
                 </div>
               )}
-              <CompressorOperatingPointTab
-                result={result}
-                inputs={inputs}
-                isCalculating={isCalculating}
-              />
-            </div>
-          </TabsContent>
 
-          <TabsContent value="envelope" className="mt-3 space-y-3">
-            <Card>
-              <CardHeader className="flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-sm">Envelope Operacional Q×Te</CardTitle>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={envelope.isGenerating || !inputs.compressorId}
-                    onClick={envelope.generate}
-                  >
-                    {envelope.isGenerating ? "Gerando..." : "Gerar 45 pontos"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    disabled={envelope.points.length === 0}
-                    onClick={envelope.saveToTestBench}
-                  >
-                    <Save className="mr-2 h-4 w-4" />
-                    💾 Salvar para Bancada
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <CompressorEnvelopeChart
-                  points={envelope.points}
-                  nominalTe_C={inputs.Te_C}
-                  nominalTc_C={inputs.Tc_C}
-                  voltage_V={inputs.voltage_V}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
+              <Tabs defaultValue="operation" className="w-full">
+                <TabsList className="flex w-full flex-wrap justify-start">
+                  <TabsTrigger value="operation">📋 Ponto de Operação</TabsTrigger>
+                  <TabsTrigger value="envelope">📊 Envelope Capacidade</TabsTrigger>
+                  <TabsTrigger value="capacity">📈 Curva Tc fixo</TabsTrigger>
+                  <TabsTrigger value="electric">⚡ Dados Elétricos</TabsTrigger>
+                </TabsList>
 
-          <TabsContent value="capacity" className="mt-3">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Curva nominal em Tc fixo</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CompressorEnvelopeChart
-                  points={envelope.points.filter((point) => point.Tc_C === inputs.Tc_C)}
-                  nominalTe_C={inputs.Te_C}
-                  nominalTc_C={inputs.Tc_C}
-                  voltage_V={inputs.voltage_V}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
+                <TabsContent value="operation" className="mt-3">
+                  <div className="rounded-lg border border-border bg-card p-4">
+                    <CompressorOperatingPointTab
+                      result={result}
+                      inputs={inputs}
+                      isCalculating={isCalculating}
+                    />
+                  </div>
+                </TabsContent>
 
-          <TabsContent value="electric" className="mt-3">
-            <ElectricalDataCard inputs={inputs} metrics={metrics} />
-          </TabsContent>
-        </Tabs>
+                <TabsContent value="envelope" className="mt-3">
+                  <div className="rounded-lg border border-border bg-card p-4">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="text-sm font-semibold">Envelope Operacional Q×Te</h3>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={envelope.isGenerating || !inputs.compressorId}
+                          onClick={envelope.generate}
+                        >
+                          {envelope.isGenerating ? "Gerando..." : "Gerar 45 pontos"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          disabled={envelope.points.length === 0}
+                          onClick={envelope.saveToTestBench}
+                        >
+                          <Save className="mr-2 h-4 w-4" />
+                          Salvar para Bancada
+                        </Button>
+                      </div>
+                    </div>
+                    <CompressorEnvelopeChart
+                      points={envelope.points}
+                      nominalTe_C={inputs.Te_C}
+                      nominalTc_C={inputs.Tc_C}
+                      voltage_V={inputs.voltage_V}
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="capacity" className="mt-3">
+                  <div className="rounded-lg border border-border bg-card p-4">
+                    <h3 className="mb-3 text-sm font-semibold">Curva nominal em Tc fixo</h3>
+                    <CompressorEnvelopeChart
+                      points={envelope.points.filter((point) => point.Tc_C === inputs.Tc_C)}
+                      nominalTe_C={inputs.Te_C}
+                      nominalTc_C={inputs.Tc_C}
+                      voltage_V={inputs.voltage_V}
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="electric" className="mt-3">
+                  <ElectricalDataCards inputs={inputs} metrics={metrics} />
+                </TabsContent>
+              </Tabs>
+            </>
+          ) : (
+            <EmptyResults />
+          )}
+        </div>
+
+        <ActionBar
+          onExportCsv={handleExportCsv}
+          onExportExcel={handleExportExcel}
+          onExportPdf={handleExportPdf}
+          onShare={handleShare}
+          hasResults={!!result}
+          isExportingPdf={pdfGenerating}
+        />
       </div>
 
       <CompressorPickerModal
@@ -329,7 +382,7 @@ export function CompressorWorkspacePage() {
         onClose={() => setPickerOpen(false)}
         onSelect={handleSelect}
       />
-    </PageContainer>
+    </WorkspaceLayout>
   );
 }
 
@@ -367,7 +420,7 @@ function parseVoltage(voltage: string | null | undefined): number | null {
   return match ? Number(match[0]) : null;
 }
 
-function ElectricalDataCard({
+function ElectricalDataCards({
   inputs,
   metrics,
 }: {
@@ -375,27 +428,53 @@ function ElectricalDataCard({
   metrics: ReturnType<typeof estimateCompressorMetrics> | null;
 }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-sm">Dados Elétricos</CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <Metric label="Corrente nominal" value={metrics ? `${fmt(metrics.current_A)} A` : "—"} />
-        <Metric label="Potência absorvida" value={metrics ? `${fmt(metrics.W_W / 1000)} kW` : "—"} />
-        <Metric label="Fator de potência" value={metrics ? fmt(metrics.powerFactor) : "—"} />
-        <Metric label="Eficiência volumétrica" value={metrics ? `${fmt(metrics.volumetricEfficiency * 100, 0)}%` : "—"} />
-        <Metric label="Tensão" value={`${fmt(inputs.voltage_V, 0)} V`} />
-        <Metric label="Frequência" value={`${fmt(inputs.frequency_Hz, 0)} Hz`} />
-      </CardContent>
-    </Card>
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-3">
+      <ResultCard
+        label="Corrente nominal"
+        value={metrics ? fmt(metrics.current_A) : "—"}
+        unit={metrics ? "A" : ""}
+      />
+      <ResultCard
+        label="Potência absorvida"
+        value={metrics ? fmt(metrics.W_W / 1000) : "—"}
+        unit={metrics ? "kW" : ""}
+      />
+      <ResultCard
+        label="Fator de potência"
+        value={metrics ? fmt(metrics.powerFactor) : "—"}
+      />
+      <ResultCard
+        label="Eficiência volumétrica"
+        value={metrics ? fmt(metrics.volumetricEfficiency * 100, 0) : "—"}
+        unit={metrics ? "%" : ""}
+      />
+      <ResultCard label="Tensão" value={fmt(inputs.voltage_V, 0)} unit="V" />
+      <ResultCard label="Frequência" value={fmt(inputs.frequency_Hz, 0)} unit="Hz" />
+    </div>
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+function EmptyResults() {
   return (
-    <div className="rounded-lg border bg-muted/20 p-3">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="mt-1 text-lg font-semibold">{value}</div>
+    <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-3 text-muted-foreground">
+      <Calculator className="h-12 w-12 opacity-30" />
+      <p className="text-sm">
+        Selecione um compressor e clique em <strong>Calcular</strong>
+      </p>
+    </div>
+  );
+}
+
+function LoadingResults() {
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <Skeleton className="h-24" />
+        <Skeleton className="h-24" />
+        <Skeleton className="h-24" />
+        <Skeleton className="h-24" />
+      </div>
+      <Skeleton className="h-48 w-full" />
     </div>
   );
 }
@@ -411,11 +490,12 @@ function NumberField({
 }) {
   return (
     <div className="space-y-1">
-      <Label className="text-xs">{label}</Label>
+      <Label className="text-[10px] text-muted-foreground">{label}</Label>
       <Input
         type="number"
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
+        className="h-8 text-xs"
       />
     </div>
   );
@@ -432,8 +512,8 @@ function TextField({
 }) {
   return (
     <div className="space-y-1">
-      <Label className="text-xs">{label}</Label>
-      <Input value={value} onChange={(event) => onChange(event.target.value)} />
+      <Label className="text-[10px] text-muted-foreground">{label}</Label>
+      <Input value={value} onChange={(event) => onChange(event.target.value)} className="h-8 text-xs" />
     </div>
   );
 }
