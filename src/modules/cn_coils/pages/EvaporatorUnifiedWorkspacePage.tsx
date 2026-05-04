@@ -12,6 +12,7 @@ import { WorkspaceLayout } from "../components/WorkspaceLayout";
 import { WorkspaceHeader } from "../components/WorkspaceHeader";
 import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
 import { ResultCard } from "../components/ResultCard";
+import { ResultPanel } from "../components/ResultPanel";
 import { ActionBar } from "../components/ActionBar";
 import { CyclePHDiagram } from "../components/CyclePHDiagram";
 import { CoilEnvelopeTab } from "../components/CoilEnvelopeTab";
@@ -26,10 +27,23 @@ import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { EnrichedWarningsPanel } from "../components/EnrichedWarningsPanel";
 import { DrawingTab } from "../components/drawing/DrawingTab";
 import { WorkspaceAIChat } from "../components/WorkspaceAIChat";
+import { AirSidePanel } from "../components/AirSidePanel";
+import { FluidSidePanel } from "../components/FluidSidePanel";
+import { GeometryBottomBar } from "../components/GeometryBottomBar";
+import { WorkspaceSidebar } from "../components/WorkspaceSidebar";
+import { CircuitrySelector } from "../components/CircuitrySelector";
+import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
+import { useCnCoilsCatalogs } from "../hooks/useCnCoilsCatalogs";
+import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
+import { useCnCoilsSimulation } from "../hooks/useCnCoilsSimulation";
+import { useCnCoilsInputBridge } from "../hooks/useCnCoilsInputBridge";
+import {
+  validatePhysicalInputs,
+  validateThermoInputs,
+} from "../validators/simulationValidator";
 import { enrichWarnings } from "../utils/warningEnricher";
 import type { AIContext } from "../components/WorkspaceAIChat";
-
-import { CnCoilsWorkspacePage } from "./CnCoilsWorkspacePage";
+import type { StructuredWarning } from "../types/warnings";
 
 import {
   Accordion,
@@ -62,6 +76,21 @@ const REFRIGERANT_OPTIONS = ["R404A", "R22", "R134a", "R410A", "R507", "R448A", 
 type CalcMode = "verify" | "design";
 type EngineMode = "v1" | "v2";
 type CompressorMode = "ari" | "constant" | "manual";
+
+export const WORKSPACE_TABS = {
+  DETAILED: "detalhado",
+  RESULTS: "resultados",
+  CYCLE_PH: "ciclo_ph",
+  ENVELOPE: "envelope_q_te",
+  GEADA: "geada",
+  GEADA_AVANCADA: "geada_avancada",
+  MAPA_OPERACIONAL: "mapa_operacional",
+  INCERTEZA: "incerteza",
+  OTIMIZACAO: "otimizacao",
+  SERIE: "serie",
+  DESENHO: "desenho",
+  RELATORIO: "relatorio",
+} as const;
 
 const fmt = (v: number, d = 2) =>
   Number.isFinite(v)
@@ -623,6 +652,160 @@ function LoadingResults() {
   );
 }
 
+function DetailedWorkspaceTab({ onOpenAI }: { onOpenAI: () => void }) {
+  const catalogs = useCnCoilsCatalogs();
+  const physical = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const thermo = useCnCoilsSimulationStore((s) => s.thermoInputs);
+  const result = useCnCoilsSimulationStore((s) => s.result);
+  const warnings = useCnCoilsSimulationStore((s) => s.warnings);
+  const isSimulating = useCnCoilsSimulationStore((s) => s.isSimulating);
+  const reset = useCnCoilsSimulationStore((s) => s.reset);
+  const setWarnings = useCnCoilsSimulationStore((s) => s.setWarnings);
+
+  useCnCoilsInputBridge("evaporator_dx");
+
+  const simulationDeps = useMemo(
+    () => ({
+      geometries: catalogs.geometries,
+      tubeMaterials: catalogs.tubeMaterials,
+      correctionCoefficients: catalogs.correctionCoefficients,
+      pressureDropFan: catalogs.pressureDropFan,
+    }),
+    [
+      catalogs.geometries,
+      catalogs.tubeMaterials,
+      catalogs.correctionCoefficients,
+      catalogs.pressureDropFan,
+    ],
+  );
+  const { run } = useCnCoilsSimulation(simulationDeps);
+
+  const physCheck = validatePhysicalInputs(physical);
+  const thermoCheck = validateThermoInputs(thermo);
+  const inputsValid = physCheck.isValid && thermoCheck.isValid;
+  const validationWarnings = useMemo(
+    () =>
+      [...physCheck.errors, ...thermoCheck.errors].map((message) => ({
+        code: "VALIDATION_ERROR",
+        message,
+        severity: "warning" as const,
+      })),
+    [physCheck.errors, thermoCheck.errors],
+  );
+  const visibleWarnings: StructuredWarning[] = inputsValid ? warnings : validationWarnings;
+  const enrichedWarnings = useMemo(
+    () =>
+      enrichWarnings(
+        visibleWarnings
+          .map((warning) => warning.message)
+          .filter((message): message is string => typeof message === "string"),
+      ),
+    [visibleWarnings],
+  );
+  const canSimulate = catalogs.ready && inputsValid && !isSimulating;
+  const disabledReason = !catalogs.ready
+    ? "Carregando catálogos…"
+    : !inputsValid
+      ? `Preencha: ${[...physCheck.errors, ...thermoCheck.errors].join(" • ")}`
+      : undefined;
+
+  const handleSimulate = () => {
+    const latestPhysCheck = validatePhysicalInputs(useCnCoilsSimulationStore.getState().physicalInputs);
+    const latestThermoCheck = validateThermoInputs(useCnCoilsSimulationStore.getState().thermoInputs);
+    const errors = [...latestPhysCheck.errors, ...latestThermoCheck.errors];
+    if (errors.length > 0) {
+      setWarnings(
+        errors.map((message) => ({
+          code: "GEOMETRY_INCOMPLETE",
+          message,
+          severity: "warning" as const,
+        })),
+      );
+      return;
+    }
+    run();
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">
+            🏭 Fonte da Verdade — Detalhado
+          </h3>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5 h-7 text-xs border-primary/40 text-primary hover:bg-primary/10"
+            onClick={onOpenAI}
+          >
+            <Bot className="h-3.5 w-3.5" />
+            IA Especialista
+          </Button>
+        </div>
+        <EnrichedWarningsPanel warnings={enrichedWarnings} />
+      </div>
+
+      {catalogs.loading && (
+        <div className="flex items-center gap-2 rounded border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
+          <svg
+            className="h-3.5 w-3.5 animate-spin"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" />
+            <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+          </svg>
+          Carregando catálogos…
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-2 rounded-md shadow-sm md:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)]">
+        <WorkspaceSidebar
+          componentType="evaporator_dx"
+          onSimulate={handleSimulate}
+          onReset={reset}
+          canSimulate={canSimulate}
+          isSimulating={isSimulating}
+          faceAreaM2={result?.faceAreaM2}
+          disabledReason={disabledReason}
+        />
+
+        <div className="min-w-0 space-y-2 xl:contents">
+          <div className="min-w-0 space-y-2 xl:border-r xl:border-border xl:pr-2">
+            <AirSidePanel result={result} />
+          </div>
+
+          <div className="min-w-0 space-y-2">
+            <FluidSidePanel
+              componentType="evaporator_dx"
+              refrigerants={catalogs.refrigerants}
+              disabled={!catalogs.ready}
+              result={result}
+            />
+            {!catalogs.loading && !catalogs.ready && (
+              <DatasetStatusPanel
+                loading={catalogs.loading}
+                ready={catalogs.ready}
+                errors={catalogs.errors}
+                missing={catalogs.missing}
+                compact
+              />
+            )}
+            <ResultPanel result={result} warnings={visibleWarnings} onGoalSeek={() => {}} />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-2 space-y-2">
+        <GeometryBottomBar />
+        <CircuitrySelector />
+      </div>
+    </div>
+  );
+}
+
 // ── Tabs ────────────────────────────────────────────────────────────────────
 function UnifiedTabs({
   config,
@@ -681,11 +864,11 @@ function UnifiedTabs({
   }
 
   return (
-    <Tabs defaultValue="detailed" className="w-full">
+    <Tabs defaultValue={WORKSPACE_TABS.DETAILED} className="w-full">
       <TabsList className="flex w-full overflow-x-auto whitespace-nowrap scrollbar-none pb-px h-auto">
         {/* Aba Detalhado — PRIMEIRA, em vermelho como fonte da verdade */}
         <TabsTrigger
-          value="detailed"
+          value={WORKSPACE_TABS.DETAILED}
           className="shrink-0 text-xs font-semibold data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=inactive]:text-red-500 data-[state=inactive]:border-red-500/40"
         >
           🏭 Detalhado
@@ -693,20 +876,20 @@ function UnifiedTabs({
             <span className="ml-1 inline-flex h-2 w-2 rounded-full bg-red-500 data-[state=active]:bg-white" />
           )}
         </TabsTrigger>
-        <TabsTrigger value="results" className="shrink-0 text-xs">📋 Resultados</TabsTrigger>
-        <TabsTrigger value="ph" className="shrink-0 text-xs">🔄 Ciclo P-H</TabsTrigger>
-        <TabsTrigger value="envelope" className="shrink-0 text-xs">📊 Envelope Q×Te</TabsTrigger>
-        <TabsTrigger value="frost-analysis" className="shrink-0 text-xs">❄️ Geada</TabsTrigger>
-        <TabsTrigger value="frost" className="shrink-0 text-xs">🧊 Geada Avançada</TabsTrigger>
-        <TabsTrigger value="map" className="shrink-0 text-xs">📈 Mapa Operacional</TabsTrigger>
-        <TabsTrigger value="uncertainty" className="shrink-0 text-xs">📐 Incerteza</TabsTrigger>
-        <TabsTrigger value="optimization" className="shrink-0 text-xs">⚙️ Otimização</TabsTrigger>
-        <TabsTrigger value="series" className="shrink-0 text-xs">🔗 Série</TabsTrigger>
-        <TabsTrigger value="drawing" className="shrink-0 text-xs font-semibold data-[state=active]:bg-blue-700 data-[state=active]:text-white">🏗️ Desenho</TabsTrigger>
-        <TabsTrigger value="report" className="shrink-0 text-xs">📄 Relatório</TabsTrigger>
+        <TabsTrigger value={WORKSPACE_TABS.RESULTS} className="shrink-0 text-xs">📋 Resultados</TabsTrigger>
+        <TabsTrigger value={WORKSPACE_TABS.CYCLE_PH} className="shrink-0 text-xs">🔄 Ciclo P-H</TabsTrigger>
+        <TabsTrigger value={WORKSPACE_TABS.ENVELOPE} className="shrink-0 text-xs">📊 Envelope Q×Te</TabsTrigger>
+        <TabsTrigger value={WORKSPACE_TABS.GEADA} className="shrink-0 text-xs">❄️ Geada</TabsTrigger>
+        <TabsTrigger value={WORKSPACE_TABS.GEADA_AVANCADA} className="shrink-0 text-xs">🧊 Geada Avançada</TabsTrigger>
+        <TabsTrigger value={WORKSPACE_TABS.MAPA_OPERACIONAL} className="shrink-0 text-xs">📈 Mapa Operacional</TabsTrigger>
+        <TabsTrigger value={WORKSPACE_TABS.INCERTEZA} className="shrink-0 text-xs">📐 Incerteza</TabsTrigger>
+        <TabsTrigger value={WORKSPACE_TABS.OTIMIZACAO} className="shrink-0 text-xs">⚙️ Otimização</TabsTrigger>
+        <TabsTrigger value={WORKSPACE_TABS.SERIE} className="shrink-0 text-xs">🔗 Série</TabsTrigger>
+        <TabsTrigger value={WORKSPACE_TABS.DESENHO} className="shrink-0 text-xs font-semibold data-[state=active]:bg-blue-700 data-[state=active]:text-white">🏗️ Desenho</TabsTrigger>
+        <TabsTrigger value={WORKSPACE_TABS.RELATORIO} className="shrink-0 text-xs">📄 Relatório</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="results" className="mt-3">
+      <TabsContent value={WORKSPACE_TABS.RESULTS} className="mt-3">
         {cycleResult ? (
           <ResultsGrid
             config={config}
@@ -719,7 +902,7 @@ function UnifiedTabs({
         )}
       </TabsContent>
 
-      <TabsContent value="ph" className="mt-3">
+      <TabsContent value={WORKSPACE_TABS.CYCLE_PH} className="mt-3">
         {cycleResult ? (
           <div className="space-y-3">
             <div className="rounded-lg border border-border bg-card p-4">
@@ -744,13 +927,13 @@ function UnifiedTabs({
         ) : <EmptyState />}
       </TabsContent>
 
-      <TabsContent value="envelope" className="mt-3">
+      <TabsContent value={WORKSPACE_TABS.ENVELOPE} className="mt-3">
         <div className="rounded-lg border border-border bg-card p-4">
           <CoilEnvelopeTab equipmentId={config.id} />
         </div>
       </TabsContent>
 
-      <TabsContent value="frost-analysis" className="mt-3">
+      <TabsContent value={WORKSPACE_TABS.GEADA} className="mt-3">
         {cycleResult ? (
           <div className="rounded-lg border border-border bg-card p-4">
             <FrostAnalysisTab
@@ -764,23 +947,23 @@ function UnifiedTabs({
         ) : <EmptyState />}
       </TabsContent>
 
-      <TabsContent value="frost" className="mt-3">
+      <TabsContent value={WORKSPACE_TABS.GEADA_AVANCADA} className="mt-3">
         {cycleResult ? <FrostTab config={config} cycleResult={cycleResult} /> : <EmptyState />}
       </TabsContent>
 
-      <TabsContent value="map" className="mt-3">
+      <TabsContent value={WORKSPACE_TABS.MAPA_OPERACIONAL} className="mt-3">
         {cycleResult ? <OperatingMapTab config={config} cycleResult={cycleResult} /> : <EmptyState />}
       </TabsContent>
 
-      <TabsContent value="uncertainty" className="mt-3">
+      <TabsContent value={WORKSPACE_TABS.INCERTEZA} className="mt-3">
         {cycleResult ? <UncertaintyTab config={config} cycleResult={cycleResult} /> : <EmptyState />}
       </TabsContent>
 
-      <TabsContent value="optimization" className="mt-3">
+      <TabsContent value={WORKSPACE_TABS.OTIMIZACAO} className="mt-3">
         {cycleResult ? <OptimizationTab config={config} cycleResult={cycleResult} /> : <EmptyState />}
       </TabsContent>
 
-      <TabsContent value="series" className="mt-3">
+      <TabsContent value={WORKSPACE_TABS.SERIE} className="mt-3">
         {cycleResult ? (
           <div className="rounded-lg border border-border bg-card p-4">
             <CoilsInSeriesPanel
@@ -795,47 +978,11 @@ function UnifiedTabs({
       </TabsContent>
 
       {/* ── Aba Detalhado — PRIMEIRA, fonte da verdade ── */}
-      <TabsContent value="detailed" className="mt-3">
-        <div className="space-y-3">
-          {/* Banner de avisos enriquecidos */}
-          {cycleResult && (
-            <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">🏭 Fonte da Verdade — Detalhado</h3>
-                <AIButton tab="Detalhado" />
-              </div>
-              <EnrichedWarningsPanel warnings={enrichedWarnings} />
-            </div>
-          )}
-          <div className="rounded-lg border border-border bg-card p-2">
-            <CnCoilsWorkspacePage />
-          </div>
-        </div>
+      <TabsContent value={WORKSPACE_TABS.DETAILED} className="mt-3">
+        <DetailedWorkspaceTab onOpenAI={() => onOpenAI("Detalhado")} />
       </TabsContent>
 
-      <TabsContent value="results" className="mt-3">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold">Resultados do Ciclo</h3>
-            <AIButton tab="Resultados" />
-          </div>
-          {cycleResult ? (
-            <ResultsGrid
-              config={config}
-              result={cycleResult}
-              frontalVelocity={frontalVelocity}
-              safetyFactor={safetyFactor}
-            />
-          ) : (
-            <EmptyState />
-          )}
-          {cycleResult && enrichedWarnings.length > 0 && (
-            <EnrichedWarningsPanel warnings={enrichedWarnings} />
-          )}
-        </div>
-      </TabsContent>
-
-      <TabsContent value="drawing" className="mt-3">
+      <TabsContent value={WORKSPACE_TABS.DESENHO} className="mt-3">
         <DrawingTab
           heightMm={geomHeight}
           widthMm={geomWidth}
@@ -850,7 +997,7 @@ function UnifiedTabs({
           projectName={`Evaporador DX — ${refrigerantId}`}
         />
       </TabsContent>
-      <TabsContent value="report" className="mt-3">
+      <TabsContent value={WORKSPACE_TABS.RELATORIO} className="mt-3">
         <ReportTab
           config={config}
           result={cycleResult}
