@@ -358,9 +358,7 @@ export function EvaporatorUnifiedWorkspacePage() {
         ? existing.id
         : ps.saveProject(projectName, "component_workspace", {});
       ps.updateProjectHeader(id, {
-        clientName: pendingEvaporator.cliente ?? undefined,
         projectCode: pendingEvaporator.modeloUnico ?? pendingEvaporator.modelo,
-        description: pendingEvaporator.descricao ?? pendingEvaporator.aplicacao,
         status: "draft",
       });
       ps.setActiveProject(id);
