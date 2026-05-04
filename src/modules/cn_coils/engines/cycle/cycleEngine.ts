@@ -8,7 +8,13 @@ import { evaluateCompressor } from "../compressor/compressorModel";
 import { runCoilForCycle } from "../coil/coilCycleAdapter";
 import { evaluateExpansionDevice } from "../expansion/expansionEngine";
 import { getRefrigerantSatProps } from "../refrigerant/refrigerantProperties";
-import type { CycleSystemConfig, CycleResult, CycleStatePoint } from "./cycleTypes";
+import type {
+  CycleResult,
+  CycleStatePoint,
+  CycleSystemConfig,
+  CycleThermoConfig,
+  CycleThermoResult,
+} from "./cycleTypes";
 import { runAssemblySimulation } from "../assembly/coilAssembly";
 import type { CoilAssemblyConfig } from "../assembly/assemblyTypes";
 import type { CycleExpansionDeviceConfig } from "./cycleTypes";
@@ -47,6 +53,45 @@ function normalizeExpansionConfig(device: CycleExpansionDeviceConfig) {
     device: full.device,
     subcoolingK: full.subcoolingK,
     actualSuperheatK: full.actualSuperheatK,
+  };
+}
+
+export async function runCycleThermo(
+  config: CycleThermoConfig,
+): Promise<CycleThermoResult> {
+  const [satEvap, satCond] = await Promise.all([
+    getRefrigerantSatProps(config.refrigerantId, config.Te_C),
+    getRefrigerantSatProps(config.refrigerantId, config.Tc_C),
+  ]);
+  const warnings = [...satEvap.warnings, ...satCond.warnings];
+  const h1 = satEvap.h_g_kJkg + satEvap.vapor.cp_kJkgK * config.superheatK;
+  const compressionRatio = satEvap.P_kPa > 0 ? satCond.P_kPa / satEvap.P_kPa : 1;
+  const gamma = 1.15;
+  const t1K = config.Te_C + config.superheatK + 273.15;
+  const t2isK = t1K * Math.pow(compressionRatio, (gamma - 1) / gamma);
+  const etaIs = 0.7;
+  const deltaTCompK = Math.max(0, (t2isK - t1K) / etaIs);
+  const h2 = h1 + satEvap.vapor.cp_kJkgK * deltaTCompK;
+  const h3 = satCond.h_f_kJkg - satCond.liquid.cp_kJkgK * config.subcoolingK;
+  const h4 = h3;
+  const qEvap = Math.max(0, h1 - h4);
+  const wComp = Math.max(0, h2 - h1);
+  const qCond = qEvap + wComp;
+  const COP = wComp > 0 ? qEvap / wComp : 0;
+
+  return {
+    Te_C: config.Te_C,
+    Tc_C: config.Tc_C,
+    h1_kJkg: h1,
+    h2_kJkg: h2,
+    h3_kJkg: h3,
+    h4_kJkg: h4,
+    qEvap_kJkg: qEvap,
+    wComp_kJkg: wComp,
+    qCond_kJkg: qCond,
+    COP,
+    EER: COP * 3.41214,
+    warnings,
   };
 }
 
