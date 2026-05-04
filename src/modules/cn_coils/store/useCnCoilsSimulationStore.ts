@@ -12,6 +12,7 @@ import {
   type MaterialKey,
   type MaterialPrices,
 } from "../engine/costCalculator";
+import { runSimulation } from "../engine/simulatorCoreAdapter";
 import { snapFinPitchToTool } from "../config/finPitchTools";
 
 /**
@@ -143,6 +144,7 @@ interface CnCoilsSimulationStore {
   setResult: (result: CnCoilsSimulationResult | undefined) => void;
   setWarnings: (warnings: StructuredWarning[]) => void;
   setIsSimulating: (value: boolean) => void;
+  recalculateWithTe: (Te: number) => Promise<CnCoilsSimulationResult | null>;
   clearResult: () => void;
   reset: () => void;
 }
@@ -165,7 +167,7 @@ const DEFAULT_PHYSICAL_INPUTS: Partial<CnCoilsPhysicalInputs> = {
   tubeInnerDiameterMm: 8.92,
 };
 
-export const useCnCoilsSimulationStore = create<CnCoilsSimulationStore>((set) => ({
+export const useCnCoilsSimulationStore = create<CnCoilsSimulationStore>((set, get) => ({
   physicalInputs: { ...DEFAULT_PHYSICAL_INPUTS },
   thermoInputs: {},
   selectedGeometry: undefined,
@@ -373,6 +375,29 @@ export const useCnCoilsSimulationStore = create<CnCoilsSimulationStore>((set) =>
   setResult: (result) => set({ result }),
   setWarnings: (warnings) => set({ warnings }),
   setIsSimulating: (value) => set({ isSimulating: value }),
+  recalculateWithTe: async (Te) => {
+    const s = get();
+    const physical = s.physicalInputs as CnCoilsPhysicalInputs;
+    const thermo = {
+      ...(s.thermoInputs as CnCoilsThermoInputs),
+      evaporatingTempC: Te,
+    };
+    try {
+      return runSimulation({
+        physical,
+        thermo,
+        catalogs: {
+          correctionCoefficients: [],
+          pressureDropFan: [],
+        },
+        tubeMaterialConductivity: 385,
+        finCorrectionFactor: 1,
+        airFrictionFactor: 1,
+      });
+    } catch {
+      return null;
+    }
+  },
   clearResult: () => set({ result: undefined, warnings: [] }),
   reset: () =>
     set({

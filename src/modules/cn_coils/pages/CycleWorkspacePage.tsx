@@ -3,6 +3,8 @@ import { useCycleSimulation } from "../hooks/useCycleSimulation";
 import { useFrostAnalysis } from "../hooks/useFrostAnalysis";
 import { useUncertaintyAnalysis } from "../hooks/useUncertaintyAnalysis";
 import { useOperatingMap } from "../hooks/useOperatingMap";
+import { CoilEnvelopeTab } from "../components/CoilEnvelopeTab";
+import { CoilsInSeriesPanel } from "../components/CoilsInSeriesPanel";
 import { CyclePHDiagram } from "../components/CyclePHDiagram";
 import { FrostAnalysisPanel } from "../components/FrostAnalysisPanel";
 import { CycleResultPanel } from "../components/CycleResultPanel";
@@ -541,6 +543,8 @@ function CycleAnalysisTabs({
         <TabsTrigger value="frost">Geada</TabsTrigger>
         <TabsTrigger value="map">Mapa de Operação</TabsTrigger>
         <TabsTrigger value="optimization">Otimização</TabsTrigger>
+        <TabsTrigger value="series">Coils em Série</TabsTrigger>
+        <TabsTrigger value="envelope">Envelope Q×Te</TabsTrigger>
       </TabsList>
 
       <TabsContent value="results" className="mt-3">
@@ -563,6 +567,22 @@ function CycleAnalysisTabs({
 
       <TabsContent value="optimization" className="mt-3">
         <OptimizationTab config={config} cycleResult={cycleResult} />
+      </TabsContent>
+
+      <TabsContent value="series" className="mt-3">
+        <CoilsInSeriesPanel
+          primaryCoilResult={{
+            deltaP_Pa: cycleResult.evaporatorResult.airPressureDropPa,
+            Q_kcalh: cycleResult.evaporatorResult.totalCapacityW * 0.86,
+            T_ar_saida: cycleResult.evaporatorResult.airOutletTempC,
+          }}
+        />
+      </TabsContent>
+
+      <TabsContent value="envelope" className="mt-3">
+        <div className="rounded-lg bg-white text-gray-900">
+          <CoilEnvelopeTab equipmentId={config.id} />
+        </div>
       </TabsContent>
     </Tabs>
   );
