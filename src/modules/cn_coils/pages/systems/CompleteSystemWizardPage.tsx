@@ -22,6 +22,7 @@ import { CompressorPickerModal } from "../../components/CompressorPickerModal";
 import { ColdRoomPdfReport } from "../../components/pdf/ColdRoomPdfReport";
 import { DXSystemPdfReport } from "../../components/pdf/DXSystemPdfReport";
 import { HeatPumpPdfReport } from "../../components/pdf/HeatPumpPdfReport";
+import { SaveProjectButton } from "../../components/SaveProjectButton";
 import { SystemEquilibriumChart } from "../../components/SystemEquilibriumChart";
 import { SystemEquilibriumResultsTab } from "../../components/SystemEquilibriumResultsTab";
 import { SystemWizard } from "../../components/SystemWizard";
@@ -116,6 +117,8 @@ export function CompleteSystemWizardPage({ mode }: CompleteSystemWizardPageProps
 
   const equilibrium = useSystemEquilibrium(equilibriumInputs ?? undefined);
   const componentsReady = Boolean(evaporatorEnvelope && condenserEnvelope && compressorEnvelope);
+  const projectType =
+    mode === "cold-room" ? "cold_room" : mode === "dx-complete" ? "dx_complete" : "heat_pump";
 
   const loadComplete = getLoadTotal(loadResult) > 0;
   const steps = [
@@ -186,6 +189,15 @@ export function CompleteSystemWizardPage({ mode }: CompleteSystemWizardPageProps
     <PageContainer
       title={`Sistema — ${titles[mode]}`}
       subtitle="Assistente guiado de dimensionamento completo"
+      actions={
+        <SaveProjectButton
+          projectType={projectType}
+          defaultName={`${titles[mode]} ${new Date().toLocaleDateString("pt-BR")}`}
+          systemInputs={(mode === "cold-room" ? coldRoomInputs : mode === "dx-complete" ? dxInputs : heatPumpInputs) as unknown as Record<string, unknown>}
+          loadResult={loadResult as unknown as Record<string, unknown>}
+          equilibriumResult={equilibrium.result}
+        />
+      }
     >
       <SystemWizard title={titles[mode]} steps={steps} />
       <CompressorPickerModal open={pickerOpen} onClose={() => setPickerOpen(false)} />

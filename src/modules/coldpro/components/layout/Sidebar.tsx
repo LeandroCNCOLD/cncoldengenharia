@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   LogOut,
   Boxes,
+  FolderOpen,
   Wrench,
   Database as DatabaseIcon,
   Gauge,
@@ -27,7 +28,9 @@ import {
 } from "lucide-react";
 import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/lib/auth";
+import { useProjectStore } from "@/modules/cn_coils/store/useProjectStore";
 
 type NavItem = {
   to: string;
@@ -36,6 +39,7 @@ type NavItem = {
   search?: Record<string, string>;
   exact?: boolean;
   comingSoon?: boolean;
+  badge?: "projects";
 };
 
 type NavGroup = {
@@ -51,6 +55,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "Simulação",
     items: [
+      { to: "/coldpro/projects", label: "Meus Projetos", Icon: FolderOpen, badge: "projects" },
       { to: "/coldpro/cncoils", label: "CN COILS", Icon: Gauge },
       {
         to: "/coldpro/cncoils/workspace",
@@ -122,6 +127,7 @@ export function Sidebar() {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const projectCount = useProjectStore((s) => s.projects.length);
 
   const isActive = (item: NavItem) =>
     item.exact ? pathname === item.to : pathname === item.to || pathname.startsWith(item.to + "/");
@@ -164,6 +170,11 @@ export function Sidebar() {
                         <span className="ml-auto rounded bg-amber-500/20 px-0.5 py-px text-[7px] font-semibold uppercase leading-none tracking-wide text-amber-300">
                           Em breve
                         </span>
+                      )}
+                      {item.badge === "projects" && projectCount > 0 && (
+                        <Badge variant="secondary" className="ml-auto h-3 px-1 text-[7px] leading-none">
+                          {projectCount}
+                        </Badge>
                       )}
                     </Link>
                   </li>

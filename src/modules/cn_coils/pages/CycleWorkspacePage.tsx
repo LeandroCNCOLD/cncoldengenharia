@@ -6,6 +6,7 @@ import { useOperatingMap } from "../hooks/useOperatingMap";
 import { CoilEnvelopeTab } from "../components/CoilEnvelopeTab";
 import { CoilsInSeriesPanel } from "../components/CoilsInSeriesPanel";
 import { FrostAnalysisTab } from "../components/FrostAnalysisTab";
+import { SaveProjectButton } from "../components/SaveProjectButton";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { CyclePHDiagram } from "../components/CyclePHDiagram";
 import { FrostAnalysisPanel } from "../components/FrostAnalysisPanel";
@@ -221,6 +222,19 @@ export function CycleWorkspacePage() {
         </div>
         <div className="flex items-center gap-3">
           <CycleStatusBar state={simState} result={cycleResult} />
+          <SaveProjectButton
+            defaultName="Workspace Evaporador DX"
+            type="component_workspace"
+            systemInputs={{
+              refrigerantId,
+              te,
+              tc,
+              superheat,
+              subcooling,
+              expansionType,
+            }}
+            loadResult={cycleResult ? { Q_evap_W: cycleResult.Q_evap_W, COP: cycleResult.COP } : null}
+          />
           <Button
             size="sm"
             onClick={() => simState.trigger()}

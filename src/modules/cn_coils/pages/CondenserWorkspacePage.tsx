@@ -21,6 +21,7 @@ import { AirSidePanel } from "../components/AirSidePanel";
 import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
 import { GeometryBottomBar } from "../components/GeometryBottomBar";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
+import { SaveProjectButton } from "../components/SaveProjectButton";
 import { useCnCoilsCatalogs } from "../hooks/useCnCoilsCatalogs";
 import { useCondenserEnvelopeGenerator } from "../hooks/useCondenserEnvelopeGenerator";
 import {
@@ -102,13 +103,20 @@ export function CondenserWorkspacePage() {
       title="CN Coils — Condensador a Ar"
       subtitle="Workspace dedicado para cálculo, envelope e ventiladores do condensador a ar"
       actions={
-        <Link
-          to="/coldpro/cncoils"
-          className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground hover:bg-accent"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Voltar ao CN COILS
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <SaveProjectButton
+            defaultName="Condensador a Ar"
+            type="component_workspace"
+            systemInputs={syncedInputs as unknown as Record<string, unknown>}
+          />
+          <Link
+            to="/coldpro/cncoils"
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground hover:bg-accent"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar ao CN COILS
+          </Link>
+        </div>
       }
     >
       {catalogs.loading && (

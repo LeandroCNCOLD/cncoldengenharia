@@ -16,6 +16,7 @@ import type { CompressorCatalogRow } from "@/modules/coldpro_catalog/data/compre
 import { CompressorEnvelopeChart } from "../components/CompressorEnvelopeChart";
 import { CompressorOperatingPointTab } from "../components/CompressorOperatingPointTab";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
+import { SaveProjectButton } from "../components/SaveProjectButton";
 import {
   CompressorPickerModal,
   type CompressorItem,
@@ -113,10 +114,17 @@ export function CompressorWorkspacePage() {
       title="Compressor"
       subtitle="Workspace dedicado ao ponto de operação e envelope operacional"
       actions={
-        <Button variant="outline" onClick={() => navigate({ to: ".." })}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <SaveProjectButton
+            defaultName={inputs.compressorModel || "Compressor"}
+            type="component_workspace"
+            systemInputs={inputs as unknown as Record<string, unknown>}
+          />
+          <Button variant="outline" onClick={() => navigate({ to: ".." })}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar
+          </Button>
+        </div>
       }
     >
       <div className="mb-3 flex flex-wrap items-center gap-2">

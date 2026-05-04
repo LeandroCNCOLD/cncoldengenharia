@@ -19,6 +19,7 @@ import { Route as AppColdproSystemBalanceRouteImport } from './routes/_app/coldp
 import { Route as AppColdproSimulationRouteImport } from './routes/_app/coldpro.simulation'
 import { Route as AppColdproRegistryRouteImport } from './routes/_app/coldpro.registry'
 import { Route as AppColdproRecordRouteImport } from './routes/_app/coldpro.record'
+import { Route as AppColdproProjectsRouteImport } from './routes/_app/coldpro.projects'
 import { Route as AppColdproPerformanceRouteImport } from './routes/_app/coldpro.performance'
 import { Route as AppColdproOptimizationRouteImport } from './routes/_app/coldpro.optimization'
 import { Route as AppColdproOperatingMapRouteImport } from './routes/_app/coldpro.operating-map'
@@ -93,6 +94,11 @@ const AppColdproRegistryRoute = AppColdproRegistryRouteImport.update({
 const AppColdproRecordRoute = AppColdproRecordRouteImport.update({
   id: '/record',
   path: '/record',
+  getParentRoute: () => AppColdproRoute,
+} as any)
+const AppColdproProjectsRoute = AppColdproProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
   getParentRoute: () => AppColdproRoute,
 } as any)
 const AppColdproPerformanceRoute = AppColdproPerformanceRouteImport.update({
@@ -256,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/coldpro/operating-map': typeof AppColdproOperatingMapRoute
   '/coldpro/optimization': typeof AppColdproOptimizationRoute
   '/coldpro/performance': typeof AppColdproPerformanceRoute
+  '/coldpro/projects': typeof AppColdproProjectsRoute
   '/coldpro/record': typeof AppColdproRecordRoute
   '/coldpro/registry': typeof AppColdproRegistryRoute
   '/coldpro/simulation': typeof AppColdproSimulationRoute
@@ -292,6 +299,7 @@ export interface FileRoutesByTo {
   '/coldpro/operating-map': typeof AppColdproOperatingMapRoute
   '/coldpro/optimization': typeof AppColdproOptimizationRoute
   '/coldpro/performance': typeof AppColdproPerformanceRoute
+  '/coldpro/projects': typeof AppColdproProjectsRoute
   '/coldpro/record': typeof AppColdproRecordRoute
   '/coldpro/registry': typeof AppColdproRegistryRoute
   '/coldpro/simulation': typeof AppColdproSimulationRoute
@@ -331,6 +339,7 @@ export interface FileRoutesById {
   '/_app/coldpro/operating-map': typeof AppColdproOperatingMapRoute
   '/_app/coldpro/optimization': typeof AppColdproOptimizationRoute
   '/_app/coldpro/performance': typeof AppColdproPerformanceRoute
+  '/_app/coldpro/projects': typeof AppColdproProjectsRoute
   '/_app/coldpro/record': typeof AppColdproRecordRoute
   '/_app/coldpro/registry': typeof AppColdproRegistryRoute
   '/_app/coldpro/simulation': typeof AppColdproSimulationRoute
@@ -370,6 +379,7 @@ export interface FileRouteTypes {
     | '/coldpro/operating-map'
     | '/coldpro/optimization'
     | '/coldpro/performance'
+    | '/coldpro/projects'
     | '/coldpro/record'
     | '/coldpro/registry'
     | '/coldpro/simulation'
@@ -406,6 +416,7 @@ export interface FileRouteTypes {
     | '/coldpro/operating-map'
     | '/coldpro/optimization'
     | '/coldpro/performance'
+    | '/coldpro/projects'
     | '/coldpro/record'
     | '/coldpro/registry'
     | '/coldpro/simulation'
@@ -444,6 +455,7 @@ export interface FileRouteTypes {
     | '/_app/coldpro/operating-map'
     | '/_app/coldpro/optimization'
     | '/_app/coldpro/performance'
+    | '/_app/coldpro/projects'
     | '/_app/coldpro/record'
     | '/_app/coldpro/registry'
     | '/_app/coldpro/simulation'
@@ -538,6 +550,13 @@ declare module '@tanstack/react-router' {
       path: '/record'
       fullPath: '/coldpro/record'
       preLoaderRoute: typeof AppColdproRecordRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
+    '/_app/coldpro/projects': {
+      id: '/_app/coldpro/projects'
+      path: '/projects'
+      fullPath: '/coldpro/projects'
+      preLoaderRoute: typeof AppColdproProjectsRouteImport
       parentRoute: typeof AppColdproRoute
     }
     '/_app/coldpro/performance': {
@@ -762,6 +781,7 @@ interface AppColdproRouteChildren {
   AppColdproOperatingMapRoute: typeof AppColdproOperatingMapRoute
   AppColdproOptimizationRoute: typeof AppColdproOptimizationRoute
   AppColdproPerformanceRoute: typeof AppColdproPerformanceRoute
+  AppColdproProjectsRoute: typeof AppColdproProjectsRoute
   AppColdproRecordRoute: typeof AppColdproRecordRoute
   AppColdproRegistryRoute: typeof AppColdproRegistryRoute
   AppColdproSimulationRoute: typeof AppColdproSimulationRoute
@@ -791,6 +811,7 @@ const AppColdproRouteChildren: AppColdproRouteChildren = {
   AppColdproOperatingMapRoute: AppColdproOperatingMapRoute,
   AppColdproOptimizationRoute: AppColdproOptimizationRoute,
   AppColdproPerformanceRoute: AppColdproPerformanceRoute,
+  AppColdproProjectsRoute: AppColdproProjectsRoute,
   AppColdproRecordRoute: AppColdproRecordRoute,
   AppColdproRegistryRoute: AppColdproRegistryRoute,
   AppColdproSimulationRoute: AppColdproSimulationRoute,

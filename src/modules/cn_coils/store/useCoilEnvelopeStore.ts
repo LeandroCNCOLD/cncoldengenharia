@@ -64,6 +64,7 @@ interface CoilEnvelopeState {
   compressorId: string | null;
   compressorModel: string | null;
   saveEnvelope: (envelope: CoilEnvelope) => void;
+  setEvaporatorEnvelope: (points: EnvelopePoint[]) => void;
   getEnvelope: (componentType: string) => CoilEnvelope | undefined;
   clearEnvelope: (componentType: string) => void;
   setCondenserEnvelope: (points: CondenserEnvelopePoint[]) => void;
@@ -89,6 +90,21 @@ export const useCoilEnvelopeStore = create<CoilEnvelopeState>()(
       saveEnvelope: (envelope) =>
         set((state) => ({
           envelopes: { ...state.envelopes, [envelope.componentType]: envelope },
+        })),
+      setEvaporatorEnvelope: (points) =>
+        set((state) => ({
+          envelopes: {
+            ...state.envelopes,
+            evaporator_dx: {
+              equipmentId: "restored-project",
+              componentType: "evaporator_dx",
+              refrigerant: "R404A",
+              nominalConditions: { Te: -10, Tc: 40, T_ar: 5, UR: 0.85 },
+              envelope: points,
+              savedAt: new Date().toISOString(),
+              version: 2,
+            },
+          },
         })),
       getEnvelope: (componentType) => get().envelopes[componentType],
       clearEnvelope: (componentType) =>
