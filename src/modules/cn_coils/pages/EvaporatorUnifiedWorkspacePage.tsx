@@ -53,7 +53,6 @@ import { useCatalogPreloadStore } from "@/modules/coldpro_catalog/store/useCatal
 import { catalogRowToEvaporatorInputs } from "@/modules/coldpro_catalog/utils/catalogRowToWorkspaceInputs";
 import { loadCompressorIndex } from "@/modules/coldpro_catalog/data/compressorCatalog.service";
 import { useProjectStore } from "../store/useProjectStore";
-import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import type { AIContext } from "../components/WorkspaceAIChat";
 import type { StructuredWarning } from "../types/warnings";
 import type { OperatingMapPoint } from "../engines/operatingMap/operatingMapTypes";
