@@ -16,6 +16,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -44,6 +51,20 @@ import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 
 const fmt = (value: number, maximumFractionDigits = 2) =>
   value.toLocaleString("pt-BR", { maximumFractionDigits });
+
+const REFRIGERANT_OPTIONS = [
+  "REF_R134a",
+  "REF_R404A",
+  "REF_R407C",
+  "REF_R410A",
+  "REF_R32",
+  "REF_R290",
+  "REF_R600a",
+  "REF_R717",
+  "REF_R744",
+  "REF_R1234yf",
+  "REF_R1234ze_E_",
+] as const;
 
 const DEFAULT_INPUTS: CondenserInputs = {
   Tc: 45,
@@ -101,6 +122,13 @@ export function CondenserWorkspacePage() {
     if (!catalogs.ready || !syncedInputs.geometryId) return;
     calculate();
   }, [calculate, catalogs.ready, syncedInputs.geometryId]);
+
+  // Auto-gera envelope quando o cálculo principal conclui pela primeira vez.
+  useEffect(() => {
+    if (!result || isGenerating || points.length > 0) return;
+    generateEnvelope();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result?.Q_cond_W]);
 
   const updateInputs = (patch: Partial<CondenserInputs>) => {
     setInputs((current) => {
@@ -199,11 +227,24 @@ export function CondenserWorkspacePage() {
             Refrigerante
           </AccordionTrigger>
           <AccordionContent className="space-y-2">
-            <TextField
-              label="ID do refrigerante"
-              value={syncedInputs.refrigerant}
-              onChange={(refrigerant) => updateInputs({ refrigerant })}
-            />
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Refrigerante</Label>
+              <Select
+                value={syncedInputs.refrigerant}
+                onValueChange={(refrigerant) => updateInputs({ refrigerant })}
+              >
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {REFRIGERANT_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt} className="text-xs">
+                      {opt.replace("REF_", "")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </AccordionContent>
         </AccordionItem>
 
@@ -218,10 +259,18 @@ export function CondenserWorkspacePage() {
               onChange={(airFlowM3H) => updateInputs({ airFlowM3H })}
             />
             <div className="rounded border border-border bg-muted/40 p-2 text-[10px] text-muted-foreground">
-              <div>Geometria: {syncedInputs.geometryId || "selecione na barra inferior"}</div>
               <div>Ventiladores: {syncedInputs.fanCount}</div>
               <div>Fan ID: {syncedInputs.fanId || "—"}</div>
             </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="geometry">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">
+            Geometria
+          </AccordionTrigger>
+          <AccordionContent>
+            <GeometryBottomBar />
           </AccordionContent>
         </AccordionItem>
 
@@ -365,9 +414,6 @@ export function CondenserWorkspacePage() {
             <EmptyResults />
           )}
 
-          <div>
-            <GeometryBottomBar />
-          </div>
         </div>
 
         <ActionBar
@@ -449,19 +495,3 @@ function NumberField({
   );
 }
 
-function TextField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div className="space-y-1">
-      <Label className="text-[10px] text-muted-foreground">{label}</Label>
-      <Input value={value} onChange={(event) => onChange(event.target.value)} className="h-8 text-xs" />
-    </div>
-  );
-}

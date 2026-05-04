@@ -163,6 +163,9 @@ export function WaterCondenserWorkspacePage() {
           title="Condensador a Água"
           icon={<Waves className="h-4 w-4" />}
           badges={[inputs.refrigerant, `${inputs.tubeCount}t × ${inputs.passes}p`]}
+          onSave={() => toast.success("Sessão salva")}
+          onShare={() => toast.info("Compartilhamento em breve")}
+          onExportPdf={() => toast.info("Exportação PDF em breve")}
         />
       }
       sidebar={sidebar}
@@ -170,9 +173,9 @@ export function WaterCondenserWorkspacePage() {
       <div className="flex flex-col gap-4 p-4">
         <Tabs defaultValue="results">
           <TabsList>
-            <TabsTrigger value="results">Resultados</TabsTrigger>
-            <TabsTrigger value="envelope">Envelope Q×Tc</TabsTrigger>
-            <TabsTrigger value="sizing">Dimensionamento</TabsTrigger>
+            <TabsTrigger value="results">📋 Resultados</TabsTrigger>
+            <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
+            <TabsTrigger value="sizing">📐 Dimensionamento</TabsTrigger>
           </TabsList>
 
           <TabsContent value="results" className="mt-3">

@@ -210,6 +210,9 @@ export function HeatingCoilWorkspacePage() {
             inputs.mode === "heating" ? "Aquecimento" : "Reaquecimento",
             inputs.heatingFluid === "hot_water" ? "Água quente" : "Vapor",
           ]}
+          onSave={() => toast.success("Sessão salva")}
+          onShare={() => toast.info("Compartilhamento em breve")}
+          onExportPdf={() => toast.info("Exportação PDF em breve")}
         />
       }
       sidebar={sidebar}
@@ -217,9 +220,9 @@ export function HeatingCoilWorkspacePage() {
       <div className="flex flex-col gap-4 p-4">
         <Tabs defaultValue="results">
           <TabsList>
-            <TabsTrigger value="results">Resultados</TabsTrigger>
-            <TabsTrigger value="curve">Curva de Aquecimento</TabsTrigger>
-            <TabsTrigger value="psychro">Psicrométrico</TabsTrigger>
+            <TabsTrigger value="results">📋 Resultados</TabsTrigger>
+            <TabsTrigger value="curve">📈 Curva de Aquecimento</TabsTrigger>
+            <TabsTrigger value="psychro">💧 Psicrométrico</TabsTrigger>
           </TabsList>
 
           <TabsContent value="results" className="mt-3">

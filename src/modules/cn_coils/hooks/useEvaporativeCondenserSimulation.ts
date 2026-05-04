@@ -54,7 +54,9 @@ export function calculateEvaporativeCondenser(
   const eta_rejection = Math.min(UA_WK / (UA_WK + inputs.Q_total_W / 20), 0.95);
   const Q_rejected_W = inputs.Q_total_W * eta_rejection;
   const Q_evaporation_W = inputs.Q_total_W * 0.75;
-  const waterEvaporation_Lh = (Q_evaporation_W / 2450e3) * 3600 * 1000;
+  // hfg ≈ 2.45 MJ/kg → m_water [kg/s] = Q/hfg → *3600 = kg/h ≈ L/h (densidade ≈ 1 kg/L).
+  const waterEvaporation_Lh = (Q_evaporation_W / 2.45e6) * 3600;
+  // Makeup = evaporação + drift/blowdown (~50%).
   const waterMakeup_Lh = waterEvaporation_Lh * 1.5;
   const W_fans_W = inputs.airVelocity_ms * A_ext_m2 * 1.2 * 50;
 
