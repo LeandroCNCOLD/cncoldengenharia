@@ -183,9 +183,9 @@ export default function TestBenchPage() {
                   <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">Status</CardTitle></CardHeader>
                   <CardContent className="pt-1">
                     <div className="flex items-center gap-2 text-lg font-semibold">
-                      {bottleneck === "balanced" && <><CheckCircle2 className="h-5 w-5 text-emerald-600"/> Balanceado</>}
-                      {bottleneck !== "balanced" && bottleneck !== "condenser" && <><AlertTriangle className="h-5 w-5 text-amber-600"/> Atenção</>}
-                      {bottleneck === "condenser" && <><XCircle className="h-5 w-5 text-destructive"/> Rejeitado</>}
+                      {bottleneck === "balanced"
+                        ? <><CheckCircle2 className="h-5 w-5 text-emerald-600"/> Balanceado</>
+                        : <><AlertTriangle className="h-5 w-5 text-amber-600"/> Atenção</>}
                     </div>
                   </CardContent>
                 </Card>
