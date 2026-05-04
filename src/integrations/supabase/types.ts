@@ -56,6 +56,353 @@ export type Database = {
         }
         Relationships: []
       }
+      compressors: {
+        Row: {
+          capacity_w: number | null
+          cond_temp_c: number | null
+          cop: number | null
+          created_at: string
+          created_by: string
+          evap_temp_c: number | null
+          id: string
+          inputs: Json
+          manufacturer: string | null
+          model: string
+          name: string
+          notes: string | null
+          power_kw: number | null
+          project_id: string | null
+          refrigerant: string | null
+          results: Json
+          updated_at: string
+        }
+        Insert: {
+          capacity_w?: number | null
+          cond_temp_c?: number | null
+          cop?: number | null
+          created_at?: string
+          created_by: string
+          evap_temp_c?: number | null
+          id?: string
+          inputs?: Json
+          manufacturer?: string | null
+          model: string
+          name: string
+          notes?: string | null
+          power_kw?: number | null
+          project_id?: string | null
+          refrigerant?: string | null
+          results?: Json
+          updated_at?: string
+        }
+        Update: {
+          capacity_w?: number | null
+          cond_temp_c?: number | null
+          cop?: number | null
+          created_at?: string
+          created_by?: string
+          evap_temp_c?: number | null
+          id?: string
+          inputs?: Json
+          manufacturer?: string | null
+          model?: string
+          name?: string
+          notes?: string | null
+          power_kw?: number | null
+          project_id?: string | null
+          refrigerant?: string | null
+          results?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compressors_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      condensers: {
+        Row: {
+          air_flow_m3h: number | null
+          ambient_temp_c: number | null
+          capacity_w: number | null
+          cond_temp_c: number | null
+          created_at: string
+          created_by: string
+          id: string
+          inputs: Json
+          model: string | null
+          name: string
+          notes: string | null
+          project_id: string | null
+          refrigerant: string | null
+          results: Json
+          subcooling_k: number | null
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          air_flow_m3h?: number | null
+          ambient_temp_c?: number | null
+          capacity_w?: number | null
+          cond_temp_c?: number | null
+          created_at?: string
+          created_by: string
+          id?: string
+          inputs?: Json
+          model?: string | null
+          name: string
+          notes?: string | null
+          project_id?: string | null
+          refrigerant?: string | null
+          results?: Json
+          subcooling_k?: number | null
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          air_flow_m3h?: number | null
+          ambient_temp_c?: number | null
+          capacity_w?: number | null
+          cond_temp_c?: number | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          inputs?: Json
+          model?: string | null
+          name?: string
+          notes?: string | null
+          project_id?: string | null
+          refrigerant?: string | null
+          results?: Json
+          subcooling_k?: number | null
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "condensers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cycle_simulations: {
+        Row: {
+          capacity_w: number | null
+          compressor_id: string | null
+          cond_temp_c: number | null
+          condenser_id: string | null
+          cop: number | null
+          created_at: string
+          created_by: string
+          evap_temp_c: number | null
+          evaporator_id: string | null
+          id: string
+          inputs: Json
+          name: string
+          notes: string | null
+          project_id: string | null
+          refrigerant: string | null
+          results: Json
+          updated_at: string
+        }
+        Insert: {
+          capacity_w?: number | null
+          compressor_id?: string | null
+          cond_temp_c?: number | null
+          condenser_id?: string | null
+          cop?: number | null
+          created_at?: string
+          created_by: string
+          evap_temp_c?: number | null
+          evaporator_id?: string | null
+          id?: string
+          inputs?: Json
+          name: string
+          notes?: string | null
+          project_id?: string | null
+          refrigerant?: string | null
+          results?: Json
+          updated_at?: string
+        }
+        Update: {
+          capacity_w?: number | null
+          compressor_id?: string | null
+          cond_temp_c?: number | null
+          condenser_id?: string | null
+          cop?: number | null
+          created_at?: string
+          created_by?: string
+          evap_temp_c?: number | null
+          evaporator_id?: string | null
+          id?: string
+          inputs?: Json
+          name?: string
+          notes?: string | null
+          project_id?: string | null
+          refrigerant?: string | null
+          results?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cycle_simulations_compressor_id_fkey"
+            columns: ["compressor_id"]
+            isOneToOne: false
+            referencedRelation: "compressors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cycle_simulations_condenser_id_fkey"
+            columns: ["condenser_id"]
+            isOneToOne: false
+            referencedRelation: "condensers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cycle_simulations_evaporator_id_fkey"
+            columns: ["evaporator_id"]
+            isOneToOne: false
+            referencedRelation: "evaporators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cycle_simulations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evaporators: {
+        Row: {
+          air_flow_m3h: number | null
+          air_inlet_rh: number | null
+          air_inlet_temp_c: number | null
+          capacity_w: number | null
+          created_at: string
+          created_by: string
+          evap_temp_c: number | null
+          id: string
+          inputs: Json
+          model: string | null
+          name: string
+          notes: string | null
+          project_id: string | null
+          refrigerant: string | null
+          results: Json
+          superheat_k: number | null
+          updated_at: string
+        }
+        Insert: {
+          air_flow_m3h?: number | null
+          air_inlet_rh?: number | null
+          air_inlet_temp_c?: number | null
+          capacity_w?: number | null
+          created_at?: string
+          created_by: string
+          evap_temp_c?: number | null
+          id?: string
+          inputs?: Json
+          model?: string | null
+          name: string
+          notes?: string | null
+          project_id?: string | null
+          refrigerant?: string | null
+          results?: Json
+          superheat_k?: number | null
+          updated_at?: string
+        }
+        Update: {
+          air_flow_m3h?: number | null
+          air_inlet_rh?: number | null
+          air_inlet_temp_c?: number | null
+          capacity_w?: number | null
+          created_at?: string
+          created_by?: string
+          evap_temp_c?: number | null
+          id?: string
+          inputs?: Json
+          model?: string | null
+          name?: string
+          notes?: string | null
+          project_id?: string | null
+          refrigerant?: string | null
+          results?: Json
+          superheat_k?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaporators_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fans: {
+        Row: {
+          air_flow_m3h: number | null
+          created_at: string
+          created_by: string
+          data: Json
+          diameter_mm: number | null
+          id: string
+          manufacturer: string | null
+          model: string | null
+          name: string
+          notes: string | null
+          power_w: number | null
+          static_pressure_pa: number | null
+          type: string | null
+          updated_at: string
+          voltage_v: number | null
+        }
+        Insert: {
+          air_flow_m3h?: number | null
+          created_at?: string
+          created_by: string
+          data?: Json
+          diameter_mm?: number | null
+          id?: string
+          manufacturer?: string | null
+          model?: string | null
+          name: string
+          notes?: string | null
+          power_w?: number | null
+          static_pressure_pa?: number | null
+          type?: string | null
+          updated_at?: string
+          voltage_v?: number | null
+        }
+        Update: {
+          air_flow_m3h?: number | null
+          created_at?: string
+          created_by?: string
+          data?: Json
+          diameter_mm?: number | null
+          id?: string
+          manufacturer?: string | null
+          model?: string | null
+          name?: string
+          notes?: string | null
+          power_w?: number | null
+          static_pressure_pa?: number | null
+          type?: string | null
+          updated_at?: string
+          voltage_v?: number | null
+        }
+        Relationships: []
+      }
       module_permissions: {
         Row: {
           can_edit: boolean
@@ -109,6 +456,84 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          client: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          client?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          client?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      refrigerants: {
+        Row: {
+          classification: string | null
+          code: string
+          created_at: string
+          created_by: string
+          data: Json
+          family: string | null
+          gwp: number | null
+          id: string
+          name: string
+          notes: string | null
+          odp: number | null
+          updated_at: string
+        }
+        Insert: {
+          classification?: string | null
+          code: string
+          created_at?: string
+          created_by: string
+          data?: Json
+          family?: string | null
+          gwp?: number | null
+          id?: string
+          name: string
+          notes?: string | null
+          odp?: number | null
+          updated_at?: string
+        }
+        Update: {
+          classification?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string
+          data?: Json
+          family?: string | null
+          gwp?: number | null
+          id?: string
+          name?: string
+          notes?: string | null
+          odp?: number | null
           updated_at?: string
         }
         Relationships: []
