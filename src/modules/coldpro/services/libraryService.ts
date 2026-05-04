@@ -201,8 +201,7 @@ export async function createItem(entity: EntityKey, payload: Record<string, unkn
   const { data: auth } = await supabase.auth.getUser();
   const created_by = auth.user?.id;
   if (!created_by) throw new Error("Usuário não autenticado");
-  const { data, error } = await supabase
-    .from(entity)
+  const { data, error } = await (supabase.from(entity) as any)
     .insert({ ...payload, created_by })
     .select()
     .single();
@@ -218,8 +217,7 @@ export async function updateItem(
   const { created_by: _ignored, id: _id, ...rest } = payload as Record<string, unknown>;
   void _ignored;
   void _id;
-  const { data, error } = await supabase
-    .from(entity)
+  const { data, error } = await (supabase.from(entity) as any)
     .update(rest)
     .eq("id", id)
     .select()
