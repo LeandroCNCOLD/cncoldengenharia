@@ -14,6 +14,7 @@ import {
 } from "../engine/costCalculator";
 import { runSimulation } from "../engine/simulatorCoreAdapter";
 import { snapFinPitchToTool } from "../config/finPitchTools";
+import type { CapacityUnit as DisplayCapacityUnit } from "../utils/unitConversions";
 
 /**
  * Modo de cálculo do CN Coils:
