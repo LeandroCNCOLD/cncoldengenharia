@@ -3,6 +3,7 @@ import { z } from "zod";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { CnCoilsWorkspacePage } from "@/modules/cn_coils/pages/CnCoilsWorkspacePage";
 import { CondenserWorkspacePage } from "@/modules/cn_coils/pages/CondenserWorkspacePage";
+import { CompressorWorkspacePage } from "@/modules/cn_coils/pages/CompressorWorkspacePage";
 
 const searchSchema = z.object({
   type: z
@@ -17,6 +18,7 @@ const searchSchema = z.object({
       "recuperator",
       "shell_tube",
       "chiller_unit",
+      "compressor",
     ])
     .optional(),
 });
@@ -29,5 +31,6 @@ export const Route = createFileRoute("/_app/coldpro/cncoils/workspace")({
 function CnCoilsWorkspaceRoute() {
   const search = Route.useSearch();
   if (search.type === "condenser_air") return <CondenserWorkspacePage />;
+  if (search.type === "compressor") return <CompressorWorkspacePage />;
   return <CnCoilsWorkspacePage />;
 }

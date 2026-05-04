@@ -9,6 +9,7 @@ import { catalogRepository } from "../services/catalogRepository";
 import { buildMotorComponentsFromCatalog } from "../adapters/sessionToMotorInputAdapter";
 import { runCycleThermo } from "@/modules/cn_coils/engines/cycle/cycleEngine";
 import type { CycleThermoResult } from "@/modules/cn_coils/engines/cycle/cycleTypes";
+import { useCoilEnvelopeStore } from "@/modules/cn_coils/store/useCoilEnvelopeStore";
 
 const KCALH_PER_W = 1 / 1.163;
 
@@ -51,6 +52,12 @@ function statusLabel(status: BenchStatus): string {
 export default function TestBenchPage() {
   const { equipmentId } = useParams({ from: "/_app/coldpro/test-bench/$equipmentId" });
   const navigate = useNavigate();
+  const evaporatorEnvelope = useCoilEnvelopeStore((s) => s.envelopes.evaporator_dx);
+  const condenserEnvelope = useCoilEnvelopeStore(
+    (s) => s.envelopes.condenser_air ?? s.condenserEnvelope,
+  );
+  const compressorEnvelope = useCoilEnvelopeStore((s) => s.compressorEnvelope);
+  const compressorModel = useCoilEnvelopeStore((s) => s.compressorModel);
   const equipment = useMemo(
     () => catalogRepository.getById(equipmentId),
     [equipmentId],
@@ -155,6 +162,7 @@ export default function TestBenchPage() {
     ...(result?.thermo.warnings ?? []).map((w) => ({ kind: "warning" as const, msg: w })),
     ...adapterWarnings.map((w) => ({ kind: "adapter" as const, msg: w })),
   ];
+  const canRunTest = Boolean(evaporatorEnvelope && condenserEnvelope && compressorEnvelope);
 
   return (
     <div className="space-y-4 p-4 lg:p-6">
@@ -180,14 +188,62 @@ export default function TestBenchPage() {
             <Badge variant="outline">Tc {fmt(Tc_C, 1)} °C</Badge>
           </div>
         </div>
-        <Button onClick={handleRun} disabled={running}>
-          {running ? (
-            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Calculando…</>
-          ) : (
-            <><Play className="mr-2 h-4 w-4" /> Executar testes</>
-          )}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={() =>
+              navigate({
+                to: "/coldpro/cncoils/workspace",
+                search: { type: "compressor" } as never,
+              })
+            }
+          >
+            → Simular Compressor
+          </Button>
+          <Button onClick={handleRun} disabled={running || !canRunTest}>
+            {running ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Calculando…</>
+            ) : (
+              <><Play className="mr-2 h-4 w-4" /> Executar Teste Integrado</>
+            )}
+          </Button>
+        </div>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Status dos envelopes da bancada</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-2 text-sm md:grid-cols-3">
+          <EnvelopeStatus
+            label="Evaporador"
+            ready={Boolean(evaporatorEnvelope)}
+            detail={evaporatorEnvelope ? "Envelope salvo" : "Aguardando simulação"}
+          />
+          <EnvelopeStatus
+            label="Condensador"
+            ready={Boolean(condenserEnvelope)}
+            detail={condenserEnvelope ? "Envelope salvo" : "Aguardando simulação"}
+          />
+          <EnvelopeStatus
+            label="Compressor"
+            ready={Boolean(compressorEnvelope)}
+            detail={
+              compressorEnvelope
+                ? `Envelope salvo${compressorModel ? ` (${compressorModel})` : ""}`
+                : "Aguardando simulação"
+            }
+          />
+        </CardContent>
+      </Card>
+
+      {!canRunTest && (
+        <Card className="border-amber-300 bg-amber-50">
+          <CardContent className="p-3 text-sm text-amber-900">
+            Salve os envelopes de evaporador, condensador e compressor para habilitar o teste integrado.
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs defaultValue="dx" className="w-full">
         <TabsList>
@@ -320,6 +376,28 @@ export default function TestBenchPage() {
           </Card>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function EnvelopeStatus({
+  label,
+  ready,
+  detail,
+}: {
+  label: string;
+  ready: boolean;
+  detail: string;
+}) {
+  return (
+    <div className="rounded-md border p-3">
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-medium">{label}</span>
+        <Badge variant={ready ? "default" : "outline"}>
+          {ready ? "✅ Envelope salvo" : "⬜ Aguardando simulação"}
+        </Badge>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
     </div>
   );
 }

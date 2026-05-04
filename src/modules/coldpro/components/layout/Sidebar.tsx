@@ -19,6 +19,7 @@ import {
   Snowflake,
   Target,
   Thermometer,
+  Zap,
 } from "lucide-react";
 import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,12 @@ const NAV_GROUPS: NavGroup[] = [
         label: "Condensador a Ar",
         Icon: Thermometer,
         search: { type: "condenser_air" },
+      },
+      {
+        to: "/coldpro/cncoils/workspace",
+        label: "Compressor",
+        Icon: Zap,
+        search: { type: "compressor" },
       },
       { to: "/coldpro/cycle", label: "Ciclo de Refrigeração", Icon: RotateCw },
       { to: "/coldpro/map", label: "Mapa Operacional", Icon: Map },

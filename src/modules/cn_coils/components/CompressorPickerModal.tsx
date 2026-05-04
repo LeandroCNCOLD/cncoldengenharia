@@ -44,6 +44,7 @@ function formatKw(w?: number | null): string {
 interface Props {
   open: boolean;
   onClose: () => void;
+  onSelect?: (compressor: CompressorItem) => void;
 }
 
 /**
@@ -52,7 +53,7 @@ interface Props {
  * A capacidade/vazão mássica total = unitária × quantidade
  * (replicado pelo motor de cálculo).
  */
-export function CompressorPickerModal({ open, onClose }: Props) {
+export function CompressorPickerModal({ open, onClose, onSelect }: Props) {
   const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
   const compressorCount = useCnCoilsSimulationStore((s) => s.compressorCount);
   const setSelectedCompressor = useCnCoilsSimulationStore((s) => s.setSelectedCompressor);
@@ -160,6 +161,7 @@ export function CompressorPickerModal({ open, onClose }: Props) {
     if (!draft) return;
     setSelectedCompressor(draft.id);
     setCompressorCount(draftCount);
+    onSelect?.(draft);
     onClose();
   };
 

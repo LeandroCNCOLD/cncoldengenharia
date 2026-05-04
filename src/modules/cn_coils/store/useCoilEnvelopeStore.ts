@@ -47,14 +47,33 @@ export interface CondenserEnvelopePoint {
   Tair_out: number;
 }
 
+export interface CompressorEnvelopePoint {
+  Te_C: number;
+  Tc_C: number;
+  Q_W: number;
+  W_W: number;
+  COP: number;
+  massFlow_kgh: number;
+  dischargeTemp_C: number;
+}
+
 interface CoilEnvelopeState {
   envelopes: Record<string, CoilEnvelope>;
   condenserEnvelope: CondenserEnvelopePoint[] | null;
+  compressorEnvelope: CompressorEnvelopePoint[] | null;
+  compressorId: string | null;
+  compressorModel: string | null;
   saveEnvelope: (envelope: CoilEnvelope) => void;
   getEnvelope: (componentType: string) => CoilEnvelope | undefined;
   clearEnvelope: (componentType: string) => void;
   setCondenserEnvelope: (points: CondenserEnvelopePoint[]) => void;
   clearCondenserEnvelope: () => void;
+  setCompressorEnvelope: (
+    points: CompressorEnvelopePoint[],
+    id: string,
+    model: string,
+  ) => void;
+  clearCompressorEnvelope: () => void;
   clearAll: () => void;
   hasAllEnvelopes: () => boolean;
 }
@@ -64,6 +83,9 @@ export const useCoilEnvelopeStore = create<CoilEnvelopeState>()(
     (set, get) => ({
       envelopes: {},
       condenserEnvelope: null,
+      compressorEnvelope: null,
+      compressorId: null,
+      compressorModel: null,
       saveEnvelope: (envelope) =>
         set((state) => ({
           envelopes: { ...state.envelopes, [envelope.componentType]: envelope },
@@ -76,13 +98,32 @@ export const useCoilEnvelopeStore = create<CoilEnvelopeState>()(
         }),
       setCondenserEnvelope: (points) => set({ condenserEnvelope: points }),
       clearCondenserEnvelope: () => set({ condenserEnvelope: null }),
-      clearAll: () => set({ envelopes: {}, condenserEnvelope: null }),
+      setCompressorEnvelope: (points, id, model) =>
+        set({
+          compressorEnvelope: points,
+          compressorId: id,
+          compressorModel: model,
+        }),
+      clearCompressorEnvelope: () =>
+        set({
+          compressorEnvelope: null,
+          compressorId: null,
+          compressorModel: null,
+        }),
+      clearAll: () =>
+        set({
+          envelopes: {},
+          condenserEnvelope: null,
+          compressorEnvelope: null,
+          compressorId: null,
+          compressorModel: null,
+        }),
       hasAllEnvelopes: () => {
         const envelopes = get().envelopes;
         return Boolean(
           envelopes.evaporator_dx &&
             (envelopes.condenser_air || get().condenserEnvelope) &&
-            envelopes.compressor,
+            (envelopes.compressor || get().compressorEnvelope),
         );
       },
     }),
