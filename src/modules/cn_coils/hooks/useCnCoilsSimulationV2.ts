@@ -13,9 +13,9 @@
 
 import { useCallback } from "react";
 import {
-  runSimulationV2,
   SimulationV2Error,
 } from "../engine_v2/simulatorCoreV2";
+import { runIterativeSolverV2 } from "../engine_v2/iterativeSolverV2";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import { getRefrigerantLiquidProps } from "../engine_v2/refrigerantProps";
 import type {
@@ -24,9 +24,6 @@ import type {
   CoilGeometryCatalogItem,
 } from "../types/cncoils.types";
 import type { StructuredWarning } from "../types/warnings";
-
-const MAX_ITER = 20;
-const TOLERANCE = 0.001; // 0.1%
 
 export interface UseCnCoilsSimulationV2Params {
   tubeMaterials: TubeMaterialItem[];
@@ -85,61 +82,17 @@ export function useCnCoilsSimulationV2(params: UseCnCoilsSimulationV2Params) {
       };
 
       const userMassFlowKgS = (state.fluidMassFlow_kg_h || 0) / 3600;
-      const h_fg_kJkg = Math.max(fluidData.h_fg_kJkg, 1);
+      const h_fg_kJkg = fluidData.h_fg_kJkg;
 
-      let rawResult;
-      const iterWarnings: string[] = [];
+      // Delegar ao solver iterativo puro (testável sem React)
+      const solverOutput = runIterativeSolverV2(
+        baseInputs,
+        userMassFlowKgS,
+        h_fg_kJkg,
+      );
 
-      if (userMassFlowKgS > 0) {
-        // Usuário informou a vazão — usa diretamente sem loop iterativo
-        rawResult = runSimulationV2({
-          ...baseInputs,
-          fluidMassFlowKgS: userMassFlowKgS,
-        });
-      } else {
-        // Solver iterativo ṁ ↔ Q (NIST ACSIM)
-        // Iteração 0: usa ṁ=0 → U_fallback=35 W/m²K → obtém Q_0
-        let prevMassFlowKgS = 0;
-        rawResult = runSimulationV2({
-          ...baseInputs,
-          fluidMassFlowKgS: 0,
-        });
-
-        let converged = false;
-        for (let iter = 1; iter <= MAX_ITER; iter++) {
-          const Q_prev_kW = rawResult.totalCapacityKw;
-          // ṁ = Q / h_fg  (Q em kW, h_fg em kJ/kg → ṁ em kg/s)
-          const massFlowKgS = Math.max(Q_prev_kW / h_fg_kJkg, 1e-6);
-
-          rawResult = runSimulationV2({
-            ...baseInputs,
-            fluidMassFlowKgS: massFlowKgS,
-          });
-
-          // Critério de convergência: variação relativa de ṁ
-          const relChange = prevMassFlowKgS > 0
-            ? Math.abs(massFlowKgS - prevMassFlowKgS) / prevMassFlowKgS
-            : 1;
-
-          prevMassFlowKgS = massFlowKgS;
-
-          if (relChange < TOLERANCE) {
-            converged = true;
-            iterWarnings.push(
-              `Motor V2: convergência ṁ ↔ Q em ${iter} iterações (ṁ = ${(massFlowKgS * 3600).toFixed(1)} kg/h)`,
-            );
-            break;
-          }
-        }
-
-        if (!converged) {
-          iterWarnings.push(
-            `Motor V2: solver iterativo não convergiu em ${MAX_ITER} iterações — resultado pode ser impreciso`,
-          );
-        }
-      }
-
-      const result = { ...rawResult };
+      const result = { ...solverOutput.result };
+      const iterWarnings = solverOutput.solverWarnings;
 
       const warnings: StructuredWarning[] = [
         ...fluidData.warnings.map((msg) => ({
