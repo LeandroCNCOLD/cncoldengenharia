@@ -25,6 +25,8 @@ import {
   Waves,
   Zap,
   X,
+  BookOpen,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +66,8 @@ const NAV_GROUPS: NavGroup[] = [
       { to: "/coldpro/cncoils/workspace", label: "· Cond. Evaporativo", Icon: Droplets, search: { type: "evaporative_condenser" } },
       { to: "/coldpro/cncoils/workspace", label: "· Cond. a Água", Icon: Waves, search: { type: "water_condenser" } },
       { to: "/coldpro/cncoils/workspace", label: "· Bat. Aquecimento", Icon: Flame, search: { type: "heating_coil" } },
+      { to: "/coldpro/cncoils/component-library", label: "· Biblioteca", Icon: BookOpen },
+      { to: "/coldpro/cncoils/project-completion", label: "· Conclusão", Icon: CheckCircle },
       { to: "/coldpro/cycle", label: "Ciclo de Refrigeração", Icon: RotateCw },
       { to: "/coldpro/map", label: "Mapa Operacional", Icon: Map },
       { to: "/coldpro/assembly", label: "Arranjo de Serpentinas", Icon: Layers },

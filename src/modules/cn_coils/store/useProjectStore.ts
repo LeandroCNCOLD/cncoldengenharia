@@ -14,6 +14,15 @@ export type SavedProjectType =
   | "heat_pump"
   | "component_workspace";
 
+// ── Feature D — Anexos ────────────────────────────────────────────────────────
+export interface ProjectAttachment {
+  id: string;          // uuid
+  name: string;        // original filename
+  type: "datasheet" | "photo" | "report" | "other";
+  dataUrl: string;     // base64 data URL (max 500KB per file)
+  addedAt: number;     // UTC timestamp
+}
+
 export interface SavedProjectSnapshot {
   evaporatorEnvelope?: CoilEnvelope | null;
   condenserEnvelope?: CondenserEnvelopePoint[] | CoilEnvelope | null;
@@ -22,6 +31,7 @@ export interface SavedProjectSnapshot {
   systemInputs?: Record<string, unknown>;
   equilibriumResult?: SystemEquilibriumResult | null;
   loadResult?: Record<string, unknown> | null;
+  attachments?: ProjectAttachment[];
 }
 
 export interface SavedProject {
@@ -46,6 +56,11 @@ interface ProjectStore {
   loadProject: (id: string) => SavedProject | null;
   setActiveProject: (id: string | null) => void;
   renameProject: (id: string, newName: string) => void;
+  addAttachment: (
+    projectId: string,
+    attachment: Omit<ProjectAttachment, "id" | "addedAt">,
+  ) => void;
+  removeAttachment: (projectId: string, attachmentId: string) => void;
 }
 
 const MAX_PROJECTS = 50;
@@ -128,6 +143,41 @@ export const useProjectStore = create<ProjectStore>()(
           projects: state.projects.map((project) =>
             project.id === id
               ? { ...project, name: newName.trim() || project.name, updatedAt: Date.now() }
+              : project,
+          ),
+        })),
+      addAttachment: (projectId, attachment) =>
+        set((state) => ({
+          projects: state.projects.map((project) =>
+            project.id === projectId
+              ? {
+                  ...project,
+                  updatedAt: Date.now(),
+                  snapshot: {
+                    ...project.snapshot,
+                    attachments: [
+                      ...(project.snapshot.attachments ?? []),
+                      { ...attachment, id: crypto.randomUUID(), addedAt: Date.now() },
+                    ],
+                  },
+                }
+              : project,
+          ),
+        })),
+      removeAttachment: (projectId, attachmentId) =>
+        set((state) => ({
+          projects: state.projects.map((project) =>
+            project.id === projectId
+              ? {
+                  ...project,
+                  updatedAt: Date.now(),
+                  snapshot: {
+                    ...project.snapshot,
+                    attachments: (project.snapshot.attachments ?? []).filter(
+                      (a) => a.id !== attachmentId,
+                    ),
+                  },
+                }
               : project,
           ),
         })),

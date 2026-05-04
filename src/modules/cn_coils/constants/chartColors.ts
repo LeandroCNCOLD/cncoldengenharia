@@ -1,14 +1,21 @@
+// Feature E — CN Cold brand chart colors
+export const CHART_COLORS_ARRAY = [
+  '#3b82f6', '#06b6d4', '#10b981', '#8b5cf6', '#f59e0b',
+  '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#6366f1'
+];
+
+// Alias para compatibilidade com Feature F (useEnvelopeExport)
 export const CHART_COLORS = {
-  primary: "#1a85e0",
-  secondary: "#00b4c4",
-  accent: "#f97316",
-  success: "#22c55e",
-  warning: "#eab308",
+  primary: "#3b82f6",
+  secondary: "#06b6d4",
+  accent: "#f59e0b",
+  success: "#10b981",
+  warning: "#f59e0b",
   danger: "#ef4444",
-  purple: "#7c3aed",
+  purple: "#8b5cf6",
   tc35: "#3b82f6",
-  tc40: "#22c55e",
-  tc45: "#eab308",
+  tc40: "#10b981",
+  tc45: "#f59e0b",
   tc50: "#f97316",
   tc55: "#ef4444",
   surface: "#f1f5f9",
