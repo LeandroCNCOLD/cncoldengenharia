@@ -335,7 +335,7 @@ function PermissionsTab() {
   const load = async () => {
     setLoading(true);
     const { data } = await supabase.from("module_permissions").select("*");
-    setPerms(((data ?? []) as PermissionRow[]) ?? []);
+    setPerms((data ?? []) as PermissionRow[]);
     setLoading(false);
   };
 
