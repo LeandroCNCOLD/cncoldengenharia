@@ -843,6 +843,15 @@ export function EvaporatorUnifiedWorkspacePage() {
         onClose={() => setCompressorPickerOpen(false)}
       />
 
+      <FanPickerModal
+        open={fanPickerOpen}
+        onClose={() => setFanPickerOpen(false)}
+        fans={fanPickerItems}
+        onConfirm={(item) => {
+          toast.success(`Ventilador selecionado: ${[item.manufacturer, item.model].filter(Boolean).join(" ")}`);
+        }}
+      />
+
       <PostSaveNextStepDialog
         open={nextStepOpen}
         onOpenChange={setNextStepOpen}
