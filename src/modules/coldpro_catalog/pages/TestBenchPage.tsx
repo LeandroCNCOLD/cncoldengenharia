@@ -6,10 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, AlertTriangle, CheckCircle2, Play, Loader2 } from "lucide-react";
 import { catalogRepository } from "../services/catalogRepository";
-import { buildCycleConfigFromCatalog } from "../utils/buildCycleConfigFromCatalog";
-import { useCycleSimulation } from "@/modules/cn_coils/hooks/useCycleSimulation";
 import { buildMotorComponentsFromCatalog } from "../adapters/sessionToMotorInputAdapter";
-import type { CycleSystemConfig } from "@/modules/cn_coils/engines/cycle/cycleTypes";
+import { runCycleThermo } from "@/modules/cn_coils/engines/cycle/cycleEngine";
+import type { CycleThermoResult } from "@/modules/cn_coils/engines/cycle/cycleTypes";
 
 const KCALH_PER_W = 1 / 1.163;
 
@@ -18,14 +17,34 @@ function fmt(v: number | undefined | null, d = 2): string {
   return v.toLocaleString("pt-BR", { maximumFractionDigits: d });
 }
 
-type BottleneckKind = "balanced" | "evaporator" | "compressor" | "condenser";
+type BottleneckKind = "none" | "compressor";
+type BenchStatus = "approved" | "attention" | "rejected" | "unavailable";
+
+interface EnergyBalanceResult {
+  thermo: CycleThermoResult;
+  mDotKgS: number;
+  QMotorW: number;
+  WCompW: number;
+  QCondW: number;
+  COPMotor: number;
+  deviationPct: number | null;
+  status: BenchStatus;
+  bottleneck: BottleneckKind;
+}
 
 function bottleneckLabel(kind: BottleneckKind): string {
   switch (kind) {
-    case "balanced": return "Sistema balanceado";
-    case "evaporator": return "Evaporador";
+    case "none": return "Nenhum";
     case "compressor": return "Compressor";
-    case "condenser": return "Condensador";
+  }
+}
+
+function statusLabel(status: BenchStatus): string {
+  switch (status) {
+    case "approved": return "Aprovado";
+    case "attention": return "Atenção";
+    case "rejected": return "Rejeitado";
+    case "unavailable": return "Sem referência";
   }
 }
 
