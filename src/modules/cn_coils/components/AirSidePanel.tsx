@@ -223,9 +223,11 @@ function Row({
 interface AirSidePanelProps {
   result?: CnCoilsSimulationResult | null;
   disabled?: boolean;
+  /** Callback para abrir o modal de seleção de ventilador */
+  onFanPickerOpen?: () => void;
 }
 
-export function AirSidePanel({ result, disabled }: AirSidePanelProps) {
+export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanelProps) {
   const thermo = useCnCoilsSimulationStore((s) => s.thermoInputs);
   const setThermo = useCnCoilsSimulationStore((s) => s.setThermoInputs);
   const errorFactorPercent = useCnCoilsSimulationStore((s) => s.errorFactorPercent);
@@ -397,9 +399,14 @@ export function AirSidePanel({ result, disabled }: AirSidePanelProps) {
                 </div>
               }
               input={
-                <div className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] text-slate-500 truncate">
+                <button
+                  type="button"
+                  onClick={onFanPickerOpen}
+                  disabled={disabled || !onFanPickerOpen}
+                  className="w-full rounded border border-slate-300 bg-white px-1.5 py-0.5 text-left text-[10px] text-slate-500 truncate hover:border-blue-400 hover:text-blue-600 disabled:cursor-default disabled:opacity-70 transition-colors"
+                >
                   {loadingFans ? "Carregando…" : fanLabel}
-                </div>
+                </button>
               }
               result={<ResultCell value="---" />}
             />

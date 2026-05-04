@@ -34,7 +34,15 @@ export function calcCoilEffectiveArea(input: CoilAreaInput): CoilAreaResult {
   return { A_fin_m2, A_tube_bare_m2, A_total_m2, A_internal_m2, N_tubes_total, surface_ratio };
 }
 
-// Eficiência da aleta — Schmidt 1949
+/**
+ * Eficiência da aleta — aproximação de Schmidt 1949 para aletas circulares contínuas.
+ *
+ * Correções de robustez:
+ *  - Protege Math.sqrt de argumento negativo (ocorre quando P_l < 0.3·P_t)
+ *  - Protege Math.log de argumento ≤ 0 (ocorre quando r_eq ≤ r_o)
+ *  - Protege divisão por zero em tanh(mLc)/mLc
+ *  - Retorna 1.0 para qualquer entrada inválida (conservador)
+ */
 export function calcFinEfficiency(
   h_air: number,
   k_fin: number,
@@ -43,11 +51,33 @@ export function calcFinEfficiency(
   P_t: number,
   P_l: number
 ): number {
-  const r_eq = 1.27 * (P_t / 2) * Math.sqrt(P_l / P_t - 0.3);
+  // Guarda-chuva: entradas inválidas → eficiência unitária (sem penalidade)
+  if (
+    !Number.isFinite(h_air) || h_air <= 0 ||
+    !Number.isFinite(k_fin) || k_fin <= 0 ||
+    !Number.isFinite(delta_f) || delta_f <= 0 ||
+    !Number.isFinite(r_o) || r_o <= 0 ||
+    !Number.isFinite(P_t) || P_t <= 0 ||
+    !Number.isFinite(P_l) || P_l <= 0
+  ) return 1.0;
+
+  // Schmidt 1949: raio equivalente da aleta circular
+  // Argumento do sqrt pode ser negativo quando P_l < 0.3·P_t → clampado em 0
+  const sqrtArg = Math.max(0, P_l / P_t - 0.3);
+  const r_eq = 1.27 * (P_t / 2) * Math.sqrt(sqrtArg);
+
+  // Se r_eq ≤ r_o a geometria é degenerada → eficiência unitária
+  if (r_eq <= r_o) return 1.0;
+
   const m = Math.sqrt((2 * h_air) / (k_fin * delta_f));
-  const L_c = (r_eq - r_o) * (1 + 0.35 * Math.log(r_eq / r_o));
+
+  // Comprimento corrigido de Schmidt (log protegido)
+  const logRatio = Math.log(r_eq / r_o);
+  const L_c = (r_eq - r_o) * (1 + 0.35 * logRatio);
+
   const mLc = m * L_c;
-  if (mLc < 1e-6) return 1.0;
+  if (!Number.isFinite(mLc) || mLc < 1e-6) return 1.0;
+
   return Math.max(0.5, Math.min(1.0, Math.tanh(mLc) / mLc));
 }
 

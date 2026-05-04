@@ -50,6 +50,8 @@ import { CyclePHDiagram } from "../components/CyclePHDiagram";
 import { CoilEnvelopeTab } from "../components/CoilEnvelopeTab";
 import { OperatingMapChart } from "../components/OperatingMapChart";
 import { CompressorPickerModal } from "../components/CompressorPickerModal";
+import { FanPickerModal, type FanPickerItem } from "../components/FanPickerModal";
+import { useCnCoilsCatalogs as useCnCoilsFullCatalogs } from "../hooks/useCnCoilsCatalogCollection";
 import { PostSaveNextStepDialog } from "../components/PostSaveNextStepDialog";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { DrawingTab } from "../components/drawing/DrawingTab";
@@ -216,6 +218,26 @@ export function CondenserWorkspacePage() {
   const [superheat, setSuperheat] = useState(5);
   const [subcooling, setSubcooling] = useState(5);
   const [massFlow, setMassFlow] = useState(0);
+
+  // ── Ventilador (picker) ──
+  const [fanPickerOpen, setFanPickerOpen] = useState(false);
+  const fullCatalogs = useCnCoilsFullCatalogs();
+  const fanPickerItems = useMemo<FanPickerItem[]>(
+    () =>
+      (fullCatalogs.fans ?? []).map((f) => ({
+        id: String(f.id),
+        manufacturer: f.builder,
+        model: f.model,
+        series: f.series,
+        airflow_m3h: f.airflowM3h,
+        diameter_mm: f.diameterMm,
+        rpm: f.speedRpm,
+        motor_power_w: f.powerW,
+        motor_current_a: f.currentA,
+        voltage_v: f.voltageV,
+      })),
+    [fullCatalogs.fans],
+  );
 
   // ── Compressor ──
   const [compressorPickerOpen, setCompressorPickerOpen] = useState(false);
@@ -712,6 +734,7 @@ export function CondenserWorkspacePage() {
                 onSimulate={() => simState.trigger()}
                 onReset={handleReset}
                 isSimulating={isSimulating}
+                onFanPickerOpen={() => setFanPickerOpen(true)}
               />
             )}
           </div>
@@ -737,6 +760,14 @@ export function CondenserWorkspacePage() {
       <CompressorPickerModal
         open={compressorPickerOpen}
         onClose={() => setCompressorPickerOpen(false)}
+      />
+      <FanPickerModal
+        open={fanPickerOpen}
+        onClose={() => setFanPickerOpen(false)}
+        fans={fanPickerItems}
+        onConfirm={(item) => {
+          toast.success(`Ventilador selecionado: ${[item.manufacturer, item.model].filter(Boolean).join(" ")}`);
+        }}
       />
       <PostSaveNextStepDialog
         open={nextStepOpen}
@@ -833,6 +864,7 @@ type CondenserTabsProps = {
   onSimulate: () => void;
   onReset: () => void;
   isSimulating: boolean;
+  onFanPickerOpen: () => void;
 };
 
 function CondenserTabs({
@@ -866,6 +898,7 @@ function CondenserTabs({
   onSimulate,
   onReset,
   isSimulating,
+  onFanPickerOpen,
 }: CondenserTabsProps) {
   const result = useCnCoilsSimulationStore((s) => s.result);
   const storeIsSimulating = useCnCoilsSimulationStore((s) => s.isSimulating);
@@ -960,7 +993,7 @@ function CondenserTabs({
               />
               <div className="min-w-0 space-y-2 xl:contents">
                 <div className="min-w-0 space-y-2 xl:border-r xl:border-border xl:pr-2">
-                  <AirSidePanel result={result} />
+                  <AirSidePanel result={result} onFanPickerOpen={onFanPickerOpen} />
                 </div>
                 <div className="min-w-0 space-y-2">
                   <FluidSidePanel
