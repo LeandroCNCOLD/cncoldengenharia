@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Snowflake, Calculator } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { Snowflake, Bot, Calculator } from "lucide-react";
 import { toast } from "sonner";
 
 import { useCycleSimulation } from "../hooks/useCycleSimulation";
@@ -23,6 +23,10 @@ import { OptimizationPanel } from "../components/OptimizationPanel";
 import { UncertaintyPanel, UncertaintyBadge } from "../components/UncertaintyBadge";
 import { CompressorPickerModal } from "../components/CompressorPickerModal";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
+import { EnrichedWarningsPanel } from "../components/EnrichedWarningsPanel";
+import { WorkspaceAIChat } from "../components/WorkspaceAIChat";
+import { enrichWarnings } from "../utils/warningEnricher";
+import type { AIContext } from "../components/WorkspaceAIChat";
 
 import { CnCoilsWorkspacePage } from "./CnCoilsWorkspacePage";
 
@@ -230,6 +234,45 @@ export function EvaporatorUnifiedWorkspacePage() {
   const simState = useCycleSimulation(config, { mode: "manual" });
   const cycleResult: CycleResult | null =
     simState.status === "success" ? simState.result : null;
+
+  // ── IA Chat state ──
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiTab, setAiTab] = useState("Detalhado");
+
+  const openAI = useCallback((tabName: string) => {
+    setAiTab(tabName);
+    setAiOpen(true);
+  }, []);
+
+  const aiContext = useMemo<AIContext>(() => ({
+    componentType: "Evaporador DX",
+    tabName: aiTab,
+    refrigerant: refrigerantId,
+    parameters: {
+      "Altura (mm)": geomHeight,
+      "Largura (mm)": geomWidth,
+      "Linhas": rows,
+      "Tubos/linha": tubesPerRow,
+      "Circuitos": circuits,
+      "Passo aleta (mm)": finPitch,
+      "Vazão ar (m³/h)": airFlow,
+      "T entrada DB (°C)": airTempIn,
+      "UR entrada (%)": airRH,
+      "Te inicial (°C)": te,
+      "Tc inicial (°C)": tc,
+      "SH (K)": superheat,
+      "SC (K)": subcooling,
+    },
+    results: cycleResult ? ({
+      "Capacidade total (kW)": (cycleResult.Q_evap_W / 1000).toFixed(2),
+      "COP": cycleResult.COP.toFixed(2),
+      "Te equilíbrio (°C)": cycleResult.Te_C.toFixed(1),
+      "Tc equilíbrio (°C)": cycleResult.Tc_C.toFixed(1),
+      "T saída ar (°C)": cycleResult.evaporatorResult.airOutletTempC.toFixed(1),
+      "ΔP ar (Pa)": cycleResult.evaporatorResult.airPressureDropPa.toFixed(0),
+    } as Record<string, string>) : undefined,
+    warnings: cycleResult ? enrichWarnings(cycleResult.warnings) : [],
+  }), [aiTab, refrigerantId, geomHeight, geomWidth, rows, tubesPerRow, circuits, finPitch, airFlow, airTempIn, airRH, te, tc, superheat, subcooling, cycleResult]);
   const { isGenerating: isExportingPdf, exportPdf } = usePdfExport();
 
   const didInitRef = useRef(false);
@@ -479,7 +522,8 @@ export function EvaporatorUnifiedWorkspacePage() {
   return (
     <WorkspaceLayout header={header} sidebar={sidebar}>
       <div className="flex h-full flex-col">
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex flex-1 min-h-0">
+          <div className="flex-1 overflow-y-auto p-4">
           {isCalculating && !cycleResult ? (
             <LoadingResults />
           ) : simState.status === "error" ? (
@@ -495,7 +539,18 @@ export function EvaporatorUnifiedWorkspacePage() {
               safetyFactor={safetyFactor}
               onExportPdf={handleExportPdf}
               isExportingPdf={isExportingPdf}
+              onOpenAI={openAI}
             />
+          )}
+          </div>
+          {aiOpen && (
+            <div className="w-80 shrink-0 overflow-hidden">
+              <WorkspaceAIChat
+                context={aiContext}
+                isOpen={aiOpen}
+                onClose={() => setAiOpen(false)}
+              />
+            </div>
           )}
         </div>
 
@@ -566,6 +621,7 @@ function UnifiedTabs({
   safetyFactor,
   onExportPdf,
   isExportingPdf,
+  onOpenAI,
 }: {
   config: CycleSystemConfig;
   cycleResult: CycleResult | null;
@@ -573,10 +629,42 @@ function UnifiedTabs({
   safetyFactor: number;
   onExportPdf: () => void;
   isExportingPdf: boolean;
+  onOpenAI: (tabName: string) => void;
 }) {
+  const enrichedWarnings = useMemo(
+    () => (cycleResult ? enrichWarnings(cycleResult.warnings) : []),
+    [cycleResult],
+  );
+  const hasErrors = enrichedWarnings.some((w) => w.severity === "error");
+
+  // Botão IA reutilizável por aba
+  function AIButton({ tab }: { tab: string }) {
+    return (
+      <Button
+        size="sm"
+        variant="outline"
+        className="gap-1.5 h-7 text-xs border-primary/40 text-primary hover:bg-primary/10"
+        onClick={() => onOpenAI(tab)}
+      >
+        <Bot className="h-3.5 w-3.5" />
+        IA Especialista
+      </Button>
+    );
+  }
+
   return (
-    <Tabs defaultValue="results" className="w-full">
+    <Tabs defaultValue="detailed" className="w-full">
       <TabsList className="flex w-full overflow-x-auto whitespace-nowrap scrollbar-none pb-px h-auto">
+        {/* Aba Detalhado — PRIMEIRA, em vermelho como fonte da verdade */}
+        <TabsTrigger
+          value="detailed"
+          className="shrink-0 text-xs font-semibold data-[state=active]:bg-red-600 data-[state=active]:text-white data-[state=inactive]:text-red-500 data-[state=inactive]:border-red-500/40"
+        >
+          🏭 Detalhado
+          {hasErrors && (
+            <span className="ml-1 inline-flex h-2 w-2 rounded-full bg-red-500 data-[state=active]:bg-white" />
+          )}
+        </TabsTrigger>
         <TabsTrigger value="results" className="shrink-0 text-xs">📋 Resultados</TabsTrigger>
         <TabsTrigger value="ph" className="shrink-0 text-xs">🔄 Ciclo P-H</TabsTrigger>
         <TabsTrigger value="envelope" className="shrink-0 text-xs">📊 Envelope Q×Te</TabsTrigger>
@@ -586,7 +674,6 @@ function UnifiedTabs({
         <TabsTrigger value="uncertainty" className="shrink-0 text-xs">📐 Incerteza</TabsTrigger>
         <TabsTrigger value="optimization" className="shrink-0 text-xs">⚙️ Otimização</TabsTrigger>
         <TabsTrigger value="series" className="shrink-0 text-xs">🔗 Série</TabsTrigger>
-        <TabsTrigger value="detailed" className="shrink-0 text-xs">🏭 Detalhado</TabsTrigger>
         <TabsTrigger value="report" className="shrink-0 text-xs">📄 Relatório</TabsTrigger>
       </TabsList>
 
@@ -678,9 +765,44 @@ function UnifiedTabs({
         ) : <EmptyState />}
       </TabsContent>
 
+      {/* ── Aba Detalhado — PRIMEIRA, fonte da verdade ── */}
       <TabsContent value="detailed" className="mt-3">
-        <div className="rounded-lg border border-border bg-card p-2">
-          <CnCoilsWorkspacePage />
+        <div className="space-y-3">
+          {/* Banner de avisos enriquecidos */}
+          {cycleResult && (
+            <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">🏭 Fonte da Verdade — Detalhado</h3>
+                <AIButton tab="Detalhado" />
+              </div>
+              <EnrichedWarningsPanel warnings={enrichedWarnings} />
+            </div>
+          )}
+          <div className="rounded-lg border border-border bg-card p-2">
+            <CnCoilsWorkspacePage />
+          </div>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="results" className="mt-3">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold">Resultados do Ciclo</h3>
+            <AIButton tab="Resultados" />
+          </div>
+          {cycleResult ? (
+            <ResultsGrid
+              config={config}
+              result={cycleResult}
+              frontalVelocity={frontalVelocity}
+              safetyFactor={safetyFactor}
+            />
+          ) : (
+            <EmptyState />
+          )}
+          {cycleResult && enrichedWarnings.length > 0 && (
+            <EnrichedWarningsPanel warnings={enrichedWarnings} />
+          )}
         </div>
       </TabsContent>
 
@@ -692,6 +814,7 @@ function UnifiedTabs({
           safetyFactor={safetyFactor}
           onExportPdf={onExportPdf}
           isExportingPdf={isExportingPdf}
+          onOpenAI={() => onOpenAI("Relatório")}
         />
       </TabsContent>
     </Tabs>
@@ -770,6 +893,7 @@ function ReportTab({
   safetyFactor,
   onExportPdf,
   isExportingPdf,
+  onOpenAI,
 }: {
   config: CycleSystemConfig;
   result: CycleResult | null;
@@ -777,6 +901,7 @@ function ReportTab({
   safetyFactor: number;
   onExportPdf: () => void;
   isExportingPdf: boolean;
+  onOpenAI?: () => void;
 }) {
   const [projectName, setProjectName] = useState("Projeto Evaporador DX");
   const date = new Date().toLocaleDateString("pt-BR");
@@ -790,6 +915,12 @@ function ReportTab({
           <Input value={projectName} onChange={(e) => setProjectName(e.target.value)} />
         </div>
         <Badge variant="secondary">{date}</Badge>
+        {onOpenAI && (
+          <Button variant="outline" size="sm" className="gap-1.5 border-primary/40 text-primary hover:bg-primary/10" onClick={onOpenAI}>
+            <Bot className="h-3.5 w-3.5" />
+            IA Especialista
+          </Button>
+        )}
         <Button onClick={onExportPdf} disabled={isExportingPdf || !result}>
           📄 Exportar PDF
         </Button>
