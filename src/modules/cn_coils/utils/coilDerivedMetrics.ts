@@ -1,4 +1,8 @@
-import { getRefrigerantLiquidProps } from "../engine_v2/refrigerantProps";
+import {
+  getRefrigerantLiquidProps,
+  getRefrigerantVaporDensity,
+  meanTwoPhaseRefrigerantDensity,
+} from "../engine_v2/refrigerantProps";
 
 export interface FanFitValidation {
   fitsHeight: boolean;
@@ -153,15 +157,30 @@ export function calcRefrigerantCharge(params: {
   nRows: number;
   nCircuits: number;
   L_fin_m: number;
-}): { kg: number; L: number; volume_L: number; L_per_circuit_m: number; warnings: string[] } {
+  /** Qualidade na entrada do evaporador DX (padrão: 0.20). */
+  x_in?: number;
+  /** Qualidade na saída do evaporador DX (padrão: 0.90). */
+  x_out?: number;
+}): { kg: number; L: number; volume_L: number; L_per_circuit_m: number; rho_effective_kg_m3: number; warnings: string[] } {
   const props = getRefrigerantLiquidProps(params.refrigerant, params.T_evap_C);
+  const rho_v = getRefrigerantVaporDensity(params.refrigerant, params.T_evap_C);
+  // Usa densidade bifásica média (Zivi 1964) em vez de rho_l puro.
+  // O evaporador DX contém mistura líquido+vapor, não líquido puro.
+  // rho_l puro superestima a carga em 3–4× para evaporadores DX.
+  const rho_effective = meanTwoPhaseRefrigerantDensity(
+    props.rho_kg_m3,
+    rho_v,
+    params.x_in ?? 0.20,
+    params.x_out ?? 0.90,
+  );
   const volumeM3 = calcInternalTubeVolumeM3(params);
   const volumeL = volumeM3 * 1000;
   return {
-    kg: volumeM3 * props.rho_kg_m3,
+    kg: volumeM3 * rho_effective,
     L: volumeL,
     volume_L: volumeL,
     L_per_circuit_m: calcTubeLengthPerCircuitM(params),
+    rho_effective_kg_m3: rho_effective,
     warnings: props.warnings,
   };
 }

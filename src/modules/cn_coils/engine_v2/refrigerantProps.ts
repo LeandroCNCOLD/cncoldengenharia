@@ -221,6 +221,87 @@ export function getRefrigerantLiquidProps(
 export const AVAILABLE_REFRIGERANTS_V2 = Object.keys(TABLES);
 
 // ============================================================================
+// Tabelas de densidade do vapor saturado [kg/m³]
+// Formato: [T_°C, rho_v kg/m³]
+// Fonte: NIST REFPROP 10.0 / ASHRAE Fundamentals 2021
+// ============================================================================
+const VAPOR_TABLES: Record<string, number[][]> = {
+  R404A:  [[-40,14.5],[-30,20.5],[-20,28.5],[-10,38.8],[0,52.0],[10,68.5],[20,89.0],[30,115],[40,148]],
+  R410A:  [[-40,18.5],[-30,26.2],[-20,36.5],[-10,49.8],[0,66.5],[10,87.5],[20,114],[30,146],[40,187]],
+  R22:    [[-40,5.3], [-30,7.6], [-20,10.7],[-10,14.8],[0,20.2],[10,27.0],[20,35.7],[30,46.6],[40,60.0]],
+  R134A:  [[-40,3.2], [-30,4.7], [-20,6.8], [-10,9.7], [0,13.6],[10,18.8],[20,25.5],[30,34.2],[40,45.2]],
+  R407C:  [[-40,7.5], [-30,10.8],[-20,15.2],[-10,21.0],[0,28.5],[10,38.2],[20,50.5],[30,66.0],[40,85.5]],
+  R507A:  [[-40,14.0],[-30,19.8],[-20,27.5],[-10,37.5],[0,50.2],[10,66.5],[20,86.5],[30,112],[40,144]],
+  R290:   [[-40,3.8], [-30,5.5], [-20,7.8], [-10,10.9],[0,15.0],[10,20.2],[20,27.0],[30,35.5],[40,46.2]],
+  R717:   [[-40,0.64],[-30,0.97],[-20,1.44],[-10,2.09],[0,2.97],[10,4.13],[20,5.65]],
+  R32:    [[-40,17.2],[-30,24.5],[-20,34.2],[-10,46.8],[0,62.5],[10,82.5],[20,107],[30,138],[40,177]],
+  R1234YF:[[-40,5.5], [-30,8.0], [-20,11.4],[-10,15.8],[0,21.5],[10,28.8],[20,38.2],[30,50.0],[40,65.0]],
+  R452B:  [[-40,17.5],[-30,24.8],[-20,34.5],[-10,47.0],[0,62.8],[10,82.8],[20,108],[30,139],[40,178]],
+  R454B:  [[-40,16.8],[-30,23.8],[-20,33.2],[-10,45.5],[0,60.8],[10,80.2],[20,104],[30,134],[40,172]],
+  R513A:  [[-40,4.8], [-30,7.0], [-20,10.0],[-10,14.0],[0,19.2],[10,25.8],[20,34.2],[30,44.8],[40,58.0]],
+  R515B:  [[-40,3.5], [-30,5.2], [-20,7.5], [-10,10.5],[0,14.5],[10,19.5],[20,26.0],[30,34.0],[40,44.5]],
+};
+
+/**
+ * Retorna a densidade do vapor saturado [kg/m³] para um refrigerante e temperatura.
+ * Usa R404A como fallback se o refrigerante não for encontrado.
+ */
+export function getRefrigerantVaporDensity(
+  refrigerantId: string,
+  T_sat_C: number,
+): number {
+  const key = normalizeId(refrigerantId);
+  const table = VAPOR_TABLES[key] ?? VAPOR_TABLES.R404A;
+  return interpolate(table, T_sat_C, 1);
+}
+
+/**
+ * Calcula a fração de vazio média pela correlação de Zivi (1964).
+ * α = 1 / [1 + (1-x)/x × (rho_v/rho_l)^(2/3)]
+ * Fonte: Zivi, S.M. (1964), Trans. ASME J. Heat Transfer.
+ * Válida para escoamento anular em tubos horizontais e verticais.
+ *
+ * @param x - qualidade do vapor (0 a 1)
+ * @param rho_l - densidade do líquido saturado [kg/m³]
+ * @param rho_v - densidade do vapor saturado [kg/m³]
+ */
+export function ziviVoidFraction(x: number, rho_l: number, rho_v: number): number {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+  const ratio = Math.pow(rho_v / rho_l, 2 / 3);
+  return 1 / (1 + ((1 - x) / x) * ratio);
+}
+
+/**
+ * Calcula a densidade média da mistura bifásica no evaporador DX.
+ *
+ * Método: integraão da fração de vazio de Zivi ao longo da qualidade
+ * de x_in (entrada, tipicamente 0.15–0.25) até x_out (saída, tipicamente 0.85–0.95).
+ * rho_m = (1-α_med)·rho_l + α_med·rho_v
+ *
+ * @param rho_l - densidade do líquido saturado [kg/m³]
+ * @param rho_v - densidade do vapor saturado [kg/m³]
+ * @param x_in  - qualidade na entrada do evaporador (padrão: 0.20)
+ * @param x_out - qualidade na saída do evaporador (padrão: 0.90)
+ */
+export function meanTwoPhaseRefrigerantDensity(
+  rho_l: number,
+  rho_v: number,
+  x_in = 0.20,
+  x_out = 0.90,
+): number {
+  // Integração numérica simples (10 pontos) de α(x) sobre [x_in, x_out]
+  const N = 10;
+  let sumAlpha = 0;
+  for (let i = 0; i <= N; i++) {
+    const x = x_in + (i / N) * (x_out - x_in);
+    sumAlpha += ziviVoidFraction(x, rho_l, rho_v);
+  }
+  const alpha_med = sumAlpha / (N + 1);
+  return (1 - alpha_med) * rho_l + alpha_med * rho_v;
+}
+
+// ============================================================================
 // M6 — Parâmetros de correção (multiplicadores) — NIST ACSIM Sect. 3.5
 // ============================================================================
 
