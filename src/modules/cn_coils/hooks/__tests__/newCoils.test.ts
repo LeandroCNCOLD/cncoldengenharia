@@ -51,6 +51,8 @@ describe("useWaterCondenserSimulation", () => {
       tubeDiameter_mm: 19.05,
       passes: 2,
       refrigerant: "R404A",
+      superheat_K: 5,
+      subcooling_K: 3,
     };
 
     const highFlow = calculateWaterCondenser({ ...base, waterFlowRate_m3h: 5 });
@@ -69,6 +71,8 @@ describe("useWaterCondenserSimulation", () => {
       tubeDiameter_mm: 19.05,
       passes: 1,
       refrigerant: "R404A",
+      superheat_K: 5,
+      subcooling_K: 3,
     });
 
     expect(result.areaMargin).toBeLessThan(0);
