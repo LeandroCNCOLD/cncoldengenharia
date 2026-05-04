@@ -14,6 +14,7 @@ import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
 import { ResultCard } from "../components/ResultCard";
 import { ResultPanel } from "../components/ResultPanel";
 import { ActionBar } from "../components/ActionBar";
+import { ProjectHeaderBar } from "../components/ProjectHeaderBar";
 import { CyclePHDiagram } from "../components/CyclePHDiagram";
 import { CoilEnvelopeTab } from "../components/CoilEnvelopeTab";
 import { CoilsInSeriesPanel } from "../components/CoilsInSeriesPanel";
@@ -551,6 +552,7 @@ export function EvaporatorUnifiedWorkspacePage() {
 
   return (
     <WorkspaceLayout header={header} sidebar={sidebar}>
+      <ProjectHeaderBar workspaceType="component_workspace" />
       <div className="flex h-full flex-col">
         <div className="flex flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto p-4">

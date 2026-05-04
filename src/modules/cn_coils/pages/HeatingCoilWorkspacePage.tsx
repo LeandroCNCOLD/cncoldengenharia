@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ActionBar } from "../components/ActionBar";
+import { ProjectHeaderBar } from "../components/ProjectHeaderBar";
 import { ResultCard } from "../components/ResultCard";
 import { WorkspaceHeader } from "../components/WorkspaceHeader";
 import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
@@ -217,6 +218,7 @@ export function HeatingCoilWorkspacePage() {
       }
       sidebar={sidebar}
     >
+      <ProjectHeaderBar workspaceType="component_workspace" />
       <div className="flex flex-col gap-4 p-4">
         <Tabs defaultValue="results">
           <TabsList>

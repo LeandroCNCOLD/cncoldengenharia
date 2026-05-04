@@ -26,6 +26,7 @@ import { ResultCard } from "../components/ResultCard";
 import { WorkspaceHeader } from "../components/WorkspaceHeader";
 import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
 import { WorkspaceLayout } from "../components/WorkspaceLayout";
+import { ProjectHeaderBar } from "../components/ProjectHeaderBar";
 import { CHART_COLORS } from "../constants/chartColors";
 import {
   calculateWaterCondenser,
@@ -172,6 +173,7 @@ export function WaterCondenserWorkspacePage() {
       }
       sidebar={sidebar}
     >
+      <ProjectHeaderBar workspaceType="component_workspace" />
       <div className="flex flex-col gap-4 p-4">
         <Tabs defaultValue="results">
           <TabsList>
