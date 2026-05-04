@@ -3,8 +3,10 @@
  * Tarefa 6: ativa CycleEngine com configuração específica por modo.
  */
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { ArrowRight, Snowflake, Flame, Box } from "lucide-react";
+import { Snowflake, Flame, Box } from "lucide-react";
+import { WorkspaceLayout } from "../../components/WorkspaceLayout";
+import { WorkspaceHeader } from "../../components/WorkspaceHeader";
+import { WorkspaceInputsSidebar } from "../../components/WorkspaceInputsSidebar";
 import { useCycleSimulation } from "../../hooks/useCycleSimulation";
 import { CyclePHDiagram } from "../../components/CyclePHDiagram";
 import { CycleResultPanel } from "../../components/CycleResultPanel";
@@ -197,40 +199,34 @@ export function SystemCyclePage({ mode }: SystemCyclePageProps) {
   const copH = cop + 1; // COP de aquecimento
   const meta = refrigerantsMeta.find((r) => r.id === refrigerantId);
 
-  return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <div className="border-b border-gray-800 px-6 py-3 flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <Icon className={`h-5 w-5 ${preset.iconColor}`} />
-            <h1 className="text-lg font-bold">{preset.title}</h1>
-            {cycleEnabled && cycleResult && (
-              <Badge
-                variant="outline"
-                className={
-                  cycleResult.converged
-                    ? "border-emerald-700 text-emerald-300"
-                    : "border-amber-700 text-amber-300"
-                }
-              >
-                {cycleResult.converged ? "🟢 Convergido" : "🟡 Estimativa"}
-              </Badge>
-            )}
-          </div>
-          <p className="text-xs text-gray-400">{preset.subtitle}</p>
-        </div>
-        <Link
-          to="/coldpro/cycle"
-          className="inline-flex items-center gap-1 rounded border border-gray-700 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-800"
-        >
-          Ver análise completa do ciclo
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
-      </div>
+  const convergenceBadge = cycleEnabled && cycleResult ? (
+    <Badge
+      variant="outline"
+      className={cycleResult.converged ? "border-emerald-600 text-emerald-400" : "border-amber-600 text-amber-400"}
+    >
+      {cycleResult.converged ? "🟢 Convergido" : "🟡 Estimativa"}
+    </Badge>
+  ) : null;
 
-      <div className="grid grid-cols-12 gap-0 h-[calc(100vh-65px)]">
-        {/* Configuração */}
-        <aside className="col-span-12 md:col-span-3 overflow-y-auto border-r border-gray-800 bg-gray-900/50 p-4 space-y-4">
+  const header = (
+    <WorkspaceHeader
+      title={preset.title}
+      badges={[refrigerantId, `Te: ${fmt(te, 0)}°C`, `Tc: ${fmt(tc, 0)}°C`]}
+      backTo="/coldpro/cncoils"
+      backLabel="CN Coils"
+    />
+  );
+
+  return (
+    <WorkspaceLayout
+      header={header}
+      sidebar={
+        <WorkspaceInputsSidebar
+          onCalculate={() => simState.trigger()}
+          isCalculating={simState.status === "running"}
+          calculateLabel="Calcular Ciclo"
+        >
+          <div className="space-y-4 p-4">
           <section className="rounded border border-gray-800 bg-gray-900 p-3 space-y-2">
             <div className="flex items-center justify-between">
               <Label className="text-xs uppercase tracking-wide text-gray-300">
@@ -344,10 +340,11 @@ export function SystemCyclePage({ mode }: SystemCyclePageProps) {
               onValueChange={(v) => setAirTempC(v[0])}
             />
           </section>
-        </aside>
-
-        {/* Resultados */}
-        <main className="col-span-12 md:col-span-9 overflow-y-auto p-6 bg-gray-950 space-y-4">
+          </div>
+        </WorkspaceInputsSidebar>
+      }
+    >
+      <div className="p-6 space-y-4">
           {!cycleEnabled && (
             <div className="rounded-lg border border-gray-800 bg-gray-900/50 p-6 text-sm text-gray-400">
               Motor de ciclo desativado. Ative para calcular o sistema.
@@ -406,9 +403,8 @@ export function SystemCyclePage({ mode }: SystemCyclePageProps) {
               </div>
             </>
           )}
-        </main>
       </div>
-    </div>
+    </WorkspaceLayout>
   );
 }
 

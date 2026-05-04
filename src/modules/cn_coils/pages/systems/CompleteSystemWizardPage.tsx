@@ -17,7 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
+import { WorkspaceLayout } from "../../components/WorkspaceLayout";
+import { WorkspaceHeader } from "../../components/WorkspaceHeader";
 import { CHART_COLORS } from "../../constants/chartColors";
 import { CompressorPickerModal } from "../../components/CompressorPickerModal";
 import { ColdRoomPdfReport } from "../../components/pdf/ColdRoomPdfReport";
@@ -186,23 +187,35 @@ export function CompleteSystemWizardPage({ mode }: CompleteSystemWizardPageProps
     },
   ];
 
-  return (
-    <PageContainer
+  const header = (
+    <WorkspaceHeader
       title={`Sistema — ${titles[mode]}`}
-      subtitle="Assistente guiado de dimensionamento completo"
-      actions={
-        <SaveProjectButton
-          projectType={projectType}
-          defaultName={`${titles[mode]} ${new Date().toLocaleDateString("pt-BR")}`}
-          systemInputs={(mode === "cold-room" ? coldRoomInputs : mode === "dx-complete" ? dxInputs : heatPumpInputs) as unknown as Record<string, unknown>}
-          loadResult={loadResult as unknown as Record<string, unknown>}
-          equilibriumResult={equilibrium.result}
-        />
-      }
-    >
-      <SystemWizard title={titles[mode]} steps={steps} />
-      <CompressorPickerModal open={pickerOpen} onClose={() => setPickerOpen(false)} />
-    </PageContainer>
+      badges={[titles[mode]]}
+      backTo="/coldpro/cncoils"
+      backLabel="CN Coils"
+    />
+  );
+
+  const sidebar = (
+    <div className="p-4 space-y-4">
+      <SaveProjectButton
+        projectType={projectType}
+        defaultName={`${titles[mode]} ${new Date().toLocaleDateString("pt-BR")}`}
+        systemInputs={(mode === "cold-room" ? coldRoomInputs : mode === "dx-complete" ? dxInputs : heatPumpInputs) as unknown as Record<string, unknown>}
+        loadResult={loadResult as unknown as Record<string, unknown>}
+        equilibriumResult={equilibrium.result}
+      />
+      <p className="text-xs text-muted-foreground">Assistente guiado de dimensionamento completo do sistema de refrigeração.</p>
+    </div>
+  );
+
+  return (
+    <WorkspaceLayout header={header} sidebar={sidebar}>
+      <div className="p-4">
+        <SystemWizard title={titles[mode]} steps={steps} />
+        <CompressorPickerModal open={pickerOpen} onClose={() => setPickerOpen(false)} />
+      </div>
+    </WorkspaceLayout>
   );
 }
 
