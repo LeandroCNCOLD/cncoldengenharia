@@ -52,6 +52,20 @@ import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 const fmt = (value: number, maximumFractionDigits = 2) =>
   value.toLocaleString("pt-BR", { maximumFractionDigits });
 
+const REFRIGERANT_OPTIONS = [
+  "REF_R134a",
+  "REF_R404A",
+  "REF_R407C",
+  "REF_R410A",
+  "REF_R32",
+  "REF_R290",
+  "REF_R600a",
+  "REF_R717",
+  "REF_R744",
+  "REF_R1234yf",
+  "REF_R1234ze_E_",
+] as const;
+
 const DEFAULT_INPUTS: CondenserInputs = {
   Tc: 45,
   Tair_in: 35,
