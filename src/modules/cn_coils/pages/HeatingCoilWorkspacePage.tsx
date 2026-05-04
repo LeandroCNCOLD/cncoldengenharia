@@ -246,12 +246,15 @@ export function HeatingCoilWorkspacePage() {
     >
       <ProjectHeaderBar workspaceType="component_workspace" />
       <div className="flex flex-col gap-4 p-4">
-        <Tabs defaultValue="results">
-          <TabsList>
-            <TabsTrigger value="results">📋 Resultados</TabsTrigger>
-            <TabsTrigger value="curve">📈 Curva de Aquecimento</TabsTrigger>
-            <TabsTrigger value="psychro">💧 Psicrométrico</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <TabsList>
+              <TabsTrigger value="results">📋 Resultados</TabsTrigger>
+              <TabsTrigger value="curve">📈 Curva de Aquecimento</TabsTrigger>
+              <TabsTrigger value="psychro">💧 Psicrométrico</TabsTrigger>
+            </TabsList>
+            <WorkspaceAIButton onClick={() => setAiOpen(true)} />
+          </div>
 
           <TabsContent value="results" className="mt-3">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
