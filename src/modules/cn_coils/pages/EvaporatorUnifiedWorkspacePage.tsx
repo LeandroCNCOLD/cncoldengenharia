@@ -317,6 +317,7 @@ export function EvaporatorUnifiedWorkspacePage() {
   // ── IA Chat state ──
   const [aiOpen, setAiOpen] = useState(false);
   const [aiTab, setAiTab] = useState("Detalhado");
+  const [nextStepOpen, setNextStepOpen] = useState(false);
 
   const openAI = useCallback((tabName: string) => {
     setAiTab(tabName);
