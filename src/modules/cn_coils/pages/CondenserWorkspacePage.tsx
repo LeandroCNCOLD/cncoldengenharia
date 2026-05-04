@@ -20,6 +20,7 @@ import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer
 import { AirSidePanel } from "../components/AirSidePanel";
 import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
 import { GeometryBottomBar } from "../components/GeometryBottomBar";
+import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { useCnCoilsCatalogs } from "../hooks/useCnCoilsCatalogs";
 import { useCondenserEnvelopeGenerator } from "../hooks/useCondenserEnvelopeGenerator";
 import {
@@ -27,12 +28,14 @@ import {
   useCondenserSimulation,
   type CondenserInputs,
 } from "../hooks/useCondenserSimulation";
+import { usePdfExport } from "../hooks/usePdfExport";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 
 const fmt = (value: number, maximumFractionDigits = 2) =>
   value.toLocaleString("pt-BR", { maximumFractionDigits });
 
 export function CondenserWorkspacePage() {
+  const { isGenerating: pdfGenerating, exportPdf } = usePdfExport();
   const catalogs = useCnCoilsCatalogs();
   const physical = useCnCoilsSimulationStore((s) => s.physicalInputs);
   const airFlowM3H = useCnCoilsSimulationStore((s) => s.airFlow_m3h);
@@ -178,7 +181,42 @@ export function CondenserWorkspacePage() {
             </TabsList>
 
             <TabsContent value="results" className="mt-3">
-              {result ? <CondenserResults result={result} /> : <EmptyState />}
+              {result ? (
+                <div className="space-y-3">
+                  <div className="flex justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={pdfGenerating}
+                      onClick={() =>
+                        exportPdf(
+                          <WorkspacePdfReport
+                            componentType="condenser_air"
+                            title="Condensador a Ar"
+                            inputs={{
+                              "Tc": `${fmt(syncedInputs.Tc)} °C`,
+                              "T ar entrada": `${fmt(syncedInputs.Tair_in)} °C`,
+                              Refrigerante: syncedInputs.refrigerant,
+                              "Vazão de ar": `${fmt(syncedInputs.airFlowM3H ?? 0, 0)} m³/h`,
+                            }}
+                            results={{
+                              "Q cond": `${fmt(result.Q_cond_W / 1000)} kW`,
+                              UA: `${fmt(result.UA)} W/K`,
+                              LMTD: `${fmt(result.LMTD)} K`,
+                              "T ar saída": `${fmt(result.Tair_out)} °C`,
+                              "ΔP ar": `${fmt(result.deltaP_Pa, 0)} Pa`,
+                            }}
+                          />,
+                          `condensador-ar-${new Date().toISOString().slice(0, 10)}.pdf`,
+                        )
+                      }
+                    >
+                      {pdfGenerating ? "⏳ Gerando PDF…" : "📄 Exportar PDF"}
+                    </Button>
+                  </div>
+                  <CondenserResults result={result} />
+                </div>
+              ) : <EmptyState />}
             </TabsContent>
 
             <TabsContent value="envelope" className="mt-3">

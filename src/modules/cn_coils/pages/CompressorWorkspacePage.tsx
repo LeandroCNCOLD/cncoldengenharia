@@ -15,6 +15,7 @@ import {
 import type { CompressorCatalogRow } from "@/modules/coldpro_catalog/data/compressorCatalog.types";
 import { CompressorEnvelopeChart } from "../components/CompressorEnvelopeChart";
 import { CompressorOperatingPointTab } from "../components/CompressorOperatingPointTab";
+import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import {
   CompressorPickerModal,
   type CompressorItem,
@@ -26,6 +27,7 @@ import {
   type CompressorWorkspaceInputs,
 } from "../hooks/useCompressorEnvelopeGenerator";
 import { useCycleSimulation } from "../hooks/useCycleSimulation";
+import { usePdfExport } from "../hooks/usePdfExport";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 
 const fmt = (value: number, maximumFractionDigits = 2) =>
@@ -46,6 +48,7 @@ const DEFAULT_INPUTS: CompressorWorkspaceInputs = {
 
 export function CompressorWorkspacePage() {
   const navigate = useNavigate();
+  const { isGenerating: pdfGenerating, exportPdf } = usePdfExport();
   const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [inputs, setInputs] = useState<CompressorWorkspaceInputs>(DEFAULT_INPUTS);
@@ -213,11 +216,48 @@ export function CompressorWorkspacePage() {
           </TabsList>
 
           <TabsContent value="operation" className="mt-3">
-            <CompressorOperatingPointTab
-              result={result}
-              inputs={inputs}
-              isCalculating={isCalculating}
-            />
+            <div className="space-y-3">
+              {result && (
+                <div className="flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={pdfGenerating}
+                    onClick={() =>
+                      exportPdf(
+                        <WorkspacePdfReport
+                          componentType="compressor"
+                          title="Compressor"
+                          inputs={{
+                            Modelo: `${inputs.compressorBrand} ${inputs.compressorModel}`,
+                            Refrigerante: inputs.refrigerant,
+                            Te: `${fmt(inputs.Te_C)} °C`,
+                            Tc: `${fmt(inputs.Tc_C)} °C`,
+                            Tensão: `${fmt(inputs.voltage_V, 0)} V`,
+                          }}
+                          results={{
+                            "Q evap": `${fmt(result.Q_evap_W / 1000)} kW`,
+                            "W comp": `${fmt(result.W_comp_W / 1000)} kW`,
+                            COP: fmt(result.COP),
+                            EER: fmt(result.EER),
+                            "Fluxo massa": `${fmt(result.m_dot_kgS * 3600)} kg/h`,
+                          }}
+                          warnings={result.warnings}
+                        />,
+                        `compressor-${new Date().toISOString().slice(0, 10)}.pdf`,
+                      )
+                    }
+                  >
+                    {pdfGenerating ? "⏳ Gerando PDF…" : "📄 Exportar PDF"}
+                  </Button>
+                </div>
+              )}
+              <CompressorOperatingPointTab
+                result={result}
+                inputs={inputs}
+                isCalculating={isCalculating}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="envelope" className="mt-3 space-y-3">

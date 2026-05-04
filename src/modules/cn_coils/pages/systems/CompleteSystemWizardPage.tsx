@@ -19,6 +19,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageContainer } from "@/modules/coldpro/components/layout/PageContainer";
 import { CompressorPickerModal } from "../../components/CompressorPickerModal";
+import { ColdRoomPdfReport } from "../../components/pdf/ColdRoomPdfReport";
+import { DXSystemPdfReport } from "../../components/pdf/DXSystemPdfReport";
+import { HeatPumpPdfReport } from "../../components/pdf/HeatPumpPdfReport";
 import { SystemEquilibriumChart } from "../../components/SystemEquilibriumChart";
 import { SystemEquilibriumResultsTab } from "../../components/SystemEquilibriumResultsTab";
 import { SystemWizard } from "../../components/SystemWizard";
@@ -45,6 +48,7 @@ import {
   type SystemCondenserEnvelopePoint,
   useSystemEquilibrium,
 } from "../../hooks/useSystemEquilibrium";
+import { usePdfExport } from "../../hooks/usePdfExport";
 import { type CoilEnvelope, useCoilEnvelopeStore } from "../../store/useCoilEnvelopeStore";
 
 type CompleteSystemMode = "cold-room" | "dx-complete" | "heat-pump";
@@ -183,11 +187,7 @@ export function CompleteSystemWizardPage({ mode }: CompleteSystemWizardPageProps
       title={`Sistema — ${titles[mode]}`}
       subtitle="Assistente guiado de dimensionamento completo"
     >
-      <SystemWizard
-        title={titles[mode]}
-        steps={steps}
-        onComplete={() => window.print()}
-      />
+      <SystemWizard title={titles[mode]} steps={steps} />
       <CompressorPickerModal open={pickerOpen} onClose={() => setPickerOpen(false)} />
     </PageContainer>
   );
@@ -429,11 +429,53 @@ function ReportStep({
   equilibriumResult: ReturnType<typeof useSystemEquilibrium>["result"];
 }) {
   const title = titles[mode].toUpperCase();
+  const { isGenerating, exportPdf } = usePdfExport();
+  const date = new Date().toISOString().slice(0, 10);
+  const filenamePrefix =
+    mode === "cold-room" ? "camara-fria" : mode === "dx-complete" ? "dx-completo" : "bomba-de-calor";
+  const handleExport = () => {
+    if (!equilibriumResult) return;
+    if (mode === "cold-room") {
+      void exportPdf(
+        <ColdRoomPdfReport
+          inputs={loadInputs as ColdRoomInputs}
+          loadResult={loadResult as ColdRoomLoadResult}
+          equilibriumResult={equilibriumResult}
+          compressorModel="Compressor selecionado"
+        />,
+        `${filenamePrefix}-${date}.pdf`,
+      );
+      return;
+    }
+    if (mode === "dx-complete") {
+      void exportPdf(
+        <DXSystemPdfReport
+          inputs={loadInputs as DXSystemInputs}
+          loadResult={loadResult as DXSystemLoadResult}
+          equilibriumResult={equilibriumResult}
+          compressorModel="Compressor selecionado"
+        />,
+        `${filenamePrefix}-${date}.pdf`,
+      );
+      return;
+    }
+    void exportPdf(
+      <HeatPumpPdfReport
+        inputs={loadInputs as HeatPumpInputs}
+        loadResult={loadResult as HeatPumpResult}
+        equilibriumResult={equilibriumResult}
+        compressorModel="Compressor selecionado"
+      />,
+      `${filenamePrefix}-${date}.pdf`,
+    );
+  };
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle>{title} — RELATÓRIO DE DIMENSIONAMENTO</CardTitle>
-        <Button onClick={() => window.print()}>📄 Exportar PDF</Button>
+        <Button onClick={handleExport} disabled={!equilibriumResult || isGenerating}>
+          {isGenerating ? "⏳ Gerando PDF…" : "📄 Exportar PDF"}
+        </Button>
       </CardHeader>
       <CardContent className="space-y-4 font-mono text-sm">
         <div>

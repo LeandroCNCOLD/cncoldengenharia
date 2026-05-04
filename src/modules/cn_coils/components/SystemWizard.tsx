@@ -12,10 +12,11 @@ export interface SystemWizardStep {
 interface SystemWizardProps {
   title: string;
   steps: SystemWizardStep[];
-  onComplete: () => void;
+  onComplete?: () => void;
+  isCompleting?: boolean;
 }
 
-export function SystemWizard({ title, steps, onComplete }: SystemWizardProps) {
+export function SystemWizard({ title, steps, onComplete, isCompleting = false }: SystemWizardProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const current = steps[currentIndex];
 
@@ -24,7 +25,7 @@ export function SystemWizard({ title, steps, onComplete }: SystemWizardProps) {
 
   const goNext = () => {
     if (currentIndex === steps.length - 1) {
-      onComplete();
+      onComplete?.();
       return;
     }
     const nextIndex = currentIndex + 1;
@@ -71,8 +72,12 @@ export function SystemWizard({ title, steps, onComplete }: SystemWizardProps) {
         >
           ← Anterior
         </Button>
-        <Button onClick={goNext} disabled={!current.isComplete}>
-          {currentIndex === steps.length - 1 ? "📄 Exportar PDF" : "Próximo →"}
+        <Button onClick={goNext} disabled={!current.isComplete || isCompleting}>
+          {currentIndex === steps.length - 1
+            ? isCompleting
+              ? "⏳ Gerando PDF..."
+              : "📄 Exportar PDF"
+            : "Próximo →"}
         </Button>
       </div>
     </div>

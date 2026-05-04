@@ -6,6 +6,7 @@ import { useOperatingMap } from "../hooks/useOperatingMap";
 import { CoilEnvelopeTab } from "../components/CoilEnvelopeTab";
 import { CoilsInSeriesPanel } from "../components/CoilsInSeriesPanel";
 import { FrostAnalysisTab } from "../components/FrostAnalysisTab";
+import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { CyclePHDiagram } from "../components/CyclePHDiagram";
 import { FrostAnalysisPanel } from "../components/FrostAnalysisPanel";
 import { CycleResultPanel } from "../components/CycleResultPanel";
@@ -13,6 +14,7 @@ import { UncertaintyPanel, UncertaintyBadge } from "../components/UncertaintyBad
 import { OperatingMapChart } from "../components/OperatingMapChart";
 import { OptimizationPanel } from "../components/OptimizationPanel";
 import { CompressorPickerModal } from "../components/CompressorPickerModal";
+import { usePdfExport } from "../hooks/usePdfExport";
 import { listAvailableRefrigerants } from "../engines/refrigerant/refrigerantProperties";
 import {
   Accordion,
@@ -536,6 +538,7 @@ function CycleAnalysisTabs({
   config: CycleSystemConfig;
   cycleResult: CycleResult;
 }) {
+  const { isGenerating, exportPdf } = usePdfExport();
   return (
     <Tabs defaultValue="results" className="w-full">
       <TabsList className="bg-gray-900 border border-gray-800">
@@ -551,6 +554,38 @@ function CycleAnalysisTabs({
 
       <TabsContent value="results" className="mt-3">
         <div className="rounded-lg bg-white p-4 text-gray-900">
+          <div className="mb-3 flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isGenerating}
+              onClick={() =>
+                exportPdf(
+                  <WorkspacePdfReport
+                    componentType="evaporator"
+                    title="Evaporador DX"
+                    inputs={{
+                      Refrigerante: config.refrigerantId,
+                      "Te inicial": `${config.solver?.Te_initial_C ?? cycleResult.Te_C} °C`,
+                      "Tc inicial": `${config.solver?.Tc_initial_C ?? cycleResult.Tc_C} °C`,
+                      "Vazão de ar": `${config.evaporator.airFlowM3H.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} m³/h`,
+                    }}
+                    results={{
+                      "Capacidade real": `${(cycleResult.Q_evap_W / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 2 })} kW`,
+                      COP: cycleResult.COP.toLocaleString("pt-BR", { maximumFractionDigits: 2 }),
+                      "Te eq": `${cycleResult.Te_C.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} °C`,
+                      "Tc eq": `${cycleResult.Tc_C.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} °C`,
+                      "ΔP ar": `${cycleResult.evaporatorResult.airPressureDropPa.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} Pa`,
+                    }}
+                    warnings={cycleResult.warnings}
+                  />,
+                  `evaporador-${new Date().toISOString().slice(0, 10)}.pdf`,
+                )
+              }
+            >
+              {isGenerating ? "⏳ Gerando PDF…" : "📄 Exportar PDF"}
+            </Button>
+          </div>
           <CycleResultPanel result={cycleResult} />
         </div>
       </TabsContent>
