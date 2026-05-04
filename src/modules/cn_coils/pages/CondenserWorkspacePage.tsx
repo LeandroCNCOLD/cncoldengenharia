@@ -59,6 +59,9 @@ import { GeometryBottomBar } from "../components/GeometryBottomBar";
 import { WorkspaceSidebar } from "../components/WorkspaceSidebar";
 import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
 import { useCnCoilsCatalogs } from "../hooks/useCnCoilsCatalogs";
+import { useCnCoilsSimulation } from "../hooks/useCnCoilsSimulation";
+import { useCnCoilsSimulationV2 } from "../hooks/useCnCoilsSimulationV2";
+import { enrichWarnings } from "../utils/warningEnricher";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import { useCnCoilsInputBridge } from "../hooks/useCnCoilsInputBridge";
 import { useCycleSimulation } from "../hooks/useCycleSimulation";
@@ -825,7 +828,59 @@ function CondenserTabs({
   isSimulating,
 }: CondenserTabsProps) {
   const result = useCnCoilsSimulationStore((s) => s.result);
+  const storeIsSimulating = useCnCoilsSimulationStore((s) => s.isSimulating);
+  const storeWarnings = useCnCoilsSimulationStore((s) => s.warnings);
+  // setStoreWarnings disponível se necessário para validações futuras
   const [activeTab, setActiveTab] = useState<string>(CONDENSER_TABS.DETAILED);
+
+  // Hooks de simulação standalone (populam o store → WorkspaceSidebar/AirSidePanel/FluidSidePanel)
+  const simulationDeps = useMemo(
+    () => ({
+      geometries: catalogs.geometries,
+      tubeMaterials: catalogs.tubeMaterials,
+      correctionCoefficients: catalogs.correctionCoefficients,
+      pressureDropFan: catalogs.pressureDropFan,
+    }),
+    [catalogs.geometries, catalogs.tubeMaterials, catalogs.correctionCoefficients, catalogs.pressureDropFan],
+  );
+  const { run: runV1 } = useCnCoilsSimulation(simulationDeps);
+  const { run: runV2 } = useCnCoilsSimulationV2({
+    tubeMaterials: catalogs.tubeMaterials,
+    geometries: catalogs.geometries,
+    componentType: "condenser_air",
+  });
+
+  // handleSimulate: garante geometryId, roda motor standalone + dispara ciclo
+  const handleSimulate = useCallback(() => {
+    // Garante geometryId para o motor V2 (não precisa de catálogo)
+    const store = useCnCoilsSimulationStore.getState();
+    if (!store.physicalInputs.geometryId) {
+      useCnCoilsSimulationStore.setState({
+        physicalInputs: { ...store.physicalInputs, geometryId: "condenser-direct" },
+      });
+    }
+    // Roda motor standalone para popular store (WorkspaceSidebar/AirSidePanel/etc.)
+    const currentEngineVersion = useCnCoilsSimulationStore.getState().engineVersion;
+    if (currentEngineVersion === "v2") {
+      runV2();
+    } else {
+      runV1();
+    }
+    // Dispara CycleEngine (ciclo completo)
+    setTimeout(onSimulate, 0);
+  }, [runV1, runV2, onSimulate]);
+
+  const enrichedWarnings = useMemo(
+    () => enrichWarnings(
+      storeWarnings
+        .map((w) => w.message)
+        .filter((m): m is string => typeof m === "string"),
+    ),
+    [storeWarnings],
+  );
+
+  const effectiveCanSimulate = catalogs.ready;
+  const effectiveDisabledReason = !catalogs.ready ? "Aguardando catálogos…" : undefined;
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
       <TabsList className="flex w-full overflow-x-auto whitespace-nowrap scrollbar-none pb-px h-auto">
@@ -854,12 +909,12 @@ function CondenserTabs({
             <div className="grid grid-cols-1 gap-2 rounded-md shadow-sm md:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)]">
               <WorkspaceSidebar
                 componentType="condenser_air"
-                onSimulate={onSimulate}
+                onSimulate={handleSimulate}
                 onReset={onReset}
-                canSimulate={canSimulate}
-                isSimulating={isSimulating}
+                canSimulate={effectiveCanSimulate}
+                isSimulating={storeIsSimulating || isSimulating}
                 faceAreaM2={result?.faceAreaM2}
-                disabledReason={disabledReason}
+                disabledReason={effectiveDisabledReason}
               />
               <div className="min-w-0 space-y-2 xl:contents">
                 <div className="min-w-0 space-y-2 xl:border-r xl:border-border xl:pr-2">
@@ -887,7 +942,7 @@ function CondenserTabs({
               <h3 className="mb-3 text-sm font-semibold text-foreground">
                 Resultado do cálculo
               </h3>
-              <ResultPanel result={result} warnings={[]} onGoalSeek={() => {}} />
+              <ResultPanel result={result} warnings={storeWarnings} onGoalSeek={() => {}} />
             </section>
           )}
           {!catalogs.ready && (
