@@ -123,6 +123,13 @@ export function CondenserWorkspacePage() {
     calculate();
   }, [calculate, catalogs.ready, syncedInputs.geometryId]);
 
+  // Auto-gera envelope quando o cálculo principal conclui pela primeira vez.
+  useEffect(() => {
+    if (!result || isGenerating || points.length > 0) return;
+    generateEnvelope();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result?.Q_cond_W]);
+
   const updateInputs = (patch: Partial<CondenserInputs>) => {
     setInputs((current) => {
       const next = { ...current, ...patch };
