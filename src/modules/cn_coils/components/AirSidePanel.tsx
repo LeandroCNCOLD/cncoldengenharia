@@ -98,10 +98,16 @@ export function AirSidePanel({ result }: AirSidePanelProps = {}) {
   const [fans, setFans] = useState<FanCatalogItem[]>([]);
 
   // Unidades selecionadas por linha (estado local — não afeta o motor)
-  // Unidades selecionadas por linha (estado local — não afeta o motor)
-  const [uCapTotal, setUCapTotal] = useState<CapacityUnit>("kcal_h");
-  const [uCapSens, setUCapSens] = useState<CapacityUnit>("kcal_h");
-  const [uCapLat, setUCapLat] = useState<CapacityUnit>("kcal_h");
+  // Capacidade total/sensível/latente são compartilhadas globalmente
+  // (useCnCoilsSimulationStore.displayCapacityUnit) para que a aba "Resultados"
+  // e relatórios respeitem a mesma seleção feita aqui no Detalhado.
+  const uCapTotal = useCnCoilsSimulationStore((s) => s.displayCapacityUnit);
+  const setUCapTotalGlobal = useCnCoilsSimulationStore((s) => s.setDisplayCapacityUnit);
+  const uCapSens = uCapTotal;
+  const uCapLat = uCapTotal;
+  const setUCapTotal = setUCapTotalGlobal;
+  const setUCapSens = setUCapTotalGlobal;
+  const setUCapLat = setUCapTotalGlobal;
   const [uAirFlow, setUAirFlow] = useState<AirFlowUnit>("m3_h");
   const [uVel, setUVel] = useState<VelocityUnit>("m_s");
   const [uTempIn, setUTempIn] = useState<TempUnit>("C");
