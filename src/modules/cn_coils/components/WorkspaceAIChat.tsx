@@ -227,42 +227,24 @@ INSTRUÇÕES:
 }
 
 async function callAI(messages: Message[], systemPrompt: string): Promise<string> {
-  const apiUrl = import.meta.env.VITE_FRONTEND_FORGE_API_URL;
-  const apiKey = import.meta.env.VITE_FRONTEND_FORGE_API_KEY;
+  const { supabase } = await import("@/integrations/supabase/client");
+  const chatMessages = messages
+    .filter((m) => m.role !== "system")
+    .slice(-10)
+    .map((m) => ({ role: m.role, content: m.content }));
 
-  if (!apiUrl || !apiKey) {
-    throw new Error("API de IA não configurada. Verifique as variáveis de ambiente.");
-  }
-
-  const payload = {
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: systemPrompt },
-      ...messages
-        .filter((m) => m.role !== "system")
-        .slice(-10)
-        .map((m) => ({ role: m.role, content: m.content })),
-    ],
-    max_tokens: 600,
-    temperature: 0.4,
-  };
-
-  const res = await fetch(`${apiUrl}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(payload),
+  const { data, error } = await supabase.functions.invoke("cn-coils-ai-chat", {
+    body: { messages: chatMessages, systemPrompt },
   });
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Erro na API: ${res.status} — ${err}`);
+  if (error) {
+    const status = (error as { context?: { status?: number } }).context?.status;
+    if (status === 429) throw new Error("Limite de requisições atingido. Aguarde um instante e tente novamente.");
+    if (status === 402) throw new Error("Créditos de IA esgotados. Adicione créditos no workspace Lovable.");
+    throw new Error(error.message || "Erro ao chamar a IA.");
   }
-
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content ?? "Sem resposta da IA.";
+  if (data?.error) throw new Error(data.error);
+  return data?.content ?? "Sem resposta da IA.";
 }
 
 const toPersisted = (m: Message): PersistedMessage => ({
