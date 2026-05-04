@@ -24,6 +24,8 @@ import { OperatingMapChart } from "../components/OperatingMapChart";
 import { OptimizationPanel } from "../components/OptimizationPanel";
 import { UncertaintyPanel, UncertaintyBadge } from "../components/UncertaintyBadge";
 import { CompressorPickerModal } from "../components/CompressorPickerModal";
+import { FanPickerModal, type FanPickerItem } from "../components/FanPickerModal";
+import { useCnCoilsCatalogs as useCnCoilsFullCatalogs } from "../hooks/useCnCoilsCatalogCollection";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { EnrichedWarningsPanel } from "../components/EnrichedWarningsPanel";
 import { DrawingTab } from "../components/drawing/DrawingTab";
