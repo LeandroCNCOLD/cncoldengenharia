@@ -222,22 +222,22 @@ export default function TestBenchPage() {
                   <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">Status</CardTitle></CardHeader>
                   <CardContent className="pt-1">
                     <div className="flex items-center gap-2 text-lg font-semibold">
-                      {bottleneck === "balanced"
-                        ? <><CheckCircle2 className="h-5 w-5 text-emerald-600"/> Balanceado</>
-                        : <><AlertTriangle className="h-5 w-5 text-amber-600"/> Atenção</>}
+                      {result.status === "approved"
+                        ? <><CheckCircle2 className="h-5 w-5 text-emerald-600"/> {statusLabel(result.status)}</>
+                        : <><AlertTriangle className="h-5 w-5 text-amber-600"/> {statusLabel(result.status)}</>}
                     </div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">Gargalo</CardTitle></CardHeader>
                   <CardContent className="pt-1 text-lg font-semibold">
-                    {bottleneckLabel(bottleneck)}
+                    {bottleneckLabel(result.bottleneck)}
                   </CardContent>
                 </Card>
                 <Card>
                   <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">COP real</CardTitle></CardHeader>
                   <CardContent className="pt-1 text-lg font-semibold">
-                    {fmt(result.COP, 2)}
+                    {fmt(result.COPMotor, 2)}
                     {COP_catalog !== undefined && (
                       <span className="ml-2 text-xs font-normal text-muted-foreground">
                         catálogo {fmt(COP_catalog, 2)}
@@ -252,8 +252,8 @@ export default function TestBenchPage() {
                 <CardContent className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                   <div>
                     <p className="text-xs text-muted-foreground">Q evap (motor)</p>
-                    <p className="font-mono">{fmt(result.Q_evap_W, 0)} W</p>
-                    <p className="text-xs text-muted-foreground">{fmt(result.Q_evap_W * KCALH_PER_W, 0)} kcal/h</p>
+                    <p className="font-mono">{fmt(result.QMotorW, 0)} W</p>
+                    <p className="text-xs text-muted-foreground">{fmt(result.QMotorW * KCALH_PER_W, 0)} kcal/h</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Q evap (catálogo)</p>
@@ -261,29 +261,27 @@ export default function TestBenchPage() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">W compressor</p>
-                    <p className="font-mono">{fmt(result.W_comp_W, 0)} W</p>
+                    <p className="font-mono">{fmt(result.WCompW, 0)} W</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Q cond</p>
-                    <p className="font-mono">{fmt(result.Q_cond_W, 0)} W</p>
+                    <p className="font-mono">{fmt(result.QCondW, 0)} W</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Te equilíbrio</p>
-                    <p className="font-mono">{fmt(result.Te_C, 2)} °C</p>
+                    <p className="text-xs text-muted-foreground">Te catálogo</p>
+                    <p className="font-mono">{fmt(result.thermo.Te_C, 2)} °C</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Tc equilíbrio</p>
-                    <p className="font-mono">{fmt(result.Tc_C, 2)} °C</p>
+                    <p className="text-xs text-muted-foreground">Tc catálogo</p>
+                    <p className="font-mono">{fmt(result.thermo.Tc_C, 2)} °C</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Convergência</p>
-                    <p className="font-mono">
-                      {result.converged ? "OK" : "Não"} ({result.iterations} it.)
-                    </p>
+                    <p className="text-xs text-muted-foreground">Desvio COP</p>
+                    <p className="font-mono">{result.deviationPct === null ? "—" : `${fmt(result.deviationPct, 1)}%`}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">EER</p>
-                    <p className="font-mono">{fmt(result.EER, 2)}</p>
+                    <p className="font-mono">{fmt(result.thermo.EER, 2)}</p>
                   </div>
                 </CardContent>
               </Card>
