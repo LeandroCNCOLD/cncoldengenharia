@@ -23,7 +23,7 @@ async function assertAdmin(userId: string) {
     .eq("user_id", userId)
     .eq("role", "admin")
     .maybeSingle();
-  if (!data) throw new Response("Forbidden", { status: 403 });
+  if (!data) throw new Error("Acesso negado: apenas administradores podem executar esta ação.");
 }
 
 export const listUsers = createServerFn({ method: "GET" })
