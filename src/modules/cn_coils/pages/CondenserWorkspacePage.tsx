@@ -571,16 +571,38 @@ export function CondenserWorkspacePage() {
               {selectedCompressorRow ? selectedCompressorRow.model : "Selecionar compressor…"}
             </Button>
             <div>
-              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
                 <Label>Te</Label>
-                <span className="font-mono text-foreground">{fmt(te, 1)} °C</span>
+                <input
+                  type="number"
+                  value={te}
+                  min={-40}
+                  max={15}
+                  step={1}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value, 10);
+                    if (!isNaN(v)) setTe(Math.max(-40, Math.min(15, v)));
+                  }}
+                  className="w-20 rounded border border-input bg-background px-2 py-0.5 text-right font-mono text-xs text-foreground"
+                />
               </div>
               <Slider value={[te]} min={-40} max={15} step={1} onValueChange={(v) => setTe(v[0])} />
             </div>
             <div>
-              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
                 <Label>Tc</Label>
-                <span className="font-mono text-foreground">{fmt(tc, 1)} °C</span>
+                <input
+                  type="number"
+                  value={tc}
+                  min={25}
+                  max={65}
+                  step={1}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value, 10);
+                    if (!isNaN(v)) setTc(Math.max(25, Math.min(65, v)));
+                  }}
+                  className="w-20 rounded border border-input bg-background px-2 py-0.5 text-right font-mono text-xs text-foreground"
+                />
               </div>
               <Slider value={[tc]} min={25} max={65} step={1} onValueChange={(v) => setTc(v[0])} />
             </div>
