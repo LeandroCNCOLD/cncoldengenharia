@@ -6,10 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, AlertTriangle, CheckCircle2, Play, Loader2 } from "lucide-react";
 import { catalogRepository } from "../services/catalogRepository";
-import { buildCycleConfigFromCatalog } from "../utils/buildCycleConfigFromCatalog";
-import { useCycleSimulation } from "@/modules/cn_coils/hooks/useCycleSimulation";
 import { buildMotorComponentsFromCatalog } from "../adapters/sessionToMotorInputAdapter";
-import type { CycleSystemConfig } from "@/modules/cn_coils/engines/cycle/cycleTypes";
+import { runCycleThermo } from "@/modules/cn_coils/engines/cycle/cycleEngine";
+import type { CycleThermoResult } from "@/modules/cn_coils/engines/cycle/cycleTypes";
 
 const KCALH_PER_W = 1 / 1.163;
 
@@ -18,14 +17,34 @@ function fmt(v: number | undefined | null, d = 2): string {
   return v.toLocaleString("pt-BR", { maximumFractionDigits: d });
 }
 
-type BottleneckKind = "balanced" | "evaporator" | "compressor" | "condenser";
+type BottleneckKind = "none" | "compressor";
+type BenchStatus = "approved" | "attention" | "rejected" | "unavailable";
+
+interface EnergyBalanceResult {
+  thermo: CycleThermoResult;
+  mDotKgS: number;
+  QMotorW: number;
+  WCompW: number;
+  QCondW: number;
+  COPMotor: number;
+  deviationPct: number | null;
+  status: BenchStatus;
+  bottleneck: BottleneckKind;
+}
 
 function bottleneckLabel(kind: BottleneckKind): string {
   switch (kind) {
-    case "balanced": return "Sistema balanceado";
-    case "evaporator": return "Evaporador";
+    case "none": return "Nenhum";
     case "compressor": return "Compressor";
-    case "condenser": return "Condensador";
+  }
+}
+
+function statusLabel(status: BenchStatus): string {
+  switch (status) {
+    case "approved": return "Aprovado";
+    case "attention": return "Atenção";
+    case "rejected": return "Rejeitado";
+    case "unavailable": return "Sem referência";
   }
 }
 
@@ -37,14 +56,11 @@ export default function TestBenchPage() {
     [equipmentId],
   );
 
-  const [config, setConfig] = useState<CycleSystemConfig | null>(null);
   const [hasRun, setHasRun] = useState(false);
   const [adapterWarnings, setAdapterWarnings] = useState<string[]>([]);
-
-  const sim = useCycleSimulation(config, { mode: "auto" });
-  const running = sim.status === "running";
-  const error = sim.status === "error" ? sim.message : null;
-  const result = sim.status === "success" ? sim.result : null;
+  const [running, setRunning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<EnergyBalanceResult | null>(null);
 
   if (!equipment) {
     return (
@@ -88,32 +104,55 @@ export default function TestBenchPage() {
     }
   };
 
-  const handleRun = () => {
+  const handleRun = async () => {
     setHasRun(true);
+    setRunning(true);
+    setError(null);
+    setResult(null);
     collectAdapterWarnings();
-    setConfig(
-      buildCycleConfigFromCatalog({
-        row: equipment,
+    try {
+      const thermo = await runCycleThermo({
         refrigerantId,
         Te_C,
         Tc_C,
-        superheatK: 5,
+        superheatK: 7,
         subcoolingK: 5,
-      }),
-    );
+      });
+      const mDotKgS = Q_catalog_W && thermo.qEvap_kJkg > 0
+        ? Q_catalog_W / (thermo.qEvap_kJkg * 1000)
+        : 0;
+      const COPMotor = thermo.COP;
+      const deviationPct = COP_catalog && COP_catalog > 0
+        ? Math.abs(COPMotor - COP_catalog) / COP_catalog * 100
+        : null;
+      const status: BenchStatus = deviationPct === null
+        ? "unavailable"
+        : deviationPct <= 5
+          ? "approved"
+          : deviationPct <= 15
+            ? "attention"
+            : "rejected";
+
+      setResult({
+        thermo,
+        mDotKgS,
+        QMotorW: mDotKgS * thermo.qEvap_kJkg * 1000,
+        WCompW: mDotKgS * thermo.wComp_kJkg * 1000,
+        QCondW: mDotKgS * thermo.qCond_kJkg * 1000,
+        COPMotor,
+        deviationPct,
+        status,
+        bottleneck: status === "attention" || status === "rejected" ? "compressor" : "none",
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro desconhecido no cálculo termodinâmico");
+    } finally {
+      setRunning(false);
+    }
   };
 
-  // Bottleneck heuristic by motor vs catalog comparison.
-  let bottleneck: BottleneckKind = "balanced";
-  if (result) {
-    const Q_motor = result.Q_evap_W;
-    const COP_motor = result.COP;
-    if (Q_catalog_W && Q_motor < Q_catalog_W * 0.9) bottleneck = "evaporator";
-    else if (COP_catalog && COP_motor < COP_catalog * 0.85) bottleneck = "compressor";
-  }
-
   const allAlerts = [
-    ...(result?.warnings ?? []).map((w) => ({ kind: "warning" as const, msg: w })),
+    ...(result?.thermo.warnings ?? []).map((w) => ({ kind: "warning" as const, msg: w })),
     ...adapterWarnings.map((w) => ({ kind: "adapter" as const, msg: w })),
   ];
 
@@ -166,7 +205,7 @@ export default function TestBenchPage() {
           {!hasRun && !error && (
             <Card>
               <CardContent className="p-6 text-center text-sm text-muted-foreground">
-                Clique em <strong>Executar testes</strong> para calcular o ciclo termodinâmico (CycleEngine V2)
+                Clique em <strong>Executar testes</strong> para validar por balanço de energia
                 a partir das condições nominais do catálogo.
               </CardContent>
             </Card>
@@ -183,22 +222,22 @@ export default function TestBenchPage() {
                   <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">Status</CardTitle></CardHeader>
                   <CardContent className="pt-1">
                     <div className="flex items-center gap-2 text-lg font-semibold">
-                      {bottleneck === "balanced"
-                        ? <><CheckCircle2 className="h-5 w-5 text-emerald-600"/> Balanceado</>
-                        : <><AlertTriangle className="h-5 w-5 text-amber-600"/> Atenção</>}
+                      {result.status === "approved"
+                        ? <><CheckCircle2 className="h-5 w-5 text-emerald-600"/> {statusLabel(result.status)}</>
+                        : <><AlertTriangle className="h-5 w-5 text-amber-600"/> {statusLabel(result.status)}</>}
                     </div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">Gargalo</CardTitle></CardHeader>
                   <CardContent className="pt-1 text-lg font-semibold">
-                    {bottleneckLabel(bottleneck)}
+                    {bottleneckLabel(result.bottleneck)}
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">COP real</CardTitle></CardHeader>
+                  <CardHeader className="pb-1"><CardTitle className="text-xs uppercase text-muted-foreground">COP motor</CardTitle></CardHeader>
                   <CardContent className="pt-1 text-lg font-semibold">
-                    {fmt(result.COP, 2)}
+                    {fmt(result.COPMotor, 2)}
                     {COP_catalog !== undefined && (
                       <span className="ml-2 text-xs font-normal text-muted-foreground">
                         catálogo {fmt(COP_catalog, 2)}
@@ -209,12 +248,12 @@ export default function TestBenchPage() {
               </div>
 
               <Card>
-                <CardHeader><CardTitle className="text-base">Resultado do ciclo</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-base">Validação por balanço de energia</CardTitle></CardHeader>
                 <CardContent className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                   <div>
                     <p className="text-xs text-muted-foreground">Q evap (motor)</p>
-                    <p className="font-mono">{fmt(result.Q_evap_W, 0)} W</p>
-                    <p className="text-xs text-muted-foreground">{fmt(result.Q_evap_W * KCALH_PER_W, 0)} kcal/h</p>
+                    <p className="font-mono">{fmt(result.QMotorW, 0)} W</p>
+                    <p className="text-xs text-muted-foreground">{fmt(result.QMotorW * KCALH_PER_W, 0)} kcal/h</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Q evap (catálogo)</p>
@@ -222,29 +261,27 @@ export default function TestBenchPage() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">W compressor</p>
-                    <p className="font-mono">{fmt(result.W_comp_W, 0)} W</p>
+                    <p className="font-mono">{fmt(result.WCompW, 0)} W</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Q cond</p>
-                    <p className="font-mono">{fmt(result.Q_cond_W, 0)} W</p>
+                    <p className="font-mono">{fmt(result.QCondW, 0)} W</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Te equilíbrio</p>
-                    <p className="font-mono">{fmt(result.Te_C, 2)} °C</p>
+                    <p className="text-xs text-muted-foreground">Te catálogo</p>
+                    <p className="font-mono">{fmt(result.thermo.Te_C, 2)} °C</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Tc equilíbrio</p>
-                    <p className="font-mono">{fmt(result.Tc_C, 2)} °C</p>
+                    <p className="text-xs text-muted-foreground">Tc catálogo</p>
+                    <p className="font-mono">{fmt(result.thermo.Tc_C, 2)} °C</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Convergência</p>
-                    <p className="font-mono">
-                      {result.converged ? "OK" : "Não"} ({result.iterations} it.)
-                    </p>
+                    <p className="text-xs text-muted-foreground">Desvio COP</p>
+                    <p className="font-mono">{result.deviationPct === null ? "—" : `${fmt(result.deviationPct, 1)}%`}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">EER</p>
-                    <p className="font-mono">{fmt(result.EER, 2)}</p>
+                    <p className="font-mono">{fmt(result.thermo.EER, 2)}</p>
                   </div>
                 </CardContent>
               </Card>

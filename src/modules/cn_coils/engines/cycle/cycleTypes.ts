@@ -103,3 +103,26 @@ export interface CycleResult {
   inletQuality?: number;
   warnings: string[];
 }
+
+export interface CycleThermoConfig {
+  refrigerantId: string;
+  Te_C: number;
+  Tc_C: number;
+  superheatK: number;
+  subcoolingK: number;
+}
+
+export interface CycleThermoResult {
+  Te_C: number;
+  Tc_C: number;
+  h1_kJkg: number;
+  h2_kJkg: number;
+  h3_kJkg: number;
+  h4_kJkg: number;
+  qEvap_kJkg: number;
+  wComp_kJkg: number;
+  qCond_kJkg: number;
+  COP: number;
+  EER: number;
+  warnings: string[];
+}
