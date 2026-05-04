@@ -9,8 +9,18 @@ import type { Database } from "@/integrations/supabase/types";
  * back to a hardcoded dev admin user so the local app — which uses a client
  * auth bypass — can still call protected server functions.
  */
-export const requireAuthOrDev = createMiddleware({ type: "function" }).server(
-  async ({ next }) => {
+export const requireAuthOrDev = createMiddleware({ type: "function" })
+  .client(async ({ next }) => {
+    if (typeof window === "undefined") return next();
+
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+
+    if (!token) return next();
+    return next({ headers: { Authorization: `Bearer ${token}` } });
+  })
+  .server(async ({ next }) => {
     const SUPABASE_URL = process.env.SUPABASE_URL!;
     const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY!;
     const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -34,6 +44,11 @@ export const requireAuthOrDev = createMiddleware({ type: "function" }).server(
       }
     }
 
+    const isDevRequest = import.meta.env.DEV || new URL(request.url).hostname === "localhost";
+    if (!isDevRequest) {
+      throw new Error("Não autorizado: faça login novamente.");
+    }
+
     // Dev fallback: use service-role client and resolve any admin user id.
     const admin = createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
@@ -45,11 +60,14 @@ export const requireAuthOrDev = createMiddleware({ type: "function" }).server(
       .limit(1)
       .maybeSingle();
 
+    if (!anyAdmin?.user_id) {
+      throw new Error("Nenhum administrador encontrado para o modo de desenvolvimento.");
+    }
+
     return next({
       context: {
         supabase: admin,
-        userId: anyAdmin?.user_id ?? "00000000-0000-0000-0000-000000000000",
+        userId: anyAdmin.user_id,
       },
     });
-  },
-);
+  });
