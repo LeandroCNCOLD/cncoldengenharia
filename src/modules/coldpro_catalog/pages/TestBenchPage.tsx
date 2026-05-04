@@ -56,14 +56,11 @@ export default function TestBenchPage() {
     [equipmentId],
   );
 
-  const [config, setConfig] = useState<CycleSystemConfig | null>(null);
   const [hasRun, setHasRun] = useState(false);
   const [adapterWarnings, setAdapterWarnings] = useState<string[]>([]);
-
-  const sim = useCycleSimulation(config, { mode: "auto" });
-  const running = sim.status === "running";
-  const error = sim.status === "error" ? sim.message : null;
-  const result = sim.status === "success" ? sim.result : null;
+  const [running, setRunning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<EnergyBalanceResult | null>(null);
 
   if (!equipment) {
     return (
@@ -107,32 +104,55 @@ export default function TestBenchPage() {
     }
   };
 
-  const handleRun = () => {
+  const handleRun = async () => {
     setHasRun(true);
+    setRunning(true);
+    setError(null);
+    setResult(null);
     collectAdapterWarnings();
-    setConfig(
-      buildCycleConfigFromCatalog({
-        row: equipment,
+    try {
+      const thermo = await runCycleThermo({
         refrigerantId,
         Te_C,
         Tc_C,
-        superheatK: 5,
+        superheatK: 7,
         subcoolingK: 5,
-      }),
-    );
+      });
+      const mDotKgS = Q_catalog_W && thermo.qEvap_kJkg > 0
+        ? Q_catalog_W / (thermo.qEvap_kJkg * 1000)
+        : 0;
+      const COPMotor = thermo.COP;
+      const deviationPct = COP_catalog && COP_catalog > 0
+        ? Math.abs(COPMotor - COP_catalog) / COP_catalog * 100
+        : null;
+      const status: BenchStatus = deviationPct === null
+        ? "unavailable"
+        : deviationPct <= 5
+          ? "approved"
+          : deviationPct <= 15
+            ? "attention"
+            : "rejected";
+
+      setResult({
+        thermo,
+        mDotKgS,
+        QMotorW: mDotKgS * thermo.qEvap_kJkg * 1000,
+        WCompW: mDotKgS * thermo.wComp_kJkg * 1000,
+        QCondW: mDotKgS * thermo.qCond_kJkg * 1000,
+        COPMotor,
+        deviationPct,
+        status,
+        bottleneck: status === "approved" ? "none" : "compressor",
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro desconhecido no cálculo termodinâmico");
+    } finally {
+      setRunning(false);
+    }
   };
 
-  // Bottleneck heuristic by motor vs catalog comparison.
-  let bottleneck: BottleneckKind = "balanced";
-  if (result) {
-    const Q_motor = result.Q_evap_W;
-    const COP_motor = result.COP;
-    if (Q_catalog_W && Q_motor < Q_catalog_W * 0.9) bottleneck = "evaporator";
-    else if (COP_catalog && COP_motor < COP_catalog * 0.85) bottleneck = "compressor";
-  }
-
   const allAlerts = [
-    ...(result?.warnings ?? []).map((w) => ({ kind: "warning" as const, msg: w })),
+    ...(result?.thermo.warnings ?? []).map((w) => ({ kind: "warning" as const, msg: w })),
     ...adapterWarnings.map((w) => ({ kind: "adapter" as const, msg: w })),
   ];
 
