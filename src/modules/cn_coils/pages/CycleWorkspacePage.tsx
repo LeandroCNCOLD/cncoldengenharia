@@ -19,6 +19,9 @@ import { CompressorPickerModal } from "../components/CompressorPickerModal";
 import { WorkspaceLayout } from "../components/WorkspaceLayout";
 import { WorkspaceHeader } from "../components/WorkspaceHeader";
 import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
+import { DrawingTab } from "../components/drawing/DrawingTab";
+import { WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
+import type { AIContext } from "../components/WorkspaceAIChat";
 import { ProjectHeaderBar } from "../components/ProjectHeaderBar";
 import { ResultCard } from "../components/ResultCard";
 import { ActionBar } from "../components/ActionBar";
@@ -64,6 +67,7 @@ const REFRIGERANT_GROUPS: Array<{ label: string; ids: string[] }> = [
 ];
 
 type CompressorMode = "bitzer" | "ari" | "constant";
+type CycleActiveTab = "ph" | "results" | "envelope" | "frost-analysis" | "map" | "uncertainty" | "optimization" | "series" | "frost" | "drawing";
 
 const DEFAULT_CONFIG: CycleSystemConfig = {
   id: "demo-01",
@@ -155,6 +159,8 @@ export function CycleWorkspacePage() {
   const [orificeDiameter, setOrificeDiameter] = useState(1.8);
   const [compressorMode, setCompressorMode] = useState<CompressorMode>("bitzer");
   const [compressorPickerOpen, setCompressorPickerOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [cycleActiveTab, setCycleActiveTab] = useState<CycleActiveTab>("ph");
   const [refrigerantsMeta, setRefrigerantsMeta] = useState<
     Array<{ id: string; name: string; category: string }>
   >([]);
@@ -492,7 +498,7 @@ export function CycleWorkspacePage() {
               <p className="mt-2 text-sm text-muted-foreground">{simState.message}</p>
             </div>
           ) : cycleResult ? (
-            <ResultsView config={config} cycleResult={cycleResult} />
+            <ResultsView config={config} cycleResult={cycleResult} activeTab={cycleActiveTab} onTabChange={setCycleActiveTab} />
           ) : (
             <EmptyResults />
           )}
@@ -511,6 +517,25 @@ export function CycleWorkspacePage() {
       <CompressorPickerModal
         open={compressorPickerOpen}
         onClose={() => setCompressorPickerOpen(false)}
+      />
+      <WorkspaceAIPanel
+        open={aiOpen}
+        onClose={() => setAiOpen(false)}
+        context={{
+          componentType: "Ciclo Completo DX",
+          tabName: cycleActiveTab,
+          parameters: cycleResult ? {
+            "Refrigerante": config.refrigerantId,
+            "Te (\u00b0C)": cycleResult.Te_C.toFixed(1),
+            "Tc (\u00b0C)": cycleResult.Tc_C.toFixed(1),
+          } : undefined,
+          results: cycleResult ? {
+            "Q evap (kW)": (cycleResult.Q_evap_W / 1000).toFixed(2),
+            "COP": cycleResult.COP.toFixed(2),
+            "W comp (kW)": (cycleResult.W_comp_W / 1000).toFixed(2),
+          } : undefined,
+          warnings: [],
+        } satisfies AIContext}
       />
     </WorkspaceLayout>
   );
@@ -589,9 +614,13 @@ function CycleStatusBar({
 function ResultsView({
   config,
   cycleResult,
+  activeTab,
+  onTabChange,
 }: {
   config: CycleSystemConfig;
   cycleResult: CycleResult;
+  activeTab: CycleActiveTab;
+  onTabChange: (tab: CycleActiveTab) => void;
 }) {
   return (
     <div className="space-y-4">
@@ -618,7 +647,7 @@ function ResultsView({
         />
       </div>
 
-      <Tabs defaultValue="ph" className="w-full">
+      <Tabs value={activeTab} onValueChange={(v) => onTabChange(v as CycleActiveTab)} className="w-full">
         <TabsList className="flex w-full overflow-x-auto whitespace-nowrap scrollbar-none pb-px">
           <TabsTrigger value="ph" className="shrink-0">🔄 Ciclo P-H</TabsTrigger>
           <TabsTrigger value="results" className="shrink-0">📋 Resultados</TabsTrigger>
@@ -629,6 +658,7 @@ function ResultsView({
           <TabsTrigger value="optimization" className="shrink-0">⚙️ Otimização</TabsTrigger>
           <TabsTrigger value="series" className="shrink-0">🔗 Coils em Série</TabsTrigger>
           <TabsTrigger value="frost" className="shrink-0">🧊 Geada Avançada</TabsTrigger>
+          <TabsTrigger value="drawing" className="shrink-0">🏗️ Desenho</TabsTrigger>
         </TabsList>
 
         <TabsContent value="ph" className="mt-3">
@@ -692,6 +722,21 @@ function ResultsView({
 
         <TabsContent value="frost" className="mt-3">
           <FrostTab config={config} cycleResult={cycleResult} />
+        </TabsContent>
+        <TabsContent value="drawing" className="mt-3">
+          <DrawingTab
+            heightMm={config.evaporator.physical.finnedHeightMm}
+            widthMm={config.evaporator.physical.finnedLengthMm}
+            depthMm={config.evaporator.physical.rows * (config.evaporator.physical.tubePitchLongitudinalMm ?? 25)}
+            rows={config.evaporator.physical.rows}
+            tubesPerRow={config.evaporator.physical.tubesPerRow}
+            tubeOuterDiamMm={config.evaporator.physical.tubeExternalDiameterMm}
+            finPitchMm={config.evaporator.physical.finPitchMm}
+            circuits={config.evaporator.physical.circuits ?? 4}
+            refrigerantId={config.refrigerantId}
+            componentType="evaporator_dx"
+            projectName={config.name}
+          />
         </TabsContent>
       </Tabs>
     </div>

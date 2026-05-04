@@ -31,6 +31,10 @@ import {
 import { useComponentStore } from "@/modules/coldpro/stores/useComponentStore";
 import { loadCoilGeometries } from "../services/coilGeometryCatalogService";
 import { getApplicationConfig } from "../config/applicationConfig";
+import { DrawingTab } from "../components/drawing/DrawingTab";
+import { WorkspaceAIButton, WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { AIContext } from "../components/WorkspaceAIChat";
 import type {
   CnCoilsComponentType,
   CnCoilsPhysicalInputs,
@@ -57,6 +61,23 @@ export function CnCoilsWorkspacePage() {
   const isSimulating = useCnCoilsSimulationStore((s) => s.isSimulating);
   const reset = useCnCoilsSimulationStore((s) => s.reset);
   const setWarnings = useCnCoilsSimulationStore((s) => s.setWarnings);
+  const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<"workspace" | "drawing" | "ai">("workspace");
+  const [aiOpen, setAiOpen] = useState(false);
+  const aiContext: AIContext = useMemo(() => ({
+    componentType: componentLabel,
+    tabName: activeWorkspaceTab,
+    parameters: physical ? {
+      "Linhas": String(physical.rows ?? ""),
+      "Tubos/linha": String(physical.tubesPerRow ?? ""),
+      "Comprimento (mm)": String(physical.finnedLengthMm ?? ""),
+    } : undefined,
+    results: result ? {
+      "Q total (kW)": (result.totalCapacityKw ?? 0).toFixed(2),
+      "\u0394P ar (Pa)": (result.airPressureDropPa ?? 0).toFixed(0),
+      "NTU": (result.ntu ?? 0).toFixed(2),
+    } : undefined,
+    warnings: warnings.map(w => ({ raw: w.message ?? w.code, severity: w.severity, title: w.message ?? w.code, explanation: "", suggestion: "" })),
+  }), [componentLabel, activeWorkspaceTab, physical, result, warnings]);
 
   useCnCoilsInputBridge(componentType);
 
@@ -322,57 +343,88 @@ export function CnCoilsWorkspacePage() {
         </div>
       )}
 
-      {/*
-        Layout configurador CN COILS:
-        - Esquerda: WorkspaceSidebar
-        - Centro: Lado Ventilação
-        - Direita: FluidSidePanel + Resultado
-        - Rodapé: GeometryBottomBar (full width)
-      */}
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)] 2xl:grid-cols-[240px_minmax(0,1fr)_minmax(0,1fr)] rounded-md shadow-sm">
-        <WorkspaceSidebar
-          componentType={componentType}
-          onSimulate={handleSimulate}
-          onReset={reset}
-          canSimulate={canSimulate}
-          isSimulating={isSimulating}
-          faceAreaM2={result?.faceAreaM2}
-          onOpenSchematic={() => setSchematicOpen(true)}
-          disabledReason={disabledReason}
-        />
-
-        <div className="min-w-0 space-y-2 xl:contents">
-          {/* COLUNA CENTRAL — Lado Ventilador */}
-          <div className="min-w-0 space-y-2 xl:border-r xl:border-border xl:pr-2">
-            <AirSidePanel result={result} />
+      {/* Abas: Workspace | Desenho */}
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <Tabs value={activeWorkspaceTab} onValueChange={(v) => setActiveWorkspaceTab(v as typeof activeWorkspaceTab)} className="w-full">
+          <div className="flex items-center justify-between gap-2">
+            <TabsList>
+              <TabsTrigger value="workspace">🌡️ Simulador</TabsTrigger>
+              <TabsTrigger value="drawing">🏗️ Desenho Técnico</TabsTrigger>
+            </TabsList>
+            <WorkspaceAIButton onClick={() => setAiOpen(true)} />
           </div>
 
-          {/* COLUNA DIREITA — Lado Fluido + Resultado */}
-          <div className="min-w-0 space-y-2">
-            <FluidSidePanel
-              componentType={componentType}
-              refrigerants={catalogs.refrigerants}
-              disabled={!catalogs.ready}
-              result={result}
-            />
-            {!catalogs.loading && !catalogs.ready && (
-              <DatasetStatusPanel
-                loading={catalogs.loading}
-                ready={catalogs.ready}
-                errors={catalogs.errors}
-                missing={catalogs.missing}
-                compact
+          <TabsContent value="workspace" className="mt-2">
+            {/*
+              Layout configurador CN COILS:
+              - Esquerda: WorkspaceSidebar
+              - Centro: Lado Ventilação
+              - Direita: FluidSidePanel + Resultado
+              - Rodapé: GeometryBottomBar (full width)
+            */}
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)] 2xl:grid-cols-[240px_minmax(0,1fr)_minmax(0,1fr)] rounded-md shadow-sm">
+              <WorkspaceSidebar
+                componentType={componentType}
+                onSimulate={handleSimulate}
+                onReset={reset}
+                canSimulate={canSimulate}
+                isSimulating={isSimulating}
+                faceAreaM2={result?.faceAreaM2}
+                onOpenSchematic={() => setSchematicOpen(true)}
+                disabledReason={disabledReason}
               />
-            )}
-            <ResultPanel result={result} warnings={visibleWarnings} onGoalSeek={handleGoalSeek} />
-          </div>
-        </div>
-      </div>
 
-      {/* BARRA INFERIOR — Geometria, full width */}
-      <div className="mt-2 space-y-2">
-        <GeometryBottomBar />
-        <CircuitrySelector />
+              <div className="min-w-0 space-y-2 xl:contents">
+                {/* COLUNA CENTRAL — Lado Ventilador */}
+                <div className="min-w-0 space-y-2 xl:border-r xl:border-border xl:pr-2">
+                  <AirSidePanel result={result} />
+                </div>
+
+                {/* COLUNA DIREITA — Lado Fluido + Resultado */}
+                <div className="min-w-0 space-y-2">
+                  <FluidSidePanel
+                    componentType={componentType}
+                    refrigerants={catalogs.refrigerants}
+                    disabled={!catalogs.ready}
+                    result={result}
+                  />
+                  {!catalogs.loading && !catalogs.ready && (
+                    <DatasetStatusPanel
+                      loading={catalogs.loading}
+                      ready={catalogs.ready}
+                      errors={catalogs.errors}
+                      missing={catalogs.missing}
+                      compact
+                    />
+                  )}
+                  <ResultPanel result={result} warnings={visibleWarnings} onGoalSeek={handleGoalSeek} />
+                </div>
+              </div>
+            </div>
+
+            {/* BARRA INFERIOR — Geometria, full width */}
+            <div className="mt-2 space-y-2">
+              <GeometryBottomBar />
+              <CircuitrySelector />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="drawing" className="mt-2">
+            <DrawingTab
+              heightMm={physical?.finnedHeightMm ?? 400}
+              widthMm={physical?.finnedLengthMm ?? 1000}
+              depthMm={(physical?.rows ?? 4) * (physical?.tubePitchLongitudinalMm ?? 25)}
+              rows={physical?.rows ?? 4}
+              tubesPerRow={physical?.tubesPerRow ?? 10}
+              tubeOuterDiamMm={physical?.tubeOuterDiameterMm ?? 12.7}
+              finPitchMm={physical?.finPitchMm ?? 6}
+              circuits={physical?.circuits ?? 4}
+              refrigerantId={thermo?.refrigerantId ?? "R404A"}
+              componentType={isCondenser(componentType) ? "condenser" : "evaporator_dx"}
+              projectName={componentLabel}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
 
       <CoilSchematicModal
@@ -385,6 +437,7 @@ export function CnCoilsWorkspacePage() {
         onClose={() => setMachineImportOpen(false)}
         componentType={componentType}
       />
+      <WorkspaceAIPanel open={aiOpen} onClose={() => setAiOpen(false)} context={aiContext} />
     </PageContainer>
   );
 }

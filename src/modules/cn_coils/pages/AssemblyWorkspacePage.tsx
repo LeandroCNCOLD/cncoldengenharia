@@ -28,6 +28,9 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ActionBar } from "../components/ActionBar";
+import { DrawingTab } from "../components/drawing/DrawingTab";
+import { WorkspaceAIButton, WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
+import type { AIContext } from "../components/WorkspaceAIChat";
 import { ResultCard } from "../components/ResultCard";
 import { WorkspaceHeader } from "../components/WorkspaceHeader";
 import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
@@ -284,6 +287,24 @@ export function AssemblyWorkspacePage() {
     </WorkspaceInputsSidebar>
   );
 
+  const [aiOpen, setAiOpen] = useState(false);
+  const aiContext: AIContext = useMemo(() => ({
+    componentType: "Bancada de Serpentinas",
+    tabName: "assembly",
+    parameters: {
+      "Arranjo": arrangement,
+      "Refrigerante": refrigerantId,
+      "Te (\u00b0C)": String(te),
+      "Tc (\u00b0C)": String(tc),
+    },
+    results: result ? {
+      "Q total (kW)": (result.totals.totalCapacityW / 1000).toFixed(2),
+      "\u0394P ar (Pa)": result.totals.totalAirPressureDropPa.toFixed(0),
+      "Serpentinas": String(result.units.length),
+    } : undefined,
+    warnings: result?.warnings.map(w => ({ raw: w, severity: "warning" as const, title: w, explanation: "", suggestion: "" })) ?? [],
+  }), [arrangement, refrigerantId, te, tc, result]);
+
   return (
     <WorkspaceLayout
       header={
@@ -313,13 +334,17 @@ export function AssemblyWorkspacePage() {
 
         {result && (
           <Tabs defaultValue="results">
-            <TabsList>
-              <TabsTrigger value="results">Resultados</TabsTrigger>
-              <TabsTrigger value="units">Por serpentina</TabsTrigger>
-              {result.warnings.length > 0 && (
-                <TabsTrigger value="alerts">Alertas ({result.warnings.length})</TabsTrigger>
-              )}
-            </TabsList>
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <TabsList>
+                <TabsTrigger value="results">Resultados</TabsTrigger>
+                <TabsTrigger value="units">Por serpentina</TabsTrigger>
+                {result.warnings.length > 0 && (
+                  <TabsTrigger value="alerts">Alertas ({result.warnings.length})</TabsTrigger>
+                )}
+                <TabsTrigger value="drawing">🏗️ Desenho</TabsTrigger>
+              </TabsList>
+              <WorkspaceAIButton onClick={() => setAiOpen(true)} />
+            </div>
 
             <TabsContent value="results" className="mt-3 space-y-3">
               <div className="flex items-center gap-2">
@@ -413,9 +438,23 @@ export function AssemblyWorkspacePage() {
                 </Card>
               </TabsContent>
             )}
+            <TabsContent value="drawing" className="mt-3">
+              <DrawingTab
+                heightMm={400}
+                widthMm={1200}
+                depthMm={100}
+                rows={4}
+                tubesPerRow={10}
+                tubeOuterDiamMm={12.7}
+                finPitchMm={6}
+                circuits={5}
+                refrigerantId={refrigerantId}
+                componentType="evaporator_dx"
+                projectName={`Bancada ${arrangement}`}
+              />
+            </TabsContent>
           </Tabs>
         )}
-
         <ActionBar
           hasResults={!!result}
           onExportCsv={() => toast.info("Exportação CSV em breve")}
@@ -424,10 +463,10 @@ export function AssemblyWorkspacePage() {
           onShare={() => toast.info("Compartilhamento em breve")}
         />
       </div>
+      <WorkspaceAIPanel open={aiOpen} onClose={() => setAiOpen(false)} context={aiContext} />
     </WorkspaceLayout>
-  );
+   );
 }
-
 function NumField({
   label,
   value,

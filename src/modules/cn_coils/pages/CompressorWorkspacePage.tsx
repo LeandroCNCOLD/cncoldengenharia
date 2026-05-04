@@ -40,6 +40,7 @@ import { useCycleSimulation } from "../hooks/useCycleSimulation";
 import { usePdfExport } from "../hooks/usePdfExport";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import { WorkspaceAIButton, WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
+import { DrawingTab } from "../components/drawing/DrawingTab";
 import type { AIContext } from "../components/WorkspaceAIChat";
 
 const fmt = (value: number, maximumFractionDigits = 2) =>
@@ -331,6 +332,7 @@ export function CompressorWorkspacePage() {
                     <TabsTrigger value="envelope">📊 Envelope Capacidade</TabsTrigger>
                     <TabsTrigger value="capacity">📈 Curva Tc fixo</TabsTrigger>
                     <TabsTrigger value="electric">⚡ Dados Elétricos</TabsTrigger>
+                    <TabsTrigger value="drawing">🏗️ Desenho</TabsTrigger>
                   </TabsList>
                   <WorkspaceAIButton onClick={() => setAiOpen(true)} />
                 </div>
@@ -391,6 +393,21 @@ export function CompressorWorkspacePage() {
 
                 <TabsContent value="electric" className="mt-3">
                   <ElectricalDataCards inputs={inputs} metrics={metrics} />
+                </TabsContent>
+                <TabsContent value="drawing" className="mt-3">
+                  <DrawingTab
+                    heightMm={400}
+                    widthMm={600}
+                    depthMm={300}
+                    rows={2}
+                    tubesPerRow={12}
+                    tubeOuterDiamMm={9.52}
+                    finPitchMm={3}
+                    circuits={4}
+                    refrigerantId={inputs.refrigerant}
+                    componentType="condenser"
+                    projectName={inputs.compressorModel ? `Compressor ${inputs.compressorModel}` : "Compressor"}
+                  />
                 </TabsContent>
               </Tabs>
             </>
