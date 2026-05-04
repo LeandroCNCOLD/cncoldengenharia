@@ -16,9 +16,12 @@ import {
   Scale,
   RotateCw,
   Layers,
+  Droplets,
+  Flame,
   Snowflake,
   Target,
   Thermometer,
+  Waves,
   Zap,
 } from "lucide-react";
 import { CnLogo } from "@/components/cn-logo";
@@ -59,6 +62,24 @@ const NAV_GROUPS: NavGroup[] = [
         label: "Compressor",
         Icon: Zap,
         search: { type: "compressor" },
+      },
+      {
+        to: "/coldpro/cncoils/workspace",
+        label: "Cond. Evaporativo",
+        Icon: Droplets,
+        search: { type: "evaporative_condenser" },
+      },
+      {
+        to: "/coldpro/cncoils/workspace",
+        label: "Cond. a Água",
+        Icon: Waves,
+        search: { type: "water_condenser" },
+      },
+      {
+        to: "/coldpro/cncoils/workspace",
+        label: "Bateria de Aquecimento",
+        Icon: Flame,
+        search: { type: "heating_coil" },
       },
       { to: "/coldpro/cycle", label: "Ciclo de Refrigeração", Icon: RotateCw },
       { to: "/coldpro/map", label: "Mapa Operacional", Icon: Map },
