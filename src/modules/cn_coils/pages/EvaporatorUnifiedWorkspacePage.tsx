@@ -37,6 +37,7 @@ import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
 import { useCnCoilsCatalogs } from "../hooks/useCnCoilsCatalogs";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import { useCnCoilsSimulation } from "../hooks/useCnCoilsSimulation";
+import { useCnCoilsSimulationV2 } from "../hooks/useCnCoilsSimulationV2";
 import { useCnCoilsInputBridge } from "../hooks/useCnCoilsInputBridge";
 import {
   validatePhysicalInputs,
@@ -948,7 +949,11 @@ function DetailedWorkspaceTab({
     ],
   );
   const { run } = useCnCoilsSimulation(simulationDeps);
-
+  const { run: runV2 } = useCnCoilsSimulationV2({
+    tubeMaterials: catalogs.tubeMaterials,
+    geometries: catalogs.geometries,
+    componentType: "evaporator_dx",
+  });
   const physCheck = validatePhysicalInputs(physical);
   const thermoCheck = validateThermoInputs(thermo);
   const inputsValid = physCheck.isValid && thermoCheck.isValid;
@@ -992,7 +997,14 @@ function DetailedWorkspaceTab({
       );
       return;
     }
-    run();
+    // Lê engineVersion diretamente do store para garantir valor atual
+    // (o WorkspaceSidebar muda o store diretamente, sem passar pelo prop engineMode)
+    const currentEngineVersion = useCnCoilsSimulationStore.getState().engineVersion;
+    if (currentEngineVersion === "v2") {
+      runV2();
+    } else {
+      run();
+    }
     setTimeout(onCalculate, 0);
   };
 
