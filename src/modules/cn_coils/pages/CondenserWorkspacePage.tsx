@@ -731,6 +731,11 @@ export function CondenserWorkspacePage() {
         open={compressorPickerOpen}
         onClose={() => setCompressorPickerOpen(false)}
       />
+      <PostSaveNextStepDialog
+        open={nextStepOpen}
+        onOpenChange={setNextStepOpen}
+        next="compressor"
+      />
     </WorkspaceLayout>
   );
 }
