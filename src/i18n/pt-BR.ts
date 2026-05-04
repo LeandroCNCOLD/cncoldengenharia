@@ -78,7 +78,7 @@ export const ptBR = {
     productRegistry: "Registro de Produtos",
     export: "Exportação",
     audit: "Auditoria CN COLD",
-    userMode: "Modo do usuário",
+    settings: "Configurações",
     engineV2: "Motor V2 — CN COLD",
   },
 

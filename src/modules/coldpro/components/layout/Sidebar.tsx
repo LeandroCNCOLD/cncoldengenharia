@@ -42,6 +42,10 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/coldpro/audit", label: "navigation.audit", Icon: ShieldCheck },
 ];
 
+const ADMIN_NAV_ITEMS: NavItem[] = [
+  { to: "/coldpro/settings", label: "navigation.settings", Icon: Settings },
+];
+
 export function Sidebar({ onClose: _onClose }: { onClose?: () => void } = {}) {
   const { t } = useTranslation();
   const { user, isAdmin, signOut } = useAuth();
@@ -59,7 +63,28 @@ export function Sidebar({ onClose: _onClose }: { onClose?: () => void } = {}) {
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         <ul className="space-y-0.5">
-          {NAV_ITEMS.map((item) => {
+          {[...NAV_ITEMS, ...(isAdmin ? ADMIN_NAV_ITEMS : [])].map((item) => {
+            const Icon = item.Icon;
+            return (
+              <li key={item.to}>
+                <Link
+                  to={item.to}
+                  activeOptions={{ exact: item.exact ?? false }}
+                  activeProps={{
+                    className:
+                      "flex items-center gap-2.5 rounded-md bg-[#1E6FD9] px-3 py-2 text-sm font-medium text-white",
+                  }}
+                  inactiveProps={{
+                    className:
+                      "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white",
+                  }}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{t(item.label)}</span>
+                </Link>
+              </li>
+            );
+          })}
             const Icon = item.Icon;
             return (
               <li key={item.to}>
