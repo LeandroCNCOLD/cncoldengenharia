@@ -1346,11 +1346,19 @@ function UnifiedTabs({
                 Tc_C: cycleResult.Tc_C,
               }}
               airFlowM3H={airFlow}
+              evaporatorGeometry={{
+                finnedHeightMm: geomHeight,
+                finnedLengthMm: geomWidth,
+                finPitchMm: finPitch,
+                tubeOuterDiameterMm: tubeDiam,
+                tubeInnerDiameterMm: Math.max(1, tubeDiam - 1),
+                tubePitchTransverseMm: 25,
+                tubePitchLongitudinalMm: 22,
+              }}
             />
           </div>
         ) : <EmptyState />}
       </TabsContent>
-
       {/* ── Aba Detalhado — PRIMEIRA, fonte da verdade ── */}
       <TabsContent value={WORKSPACE_TABS.DETAILED} className="mt-3">
         <DetailedWorkspaceTab
