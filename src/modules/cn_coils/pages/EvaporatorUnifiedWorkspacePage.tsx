@@ -576,18 +576,18 @@ function UnifiedTabs({
 }) {
   return (
     <Tabs defaultValue="results" className="w-full">
-      <TabsList className="flex w-full flex-wrap justify-start">
-        <TabsTrigger value="results">📋 Resultados</TabsTrigger>
-        <TabsTrigger value="ph">🔄 Ciclo P-H</TabsTrigger>
-        <TabsTrigger value="envelope">📊 Envelope Q×Te</TabsTrigger>
-        <TabsTrigger value="frost-analysis">❄️ Geada</TabsTrigger>
-        <TabsTrigger value="frost">🧊 Geada Avançada</TabsTrigger>
-        <TabsTrigger value="map">📈 Mapa Operacional</TabsTrigger>
-        <TabsTrigger value="uncertainty">📐 Incerteza</TabsTrigger>
-        <TabsTrigger value="optimization">⚙️ Otimização</TabsTrigger>
-        <TabsTrigger value="series">🔗 Série</TabsTrigger>
-        <TabsTrigger value="detailed">🏭 Detalhado</TabsTrigger>
-        <TabsTrigger value="report">📄 Relatório</TabsTrigger>
+      <TabsList className="flex w-full overflow-x-auto whitespace-nowrap scrollbar-none pb-px h-auto">
+        <TabsTrigger value="results" className="shrink-0 text-xs">📋 Resultados</TabsTrigger>
+        <TabsTrigger value="ph" className="shrink-0 text-xs">🔄 Ciclo P-H</TabsTrigger>
+        <TabsTrigger value="envelope" className="shrink-0 text-xs">📊 Envelope Q×Te</TabsTrigger>
+        <TabsTrigger value="frost-analysis" className="shrink-0 text-xs">❄️ Geada</TabsTrigger>
+        <TabsTrigger value="frost" className="shrink-0 text-xs">🧊 Geada Avançada</TabsTrigger>
+        <TabsTrigger value="map" className="shrink-0 text-xs">📈 Mapa Operacional</TabsTrigger>
+        <TabsTrigger value="uncertainty" className="shrink-0 text-xs">📐 Incerteza</TabsTrigger>
+        <TabsTrigger value="optimization" className="shrink-0 text-xs">⚙️ Otimização</TabsTrigger>
+        <TabsTrigger value="series" className="shrink-0 text-xs">🔗 Série</TabsTrigger>
+        <TabsTrigger value="detailed" className="shrink-0 text-xs">🏭 Detalhado</TabsTrigger>
+        <TabsTrigger value="report" className="shrink-0 text-xs">📄 Relatório</TabsTrigger>
       </TabsList>
 
       <TabsContent value="results" className="mt-3">
