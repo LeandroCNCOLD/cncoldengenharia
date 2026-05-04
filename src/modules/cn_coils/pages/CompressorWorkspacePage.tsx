@@ -39,6 +39,8 @@ import {
 import { useCycleSimulation } from "../hooks/useCycleSimulation";
 import { usePdfExport } from "../hooks/usePdfExport";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
+import { WorkspaceAIButton, WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
+import type { AIContext } from "../components/WorkspaceAIChat";
 
 const fmt = (value: number, maximumFractionDigits = 2) =>
   value.toLocaleString("pt-BR", { maximumFractionDigits });
@@ -62,6 +64,8 @@ export function CompressorWorkspacePage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [inputs, setInputs] = useState<CompressorWorkspaceInputs>(DEFAULT_INPUTS);
   const [selectedRow, setSelectedRow] = useState<CompressorCatalogRow | null>(null);
+  const [activeTab, setActiveTab] = useState("operation");
+  const [aiOpen, setAiOpen] = useState(false);
 
   useEffect(() => {
     if (!selectedCompressorId || selectedCompressorId === inputs.compressorId) return;
@@ -165,6 +169,29 @@ export function CompressorWorkspacePage() {
     inputs.compressorModel || "—",
     `${fmt(inputs.frequency_Hz, 0)} Hz`,
   ];
+
+  const aiContext: AIContext = useMemo(() => ({
+    componentType: "Compressor",
+    tabName: activeTab,
+    refrigerant: inputs.refrigerant,
+    parameters: {
+      "Modelo": `${inputs.compressorBrand} ${inputs.compressorModel}` || "—",
+      "Te (°C)": inputs.Te_C,
+      "Tc (°C)": inputs.Tc_C,
+      "SH (K)": inputs.Tsuperheating_K,
+      "SC (K)": inputs.Tsubcooling_K,
+      "Tensão (V)": inputs.voltage_V,
+      "Frequência (Hz)": inputs.frequency_Hz,
+    },
+    results: result ? {
+      "Q evap (kW)": (result.Q_evap_W / 1000).toFixed(2),
+      "W comp (kW)": (result.W_comp_W / 1000).toFixed(2),
+      "COP": result.COP.toFixed(2),
+      "EER": result.EER.toFixed(2),
+      "Fluxo massa (kg/h)": (result.m_dot_kgS * 3600).toFixed(1),
+    } : undefined,
+    warnings: [],
+  }), [activeTab, inputs, result]);
 
   const sidebar = (
     <WorkspaceInputsSidebar
@@ -297,13 +324,16 @@ export function CompressorWorkspacePage() {
                 </div>
               )}
 
-              <Tabs defaultValue="operation" className="w-full">
-                <TabsList className="flex w-full flex-wrap justify-start">
-                  <TabsTrigger value="operation">📋 Ponto de Operação</TabsTrigger>
-                  <TabsTrigger value="envelope">📊 Envelope Capacidade</TabsTrigger>
-                  <TabsTrigger value="capacity">📈 Curva Tc fixo</TabsTrigger>
-                  <TabsTrigger value="electric">⚡ Dados Elétricos</TabsTrigger>
-                </TabsList>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <TabsList className="flex flex-wrap justify-start">
+                    <TabsTrigger value="operation">📋 Ponto de Operação</TabsTrigger>
+                    <TabsTrigger value="envelope">📊 Envelope Capacidade</TabsTrigger>
+                    <TabsTrigger value="capacity">📈 Curva Tc fixo</TabsTrigger>
+                    <TabsTrigger value="electric">⚡ Dados Elétricos</TabsTrigger>
+                  </TabsList>
+                  <WorkspaceAIButton onClick={() => setAiOpen(true)} />
+                </div>
 
                 <TabsContent value="operation" className="mt-3">
                   <div className="rounded-lg border border-border bg-card p-4">
@@ -384,6 +414,7 @@ export function CompressorWorkspacePage() {
         onClose={() => setPickerOpen(false)}
         onSelect={handleSelect}
       />
+      <WorkspaceAIPanel open={aiOpen} onClose={() => setAiOpen(false)} context={aiContext} />
     </WorkspaceLayout>
   );
 }

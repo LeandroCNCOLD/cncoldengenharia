@@ -33,6 +33,8 @@ import {
   type WaterCondenserInputs,
 } from "../hooks/useWaterCondenserSimulation";
 import { useCoilEnvelopeStore } from "../store/useCoilEnvelopeStore";
+import { WorkspaceAIButton, WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
+import type { AIContext } from "../components/WorkspaceAIChat";
 
 const fmt = (value: number, maximumFractionDigits = 2) =>
   value.toLocaleString("pt-BR", { maximumFractionDigits });
@@ -54,7 +56,30 @@ export function WaterCondenserWorkspacePage() {
   const setCondenserEnvelope = useCoilEnvelopeStore((s) => s.setCondenserEnvelope);
   const [inputs, setInputs] = useState<WaterCondenserInputs>(DEFAULT_INPUTS);
   const [draft, setDraft] = useState<WaterCondenserInputs>(DEFAULT_INPUTS);
+  const [activeTab, setActiveTab] = useState("results");
+  const [aiOpen, setAiOpen] = useState(false);
   const result = useMemo(() => calculateWaterCondenser(inputs), [inputs]);
+
+  const aiContext: AIContext = useMemo(() => ({
+    componentType: "Cond. a Água",
+    tabName: activeTab,
+    refrigerant: inputs.refrigerant,
+    parameters: {
+      "Q total (kW)": (inputs.Q_total_W / 1000).toFixed(1),
+      "T água entrada (°C)": inputs.Tw_in_C,
+      "Vazão água (m³/h)": inputs.waterFlowRate_m3h,
+      "Nº tubos": inputs.tubeCount,
+      "Passes": inputs.passes,
+    },
+    results: {
+      "Tc (°C)": result.Tc_C.toFixed(1),
+      "T água saída (°C)": result.Tw_out_C.toFixed(1),
+      "LMTD (K)": result.LMTD_K.toFixed(1),
+      "U (W/m²K)": result.U_Wm2K.toFixed(0),
+      "Margem área (%)": (result.areaMargin * 100).toFixed(1),
+    },
+    warnings: [],
+  }), [activeTab, inputs, result]);
 
   const envelope = useMemo(
     () =>
@@ -175,12 +200,15 @@ export function WaterCondenserWorkspacePage() {
     >
       <ProjectHeaderBar workspaceType="component_workspace" />
       <div className="flex flex-col gap-4 p-4">
-        <Tabs defaultValue="results">
-          <TabsList>
-            <TabsTrigger value="results">📋 Resultados</TabsTrigger>
-            <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
-            <TabsTrigger value="sizing">📐 Dimensionamento</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <TabsList>
+              <TabsTrigger value="results">📋 Resultados</TabsTrigger>
+              <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
+              <TabsTrigger value="sizing">📐 Dimensionamento</TabsTrigger>
+            </TabsList>
+            <WorkspaceAIButton onClick={() => setAiOpen(true)} />
+          </div>
 
           <TabsContent value="results" className="mt-3">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -260,6 +288,7 @@ export function WaterCondenserWorkspacePage() {
           onShare={() => toast.info("Compartilhamento em breve")}
         />
       </div>
+      <WorkspaceAIPanel open={aiOpen} onClose={() => setAiOpen(false)} context={aiContext} />
     </WorkspaceLayout>
   );
 }

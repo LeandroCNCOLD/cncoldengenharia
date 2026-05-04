@@ -49,6 +49,8 @@ import {
 } from "../hooks/useCondenserSimulation";
 import { usePdfExport } from "../hooks/usePdfExport";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
+import { WorkspaceAIButton, WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
+import type { AIContext } from "../components/WorkspaceAIChat";
 
 const fmt = (value: number, maximumFractionDigits = 2) =>
   value.toLocaleString("pt-BR", { maximumFractionDigits });
@@ -96,6 +98,8 @@ export function CondenserWorkspacePage() {
     geometryId: physical.geometryId ?? "",
     airFlowM3H: airFlowM3H > 0 ? airFlowM3H : 5000,
   });
+  const [activeTab, setActiveTab] = useState("results");
+  const [aiOpen, setAiOpen] = useState(false);
 
   const syncedInputs = useMemo<CondenserInputs>(
     () => ({
@@ -191,6 +195,27 @@ export function CondenserWorkspacePage() {
     `Tc: ${fmt(syncedInputs.Tc, 0)}°C`,
     `Tar: ${fmt(syncedInputs.Tair_in, 0)}°C`,
   ];
+
+  const aiContext: AIContext = useMemo(() => ({
+    componentType: "Condensador a Ar",
+    tabName: activeTab,
+    refrigerant: syncedInputs.refrigerant,
+    parameters: {
+      "Tc (°C)": syncedInputs.Tc,
+      "T ar entrada (°C)": syncedInputs.Tair_in,
+      "Subresfriamento (K)": syncedInputs.subcooling,
+      "Vazão de ar (m³/h)": syncedInputs.airFlowM3H ?? 0,
+      "Ventiladores": syncedInputs.fanCount,
+    },
+    results: result ? {
+      "Q cond (kW)": (result.Q_cond_W / 1000).toFixed(2),
+      "UA (W/K)": result.UA.toFixed(0),
+      "LMTD (K)": result.LMTD.toFixed(1),
+      "T ar saída (°C)": result.Tair_out.toFixed(1),
+      "ΔP ar (Pa)": result.deltaP_Pa.toFixed(0),
+    } : undefined,
+    warnings: [],
+  }), [activeTab, syncedInputs, result]);
 
   const sidebar = (
     <WorkspaceInputsSidebar
@@ -323,12 +348,15 @@ export function CondenserWorkspacePage() {
           {isCalculating && !result ? (
             <LoadingResults />
           ) : result ? (
-            <Tabs defaultValue="results" className="w-full">
-              <TabsList className="flex w-full flex-wrap justify-start">
-                <TabsTrigger value="results">📋 Resultados</TabsTrigger>
-                <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
-                <TabsTrigger value="fans">🔧 Ventiladores</TabsTrigger>
-              </TabsList>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <TabsList className="flex flex-wrap justify-start">
+                  <TabsTrigger value="results">📋 Resultados</TabsTrigger>
+                  <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
+                  <TabsTrigger value="fans">🔧 Ventiladores</TabsTrigger>
+                </TabsList>
+                <WorkspaceAIButton onClick={() => setAiOpen(true)} />
+              </div>
 
               <TabsContent value="results" className="mt-3 space-y-3">
                 <CondenserResults result={result} />
@@ -427,6 +455,7 @@ export function CondenserWorkspacePage() {
           isExportingPdf={pdfGenerating}
         />
       </div>
+      <WorkspaceAIPanel open={aiOpen} onClose={() => setAiOpen(false)} context={aiContext} />
     </WorkspaceLayout>
   );
 }

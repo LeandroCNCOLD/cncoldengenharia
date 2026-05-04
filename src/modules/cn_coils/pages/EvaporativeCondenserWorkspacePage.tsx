@@ -34,6 +34,8 @@ import {
   type EvaporativeCondenserInputs,
   type EvaporativeCondenserResult,
 } from "../hooks/useEvaporativeCondenserSimulation";
+import { WorkspaceAIButton, WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
+import type { AIContext } from "../components/WorkspaceAIChat";
 
 const fmt = (value: number, maximumFractionDigits = 2) =>
   value.toLocaleString("pt-BR", { maximumFractionDigits });
@@ -54,6 +56,8 @@ const DEFAULT_INPUTS: EvaporativeCondenserInputs = {
 export function EvaporativeCondenserWorkspacePage() {
   const [inputs, setInputs] = useState<EvaporativeCondenserInputs>(DEFAULT_INPUTS);
   const { isGenerating: pdfGenerating, exportPdf } = usePdfExport();
+  const [activeTab, setActiveTab] = useState("results");
+  const [aiOpen, setAiOpen] = useState(false);
 
   const result = useMemo(() => calculateEvaporativeCondenser(inputs), [inputs]);
   const envelope = useMemo(
@@ -106,6 +110,24 @@ export function EvaporativeCondenserWorkspacePage() {
   const handleReset = () => setInputs(DEFAULT_INPUTS);
 
   const badges = [`Q: ${fmt(inputs.Q_total_W / 1000, 0)} kW`, `Twb: ${fmt(inputs.Twb_C, 0)}°C`];
+
+  const aiContext: AIContext = useMemo(() => ({
+    componentType: "Cond. Evaporativo",
+    tabName: activeTab,
+    parameters: {
+      "Q total (kW)": (inputs.Q_total_W / 1000).toFixed(1),
+      "T bulbo úmido (°C)": inputs.Twb_C,
+      "T bulbo seco (°C)": inputs.Tdb_C,
+      "Vazão água (L/min)": inputs.waterFlowRate_Lmin,
+      "Velocidade ar (m/s)": inputs.airVelocity_ms,
+    },
+    results: result ? {
+      "Tc (°C)": result.Tc_C.toFixed(1),
+      "Q rejeitado (kW)": (result.Q_rejected_W / 1000).toFixed(2),
+      "Consumo água (L/h)": result.waterMakeup_Lh.toFixed(1),
+    } : undefined,
+    warnings: [],
+  }), [activeTab, inputs, result]);
 
   const sidebar = (
     <WorkspaceInputsSidebar
@@ -160,12 +182,15 @@ export function EvaporativeCondenserWorkspacePage() {
       <div className="flex h-full flex-col">
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {result ? (
-            <Tabs defaultValue="results" className="w-full">
-              <TabsList className="flex w-full flex-wrap justify-start">
-                <TabsTrigger value="results">📋 Resultados</TabsTrigger>
-                <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
-                <TabsTrigger value="water">💧 Consumo de Água</TabsTrigger>
-              </TabsList>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <TabsList className="flex flex-wrap justify-start">
+                  <TabsTrigger value="results">📋 Resultados</TabsTrigger>
+                  <TabsTrigger value="envelope">📊 Envelope Q×Tc</TabsTrigger>
+                  <TabsTrigger value="water">💧 Consumo de Água</TabsTrigger>
+                </TabsList>
+                <WorkspaceAIButton onClick={() => setAiOpen(true)} />
+              </div>
 
               <TabsContent value="results" className="mt-3">
                 <ResultsGrid result={result} inputs={inputs} />
@@ -205,6 +230,7 @@ export function EvaporativeCondenserWorkspacePage() {
           isExportingPdf={pdfGenerating}
         />
       </div>
+      <WorkspaceAIPanel open={aiOpen} onClose={() => setAiOpen(false)} context={aiContext} />
     </WorkspaceLayout>
   );
 }
