@@ -50,6 +50,7 @@ import { CyclePHDiagram } from "../components/CyclePHDiagram";
 import { CoilEnvelopeTab } from "../components/CoilEnvelopeTab";
 import { OperatingMapChart } from "../components/OperatingMapChart";
 import { CompressorPickerModal } from "../components/CompressorPickerModal";
+import { PostSaveNextStepDialog } from "../components/PostSaveNextStepDialog";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { DrawingTab } from "../components/drawing/DrawingTab";
 import { WorkspaceAIChat } from "../components/WorkspaceAIChat";
@@ -212,6 +213,7 @@ export function CondenserWorkspacePage() {
 
   // ── Compressor ──
   const [compressorPickerOpen, setCompressorPickerOpen] = useState(false);
+  const [nextStepOpen, setNextStepOpen] = useState(false);
   const [compressorMode, setCompressorMode] = useState<CompressorMode>("ari");
   const [frequency, setFrequency] = useState(60);
   const [voltage, setVoltage] = useState(380);
@@ -420,7 +422,10 @@ export function CondenserWorkspacePage() {
     setSuperheat(5); setSubcooling(5); setMassFlow(0);
     setCompressorMode("ari"); setFrequency(60); setVoltage(380);
   };
-  const handleSave = () => toast.success("Projeto salvo (em memória).");
+  const handleSave = () => {
+    toast.success("Projeto salvo (em memória).");
+    setNextStepOpen(true);
+  };
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -726,6 +731,11 @@ export function CondenserWorkspacePage() {
       <CompressorPickerModal
         open={compressorPickerOpen}
         onClose={() => setCompressorPickerOpen(false)}
+      />
+      <PostSaveNextStepDialog
+        open={nextStepOpen}
+        onOpenChange={setNextStepOpen}
+        next="compressor"
       />
     </WorkspaceLayout>
   );

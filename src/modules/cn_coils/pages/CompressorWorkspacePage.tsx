@@ -40,6 +40,7 @@ import { useCycleSimulation } from "../hooks/useCycleSimulation";
 import { usePdfExport } from "../hooks/usePdfExport";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import { WorkspaceAIButton, WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
+import { PostSaveNextStepDialog } from "../components/PostSaveNextStepDialog";
 import { DrawingTab } from "../components/drawing/DrawingTab";
 import type { AIContext } from "../components/WorkspaceAIChat";
 
@@ -63,6 +64,7 @@ export function CompressorWorkspacePage() {
   const { isGenerating: pdfGenerating, exportPdf } = usePdfExport();
   const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [nextStepOpen, setNextStepOpen] = useState(false);
   const [inputs, setInputs] = useState<CompressorWorkspaceInputs>(DEFAULT_INPUTS);
   const [selectedRow, setSelectedRow] = useState<CompressorCatalogRow | null>(null);
   const [activeTab, setActiveTab] = useState("operation");
@@ -153,7 +155,10 @@ export function CompressorWorkspacePage() {
     );
   };
 
-  const handleSave = () => toast.success("Projeto salvo (em memória).");
+  const handleSave = () => {
+    toast.success("Projeto salvo (em memória).");
+    setNextStepOpen(true);
+  };
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -432,6 +437,11 @@ export function CompressorWorkspacePage() {
         onSelect={handleSelect}
       />
       <WorkspaceAIPanel open={aiOpen} onClose={() => setAiOpen(false)} context={aiContext} />
+      <PostSaveNextStepDialog
+        open={nextStepOpen}
+        onOpenChange={setNextStepOpen}
+        next="simulation"
+      />
     </WorkspaceLayout>
   );
 }

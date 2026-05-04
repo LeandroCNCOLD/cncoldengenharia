@@ -34,6 +34,7 @@ import { GeometryBottomBar } from "../components/GeometryBottomBar";
 import { WorkspaceSidebar } from "../components/WorkspaceSidebar";
 import { CircuitrySelector } from "../components/CircuitrySelector";
 import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
+import { PostSaveNextStepDialog } from "../components/PostSaveNextStepDialog";
 import { useCnCoilsCatalogs } from "../hooks/useCnCoilsCatalogs";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import { useCnCoilsSimulation } from "../hooks/useCnCoilsSimulation";
@@ -317,6 +318,7 @@ export function EvaporatorUnifiedWorkspacePage() {
   // ── IA Chat state ──
   const [aiOpen, setAiOpen] = useState(false);
   const [aiTab, setAiTab] = useState("Detalhado");
+  const [nextStepOpen, setNextStepOpen] = useState(false);
 
   const openAI = useCallback((tabName: string) => {
     setAiTab(tabName);
@@ -480,7 +482,10 @@ export function EvaporatorUnifiedWorkspacePage() {
     setCompressorMode("ari"); setFrequency(60); setVoltage(380);
   };
 
-  const handleSave = () => toast.success("Projeto salvo (em memória).");
+  const handleSave = () => {
+    toast.success("Projeto salvo (em memória).");
+    setNextStepOpen(true);
+  };
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -799,6 +804,12 @@ export function EvaporatorUnifiedWorkspacePage() {
       <CompressorPickerModal
         open={compressorPickerOpen}
         onClose={() => setCompressorPickerOpen(false)}
+      />
+
+      <PostSaveNextStepDialog
+        open={nextStepOpen}
+        onOpenChange={setNextStepOpen}
+        next="condenser"
       />
     </WorkspaceLayout>
   );
