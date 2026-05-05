@@ -4,35 +4,14 @@
  * Layout de tabela com cabeçalho azul, campos de entrada e resultados
  * lado a lado, conforme o layout ColdPro de referência.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
-import {
-  getAxialFans,
-  getCentrifugalFans,
-} from "../services/unilabCoefficientsService";
-import type {
-  AxialFanCoefficient,
-  CentrifugalFanCoefficient,
-} from "../types/unilabCoefficients.types";
 import type { CnCoilsSimulationResult } from "../types/cncoils.types";
-import { FanPickerModal, type FanPickerItem } from "./FanPickerModal";
+import { FanPickerModal } from "./FanPickerModal";
+import { useEnrichedFanPickerItems } from "../hooks/useEnrichedFanPickerItems";
 
 
-// ─── tipos de ventilador ─────────────────────────────────────────────────────
-type FanOption =
-  | { type: "axial"; fan: AxialFanCoefficient }
-  | { type: "centrifugal"; fan: CentrifugalFanCoefficient };
-
-function airflowRange(option: FanOption) {
-  return option.type === "axial"
-    ? option.fan.airflowRange_m3h
-    : option.fan.capacityRange_m3h;
-}
-function nominalAirflow(option: FanOption): number {
-  const range = airflowRange(option);
-  if (option.type === "axial") return (range.min + range.max) / 2;
-  return range.max;
-}
+// (helpers de FanOption removidos — usamos a biblioteca enriquecida diretamente)
 
 // ─── tipos de unidade ────────────────────────────────────────────────────────
 type AirFlowUnit = "m3h" | "m3s" | "cfm";
@@ -239,32 +218,9 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
   const selectedFanId = useCnCoilsSimulationStore((s) => s.selectedFanId);
   const fanCount = useCnCoilsSimulationStore((s) => s.fanCount);
 
-  // biblioteca de ventiladores
-  const [fans, setFans] = useState<FanOption[]>([]);
-  const [loadingFans, setLoadingFans] = useState(false);
+  // biblioteca enriquecida (EBM-Papst etc.) com fabricante, série, motor, diâmetro
+  const { items: fanPickerItems, loading: loadingFans } = useEnrichedFanPickerItems();
   const [pickerOpen, setPickerOpen] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoadingFans(true);
-    Promise.all([getAxialFans(), getCentrifugalFans()])
-      .then(([axial, centrifugal]) => {
-        if (cancelled) return;
-        setFans([
-          ...axial.map((fan) => ({ type: "axial" as const, fan })),
-          ...centrifugal.map((fan) => ({ type: "centrifugal" as const, fan })),
-        ]);
-      })
-      .catch(() => {
-        /* silencioso — ventilador não é obrigatório */
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingFans(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   // unidades locais
   const [uCap, setUCap] = useState<CapacityUnit>("kcal_h");
@@ -288,46 +244,12 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
   // ventilador selecionado — prioriza store principal, com fallback ao thermo legado
   const activeFanId = selectedFanId ?? thermo.selectedFanId;
   const selectedFan = useMemo(
-    () => fans.find((o) => o.fan.id === activeFanId),
-    [fans, activeFanId],
+    () => fanPickerItems.find((f) => f.id === activeFanId),
+    [fanPickerItems, activeFanId],
   );
   const fanLabel = selectedFan
-    ? `${fanCount}× ${selectedFan.fan.model} · ${selectedFan.type === "axial" ? "axial" : "centrífugo"}`
+    ? `${fanCount}× ${[selectedFan.manufacturer, selectedFan.model].filter(Boolean).join(" ")}`
     : "Manual / Selecionar…";
-
-  // Itens para o modal — converte coefficient → FanPickerItem
-  const fanPickerItems = useMemo<FanPickerItem[]>(
-    () =>
-      fans.map((opt) => {
-        if (opt.type === "axial") {
-          const f = opt.fan;
-          return {
-            id: f.id,
-            manufacturer: "Ziehl-Abegg",
-            model: f.model,
-            airflow_m3h: f.airflowRange_m3h
-              ? (f.airflowRange_m3h.min + f.airflowRange_m3h.max) / 2
-              : undefined,
-            rpm: f.rpm,
-            motor_power_w: f.power_W,
-            motor_current_a: f.current_A,
-            voltage_v: f.voltage,
-            frequency_hz: f.frequency,
-            fanCategory: "axial",
-            fanFunction: "soprador",
-          };
-        }
-        const f = opt.fan;
-        return {
-          id: f.id,
-          manufacturer: "Ziehl-Abegg",
-          model: f.model,
-          fanCategory: "centrifugal",
-          fanFunction: "soprador",
-        };
-      }),
-    [fans],
-  );
 
   const handleOpenPicker = () => {
     onFanPickerOpen?.();
