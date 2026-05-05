@@ -1643,6 +1643,8 @@ function UnifiedTabs({
           onReset={() => {}}
           onOpenAI={() => onOpenAI("Detalhado")}
           isCalculating={false}
+          onOpenGeometryPicker={onOpenGeometryPicker}
+          onOpenGeomModal={onOpenGeomModal}
         />
       </TabsContent>
 
