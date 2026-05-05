@@ -603,7 +603,6 @@ function NumInput({
   onChange,
   min,
   max,
-  step,
   disabled,
   placeholder,
 }: {
@@ -615,19 +614,14 @@ function NumInput({
   disabled?: boolean;
   placeholder?: string;
 }) {
+  const inputProps = useNumericInput(value, (v) => onChange(v ?? 0), { min, max });
   return (
     <input
-      type="number"
-      value={Number.isFinite(value) ? value : 0}
-      min={min}
-      max={max}
-      step={step ?? "any"}
+      type="text"
+      inputMode="decimal"
+      {...inputProps}
       disabled={disabled}
       placeholder={placeholder}
-      onChange={(e) => {
-        const n = parseFloat(e.target.value);
-        onChange(Number.isFinite(n) ? n : 0);
-      }}
       className="w-full min-w-0 rounded border border-slate-300 bg-white px-1.5 py-1 text-right text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
     />
   );
