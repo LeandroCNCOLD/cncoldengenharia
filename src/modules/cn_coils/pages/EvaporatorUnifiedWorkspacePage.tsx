@@ -1455,6 +1455,8 @@ function UnifiedTabs({
   onCalculate: () => void;
   onReset: () => void;
   isCalculating: boolean;
+  activeTab: string;
+  onTabChange: (value: string) => void;
   geomHeight: number;
   geomWidth: number;
   geomDepth: number;
