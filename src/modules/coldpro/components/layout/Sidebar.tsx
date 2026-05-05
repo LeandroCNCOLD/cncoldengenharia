@@ -1,20 +1,15 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
-  Activity,
-  TrendingUp,
-  Map,
+  FlaskConical,
+  Gauge,
   FileText,
   Database,
-  Download,
-  ShieldCheck,
-  LogOut,
-  Boxes,
-  Wrench,
-  Database as DatabaseIcon,
-  Gauge,
-  Settings,
   Library,
+  ShieldCheck,
+  Settings,
+  LogOut,
+  BookOpen,
 } from "lucide-react";
 import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
@@ -28,25 +23,61 @@ type NavItem = {
   exact?: boolean;
 };
 
-const NAV_ITEMS: NavItem[] = [
-  { to: "/coldpro", label: "common.dashboard", Icon: LayoutDashboard, exact: true },
-  { to: "/coldpro/catalog", label: "navigation.catalog", Icon: DatabaseIcon },
-  { to: "/coldpro/components", label: "navigation.components", Icon: Boxes },
-  { to: "/coldpro/assembly", label: "navigation.assembly", Icon: Wrench },
-  { to: "/coldpro/simulation", label: "navigation.systemEquilibrium", Icon: Activity },
-  { to: "/coldpro/curve", label: "navigation.performanceCurve", Icon: TrendingUp },
-  { to: "/coldpro/cncoils", label: "navigation.unilabSimulator", Icon: Gauge },
-  { to: "/coldpro/map", label: "navigation.operatingMap", Icon: Map },
-  { to: "/coldpro/record", label: "navigation.productRecord", Icon: FileText },
-  { to: "/coldpro/registry", label: "navigation.productRegistry", Icon: Database },
-  { to: "/coldpro/export", label: "navigation.export", Icon: Download },
-  { to: "/coldpro/audit", label: "navigation.audit", Icon: ShieldCheck },
+const NAV_PROJETOS: NavItem[] = [
+  { to: "/coldpro", label: "navigation.dashboard", Icon: LayoutDashboard, exact: true },
+];
+
+const NAV_ENGENHARIA: NavItem[] = [
+  { to: "/coldpro/catalog", label: "navigation.catalogSelection", Icon: Database },
+  { to: "/coldpro/cncoils", label: "navigation.cnCoilsSimulator", Icon: Gauge },
+  { to: "/coldpro/hub-de-testes", label: "navigation.testHub", Icon: FlaskConical },
+];
+
+const NAV_DOCUMENTACAO: NavItem[] = [
+  { to: "/coldpro/ficha-tecnica", label: "navigation.technicalSheet", Icon: FileText },
+  { to: "/coldpro/registry", label: "navigation.productRegistry", Icon: BookOpen },
   { to: "/coldpro/library", label: "navigation.library", Icon: Library },
 ];
 
-const ADMIN_NAV_ITEMS: NavItem[] = [
+const NAV_ADMIN: NavItem[] = [
+  { to: "/coldpro/audit", label: "navigation.audit", Icon: ShieldCheck },
   { to: "/coldpro/settings", label: "navigation.settings", Icon: Settings },
 ];
+
+function NavSection({ title, items }: { title: string; items: NavItem[] }) {
+  const { t } = useTranslation();
+  return (
+    <div className="mb-4">
+      <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+        {title}
+      </p>
+      <ul className="space-y-0.5">
+        {items.map((item) => {
+          const Icon = item.Icon;
+          return (
+            <li key={item.to}>
+              <Link
+                to={item.to}
+                activeOptions={{ exact: item.exact ?? false }}
+                activeProps={{
+                  className:
+                    "flex items-center gap-2.5 rounded-md bg-[#1E6FD9] px-3 py-2 text-sm font-medium text-white",
+                }}
+                inactiveProps={{
+                  className:
+                    "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white",
+                }}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="truncate">{t(item.label)}</span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
 
 export function Sidebar({ onClose: _onClose }: { onClose?: () => void } = {}) {
   const { t } = useTranslation();
@@ -58,36 +89,20 @@ export function Sidebar({ onClose: _onClose }: { onClose?: () => void } = {}) {
       <div className="flex items-center gap-3 border-b border-white/10 px-5 py-4">
         <CnLogo variant="dark" />
         <div className="min-w-0">
-          <p className="text-sm font-semibold leading-tight">{t("navigation.coldProV2")}</p>
-          <p className="text-[10px] uppercase tracking-wider text-slate-400">{t("navigation.cnCold")}</p>
+          <p className="text-sm font-semibold leading-tight">CN COLD</p>
+          <p className="text-[10px] uppercase tracking-wider text-slate-400">
+            {t("navigation.engineV2")}
+          </p>
         </div>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <ul className="space-y-0.5">
-          {[...NAV_ITEMS, ...(isAdmin ? ADMIN_NAV_ITEMS : [])].map((item) => {
-            const Icon = item.Icon;
-            return (
-              <li key={item.to}>
-                <Link
-                  to={item.to}
-                  activeOptions={{ exact: item.exact ?? false }}
-                  activeProps={{
-                    className:
-                      "flex items-center gap-2.5 rounded-md bg-[#1E6FD9] px-3 py-2 text-sm font-medium text-white",
-                  }}
-                  inactiveProps={{
-                    className:
-                      "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white",
-                  }}
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{t(item.label)}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        <NavSection title={t("navigation.sectionProjects")} items={NAV_PROJETOS} />
+        <NavSection title={t("navigation.sectionEngineering")} items={NAV_ENGENHARIA} />
+        <NavSection title={t("navigation.sectionDocumentation")} items={NAV_DOCUMENTACAO} />
+        {isAdmin && (
+          <NavSection title={t("navigation.sectionAdmin")} items={NAV_ADMIN} />
+        )}
       </nav>
 
       <div className="space-y-2 border-t border-white/10 px-4 py-3">
@@ -99,7 +114,6 @@ export function Sidebar({ onClose: _onClose }: { onClose?: () => void } = {}) {
             {isAdmin ? t("common.administrator") : t("common.engineer")}
           </p>
         </div>
-
         <Button
           variant="ghost"
           size="sm"
@@ -112,10 +126,7 @@ export function Sidebar({ onClose: _onClose }: { onClose?: () => void } = {}) {
           <LogOut className="h-4 w-4" />
           {t("common.signOut")}
         </Button>
-
-        <p className="pt-1 text-[10px] text-slate-500">{t("navigation.engineV2")}</p>
       </div>
     </aside>
   );
 }
-
