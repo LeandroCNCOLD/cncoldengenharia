@@ -4,7 +4,7 @@
  * Layout de tabela com cabeçalho azul, campos de entrada e resultados
  * lado a lado, conforme o layout ColdPro de referência.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import type { CnCoilsSimulationResult } from "../types/cncoils.types";
 import { FanPickerModal } from "./FanPickerModal";
