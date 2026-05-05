@@ -887,6 +887,107 @@ function NumField({
   );
 }
 
+function ResultsCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded border border-border bg-card">
+      <div className="border-b border-border bg-muted/40 px-2 py-1 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">
+        {title}
+      </div>
+      <div className="space-y-0.5 p-2">{children}</div>
+    </div>
+  );
+}
+
+function ResultsLine({ label, value }: { label: string; value: string }) {
+  const hasValue = value !== "---" && !value.startsWith("---");
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-muted-foreground">{label}</span>
+      <span className={`font-mono font-medium ${hasValue ? "text-foreground" : "text-slate-400"}`}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function ResultsPanel() {
+  const result = useCnCoilsSimulationStore((s) => s.result);
+  const warnings = useCnCoilsSimulationStore((s) => s.warnings);
+  const physicalInputs = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const fluid = useCnCoilsSimulationStore((s) => s.fluid);
+  const fluidOperatingTemp_C = useCnCoilsSimulationStore((s) => s.fluidOperatingTemp_C);
+
+  const hasResult = !!result;
+  const nTubesPerRow =
+    physicalInputs.tubesPerRow ??
+    (physicalInputs.finnedHeightMm && physicalInputs.tubePitchTransverseMm
+      ? Math.round(physicalInputs.finnedHeightMm / physicalInputs.tubePitchTransverseMm)
+      : 0);
+  const derived = calcCoilDerivedDimensions({
+    nTubesPerRow,
+    tubePitchTransverse_mm: physicalInputs.tubePitchTransverseMm ?? 0,
+    nRows: physicalInputs.rows ?? 0,
+    tubePitchLongitudinal_mm: physicalInputs.tubePitchLongitudinalMm ?? 0,
+    lengthMm: physicalInputs.finnedLengthMm ?? 0,
+    refrigerant: fluid,
+    T_evap_C: fluidOperatingTemp_C,
+    tubeID_m: (physicalInputs.tubeInnerDiameterMm ?? 0) / 1000,
+    tubeOD_m: (physicalInputs.tubeOuterDiameterMm ?? 0) / 1000,
+    nCircuits: physicalInputs.circuits ?? 0,
+    finThickness_m: (physicalInputs.finThicknessMm ?? 0.13) / 1000,
+    finPitch_m: (physicalInputs.finPitchMm ?? 2.5) / 1000,
+    tubeMaterial: "copper",
+    finMaterial: "aluminum",
+  });
+
+  const hasWarn = warnings && warnings.length > 0;
+
+  return (
+    <div className="sticky top-4 space-y-2 text-[10px]">
+      <div
+        className={`rounded border px-2 py-1.5 text-center text-[10px] font-semibold ${
+          !hasResult
+            ? "border-slate-200 bg-slate-50 text-slate-400"
+            : hasWarn
+              ? "border-amber-300 bg-amber-50 text-amber-800"
+              : "border-emerald-300 bg-emerald-50 text-emerald-800"
+        }`}
+      >
+        {!hasResult ? "Aguardando cálculo" : hasWarn ? `${warnings.length} alerta(s)` : "✓ Sem Avisos"}
+      </div>
+
+      <ResultsCard title="Superfície de Troca">
+        <ResultsLine label="Área externa" value={`${fmtBRUtil(derived.areaExterna_m2, 2)} m²`} />
+        <ResultsLine label="Área interna" value={`${fmtBRUtil(derived.areaInterna_m2, 2)} m²`} />
+      </ResultsCard>
+
+      <ResultsCard title="Dimensões do Aletado">
+        <ResultsLine label="Altura" value={`${fmtBRUtil(derived.altura_mm, 0)} mm`} />
+        <ResultsLine label="Largura" value={`${fmtBRUtil(derived.largura_mm, 0)} mm`} />
+        <ResultsLine label="Profund." value={`${fmtBRUtil(derived.prof_mm, 0)} mm`} />
+      </ResultsCard>
+
+      <ResultsCard title="Volume e Carga">
+        <ResultsLine label="Volume interno" value={`${fmtBRUtil(derived.volumeInterno_L, 2)} L`} />
+        <ResultsLine label="Carga refrig." value={`${fmtBRUtil(derived.cargaRefrigerante_kg, 2)} kg`} />
+      </ResultsCard>
+
+      <ResultsCard title="Peso do Aletado">
+        <ResultsLine label="Peso seco" value={`${fmtBRUtil(derived.pesoSeco_kg, 2)} kg`} />
+        <ResultsLine label="Peso c/ fluido" value={`${fmtBRUtil(derived.pesoComFluido_kg, 2)} kg`} />
+      </ResultsCard>
+
+      {derived.gabinete_largura_mm > 0 && (
+        <ResultsCard title="Gabinete">
+          <div className="rounded bg-muted/30 px-1.5 py-1 text-center font-mono text-[11px] font-semibold text-foreground">
+            {fmtBRUtil(derived.gabinete_largura_mm, 0)} × {fmtBRUtil(derived.gabinete_altura_mm, 0)} × {fmtBRUtil(derived.gabinete_prof_mm, 0)} mm
+          </div>
+        </ResultsCard>
+      )}
+    </div>
+  );
+}
+
 function LoadingResults() {
   return (
     <div className="space-y-3">
