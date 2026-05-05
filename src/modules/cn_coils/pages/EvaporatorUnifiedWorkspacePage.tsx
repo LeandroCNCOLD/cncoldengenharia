@@ -270,6 +270,18 @@ export function EvaporatorUnifiedWorkspacePage() {
   // ── Modo ──
   const [calcMode, setCalcMode] = useState<CalcMode>("verify");
   const [engineMode, setEngineMode] = useState<EngineMode>("v1");
+  const [activeTab, setActiveTab] = useState<string>(WORKSPACE_TABS.DETAILED);
+  const focusDetailedSection = (sectionId: string) => {
+    setActiveTab(WORKSPACE_TABS.DETAILED);
+    setTimeout(() => {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        el.classList.add("ring-2", "ring-primary/60");
+        setTimeout(() => el.classList.remove("ring-2", "ring-primary/60"), 1500);
+      }
+    }, 60);
+  };
 
   // ── Geometria ──
   const [geomHeight, setGeomHeight] = useState(400);
@@ -689,6 +701,7 @@ export function EvaporatorUnifiedWorkspacePage() {
       <NavCard
         title="Modo de Cálculo"
         status={modeStatus}
+        onEdit={() => focusDetailedSection("section-modo-calculo")}
         lines={[
           `Objetivo: ${calcMode === "verify" ? "Verificar" : "Desenho"}`,
           `Motor: ${engineMode === "v1" ? "V1 NTU-ε" : "V2 ASHRAE"}`,
@@ -711,6 +724,7 @@ export function EvaporatorUnifiedWorkspacePage() {
         title="Lado Ventilação"
         status={ventStatus}
         errors={ventErrors}
+        onEdit={() => focusDetailedSection("section-lado-ventilacao")}
         lines={[
           airFlow ? `Vazão: ${airFlow.toLocaleString("pt-BR")} m³/h` : "Vazão não informada",
           airTempIn !== undefined ? `Entrada: ${airTempIn} °C / ${airRH}% UR` : "",
@@ -724,6 +738,7 @@ export function EvaporatorUnifiedWorkspacePage() {
         title="Lado Fluido / Refrigerante"
         status={fluidStatus}
         errors={fluidErrors}
+        onEdit={() => focusDetailedSection("section-lado-fluido")}
         lines={[
           refrigerantId ? `Fluido: ${refrigerantId}` : "Fluido não selecionado",
           selectedCompressorRow
@@ -737,6 +752,7 @@ export function EvaporatorUnifiedWorkspacePage() {
       <NavCard
         title="Condições Operacionais"
         status={opsStatus}
+        onEdit={() => focusDetailedSection("section-condicoes-operacionais")}
         lines={[
           `Padrão: ${compressorMode === "ari" ? "ARI 540" : compressorMode === "constant" ? "Constante" : "Manual"}`,
           `${frequency} Hz | ${voltage} V`,
@@ -782,6 +798,8 @@ export function EvaporatorUnifiedWorkspacePage() {
               onCalculate={() => simState.trigger()}
               onReset={handleReset}
               isCalculating={isCalculating}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
               geomHeight={geomHeight}
               geomWidth={geomWidth}
               geomDepth={geomDepth}
@@ -1237,18 +1255,18 @@ function DetailedWorkspaceTab({
 
   return (
     <div className="space-y-3">
-      <section className="space-y-2">
+      <section id="section-modo-calculo" className="space-y-2">
         <h3 className="text-sm font-semibold text-foreground">
           Formulário principal / dados do ambiente
         </h3>
         <div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_240px]">
           {/* Coluna 1 — Lado Ventilação */}
-          <div className="min-w-0 rounded-md border border-border bg-card shadow-sm">
+          <div id="section-lado-ventilacao" className="min-w-0 rounded-md border border-border bg-card shadow-sm transition-shadow">
             <AirSidePanel result={result} disabled={!catalogs.ready} />
           </div>
 
           {/* Coluna 2 — Lado Fluido */}
-          <div className="min-w-0 rounded-md border border-border bg-card shadow-sm">
+          <div id="section-lado-fluido" className="min-w-0 rounded-md border border-border bg-card shadow-sm transition-shadow">
             <FluidSidePanel
               componentType="evaporator_dx"
               refrigerants={catalogs.refrigerants}
@@ -1264,7 +1282,7 @@ function DetailedWorkspaceTab({
         </div>
       </section>
 
-      <section className="mt-2 space-y-2">
+      <section id="section-condicoes-operacionais" className="mt-2 space-y-2">
         <h3 className="text-sm font-semibold text-foreground">
           Dados técnicos e premissas
         </h3>
@@ -1424,6 +1442,8 @@ function UnifiedTabs({
   onCalculate,
   onReset,
   isCalculating,
+  activeTab,
+  onTabChange,
 }: {
   config: CycleSystemConfig;
   cycleResult: CycleResult | null;
@@ -1435,6 +1455,8 @@ function UnifiedTabs({
   onCalculate: () => void;
   onReset: () => void;
   isCalculating: boolean;
+  activeTab: string;
+  onTabChange: (value: string) => void;
   geomHeight: number;
   geomWidth: number;
   geomDepth: number;
@@ -1507,7 +1529,7 @@ function UnifiedTabs({
   }
 
   return (
-    <Tabs defaultValue={WORKSPACE_TABS.DETAILED} className="w-full">
+    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabsList className="flex w-full overflow-x-auto whitespace-nowrap scrollbar-none pb-px h-auto">
         {/* Aba Detalhado — PRIMEIRA, em vermelho como fonte da verdade */}
         <TabsTrigger
