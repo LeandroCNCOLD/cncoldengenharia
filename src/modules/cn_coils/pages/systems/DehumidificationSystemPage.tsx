@@ -80,7 +80,7 @@ function NumberInput({
     <label className="flex flex-col gap-1 text-xs text-slate-700">
       <span className="font-medium">{label}{unit && <span className="ml-1 text-slate-400">({unit})</span>}</span>
       <input
-        type="number"
+        type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
         step={step}
         value={Number.isFinite(value) ? value : ""}
         disabled={disabled}

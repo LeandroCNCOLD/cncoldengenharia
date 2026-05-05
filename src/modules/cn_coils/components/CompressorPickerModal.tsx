@@ -285,7 +285,7 @@ export function CompressorPickerModal({ open, onClose, onSelect }: Props) {
                 Quantidade
               </label>
               <Input
-                type="number"
+                type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
                 min={1}
                 step={1}
                 value={draftCount}
