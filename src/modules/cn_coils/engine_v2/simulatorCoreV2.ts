@@ -20,6 +20,7 @@ import {
   buildMoistAirState,
   type MoistAirState,
 } from "./airProperties";
+import { calcCoilEffectiveArea, calcEffectiveArea } from "../engine/effectiveArea";
 import { calcAirPressureDrop, calcFluidPressureDrop } from "@/modules/cn_coils/services/pressureDropService";
 import {
   checkCondensation,
@@ -242,16 +243,26 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
     ]);
   }
 
-  // 8. Área efetiva (face × rows × η_o_Schmidt × areaCorrection)
+  // 8. Área efetiva — aletas + tubos expostos (ASHRAE/UNILAB)
+  // Usa calcCoilEffectiveArea do V1 para consistência com engine/simulatorCore.ts
   // M2 — usa η_surface calculado pelo método de Schmidt em vez de 0.85 fixo
   const finEff = airH.eta_surface; // Schmidt — varia com geometria e material
   // M6 — Multiplicador de área
   const areaCorr = applyCorrection(1.0, cm.heatTransferArea);
-  // Estimativa: área externa ≈ face × rows × (π·Do/passo_long) × finEff × correção
-  const tubeDensityPerRow = 1 / (physical.tubePitchLongitudinalMm * MM_TO_M);
-  const areaPerRowPerM2Face = Math.PI * Do_m * tubeDensityPerRow;
-  const areaTotalM2 =
-    faceAreaM2 * physical.rows * areaPerRowPerM2Face * finEff * areaCorr;
+  const N_tubes_per_row = physical.tubesPerRow ??
+    Math.max(1, Math.round(finnedHeightM / (physical.tubePitchTransverseMm * MM_TO_M)));
+  const coilAreas = calcCoilEffectiveArea({
+    N_rows: physical.rows,
+    N_tubes_per_row,
+    L_tube_m: finnedLengthM,
+    D_o_m: Do_m,
+    P_t_m: physical.tubePitchTransverseMm * MM_TO_M,
+    P_l_m: physical.tubePitchLongitudinalMm * MM_TO_M,
+    F_p_m: (physical.finPitchMm ?? 3.0) * MM_TO_M,
+    delta_f_m: (physical.finThicknessMm ?? 0.1) * MM_TO_M,
+  });
+  const areaEffM2_raw = calcEffectiveArea(coilAreas, finEff);
+  const areaTotalM2 = areaEffM2_raw * areaCorr;
 
   // 9. NTU-ε
   const cAir = airMassFlowKgS * airIn.cp_J_kgK;
