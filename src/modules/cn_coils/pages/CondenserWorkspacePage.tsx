@@ -570,7 +570,14 @@ export function CondenserWorkspacePage() {
         {/* 3. VENTILAÇÃO */}
         <AccordionItem value="vent">
           <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Lado Ventilação
+            <span className="flex items-center gap-2">
+              Lado Ventilação
+              {airFlow > 0 ? (
+                <span className="rounded bg-emerald-100 px-1 py-0.5 text-[8px] font-semibold text-emerald-700">OK</span>
+              ) : (
+                <span className="rounded bg-slate-100 px-1 py-0.5 text-[8px] font-semibold text-slate-500">Incompleto</span>
+              )}
+            </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-2">
             <NumField label="Vazão de ar (m³/h)" value={airFlow} onChange={setAirFlow} />
