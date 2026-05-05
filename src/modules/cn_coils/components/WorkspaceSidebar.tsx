@@ -18,6 +18,7 @@ import {
   FinModal,
   DistributorModal,
 } from "./GeometryDerivedModals";
+import { GeometryEditorModal } from "./GeometryEditorModal";
 import type { CnCoilsComponentType } from "../types/cncoils.types";
 import {
   calcCoilDerivedDimensions,
@@ -103,6 +104,7 @@ export function WorkspaceSidebar({
 
   const [costModalOpen, setCostModalOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalKey>(null);
+  const [geomEditorOpen, setGeomEditorOpen] = useState(false);
   const [fans, setFans] = useState<Array<{ id: string; diameter_mm?: number; axial?: AxialFanRecord }>>([]);
   const [tubeWeightMaterial, setTubeWeightMaterial] = useState<TubeMaterial>("copper");
   const [finWeightMaterial, setFinWeightMaterial] = useState<FinMaterial>("aluminum");
@@ -314,6 +316,15 @@ export function WorkspaceSidebar({
               </li>
             );
           })}
+          <li>
+            <button
+              type="button"
+              onClick={() => setGeomEditorOpen(true)}
+              className="block w-full border-b border-slate-100 px-2 py-1 text-left text-[10px] font-semibold text-emerald-700 last:border-b-0 hover:bg-emerald-50"
+            >
+              + Novo Aletado…
+            </button>
+          </li>
         </ul>
       </nav>
 
@@ -513,6 +524,13 @@ export function WorkspaceSidebar({
       <DistributorModal
         open={activeModal === "distributor"}
         onClose={() => setActiveModal(null)}
+      />
+      <GeometryEditorModal
+        open={geomEditorOpen}
+        onClose={() => setGeomEditorOpen(false)}
+        baseGeometry={null}
+        mode="create"
+        onSaved={() => setGeomEditorOpen(false)}
       />
     </aside>
   );

@@ -55,6 +55,7 @@ type ProjectHeaderFormState = ProjectHeader & { name: string };
 
 interface ProjectHeaderBarProps {
   workspaceType: SavedProjectType;
+  onNovoAletado?: () => void;
 }
 
 function emptyForm(): ProjectHeaderFormState {
@@ -70,7 +71,7 @@ function emptyForm(): ProjectHeaderFormState {
   };
 }
 
-export function ProjectHeaderBar({ workspaceType }: ProjectHeaderBarProps) {
+export function ProjectHeaderBar({ workspaceType, onNovoAletado }: ProjectHeaderBarProps) {
   const navigate = useNavigate();
   const {
     projects,
@@ -201,6 +202,18 @@ export function ProjectHeaderBar({ workspaceType }: ProjectHeaderBarProps) {
                 </span>
               </div>
             </div>
+            {onNovoAletado && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 gap-1 text-xs border-emerald-400 text-emerald-700 hover:bg-emerald-50"
+                title="Iniciar cálculo de um aletado do zero (sem usar catálogo)"
+                onClick={onNovoAletado}
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Novo Aletado
+              </Button>
+            )}
             <Button
               size="sm"
               variant="ghost"
@@ -230,6 +243,18 @@ export function ProjectHeaderBar({ workspaceType }: ProjectHeaderBarProps) {
               <FolderOpen className="h-3.5 w-3.5" />
               Nenhum projeto ativo
             </span>
+            {onNovoAletado && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 gap-1 text-xs border-emerald-400 text-emerald-700 hover:bg-emerald-50"
+                title="Iniciar cálculo de um aletado do zero (sem usar catálogo)"
+                onClick={onNovoAletado}
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Novo Aletado
+              </Button>
+            )}
             <Button
               size="sm"
               variant="outline"

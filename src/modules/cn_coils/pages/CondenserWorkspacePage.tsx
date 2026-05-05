@@ -67,6 +67,7 @@ import { useCnCoilsSimulation } from "../hooks/useCnCoilsSimulation";
 import { useCnCoilsSimulationV2 } from "../hooks/useCnCoilsSimulationV2";
 import { enrichWarnings } from "../utils/warningEnricher";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
+import { useProjectStore } from "../store/useProjectStore";
 import { useCnCoilsInputBridge } from "../hooks/useCnCoilsInputBridge";
 import { useCycleSimulation } from "../hooks/useCycleSimulation";
 import { useOperatingMap } from "../hooks/useOperatingMap";
@@ -237,6 +238,13 @@ export function CondenserWorkspacePage() {
   const [frequency, setFrequency] = useState(60);
   const [voltage, setVoltage] = useState(380);
   const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
+  const resetSimStore = useCnCoilsSimulationStore((s) => s.reset);
+  const setActiveProjectGlobal = useProjectStore((s) => s.setActiveProject);
+  const handleNovoAletado = () => {
+    resetSimStore();
+    setActiveProjectGlobal(null);
+    toast.success("Workspace limpo. Configure um novo aletado do zero.");
+  };
   const [selectedCompressorRow, setSelectedCompressorRow] = useState<CompressorCatalogRow | null>(null);
   useEffect(() => {
     if (!selectedCompressorId) { setSelectedCompressorRow(null); return; }
@@ -722,7 +730,7 @@ export function CondenserWorkspacePage() {
 
   return (
     <WorkspaceLayout header={header} sidebar={sidebar}>
-      <ProjectHeaderBar workspaceType="component_workspace" />
+      <ProjectHeaderBar workspaceType="component_workspace" onNovoAletado={handleNovoAletado} />
       <div className="flex h-full flex-col">
         <div className="flex flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto p-4">
