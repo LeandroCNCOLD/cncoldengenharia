@@ -469,6 +469,7 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               }
               input={null}
               result={<ResultCell value={fmtVel(faceVelMs)} />}
+              badge={<BadgeCell type="calculated" />}
             />
             {/* Pressão estática (ventilador) */}
             <Row
