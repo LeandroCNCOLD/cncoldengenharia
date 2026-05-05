@@ -9,6 +9,7 @@ import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import type { CnCoilsSimulationResult } from "../types/cncoils.types";
 import { FanPickerModal } from "./FanPickerModal";
 import { useEnrichedFanPickerItems } from "../hooks/useEnrichedFanPickerItems";
+import { FAN_CATALOG, findOperatingPoint } from "@/data/fanCatalog";
 
 
 // (helpers de FanOption removidos — usamos a biblioteca enriquecida diretamente)
@@ -168,6 +169,7 @@ function InputCell({
       max={max}
       disabled={disabled}
       placeholder={placeholder}
+      onFocus={(e) => e.target.select()}
       onChange={(e) => {
         const n = parseFloat(e.target.value);
         if (Number.isFinite(n)) onChange(n);
@@ -283,16 +285,41 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
   const fmtTempOut = (c: number | undefined) =>
     c !== undefined && Number.isFinite(c) ? fmt(toTemp(c, uTempOut), 1) : "---";
 
-  // Ponto de operação real (Q / P)
+  // Ponto de operação real calculado a partir do catálogo
+  // (curva do ventilador × resistência do sistema R = ΔP / Q²)
+  const opCalc = useMemo(() => {
+    if (!selectedFan || !airPressDropPa || !thermo.airFlowM3H) return null;
+    const fanModel = FAN_CATALOG.find(
+      (f) => `ZA_${f.model}` === selectedFan.id || f.model === selectedFan.model,
+    );
+    if (!fanModel) return null;
+    const qTotal = thermo.airFlowM3H;
+    const count = Math.max(1, fanCount || 1);
+    const qPerFan = qTotal / count;
+    if (qPerFan <= 0) return null;
+    const R = airPressDropPa / (qPerFan * qPerFan);
+    const op = findOperatingPoint(fanModel, R);
+    if (!op) return { offCurve: true as const };
+    return { offCurve: false as const, q_m3h: op.q_m3h, psf_pa: op.psf_pa, count };
+  }, [selectedFan, fanCount, airPressDropPa, thermo.airFlowM3H]);
+
   const opPoint = useMemo(() => {
-    if (!fanEval || fanEval.method === "unavailable") return "---";
-    const q = fmt(toAirFlow(fanEval.airflow_m3h, uFlow), 0);
-    const p =
-      fanEval.pressure_Pa !== null
-        ? fmt(toPress(fanEval.pressure_Pa, uPress), 0)
-        : "---";
-    return `${q} / ${p}`;
-  }, [fanEval, uFlow, uPress]);
+    if (!opCalc) {
+      if (!fanEval || fanEval.method === "unavailable") return "---";
+      const q = fmt(toAirFlow(fanEval.airflow_m3h, uFlow), 0);
+      const p =
+        fanEval.pressure_Pa !== null ? fmt(toPress(fanEval.pressure_Pa, uPress), 0) : "---";
+      return `${q} m³/h @ ${p} Pa`;
+    }
+    if (opCalc.offCurve) return "Fora da curva";
+    const qTotal = opCalc.q_m3h * opCalc.count;
+    const q = fmt(toAirFlow(qTotal, uFlow), 0);
+    const p = fmt(toPress(opCalc.psf_pa, uPress), 0);
+    return `${q} m³/h @ ${p} Pa`;
+  }, [opCalc, fanEval, uFlow, uPress]);
+
+  const fanStaticPa = opCalc && !opCalc.offCurve ? opCalc.psf_pa : fanEval?.pressure_Pa ?? null;
+  const fanStaticOffCurve = opCalc?.offCurve === true;
 
   return (
     <div className="flex flex-col rounded border border-slate-300 bg-slate-50 shadow-sm overflow-hidden">
@@ -428,12 +455,11 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               result={
                 <ResultCell
                   value={
-                    fanEval?.pressure_Pa !== null && fanEval?.pressure_Pa !== undefined
-                      ? fmt(
-                          toPress(fanEval.pressure_Pa, uPress),
-                          uPress === "Pa" ? 0 : 2,
-                        )
-                      : "---"
+                    fanStaticOffCurve
+                      ? "Fora da curva"
+                      : fanStaticPa !== null && fanStaticPa !== undefined
+                        ? fmt(toPress(fanStaticPa, uPress), uPress === "Pa" ? 0 : 2)
+                        : "---"
                   }
                 />
               }
