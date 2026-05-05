@@ -75,6 +75,11 @@ export interface Fan {
   speedRpm?: number;
   airflowM3h?: number;
   maxPressurePa?: number;
+  frequencyHz?: number;
+  /** Categoria construtiva derivada dos arquivos fanAxial/fanCentrifugal */
+  fanCategory?: "axial" | "centrifugal";
+  /** Função no sistema: soprador, exaustor, livre ou universal */
+  fanFunction?: "soprador" | "exaustor" | "livre" | "universal";
 }
 
 /**

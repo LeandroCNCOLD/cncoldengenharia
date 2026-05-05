@@ -225,6 +225,8 @@ export function EvaporatorUnifiedWorkspacePage() {
         motor_power_w: f.powerW,
         motor_current_a: f.currentA,
         voltage_v: f.voltageV,
+        fanCategory: f.fanCategory,
+        fanFunction: f.fanFunction,
       })),
     [fullCatalogs.fans],
   );
