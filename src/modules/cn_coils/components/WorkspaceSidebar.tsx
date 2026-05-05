@@ -18,6 +18,7 @@ import {
   FinModal,
   DistributorModal,
 } from "./GeometryDerivedModals";
+import { GeometryEditorModal } from "./GeometryEditorModal";
 import type { CnCoilsComponentType } from "../types/cncoils.types";
 import {
   calcCoilDerivedDimensions,
