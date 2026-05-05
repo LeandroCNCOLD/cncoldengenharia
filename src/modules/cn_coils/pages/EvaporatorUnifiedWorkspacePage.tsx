@@ -249,6 +249,13 @@ export function EvaporatorUnifiedWorkspacePage() {
   const [compressorMode, setCompressorMode] = useState<CompressorMode>("ari");
   const [frequency, setFrequency] = useState(60);
   const [voltage, setVoltage] = useState(380);
+  // ── Modais de configuração (placeholders — modais ainda não existentes nesta página) ──
+  const [geomPickerOpen, setGeomPickerOpen] = useState(false);
+  const [tubeModalOpen, setTubeModalOpen] = useState(false);
+  const [finModalOpen, setFinModalOpen] = useState(false);
+  const [distributorModalOpen, setDistributorModalOpen] = useState(false);
+  const [selectedGeometry, _setSelectedGeometry] = useState<{ id?: string; codigo?: string } | null>(null);
+  void geomPickerOpen; void tubeModalOpen; void finModalOpen; void distributorModalOpen; void _setSelectedGeometry;
   const pendingEvaporator = useCatalogPreloadStore((s) => s.pendingEvaporator);
   const clearCatalogPreload = useCatalogPreloadStore((s) => s.clearAll);
   const { capacityUnit } = useUnitStore();
