@@ -1125,6 +1125,8 @@ type DetailedWorkspaceTabProps = {
   setCompressorMode: (value: CompressorMode) => void;
   frequency: number;
   setFrequency: (value: number) => void;
+  voltage: number;
+  setVoltage: (value: number) => void;
   cycleResult: CycleResult | null;
   onCalculate: () => void;
   onReset: () => void;
