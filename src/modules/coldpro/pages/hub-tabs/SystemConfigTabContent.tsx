@@ -73,9 +73,9 @@ export function SystemConfigTabContent({ onDone }: Props) {
       {/* Status dos componentes */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Compressor", ok: hasCompressor, source: selectedCompressor?.name },
-          { label: "Evaporador", ok: hasEvaporator, source: selectedEvaporator?.name },
-          { label: "Condensador", ok: hasCondenser, source: selectedCondenser?.name },
+          { label: "Compressor", ok: hasCompressor, source: selectedCompressor?.modelo },
+          { label: "Evaporador", ok: hasEvaporator, source: selectedEvaporator?.modelo },
+          { label: "Condensador", ok: hasCondenser, source: selectedCondenser?.modelo },
         ].map(({ label, ok, source }) => (
           <Card key={label} className={`border ${ok ? "border-emerald-200 bg-emerald-50" : "border-slate-200"}`}>
             <CardContent className="flex items-center gap-2 p-3">
