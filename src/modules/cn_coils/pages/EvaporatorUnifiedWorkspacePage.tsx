@@ -40,6 +40,8 @@ import { DrawingTab } from "../components/drawing/DrawingTab";
 import { WorkspaceAIChat } from "../components/WorkspaceAIChat";
 import { AirSidePanel } from "../components/AirSidePanel";
 import { FluidSidePanel } from "../components/FluidSidePanel";
+import { MaterialCostConfigModal } from "../components/MaterialCostConfigModal";
+import { formatBRL } from "../engine/costCalculator";
 import { GeometryBottomBar } from "../components/GeometryBottomBar";
 import { WorkspaceSidebar } from "../components/WorkspaceSidebar";
 import { calcCoilDerivedDimensions } from "../utils/coilDerivedMetrics";
