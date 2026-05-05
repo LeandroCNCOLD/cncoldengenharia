@@ -441,20 +441,20 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               label="Ventilador"
               unit={
                 <div className="rounded border border-slate-300 bg-white px-0.5 py-0.5 text-center text-[10px] text-slate-500">
-                  ×1
+                  ×{fanCount}
                 </div>
               }
               input={
                 <button
                   type="button"
-                  onClick={onFanPickerOpen}
-                  disabled={disabled || !onFanPickerOpen}
+                  onClick={handleOpenPicker}
+                  disabled={disabled}
                   className="w-full rounded border border-slate-300 bg-white px-1.5 py-0.5 text-left text-[10px] text-slate-500 truncate hover:border-blue-400 hover:text-blue-600 disabled:cursor-default disabled:opacity-70 transition-colors"
                 >
                   {loadingFans ? "Carregando…" : fanLabel}
                 </button>
               }
-              result={<ResultCell value="---" />}
+              result={<ResultCell value={selectedFan ? "OK" : "---"} />}
             />
             {/* Vazão de Ar */}
             <Row
