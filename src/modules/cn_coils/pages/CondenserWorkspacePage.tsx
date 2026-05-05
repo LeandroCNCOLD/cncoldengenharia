@@ -504,7 +504,10 @@ export function CondenserWorkspacePage() {
         {/* 1. MODO */}
         <AccordionItem value="mode">
           <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Modo de Cálculo
+            <span className="flex items-center gap-2">
+              Modo de Cálculo
+              <span className="rounded bg-emerald-100 px-1 py-0.5 text-[8px] font-semibold text-emerald-700">OK</span>
+            </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-3">
             <div>
