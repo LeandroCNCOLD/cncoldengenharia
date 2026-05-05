@@ -779,6 +779,9 @@ export function EvaporatorUnifiedWorkspacePage() {
               onExportPdf={handleExportPdf}
               isExportingPdf={isExportingPdf}
               onOpenAI={openAI}
+              onCalculate={() => simState.trigger()}
+              onReset={handleReset}
+              isCalculating={isCalculating}
               geomHeight={geomHeight}
               geomWidth={geomWidth}
               geomDepth={geomDepth}
