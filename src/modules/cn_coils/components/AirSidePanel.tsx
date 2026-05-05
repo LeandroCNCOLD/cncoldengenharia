@@ -632,6 +632,7 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               }
               input={null}
               result={<ResultCell value={fmtPress(airPressDropPa)} highlight />}
+              badge={<BadgeCell type="calculated" />}
             />
           </tbody>
         </table>
