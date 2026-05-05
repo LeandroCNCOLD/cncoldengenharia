@@ -225,7 +225,7 @@ export function CondenserWorkspacePage() {
   const fullCatalogs = useCnCoilsFullCatalogs();
   // Biblioteca enriquecida (EBM-Papst etc.) — fabricante, série, motor, diâmetro
   const { items: fanPickerItems } = useEnrichedFanPickerItems();
-  ], [unilabAxialFans, unilabCentrifugalFans]);
+  
 
   // ── Compressor ──
   const [compressorPickerOpen, setCompressorPickerOpen] = useState(false);
