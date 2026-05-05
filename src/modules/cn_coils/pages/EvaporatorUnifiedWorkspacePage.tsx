@@ -714,7 +714,7 @@ export function EvaporatorUnifiedWorkspacePage() {
       <NavCard
         title="Modo de Cálculo"
         status={modeStatus}
-        onEdit={() => focusDetailedSection("section-modo-calculo")}
+        onEdit={() => setCalcModeModalOpen(true)}
         lines={[
           `Objetivo: ${calcMode === "verify" ? "Verificar" : "Desenho"}`,
           `Motor: ${engineMode === "v1" ? "V1 NTU-ε" : "V2 ASHRAE"}`,
