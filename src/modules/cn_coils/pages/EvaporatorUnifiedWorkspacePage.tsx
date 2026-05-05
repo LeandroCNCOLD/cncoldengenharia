@@ -1139,23 +1139,7 @@ function DetailedWorkspaceTab({
           Formulário principal / dados do ambiente
         </h3>
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
-          {/* Coluna esquerda — configuração da bateria */}
-          <div className="w-full shrink-0 xl:w-[220px]">
-            <WorkspaceSidebar
-              componentType="evaporator_dx"
-              onSimulate={handleSimulate}
-              onReset={reset}
-              canSimulate={canSimulate}
-              isSimulating={isSimulating}
-              faceAreaM2={result?.faceAreaM2}
-              disabledReason={disabledReason}
-            />
-          </div>
-
-          {/* Separador vertical (visível apenas em xl) */}
-          <div className="hidden xl:block w-px self-stretch bg-border" />
-
-          {/* Coluna central — Lado Ventilação */}
+          {/* Coluna — Lado Ventilação */}
           <div className="min-w-0 flex-1 rounded-md border border-border bg-card shadow-sm">
             <AirSidePanel result={result} />
           </div>
@@ -1163,7 +1147,7 @@ function DetailedWorkspaceTab({
           {/* Separador vertical (visível apenas em xl) */}
           <div className="hidden xl:block w-px self-stretch bg-border" />
 
-          {/* Coluna direita — Lado Fluido */}
+          {/* Coluna — Lado Fluido */}
           <div className="min-w-0 flex-1 rounded-md border border-border bg-card shadow-sm">
             <FluidSidePanel
               componentType="evaporator_dx"
