@@ -1529,7 +1529,7 @@ function UnifiedTabs({
   }
 
   return (
-    <Tabs defaultValue={WORKSPACE_TABS.DETAILED} className="w-full">
+    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabsList className="flex w-full overflow-x-auto whitespace-nowrap scrollbar-none pb-px h-auto">
         {/* Aba Detalhado — PRIMEIRA, em vermelho como fonte da verdade */}
         <TabsTrigger
