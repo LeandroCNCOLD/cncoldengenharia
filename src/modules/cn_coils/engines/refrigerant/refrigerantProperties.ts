@@ -59,10 +59,15 @@ async function loadTables(): Promise<RefrigerantTablesCache> {
   if (_cache) return _cache;
 
   let json: Record<string, unknown>;
-  try {
+  if (typeof window !== "undefined") {
     const res = await fetch("/data/refrigerants/saturation_tables.json");
+    if (!res.ok) {
+      throw new Error(
+        `Falha ao carregar saturation_tables.json: HTTP ${res.status}`,
+      );
+    }
     json = (await res.json()) as Record<string, unknown>;
-  } catch {
+  } else {
     const [{ readFile }, { resolve }] = await Promise.all([
       import("node:fs/promises"),
       import("node:path"),
