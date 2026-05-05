@@ -396,6 +396,7 @@ export function FluidSidePanel({
         {/* 3) Temp. Condensação / Evaporação */}
         <FieldRow
           label={operatingTempLabel}
+          badge={opTempReadOnly ? <BadgeCell type="auto" /> : undefined}
           unit={
             <UnitSelect
               value={uOpTemp}
