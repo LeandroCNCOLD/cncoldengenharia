@@ -386,6 +386,13 @@ export function FluidSidePanel({
           </div>
         </FieldRow>
 
+        {!massFlowReadOnly && !isMassFlowLocked && (
+          <div className="flex items-center gap-1 rounded border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] text-amber-700">
+            <span>⚠</span>
+            <span>Valor sobrescrito manualmente. Resultado pode divergir do equilíbrio automático.</span>
+          </div>
+        )}
+
         {/* 3) Temp. Condensação / Evaporação */}
         <FieldRow
           label={operatingTempLabel}
