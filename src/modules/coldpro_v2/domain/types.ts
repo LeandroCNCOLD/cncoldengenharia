@@ -606,6 +606,14 @@ export interface ProgressiveCoilInput {
   frost_thickness_mm_per_roll?: number[];
   frost_density_kg_m3?: number;
   frost_thermal_conductivity_w_mk?: number;
+  /** Tipo de aleta — seleciona correlação Wang 2000/1999a/Chang-Wang. Padrão: "plain" */
+  fin_type?: "plain" | "wavy" | "louver" | "slit";
+  /** Passo de aleta [mm] — necessário para Wang 2000/1999a */
+  fin_pitch_mm?: number;
+  /** Tempo de operação desde o último degelo [h] — ativa modelo de gelo dinâmico */
+  operation_time_h?: number;
+  /** Ativa modelo de gelo dinâmico (iceModel.ts). Padrão: false */
+  use_ice_model?: boolean;
 }
 
 export interface RollResult {
@@ -630,6 +638,14 @@ export interface RollResult {
   air_relative_humidity_out: number;
   W_out_kg_kg: number;
   enthalpy_out_j_kg: number;
+  /** Correlação de ar utilizada nesta fila */
+  correlation_used?: string;
+  /** Espessura de gelo calculada pelo modelo dinâmico [mm] */
+  ice_thickness_dynamic_mm?: number;
+  /** Resistência térmica do gelo calculada pelo modelo dinâmico [m²K/W] */
+  R_ice_dynamic_m2k_w?: number;
+  /** Tempo estimado até degelo necessário [h] */
+  time_to_defrost_h?: number | null;
 }
 
 export interface ProgressiveCoilResult {
