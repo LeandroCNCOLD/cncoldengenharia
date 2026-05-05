@@ -779,6 +779,9 @@ export function EvaporatorUnifiedWorkspacePage() {
               onExportPdf={handleExportPdf}
               isExportingPdf={isExportingPdf}
               onOpenAI={openAI}
+              onCalculate={() => simState.trigger()}
+              onReset={handleReset}
+              isCalculating={isCalculating}
               geomHeight={geomHeight}
               geomWidth={geomWidth}
               geomDepth={geomDepth}
@@ -1418,6 +1421,9 @@ function UnifiedTabs({
   setFrequency,
   onOpenGeometryPicker,
   onOpenGeomModal,
+  onCalculate,
+  onReset,
+  isCalculating,
 }: {
   config: CycleSystemConfig;
   cycleResult: CycleResult | null;
@@ -1426,6 +1432,9 @@ function UnifiedTabs({
   onExportPdf: () => void;
   isExportingPdf: boolean;
   onOpenAI: (tabName: string) => void;
+  onCalculate: () => void;
+  onReset: () => void;
+  isCalculating: boolean;
   geomHeight: number;
   geomWidth: number;
   geomDepth: number;
@@ -1680,10 +1689,10 @@ function UnifiedTabs({
           frequency={frequency}
           setFrequency={setFrequency}
           cycleResult={cycleResult}
-          onCalculate={() => onOpenAI("Detalhado")}
-          onReset={() => {}}
+          onCalculate={onCalculate}
+          onReset={onReset}
           onOpenAI={() => onOpenAI("Detalhado")}
-          isCalculating={false}
+          isCalculating={isCalculating}
           onOpenGeometryPicker={onOpenGeometryPicker}
           onOpenGeomModal={onOpenGeomModal}
         />
