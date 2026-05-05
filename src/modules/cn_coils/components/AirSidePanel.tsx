@@ -590,6 +590,7 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
                   }
                 />
               }
+              badge={<BadgeCell type="calculated" />}
             />
             {/* Fator de Segurança */}
             <Row
