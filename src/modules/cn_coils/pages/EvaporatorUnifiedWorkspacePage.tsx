@@ -1689,10 +1689,10 @@ function UnifiedTabs({
           frequency={frequency}
           setFrequency={setFrequency}
           cycleResult={cycleResult}
-          onCalculate={() => onOpenAI("Detalhado")}
-          onReset={() => {}}
+          onCalculate={onCalculate}
+          onReset={onReset}
           onOpenAI={() => onOpenAI("Detalhado")}
-          isCalculating={false}
+          isCalculating={isCalculating}
           onOpenGeometryPicker={onOpenGeometryPicker}
           onOpenGeomModal={onOpenGeomModal}
         />
