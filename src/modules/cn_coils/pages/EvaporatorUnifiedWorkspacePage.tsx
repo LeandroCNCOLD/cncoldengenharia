@@ -1255,7 +1255,7 @@ function DetailedWorkspaceTab({
 
   return (
     <div className="space-y-3">
-      <section className="space-y-2">
+      <section id="section-modo-calculo" className="space-y-2">
         <h3 className="text-sm font-semibold text-foreground">
           Formulário principal / dados do ambiente
         </h3>
