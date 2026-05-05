@@ -159,6 +159,18 @@ export function CycleWorkspacePage() {
   const [orificeDiameter, setOrificeDiameter] = useState(1.8);
   const [compressorMode, setCompressorMode] = useState<CompressorMode>("bitzer");
   const [compressorPickerOpen, setCompressorPickerOpen] = useState(false);
+  const [selectedCompressor, setSelectedCompressor] = useState<{
+    id: string;
+    model: string;
+    manufacturer: string;
+    bitzerNative?: {
+      displacement_m3h: number;
+      coeff_lambda: number[];
+      coeff_current: number[];
+      coeff_specific_power: number[];
+      rpm: number;
+    };
+  } | null>(null);
   const [aiOpen, setAiOpen] = useState(false);
   const [cycleActiveTab, setCycleActiveTab] = useState<CycleActiveTab>("ph");
   const [refrigerantsMeta, setRefrigerantsMeta] = useState<
@@ -203,13 +215,22 @@ export function CycleWorkspacePage() {
     return {
       ...DEFAULT_CONFIG,
       refrigerantId,
-      compressor: { ...DEFAULT_CONFIG.compressor, refrigerant: refrigerantId },
+      compressor: selectedCompressor?.bitzerNative
+        ? {
+            id: selectedCompressor.id,
+            model: selectedCompressor.model,
+            manufacturer: selectedCompressor.manufacturer,
+            refrigerant: refrigerantId,
+            modelType: "bitzer_native" as const,
+            bitzerNative: selectedCompressor.bitzerNative,
+          }
+        : { ...DEFAULT_CONFIG.compressor, refrigerant: refrigerantId },
       evaporator: { ...DEFAULT_CONFIG.evaporator, superheatK: superheat },
       condenser: { ...DEFAULT_CONFIG.condenser, subcoolingK: subcooling },
       expansionDevice: exp,
       solver: { ...DEFAULT_CONFIG.solver, Te_initial_C: te, Tc_initial_C: tc },
     };
-  }, [refrigerantId, te, tc, superheat, subcooling, expansionType, shTarget, capLength, capDiameter, orificeDiameter]);
+  }, [refrigerantId, te, tc, superheat, subcooling, expansionType, shTarget, capLength, capDiameter, orificeDiameter, selectedCompressor]);
 
   const simState = useCycleSimulation(config, { mode: "manual" });
   const cycleResult: CycleResult | null =
@@ -348,10 +369,16 @@ export function CycleWorkspacePage() {
                   Selecionar compressor…
                 </Button>
                 <div className="rounded border border-border bg-muted/40 p-2 text-[10px]">
-                  <div className="font-mono text-foreground">{DEFAULT_CONFIG.compressor.model}</div>
+                  <div className="font-mono text-foreground">
+                    {selectedCompressor?.model ?? DEFAULT_CONFIG.compressor.model}
+                  </div>
                   <div className="text-muted-foreground">
-                    {DEFAULT_CONFIG.compressor.manufacturer} ·{" "}
-                    {fmt(DEFAULT_CONFIG.compressor.bitzerNative?.displacement_m3h ?? 0, 2)} m³/h
+                    {selectedCompressor?.manufacturer ?? DEFAULT_CONFIG.compressor.manufacturer} ·{" "}
+                    {fmt(
+                      selectedCompressor?.bitzerNative?.displacement_m3h ??
+                        DEFAULT_CONFIG.compressor.bitzerNative?.displacement_m3h ?? 0,
+                      2,
+                    )} m³/h
                   </div>
                 </div>
               </>
@@ -517,6 +544,25 @@ export function CycleWorkspacePage() {
       <CompressorPickerModal
         open={compressorPickerOpen}
         onClose={() => setCompressorPickerOpen(false)}
+        onSelect={(c) => {
+          import("@/modules/coldpro_catalog/data/compressorCatalog.service")
+            .then(({ loadCompressorSpec }) => loadCompressorSpec(c.id))
+            .then((spec) => {
+              setSelectedCompressor({
+                id: c.id,
+                model: c.model,
+                manufacturer: c.brand ?? "BITZER",
+                bitzerNative: spec?.bitzerNative,
+              });
+            })
+            .catch(() => {
+              setSelectedCompressor({
+                id: c.id,
+                model: c.model,
+                manufacturer: c.brand ?? "BITZER",
+              });
+            });
+        }}
       />
       <WorkspaceAIPanel
         open={aiOpen}
