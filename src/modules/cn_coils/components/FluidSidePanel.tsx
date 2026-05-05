@@ -390,7 +390,9 @@ export function FluidSidePanel({
         >
           <div className="min-w-0">
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
+              onFocus={(e) => e.target.select()}
               value={
                 pairedTempC != null && Number.isFinite(pairedTempC)
                   ? tempConv.fromCanonical(pairedTempC, uPaired)
