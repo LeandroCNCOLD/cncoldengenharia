@@ -570,6 +570,7 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               }
               input={null}
               result={<ResultCell value={fmtTempOut(airOutTempC)} highlight />}
+              badge={<BadgeCell type="calculated" />}
             />
             {/* Umidade Relativa de Saída */}
             <Row
