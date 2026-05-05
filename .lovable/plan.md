@@ -1,77 +1,55 @@
-# Unificar ventiladores Ziehl-Abegg + EBM-Papst num só catálogo
+## Objetivo
 
-## Situação atual
+Substituir a fonte do FanPicker do CN Coils (hoje vinda de `/data/equipment/fans.json` + `/data/catalogs/fans.json` + tabela `fans_catalog` do Supabase, sem curvas reais) pelo novo catálogo Ziehl-Abegg fornecido (`cn_coils_fans_catalog.ts`, 9 modelos com curvas Q×ΔP de 8–10 pontos extraídas dos datasheets).
 
-Hoje o `FanLibraryBrowser` / `FanPickerModal` é alimentado pelo hook
-`useEnrichedFanPickerItems`, que lê **apenas** `/public/data/equipment/fans.json`
-(185 modelos EBM-Papst, com coeficientes SPH).
+Os engines de cálculo (`simulatorCore`, `cycleEngine`, `findFanOperatingPoint`) **não serão modificados**.
 
-Mas o projeto já tem um segundo catálogo, mais rico em metadados, em
-`/public/data/catalogs/fans.json`: **459 modelos Ziehl-Abegg** com campos
-prontos (`model`, `series`, `builder`, `airflowM3h`, `powerW`, `speedRpm`,
-`currentA`, `voltageV`, `frequencyHz`, `fanCategory`, `fanFunction`).
-Ele só está sendo consumido pelo `useCnCoilsCatalogCollection` (uso interno
-do solver), nunca aparece no seletor de ventiladores da interface.
+## Mudanças
 
-Resultado: ao abrir o picker, o usuário só vê EBM-Papst.
+### 1. Instalar o novo catálogo
+- Copiar `cn_coils_fans_catalog.ts` (do upload) para **`src/modules/cn_coils/data/fanCatalog.ts`** sem alterações de conteúdo.
+- Exporta: `FAN_CATALOG`, `FanModel`, `FanCurvePoint`, `interpolatePressure`, `interpolatePower`, `findOperatingPoint`.
 
-## O que vamos fazer
+### 2. Esvaziar fontes antigas usadas pelo picker
+- **`src/modules/cn_coils/hooks/useZiehlAbeggFanPickerItems.ts`** — manter o arquivo e a interface, mas retornar `items: []` (sem fetch de `/data/catalogs/fans.json`). Mantém as interfaces TS intactas, conforme pedido.
+- **`src/modules/cn_coils/hooks/useFansCatalog.ts`** — manter arquivo e tipos, mas retornar `data: []` (sem chamada ao Supabase). O hook hoje não é usado pelo picker; é só limpeza preventiva.
+- **Não** mexer em arquivos `.json` em `public/data/` nem em outros catálogos do `coldpro_v2`. **Não** mexer em `useEquipmentLibrary` (usado por outros módulos coldpro).
 
-Unir as duas bibliotecas num único stream do picker, sem duplicar nada e
-preservando a marca/série/motor de cada modelo.
-
-### 1. Novo hook `useZiehlAbeggFanPickerItems`
-
-Arquivo: `src/modules/cn_coils/hooks/useZiehlAbeggFanPickerItems.ts`
-
-- Carrega `/data/catalogs/fans.json` via `fetch` (mesmo padrão do `useFanLibrary`).
-- Mapeia cada linha para `FanPickerItem`:
+### 3. Novo hook de adaptação
+Criar **`src/modules/cn_coils/hooks/useFanCatalogPickerItems.ts`** que mapeia cada `FanModel` do `FAN_CATALOG` para um `FanPickerItem` (interface já existente em `FanPickerModal.tsx`):
 
 ```text
-id              → `ZIEHL_${row.id}_${slug(row.model)}`
-manufacturer    → row.builder            // "Ziehl-Abegg"
-model           → row.model              // ex.: "TLI 9-9"
-series          → row.series             // "TLI", "FN", "RDH" …
-fanCategory     → row.fanCategory        // "axial" | "centrifugal"
-fanFunction     → row.fanFunction        // soprador|exaustor|livre|universal
-airflow_m3h     → row.airflowM3h
-motor_power_w   → row.powerW
-motor_current_a → row.currentA
-voltage_v       → row.voltageV
-frequency_hz    → row.frequencyHz
-rpm             → row.speedRpm
-diameter_mm     → derivado do modelo quando possível (regex p/ "TLI 9-9" → 900 mm,
-                  "FN050" → 500 mm). Quando o regex não casar, deixa undefined.
+FanModel.model           → FanPickerItem.model
+FanModel.manufacturer    → manufacturer ("Ziehl-Abegg")
+FanModel.diameter_mm     → diameter_mm
+FanModel.rpm_nominal     → rpm
+FanModel.p1_nominal_w    → motor_power_w
+"FN" / "FN-EC" derivado  → series, fanCategory: "axial",
+                           fanFunction: "soprador"
+id = `ZA_${model}`       → id estável
+airflow_m3h = ponto da curva onde psf_pa ≈ 0 (último ponto) ou
+              ponto recomendado de operação (~ q_max × 0.6)
 ```
 
-- Retorna `{ items, loading, error }` no mesmo formato que o hook EBM.
+Sem warnings hardcoded; sem fallback inventado.
 
-### 2. Atualizar `useEnrichedFanPickerItems`
+### 4. Reescrever `useEnrichedFanPickerItems`
+Substituir o conteúdo de **`src/modules/cn_coils/hooks/useEnrichedFanPickerItems.ts`** para que ele retorne **exclusivamente** os 9 ventiladores do `FAN_CATALOG` via `useFanCatalogPickerItems`. Mantém a assinatura `{ items, loading, error }` para que `AirSidePanel.tsx`, `EvaporatorUnifiedWorkspacePage.tsx` e `CondenserWorkspacePage.tsx` continuem funcionando sem alteração.
 
-Arquivo: `src/modules/cn_coils/hooks/useEnrichedFanPickerItems.ts`
+### 5. Verificações
+- `bunx tsc --noEmit` deve passar (interfaces preservadas).
+- Abrir o FanPicker no workspace evaporador (rota atual `/coldpro/cncoils/workspace?type=evaporator_dx`) e confirmar que aparecem exatamente os 9 modelos: FN035-4DK.0F.V7P2, FN035-4EK.0F.V7P2, FN040-4DK.0F.V7P1, FN040-4EK.2F.V7P1, FN045-4DQ.4I.V7P1, FN050-4DK.4I.V7P1, FN056-4DK.4M.V7P2, FN063-4DK.6N.V7P6, FN080-6DQ.6N.V7.
 
-- Manter toda a lógica EBM-Papst atual (decode do código, estimativa SPH).
-- Importar e chamar `useZiehlAbeggFanPickerItems`.
-- Concatenar: `[...ebmItems, ...ziehlItems]`, ordenados por
-  `manufacturer + model`.
-- Combinar `loading` (OR) e `error` (primeiro não-nulo) das duas fontes.
+## Fora de escopo (intencionalmente)
 
-Como `FanPickerModal` / `FanLibraryBrowser` já consomem esse hook nas três
-páginas (Evaporador, Condensador, Genérico) via `AirSidePanel`, **nenhuma
-alteração de UI** é necessária — assim que o hook devolver os 644 modelos,
-os filtros de fabricante, série, categoria e função já funcionam.
+- **Não** alterar `simulatorCoreAdapter` para popular `result.fanEvaluation` (recusado em rodada anterior). A integração da curva no cálculo continua sendo feita só onde já existe (`findFanOperatingPointSimple`); a UI continua mostrando "—" em pressão estática até essa wiring ser aprovada separadamente.
+- **Não** apagar arquivos `.json` em `public/data/catalogs/` (são consumidos por outros catálogos como `fansComplete`, `coilCorrections`, etc.).
+- **Não** mexer em engines, validadores, ou tabelas do Supabase.
 
-### 3. Verificações pós-mudança
+## Arquivos afetados
 
-- Abrir o picker no workspace de Evaporador, Condensador e Genérico e
-  confirmar que aparecem os dois fabricantes no filtro.
-- Conferir que selecionar um Ziehl-Abegg grava um `selectedFanId` válido
-  (prefixo `ZIEHL_…`) no `useCnCoilsSimulationStore`.
-- Rodar `bunx tsc --noEmit` e `bun run lint`.
-
-## Fora do escopo
-
-- Não vamos alterar o solver/back-end: o cálculo térmico continua usando os
-  coeficientes do catálogo interno (`useCnCoilsCatalogCollection`). A união
-  aqui é apenas no **seletor de ventilador** (metadados/UX).
-- Sem migrações de banco, sem mudanças nos arquivos JSON de origem.
+- + `src/modules/cn_coils/data/fanCatalog.ts` (novo, ~640 linhas)
+- + `src/modules/cn_coils/hooks/useFanCatalogPickerItems.ts` (novo, ~50 linhas)
+- ~ `src/modules/cn_coils/hooks/useEnrichedFanPickerItems.ts` (reescrito, fino)
+- ~ `src/modules/cn_coils/hooks/useZiehlAbeggFanPickerItems.ts` (retorna lista vazia)
+- ~ `src/modules/cn_coils/hooks/useFansCatalog.ts` (retorna lista vazia)
