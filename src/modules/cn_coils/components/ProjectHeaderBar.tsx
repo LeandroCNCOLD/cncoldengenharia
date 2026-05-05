@@ -55,6 +55,7 @@ type ProjectHeaderFormState = ProjectHeader & { name: string };
 
 interface ProjectHeaderBarProps {
   workspaceType: SavedProjectType;
+  onNovoAletado?: () => void;
 }
 
 function emptyForm(): ProjectHeaderFormState {
