@@ -546,7 +546,7 @@ export function EvaporatorUnifiedWorkspacePage() {
       onReset={handleReset}
       isCalculating={isCalculating}
     >
-      <Accordion type="multiple" defaultValue={["mode", "geom", "vent", "fluid", "ops"]} className="w-full">
+      <Accordion type="multiple" defaultValue={["mode", "vent", "fluid", "ops"]} className="w-full">
         {/* 1. MODO */}
         <AccordionItem value="mode">
           <AccordionTrigger className="text-xs uppercase tracking-wide">
@@ -1088,14 +1088,34 @@ function DetailedWorkspaceTab({
     <div className="space-y-3">
       <section className="space-y-2">
         <h3 className="text-sm font-semibold text-foreground">
-          Lado Fluido / Refrigerante
+          Formulário principal / dados do ambiente
         </h3>
-        <FluidSidePanel
+        <div className="grid grid-cols-1 gap-2 rounded-md shadow-sm md:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)]">
+        <WorkspaceSidebar
           componentType="evaporator_dx"
-          refrigerants={catalogs.refrigerants}
-          disabled={!catalogs.ready}
-          result={result}
+          onSimulate={handleSimulate}
+          onReset={reset}
+          canSimulate={canSimulate}
+          isSimulating={isSimulating}
+          faceAreaM2={result?.faceAreaM2}
+          disabledReason={disabledReason}
         />
+
+        <div className="min-w-0 space-y-2 xl:contents">
+          <div className="min-w-0 space-y-2 xl:border-r xl:border-border xl:pr-2">
+            <AirSidePanel result={result} />
+          </div>
+
+          <div className="min-w-0 space-y-2">
+            <FluidSidePanel
+              componentType="evaporator_dx"
+              refrigerants={catalogs.refrigerants}
+              disabled={!catalogs.ready}
+              result={result}
+            />
+          </div>
+        </div>
+        </div>
       </section>
 
       <section className="mt-2 space-y-2">
