@@ -249,13 +249,6 @@ export function EvaporatorUnifiedWorkspacePage() {
   const [compressorMode, setCompressorMode] = useState<CompressorMode>("ari");
   const [frequency, setFrequency] = useState(60);
   const [voltage, setVoltage] = useState(380);
-  // ── Modais de configuração (placeholders — modais ainda não existentes nesta página) ──
-  const [geomPickerOpen, setGeomPickerOpen] = useState(false);
-  const [tubeModalOpen, setTubeModalOpen] = useState(false);
-  const [finModalOpen, setFinModalOpen] = useState(false);
-  const [distributorModalOpen, setDistributorModalOpen] = useState(false);
-  const [selectedGeometry, _setSelectedGeometry] = useState<{ id?: string; codigo?: string } | null>(null);
-  void geomPickerOpen; void tubeModalOpen; void finModalOpen; void distributorModalOpen; void _setSelectedGeometry;
   const pendingEvaporator = useCatalogPreloadStore((s) => s.pendingEvaporator);
   const clearCatalogPreload = useCatalogPreloadStore((s) => s.clearAll);
   const { capacityUnit } = useUnitStore();
@@ -553,22 +546,13 @@ export function EvaporatorUnifiedWorkspacePage() {
       onReset={handleReset}
       isCalculating={isCalculating}
     >
-      {/* Cabeçalho identificador */}
-      <div className="mb-2 rounded bg-[#1E6FD9] px-2 py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white">
-        Evaporador DX
-      </div>
-
-      <Accordion
-        type="multiple"
-        defaultValue={["mode", "geom", "vent", "fluid", "ops"]}
-        className="w-full"
-      >
-        {/* 1. MODO DE CÁLCULO */}
+      <Accordion type="multiple" defaultValue={["mode", "vent", "fluid", "ops"]} className="w-full">
+        {/* 1. MODO */}
         <AccordionItem value="mode">
-          <AccordionTrigger className="text-xs font-semibold uppercase tracking-wide">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">
             Modo de Cálculo
           </AccordionTrigger>
-          <AccordionContent className="space-y-3 pb-3">
+          <AccordionContent className="space-y-3">
             <div>
               <Label className="text-[10px] text-muted-foreground">Objetivo</Label>
               <RadioGroup
@@ -576,10 +560,10 @@ export function EvaporatorUnifiedWorkspacePage() {
                 onValueChange={(v) => setCalcMode(v as CalcMode)}
                 className="mt-1 flex gap-3"
               >
-                <label className="flex cursor-pointer items-center gap-1.5 text-xs">
+                <label className="flex items-center gap-1.5 text-xs">
                   <RadioGroupItem value="verify" /> Verificar
                 </label>
-                <label className="flex cursor-pointer items-center gap-1.5 text-xs">
+                <label className="flex items-center gap-1.5 text-xs">
                   <RadioGroupItem value="design" /> Desenho
                 </label>
               </RadioGroup>
@@ -591,10 +575,10 @@ export function EvaporatorUnifiedWorkspacePage() {
                 onValueChange={(v) => setEngineMode(v as EngineMode)}
                 className="mt-1 flex flex-col gap-1"
               >
-                <label className="flex cursor-pointer items-center gap-1.5 text-xs">
+                <label className="flex items-center gap-1.5 text-xs">
                   <RadioGroupItem value="v1" /> V1 NTU-ε
                 </label>
-                <label className="flex cursor-pointer items-center gap-1.5 text-xs">
+                <label className="flex items-center gap-1.5 text-xs">
                   <RadioGroupItem value="v2" /> V2 ASHRAE
                 </label>
               </RadioGroup>
@@ -602,61 +586,35 @@ export function EvaporatorUnifiedWorkspacePage() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* 2. CONFIGURAR (modais) */}
-        <AccordionItem value="config">
-          <AccordionTrigger className="text-xs font-semibold uppercase tracking-wide">
-            Configurar
-          </AccordionTrigger>
-          <AccordionContent className="pb-3">
-            <nav className="rounded border border-slate-200">
-              {[
-                { label: selectedGeometry
-                    ? `Geometria: ${selectedGeometry.codigo ?? selectedGeometry.id}`
-                    : "Geometria…",
-                  onClick: () => setGeomPickerOpen(true) },
-                { label: "Tubo…",        onClick: () => setTubeModalOpen(true) },
-                { label: "Aleta…",       onClick: () => setFinModalOpen(true) },
-                { label: "Distribuidor…",onClick: () => setDistributorModalOpen(true) },
-              ].map((item) => (
-                <button
-                  key={item.label}
-                  type="button"
-                  onClick={item.onClick}
-                  className="block w-full border-b border-slate-100 px-2 py-1.5 text-left text-[10px] text-slate-700 last:border-b-0 hover:bg-slate-100"
-                >
-                  {item.label}
-                </button>
-              ))}
-            </nav>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* 3. GEOMETRIA DO ALETADO */}
+        {/* 2. GEOMETRIA */}
         <AccordionItem value="geom">
-          <AccordionTrigger className="text-xs font-semibold uppercase tracking-wide">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">
             Geometria do Aletado
           </AccordionTrigger>
-          <AccordionContent className="space-y-2 pb-3">
-            <NumField label="Altura (mm)"          value={geomHeight}   onChange={setGeomHeight} />
-            <NumField label="Largura (mm)"         value={geomWidth}    onChange={setGeomWidth} />
-            <NumField label="Profundidade (mm)"    value={geomDepth}    onChange={setGeomDepth} />
-            <NumField label="Passo de aleta (mm)"  value={finPitch}     step={0.1} onChange={setFinPitch} />
-            <NumField label="Diâmetro do tubo (mm)" value={tubeDiam}   step={0.01} onChange={setTubeDiam} />
-            <NumField label="Nº de circuitos"      value={circuits}     onChange={setCircuits} />
-            <NumField label="Linhas de tubos"      value={rows}         onChange={setRows} />
-            <NumField label="Tubos por linha"      value={tubesPerRow}  onChange={setTubesPerRow} />
+          <AccordionContent className="space-y-2">
+            <NumField label="Altura (mm)" value={geomHeight} onChange={setGeomHeight} />
+            <NumField label="Largura (mm)" value={geomWidth} onChange={setGeomWidth} />
+            <NumField label="Profundidade (mm)" value={geomDepth} onChange={setGeomDepth} />
+            <NumField label="Passo de aleta (mm)" value={finPitch} step={0.1} onChange={setFinPitch} />
+            <NumField label="Diâmetro do tubo (mm)" value={tubeDiam} step={0.01} onChange={setTubeDiam} />
+            <NumField label="Nº de circuitos" value={circuits} onChange={setCircuits} />
+            <NumField label="Linhas de tubos" value={rows} onChange={setRows} />
+            <NumField label="Tubos por linha" value={tubesPerRow} onChange={setTubesPerRow} />
+            <Button size="sm" variant="outline" className="w-full h-8 text-xs">
+              Configurar Geometria…
+            </Button>
           </AccordionContent>
         </AccordionItem>
 
-        {/* 4. LADO VENTILAÇÃO */}
+        {/* 3. VENTILAÇÃO */}
         <AccordionItem value="vent">
-          <AccordionTrigger className="text-xs font-semibold uppercase tracking-wide">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">
             Lado Ventilação
           </AccordionTrigger>
-          <AccordionContent className="space-y-2 pb-3">
-            <NumField label="Vazão de ar (m³/h)"     value={airFlow}        onChange={setAirFlow} />
-            <NumField label="Temp. entrada DB (°C)"  value={airTempIn}      step={0.5} onChange={setAirTempIn} />
-            <NumField label="UR entrada (%)"         value={airRH}          onChange={setAirRH} />
+          <AccordionContent className="space-y-2">
+            <NumField label="Vazão de ar (m³/h)" value={airFlow} onChange={setAirFlow} />
+            <NumField label="Temp. entrada DB (°C)" value={airTempIn} step={0.5} onChange={setAirTempIn} />
+            <NumField label="UR entrada (%)" value={airRH} onChange={setAirRH} />
             <div>
               <Label className="text-[10px] text-muted-foreground">Ventilador</Label>
               <Select value={fanMode} onValueChange={(v) => setFanMode(v as "manual" | "catalog")}>
@@ -668,8 +626,12 @@ export function EvaporatorUnifiedWorkspacePage() {
               </Select>
             </div>
             {fanMode === "catalog" && (
-              <Button size="sm" variant="outline" className="w-full h-8 text-xs"
-                onClick={() => setFanPickerOpen(true)}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full h-8 text-xs"
+                onClick={() => setFanPickerOpen(true)}
+              >
                 {selectedFan
                   ? `${[selectedFan.manufacturer, selectedFan.model].filter(Boolean).join(" ") || "Ventilador"} ✓`
                   : "Selecionar ventilador…"}
@@ -679,17 +641,17 @@ export function EvaporatorUnifiedWorkspacePage() {
               <Label className="text-[10px] text-muted-foreground">Velocidade frontal (m/s)</Label>
               <Input readOnly value={fmt(frontalVelocity, 2)} className="h-8 text-xs bg-muted/40" />
             </div>
-            <NumField label="Pressão estática (Pa)"  value={staticPressure} onChange={setStaticPressure} />
-            <NumField label="Fator de segurança (%)" value={safetyFactor}   onChange={setSafetyFactor} />
+            <NumField label="Pressão estática (Pa)" value={staticPressure} onChange={setStaticPressure} />
+            <NumField label="Fator de segurança (%)" value={safetyFactor} onChange={setSafetyFactor} />
           </AccordionContent>
         </AccordionItem>
 
-        {/* 5. LADO FLUIDO / REFRIGERANTE */}
+        {/* 4. FLUIDO */}
         <AccordionItem value="fluid">
-          <AccordionTrigger className="text-xs font-semibold uppercase tracking-wide">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">
             Lado Fluido / Refrigerante
           </AccordionTrigger>
-          <AccordionContent className="space-y-2 pb-3">
+          <AccordionContent className="space-y-2">
             <div>
               <Label className="text-[10px] text-muted-foreground">Fluido</Label>
               <Select value={refrigerantId} onValueChange={setRefrigerantId}>
@@ -701,8 +663,12 @@ export function EvaporatorUnifiedWorkspacePage() {
                 </SelectContent>
               </Select>
             </div>
-            <Button size="sm" variant="outline" className="w-full h-8 text-xs"
-              onClick={() => setCompressorPickerOpen(true)}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full h-8 text-xs"
+              onClick={() => setCompressorPickerOpen(true)}
+            >
               Selecionar compressor…
             </Button>
             <div>
@@ -720,52 +686,38 @@ export function EvaporatorUnifiedWorkspacePage() {
               <Slider value={[tc]} min={20} max={60} step={1} onValueChange={(v) => setTc(v[0])} />
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <NumField label="SH (K)" value={superheat}  onChange={setSuperheat} />
-              <NumField label="SC (K)" value={subcooling}  onChange={setSubcooling} />
+              <NumField label="SH (K)" value={superheat} onChange={setSuperheat} />
+              <NumField label="SC (K)" value={subcooling} onChange={setSubcooling} />
             </div>
             <NumField label="Vazão fluido (kg/h)" value={massFlow} onChange={setMassFlow} />
           </AccordionContent>
         </AccordionItem>
 
-        {/* 6. CONDIÇÕES OPERACIONAIS */}
+        {/* 5. OPERAÇÃO */}
         <AccordionItem value="ops">
-          <AccordionTrigger className="text-xs font-semibold uppercase tracking-wide">
+          <AccordionTrigger className="text-xs uppercase tracking-wide">
             Condições Operacionais
           </AccordionTrigger>
-          <AccordionContent className="space-y-2 pb-3">
+          <AccordionContent className="space-y-2">
             <div className="flex gap-1">
               {(["ari", "constant", "manual"] as CompressorMode[]).map((m) => (
-                <Button key={m} type="button" size="sm"
+                <Button
+                  key={m}
+                  type="button"
+                  size="sm"
                   variant={compressorMode === m ? "default" : "outline"}
                   className="flex-1 h-7 text-[10px] px-1"
-                  onClick={() => setCompressorMode(m)}>
+                  onClick={() => setCompressorMode(m)}
+                >
                   {m === "ari" ? "ARI 540" : m === "constant" ? "Const." : "Manual"}
                 </Button>
               ))}
             </div>
             <NumField label="Frequência (Hz)" value={frequency} onChange={setFrequency} />
-            <NumField label="Tensão (V)"      value={voltage}   onChange={setVoltage} />
+            <NumField label="Tensão (V)" value={voltage} onChange={setVoltage} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-
-      {/* Superfície de Troca */}
-      <div className="mt-2 rounded border border-slate-300 bg-white">
-        <div className="border-b border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
-          Superfície de Troca
-        </div>
-        <div className="grid grid-cols-[40px_1fr] items-center gap-1 p-1.5">
-          <span className="text-[10px] text-slate-500">m²</span>
-          <span className="text-right font-mono text-[11px] text-foreground">
-            {cycleResult && Number.isFinite((cycleResult as { faceAreaM2?: number }).faceAreaM2 ?? NaN)
-              ? ((cycleResult as { faceAreaM2?: number }).faceAreaM2 as number).toFixed(4).replace(".", ",")
-              : "---"}
-          </span>
-        </div>
-        <div className="mx-1.5 mb-1.5 flex items-center gap-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-800">
-          ✓ Sem Avisos
-        </div>
-      </div>
     </WorkspaceInputsSidebar>
   );
 
@@ -1139,7 +1091,23 @@ function DetailedWorkspaceTab({
           Formulário principal / dados do ambiente
         </h3>
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
-          {/* Coluna — Lado Ventilação */}
+          {/* Coluna esquerda — configuração da bateria */}
+          <div className="w-full shrink-0 xl:w-[220px]">
+            <WorkspaceSidebar
+              componentType="evaporator_dx"
+              onSimulate={handleSimulate}
+              onReset={reset}
+              canSimulate={canSimulate}
+              isSimulating={isSimulating}
+              faceAreaM2={result?.faceAreaM2}
+              disabledReason={disabledReason}
+            />
+          </div>
+
+          {/* Separador vertical (visível apenas em xl) */}
+          <div className="hidden xl:block w-px self-stretch bg-border" />
+
+          {/* Coluna central — Lado Ventilação */}
           <div className="min-w-0 flex-1 rounded-md border border-border bg-card shadow-sm">
             <AirSidePanel result={result} />
           </div>
@@ -1147,7 +1115,7 @@ function DetailedWorkspaceTab({
           {/* Separador vertical (visível apenas em xl) */}
           <div className="hidden xl:block w-px self-stretch bg-border" />
 
-          {/* Coluna — Lado Fluido */}
+          {/* Coluna direita — Lado Fluido */}
           <div className="min-w-0 flex-1 rounded-md border border-border bg-card shadow-sm">
             <FluidSidePanel
               componentType="evaporator_dx"
