@@ -454,6 +454,7 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
                 />
               }
               result={<ResultCell value={fmt(airFlowDisplay, 0)} />}
+              badge={selectedFan ? <BadgeCell type="auto" /> : undefined}
             />
             {/* Velocidade Frontal */}
             <Row
