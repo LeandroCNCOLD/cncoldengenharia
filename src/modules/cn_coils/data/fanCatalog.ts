@@ -5,7 +5,7 @@
 export interface FanCurvePoint {
   q_m3h: number;      // Vazão em m³/h
   psf_pa: number;     // Pressão estática em Pa
-  p1_w?: number;      // Potência elétrica em W
+  p1_w?: number | null; // Potência elétrica em W
 }
 
 export interface FanModel {
