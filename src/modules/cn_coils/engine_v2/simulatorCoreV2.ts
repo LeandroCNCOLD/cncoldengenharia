@@ -217,11 +217,16 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
   // M6 — Aplicar multiplicador h_i
   const hFluid = applyCorrection(hFluidRaw, cm.fluidSideH);
 
+  // U_fallback para iteração 0 do solver (quando ṁ não é conhecido ainda).
+  // Ref: NIST ACSIM — valor típico para evaporadores DX aletados: 35 W/(m²·K)
+  // Garante que NTU > 0 na primeira iteração, evitando convergência falsa em Q≈0.
+  const hFluidForU = inputs.fluidMassFlowKgS > 0 ? hFluid : 35; // W/(m²·K)
+
   // 7. U global por resistências em série, referenciado à área externa.
   // M2 — Eficiência de superfície η_o via método de Schmidt (já calculada em computeAirSideH)
   const overall = computeOverallU({
     h_o: h_air_corrected,
-    h_i: hFluid,
+    h_i: hFluidForU,
     r_o_m: Do_m / 2,
     r_i_m: Di_m / 2,
     k_tube_WmK: inputs.tubeMaterialConductivity,
