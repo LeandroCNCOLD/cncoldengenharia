@@ -238,6 +238,13 @@ export function CondenserWorkspacePage() {
   const [frequency, setFrequency] = useState(60);
   const [voltage, setVoltage] = useState(380);
   const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
+  const resetSimStore = useCnCoilsSimulationStore((s) => s.reset);
+  const setActiveProjectGlobal = useProjectStore((s) => s.setActiveProject);
+  const handleNovoAletado = () => {
+    resetSimStore();
+    setActiveProjectGlobal(null);
+    toast.success("Workspace limpo. Configure um novo aletado do zero.");
+  };
   const [selectedCompressorRow, setSelectedCompressorRow] = useState<CompressorCatalogRow | null>(null);
   useEffect(() => {
     if (!selectedCompressorId) { setSelectedCompressorRow(null); return; }
