@@ -301,7 +301,9 @@ export function FluidSidePanel({
               </div>
             ) : (
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
+                onFocus={(e) => e.target.select()}
                 value={
                   Number.isFinite(displayedMassFlowKgH)
                     ? Number(
