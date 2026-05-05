@@ -424,7 +424,6 @@ export function FluidSidePanel({
         {/* 3.5) Temperatura emparelhada (Tc para evap, Te para condensador) */}
         <FieldRow
           label={pairedTempLabel + (pairedRequired ? " *" : "")}
-          badge={hasCompressor ? undefined : <BadgeCell type="auto" />}
           unit={
             <UnitSelect
               value={uPaired}
