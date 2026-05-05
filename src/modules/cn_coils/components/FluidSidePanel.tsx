@@ -315,6 +315,13 @@ export function FluidSidePanel({
         {/* 2) Vazão + cadeado */}
         <FieldRow
           label="Vazão"
+          badge={
+            massFlowReadOnly ? (
+              <BadgeCell type="auto" />
+            ) : !isMassFlowLocked ? (
+              <BadgeCell type="manual" />
+            ) : undefined
+          }
           unit={
             <UnitSelect
               value={uMassFlow}
