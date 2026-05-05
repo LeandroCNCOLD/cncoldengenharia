@@ -682,7 +682,6 @@ export function EvaporatorUnifiedWorkspacePage() {
       <NavCard
         title="Modo de Cálculo"
         status={modeStatus}
-        onEdit={() => console.log("scroll to:", "mode")}
         lines={[
           `Objetivo: ${calcMode === "verify" ? "Verificar" : "Desenho"}`,
           `Motor: ${engineMode === "v1" ? "V1 NTU-ε" : "V2 ASHRAE"}`,
@@ -693,7 +692,7 @@ export function EvaporatorUnifiedWorkspacePage() {
         title="Geometria do Aletado"
         status={geomStatus}
         errors={geomErrors}
-        onEdit={() => console.log("scroll to:", "geom")}
+        onEdit={() => setGeomPickerOpen(true)}
         lines={[
           geomHeight && geomWidth && geomDepth
             ? `${geomHeight} × ${geomWidth} × ${geomDepth} mm`
@@ -705,7 +704,6 @@ export function EvaporatorUnifiedWorkspacePage() {
         title="Lado Ventilação"
         status={ventStatus}
         errors={ventErrors}
-        onEdit={() => console.log("scroll to:", "vent")}
         lines={[
           airFlow ? `Vazão: ${airFlow.toLocaleString("pt-BR")} m³/h` : "Vazão não informada",
           airTempIn !== undefined ? `Entrada: ${airTempIn} °C / ${airRH}% UR` : "",
@@ -719,7 +717,6 @@ export function EvaporatorUnifiedWorkspacePage() {
         title="Lado Fluido / Refrigerante"
         status={fluidStatus}
         errors={fluidErrors}
-        onEdit={() => console.log("scroll to:", "fluid")}
         lines={[
           refrigerantId ? `Fluido: ${refrigerantId}` : "Fluido não selecionado",
           selectedCompressorRow
@@ -733,7 +730,6 @@ export function EvaporatorUnifiedWorkspacePage() {
       <NavCard
         title="Condições Operacionais"
         status={opsStatus}
-        onEdit={() => console.log("scroll to:", "ops")}
         lines={[
           `Padrão: ${compressorMode === "ari" ? "ARI 540" : compressorMode === "constant" ? "Constante" : "Manual"}`,
           `${frequency} Hz | ${voltage} V`,
