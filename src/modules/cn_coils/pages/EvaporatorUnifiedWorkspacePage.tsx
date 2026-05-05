@@ -306,6 +306,8 @@ export function EvaporatorUnifiedWorkspacePage() {
   const [subcooling, setSubcooling] = useState(5);
   const [massFlow, setMassFlow] = useState(0);
    const [compressorPickerOpen, setCompressorPickerOpen] = useState(false);
+  const [geomPickerOpen, setGeomPickerOpen] = useState(false);
+  const [activeGeomModal, setActiveGeomModal] = useState<"tube" | "fin" | "distributor" | null>(null);
   // ── Compressor selecionado do catálogo ──
   const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
   const [selectedCompressorRow, setSelectedCompressorRow] = useState<CompressorCatalogRow | null>(null);
