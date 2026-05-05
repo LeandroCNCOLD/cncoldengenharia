@@ -60,7 +60,7 @@ import { WorkspaceAIChat } from "../components/WorkspaceAIChat";
 import { AirSidePanel } from "../components/AirSidePanel";
 import { FluidSidePanel } from "../components/FluidSidePanel";
 import { GeometryBottomBar } from "../components/GeometryBottomBar";
-import { WorkspaceSidebar } from "../components/WorkspaceSidebar";
+
 import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
 import { useCnCoilsCatalogs } from "../hooks/useCnCoilsCatalogs";
 import { useCnCoilsSimulation } from "../hooks/useCnCoilsSimulation";
@@ -79,6 +79,9 @@ import type { OperatingMapConfig } from "../engines/operatingMap/operatingMapTyp
 import { usePdfExport } from "../hooks/usePdfExport";
 import { useCondenserSimulation, type CondenserInputs } from "../hooks/useCondenserSimulation";
 import { useCondenserEnvelopeGenerator } from "../hooks/useCondenserEnvelopeGenerator";
+import { calcCoilDerivedDimensions } from "../utils/coilDerivedMetrics";
+import { fmtBR as fmtBRUtil } from "../utils/unitConversions";
+import { validatePhysicalInputs, validateThermoInputs } from "../validators/simulationValidator";
 import { getCompressorById } from "@/modules/coldpro_catalog/data/compressorCatalog.service";
 import type { CompressorCatalogRow } from "@/modules/coldpro_catalog/data/compressorCatalog.types";
 import type { AIContext } from "../components/WorkspaceAIChat";
@@ -483,6 +486,13 @@ export function CondenserWorkspacePage() {
   const canSimulate = catalogs.ready;
   const disabledReason = !catalogs.ready ? "Aguardando catálogos…" : undefined;
 
+  // ── Validações por seção ──
+  const physicalInputsState = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const thermoInputsState = useCnCoilsSimulationStore((s) => s.thermoInputs);
+  const physCheck = validatePhysicalInputs(physicalInputsState);
+  const thermoCheck = validateThermoInputs(thermoInputsState);
+  const tcVsAirWarn = tc <= airTempIn;
+
   // ── Sidebar ──
   const sidebar = (
     <WorkspaceInputsSidebar
@@ -494,7 +504,10 @@ export function CondenserWorkspacePage() {
         {/* 1. MODO */}
         <AccordionItem value="mode">
           <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Modo de Cálculo
+            <span className="flex items-center gap-2">
+              Modo de Cálculo
+              <span className="rounded bg-emerald-100 px-1 py-0.5 text-[8px] font-semibold text-emerald-700">OK</span>
+            </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-3">
             <div>
@@ -533,7 +546,14 @@ export function CondenserWorkspacePage() {
         {/* 2. GEOMETRIA */}
         <AccordionItem value="geom">
           <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Geometria do Aletado
+            <span className="flex items-center gap-2">
+              Geometria do Aletado
+              {physCheck.isValid ? (
+                <span className="rounded bg-emerald-100 px-1 py-0.5 text-[8px] font-semibold text-emerald-700">OK</span>
+              ) : (
+                <span className="rounded bg-slate-100 px-1 py-0.5 text-[8px] font-semibold text-slate-500">Incompleto</span>
+              )}
+            </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-2">
             <NumField label="Altura (mm)" value={geomHeight} onChange={setGeomHeight} />
@@ -550,7 +570,14 @@ export function CondenserWorkspacePage() {
         {/* 3. VENTILAÇÃO */}
         <AccordionItem value="vent">
           <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Lado Ventilação
+            <span className="flex items-center gap-2">
+              Lado Ventilação
+              {airFlow > 0 ? (
+                <span className="rounded bg-emerald-100 px-1 py-0.5 text-[8px] font-semibold text-emerald-700">OK</span>
+              ) : (
+                <span className="rounded bg-slate-100 px-1 py-0.5 text-[8px] font-semibold text-slate-500">Incompleto</span>
+              )}
+            </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-2">
             <NumField label="Vazão de ar (m³/h)" value={airFlow} onChange={setAirFlow} />
@@ -568,9 +595,24 @@ export function CondenserWorkspacePage() {
         {/* 4. FLUIDO */}
         <AccordionItem value="fluid">
           <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Lado Fluido / Refrigerante
+            <span className="flex items-center gap-2">
+              Lado Fluido / Refrigerante
+              {refrigerantId ? (
+                <span className="rounded bg-emerald-100 px-1 py-0.5 text-[8px] font-semibold text-emerald-700">OK</span>
+              ) : (
+                <span className="rounded bg-slate-100 px-1 py-0.5 text-[8px] font-semibold text-slate-500">Incompleto</span>
+              )}
+              {tcVsAirWarn && (
+                <span className="rounded bg-amber-100 px-1 py-0.5 text-[8px] font-semibold text-amber-700">⚠</span>
+              )}
+            </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-2">
+            {tcVsAirWarn && (
+              <div className="rounded border border-amber-200 bg-amber-50 px-2 py-1 text-[9px] text-amber-700">
+                ⚠ Tc ({tc} °C) ≤ Temp. entrada ar ({airTempIn} °C) — verificar condições
+              </div>
+            )}
             <div>
               <Label className="text-[10px] text-muted-foreground">Fluido</Label>
               <Select value={refrigerantId} onValueChange={setRefrigerantId}>
@@ -638,7 +680,10 @@ export function CondenserWorkspacePage() {
         {/* 5. OPERAÇÃO */}
         <AccordionItem value="ops">
           <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Condições Operacionais
+            <span className="flex items-center gap-2">
+              Condições Operacionais
+              <span className="rounded bg-emerald-100 px-1 py-0.5 text-[8px] font-semibold text-emerald-700">OK</span>
+            </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-2">
             <div className="flex gap-1">
@@ -818,6 +863,107 @@ function EmptyState() {
   );
 }
 
+// ── CondenserResultsPanel (sticky) ───────────────────────────────────────────
+function CondenserResultCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded border border-border bg-card">
+      <div className="border-b border-border bg-muted/40 px-2 py-1 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">
+        {title}
+      </div>
+      <div className="space-y-0.5 p-2">{children}</div>
+    </div>
+  );
+}
+
+function CondenserResultLine({ label, value }: { label: string; value: string }) {
+  const hasValue = value !== "---" && !value.startsWith("---");
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-muted-foreground">{label}</span>
+      <span className={`font-mono font-medium ${hasValue ? "text-foreground" : "text-slate-400"}`}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function CondenserResultsPanel() {
+  const result = useCnCoilsSimulationStore((s) => s.result);
+  const warnings = useCnCoilsSimulationStore((s) => s.warnings);
+  const physicalInputs = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const fluid = useCnCoilsSimulationStore((s) => s.fluid);
+  const fluidOperatingTemp_C = useCnCoilsSimulationStore((s) => s.fluidOperatingTemp_C);
+
+  const hasResult = !!result;
+  const hasWarn = warnings && warnings.length > 0;
+
+  const nTubesPerRow =
+    physicalInputs.tubesPerRow ??
+    (physicalInputs.finnedHeightMm && physicalInputs.tubePitchTransverseMm
+      ? Math.round(physicalInputs.finnedHeightMm / physicalInputs.tubePitchTransverseMm)
+      : 0);
+  const derived = calcCoilDerivedDimensions({
+    nTubesPerRow,
+    tubePitchTransverse_mm: physicalInputs.tubePitchTransverseMm ?? 0,
+    nRows: physicalInputs.rows ?? 0,
+    tubePitchLongitudinal_mm: physicalInputs.tubePitchLongitudinalMm ?? 0,
+    lengthMm: physicalInputs.finnedLengthMm ?? 0,
+    refrigerant: fluid,
+    T_evap_C: fluidOperatingTemp_C,
+    tubeID_m: (physicalInputs.tubeInnerDiameterMm ?? 0) / 1000,
+    tubeOD_m: (physicalInputs.tubeOuterDiameterMm ?? 0) / 1000,
+    nCircuits: physicalInputs.circuits ?? 0,
+    finThickness_m: (physicalInputs.finThicknessMm ?? 0.13) / 1000,
+    finPitch_m: (physicalInputs.finPitchMm ?? 2.5) / 1000,
+    tubeMaterial: "copper",
+    finMaterial: "aluminum",
+  });
+
+  return (
+    <div className="sticky top-4 space-y-2 text-[10px]">
+      <div
+        className={`rounded border px-2 py-1.5 text-center text-[10px] font-semibold ${
+          !hasResult
+            ? "border-slate-200 bg-slate-50 text-slate-400"
+            : hasWarn
+              ? "border-amber-300 bg-amber-50 text-amber-800"
+              : "border-emerald-300 bg-emerald-50 text-emerald-800"
+        }`}
+      >
+        {!hasResult ? "Aguardando cálculo" : hasWarn ? `${warnings.length} alerta(s)` : "✓ Sem Avisos"}
+      </div>
+
+      <CondenserResultCard title="Superfície de Troca">
+        <CondenserResultLine label="Área frontal" value={`${fmtBRUtil((derived.altura_mm * derived.largura_mm) / 1e6, 4)} m²`} />
+      </CondenserResultCard>
+
+      <CondenserResultCard title="Dimensões do Aletado">
+        <CondenserResultLine label="Altura" value={`${fmtBRUtil(derived.altura_mm, 0)} mm`} />
+        <CondenserResultLine label="Largura" value={`${fmtBRUtil(derived.largura_mm, 0)} mm`} />
+        <CondenserResultLine label="Profund." value={`${fmtBRUtil(derived.prof_mm, 0)} mm`} />
+      </CondenserResultCard>
+
+      <CondenserResultCard title="Volume e Carga">
+        <CondenserResultLine label="Volume interno" value={`${fmtBRUtil(derived.volumeInterno_L, 2)} L`} />
+        <CondenserResultLine label="Carga refrig." value={`${fmtBRUtil(derived.cargaRefrigerante_kg, 2)} kg`} />
+      </CondenserResultCard>
+
+      <CondenserResultCard title="Peso do Aletado">
+        <CondenserResultLine label="Peso seco" value={`${fmtBRUtil(derived.pesoSeco_kg, 2)} kg`} />
+        <CondenserResultLine label="Peso c/ fluido" value={`${fmtBRUtil(derived.pesoComFluido_kg, 2)} kg`} />
+      </CondenserResultCard>
+
+      {derived.gabinete_largura_mm > 0 && (
+        <CondenserResultCard title="Gabinete">
+          <div className="rounded bg-muted/30 px-1.5 py-1 text-center font-mono text-[11px] font-semibold text-foreground">
+            {fmtBRUtil(derived.gabinete_largura_mm, 0)} × {fmtBRUtil(derived.gabinete_altura_mm, 0)} × {fmtBRUtil(derived.gabinete_prof_mm, 0)} mm
+          </div>
+        </CondenserResultCard>
+      )}
+    </div>
+  );
+}
+
 // ── CondenserTabs ────────────────────────────────────────────────────────────
 type CondenserTabsProps = {
   cycleResult: CycleResult | null;
@@ -966,31 +1112,23 @@ function CondenserTabs({
       <TabsContent value={CONDENSER_TABS.DETAILED} className="mt-3">
         <div className="space-y-3">
           <section className="space-y-2">
-            <h3 className="text-sm font-semibold text-foreground">
-              Formulário principal / dados do ambiente
-            </h3>
-            <div className="grid grid-cols-1 gap-2 rounded-md shadow-sm md:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)]">
-              <WorkspaceSidebar
-                componentType="condenser_air"
-                onSimulate={handleSimulate}
-                onReset={onReset}
-                canSimulate={effectiveCanSimulate}
-                isSimulating={storeIsSimulating || isSimulating}
-                faceAreaM2={result?.faceAreaM2}
-                disabledReason={effectiveDisabledReason}
-              />
-              <div className="min-w-0 space-y-2 xl:contents">
-                <div className="min-w-0 space-y-2 xl:border-r xl:border-border xl:pr-2">
-                  <AirSidePanel result={result} onFanPickerOpen={onFanPickerOpen} />
-                </div>
-                <div className="min-w-0 space-y-2">
-                  <FluidSidePanel
-                    componentType="condenser_air"
-                    refrigerants={catalogs.refrigerants}
-                    disabled={!catalogs.ready}
-                    result={result}
-                  />
-                </div>
+            <div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_220px]">
+              {/* Coluna 1 — Lado Ventilação */}
+              <div className="min-w-0 rounded border border-border bg-card">
+                <AirSidePanel result={result} onFanPickerOpen={onFanPickerOpen} />
+              </div>
+              {/* Coluna 2 — Lado Fluido */}
+              <div className="min-w-0 rounded border border-border bg-card">
+                <FluidSidePanel
+                  componentType="condenser_air"
+                  refrigerants={catalogs.refrigerants}
+                  disabled={!catalogs.ready}
+                  result={result}
+                />
+              </div>
+              {/* Coluna 3 — Resultados (sticky) */}
+              <div className="min-w-0">
+                <CondenserResultsPanel />
               </div>
             </div>
           </section>
