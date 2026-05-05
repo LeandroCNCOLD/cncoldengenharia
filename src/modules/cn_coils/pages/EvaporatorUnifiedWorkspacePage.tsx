@@ -588,12 +588,64 @@ export function EvaporatorUnifiedWorkspacePage() {
   const badges = [refrigerantId, `Te: ${fmt(te, 0)}°C`, `Tc: ${fmt(tc, 0)}°C`];
   const isCalculating = simState.status === "running";
 
+  // ── Validações por seção ──
+  const physicalForCheck = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const thermoForCheck = useCnCoilsSimulationStore((s) => s.thermoInputs);
+  const physCheckSidebar = validatePhysicalInputs(physicalForCheck);
+  const thermoCheckSidebar = validateThermoInputs(thermoForCheck);
+
+  const ventIncomplete = !airFlow || airFlow <= 0 || airTempIn === undefined;
+  const velocityWarning =
+    frontalVelocity > 0 && (frontalVelocity < 1.5 || frontalVelocity > 3.5);
+  const fluidIncomplete = !refrigerantId;
+  const teAboveAirTemp =
+    typeof te === "number" && typeof airTempIn === "number" && te >= airTempIn;
+
+  type NavCardStatus = "ok" | "incomplete" | "warning" | "error";
+  const modeStatus: NavCardStatus = "ok";
+  const geomStatus: NavCardStatus = physCheckSidebar.isValid ? "ok" : "incomplete";
+  const ventStatus: NavCardStatus = ventIncomplete
+    ? "incomplete"
+    : velocityWarning
+      ? "warning"
+      : "ok";
+  const fluidStatus: NavCardStatus = fluidIncomplete
+    ? "incomplete"
+    : teAboveAirTemp
+      ? "warning"
+      : "ok";
+  const opsStatus: NavCardStatus = "ok";
+
+  const ventErrors = ventIncomplete
+    ? thermoCheckSidebar.errors.filter((e) => {
+        const s = e.toLowerCase();
+        return s.includes("vazão") || s.includes("temperatura") || s.includes("umidade");
+      })
+    : velocityWarning
+      ? [
+          `Velocidade frontal ${frontalVelocity.toFixed(2)} m/s fora da faixa recomendada (1,5–3,5 m/s)`,
+        ]
+      : undefined;
+
+  const fluidErrors = fluidIncomplete
+    ? thermoCheckSidebar.errors.filter((e) => {
+        const s = e.toLowerCase();
+        return s.includes("refriger") || s.includes("fluido") || s.includes("evap") || s.includes("cond");
+      })
+    : teAboveAirTemp
+      ? [`Te (${te} °C) ≥ Temp. entrada ar (${airTempIn} °C) — verificar condições`]
+      : undefined;
+
+  const geomErrors = geomStatus !== "ok" ? physCheckSidebar.errors : undefined;
+  const sidebarCanCalculate = physCheckSidebar.isValid && thermoCheckSidebar.isValid;
+
   // ── Sidebar ──
   const sidebar = (
     <WorkspaceInputsSidebar
       onCalculate={() => simState.trigger()}
       onReset={handleReset}
       isCalculating={isCalculating}
+      canCalculate={sidebarCanCalculate}
     >
       <div className="mb-3 rounded bg-[#1E6FD9] px-2 py-1.5 text-center text-xs font-bold uppercase tracking-wider text-white">
         Evaporador DX
