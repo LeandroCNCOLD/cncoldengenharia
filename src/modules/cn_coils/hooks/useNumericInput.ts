@@ -13,8 +13,14 @@ export function useNumericInput(
   onCommit: (v: number | undefined) => void,
   options?: { min?: number; max?: number }
 ) {
-  const toStr = (v: number | undefined | null) =>
-    v !== undefined && v !== null && Number.isFinite(v) ? String(v) : "";
+  const toStr = (v: number | undefined | null): string => {
+    if (v === undefined || v === null || !Number.isFinite(v)) return "";
+    const s = String(v);
+    if (s.includes(".") && s.split(".")[1].length > 6) {
+      return parseFloat(v.toFixed(6)).toString();
+    }
+    return s;
+  };
 
   const [local, setLocal] = useState<string>(() => toStr(externalValue));
 
