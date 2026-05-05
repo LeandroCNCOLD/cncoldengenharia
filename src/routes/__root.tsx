@@ -93,6 +93,28 @@ function RootComponent() {
       }),
   );
 
+  // Global UX: ao focar qualquer <input type="number">, seleciona todo o conteúdo
+  // para que o usuário possa digitar diretamente (incluindo "-" para negativos)
+  // sem precisar apagar o zero existente.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const handler = (e: FocusEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && t instanceof HTMLInputElement && t.type === "number") {
+        // setTimeout garante que o select() acontece após o foco nativo
+        setTimeout(() => {
+          try {
+            t.select();
+          } catch {
+            /* ignore */
+          }
+        }, 0);
+      }
+    };
+    document.addEventListener("focusin", handler);
+    return () => document.removeEventListener("focusin", handler);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
