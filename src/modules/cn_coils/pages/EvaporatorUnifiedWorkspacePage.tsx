@@ -862,6 +862,8 @@ export function EvaporatorUnifiedWorkspacePage() {
               setEngineMode={setEngineMode}
               setCompressorMode={setCompressorMode}
               setFrequency={setFrequency}
+              voltage={voltage}
+              setVoltage={setVoltage}
               onOpenGeometryPicker={() => setGeomPickerOpen(true)}
               onOpenGeomModal={(t) => setActiveGeomModal(t)}
             />
@@ -1433,6 +1435,8 @@ function UnifiedTabs({
   engineMode,
   compressorMode,
   frequency,
+  voltage,
+  setVoltage,
   setGeomHeight,
   setGeomWidth,
   setGeomDepth,
@@ -1500,6 +1504,7 @@ function UnifiedTabs({
   engineMode: EngineMode;
   compressorMode: CompressorMode;
   frequency: number;
+  voltage: number;
   setGeomHeight: (value: number) => void;
   setGeomWidth: (value: number) => void;
   setGeomDepth: (value: number) => void;
@@ -1524,6 +1529,8 @@ function UnifiedTabs({
   setEngineMode: (value: EngineMode) => void;
   setCompressorMode: (value: CompressorMode) => void;
   setFrequency: (value: number) => void;
+  voltage: number;
+  setVoltage: (value: number) => void;
   onOpenGeometryPicker: () => void;
   onOpenGeomModal: (type: "tube" | "fin" | "distributor") => void;
 }) {
