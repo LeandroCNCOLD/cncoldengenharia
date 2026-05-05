@@ -7,7 +7,7 @@
  *
  * Ao concluir, chama onDone() para avançar para a aba de Equilíbrio.
  */
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Database, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,14 +18,10 @@ import { CompressorForm } from "../../components/forms/CompressorForm";
 import { CondenserForm } from "../../components/forms/CondenserForm";
 import {
   EvaporatorForm,
-  buildEvaporatorInputFromForm,
   type EvaporatorFormValue,
 } from "../../components/forms/EvaporatorForm";
 import { SystemConditionsForm, type SystemConditions } from "../../components/forms/SystemConditionsForm";
 import { useCatalogSessionStore } from "@/modules/coldpro_catalog/store/useCatalogSessionStore";
-import { useCoilEnvelopeStore } from "@/modules/cn_coils/store/useCoilEnvelopeStore";
-import { buildMotorComponentsFromCatalog } from "@/modules/coldpro_catalog/adapters/sessionToMotorInputAdapter";
-import { useCatalogRevisionStore } from "@/modules/coldpro_catalog/store/useCatalogRevisionStore";
 import type { CompressorSpec, CondenserSpec } from "@/modules/coldpro_v2";
 
 interface Props {
@@ -45,40 +41,8 @@ export function SystemConfigTabContent({ onDone }: Props) {
     clearSelection,
   } = useCatalogSessionStore();
 
-  const { setCompressorEnvelope, setCondenserEnvelope, setEvaporatorEnvelope } =
-    useCoilEnvelopeStore();
-
-  const revision = useCatalogRevisionStore((s) => s.revision);
-  const lastRevisionRef = useRef<number | undefined>(undefined);
-
-  // Sincronizar do catálogo quando há seleção
-  useEffect(() => {
-    if (revision === lastRevisionRef.current) return;
-    lastRevisionRef.current = revision;
-
-    const { compressorEnvelope, condenserEnvelope, evaporatorEnvelope } =
-      buildMotorComponentsFromCatalog({
-        selectedCompressor,
-        selectedCondenser,
-        selectedEvaporator,
-        selectedReheatCoil: null,
-      });
-
-    if (compressorEnvelope) setCompressorEnvelope(compressorEnvelope);
-    if (condenserEnvelope) setCondenserEnvelope(condenserEnvelope);
-    if (evaporatorEnvelope) setEvaporatorEnvelope("evaporator_dx", evaporatorEnvelope);
-  }, [
-    revision,
-    selectedCompressor,
-    selectedCondenser,
-    selectedEvaporator,
-    setCompressorEnvelope,
-    setCondenserEnvelope,
-    setEvaporatorEnvelope,
-  ]);
-
   const hasCompressor = Boolean(selectedCompressor || compressor.cooling_capacity_w);
-  const hasEvaporator = Boolean(selectedEvaporator || evaporator.rows);
+  const hasEvaporator = Boolean(selectedEvaporator || evaporator.rows_total);
   const hasCondenser = Boolean(selectedCondenser || condenser.heat_rejection_capacity_w);
   const isReady = hasCompressor && hasEvaporator && hasCondenser;
 
@@ -109,9 +73,9 @@ export function SystemConfigTabContent({ onDone }: Props) {
       {/* Status dos componentes */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Compressor", ok: hasCompressor, source: selectedCompressor?.name },
-          { label: "Evaporador", ok: hasEvaporator, source: selectedEvaporator?.name },
-          { label: "Condensador", ok: hasCondenser, source: selectedCondenser?.name },
+          { label: "Compressor", ok: hasCompressor, source: selectedCompressor?.modelo },
+          { label: "Evaporador", ok: hasEvaporator, source: selectedEvaporator?.modelo },
+          { label: "Condensador", ok: hasCondenser, source: selectedCondenser?.modelo },
         ].map(({ label, ok, source }) => (
           <Card key={label} className={`border ${ok ? "border-emerald-200 bg-emerald-50" : "border-slate-200"}`}>
             <CardContent className="flex items-center gap-2 p-3">
