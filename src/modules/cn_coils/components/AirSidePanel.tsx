@@ -455,12 +455,11 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               result={
                 <ResultCell
                   value={
-                    fanEval?.pressure_Pa !== null && fanEval?.pressure_Pa !== undefined
-                      ? fmt(
-                          toPress(fanEval.pressure_Pa, uPress),
-                          uPress === "Pa" ? 0 : 2,
-                        )
-                      : "---"
+                    fanStaticOffCurve
+                      ? "Fora da curva"
+                      : fanStaticPa !== null && fanStaticPa !== undefined
+                        ? fmt(toPress(fanStaticPa, uPress), uPress === "Pa" ? 0 : 2)
+                        : "---"
                   }
                 />
               }
