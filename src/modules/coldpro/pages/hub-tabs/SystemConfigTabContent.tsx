@@ -42,7 +42,7 @@ export function SystemConfigTabContent({ onDone }: Props) {
   } = useCatalogSessionStore();
 
   const hasCompressor = Boolean(selectedCompressor || compressor.cooling_capacity_w);
-  const hasEvaporator = Boolean(selectedEvaporator || evaporator.rows);
+  const hasEvaporator = Boolean(selectedEvaporator || evaporator.rows_total);
   const hasCondenser = Boolean(selectedCondenser || condenser.heat_rejection_capacity_w);
   const isReady = hasCompressor && hasEvaporator && hasCondenser;
 
