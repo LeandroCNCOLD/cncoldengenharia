@@ -486,6 +486,13 @@ export function CondenserWorkspacePage() {
   const canSimulate = catalogs.ready;
   const disabledReason = !catalogs.ready ? "Aguardando catálogos…" : undefined;
 
+  // ── Validações por seção ──
+  const physicalInputsState = useCnCoilsSimulationStore((s) => s.physicalInputs);
+  const thermoInputsState = useCnCoilsSimulationStore((s) => s.thermoInputs);
+  const physCheck = validatePhysicalInputs(physicalInputsState);
+  const thermoCheck = validateThermoInputs(thermoInputsState);
+  const tcVsAirWarn = tc <= airTempIn;
+
   // ── Sidebar ──
   const sidebar = (
     <WorkspaceInputsSidebar
