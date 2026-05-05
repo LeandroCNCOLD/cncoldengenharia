@@ -1261,12 +1261,12 @@ function DetailedWorkspaceTab({
         </h3>
         <div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_240px]">
           {/* Coluna 1 — Lado Ventilação */}
-          <div className="min-w-0 rounded-md border border-border bg-card shadow-sm">
+          <div id="section-lado-ventilacao" className="min-w-0 rounded-md border border-border bg-card shadow-sm transition-shadow">
             <AirSidePanel result={result} disabled={!catalogs.ready} />
           </div>
 
           {/* Coluna 2 — Lado Fluido */}
-          <div className="min-w-0 rounded-md border border-border bg-card shadow-sm">
+          <div id="section-lado-fluido" className="min-w-0 rounded-md border border-border bg-card shadow-sm transition-shadow">
             <FluidSidePanel
               componentType="evaporator_dx"
               refrigerants={catalogs.refrigerants}
