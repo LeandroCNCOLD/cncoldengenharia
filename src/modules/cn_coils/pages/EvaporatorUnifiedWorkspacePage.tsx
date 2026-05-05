@@ -191,6 +191,55 @@ const DEFAULT_CONFIG: CycleSystemConfig = {
   },
 };
 
+function NavCard({
+  title,
+  status,
+  lines,
+  onEdit,
+}: {
+  title: string;
+  status: "ok" | "incomplete" | "warning" | "error";
+  lines: string[];
+  onEdit?: () => void;
+}) {
+  const statusColors = {
+    ok: "bg-emerald-100 text-emerald-800",
+    incomplete: "bg-slate-100 text-slate-500",
+    warning: "bg-amber-100 text-amber-800",
+    error: "bg-red-100 text-red-700",
+  };
+  const statusLabels = {
+    ok: "OK",
+    incomplete: "Incompleto",
+    warning: "Alerta",
+    error: "Erro",
+  };
+  return (
+    <div className="mb-2 rounded border border-border bg-card p-2 text-[10px]">
+      <div className="mb-1 flex items-center justify-between">
+        <span className="font-semibold uppercase tracking-wide text-foreground">
+          {title}
+        </span>
+        <span className={`rounded px-1 py-0.5 text-[9px] font-semibold ${statusColors[status]}`}>
+          {statusLabels[status]}
+        </span>
+      </div>
+      {lines.map((line, i) => (
+        <div key={i} className="text-muted-foreground">{line}</div>
+      ))}
+      {onEdit && (
+        <button
+          type="button"
+          onClick={onEdit}
+          className="mt-1.5 text-[9px] font-semibold text-[#1E6FD9] hover:underline"
+        >
+          Editar →
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function EvaporatorUnifiedWorkspacePage() {
   // ── Modo ──
   const [calcMode, setCalcMode] = useState<CalcMode>("verify");
