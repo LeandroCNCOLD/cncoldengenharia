@@ -957,8 +957,7 @@ function ResultsPanel() {
       </div>
 
       <ResultsCard title="Superfície de Troca">
-        <ResultsLine label="Área externa" value={`${fmtBRUtil(derived.areaExterna_m2, 2)} m²`} />
-        <ResultsLine label="Área interna" value={`${fmtBRUtil(derived.areaInterna_m2, 2)} m²`} />
+        <ResultsLine label="Área frontal" value={`${fmtBRUtil((derived.altura_mm * derived.largura_mm) / 1e6, 4)} m²`} />
       </ResultsCard>
 
       <ResultsCard title="Dimensões do Aletado">
