@@ -936,6 +936,84 @@ export function EvaporatorUnifiedWorkspacePage() {
         onClose={() => setCostModalOpen(false)}
       />
 
+      <Dialog open={calcModeModalOpen} onOpenChange={setCalcModeModalOpen}>
+        <DialogContent className="sm:max-w-[520px]">
+          <DialogHeader>
+            <DialogTitle>Modo de Cálculo</DialogTitle>
+            <DialogDescription>
+              Selecione o objetivo do cálculo e qual motor de simulação será acoplado.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-5 py-2">
+            <div>
+              <Label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Objetivo
+              </Label>
+              <RadioGroup
+                value={calcMode}
+                onValueChange={(v) => setCalcMode(v as CalcMode)}
+                className="grid grid-cols-2 gap-2"
+              >
+                <label className={`flex cursor-pointer items-start gap-2 rounded-md border p-3 text-sm ${calcMode === "verify" ? "border-primary bg-primary/5" : "border-border"}`}>
+                  <RadioGroupItem value="verify" className="mt-0.5" />
+                  <div>
+                    <div className="font-medium">Verificar</div>
+                    <div className="text-xs text-muted-foreground">Geometria conhecida → calcula performance.</div>
+                  </div>
+                </label>
+                <label className={`flex cursor-pointer items-start gap-2 rounded-md border p-3 text-sm ${calcMode === "design" ? "border-primary bg-primary/5" : "border-border"}`}>
+                  <RadioGroupItem value="design" className="mt-0.5" />
+                  <div>
+                    <div className="font-medium">Desenho</div>
+                    <div className="text-xs text-muted-foreground">Capacidade alvo → dimensiona geometria.</div>
+                  </div>
+                </label>
+              </RadioGroup>
+            </div>
+
+            <div>
+              <Label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Motor de Cálculo
+              </Label>
+              <RadioGroup
+                value={engineMode}
+                onValueChange={(v) => setEngineMode(v as EngineMode)}
+                className="grid grid-cols-1 gap-2"
+              >
+                <label className={`flex cursor-pointer items-start gap-2 rounded-md border p-3 text-sm ${engineMode === "v1" ? "border-primary bg-primary/5" : "border-border"}`}>
+                  <RadioGroupItem value="v1" className="mt-0.5" />
+                  <div>
+                    <div className="font-medium">V1 NTU-ε</div>
+                    <div className="text-xs text-muted-foreground">
+                      Motor original com correção CN Coils + Wang-Chi-Chang. Estável e rápido.
+                    </div>
+                  </div>
+                </label>
+                <label className={`flex cursor-pointer items-start gap-2 rounded-md border p-3 text-sm ${engineMode === "v2" ? "border-primary bg-primary/5" : "border-border"}`}>
+                  <RadioGroupItem value="v2" className="mt-0.5" />
+                  <div>
+                    <div className="font-medium">V2 ASHRAE</div>
+                    <div className="text-xs text-muted-foreground">
+                      Motor ASHRAE com psicrometria real + NTU-ε avançado. Maior fidelidade.
+                    </div>
+                  </div>
+                </label>
+              </RadioGroup>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCalcModeModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => setCalcModeModalOpen(false)}>
+              Confirmar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <PostSaveNextStepDialog
         open={nextStepOpen}
         onOpenChange={setNextStepOpen}
