@@ -546,7 +546,7 @@ export function EvaporatorUnifiedWorkspacePage() {
       onReset={handleReset}
       isCalculating={isCalculating}
     >
-      <Accordion type="multiple" defaultValue={["mode", "vent", "fluid", "ops"]} className="w-full">
+      <Accordion type="multiple" defaultValue={["mode", "geom", "vent", "fluid", "ops"]} className="w-full">
         {/* 1. MODO */}
         <AccordionItem value="mode">
           <AccordionTrigger className="text-xs uppercase tracking-wide">
