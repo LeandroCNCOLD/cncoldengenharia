@@ -798,6 +798,8 @@ export function EvaporatorUnifiedWorkspacePage() {
               onCalculate={() => simState.trigger()}
               onReset={handleReset}
               isCalculating={isCalculating}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
               geomHeight={geomHeight}
               geomWidth={geomWidth}
               geomDepth={geomDepth}
