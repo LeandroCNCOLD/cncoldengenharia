@@ -28,6 +28,7 @@ import { Route as AppColdproOperatingMapRouteImport } from './routes/_app/coldpr
 import { Route as AppColdproMontagemRouteImport } from './routes/_app/coldpro.montagem'
 import { Route as AppColdproMapRouteImport } from './routes/_app/coldpro.map'
 import { Route as AppColdproLibraryRouteImport } from './routes/_app/coldpro.library'
+import { Route as AppColdproHubDeTestesRouteImport } from './routes/_app/coldpro.hub-de-testes'
 import { Route as AppColdproFrostRouteImport } from './routes/_app/coldpro.frost'
 import { Route as AppColdproFichaTecnicaRouteImport } from './routes/_app/coldpro.ficha-tecnica'
 import { Route as AppColdproExportRouteImport } from './routes/_app/coldpro.export'
@@ -147,6 +148,11 @@ const AppColdproMapRoute = AppColdproMapRouteImport.update({
 const AppColdproLibraryRoute = AppColdproLibraryRouteImport.update({
   id: '/library',
   path: '/library',
+  getParentRoute: () => AppColdproRoute,
+} as any)
+const AppColdproHubDeTestesRoute = AppColdproHubDeTestesRouteImport.update({
+  id: '/hub-de-testes',
+  path: '/hub-de-testes',
   getParentRoute: () => AppColdproRoute,
 } as any)
 const AppColdproFrostRoute = AppColdproFrostRouteImport.update({
@@ -311,6 +317,7 @@ export interface FileRoutesByFullPath {
   '/coldpro/export': typeof AppColdproExportRoute
   '/coldpro/ficha-tecnica': typeof AppColdproFichaTecnicaRoute
   '/coldpro/frost': typeof AppColdproFrostRoute
+  '/coldpro/hub-de-testes': typeof AppColdproHubDeTestesRoute
   '/coldpro/library': typeof AppColdproLibraryRoute
   '/coldpro/map': typeof AppColdproMapRoute
   '/coldpro/montagem': typeof AppColdproMontagemRoute
@@ -356,6 +363,7 @@ export interface FileRoutesByTo {
   '/coldpro/export': typeof AppColdproExportRoute
   '/coldpro/ficha-tecnica': typeof AppColdproFichaTecnicaRoute
   '/coldpro/frost': typeof AppColdproFrostRoute
+  '/coldpro/hub-de-testes': typeof AppColdproHubDeTestesRoute
   '/coldpro/library': typeof AppColdproLibraryRoute
   '/coldpro/map': typeof AppColdproMapRoute
   '/coldpro/montagem': typeof AppColdproMontagemRoute
@@ -404,6 +412,7 @@ export interface FileRoutesById {
   '/_app/coldpro/export': typeof AppColdproExportRoute
   '/_app/coldpro/ficha-tecnica': typeof AppColdproFichaTecnicaRoute
   '/_app/coldpro/frost': typeof AppColdproFrostRoute
+  '/_app/coldpro/hub-de-testes': typeof AppColdproHubDeTestesRoute
   '/_app/coldpro/library': typeof AppColdproLibraryRoute
   '/_app/coldpro/map': typeof AppColdproMapRoute
   '/_app/coldpro/montagem': typeof AppColdproMontagemRoute
@@ -452,6 +461,7 @@ export interface FileRouteTypes {
     | '/coldpro/export'
     | '/coldpro/ficha-tecnica'
     | '/coldpro/frost'
+    | '/coldpro/hub-de-testes'
     | '/coldpro/library'
     | '/coldpro/map'
     | '/coldpro/montagem'
@@ -497,6 +507,7 @@ export interface FileRouteTypes {
     | '/coldpro/export'
     | '/coldpro/ficha-tecnica'
     | '/coldpro/frost'
+    | '/coldpro/hub-de-testes'
     | '/coldpro/library'
     | '/coldpro/map'
     | '/coldpro/montagem'
@@ -544,6 +555,7 @@ export interface FileRouteTypes {
     | '/_app/coldpro/export'
     | '/_app/coldpro/ficha-tecnica'
     | '/_app/coldpro/frost'
+    | '/_app/coldpro/hub-de-testes'
     | '/_app/coldpro/library'
     | '/_app/coldpro/map'
     | '/_app/coldpro/montagem'
@@ -713,6 +725,13 @@ declare module '@tanstack/react-router' {
       path: '/library'
       fullPath: '/coldpro/library'
       preLoaderRoute: typeof AppColdproLibraryRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
+    '/_app/coldpro/hub-de-testes': {
+      id: '/_app/coldpro/hub-de-testes'
+      path: '/hub-de-testes'
+      fullPath: '/coldpro/hub-de-testes'
+      preLoaderRoute: typeof AppColdproHubDeTestesRouteImport
       parentRoute: typeof AppColdproRoute
     }
     '/_app/coldpro/frost': {
@@ -951,6 +970,7 @@ interface AppColdproRouteChildren {
   AppColdproExportRoute: typeof AppColdproExportRoute
   AppColdproFichaTecnicaRoute: typeof AppColdproFichaTecnicaRoute
   AppColdproFrostRoute: typeof AppColdproFrostRoute
+  AppColdproHubDeTestesRoute: typeof AppColdproHubDeTestesRoute
   AppColdproLibraryRoute: typeof AppColdproLibraryRoute
   AppColdproMapRoute: typeof AppColdproMapRoute
   AppColdproMontagemRoute: typeof AppColdproMontagemRoute
@@ -985,6 +1005,7 @@ const AppColdproRouteChildren: AppColdproRouteChildren = {
   AppColdproExportRoute: AppColdproExportRoute,
   AppColdproFichaTecnicaRoute: AppColdproFichaTecnicaRoute,
   AppColdproFrostRoute: AppColdproFrostRoute,
+  AppColdproHubDeTestesRoute: AppColdproHubDeTestesRoute,
   AppColdproLibraryRoute: AppColdproLibraryRoute,
   AppColdproMapRoute: AppColdproMapRoute,
   AppColdproMontagemRoute: AppColdproMontagemRoute,
@@ -1031,3 +1052,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
