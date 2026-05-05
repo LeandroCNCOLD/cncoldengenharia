@@ -36,6 +36,8 @@ import { AirSidePanel } from "../components/AirSidePanel";
 import { FluidSidePanel } from "../components/FluidSidePanel";
 import { GeometryBottomBar } from "../components/GeometryBottomBar";
 import { WorkspaceSidebar } from "../components/WorkspaceSidebar";
+import { calcCoilDerivedDimensions } from "../utils/coilDerivedMetrics";
+import { fmtBR as fmtBRUtil } from "../utils/unitConversions";
 import { CircuitrySelector } from "../components/CircuitrySelector";
 import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
 import { PostSaveNextStepDialog } from "../components/PostSaveNextStepDialog";
