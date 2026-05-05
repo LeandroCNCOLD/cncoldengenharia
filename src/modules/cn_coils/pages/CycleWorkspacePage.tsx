@@ -165,9 +165,9 @@ export function CycleWorkspacePage() {
     manufacturer: string;
     bitzerNative?: {
       displacement_m3h: number;
-      coeff_lambda: number[];
-      coeff_current: number[];
-      coeff_specific_power: number[];
+      coeff_lambda: [number, number, number];
+      coeff_current: [number, number, number];
+      coeff_specific_power: [number, number, number];
       rpm: number;
     };
   } | null>(null);
@@ -548,11 +548,32 @@ export function CycleWorkspacePage() {
           import("@/modules/coldpro_catalog/data/compressorCatalog.service")
             .then(({ loadCompressorSpec }) => loadCompressorSpec(c.id))
             .then((spec) => {
+              const native = spec?.bitzerNative;
               setSelectedCompressor({
                 id: c.id,
                 model: c.model,
                 manufacturer: c.brand ?? "BITZER",
-                bitzerNative: spec?.bitzerNative,
+                bitzerNative: native
+                  ? {
+                      displacement_m3h: native.displacement_m3h,
+                      coeff_lambda: [
+                        native.coeff_lambda[0] ?? 0,
+                        native.coeff_lambda[1] ?? 0,
+                        native.coeff_lambda[2] ?? 0,
+                      ],
+                      coeff_current: [
+                        native.coeff_current[0] ?? 0,
+                        native.coeff_current[1] ?? 0,
+                        native.coeff_current[2] ?? 0,
+                      ],
+                      coeff_specific_power: [
+                        native.coeff_specific_power[0] ?? 0,
+                        native.coeff_specific_power[1] ?? 0,
+                        native.coeff_specific_power[2] ?? 0,
+                      ],
+                      rpm: native.rpm,
+                    }
+                  : undefined,
               });
             })
             .catch(() => {
