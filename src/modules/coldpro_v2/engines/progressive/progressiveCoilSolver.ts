@@ -209,7 +209,7 @@ export function calculateProgressiveCoil(input: ProgressiveCoilInput): Progressi
 
   let estimatedDefrost: number | null = null;
   if (useIceModel) {
-    const times = rollResults.map((r) => r.time_to_defrost_h).filter((t): t is number => t !== null && t >= 0);
+    const times = rollResults.map((r) => r.time_to_defrost_h).filter((t): t is number => t !== null && t !== undefined && t >= 0);
     estimatedDefrost = times.length > 0 ? Math.min(...times) : null;
   } else {
     const hasFrost = input.frost_thickness_mm_per_roll?.some((f) => f > 0);

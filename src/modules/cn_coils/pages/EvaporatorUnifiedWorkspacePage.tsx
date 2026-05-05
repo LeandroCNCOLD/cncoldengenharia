@@ -1137,7 +1137,7 @@ function DetailedWorkspaceTab({
 
         <div className="min-w-0 space-y-2 xl:contents">
           <div className="min-w-0 space-y-2 xl:border-r xl:border-border xl:pr-2">
-            <AirSidePanel result={result} onFanPickerOpen={() => setFanPickerOpen(true)} />
+            <AirSidePanel result={result} />
           </div>
 
           <div className="min-w-0 space-y-2">
