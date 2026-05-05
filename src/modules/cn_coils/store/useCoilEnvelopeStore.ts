@@ -59,11 +59,14 @@ export interface CompressorEnvelopePoint {
 }
 
 interface CoilEnvelopeState {
+  /** Equipamento atualmente em foco no fluxo bancada/workspace */
+  currentEquipmentId: string | null;
   envelopes: Record<string, CoilEnvelope>;
   condenserEnvelope: CondenserEnvelopePoint[] | null;
   compressorEnvelope: CompressorEnvelopePoint[] | null;
   compressorId: string | null;
   compressorModel: string | null;
+  setCurrentEquipmentId: (id: string | null) => void;
   saveEnvelope: (envelope: CoilEnvelope) => void;
   setEvaporatorEnvelope: (points: EnvelopePoint[]) => void;
   getEnvelope: (componentType: string) => CoilEnvelope | undefined;
@@ -78,6 +81,10 @@ interface CoilEnvelopeState {
   clearCompressorEnvelope: () => void;
   clearAll: () => void;
   hasAllEnvelopes: () => boolean;
+  /** Carrega configuração persistida no Supabase para o equipmentId */
+  hydrateFromRemote: (equipmentId: string) => Promise<void>;
+  /** Persiste estado atual no Supabase para o equipmentId atual */
+  persistRemote: (equipmentIdOverride?: string) => Promise<void>;
 }
 
 export const useCoilEnvelopeStore = create<CoilEnvelopeState>()(
