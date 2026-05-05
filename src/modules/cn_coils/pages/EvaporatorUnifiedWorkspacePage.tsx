@@ -920,6 +920,11 @@ export function EvaporatorUnifiedWorkspacePage() {
         onClose={() => setActiveGeomModal(null)}
       />
 
+      <MaterialCostConfigModal
+        open={costModalOpen}
+        onClose={() => setCostModalOpen(false)}
+      />
+
       <PostSaveNextStepDialog
         open={nextStepOpen}
         onOpenChange={setNextStepOpen}
