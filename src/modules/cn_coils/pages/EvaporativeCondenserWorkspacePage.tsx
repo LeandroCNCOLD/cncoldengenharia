@@ -248,7 +248,7 @@ export function EvaporativeCondenserWorkspacePage() {
               <div className="space-y-1">
                 <Label className="text-[10px] text-muted-foreground">Q total (kW)</Label>
                 <Input
-                  type="number"
+                  type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
                   value={draft.Q_total_W / 1000}
                   onChange={(e) => update({ Q_total_W: Number(e.target.value) * 1000 })}
                   className="h-7 text-xs"
@@ -289,7 +289,7 @@ export function EvaporativeCondenserWorkspacePage() {
               </div>
               <div className="space-y-1">
                 <Label className="text-[10px] text-muted-foreground">Altitude (m)</Label>
-                <Input type="number" value={draft.altitude_m}
+                <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.altitude_m}
                   onChange={(e) => update({ altitude_m: Number(e.target.value) })}
                   className="h-7 text-xs" />
               </div>
@@ -321,13 +321,13 @@ export function EvaporativeCondenserWorkspacePage() {
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
                   <Label className="text-[10px] text-muted-foreground">Comprimento (m)</Label>
-                  <Input type="number" value={draft.tubeLength_m}
+                  <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.tubeLength_m}
                     onChange={(e) => update({ tubeLength_m: Number(e.target.value) })}
                     className="h-7 text-xs" />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-[10px] text-muted-foreground">Ø tubo (mm)</Label>
-                  <Input type="number" value={draft.tubeDiameter_mm}
+                  <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.tubeDiameter_mm}
                     onChange={(e) => update({ tubeDiameter_mm: Number(e.target.value) })}
                     className="h-7 text-xs" />
                 </div>

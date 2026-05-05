@@ -396,7 +396,7 @@ export function CycleWorkspacePage() {
               <div>
                 <Label className="text-[10px] text-muted-foreground">SH alvo (K)</Label>
                 <Input
-                  type="number"
+                  type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
                   value={shTarget}
                   onChange={(e) => setShTarget(Number(e.target.value))}
                   className="h-8 text-xs"
@@ -407,18 +407,18 @@ export function CycleWorkspacePage() {
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <Label className="text-[10px] text-muted-foreground">L (m)</Label>
-                  <Input type="number" value={capLength} step="0.1" onChange={(e) => setCapLength(Number(e.target.value))} className="h-8 text-xs" />
+                  <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={capLength} step="0.1" onChange={(e) => setCapLength(Number(e.target.value))} className="h-8 text-xs" />
                 </div>
                 <div>
                   <Label className="text-[10px] text-muted-foreground">Di (mm)</Label>
-                  <Input type="number" value={capDiameter} step="0.1" onChange={(e) => setCapDiameter(Number(e.target.value))} className="h-8 text-xs" />
+                  <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={capDiameter} step="0.1" onChange={(e) => setCapDiameter(Number(e.target.value))} className="h-8 text-xs" />
                 </div>
               </div>
             )}
             {expansionType === "fixed_orifice" && (
               <div>
                 <Label className="text-[10px] text-muted-foreground">Diâmetro (mm)</Label>
-                <Input type="number" value={orificeDiameter} step="0.1" onChange={(e) => setOrificeDiameter(Number(e.target.value))} className="h-8 text-xs" />
+                <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={orificeDiameter} step="0.1" onChange={(e) => setOrificeDiameter(Number(e.target.value))} className="h-8 text-xs" />
               </div>
             )}
           </AccordionContent>
@@ -447,7 +447,7 @@ export function CycleWorkspacePage() {
               <div>
                 <Label className="text-[10px] text-muted-foreground">Subresfr. (K)</Label>
                 <Input
-                  type="number"
+                  type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
                   value={subcooling}
                   onChange={(e) => setSubcooling(Number(e.target.value))}
                   className="h-8 text-xs"
@@ -456,7 +456,7 @@ export function CycleWorkspacePage() {
               <div>
                 <Label className="text-[10px] text-muted-foreground">Superaq. (K)</Label>
                 <Input
-                  type="number"
+                  type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
                   value={superheat}
                   onChange={(e) => setSuperheat(Number(e.target.value))}
                   className="h-8 text-xs"

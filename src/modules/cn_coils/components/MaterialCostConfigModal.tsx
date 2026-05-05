@@ -94,7 +94,7 @@ export function MaterialCostConfigModal({ open, onClose }: MaterialCostConfigMod
                   <div className="flex items-center gap-1">
                     <span className="text-[11px] text-slate-500">R$</span>
                     <input
-                      type="number"
+                      type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
                       value={prices[key]}
                       step={0.01}
                       min={0}

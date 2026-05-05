@@ -303,13 +303,13 @@ export function HeatingCoilWorkspacePage() {
               </div>
               <div className="space-y-1">
                 <Label className="text-[10px] text-muted-foreground">Vazão ar (m³/h)</Label>
-                <Input type="number" value={draft.airFlowRate_m3h}
+                <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.airFlowRate_m3h}
                   onChange={(e) => update({ airFlowRate_m3h: Number(e.target.value) })}
                   className="h-7 text-xs" />
               </div>
               <div className="space-y-1">
                 <Label className="text-[10px] text-muted-foreground">Altitude (m)</Label>
-                <Input type="number" value={draft.altitude_m}
+                <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.altitude_m}
                   onChange={(e) => update({ altitude_m: Number(e.target.value) })}
                   className="h-7 text-xs" />
               </div>
@@ -343,7 +343,7 @@ export function HeatingCoilWorkspacePage() {
               {draft.heatingFluid === "hot_water" && (
                 <div className="space-y-1">
                   <Label className="text-[10px] text-muted-foreground">Vazão fluido (m³/h)</Label>
-                  <Input type="number" value={draft.fluidFlowRate_m3h}
+                  <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.fluidFlowRate_m3h}
                     onChange={(e) => update({ fluidFlowRate_m3h: Number(e.target.value) })}
                     className="h-7 text-xs" />
                 </div>
@@ -376,20 +376,20 @@ export function HeatingCoilWorkspacePage() {
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
                   <Label className="text-[10px] text-muted-foreground">Comprimento (m)</Label>
-                  <Input type="number" value={draft.tubeLength_m}
+                  <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.tubeLength_m}
                     onChange={(e) => update({ tubeLength_m: Number(e.target.value) })}
                     className="h-7 text-xs" />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-[10px] text-muted-foreground">Passo aletas (mm)</Label>
-                  <Input type="number" value={draft.finPitch_mm}
+                  <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.finPitch_mm}
                     onChange={(e) => update({ finPitch_mm: Number(e.target.value) })}
                     className="h-7 text-xs" />
                 </div>
               </div>
               <div className="space-y-1">
                 <Label className="text-[10px] text-muted-foreground">Ø tubo (mm)</Label>
-                <Input type="number" value={draft.tubeDiameter_mm}
+                <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.tubeDiameter_mm}
                   onChange={(e) => update({ tubeDiameter_mm: Number(e.target.value) })}
                   className="h-7 text-xs" />
               </div>

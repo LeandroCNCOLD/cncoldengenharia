@@ -569,7 +569,7 @@ function NumberField({
   return (
     <div className="space-y-1">
       <Label className="text-xs">{label}</Label>
-      <Input type="number" step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} />
+      <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} />
     </div>
   );
 }
