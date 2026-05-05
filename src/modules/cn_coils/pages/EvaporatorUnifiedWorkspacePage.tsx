@@ -270,6 +270,18 @@ export function EvaporatorUnifiedWorkspacePage() {
   // ── Modo ──
   const [calcMode, setCalcMode] = useState<CalcMode>("verify");
   const [engineMode, setEngineMode] = useState<EngineMode>("v1");
+  const [activeTab, setActiveTab] = useState<string>(WORKSPACE_TABS.DETAILED);
+  const focusDetailedSection = (sectionId: string) => {
+    setActiveTab(WORKSPACE_TABS.DETAILED);
+    setTimeout(() => {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        el.classList.add("ring-2", "ring-primary/60");
+        setTimeout(() => el.classList.remove("ring-2", "ring-primary/60"), 1500);
+      }
+    }, 60);
+  };
 
   // ── Geometria ──
   const [geomHeight, setGeomHeight] = useState(400);
