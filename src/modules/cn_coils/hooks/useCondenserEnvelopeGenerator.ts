@@ -53,6 +53,7 @@ export function useCondenserEnvelopeGenerator({
       return;
     }
     setCondenserEnvelope(points);
+    void useCoilEnvelopeStore.getState().persistRemote();
     toast.success("✅ Envelope do condensador salvo — disponível na Bancada de Testes");
   }, [points, setCondenserEnvelope]);
 
