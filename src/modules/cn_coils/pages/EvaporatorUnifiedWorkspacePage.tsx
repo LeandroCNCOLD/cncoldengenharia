@@ -759,7 +759,7 @@ export function EvaporatorUnifiedWorkspacePage() {
 
   return (
     <WorkspaceLayout header={header} sidebar={sidebar}>
-      <ProjectHeaderBar workspaceType="component_workspace" />
+      <ProjectHeaderBar workspaceType="component_workspace" onNovoAletado={handleNovoAletado} />
       <div className="flex h-full flex-col">
         <div className="flex flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto p-4">
