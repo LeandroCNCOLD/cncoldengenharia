@@ -1258,6 +1258,40 @@ function DetailedWorkspaceTab({
         <h3 className="text-sm font-semibold text-foreground">
           Dados técnicos e premissas
         </h3>
+        <div className="flex flex-wrap gap-1.5">
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs"
+            onClick={onOpenGeometryPicker}
+          >
+            Selecionar Geometria do Catálogo…
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs"
+            onClick={() => onOpenGeomModal("tube")}
+          >
+            Tubo…
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs"
+            onClick={() => onOpenGeomModal("fin")}
+          >
+            Aleta…
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs"
+            onClick={() => onOpenGeomModal("distributor")}
+          >
+            Distribuidor…
+          </Button>
+        </div>
         <GeometryBottomBar />
         <CircuitrySelector />
       </section>
