@@ -80,6 +80,23 @@ export interface Fan {
   fanCategory?: "axial" | "centrifugal";
   /** Função no sistema: soprador, exaustor, livre ou universal */
   fanFunction?: "soprador" | "exaustor" | "livre" | "universal";
+  /** Tipo de motor: standard (indução) ou ec_motor (EC/brushless) */
+  curveType?: "standard" | "ec_motor";
+  /** Curva Q×P com 11 pontos de operação (Xmin..Xmax vs pressão Pa) */
+  curvePoints?: {
+    airflowM3h: number[];
+    pressurePa: number[];
+  };
+  /** Nível de potência sonora LwA em dB(A) */
+  soundPowerLwA?: number;
+  /** Nível de pressão sonora LpA em dB(A) */
+  soundPressureLpA?: number;
+  /** Eficiência estática em % (dado do FanSelect Ziehl-Abegg) */
+  staticEfficiencyPct?: number;
+  /** Specific Fan Power em W·s/m³ (dado do FanSelect Ziehl-Abegg) */
+  sfpWsM3?: number;
+  /** Classe ERP ("1", "2" ou "3") */
+  erpClass?: string;
 }
 
 /**
