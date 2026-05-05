@@ -196,11 +196,13 @@ function NavCard({
   status,
   lines,
   onEdit,
+  errors,
 }: {
   title: string;
   status: "ok" | "incomplete" | "warning" | "error";
   lines: string[];
   onEdit?: () => void;
+  errors?: string[];
 }) {
   const statusColors = {
     ok: "bg-emerald-100 text-emerald-800",
@@ -227,6 +229,22 @@ function NavCard({
       {lines.map((line, i) => (
         <div key={i} className="text-muted-foreground">{line}</div>
       ))}
+      {errors && errors.length > 0 && (
+        <div className="mt-1 space-y-0.5">
+          {errors.map((err, i) => (
+            <div
+              key={i}
+              className={`rounded border px-1.5 py-0.5 text-[9px] ${
+                status === "warning"
+                  ? "border-amber-200 bg-amber-50 text-amber-800"
+                  : "border-red-200 bg-red-50 text-red-700"
+              }`}
+            >
+              {err}
+            </div>
+          ))}
+        </div>
+      )}
       {onEdit && (
         <button
           type="button"
