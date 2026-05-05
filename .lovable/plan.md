@@ -1,72 +1,77 @@
+# Unificar ventiladores Ziehl-Abegg + EBM-Papst num só catálogo
 
-## Problema
+## Situação atual
 
-O catálogo `public/data/equipment/compressors.json` contém **10.301 compressores**:
-- **Copeland: 9.191 modelos** ✅ (estão lá)
-- Bristol: 1.104 modelos
-- Bitzer: 6 modelos (versão completa Bitzer está separada em `compressors_bitzer.json`, com seu próprio browser)
+Hoje o `FanLibraryBrowser` / `FanPickerModal` é alimentado pelo hook
+`useEnrichedFanPickerItems`, que lê **apenas** `/public/data/equipment/fans.json`
+(185 modelos EBM-Papst, com coeficientes SPH).
 
-Os Copeland **existem no JSON** mas na prática "não aparecem" na tela `/coldpro/components` → aba **Compressor** porque o `CompressorLibraryBrowser`:
+Mas o projeto já tem um segundo catálogo, mais rico em metadados, em
+`/public/data/catalogs/fans.json`: **459 modelos Ziehl-Abegg** com campos
+prontos (`model`, `series`, `builder`, `airflowM3h`, `powerW`, `speedRpm`,
+`currentA`, `voltageV`, `frequencyHz`, `fanCategory`, `fanFunction`).
+Ele só está sendo consumido pelo `useCnCoilsCatalogCollection` (uso interno
+do solver), nunca aparece no seletor de ventiladores da interface.
 
-1. Renderiza todos os 9.191 modelos Copeland como `<button>` numa única coluna **sem virtualização** → o navegador trava ou demora vários segundos quando você clica em "Copeland".
-2. Tem **apenas busca textual livre** — sem filtros por refrigerante, tipo (scroll/recip/etc), aplicação, faixa de capacidade. Com 9k itens vira "agulha no palheiro".
-3. A lista de fabricantes não mostra contagem de forma destacada, então o usuário não percebe que Copeland tem 9k modelos.
+Resultado: ao abrir o picker, o usuário só vê EBM-Papst.
 
-## Solução
+## O que vamos fazer
 
-Reescrever `src/modules/coldpro/components/components/CompressorLibraryBrowser.tsx` aplicando o mesmo padrão de qualidade do `FanLibraryBrowser` recém-melhorado.
+Unir as duas bibliotecas num único stream do picker, sem duplicar nada e
+preservando a marca/série/motor de cada modelo.
 
-### 1. Virtualização da lista de modelos
+### 1. Novo hook `useZiehlAbeggFanPickerItems`
 
-Usar `@tanstack/react-virtual` (já é parte do ecossistema TanStack do projeto; se não estiver instalado, adicionar via `bun add @tanstack/react-virtual`) para renderizar apenas os itens visíveis na coluna "Modelos". Isso resolve o travamento ao selecionar Copeland.
+Arquivo: `src/modules/cn_coils/hooks/useZiehlAbeggFanPickerItems.ts`
 
-### 2. Filtros faceted (header)
+- Carrega `/data/catalogs/fans.json` via `fetch` (mesmo padrão do `useFanLibrary`).
+- Mapeia cada linha para `FanPickerItem`:
 
-Adicionar uma barra de filtros logo abaixo do header com:
+```text
+id              → `ZIEHL_${row.id}_${slug(row.model)}`
+manufacturer    → row.builder            // "Ziehl-Abegg"
+model           → row.model              // ex.: "TLI 9-9"
+series          → row.series             // "TLI", "FN", "RDH" …
+fanCategory     → row.fanCategory        // "axial" | "centrifugal"
+fanFunction     → row.fanFunction        // soprador|exaustor|livre|universal
+airflow_m3h     → row.airflowM3h
+motor_power_w   → row.powerW
+motor_current_a → row.currentA
+voltage_v       → row.voltageV
+frequency_hz    → row.frequencyHz
+rpm             → row.speedRpm
+diameter_mm     → derivado do modelo quando possível (regex p/ "TLI 9-9" → 900 mm,
+                  "FN050" → 500 mm). Quando o regex não casar, deixa undefined.
+```
 
-- **Refrigerante** (multi-select) — derivado de `item.refrigerant[]` distintos do JSON
-- **Tipo** (select) — `scroll`, `reciprocating`, `screw`, etc., derivado de `item.type`
-- **Aplicação** (select) — `refrigeration`, `air_conditioning`, `heat_pump` (de `application_type`)
-- **Capacidade mínima (kW)** — input numérico, filtra `cooling_capacity_kw >= valor`
-- **Capacidade máxima (kW)** — input numérico
-- **Buscar modelo/fabricante** — mantém o input de texto livre atual
-- Botão **"Limpar filtros"**
+- Retorna `{ items, loading, error }` no mesmo formato que o hook EBM.
 
-Os valores possíveis de cada facet são calculados via `useMemo` a partir do dataset completo.
+### 2. Atualizar `useEnrichedFanPickerItems`
 
-### 3. Contador dinâmico e UX
+Arquivo: `src/modules/cn_coils/hooks/useEnrichedFanPickerItems.ts`
 
-- Mostrar `{filtered.length} de {data.length} modelos` no header
-- Coluna "Fabricantes" continua mostrando contagem por fabricante (já existe), mas refletindo o resultado **após filtros**
-- Quando o usuário troca de fabricante, manter os filtros ativos
-- Default: nenhum fabricante pré-selecionado (evita render acidental dos 9k Copeland antes do filtro)
+- Manter toda a lógica EBM-Papst atual (decode do código, estimativa SPH).
+- Importar e chamar `useZiehlAbeggFanPickerItems`.
+- Concatenar: `[...ebmItems, ...ziehlItems]`, ordenados por
+  `manufacturer + model`.
+- Combinar `loading` (OR) e `error` (primeiro não-nulo) das duas fontes.
 
-### 4. Reorganização visual da aba Compressor
+Como `FanPickerModal` / `FanLibraryBrowser` já consomem esse hook nas três
+páginas (Evaporador, Condensador, Genérico) via `AirSidePanel`, **nenhuma
+alteração de UI** é necessária — assim que o hook devolver os 644 modelos,
+os filtros de fabricante, série, categoria e função já funcionam.
 
-Em `ComponentsPage.tsx`, dentro do bloco `activeTab === "compressor"`, manter os dois browsers mas com títulos claros:
+### 3. Verificações pós-mudança
 
-- **"Catálogo Bitzer (oficial)"** → `BitzerLibraryBrowser` (compressores Bitzer reais, não os 6 do dataset misto)
-- **"Catálogo geral (Copeland · Bristol · outros)"** → `CompressorLibraryBrowser` virtualizado
+- Abrir o picker no workspace de Evaporador, Condensador e Genérico e
+  confirmar que aparecem os dois fabricantes no filtro.
+- Conferir que selecionar um Ziehl-Abegg grava um `selectedFanId` válido
+  (prefixo `ZIEHL_…`) no `useCnCoilsSimulationStore`.
+- Rodar `bunx tsc --noEmit` e `bun run lint`.
 
-Adicionar um pequeno header textual antes de cada um para o usuário entender que são duas fontes distintas.
+## Fora do escopo
 
-## Arquivos afetados
-
-- `src/modules/coldpro/components/components/CompressorLibraryBrowser.tsx` — reescrita completa (virtualização + filtros)
-- `src/modules/coldpro/pages/ComponentsPage.tsx` — adicionar títulos de seção antes dos dois browsers
-- `package.json` — possivelmente `bun add @tanstack/react-virtual` se ainda não estiver presente
-
-## Garantias
-
-- ✅ Sem alterações no JSON (`compressors.json` permanece com os 9.191 Copeland)
-- ✅ Sem alterações no `coldpro_v2`
-- ✅ Sem alterações no `useEquipmentLibrary.ts` (interface `LibraryCompressor` já cobre todos os campos necessários)
-- ✅ Validação com `tsc --noEmit` ao final
-
-## Resultado esperado
-
-Ao abrir `/coldpro/components` → Compressor:
-1. Aba mostra "Catálogo geral" com 10.301 modelos disponíveis
-2. Clicar em "Copeland" lista os 9.191 modelos **instantaneamente** (virtualizado)
-3. Filtros permitem reduzir a, ex.: Copeland + R-404A + scroll + 5–15 kW → ~30 modelos
-4. Catálogo Bitzer separado continua funcionando como hoje
+- Não vamos alterar o solver/back-end: o cálculo térmico continua usando os
+  coeficientes do catálogo interno (`useCnCoilsCatalogCollection`). A união
+  aqui é apenas no **seletor de ventilador** (metadados/UX).
+- Sem migrações de banco, sem mudanças nos arquivos JSON de origem.
