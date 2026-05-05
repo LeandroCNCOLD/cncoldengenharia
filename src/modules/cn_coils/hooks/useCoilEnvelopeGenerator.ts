@@ -136,6 +136,7 @@ export function useCoilEnvelopeGenerator() {
       };
 
       saveEnvelope(envelope);
+      void useCoilEnvelopeStore.getState().persistRemote(equipmentId);
       toast.success("✅ Envelope do evaporador salvo — disponível na Bancada de Testes");
     },
     [
