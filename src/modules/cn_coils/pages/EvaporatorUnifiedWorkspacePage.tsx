@@ -26,6 +26,12 @@ import { OptimizationPanel } from "../components/OptimizationPanel";
 import { UncertaintyPanel, UncertaintyBadge } from "../components/UncertaintyBadge";
 import { CompressorPickerModal } from "../components/CompressorPickerModal";
 import { FanPickerModal } from "../components/FanPickerModal";
+import { GeometryPickerModal } from "../components/GeometryPickerModal";
+import {
+  TubeModal,
+  FinModal,
+  DistributorModal,
+} from "../components/GeometryDerivedModals";
 import { useCnCoilsCatalogs as useCnCoilsFullCatalogs } from "../hooks/useCnCoilsCatalogCollection";
 import { useEnrichedFanPickerItems } from "../hooks/useEnrichedFanPickerItems";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
@@ -300,6 +306,8 @@ export function EvaporatorUnifiedWorkspacePage() {
   const [subcooling, setSubcooling] = useState(5);
   const [massFlow, setMassFlow] = useState(0);
    const [compressorPickerOpen, setCompressorPickerOpen] = useState(false);
+  const [geomPickerOpen, setGeomPickerOpen] = useState(false);
+  const [activeGeomModal, setActiveGeomModal] = useState<"tube" | "fin" | "distributor" | null>(null);
   // ── Compressor selecionado do catálogo ──
   const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
   const [selectedCompressorRow, setSelectedCompressorRow] = useState<CompressorCatalogRow | null>(null);
@@ -674,7 +682,6 @@ export function EvaporatorUnifiedWorkspacePage() {
       <NavCard
         title="Modo de Cálculo"
         status={modeStatus}
-        onEdit={() => console.log("scroll to:", "mode")}
         lines={[
           `Objetivo: ${calcMode === "verify" ? "Verificar" : "Desenho"}`,
           `Motor: ${engineMode === "v1" ? "V1 NTU-ε" : "V2 ASHRAE"}`,
@@ -685,7 +692,7 @@ export function EvaporatorUnifiedWorkspacePage() {
         title="Geometria do Aletado"
         status={geomStatus}
         errors={geomErrors}
-        onEdit={() => console.log("scroll to:", "geom")}
+        onEdit={() => setGeomPickerOpen(true)}
         lines={[
           geomHeight && geomWidth && geomDepth
             ? `${geomHeight} × ${geomWidth} × ${geomDepth} mm`
@@ -697,7 +704,6 @@ export function EvaporatorUnifiedWorkspacePage() {
         title="Lado Ventilação"
         status={ventStatus}
         errors={ventErrors}
-        onEdit={() => console.log("scroll to:", "vent")}
         lines={[
           airFlow ? `Vazão: ${airFlow.toLocaleString("pt-BR")} m³/h` : "Vazão não informada",
           airTempIn !== undefined ? `Entrada: ${airTempIn} °C / ${airRH}% UR` : "",
@@ -711,7 +717,6 @@ export function EvaporatorUnifiedWorkspacePage() {
         title="Lado Fluido / Refrigerante"
         status={fluidStatus}
         errors={fluidErrors}
-        onEdit={() => console.log("scroll to:", "fluid")}
         lines={[
           refrigerantId ? `Fluido: ${refrigerantId}` : "Fluido não selecionado",
           selectedCompressorRow
@@ -725,7 +730,6 @@ export function EvaporatorUnifiedWorkspacePage() {
       <NavCard
         title="Condições Operacionais"
         status={opsStatus}
-        onEdit={() => console.log("scroll to:", "ops")}
         lines={[
           `Padrão: ${compressorMode === "ari" ? "ARI 540" : compressorMode === "constant" ? "Constante" : "Manual"}`,
           `${frequency} Hz | ${voltage} V`,
@@ -815,6 +819,8 @@ export function EvaporatorUnifiedWorkspacePage() {
               setEngineMode={setEngineMode}
               setCompressorMode={setCompressorMode}
               setFrequency={setFrequency}
+              onOpenGeometryPicker={() => setGeomPickerOpen(true)}
+              onOpenGeomModal={(t) => setActiveGeomModal(t)}
             />
           )}
           </div>
@@ -851,6 +857,24 @@ export function EvaporatorUnifiedWorkspacePage() {
         onConfirm={(item) => {
           toast.success(`Ventilador selecionado: ${[item.manufacturer, item.model].filter(Boolean).join(" ")}`);
         }}
+      />
+
+      <GeometryPickerModal
+        open={geomPickerOpen}
+        onClose={() => setGeomPickerOpen(false)}
+        componentType="evaporator_dx"
+      />
+      <TubeModal
+        open={activeGeomModal === "tube"}
+        onClose={() => setActiveGeomModal(null)}
+      />
+      <FinModal
+        open={activeGeomModal === "fin"}
+        onClose={() => setActiveGeomModal(null)}
+      />
+      <DistributorModal
+        open={activeGeomModal === "distributor"}
+        onClose={() => setActiveGeomModal(null)}
       />
 
       <PostSaveNextStepDialog
@@ -1056,6 +1080,8 @@ type DetailedWorkspaceTabProps = {
   onReset: () => void;
   onOpenAI: () => void;
   isCalculating: boolean;
+  onOpenGeometryPicker: () => void;
+  onOpenGeomModal: (type: "tube" | "fin" | "distributor") => void;
 };
 
 function DetailedWorkspaceTab({
@@ -1112,6 +1138,8 @@ function DetailedWorkspaceTab({
   onReset,
   onOpenAI,
   isCalculating,
+  onOpenGeometryPicker,
+  onOpenGeomModal,
 }: DetailedWorkspaceTabProps) {
   const catalogs = useCnCoilsCatalogs();
   const physical = useCnCoilsSimulationStore((s) => s.physicalInputs);
@@ -1230,6 +1258,40 @@ function DetailedWorkspaceTab({
         <h3 className="text-sm font-semibold text-foreground">
           Dados técnicos e premissas
         </h3>
+        <div className="flex flex-wrap gap-1.5">
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs"
+            onClick={onOpenGeometryPicker}
+          >
+            Selecionar Geometria do Catálogo…
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs"
+            onClick={() => onOpenGeomModal("tube")}
+          >
+            Tubo…
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs"
+            onClick={() => onOpenGeomModal("fin")}
+          >
+            Aleta…
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs"
+            onClick={() => onOpenGeomModal("distributor")}
+          >
+            Distribuidor…
+          </Button>
+        </div>
         <GeometryBottomBar />
         <CircuitrySelector />
       </section>
@@ -1347,6 +1409,8 @@ function UnifiedTabs({
   setEngineMode,
   setCompressorMode,
   setFrequency,
+  onOpenGeometryPicker,
+  onOpenGeomModal,
 }: {
   config: CycleSystemConfig;
   cycleResult: CycleResult | null;
@@ -1402,6 +1466,8 @@ function UnifiedTabs({
   setEngineMode: (value: EngineMode) => void;
   setCompressorMode: (value: CompressorMode) => void;
   setFrequency: (value: number) => void;
+  onOpenGeometryPicker: () => void;
+  onOpenGeomModal: (type: "tube" | "fin" | "distributor") => void;
 }) {
   const enrichedWarnings = useMemo(
     () => (cycleResult ? enrichWarnings(cycleResult.warnings) : []),
@@ -1611,6 +1677,8 @@ function UnifiedTabs({
           onReset={() => {}}
           onOpenAI={() => onOpenAI("Detalhado")}
           isCalculating={false}
+          onOpenGeometryPicker={onOpenGeometryPicker}
+          onOpenGeomModal={onOpenGeomModal}
         />
       </TabsContent>
 
