@@ -49,6 +49,14 @@ import { fmtBR as fmtBRUtil } from "../utils/unitConversions";
 import { CircuitrySelector } from "../components/CircuitrySelector";
 import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
 import { PostSaveNextStepDialog } from "../components/PostSaveNextStepDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useCnCoilsCatalogs } from "../hooks/useCnCoilsCatalogs";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import { useCnCoilsSimulation } from "../hooks/useCnCoilsSimulation";
