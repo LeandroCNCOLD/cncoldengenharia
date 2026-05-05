@@ -80,8 +80,28 @@ export interface UseEnrichedFanPickerItemsResult {
   error: string | null;
 }
 
+import { useZiehlAbeggFanPickerItems } from "./useZiehlAbeggFanPickerItems";
+
 export function useEnrichedFanPickerItems(): UseEnrichedFanPickerItemsResult {
-  const { loading, error, data } = useFanLibrary();
-  const items = useMemo(() => data.map(toPickerItem), [data]);
-  return { items, loading, error };
+  const { loading: loadingEbm, error: errorEbm, data } = useFanLibrary();
+  const ebmItems = useMemo(() => data.map(toPickerItem), [data]);
+
+  const { items: ziehlItems, loading: loadingZiehl, error: errorZiehl } =
+    useZiehlAbeggFanPickerItems();
+
+  const items = useMemo(() => {
+    const merged = [...ebmItems, ...ziehlItems];
+    merged.sort((a, b) => {
+      const mA = `${a.manufacturer ?? ""} ${a.model ?? ""}`.toLowerCase();
+      const mB = `${b.manufacturer ?? ""} ${b.model ?? ""}`.toLowerCase();
+      return mA.localeCompare(mB);
+    });
+    return merged;
+  }, [ebmItems, ziehlItems]);
+
+  return {
+    items,
+    loading: loadingEbm || loadingZiehl,
+    error: errorEbm ?? errorZiehl,
+  };
 }
