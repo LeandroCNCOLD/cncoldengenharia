@@ -26,6 +26,12 @@ import { OptimizationPanel } from "../components/OptimizationPanel";
 import { UncertaintyPanel, UncertaintyBadge } from "../components/UncertaintyBadge";
 import { CompressorPickerModal } from "../components/CompressorPickerModal";
 import { FanPickerModal } from "../components/FanPickerModal";
+import { GeometryPickerModal } from "../components/GeometryPickerModal";
+import {
+  TubeModal,
+  FinModal,
+  DistributorModal,
+} from "../components/GeometryDerivedModals";
 import { useCnCoilsCatalogs as useCnCoilsFullCatalogs } from "../hooks/useCnCoilsCatalogCollection";
 import { useEnrichedFanPickerItems } from "../hooks/useEnrichedFanPickerItems";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
