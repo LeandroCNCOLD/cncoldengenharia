@@ -11,21 +11,7 @@ import { FanPickerModal } from "./FanPickerModal";
 import { useEnrichedFanPickerItems } from "../hooks/useEnrichedFanPickerItems";
 
 
-// ─── tipos de ventilador ─────────────────────────────────────────────────────
-type FanOption =
-  | { type: "axial"; fan: AxialFanCoefficient }
-  | { type: "centrifugal"; fan: CentrifugalFanCoefficient };
-
-function airflowRange(option: FanOption) {
-  return option.type === "axial"
-    ? option.fan.airflowRange_m3h
-    : option.fan.capacityRange_m3h;
-}
-function nominalAirflow(option: FanOption): number {
-  const range = airflowRange(option);
-  if (option.type === "axial") return (range.min + range.max) / 2;
-  return range.max;
-}
+// (helpers de FanOption removidos — usamos a biblioteca enriquecida diretamente)
 
 // ─── tipos de unidade ────────────────────────────────────────────────────────
 type AirFlowUnit = "m3h" | "m3s" | "cfm";
