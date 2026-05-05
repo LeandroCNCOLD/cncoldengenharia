@@ -604,18 +604,21 @@ function FieldRow({
   label,
   unit,
   children,
+  badge,
 }: {
   label: string;
   unit?: React.ReactNode;
   children: React.ReactNode;
+  badge?: React.ReactNode;
 }) {
   return (
     <div className="grid grid-cols-[minmax(90px,1fr)_60px_minmax(0,1.2fr)] items-center gap-1">
       <label
-        className="truncate text-[10px] font-medium text-slate-700"
+        className="flex min-w-0 items-center gap-1 truncate text-[10px] font-medium text-slate-700"
         title={label}
       >
-        {label}
+        <span className="truncate">{label}</span>
+        {badge}
       </label>
       <div className="min-w-0">{unit ?? <UnitText text="—" />}</div>
       <div className="min-w-0">{children}</div>
