@@ -595,9 +595,24 @@ export function CondenserWorkspacePage() {
         {/* 4. FLUIDO */}
         <AccordionItem value="fluid">
           <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Lado Fluido / Refrigerante
+            <span className="flex items-center gap-2">
+              Lado Fluido / Refrigerante
+              {refrigerantId ? (
+                <span className="rounded bg-emerald-100 px-1 py-0.5 text-[8px] font-semibold text-emerald-700">OK</span>
+              ) : (
+                <span className="rounded bg-slate-100 px-1 py-0.5 text-[8px] font-semibold text-slate-500">Incompleto</span>
+              )}
+              {tcVsAirWarn && (
+                <span className="rounded bg-amber-100 px-1 py-0.5 text-[8px] font-semibold text-amber-700">⚠</span>
+              )}
+            </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-2">
+            {tcVsAirWarn && (
+              <div className="rounded border border-amber-200 bg-amber-50 px-2 py-1 text-[9px] text-amber-700">
+                ⚠ Tc ({tc} °C) ≤ Temp. entrada ar ({airTempIn} °C) — verificar condições
+              </div>
+            )}
             <div>
               <Label className="text-[10px] text-muted-foreground">Fluido</Label>
               <Select value={refrigerantId} onValueChange={setRefrigerantId}>
