@@ -574,6 +574,7 @@ export function FluidSidePanel({
         {/* 8) Velocidade do Fluido (resultado) */}
         <FieldRow
           label="Vel. do Fluido"
+          badge={<BadgeCell type="calculated" />}
           unit={
             <UnitSelect value={uVel} onChange={setUVel} options={VELOCITY_UNITS} />
           }
