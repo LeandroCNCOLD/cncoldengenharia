@@ -280,6 +280,7 @@ export function EvaporatorUnifiedWorkspacePage() {
   // ── Modo ──
   const [calcMode, setCalcMode] = useState<CalcMode>("verify");
   const [engineMode, setEngineMode] = useState<EngineMode>("v1");
+  const [calcModeModalOpen, setCalcModeModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>(WORKSPACE_TABS.DETAILED);
   const focusDetailedSection = (sectionId: string) => {
     setActiveTab(WORKSPACE_TABS.DETAILED);
