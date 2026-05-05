@@ -653,7 +653,7 @@ export function EvaporatorUnifiedWorkspacePage() {
 
       <NavCard
         title="Modo de Cálculo"
-        status="ok"
+        status={modeStatus}
         onEdit={() => console.log("scroll to:", "mode")}
         lines={[
           `Objetivo: ${calcMode === "verify" ? "Verificar" : "Desenho"}`,
@@ -663,7 +663,8 @@ export function EvaporatorUnifiedWorkspacePage() {
 
       <NavCard
         title="Geometria do Aletado"
-        status={geomHeight && geomWidth && geomDepth ? "ok" : "incomplete"}
+        status={geomStatus}
+        errors={geomErrors}
         onEdit={() => console.log("scroll to:", "geom")}
         lines={[
           geomHeight && geomWidth && geomDepth
@@ -674,7 +675,8 @@ export function EvaporatorUnifiedWorkspacePage() {
 
       <NavCard
         title="Lado Ventilação"
-        status={airFlow && airTempIn !== undefined ? "ok" : "incomplete"}
+        status={ventStatus}
+        errors={ventErrors}
         onEdit={() => console.log("scroll to:", "vent")}
         lines={[
           airFlow ? `Vazão: ${airFlow.toLocaleString("pt-BR")} m³/h` : "Vazão não informada",
@@ -687,7 +689,8 @@ export function EvaporatorUnifiedWorkspacePage() {
 
       <NavCard
         title="Lado Fluido / Refrigerante"
-        status={refrigerantId ? "ok" : "incomplete"}
+        status={fluidStatus}
+        errors={fluidErrors}
         onEdit={() => console.log("scroll to:", "fluid")}
         lines={[
           refrigerantId ? `Fluido: ${refrigerantId}` : "Fluido não selecionado",
@@ -701,7 +704,7 @@ export function EvaporatorUnifiedWorkspacePage() {
 
       <NavCard
         title="Condições Operacionais"
-        status="ok"
+        status={opsStatus}
         onEdit={() => console.log("scroll to:", "ops")}
         lines={[
           `Padrão: ${compressorMode === "ari" ? "ARI 540" : compressorMode === "constant" ? "Constante" : "Manual"}`,
