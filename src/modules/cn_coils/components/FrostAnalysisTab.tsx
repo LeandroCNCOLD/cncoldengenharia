@@ -222,7 +222,7 @@ export function FrostAnalysisTab({
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="t"
-                  type="number"
+                  type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
                   domain={[0, Math.max(frost.recommendedDefrostInterval_h, 1)]}
                   label={{ value: "Tempo (h)", position: "insideBottom", offset: -5 }}
                 />

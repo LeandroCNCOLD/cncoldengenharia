@@ -243,9 +243,11 @@ function NumField({
   return (
     <Field label={label}>
       <Input
-        type="number"
+        type="text"
+        inputMode="decimal"
         step="any"
         value={v ?? ""}
+        onFocus={(e) => e.target.select()}
         onChange={(e) => setNum(k, e.target.value)}
       />
     </Field>

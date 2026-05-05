@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Lock, Unlock, Zap, Search } from "lucide-react";
+import { useNumericInput } from "../hooks/useNumericInput";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import { CompressorPickerModal } from "./CompressorPickerModal";
 import { RefrigerantPickerModal } from "./RefrigerantPickerModal";
@@ -300,7 +301,9 @@ export function FluidSidePanel({
               </div>
             ) : (
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
+                onFocus={(e) => e.target.select()}
                 value={
                   Number.isFinite(displayedMassFlowKgH)
                     ? Number(
@@ -387,7 +390,9 @@ export function FluidSidePanel({
         >
           <div className="min-w-0">
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
+              onFocus={(e) => e.target.select()}
               value={
                 pairedTempC != null && Number.isFinite(pairedTempC)
                   ? tempConv.fromCanonical(pairedTempC, uPaired)
@@ -602,7 +607,6 @@ function NumInput({
   onChange,
   min,
   max,
-  step,
   disabled,
   placeholder,
 }: {
@@ -614,19 +618,14 @@ function NumInput({
   disabled?: boolean;
   placeholder?: string;
 }) {
+  const inputProps = useNumericInput(value, (v) => onChange(v ?? 0), { min, max });
   return (
     <input
-      type="number"
-      value={Number.isFinite(value) ? value : 0}
-      min={min}
-      max={max}
-      step={step ?? "any"}
+      type="text"
+      inputMode="decimal"
+      {...inputProps}
       disabled={disabled}
       placeholder={placeholder}
-      onChange={(e) => {
-        const n = parseFloat(e.target.value);
-        onChange(Number.isFinite(n) ? n : 0);
-      }}
       className="w-full min-w-0 rounded border border-slate-300 bg-white px-1.5 py-1 text-right text-xs text-slate-900 focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
     />
   );

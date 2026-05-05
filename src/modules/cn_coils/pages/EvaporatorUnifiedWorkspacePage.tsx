@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useNumericInput } from "../hooks/useNumericInput";
 import { Snowflake, Bot, Calculator } from "lucide-react";
 import { toast } from "sonner";
 
@@ -852,7 +853,6 @@ export function EvaporatorUnifiedWorkspacePage() {
 function NumField({
   label,
   value,
-  step = 1,
   onChange,
 }: {
   label: string;
@@ -860,14 +860,14 @@ function NumField({
   step?: number;
   onChange: (v: number) => void;
 }) {
+  const inputProps = useNumericInput(value, (v) => onChange(v ?? 0));
   return (
     <div>
       <Label className="text-[10px] text-muted-foreground">{label}</Label>
       <Input
-        type="number"
-        value={value}
-        step={step}
-        onChange={(e) => onChange(Number(e.target.value))}
+        type="text"
+        inputMode="decimal"
+        {...inputProps}
         className="h-8 text-xs"
       />
     </div>

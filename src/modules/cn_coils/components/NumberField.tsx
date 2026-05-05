@@ -1,4 +1,5 @@
-import { useId, useState, useEffect } from "react";
+import { useId } from "react";
+import { useNumericInput } from "../hooks/useNumericInput";
 
 interface NumberFieldProps {
   label: string;
@@ -17,20 +18,13 @@ export function NumberField({
   value,
   onChange,
   unit,
-  step,
   min,
   max,
   placeholder,
   disabled,
 }: NumberFieldProps) {
   const id = useId();
-  const [localValue, setLocalValue] = useState<string>(
-    value !== undefined && Number.isFinite(value) ? String(value) : ""
-  );
-
-  useEffect(() => {
-    setLocalValue(value !== undefined && Number.isFinite(value) ? String(value) : "");
-  }, [value]);
+  const inputProps = useNumericInput(value, onChange, { min, max });
 
   return (
     <div className="min-w-0 space-y-0.5">
@@ -45,30 +39,9 @@ export function NumberField({
         id={id}
         type="text"
         inputMode="decimal"
-        value={localValue}
+        {...inputProps}
         placeholder={placeholder}
         disabled={disabled}
-        onFocus={(e) => e.target.select()}
-        onChange={(e) => {
-          const raw = e.target.value;
-          if (raw === "" || raw === "-" || raw === "." || raw === "-." || /^-?\d*\.?\d*$/.test(raw)) {
-            setLocalValue(raw);
-            const n = parseFloat(raw);
-            if (Number.isFinite(n)) onChange(n);
-            else if (raw === "") onChange(undefined);
-          }
-        }}
-        onBlur={() => {
-          const n = parseFloat(localValue);
-          if (Number.isFinite(n)) {
-            const clamped = min !== undefined ? Math.max(min, n) : n;
-            const final = max !== undefined ? Math.min(max, clamped) : clamped;
-            setLocalValue(String(final));
-            onChange(final);
-          } else {
-            setLocalValue(value !== undefined && Number.isFinite(value) ? String(value) : "");
-          }
-        }}
         className="w-full min-w-0 rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 shadow-sm focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
       />
     </div>
