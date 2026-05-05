@@ -51,11 +51,13 @@ export const testBenchConfigService = {
     const { data, error } = await supabase
       .from("equipment_test_bench_configs")
       .upsert(
-        {
-          equipment_id: equipmentId,
-          created_by: userId,
-          ...payload,
-        },
+        [
+          {
+            equipment_id: equipmentId,
+            created_by: userId,
+            ...payload,
+          },
+        ] as never,
         { onConflict: "equipment_id,created_by" },
       )
       .select()
