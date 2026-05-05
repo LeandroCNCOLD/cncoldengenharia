@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useNumericInput } from "../hooks/useNumericInput";
 import { Snowflake, Bot, Calculator } from "lucide-react";
 import { toast } from "sonner";
 
