@@ -21,6 +21,7 @@ export interface FanModel {
   q_max_m3h: number;          // Vazão máxima (pressão zero) [m³/h]
   dp_max_pa: number;          // Pressão máxima (vazão zero) [Pa]
   p1_nominal_w: number;       // Potência nominal [W]
+  num_curve_points?: number;  // Quantidade de pontos da curva
   curve_points: FanCurvePoint[]; // Pontos da curva Q×ΔP
 }
 
