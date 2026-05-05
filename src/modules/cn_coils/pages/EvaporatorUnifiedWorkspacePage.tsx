@@ -1373,6 +1373,8 @@ function UnifiedTabs({
   setEngineMode,
   setCompressorMode,
   setFrequency,
+  onOpenGeometryPicker,
+  onOpenGeomModal,
 }: {
   config: CycleSystemConfig;
   cycleResult: CycleResult | null;
