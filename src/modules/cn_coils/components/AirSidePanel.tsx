@@ -654,6 +654,16 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
           </tbody>
         </table>
       </div>
+
+      <FanPickerModal
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        fans={fanPickerItems}
+        onConfirm={(item) => {
+          // Mantém compatibilidade com o thermo legado
+          setThermo({ selectedFanId: item.id });
+        }}
+      />
     </div>
   );
 }
