@@ -1078,6 +1078,8 @@ type DetailedWorkspaceTabProps = {
   onReset: () => void;
   onOpenAI: () => void;
   isCalculating: boolean;
+  onOpenGeometryPicker: () => void;
+  onOpenGeomModal: (type: "tube" | "fin" | "distributor") => void;
 };
 
 function DetailedWorkspaceTab({
