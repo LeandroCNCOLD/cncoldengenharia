@@ -536,6 +536,7 @@ export function FluidSidePanel({
         {/* 6) Queda de Pressão (resultado) */}
         <FieldRow
           label="Queda de Pressão"
+          badge={<BadgeCell type="calculated" />}
           unit={
             <UnitSelect
               value={uPdrop}
