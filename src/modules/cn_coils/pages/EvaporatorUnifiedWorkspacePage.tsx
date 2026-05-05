@@ -1090,23 +1090,33 @@ function DetailedWorkspaceTab({
         <h3 className="text-sm font-semibold text-foreground">
           Formulário principal / dados do ambiente
         </h3>
-        <div className="grid grid-cols-1 gap-2 rounded-md shadow-sm md:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)]">
-        <WorkspaceSidebar
-          componentType="evaporator_dx"
-          onSimulate={handleSimulate}
-          onReset={reset}
-          canSimulate={canSimulate}
-          isSimulating={isSimulating}
-          faceAreaM2={result?.faceAreaM2}
-          disabledReason={disabledReason}
-        />
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
+          {/* Coluna esquerda — configuração da bateria */}
+          <div className="w-full shrink-0 xl:w-[220px]">
+            <WorkspaceSidebar
+              componentType="evaporator_dx"
+              onSimulate={handleSimulate}
+              onReset={reset}
+              canSimulate={canSimulate}
+              isSimulating={isSimulating}
+              faceAreaM2={result?.faceAreaM2}
+              disabledReason={disabledReason}
+            />
+          </div>
 
-        <div className="min-w-0 space-y-2 xl:contents">
-          <div className="min-w-0 space-y-2 xl:border-r xl:border-border xl:pr-2">
+          {/* Separador vertical (visível apenas em xl) */}
+          <div className="hidden xl:block w-px self-stretch bg-border" />
+
+          {/* Coluna central — Lado Ventilação */}
+          <div className="min-w-0 flex-1 rounded-md border border-border bg-card shadow-sm">
             <AirSidePanel result={result} />
           </div>
 
-          <div className="min-w-0 space-y-2">
+          {/* Separador vertical (visível apenas em xl) */}
+          <div className="hidden xl:block w-px self-stretch bg-border" />
+
+          {/* Coluna direita — Lado Fluido */}
+          <div className="min-w-0 flex-1 rounded-md border border-border bg-card shadow-sm">
             <FluidSidePanel
               componentType="evaporator_dx"
               refrigerants={catalogs.refrigerants}
@@ -1114,7 +1124,6 @@ function DetailedWorkspaceTab({
               result={result}
             />
           </div>
-        </div>
         </div>
       </section>
 
