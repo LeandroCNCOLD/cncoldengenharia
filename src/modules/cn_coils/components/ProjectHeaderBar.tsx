@@ -71,7 +71,7 @@ function emptyForm(): ProjectHeaderFormState {
   };
 }
 
-export function ProjectHeaderBar({ workspaceType }: ProjectHeaderBarProps) {
+export function ProjectHeaderBar({ workspaceType, onNovoAletado }: ProjectHeaderBarProps) {
   const navigate = useNavigate();
   const {
     projects,
