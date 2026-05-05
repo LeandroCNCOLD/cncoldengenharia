@@ -857,6 +857,24 @@ export function EvaporatorUnifiedWorkspacePage() {
         }}
       />
 
+      <GeometryPickerModal
+        open={geomPickerOpen}
+        onClose={() => setGeomPickerOpen(false)}
+        componentType="evaporator_dx"
+      />
+      <TubeModal
+        open={activeGeomModal === "tube"}
+        onClose={() => setActiveGeomModal(null)}
+      />
+      <FinModal
+        open={activeGeomModal === "fin"}
+        onClose={() => setActiveGeomModal(null)}
+      />
+      <DistributorModal
+        open={activeGeomModal === "distributor"}
+        onClose={() => setActiveGeomModal(null)}
+      />
+
       <PostSaveNextStepDialog
         open={nextStepOpen}
         onOpenChange={setNextStepOpen}
