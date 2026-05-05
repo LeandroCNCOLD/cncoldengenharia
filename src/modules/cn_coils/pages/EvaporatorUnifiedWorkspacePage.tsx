@@ -1138,6 +1138,8 @@ function DetailedWorkspaceTab({
   onReset,
   onOpenAI,
   isCalculating,
+  onOpenGeometryPicker,
+  onOpenGeomModal,
 }: DetailedWorkspaceTabProps) {
   const catalogs = useCnCoilsCatalogs();
   const physical = useCnCoilsSimulationStore((s) => s.physicalInputs);
