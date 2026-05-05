@@ -149,7 +149,6 @@ function InputCell({
   onChange,
   disabled,
   placeholder,
-  step = "any",
   min,
   max,
 }: {
@@ -161,41 +160,14 @@ function InputCell({
   min?: number;
   max?: number;
 }) {
-  const [localValue, setLocalValue] = useState<string>(
-    Number.isFinite(value) ? String(value) : ""
-  );
-
-  useEffect(() => {
-    setLocalValue(Number.isFinite(value) ? String(value) : "");
-  }, [value]);
-
+  const inputProps = useNumericInput(value, (v) => onChange(v ?? 0), { min, max });
   return (
     <input
       type="text"
       inputMode="decimal"
-      value={localValue}
+      {...inputProps}
       disabled={disabled}
       placeholder={placeholder}
-      onFocus={(e) => e.target.select()}
-      onChange={(e) => {
-        const raw = e.target.value;
-        if (raw === "" || raw === "-" || raw === "." || raw === "-." || /^-?\d*\.?\d*$/.test(raw)) {
-          setLocalValue(raw);
-          const n = parseFloat(raw);
-          if (Number.isFinite(n)) onChange(n);
-        }
-      }}
-      onBlur={() => {
-        const n = parseFloat(localValue);
-        if (Number.isFinite(n)) {
-          const clamped = min !== undefined ? Math.max(min, n) : n;
-          const final = max !== undefined ? Math.min(max, clamped) : clamped;
-          setLocalValue(String(final));
-          onChange(final);
-        } else {
-          setLocalValue(Number.isFinite(value) ? String(value) : "");
-        }
-      }}
       className="w-full min-w-0 rounded border border-slate-300 bg-white px-1.5 py-0.5 text-right text-[10px] text-slate-900 focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
     />
   );
