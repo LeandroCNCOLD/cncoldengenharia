@@ -289,6 +289,7 @@ export function FluidSidePanel({
         {/* 1.5) Compressor (acopla cálculo ao polinômio ASHRAE) */}
         <FieldRow
           label="Compressor"
+          badge={hasCompressor ? <BadgeCell type="catalog" /> : undefined}
           unit={
             <div className="flex w-full items-center justify-center rounded border border-amber-300 bg-amber-50 px-1 py-0.5 text-[10px] font-bold text-amber-900">
               {compressorCount}×
