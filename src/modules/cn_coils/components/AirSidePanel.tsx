@@ -4,7 +4,7 @@
  * Layout de tabela com cabeçalho azul, campos de entrada e resultados
  * lado a lado, conforme o layout ColdPro de referência.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import type { CnCoilsSimulationResult } from "../types/cncoils.types";
 import { FanPickerModal } from "./FanPickerModal";
@@ -160,19 +160,40 @@ function InputCell({
   min?: number;
   max?: number;
 }) {
+  const [localValue, setLocalValue] = useState<string>(
+    Number.isFinite(value) ? String(value) : ""
+  );
+
+  useEffect(() => {
+    setLocalValue(Number.isFinite(value) ? String(value) : "");
+  }, [value]);
+
   return (
     <input
-      type="number"
-      value={Number.isFinite(value) ? value : ""}
-      step={step}
-      min={min}
-      max={max}
+      type="text"
+      inputMode="decimal"
+      value={localValue}
       disabled={disabled}
       placeholder={placeholder}
       onFocus={(e) => e.target.select()}
       onChange={(e) => {
-        const n = parseFloat(e.target.value);
-        if (Number.isFinite(n)) onChange(n);
+        const raw = e.target.value;
+        if (raw === "" || raw === "-" || raw === "." || raw === "-." || /^-?\d*\.?\d*$/.test(raw)) {
+          setLocalValue(raw);
+          const n = parseFloat(raw);
+          if (Number.isFinite(n)) onChange(n);
+        }
+      }}
+      onBlur={() => {
+        const n = parseFloat(localValue);
+        if (Number.isFinite(n)) {
+          const clamped = min !== undefined ? Math.max(min, n) : n;
+          const final = max !== undefined ? Math.min(max, clamped) : clamped;
+          setLocalValue(String(final));
+          onChange(final);
+        } else {
+          setLocalValue(Number.isFinite(value) ? String(value) : "");
+        }
       }}
       className="w-full min-w-0 rounded border border-slate-300 bg-white px-1.5 py-0.5 text-right text-[10px] text-slate-900 focus:border-[#1E6FD9] focus:outline-none focus:ring-1 focus:ring-[#1E6FD9] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
     />
