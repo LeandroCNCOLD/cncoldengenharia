@@ -1421,6 +1421,9 @@ function UnifiedTabs({
   setFrequency,
   onOpenGeometryPicker,
   onOpenGeomModal,
+  onCalculate,
+  onReset,
+  isCalculating,
 }: {
   config: CycleSystemConfig;
   cycleResult: CycleResult | null;
@@ -1429,6 +1432,9 @@ function UnifiedTabs({
   onExportPdf: () => void;
   isExportingPdf: boolean;
   onOpenAI: (tabName: string) => void;
+  onCalculate: () => void;
+  onReset: () => void;
+  isCalculating: boolean;
   geomHeight: number;
   geomWidth: number;
   geomDepth: number;
