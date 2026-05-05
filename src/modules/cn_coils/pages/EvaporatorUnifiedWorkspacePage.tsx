@@ -819,6 +819,8 @@ export function EvaporatorUnifiedWorkspacePage() {
               setEngineMode={setEngineMode}
               setCompressorMode={setCompressorMode}
               setFrequency={setFrequency}
+              onOpenGeometryPicker={() => setGeomPickerOpen(true)}
+              onOpenGeomModal={(t) => setActiveGeomModal(t)}
             />
           )}
           </div>
