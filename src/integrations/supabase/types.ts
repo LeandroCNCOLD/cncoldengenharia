@@ -281,6 +281,51 @@ export type Database = {
           },
         ]
       }
+      equipment_test_bench_configs: {
+        Row: {
+          bench_inputs: Json
+          compressor_envelope: Json | null
+          compressor_id: string | null
+          compressor_model: string | null
+          condenser_envelope: Json | null
+          created_at: string
+          created_by: string
+          equipment_id: string
+          evaporator_envelope: Json | null
+          id: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          bench_inputs?: Json
+          compressor_envelope?: Json | null
+          compressor_id?: string | null
+          compressor_model?: string | null
+          condenser_envelope?: Json | null
+          created_at?: string
+          created_by: string
+          equipment_id: string
+          evaporator_envelope?: Json | null
+          id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bench_inputs?: Json
+          compressor_envelope?: Json | null
+          compressor_id?: string | null
+          compressor_model?: string | null
+          condenser_envelope?: Json | null
+          created_at?: string
+          created_by?: string
+          equipment_id?: string
+          evaporator_envelope?: Json | null
+          id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       evaporators: {
         Row: {
           air_flow_m3h: number | null
