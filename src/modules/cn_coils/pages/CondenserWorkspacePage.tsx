@@ -546,7 +546,14 @@ export function CondenserWorkspacePage() {
         {/* 2. GEOMETRIA */}
         <AccordionItem value="geom">
           <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Geometria do Aletado
+            <span className="flex items-center gap-2">
+              Geometria do Aletado
+              {physCheck.isValid ? (
+                <span className="rounded bg-emerald-100 px-1 py-0.5 text-[8px] font-semibold text-emerald-700">OK</span>
+              ) : (
+                <span className="rounded bg-slate-100 px-1 py-0.5 text-[8px] font-semibold text-slate-500">Incompleto</span>
+              )}
+            </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-2">
             <NumField label="Altura (mm)" value={geomHeight} onChange={setGeomHeight} />
