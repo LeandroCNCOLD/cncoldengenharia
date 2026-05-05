@@ -79,6 +79,9 @@ import type { OperatingMapConfig } from "../engines/operatingMap/operatingMapTyp
 import { usePdfExport } from "../hooks/usePdfExport";
 import { useCondenserSimulation, type CondenserInputs } from "../hooks/useCondenserSimulation";
 import { useCondenserEnvelopeGenerator } from "../hooks/useCondenserEnvelopeGenerator";
+import { calcCoilDerivedDimensions } from "../utils/coilDerivedMetrics";
+import { fmtBR as fmtBRUtil } from "../utils/unitConversions";
+import { validatePhysicalInputs, validateThermoInputs } from "../validators/simulationValidator";
 import { getCompressorById } from "@/modules/coldpro_catalog/data/compressorCatalog.service";
 import type { CompressorCatalogRow } from "@/modules/coldpro_catalog/data/compressorCatalog.types";
 import type { AIContext } from "../components/WorkspaceAIChat";
