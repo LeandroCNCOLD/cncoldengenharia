@@ -22,16 +22,18 @@ export interface CompressorSearchResult {
 }
 
 async function readJson<T>(url: string, fsPath: string): Promise<T> {
-  try {
+  if (typeof window !== "undefined") {
     const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Falha ao carregar ${url}: HTTP ${response.status}`);
+    }
     return (await response.json()) as T;
-  } catch {
-    const [{ readFile }, { resolve }] = await Promise.all([
-      import("node:fs/promises"),
-      import("node:path"),
-    ]);
-    return JSON.parse(await readFile(resolve(process.cwd(), fsPath), "utf-8")) as T;
   }
+  const [{ readFile }, { resolve }] = await Promise.all([
+    import("node:fs/promises"),
+    import("node:path"),
+  ]);
+  return JSON.parse(await readFile(resolve(process.cwd(), fsPath), "utf-8")) as T;
 }
 
 export async function loadBitzerCatalog(): Promise<CompressorRecord[]> {
