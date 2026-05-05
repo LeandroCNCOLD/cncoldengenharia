@@ -701,6 +701,7 @@ export function EvaporatorUnifiedWorkspacePage() {
       <NavCard
         title="Modo de Cálculo"
         status={modeStatus}
+        onEdit={() => focusDetailedSection("section-modo-calculo")}
         lines={[
           `Objetivo: ${calcMode === "verify" ? "Verificar" : "Desenho"}`,
           `Motor: ${engineMode === "v1" ? "V1 NTU-ε" : "V2 ASHRAE"}`,
@@ -723,6 +724,7 @@ export function EvaporatorUnifiedWorkspacePage() {
         title="Lado Ventilação"
         status={ventStatus}
         errors={ventErrors}
+        onEdit={() => focusDetailedSection("section-lado-ventilacao")}
         lines={[
           airFlow ? `Vazão: ${airFlow.toLocaleString("pt-BR")} m³/h` : "Vazão não informada",
           airTempIn !== undefined ? `Entrada: ${airTempIn} °C / ${airRH}% UR` : "",
@@ -736,6 +738,7 @@ export function EvaporatorUnifiedWorkspacePage() {
         title="Lado Fluido / Refrigerante"
         status={fluidStatus}
         errors={fluidErrors}
+        onEdit={() => focusDetailedSection("section-lado-fluido")}
         lines={[
           refrigerantId ? `Fluido: ${refrigerantId}` : "Fluido não selecionado",
           selectedCompressorRow
@@ -749,6 +752,7 @@ export function EvaporatorUnifiedWorkspacePage() {
       <NavCard
         title="Condições Operacionais"
         status={opsStatus}
+        onEdit={() => focusDetailedSection("section-condicoes-operacionais")}
         lines={[
           `Padrão: ${compressorMode === "ari" ? "ARI 540" : compressorMode === "constant" ? "Constante" : "Manual"}`,
           `${frequency} Hz | ${voltage} V`,
