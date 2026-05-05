@@ -50,12 +50,9 @@ import { CyclePHDiagram } from "../components/CyclePHDiagram";
 import { CoilEnvelopeTab } from "../components/CoilEnvelopeTab";
 import { OperatingMapChart } from "../components/OperatingMapChart";
 import { CompressorPickerModal } from "../components/CompressorPickerModal";
-import { FanPickerModal, type FanPickerItem } from "../components/FanPickerModal";
+import { FanPickerModal } from "../components/FanPickerModal";
 import { useCnCoilsCatalogs as useCnCoilsFullCatalogs } from "../hooks/useCnCoilsCatalogCollection";
-import {
-  getAxialFans,
-  getCentrifugalFans,
-} from "../services/unilabCoefficientsService";
+import { useEnrichedFanPickerItems } from "../hooks/useEnrichedFanPickerItems";
 import { PostSaveNextStepDialog } from "../components/PostSaveNextStepDialog";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { DrawingTab } from "../components/drawing/DrawingTab";
