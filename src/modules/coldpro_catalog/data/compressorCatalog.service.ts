@@ -50,6 +50,49 @@ export async function getCompressorById(id: string): Promise<CompressorCatalogRo
   return data.find(r => r.id === id) ?? null;
 }
 
+/**
+ * Carrega o spec completo de um compressor pelo id, expondo opcionalmente
+ * os coeficientes polinomiais nativos BITZER quando disponíveis no catálogo.
+ */
+export async function loadCompressorSpec(id: string): Promise<
+  | (CompressorCatalogRow & {
+      bitzerNative?: {
+        displacement_m3h: number;
+        coeff_lambda: number[];
+        coeff_current: number[];
+        coeff_specific_power: number[];
+        rpm: number;
+      };
+    })
+  | null
+> {
+  const row = await getCompressorById(id);
+  if (!row) return null;
+  const raw = row as CompressorCatalogRow & {
+    bitzer_native?: Record<string, unknown>;
+    bitzerNative?: Record<string, unknown>;
+  };
+  const native = raw.bitzerNative ?? raw.bitzer_native;
+  if (
+    native &&
+    Array.isArray(native.coeff_lambda) &&
+    Array.isArray(native.coeff_current) &&
+    Array.isArray(native.coeff_specific_power)
+  ) {
+    return {
+      ...row,
+      bitzerNative: {
+        displacement_m3h: Number(native.displacement_m3h ?? row.nominal_displacement_cm3 ?? 0),
+        coeff_lambda: (native.coeff_lambda as number[]).map(Number),
+        coeff_current: (native.coeff_current as number[]).map(Number),
+        coeff_specific_power: (native.coeff_specific_power as number[]).map(Number),
+        rpm: Number(native.rpm ?? row.nominal_rpm ?? 0),
+      },
+    };
+  }
+  return row;
+}
+
 // ─── Filtros ──────────────────────────────────────────────────────
 
 /** Filtra o índice leve (rápido, sem carregar dados completos) */
