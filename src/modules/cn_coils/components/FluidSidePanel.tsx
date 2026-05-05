@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Lock, Unlock, Zap, Search } from "lucide-react";
+import { useNumericInput } from "../hooks/useNumericInput";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import { CompressorPickerModal } from "./CompressorPickerModal";
 import { RefrigerantPickerModal } from "./RefrigerantPickerModal";
