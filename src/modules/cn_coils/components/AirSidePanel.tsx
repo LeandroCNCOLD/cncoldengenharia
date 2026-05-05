@@ -505,6 +505,7 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               }
               input={null}
               result={<ResultCell value={opPoint} />}
+              badge={<BadgeCell type="calculated" />}
             />
             {/* Temperatura de Entrada DB */}
             <Row
