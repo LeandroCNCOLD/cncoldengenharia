@@ -4,18 +4,11 @@
  * Layout de tabela com cabeçalho azul, campos de entrada e resultados
  * lado a lado, conforme o layout ColdPro de referência.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
-import {
-  getAxialFans,
-  getCentrifugalFans,
-} from "../services/unilabCoefficientsService";
-import type {
-  AxialFanCoefficient,
-  CentrifugalFanCoefficient,
-} from "../types/unilabCoefficients.types";
 import type { CnCoilsSimulationResult } from "../types/cncoils.types";
-import { FanPickerModal, type FanPickerItem } from "./FanPickerModal";
+import { FanPickerModal } from "./FanPickerModal";
+import { useEnrichedFanPickerItems } from "../hooks/useEnrichedFanPickerItems";
 
 
 // ─── tipos de ventilador ─────────────────────────────────────────────────────
