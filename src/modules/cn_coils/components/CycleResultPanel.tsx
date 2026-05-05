@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import type { CycleResult } from "../engines/cycle/cycleTypes";
 
 interface Props {
@@ -17,11 +16,19 @@ function Row({
   highlight?: boolean;
 }) {
   return (
-    <div className={`flex items-center justify-between rounded px-3 py-1.5 ${highlight ? "bg-blue-950/40" : ""}`}>
-      <span className="text-sm text-gray-400">{label}</span>
-      <span className={`text-sm font-mono font-semibold ${highlight ? "text-blue-300" : "text-white"}`}>
+    <div
+      className={`flex items-center justify-between rounded px-3 py-1.5 ${
+        highlight ? "bg-blue-50" : ""
+      }`}
+    >
+      <span className="text-sm text-slate-700">{label}</span>
+      <span
+        className={`text-sm font-mono font-semibold ${
+          highlight ? "text-blue-700" : "text-slate-900"
+        }`}
+      >
         {value}
-        {unit && <span className="ml-1 text-xs text-gray-500">{unit}</span>}
+        {unit && <span className="ml-1 text-xs text-slate-500">{unit}</span>}
       </span>
     </div>
   );
@@ -36,7 +43,13 @@ export function CycleResultPanel({ result }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${result.converged ? "bg-green-950/50 text-green-400" : "bg-yellow-950/50 text-yellow-400"}`}>
+      <div
+        className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${
+          result.converged
+            ? "bg-green-50 text-green-800 border border-green-200"
+            : "bg-yellow-50 text-yellow-900 border border-yellow-200"
+        }`}
+      >
         <span>{result.converged ? "✓" : "⚠"}</span>
         <span>
           {result.converged
@@ -46,7 +59,7 @@ export function CycleResultPanel({ result }: Props) {
       </div>
 
       <div>
-        <h3 className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Desempenho do Sistema</h3>
+        <h3 className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-600">Desempenho do Sistema</h3>
         <div className="space-y-0.5">
           <Row label="Capacidade de refrigeração" value={fmtW(result.Q_evap_W)} unit={unitW(result.Q_evap_W)} highlight />
           <Row label="Potência do compressor" value={fmtW(result.W_comp_W)} unit={unitW(result.W_comp_W)} />
@@ -58,7 +71,7 @@ export function CycleResultPanel({ result }: Props) {
       </div>
 
       <div>
-        <h3 className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Temperaturas de Equilíbrio</h3>
+        <h3 className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-600">Temperaturas de Equilíbrio</h3>
         <div className="space-y-0.5">
           <Row label="Temperatura de evaporação (Te)" value={result.Te_C.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} unit="°C" highlight />
           <Row label="Temperatura de condensação (Tc)" value={result.Tc_C.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} unit="°C" highlight />
@@ -67,7 +80,7 @@ export function CycleResultPanel({ result }: Props) {
       </div>
 
       <div>
-        <h3 className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Evaporador</h3>
+        <h3 className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-600">Evaporador</h3>
         <div className="space-y-0.5">
           <Row label="Capacidade total" value={fmtW(result.evaporatorResult.totalCapacityW)} unit={unitW(result.evaporatorResult.totalCapacityW)} />
           <Row label="Capacidade sensível" value={fmtW(result.evaporatorResult.sensibleCapacityW)} unit={unitW(result.evaporatorResult.sensibleCapacityW)} />
@@ -79,7 +92,7 @@ export function CycleResultPanel({ result }: Props) {
       </div>
 
       <div>
-        <h3 className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Condensador</h3>
+        <h3 className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-slate-600">Condensador</h3>
         <div className="space-y-0.5">
           <Row label="Calor rejeitado" value={fmtW(result.condenserResult.totalCapacityW)} unit={unitW(result.condenserResult.totalCapacityW)} />
           <Row label="Temperatura de saída do ar" value={result.condenserResult.airOutletTempC.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} unit="°C" />
@@ -89,10 +102,10 @@ export function CycleResultPanel({ result }: Props) {
 
       {result.warnings.length > 0 && (
         <div>
-          <h3 className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-yellow-600">Avisos</h3>
+          <h3 className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-yellow-800">Avisos</h3>
           <div className="space-y-1">
             {result.warnings.map((warning, index) => (
-              <div key={index} className="rounded bg-yellow-950/30 px-3 py-1.5 text-xs text-yellow-400">
+              <div key={index} className="rounded bg-yellow-50 border border-yellow-200 px-3 py-1.5 text-xs text-yellow-900">
                 {warning}
               </div>
             ))}
