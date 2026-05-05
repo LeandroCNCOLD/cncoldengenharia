@@ -169,6 +169,7 @@ function InputCell({
       max={max}
       disabled={disabled}
       placeholder={placeholder}
+      onFocus={(e) => e.target.select()}
       onChange={(e) => {
         const n = parseFloat(e.target.value);
         if (Number.isFinite(n)) onChange(n);
