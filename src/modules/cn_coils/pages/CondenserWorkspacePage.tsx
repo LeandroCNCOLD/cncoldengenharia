@@ -1011,31 +1011,23 @@ function CondenserTabs({
       <TabsContent value={CONDENSER_TABS.DETAILED} className="mt-3">
         <div className="space-y-3">
           <section className="space-y-2">
-            <h3 className="text-sm font-semibold text-foreground">
-              Formulário principal / dados do ambiente
-            </h3>
-            <div className="grid grid-cols-1 gap-2 rounded-md shadow-sm md:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_minmax(0,1fr)]">
-              <WorkspaceSidebar
-                componentType="condenser_air"
-                onSimulate={handleSimulate}
-                onReset={onReset}
-                canSimulate={effectiveCanSimulate}
-                isSimulating={storeIsSimulating || isSimulating}
-                faceAreaM2={result?.faceAreaM2}
-                disabledReason={effectiveDisabledReason}
-              />
-              <div className="min-w-0 space-y-2 xl:contents">
-                <div className="min-w-0 space-y-2 xl:border-r xl:border-border xl:pr-2">
-                  <AirSidePanel result={result} onFanPickerOpen={onFanPickerOpen} />
-                </div>
-                <div className="min-w-0 space-y-2">
-                  <FluidSidePanel
-                    componentType="condenser_air"
-                    refrigerants={catalogs.refrigerants}
-                    disabled={!catalogs.ready}
-                    result={result}
-                  />
-                </div>
+            <div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_220px]">
+              {/* Coluna 1 — Lado Ventilação */}
+              <div className="min-w-0 rounded border border-border bg-card">
+                <AirSidePanel result={result} onFanPickerOpen={onFanPickerOpen} />
+              </div>
+              {/* Coluna 2 — Lado Fluido */}
+              <div className="min-w-0 rounded border border-border bg-card">
+                <FluidSidePanel
+                  componentType="condenser_air"
+                  refrigerants={catalogs.refrigerants}
+                  disabled={!catalogs.ready}
+                  result={result}
+                />
+              </div>
+              {/* Coluna 3 — Resultados (sticky) */}
+              <div className="min-w-0">
+                <CondenserResultsPanel />
               </div>
             </div>
           </section>
