@@ -20,6 +20,7 @@ import {
   buildMoistAirState,
   type MoistAirState,
 } from "./airProperties";
+import { calcCoilEffectiveArea, calcEffectiveArea } from "../engine/effectiveArea";
 import { calcAirPressureDrop, calcFluidPressureDrop } from "@/modules/cn_coils/services/pressureDropService";
 import {
   checkCondensation,
