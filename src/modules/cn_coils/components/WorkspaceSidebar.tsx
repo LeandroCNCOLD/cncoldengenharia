@@ -104,6 +104,7 @@ export function WorkspaceSidebar({
 
   const [costModalOpen, setCostModalOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalKey>(null);
+  const [geomEditorOpen, setGeomEditorOpen] = useState(false);
   const [fans, setFans] = useState<Array<{ id: string; diameter_mm?: number; axial?: AxialFanRecord }>>([]);
   const [tubeWeightMaterial, setTubeWeightMaterial] = useState<TubeMaterial>("copper");
   const [finWeightMaterial, setFinWeightMaterial] = useState<FinMaterial>("aluminum");
