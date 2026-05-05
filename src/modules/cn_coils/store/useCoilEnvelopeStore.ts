@@ -90,11 +90,13 @@ interface CoilEnvelopeState {
 export const useCoilEnvelopeStore = create<CoilEnvelopeState>()(
   persist(
     (set, get) => ({
+      currentEquipmentId: null,
       envelopes: {},
       condenserEnvelope: null,
       compressorEnvelope: null,
       compressorId: null,
       compressorModel: null,
+      setCurrentEquipmentId: (id) => set({ currentEquipmentId: id }),
       saveEnvelope: (envelope) =>
         set((state) => ({
           envelopes: { ...state.envelopes, [envelope.componentType]: envelope },
