@@ -1,4 +1,4 @@
-import { getRefrigerantSatProps } from "../../../cn_coils/engines/refrigerant/refrigerantProperties";
+import { getRefrigerantSatProps, getRefrigerantMetadata } from "../../../cn_coils/engines/refrigerant/refrigerantProperties";
 
 export interface TwoPhasePropertiesInput {
   fluid: string;
@@ -17,6 +17,10 @@ export interface TwoPhaseProperties {
   prandtl_liquid: number;
   prandtl_vapor: number;
   latent_heat_j_kg: number;
+  /** Pressão reduzida pr = P_sat / P_crit — necessária para Shah (1979) e Jung & Didion (1989) */
+  pressure_reduced?: number;
+  /** Massa molar [kg/kmol] — necessária para Cooper (1984) */
+  molar_mass_kg_kmol?: number;
   warnings: string[];
 }
 
@@ -64,7 +68,17 @@ export function calculateTwoPhaseProperties(input: TwoPhasePropertiesInput): Two
 export async function calculateTwoPhasePropertiesReal(
   input: TwoPhasePropertiesInput,
 ): Promise<TwoPhaseProperties & { warnings: string[] }> {
-  const satProps = await getRefrigerantSatProps(input.fluid, input.temperature_c);
+  const [satProps, meta] = await Promise.all([
+    getRefrigerantSatProps(input.fluid, input.temperature_c),
+    getRefrigerantMetadata(input.fluid),
+  ]);
+
+  // Calcular pressão reduzida se P_crit disponível
+  let pressure_reduced: number | undefined;
+  if (meta?.P_crit_kPa && satProps.P_kPa > 0) {
+    pressure_reduced = satProps.P_kPa / meta.P_crit_kPa;
+  }
+
   return {
     density_liquid: satProps.liquid.rho_kgm3,
     density_vapor: satProps.vapor.rho_kgm3,
@@ -77,6 +91,8 @@ export async function calculateTwoPhasePropertiesReal(
     prandtl_liquid: satProps.liquid.Pr,
     prandtl_vapor: satProps.vapor.Pr,
     latent_heat_j_kg: satProps.h_fg_kJkg * 1000,
+    pressure_reduced,
+    molar_mass_kg_kmol: meta?.M_kg_kmol,
     warnings: satProps.warnings,
   };
 }

@@ -40,6 +40,12 @@ export interface RefrigerantMetadata {
   points_count: number;
   P_range_kPa: [number, number];
   note?: string;
+  /** Pressão crítica [kPa] — necessária para Shah (1979) e Jung & Didion (1989) */
+  P_crit_kPa?: number;
+  /** Massa molar [kg/kmol] — necessária para Cooper (1984) */
+  M_kg_kmol?: number;
+  /** Temperatura crítica [°C] */
+  T_crit_C?: number;
 }
 
 interface RefrigerantTablesCache {
@@ -181,6 +187,18 @@ export async function listAvailableRefrigerants(): Promise<
 > {
   const { metadata } = await loadTables();
   return Object.entries(metadata).map(([id, meta]) => ({ id, ...meta }));
+}
+
+/**
+ * Retorna os metadados do refrigerante (inclui P_crit_kPa, M_kg_kmol, T_crit_C).
+ * Útil para cálculos de Shah (1979) e Jung & Didion (1989).
+ */
+export async function getRefrigerantMetadata(
+  refrigerantId: string,
+): Promise<RefrigerantMetadata | null> {
+  const { metadata } = await loadTables();
+  const key = normalizeRefrigerantId(refrigerantId);
+  return metadata[key] ?? null;
 }
 
 export function getRefrigerantMaxTubeVelocity(_id: string): number {
