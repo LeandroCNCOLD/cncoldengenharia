@@ -60,7 +60,7 @@ import { WorkspaceAIChat } from "../components/WorkspaceAIChat";
 import { AirSidePanel } from "../components/AirSidePanel";
 import { FluidSidePanel } from "../components/FluidSidePanel";
 import { GeometryBottomBar } from "../components/GeometryBottomBar";
-import { WorkspaceSidebar } from "../components/WorkspaceSidebar";
+
 import { DatasetStatusPanel } from "../components/DatasetStatusPanel";
 import { useCnCoilsCatalogs } from "../hooks/useCnCoilsCatalogs";
 import { useCnCoilsSimulation } from "../hooks/useCnCoilsSimulation";
