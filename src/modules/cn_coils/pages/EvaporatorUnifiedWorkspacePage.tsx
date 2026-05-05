@@ -1442,6 +1442,8 @@ function UnifiedTabs({
   onCalculate,
   onReset,
   isCalculating,
+  activeTab,
+  onTabChange,
 }: {
   config: CycleSystemConfig;
   cycleResult: CycleResult | null;
