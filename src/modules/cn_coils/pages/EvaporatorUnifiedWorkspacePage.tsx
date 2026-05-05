@@ -546,178 +546,67 @@ export function EvaporatorUnifiedWorkspacePage() {
       onReset={handleReset}
       isCalculating={isCalculating}
     >
-      <Accordion type="multiple" defaultValue={["mode", "vent", "fluid", "ops"]} className="w-full">
-        {/* 1. MODO */}
-        <AccordionItem value="mode">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Modo de Cálculo
-          </AccordionTrigger>
-          <AccordionContent className="space-y-3">
-            <div>
-              <Label className="text-[10px] text-muted-foreground">Objetivo</Label>
-              <RadioGroup
-                value={calcMode}
-                onValueChange={(v) => setCalcMode(v as CalcMode)}
-                className="mt-1 flex gap-3"
-              >
-                <label className="flex items-center gap-1.5 text-xs">
-                  <RadioGroupItem value="verify" /> Verificar
-                </label>
-                <label className="flex items-center gap-1.5 text-xs">
-                  <RadioGroupItem value="design" /> Desenho
-                </label>
-              </RadioGroup>
-            </div>
-            <div>
-              <Label className="text-[10px] text-muted-foreground">Motor</Label>
-              <RadioGroup
-                value={engineMode}
-                onValueChange={(v) => setEngineMode(v as EngineMode)}
-                className="mt-1 flex flex-col gap-1"
-              >
-                <label className="flex items-center gap-1.5 text-xs">
-                  <RadioGroupItem value="v1" /> V1 NTU-ε
-                </label>
-                <label className="flex items-center gap-1.5 text-xs">
-                  <RadioGroupItem value="v2" /> V2 ASHRAE
-                </label>
-              </RadioGroup>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+      <div className="mb-3 rounded bg-[#1E6FD9] px-2 py-1.5 text-center text-xs font-bold uppercase tracking-wider text-white">
+        Evaporador DX
+      </div>
 
-        {/* 2. GEOMETRIA */}
-        <AccordionItem value="geom">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Geometria do Aletado
-          </AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            <NumField label="Altura (mm)" value={geomHeight} onChange={setGeomHeight} />
-            <NumField label="Largura (mm)" value={geomWidth} onChange={setGeomWidth} />
-            <NumField label="Profundidade (mm)" value={geomDepth} onChange={setGeomDepth} />
-            <NumField label="Passo de aleta (mm)" value={finPitch} step={0.1} onChange={setFinPitch} />
-            <NumField label="Diâmetro do tubo (mm)" value={tubeDiam} step={0.01} onChange={setTubeDiam} />
-            <NumField label="Nº de circuitos" value={circuits} onChange={setCircuits} />
-            <NumField label="Linhas de tubos" value={rows} onChange={setRows} />
-            <NumField label="Tubos por linha" value={tubesPerRow} onChange={setTubesPerRow} />
-            <Button size="sm" variant="outline" className="w-full h-8 text-xs">
-              Configurar Geometria…
-            </Button>
-          </AccordionContent>
-        </AccordionItem>
+      <NavCard
+        title="Modo de Cálculo"
+        status="ok"
+        onEdit={() => console.log("scroll to:", "mode")}
+        lines={[
+          `Objetivo: ${calcMode === "verify" ? "Verificar" : "Desenho"}`,
+          `Motor: ${engineMode === "v1" ? "V1 NTU-ε" : "V2 ASHRAE"}`,
+        ]}
+      />
 
-        {/* 3. VENTILAÇÃO */}
-        <AccordionItem value="vent">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Lado Ventilação
-          </AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            <NumField label="Vazão de ar (m³/h)" value={airFlow} onChange={setAirFlow} />
-            <NumField label="Temp. entrada DB (°C)" value={airTempIn} step={0.5} onChange={setAirTempIn} />
-            <NumField label="UR entrada (%)" value={airRH} onChange={setAirRH} />
-            <div>
-              <Label className="text-[10px] text-muted-foreground">Ventilador</Label>
-              <Select value={fanMode} onValueChange={(v) => setFanMode(v as "manual" | "catalog")}>
-                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="manual">Manual</SelectItem>
-                  <SelectItem value="catalog">Selecionar catálogo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {fanMode === "catalog" && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full h-8 text-xs"
-                onClick={() => setFanPickerOpen(true)}
-              >
-                {selectedFan
-                  ? `${[selectedFan.manufacturer, selectedFan.model].filter(Boolean).join(" ") || "Ventilador"} ✓`
-                  : "Selecionar ventilador…"}
-              </Button>
-            )}
-            <div>
-              <Label className="text-[10px] text-muted-foreground">Velocidade frontal (m/s)</Label>
-              <Input readOnly value={fmt(frontalVelocity, 2)} className="h-8 text-xs bg-muted/40" />
-            </div>
-            <NumField label="Pressão estática (Pa)" value={staticPressure} onChange={setStaticPressure} />
-            <NumField label="Fator de segurança (%)" value={safetyFactor} onChange={setSafetyFactor} />
-          </AccordionContent>
-        </AccordionItem>
+      <NavCard
+        title="Geometria do Aletado"
+        status={geomHeight && geomWidth && geomDepth ? "ok" : "incomplete"}
+        onEdit={() => console.log("scroll to:", "geom")}
+        lines={[
+          geomHeight && geomWidth && geomDepth
+            ? `${geomHeight} × ${geomWidth} × ${geomDepth} mm`
+            : "Não configurada",
+        ]}
+      />
 
-        {/* 4. FLUIDO */}
-        <AccordionItem value="fluid">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Lado Fluido / Refrigerante
-          </AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            <div>
-              <Label className="text-[10px] text-muted-foreground">Fluido</Label>
-              <Select value={refrigerantId} onValueChange={setRefrigerantId}>
-                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {REFRIGERANT_OPTIONS.map((r) => (
-                    <SelectItem key={r} value={r}>{r}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full h-8 text-xs"
-              onClick={() => setCompressorPickerOpen(true)}
-            >
-              Selecionar compressor…
-            </Button>
-            <div>
-              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                <Label>Te</Label>
-                <span className="font-mono text-foreground">{fmt(te, 1)} °C</span>
-              </div>
-              <Slider value={[te]} min={-40} max={15} step={1} onValueChange={(v) => setTe(v[0])} />
-            </div>
-            <div>
-              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                <Label>Tc</Label>
-                <span className="font-mono text-foreground">{fmt(tc, 1)} °C</span>
-              </div>
-              <Slider value={[tc]} min={20} max={60} step={1} onValueChange={(v) => setTc(v[0])} />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <NumField label="SH (K)" value={superheat} onChange={setSuperheat} />
-              <NumField label="SC (K)" value={subcooling} onChange={setSubcooling} />
-            </div>
-            <NumField label="Vazão fluido (kg/h)" value={massFlow} onChange={setMassFlow} />
-          </AccordionContent>
-        </AccordionItem>
+      <NavCard
+        title="Lado Ventilação"
+        status={airFlow && airTempIn !== undefined ? "ok" : "incomplete"}
+        onEdit={() => console.log("scroll to:", "vent")}
+        lines={[
+          airFlow ? `Vazão: ${airFlow.toLocaleString("pt-BR")} m³/h` : "Vazão não informada",
+          airTempIn !== undefined ? `Entrada: ${airTempIn} °C / ${airRH}% UR` : "",
+          selectedFan
+            ? `Ventilador: ${[selectedFan.manufacturer, selectedFan.model].filter(Boolean).join(" ")}`
+            : fanMode === "manual" ? "Ventilador: Manual" : "Ventilador não selecionado",
+        ].filter(Boolean)}
+      />
 
-        {/* 5. OPERAÇÃO */}
-        <AccordionItem value="ops">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Condições Operacionais
-          </AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            <div className="flex gap-1">
-              {(["ari", "constant", "manual"] as CompressorMode[]).map((m) => (
-                <Button
-                  key={m}
-                  type="button"
-                  size="sm"
-                  variant={compressorMode === m ? "default" : "outline"}
-                  className="flex-1 h-7 text-[10px] px-1"
-                  onClick={() => setCompressorMode(m)}
-                >
-                  {m === "ari" ? "ARI 540" : m === "constant" ? "Const." : "Manual"}
-                </Button>
-              ))}
-            </div>
-            <NumField label="Frequência (Hz)" value={frequency} onChange={setFrequency} />
-            <NumField label="Tensão (V)" value={voltage} onChange={setVoltage} />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      <NavCard
+        title="Lado Fluido / Refrigerante"
+        status={refrigerantId ? "ok" : "incomplete"}
+        onEdit={() => console.log("scroll to:", "fluid")}
+        lines={[
+          refrigerantId ? `Fluido: ${refrigerantId}` : "Fluido não selecionado",
+          selectedCompressorRow
+            ? `Compressor: ${selectedCompressorRow.model ?? selectedCompressorRow.id}`
+            : "Compressor não selecionado",
+          `Te: ${fmt(te, 1)} °C | Tc: ${fmt(tc, 1)} °C`,
+          `SH: ${superheat} K | SC: ${subcooling} K`,
+        ]}
+      />
+
+      <NavCard
+        title="Condições Operacionais"
+        status="ok"
+        onEdit={() => console.log("scroll to:", "ops")}
+        lines={[
+          `Padrão: ${compressorMode === "ari" ? "ARI 540" : compressorMode === "constant" ? "Constante" : "Manual"}`,
+          `${frequency} Hz | ${voltage} V`,
+        ]}
+      />
     </WorkspaceInputsSidebar>
   );
 
