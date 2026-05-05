@@ -1183,6 +1183,8 @@ function DetailedWorkspaceTab({
   setCompressorMode,
   frequency,
   setFrequency,
+  voltage,
+  setVoltage,
   cycleResult,
   onCalculate,
   onReset,
