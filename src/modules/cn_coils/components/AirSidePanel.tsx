@@ -218,32 +218,9 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
   const selectedFanId = useCnCoilsSimulationStore((s) => s.selectedFanId);
   const fanCount = useCnCoilsSimulationStore((s) => s.fanCount);
 
-  // biblioteca de ventiladores
-  const [fans, setFans] = useState<FanOption[]>([]);
-  const [loadingFans, setLoadingFans] = useState(false);
+  // biblioteca enriquecida (EBM-Papst etc.) com fabricante, série, motor, diâmetro
+  const { items: fanPickerItems, loading: loadingFans } = useEnrichedFanPickerItems();
   const [pickerOpen, setPickerOpen] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoadingFans(true);
-    Promise.all([getAxialFans(), getCentrifugalFans()])
-      .then(([axial, centrifugal]) => {
-        if (cancelled) return;
-        setFans([
-          ...axial.map((fan) => ({ type: "axial" as const, fan })),
-          ...centrifugal.map((fan) => ({ type: "centrifugal" as const, fan })),
-        ]);
-      })
-      .catch(() => {
-        /* silencioso — ventilador não é obrigatório */
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingFans(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   // unidades locais
   const [uCap, setUCap] = useState<CapacityUnit>("kcal_h");
@@ -267,46 +244,12 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
   // ventilador selecionado — prioriza store principal, com fallback ao thermo legado
   const activeFanId = selectedFanId ?? thermo.selectedFanId;
   const selectedFan = useMemo(
-    () => fans.find((o) => o.fan.id === activeFanId),
-    [fans, activeFanId],
+    () => fanPickerItems.find((f) => f.id === activeFanId),
+    [fanPickerItems, activeFanId],
   );
   const fanLabel = selectedFan
-    ? `${fanCount}× ${selectedFan.fan.model} · ${selectedFan.type === "axial" ? "axial" : "centrífugo"}`
+    ? `${fanCount}× ${[selectedFan.manufacturer, selectedFan.model].filter(Boolean).join(" ")}`
     : "Manual / Selecionar…";
-
-  // Itens para o modal — converte coefficient → FanPickerItem
-  const fanPickerItems = useMemo<FanPickerItem[]>(
-    () =>
-      fans.map((opt) => {
-        if (opt.type === "axial") {
-          const f = opt.fan;
-          return {
-            id: f.id,
-            manufacturer: "Ziehl-Abegg",
-            model: f.model,
-            airflow_m3h: f.airflowRange_m3h
-              ? (f.airflowRange_m3h.min + f.airflowRange_m3h.max) / 2
-              : undefined,
-            rpm: f.rpm,
-            motor_power_w: f.power_W,
-            motor_current_a: f.current_A,
-            voltage_v: f.voltage,
-            frequency_hz: f.frequency,
-            fanCategory: "axial",
-            fanFunction: "soprador",
-          };
-        }
-        const f = opt.fan;
-        return {
-          id: f.id,
-          manufacturer: "Ziehl-Abegg",
-          model: f.model,
-          fanCategory: "centrifugal",
-          fanFunction: "soprador",
-        };
-      }),
-    [fans],
-  );
 
   const handleOpenPicker = () => {
     onFanPickerOpen?.();
