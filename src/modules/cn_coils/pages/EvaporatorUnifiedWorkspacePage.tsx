@@ -1430,6 +1430,8 @@ function UnifiedTabs({
   setEngineMode: (value: EngineMode) => void;
   setCompressorMode: (value: CompressorMode) => void;
   setFrequency: (value: number) => void;
+  onOpenGeometryPicker: () => void;
+  onOpenGeomModal: (type: "tube" | "fin" | "distributor") => void;
 }) {
   const enrichedWarnings = useMemo(
     () => (cycleResult ? enrichWarnings(cycleResult.warnings) : []),
