@@ -310,6 +310,13 @@ export function EvaporatorUnifiedWorkspacePage() {
   const [activeGeomModal, setActiveGeomModal] = useState<"tube" | "fin" | "distributor" | null>(null);
   // ── Compressor selecionado do catálogo ──
   const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
+  const resetSimStore = useCnCoilsSimulationStore((s) => s.reset);
+  const setActiveProjectGlobal = useProjectStore((s) => s.setActiveProject);
+  const handleNovoAletado = () => {
+    resetSimStore();
+    setActiveProjectGlobal(null);
+    toast.success("Workspace limpo. Configure um novo aletado do zero.");
+  };
   const [selectedCompressorRow, setSelectedCompressorRow] = useState<CompressorCatalogRow | null>(null);
   useEffect(() => {
     if (!selectedCompressorId) {
