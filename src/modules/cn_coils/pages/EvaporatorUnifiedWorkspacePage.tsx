@@ -862,6 +862,8 @@ export function EvaporatorUnifiedWorkspacePage() {
               setEngineMode={setEngineMode}
               setCompressorMode={setCompressorMode}
               setFrequency={setFrequency}
+              voltage={voltage}
+              setVoltage={setVoltage}
               onOpenGeometryPicker={() => setGeomPickerOpen(true)}
               onOpenGeomModal={(t) => setActiveGeomModal(t)}
             />
@@ -1123,6 +1125,8 @@ type DetailedWorkspaceTabProps = {
   setCompressorMode: (value: CompressorMode) => void;
   frequency: number;
   setFrequency: (value: number) => void;
+  voltage: number;
+  setVoltage: (value: number) => void;
   cycleResult: CycleResult | null;
   onCalculate: () => void;
   onReset: () => void;
@@ -1181,6 +1185,8 @@ function DetailedWorkspaceTab({
   setCompressorMode,
   frequency,
   setFrequency,
+  voltage,
+  setVoltage,
   cycleResult,
   onCalculate,
   onReset,
@@ -1302,7 +1308,48 @@ function DetailedWorkspaceTab({
         </div>
       </section>
 
-      <section id="section-condicoes-operacionais" className="mt-2 space-y-2">
+      <section id="section-condicoes-operacionais" className="mt-2 space-y-3">
+        <h3 className="text-sm font-semibold text-foreground">
+          Condições Operacionais
+        </h3>
+
+        <div className="rounded-lg border border-border bg-card p-3 space-y-2">
+          <div className="flex gap-1">
+            {(["ari", "constant", "manual"] as CompressorMode[]).map((m) => (
+              <Button
+                key={m}
+                type="button"
+                size="sm"
+                variant={compressorMode === m ? "default" : "outline"}
+                className="flex-1 h-8 text-xs"
+                onClick={() => setCompressorMode(m)}
+              >
+                {m === "ari" ? "ARI 540" : m === "constant" ? "Const." : "Manual"}
+              </Button>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-muted-foreground">Frequência (Hz)</span>
+              <input
+                type="number"
+                value={frequency}
+                onChange={(e) => setFrequency(parseFloat(e.target.value) || 0)}
+                className="h-8 rounded border border-border bg-background px-2 text-sm"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-muted-foreground">Tensão (V)</span>
+              <input
+                type="number"
+                value={voltage}
+                onChange={(e) => setVoltage(parseFloat(e.target.value) || 0)}
+                className="h-8 rounded border border-border bg-background px-2 text-sm"
+              />
+            </label>
+          </div>
+        </div>
+
         <h3 className="text-sm font-semibold text-foreground">
           Dados técnicos e premissas
         </h3>
@@ -1433,6 +1480,8 @@ function UnifiedTabs({
   engineMode,
   compressorMode,
   frequency,
+  voltage,
+  setVoltage,
   setGeomHeight,
   setGeomWidth,
   setGeomDepth,
@@ -1500,6 +1549,7 @@ function UnifiedTabs({
   engineMode: EngineMode;
   compressorMode: CompressorMode;
   frequency: number;
+  voltage: number;
   setGeomHeight: (value: number) => void;
   setGeomWidth: (value: number) => void;
   setGeomDepth: (value: number) => void;
@@ -1524,6 +1574,7 @@ function UnifiedTabs({
   setEngineMode: (value: EngineMode) => void;
   setCompressorMode: (value: CompressorMode) => void;
   setFrequency: (value: number) => void;
+  setVoltage: (value: number) => void;
   onOpenGeometryPicker: () => void;
   onOpenGeomModal: (type: "tube" | "fin" | "distributor") => void;
 }) {
@@ -1730,6 +1781,8 @@ function UnifiedTabs({
           setCompressorMode={setCompressorMode}
           frequency={frequency}
           setFrequency={setFrequency}
+          voltage={voltage}
+          setVoltage={setVoltage}
           cycleResult={cycleResult}
           onCalculate={onCalculate}
           onReset={onReset}
