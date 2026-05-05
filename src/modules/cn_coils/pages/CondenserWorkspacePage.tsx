@@ -223,38 +223,8 @@ export function CondenserWorkspacePage() {
   // ── Ventilador (picker) ──
   const [fanPickerOpen, setFanPickerOpen] = useState(false);
   const fullCatalogs = useCnCoilsFullCatalogs();
-  // Ventiladores carregados do unilabCoefficients (ids compatíveis com AirSidePanel)
-  const [unilabAxialFans, setUnilabAxialFans] = useState<Awaited<ReturnType<typeof getAxialFans>>>([]);
-  const [unilabCentrifugalFans, setUnilabCentrifugalFans] = useState<Awaited<ReturnType<typeof getCentrifugalFans>>>([]);
-  useEffect(() => {
-    Promise.all([getAxialFans(), getCentrifugalFans()]).then(([axial, centrifugal]) => {
-      setUnilabAxialFans(axial);
-      setUnilabCentrifugalFans(centrifugal);
-    }).catch(() => {});
-  }, []);
-  const fanPickerItems = useMemo<FanPickerItem[]>(() => [
-    ...unilabAxialFans.map((f) => ({
-      id: f.id,
-      manufacturer: "Ziehl-Abegg",
-      model: f.model,
-      airflow_m3h: f.airflowRange_m3h
-        ? (f.airflowRange_m3h.min + f.airflowRange_m3h.max) / 2
-        : undefined,
-      rpm: f.rpm,
-      motor_power_w: f.power_W,
-      motor_current_a: f.current_A,
-      voltage_v: f.voltage,
-      frequency_hz: f.frequency,
-      fanCategory: "axial" as const,
-      fanFunction: "soprador" as const,
-    })),
-    ...unilabCentrifugalFans.map((f) => ({
-      id: f.id,
-      manufacturer: "Ziehl-Abegg",
-      model: f.model,
-      fanCategory: "centrifugal" as const,
-      fanFunction: "soprador" as const,
-    })),
+  // Biblioteca enriquecida (EBM-Papst etc.) — fabricante, série, motor, diâmetro
+  const { items: fanPickerItems } = useEnrichedFanPickerItems();
   ], [unilabAxialFans, unilabCentrifugalFans]);
 
   // ── Compressor ──
