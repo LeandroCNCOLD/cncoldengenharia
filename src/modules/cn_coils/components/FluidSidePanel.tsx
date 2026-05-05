@@ -33,6 +33,35 @@ import {
   type VelocityUnit,
 } from "../utils/unitConversions";
 
+/** Badge de origem do valor */
+function BadgeCell({
+  type,
+}: {
+  type: "auto" | "manual" | "catalog" | "calculated" | "pending";
+}) {
+  const styles = {
+    auto: "bg-slate-100 text-slate-500 border-slate-200",
+    manual: "bg-amber-50 text-amber-700 border-amber-200",
+    catalog: "bg-blue-50 text-blue-700 border-blue-200",
+    calculated: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    pending: "bg-slate-50 text-slate-400 border-slate-200",
+  };
+  const labels = {
+    auto: "Auto",
+    manual: "Manual",
+    catalog: "Catálogo",
+    calculated: "Calculado",
+    pending: "Pendente",
+  };
+  return (
+    <span
+      className={`inline-block rounded border px-1 py-0.5 text-[8px] font-semibold leading-none ${styles[type]}`}
+    >
+      {labels[type]}
+    </span>
+  );
+}
+
 interface FluidSidePanelProps {
   componentType: CnCoilsComponentType;
   refrigerants?: unknown;
@@ -260,6 +289,7 @@ export function FluidSidePanel({
         {/* 1.5) Compressor (acopla cálculo ao polinômio ASHRAE) */}
         <FieldRow
           label="Compressor"
+          badge={hasCompressor ? <BadgeCell type="catalog" /> : undefined}
           unit={
             <div className="flex w-full items-center justify-center rounded border border-amber-300 bg-amber-50 px-1 py-0.5 text-[10px] font-bold text-amber-900">
               {compressorCount}×
@@ -285,6 +315,13 @@ export function FluidSidePanel({
         {/* 2) Vazão + cadeado */}
         <FieldRow
           label="Vazão"
+          badge={
+            massFlowReadOnly ? (
+              <BadgeCell type="auto" />
+            ) : !isMassFlowLocked ? (
+              <BadgeCell type="manual" />
+            ) : undefined
+          }
           unit={
             <UnitSelect
               value={uMassFlow}
@@ -349,9 +386,17 @@ export function FluidSidePanel({
           </div>
         </FieldRow>
 
+        {!massFlowReadOnly && !isMassFlowLocked && (
+          <div className="flex items-center gap-1 rounded border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] text-amber-700">
+            <span>⚠</span>
+            <span>Valor sobrescrito manualmente. Resultado pode divergir do equilíbrio automático.</span>
+          </div>
+        )}
+
         {/* 3) Temp. Condensação / Evaporação */}
         <FieldRow
           label={operatingTempLabel}
+          badge={opTempReadOnly ? <BadgeCell type="auto" /> : undefined}
           unit={
             <UnitSelect
               value={uOpTemp}
@@ -491,6 +536,7 @@ export function FluidSidePanel({
         {/* 6) Queda de Pressão (resultado) */}
         <FieldRow
           label="Queda de Pressão"
+          badge={<BadgeCell type="calculated" />}
           unit={
             <UnitSelect
               value={uPdrop}
@@ -528,6 +574,7 @@ export function FluidSidePanel({
         {/* 8) Velocidade do Fluido (resultado) */}
         <FieldRow
           label="Vel. do Fluido"
+          badge={<BadgeCell type="calculated" />}
           unit={
             <UnitSelect value={uVel} onChange={setUVel} options={VELOCITY_UNITS} />
           }
@@ -575,18 +622,21 @@ function FieldRow({
   label,
   unit,
   children,
+  badge,
 }: {
   label: string;
   unit?: React.ReactNode;
   children: React.ReactNode;
+  badge?: React.ReactNode;
 }) {
   return (
     <div className="grid grid-cols-[minmax(90px,1fr)_60px_minmax(0,1.2fr)] items-center gap-1">
       <label
-        className="truncate text-[10px] font-medium text-slate-700"
+        className="flex min-w-0 items-center gap-1 truncate text-[10px] font-medium text-slate-700"
         title={label}
       >
-        {label}
+        <span className="truncate">{label}</span>
+        {badge}
       </label>
       <div className="min-w-0">{unit ?? <UnitText text="—" />}</div>
       <div className="min-w-0">{children}</div>
