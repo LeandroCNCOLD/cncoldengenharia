@@ -202,6 +202,18 @@ export function ProjectHeaderBar({ workspaceType, onNovoAletado }: ProjectHeader
                 </span>
               </div>
             </div>
+            {onNovoAletado && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 gap-1 text-xs border-emerald-400 text-emerald-700 hover:bg-emerald-50"
+                title="Iniciar cálculo de um aletado do zero (sem usar catálogo)"
+                onClick={onNovoAletado}
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Novo Aletado
+              </Button>
+            )}
             <Button
               size="sm"
               variant="ghost"
