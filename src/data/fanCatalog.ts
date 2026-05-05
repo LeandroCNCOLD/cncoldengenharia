@@ -22,7 +22,9 @@ export interface FanModel {
   dp_max_pa: number;          // Pressão máxima (vazão zero) [Pa]
   p1_nominal_w: number;       // Potência nominal [W]
   num_curve_points?: number;  // Quantidade de pontos da curva
+  source_file?: string;       // Arquivo fonte do datasheet
   curve_points: FanCurvePoint[]; // Pontos da curva Q×ΔP
+  [key: string]: unknown;     // Permite campos extras dos datasheets
 }
 
 export const FAN_CATALOG: FanModel[] = [
