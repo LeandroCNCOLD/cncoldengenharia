@@ -5,7 +5,7 @@
  * Fonte: src/modules/cn_coils/data/fanCatalog.ts (FAN_CATALOG)
  */
 import { useMemo } from "react";
-import { FAN_CATALOG, type FanModel } from "../data/fanCatalog";
+import { FAN_CATALOG, type FanModel } from "@/data/fanCatalog";
 import type { FanPickerItem } from "../components/FanPickerModal";
 
 /** Vazão recomendada de operação: ponto da curva onde psf_pa cai a ~60% do max. */
