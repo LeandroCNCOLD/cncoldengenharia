@@ -432,6 +432,7 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
                 </button>
               }
               result={<ResultCell value={selectedFan ? "OK" : "---"} />}
+              badge={selectedFan ? <BadgeCell type="catalog" /> : undefined}
             />
             {/* Vazão de Ar */}
             <Row
