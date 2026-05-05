@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { testBenchConfigService } from "@/modules/coldpro_catalog/services/testBenchConfigService";
 
 export interface EnvelopePoint {
   Te: number;
