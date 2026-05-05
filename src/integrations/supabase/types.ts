@@ -403,6 +403,96 @@ export type Database = {
         }
         Relationships: []
       }
+      fans_catalog: {
+        Row: {
+          airflow_m3h: number | null
+          article_number: string | null
+          created_at: string
+          design: string | null
+          efficiency_pct: number | null
+          electrical: string | null
+          fan_genre: string | null
+          frequency_hz: number | null
+          id: string
+          manufacturer: string
+          motor: string | null
+          motor_family: string | null
+          motor_power_w: number | null
+          operating_points: Json
+          phases: number | null
+          power_w: number | null
+          raw: Json
+          rpm: number | null
+          series: string | null
+          sfp_class: string | null
+          sfp_value: number | null
+          size_mm: number | null
+          sound_db: string | null
+          static_pressure_pa: number | null
+          type_key: string
+          updated_at: string
+          voltage_v: number | null
+        }
+        Insert: {
+          airflow_m3h?: number | null
+          article_number?: string | null
+          created_at?: string
+          design?: string | null
+          efficiency_pct?: number | null
+          electrical?: string | null
+          fan_genre?: string | null
+          frequency_hz?: number | null
+          id?: string
+          manufacturer: string
+          motor?: string | null
+          motor_family?: string | null
+          motor_power_w?: number | null
+          operating_points?: Json
+          phases?: number | null
+          power_w?: number | null
+          raw?: Json
+          rpm?: number | null
+          series?: string | null
+          sfp_class?: string | null
+          sfp_value?: number | null
+          size_mm?: number | null
+          sound_db?: string | null
+          static_pressure_pa?: number | null
+          type_key: string
+          updated_at?: string
+          voltage_v?: number | null
+        }
+        Update: {
+          airflow_m3h?: number | null
+          article_number?: string | null
+          created_at?: string
+          design?: string | null
+          efficiency_pct?: number | null
+          electrical?: string | null
+          fan_genre?: string | null
+          frequency_hz?: number | null
+          id?: string
+          manufacturer?: string
+          motor?: string | null
+          motor_family?: string | null
+          motor_power_w?: number | null
+          operating_points?: Json
+          phases?: number | null
+          power_w?: number | null
+          raw?: Json
+          rpm?: number | null
+          series?: string | null
+          sfp_class?: string | null
+          sfp_value?: number | null
+          size_mm?: number | null
+          sound_db?: string | null
+          static_pressure_pa?: number | null
+          type_key?: string
+          updated_at?: string
+          voltage_v?: number | null
+        }
+        Relationships: []
+      }
       module_permissions: {
         Row: {
           can_edit: boolean
