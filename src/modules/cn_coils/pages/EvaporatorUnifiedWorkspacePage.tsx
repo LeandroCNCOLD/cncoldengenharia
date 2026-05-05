@@ -1282,7 +1282,7 @@ function DetailedWorkspaceTab({
         </div>
       </section>
 
-      <section className="mt-2 space-y-2">
+      <section id="section-condicoes-operacionais" className="mt-2 space-y-2">
         <h3 className="text-sm font-semibold text-foreground">
           Dados técnicos e premissas
         </h3>
