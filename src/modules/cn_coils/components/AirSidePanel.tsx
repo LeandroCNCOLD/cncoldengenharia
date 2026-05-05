@@ -9,6 +9,7 @@ import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import type { CnCoilsSimulationResult } from "../types/cncoils.types";
 import { FanPickerModal } from "./FanPickerModal";
 import { useEnrichedFanPickerItems } from "../hooks/useEnrichedFanPickerItems";
+import { FAN_CATALOG, findOperatingPoint } from "@/data/fanCatalog";
 
 
 // (helpers de FanOption removidos — usamos a biblioteca enriquecida diretamente)
