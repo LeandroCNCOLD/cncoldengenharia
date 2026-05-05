@@ -525,6 +525,13 @@ export function WorkspaceSidebar({
         open={activeModal === "distributor"}
         onClose={() => setActiveModal(null)}
       />
+      <GeometryEditorModal
+        open={geomEditorOpen}
+        onClose={() => setGeomEditorOpen(false)}
+        baseGeometry={null}
+        mode="create"
+        onSaved={() => setGeomEditorOpen(false)}
+      />
     </aside>
   );
 }
