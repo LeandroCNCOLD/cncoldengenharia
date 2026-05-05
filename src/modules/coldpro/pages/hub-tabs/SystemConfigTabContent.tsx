@@ -7,7 +7,7 @@
  *
  * Ao concluir, chama onDone() para avançar para a aba de Equilíbrio.
  */
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Database, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,14 +18,10 @@ import { CompressorForm } from "../../components/forms/CompressorForm";
 import { CondenserForm } from "../../components/forms/CondenserForm";
 import {
   EvaporatorForm,
-  buildEvaporatorInputFromForm,
   type EvaporatorFormValue,
 } from "../../components/forms/EvaporatorForm";
 import { SystemConditionsForm, type SystemConditions } from "../../components/forms/SystemConditionsForm";
 import { useCatalogSessionStore } from "@/modules/coldpro_catalog/store/useCatalogSessionStore";
-import { useCoilEnvelopeStore } from "@/modules/cn_coils/store/useCoilEnvelopeStore";
-import { buildMotorComponentsFromCatalog } from "@/modules/coldpro_catalog/adapters/sessionToMotorInputAdapter";
-import { useCatalogRevisionStore } from "@/modules/coldpro_catalog/store/useCatalogRevisionStore";
 import type { CompressorSpec, CondenserSpec } from "@/modules/coldpro_v2";
 
 interface Props {
@@ -44,38 +40,6 @@ export function SystemConfigTabContent({ onDone }: Props) {
     selectedEvaporator,
     clearSelection,
   } = useCatalogSessionStore();
-
-  const { setCompressorEnvelope, setCondenserEnvelope, setEvaporatorEnvelope } =
-    useCoilEnvelopeStore();
-
-  const revision = useCatalogRevisionStore((s) => s.revision);
-  const lastRevisionRef = useRef<number | undefined>(undefined);
-
-  // Sincronizar do catálogo quando há seleção
-  useEffect(() => {
-    if (revision === lastRevisionRef.current) return;
-    lastRevisionRef.current = revision;
-
-    const { compressorEnvelope, condenserEnvelope, evaporatorEnvelope } =
-      buildMotorComponentsFromCatalog({
-        selectedCompressor,
-        selectedCondenser,
-        selectedEvaporator,
-        selectedReheatCoil: null,
-      });
-
-    if (compressorEnvelope) setCompressorEnvelope(compressorEnvelope);
-    if (condenserEnvelope) setCondenserEnvelope(condenserEnvelope);
-    if (evaporatorEnvelope) setEvaporatorEnvelope("evaporator_dx", evaporatorEnvelope);
-  }, [
-    revision,
-    selectedCompressor,
-    selectedCondenser,
-    selectedEvaporator,
-    setCompressorEnvelope,
-    setCondenserEnvelope,
-    setEvaporatorEnvelope,
-  ]);
 
   const hasCompressor = Boolean(selectedCompressor || compressor.cooling_capacity_w);
   const hasEvaporator = Boolean(selectedEvaporator || evaporator.rows);
