@@ -40,6 +40,8 @@ import { DrawingTab } from "../components/drawing/DrawingTab";
 import { WorkspaceAIChat } from "../components/WorkspaceAIChat";
 import { AirSidePanel } from "../components/AirSidePanel";
 import { FluidSidePanel } from "../components/FluidSidePanel";
+import { MaterialCostConfigModal } from "../components/MaterialCostConfigModal";
+import { formatBRL } from "../engine/costCalculator";
 import { GeometryBottomBar } from "../components/GeometryBottomBar";
 import { WorkspaceSidebar } from "../components/WorkspaceSidebar";
 import { calcCoilDerivedDimensions } from "../utils/coilDerivedMetrics";
@@ -322,6 +324,8 @@ export function EvaporatorUnifiedWorkspacePage() {
   const [activeGeomModal, setActiveGeomModal] = useState<"tube" | "fin" | "distributor" | null>(null);
   // ── Compressor selecionado do catálogo ──
   const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
+  const calculatedCost = useCnCoilsSimulationStore((s) => s.calculatedCost);
+  const [costModalOpen, setCostModalOpen] = useState(false);
   const resetSimStore = useCnCoilsSimulationStore((s) => s.reset);
   const setActiveProjectGlobal = useProjectStore((s) => s.setActiveProject);
   const handleNovoAletado = () => {
@@ -758,6 +762,17 @@ export function EvaporatorUnifiedWorkspacePage() {
           `${frequency} Hz | ${voltage} V`,
         ]}
       />
+
+      <NavCard
+        title="Custo da Bateria"
+        status={calculatedCost > 0 ? "ok" : "incomplete"}
+        onEdit={() => setCostModalOpen(true)}
+        lines={[
+          calculatedCost > 0
+            ? `Total: ${formatBRL(calculatedCost)}`
+            : "Configure preços de materiais",
+        ]}
+      />
     </WorkspaceInputsSidebar>
   );
 
@@ -903,6 +918,11 @@ export function EvaporatorUnifiedWorkspacePage() {
       <DistributorModal
         open={activeGeomModal === "distributor"}
         onClose={() => setActiveGeomModal(null)}
+      />
+
+      <MaterialCostConfigModal
+        open={costModalOpen}
+        onClose={() => setCostModalOpen(false)}
       />
 
       <PostSaveNextStepDialog
