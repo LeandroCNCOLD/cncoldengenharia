@@ -762,6 +762,17 @@ export function EvaporatorUnifiedWorkspacePage() {
           `${frequency} Hz | ${voltage} V`,
         ]}
       />
+
+      <NavCard
+        title="Custo da Bateria"
+        status={calculatedCost > 0 ? "ok" : "incomplete"}
+        onEdit={() => setCostModalOpen(true)}
+        lines={[
+          calculatedCost > 0
+            ? `Total: ${formatBRL(calculatedCost)}`
+            : "Configure preços de materiais",
+        ]}
+      />
     </WorkspaceInputsSidebar>
   );
 
