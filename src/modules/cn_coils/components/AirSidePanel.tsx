@@ -15,6 +15,7 @@ import type {
   CentrifugalFanCoefficient,
 } from "../types/unilabCoefficients.types";
 import type { CnCoilsSimulationResult } from "../types/cncoils.types";
+import { FanPickerModal, type FanPickerItem } from "./FanPickerModal";
 
 
 // ─── tipos de ventilador ─────────────────────────────────────────────────────
@@ -234,10 +235,14 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
   const setErrorFactorPercent = useCnCoilsSimulationStore(
     (s) => s.setErrorFactorPercent,
   );
+  // Estado canônico do ventilador (store principal)
+  const selectedFanId = useCnCoilsSimulationStore((s) => s.selectedFanId);
+  const fanCount = useCnCoilsSimulationStore((s) => s.fanCount);
 
   // biblioteca de ventiladores
   const [fans, setFans] = useState<FanOption[]>([]);
   const [loadingFans, setLoadingFans] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -280,14 +285,55 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
     [thermo.airInletTempC, uTempIn],
   );
 
-  // ventilador selecionado
+  // ventilador selecionado — prioriza store principal, com fallback ao thermo legado
+  const activeFanId = selectedFanId ?? thermo.selectedFanId;
   const selectedFan = useMemo(
-    () => fans.find((o) => o.fan.id === thermo.selectedFanId),
-    [fans, thermo.selectedFanId],
+    () => fans.find((o) => o.fan.id === activeFanId),
+    [fans, activeFanId],
   );
   const fanLabel = selectedFan
-    ? `${selectedFan.fan.model} · ${selectedFan.type === "axial" ? "axial" : "centrífugo"}`
+    ? `${fanCount}× ${selectedFan.fan.model} · ${selectedFan.type === "axial" ? "axial" : "centrífugo"}`
     : "Manual / Selecionar…";
+
+  // Itens para o modal — converte coefficient → FanPickerItem
+  const fanPickerItems = useMemo<FanPickerItem[]>(
+    () =>
+      fans.map((opt) => {
+        if (opt.type === "axial") {
+          const f = opt.fan;
+          return {
+            id: f.id,
+            manufacturer: "Ziehl-Abegg",
+            model: f.model,
+            airflow_m3h: f.airflowRange_m3h
+              ? (f.airflowRange_m3h.min + f.airflowRange_m3h.max) / 2
+              : undefined,
+            rpm: f.rpm,
+            motor_power_w: f.power_W,
+            motor_current_a: f.current_A,
+            voltage_v: f.voltage,
+            frequency_hz: f.frequency,
+            fanCategory: "axial",
+            fanFunction: "soprador",
+          };
+        }
+        const f = opt.fan;
+        return {
+          id: f.id,
+          manufacturer: "Ziehl-Abegg",
+          model: f.model,
+          fanCategory: "centrifugal",
+          fanFunction: "soprador",
+        };
+      }),
+    [fans],
+  );
+
+  const handleOpenPicker = () => {
+    onFanPickerOpen?.();
+    setPickerOpen(true);
+  };
+
 
   // valores de resultado
   const totalKw = result?.totalCapacityKw;
@@ -395,20 +441,20 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               label="Ventilador"
               unit={
                 <div className="rounded border border-slate-300 bg-white px-0.5 py-0.5 text-center text-[10px] text-slate-500">
-                  ×1
+                  ×{fanCount}
                 </div>
               }
               input={
                 <button
                   type="button"
-                  onClick={onFanPickerOpen}
-                  disabled={disabled || !onFanPickerOpen}
+                  onClick={handleOpenPicker}
+                  disabled={disabled}
                   className="w-full rounded border border-slate-300 bg-white px-1.5 py-0.5 text-left text-[10px] text-slate-500 truncate hover:border-blue-400 hover:text-blue-600 disabled:cursor-default disabled:opacity-70 transition-colors"
                 >
                   {loadingFans ? "Carregando…" : fanLabel}
                 </button>
               }
-              result={<ResultCell value="---" />}
+              result={<ResultCell value={selectedFan ? "OK" : "---"} />}
             />
             {/* Vazão de Ar */}
             <Row
@@ -608,6 +654,16 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
           </tbody>
         </table>
       </div>
+
+      <FanPickerModal
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        fans={fanPickerItems}
+        onConfirm={(item) => {
+          // Mantém compatibilidade com o thermo legado
+          setThermo({ selectedFanId: item.id });
+        }}
+      />
     </div>
   );
 }
