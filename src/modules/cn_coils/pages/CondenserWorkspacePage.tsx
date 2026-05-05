@@ -67,6 +67,7 @@ import { useCnCoilsSimulation } from "../hooks/useCnCoilsSimulation";
 import { useCnCoilsSimulationV2 } from "../hooks/useCnCoilsSimulationV2";
 import { enrichWarnings } from "../utils/warningEnricher";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
+import { useProjectStore } from "../store/useProjectStore";
 import { useCnCoilsInputBridge } from "../hooks/useCnCoilsInputBridge";
 import { useCycleSimulation } from "../hooks/useCycleSimulation";
 import { useOperatingMap } from "../hooks/useOperatingMap";
