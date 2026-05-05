@@ -173,21 +173,55 @@ function InputCell({
   );
 }
 
+/** Badge de origem do valor */
+function BadgeCell({
+  type,
+}: {
+  type: "auto" | "manual" | "catalog" | "calculated" | "pending";
+}) {
+  const styles = {
+    auto: "bg-slate-100 text-slate-500 border-slate-200",
+    manual: "bg-amber-50 text-amber-700 border-amber-200",
+    catalog: "bg-blue-50 text-blue-700 border-blue-200",
+    calculated: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    pending: "bg-slate-50 text-slate-400 border-slate-200",
+  };
+  const labels = {
+    auto: "Auto",
+    manual: "Manual",
+    catalog: "Catálogo",
+    calculated: "Calculado",
+    pending: "Pendente",
+  };
+  return (
+    <span
+      className={`inline-block rounded border px-1 py-0.5 text-[8px] font-semibold leading-none ${styles[type]}`}
+    >
+      {labels[type]}
+    </span>
+  );
+}
+
 /** Linha da tabela */
 function Row({
   label,
   unit,
   input,
   result,
+  badge,
 }: {
   label: string;
   unit?: React.ReactNode;
   input?: React.ReactNode;
   result?: React.ReactNode;
+  badge?: React.ReactNode;
 }) {
   return (
     <tr className="border-b border-slate-100 last:border-0">
-      <td className="py-0.5 pr-1 text-[10px] text-slate-700 whitespace-nowrap">{label}</td>
+      <td className="py-0.5 pr-1 text-[10px] text-slate-700 whitespace-nowrap">
+        {label}
+        {badge && <span className="ml-1">{badge}</span>}
+      </td>
       <td className="w-[70px] py-0.5 px-0.5">{unit}</td>
       <td className="py-0.5 pl-0.5">{input}</td>
       <td className="w-[72px] py-0.5 pl-1">{result}</td>
