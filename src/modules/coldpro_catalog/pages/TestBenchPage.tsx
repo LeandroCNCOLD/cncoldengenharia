@@ -29,9 +29,18 @@ export default function TestBenchPage() {
   const condenserEnvelope = useCoilEnvelopeStore((s) => s.envelopes.condenser_air ?? s.condenserEnvelope);
   const compressorEnvelope = useCoilEnvelopeStore((s) => s.compressorEnvelope);
   const compressorModel = useCoilEnvelopeStore((s) => s.compressorModel);
+  const hydrateFromRemote = useCoilEnvelopeStore((s) => s.hydrateFromRemote);
+  const setCurrentEquipmentId = useCoilEnvelopeStore((s) => s.setCurrentEquipmentId);
+  const persistRemote = useCoilEnvelopeStore((s) => s.persistRemote);
   const { selectedEvaporator, selectedCondenser, selectedCompressor } = useCatalogSessionStore();
   const { setPendingEvaporator, setPendingCondenser, setPendingCompressor } =
     useCatalogPreloadStore();
+
+  useEffect(() => {
+    if (!equipmentId) return;
+    setCurrentEquipmentId(equipmentId);
+    void hydrateFromRemote(equipmentId);
+  }, [equipmentId, hydrateFromRemote, setCurrentEquipmentId]);
 
   const [benchInputs, setBenchInputs] = useState({
     Tamb_C: 35,
