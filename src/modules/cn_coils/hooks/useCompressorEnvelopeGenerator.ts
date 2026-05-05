@@ -211,6 +211,7 @@ export function useCompressorEnvelopeGenerator({
       return;
     }
     setCompressorEnvelope(points, inputs.compressorId, inputs.compressorModel);
+    void useCoilEnvelopeStore.getState().persistRemote();
     toast.success("✅ Envelope do compressor salvo — disponível na Bancada de Testes");
   }, [inputs.compressorId, inputs.compressorModel, points, setCompressorEnvelope]);
 
