@@ -1304,7 +1304,48 @@ function DetailedWorkspaceTab({
         </div>
       </section>
 
-      <section id="section-condicoes-operacionais" className="mt-2 space-y-2">
+      <section id="section-condicoes-operacionais" className="mt-2 space-y-3">
+        <h3 className="text-sm font-semibold text-foreground">
+          Condições Operacionais
+        </h3>
+
+        <div className="rounded-lg border border-border bg-card p-3 space-y-2">
+          <div className="flex gap-1">
+            {(["ari", "constant", "manual"] as CompressorMode[]).map((m) => (
+              <Button
+                key={m}
+                type="button"
+                size="sm"
+                variant={compressorMode === m ? "default" : "outline"}
+                className="flex-1 h-8 text-xs"
+                onClick={() => setCompressorMode(m)}
+              >
+                {m === "ari" ? "ARI 540" : m === "constant" ? "Const." : "Manual"}
+              </Button>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-muted-foreground">Frequência (Hz)</span>
+              <input
+                type="number"
+                value={frequency}
+                onChange={(e) => setFrequency(parseFloat(e.target.value) || 0)}
+                className="h-8 rounded border border-border bg-background px-2 text-sm"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-xs">
+              <span className="text-muted-foreground">Tensão (V)</span>
+              <input
+                type="number"
+                value={voltage}
+                onChange={(e) => setVoltage(parseFloat(e.target.value) || 0)}
+                className="h-8 rounded border border-border bg-background px-2 text-sm"
+              />
+            </label>
+          </div>
+        </div>
+
         <h3 className="text-sm font-semibold text-foreground">
           Dados técnicos e premissas
         </h3>
