@@ -33,6 +33,35 @@ import {
   type VelocityUnit,
 } from "../utils/unitConversions";
 
+/** Badge de origem do valor */
+function BadgeCell({
+  type,
+}: {
+  type: "auto" | "manual" | "catalog" | "calculated" | "pending";
+}) {
+  const styles = {
+    auto: "bg-slate-100 text-slate-500 border-slate-200",
+    manual: "bg-amber-50 text-amber-700 border-amber-200",
+    catalog: "bg-blue-50 text-blue-700 border-blue-200",
+    calculated: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    pending: "bg-slate-50 text-slate-400 border-slate-200",
+  };
+  const labels = {
+    auto: "Auto",
+    manual: "Manual",
+    catalog: "Catálogo",
+    calculated: "Calculado",
+    pending: "Pendente",
+  };
+  return (
+    <span
+      className={`inline-block rounded border px-1 py-0.5 text-[8px] font-semibold leading-none ${styles[type]}`}
+    >
+      {labels[type]}
+    </span>
+  );
+}
+
 interface FluidSidePanelProps {
   componentType: CnCoilsComponentType;
   refrigerants?: unknown;
