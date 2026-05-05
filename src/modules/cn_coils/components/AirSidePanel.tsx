@@ -15,6 +15,7 @@ import type {
   CentrifugalFanCoefficient,
 } from "../types/unilabCoefficients.types";
 import type { CnCoilsSimulationResult } from "../types/cncoils.types";
+import { FanPickerModal, type FanPickerItem } from "./FanPickerModal";
 
 
 // ─── tipos de ventilador ─────────────────────────────────────────────────────
