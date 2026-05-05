@@ -81,6 +81,15 @@ export const ptBR = {
     settings: "Configurações",
     library: "Biblioteca",
     engineV2: "Motor V2 — CN COLD",
+    dashboard: "Painel",
+    catalogSelection: "Catálogo & Seleção",
+    cnCoilsSimulator: "CN COILS — Simulador",
+    testHub: "Hub de Testes",
+    technicalSheet: "Ficha Técnica & Exportação",
+    sectionProjects: "Projetos",
+    sectionEngineering: "Engenharia",
+    sectionDocumentation: "Documentação",
+    sectionAdmin: "Administração",
   },
 
   dashboard: {
