@@ -324,6 +324,8 @@ export function EvaporatorUnifiedWorkspacePage() {
   const [activeGeomModal, setActiveGeomModal] = useState<"tube" | "fin" | "distributor" | null>(null);
   // ── Compressor selecionado do catálogo ──
   const selectedCompressorId = useCnCoilsSimulationStore((s) => s.selectedCompressorId);
+  const calculatedCost = useCnCoilsSimulationStore((s) => s.calculatedCost);
+  const [costModalOpen, setCostModalOpen] = useState(false);
   const resetSimStore = useCnCoilsSimulationStore((s) => s.reset);
   const setActiveProjectGlobal = useProjectStore((s) => s.setActiveProject);
   const handleNovoAletado = () => {
