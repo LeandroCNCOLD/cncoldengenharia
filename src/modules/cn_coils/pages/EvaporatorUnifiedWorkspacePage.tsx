@@ -1781,6 +1781,8 @@ function UnifiedTabs({
           setCompressorMode={setCompressorMode}
           frequency={frequency}
           setFrequency={setFrequency}
+          voltage={voltage}
+          setVoltage={setVoltage}
           cycleResult={cycleResult}
           onCalculate={onCalculate}
           onReset={onReset}
