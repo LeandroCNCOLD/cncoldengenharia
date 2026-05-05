@@ -595,7 +595,7 @@ export function CondenserWorkspacePage() {
               <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
                 <Label>Te</Label>
                 <input
-                  type="number"
+                  type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
                   value={te}
                   min={-40}
                   max={15}
@@ -613,7 +613,7 @@ export function CondenserWorkspacePage() {
               <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
                 <Label>Tc</Label>
                 <input
-                  type="number"
+                  type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
                   value={tc}
                   min={25}
                   max={65}
@@ -782,7 +782,7 @@ function NumField({
     <div>
       <Label className="text-[10px] text-muted-foreground">{label}</Label>
       <Input
-        type="number"
+        type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
         value={value}
         step={step}
         onChange={(e) => onChange(Number(e.target.value))}

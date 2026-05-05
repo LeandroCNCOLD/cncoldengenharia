@@ -88,7 +88,7 @@ export function OptimizationPanel({
         <div>
           <label className="mb-1 block text-xs text-gray-500">Capacidade mínima (kW)</label>
           <input
-            type="number"
+            type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
             className="w-full rounded border px-2 py-1 text-sm"
             value={(minCapacityW / 1000).toFixed(1)}
             onChange={(event) => setMinCapacityW(parseFloat(event.target.value) * 1000)}
@@ -100,7 +100,7 @@ export function OptimizationPanel({
         <div>
           <label className="mb-1 block text-xs text-gray-500">ΔP ar máximo (Pa)</label>
           <input
-            type="number"
+            type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
             className="w-full rounded border px-2 py-1 text-sm"
             value={maxDpPa}
             onChange={(event) => setMaxDpPa(parseInt(event.target.value, 10))}

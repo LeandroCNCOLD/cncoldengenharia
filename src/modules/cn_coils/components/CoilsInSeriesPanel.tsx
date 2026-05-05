@@ -571,19 +571,19 @@ export function CoilsInSeriesPanel({
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <Label className="text-xs">T entrada água (°C)</Label>
-                    <Input type="number" value={coil.T_water_in}
+                    <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={coil.T_water_in}
                       onChange={(e) => updateCoil(coil.id, { T_water_in: Number(e.target.value) })}
                       className="h-7 text-xs" />
                   </div>
                   <div>
                     <Label className="text-xs">T saída água (°C)</Label>
-                    <Input type="number" value={coil.T_water_out}
+                    <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={coil.T_water_out}
                       onChange={(e) => updateCoil(coil.id, { T_water_out: Number(e.target.value) })}
                       className="h-7 text-xs" />
                   </div>
                   <div>
                     <Label className="text-xs">Fileiras</Label>
-                    <Input type="number" value={coil.rows} min={1} max={4}
+                    <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={coil.rows} min={1} max={4}
                       onChange={(e) => updateCoil(coil.id, { rows: Number(e.target.value) })}
                       className="h-7 text-xs" />
                   </div>
@@ -594,7 +594,7 @@ export function CoilsInSeriesPanel({
               {coil.type === "reheat_electric" && (
                 <div>
                   <Label className="text-xs">Potência (kW)</Label>
-                  <Input type="number" value={coil.powerKW} step={0.5}
+                  <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={coil.powerKW} step={0.5}
                     onChange={(e) => updateCoil(coil.id, { powerKW: Number(e.target.value) })}
                     className="h-7 w-32 text-xs" />
                 </div>
@@ -623,7 +623,7 @@ export function CoilsInSeriesPanel({
                         <div>
                           <Label className="text-xs">UR alvo na saída (%)</Label>
                           <Input
-                            type="number"
+                            type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
                             value={coil.targetRH ?? 55}
                             min={30} max={90} step={1}
                             onChange={(e) => updateCoil(coil.id, { targetRH: Number(e.target.value) })}
@@ -641,7 +641,7 @@ export function CoilsInSeriesPanel({
                         <div>
                           <Label className="text-xs">Fração de by-pass (%)</Label>
                           <Input
-                            type="number"
+                            type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
                             value={Math.round((coil.bypassFraction ?? 0.15) * 100)}
                             min={5} max={60} step={1}
                             onChange={(e) => updateCoil(coil.id, { bypassFraction: Number(e.target.value) / 100 })}
@@ -667,7 +667,7 @@ export function CoilsInSeriesPanel({
                       <div className="flex items-center gap-2 mt-1">
                         {coil.rowsOverride ? (
                           <Input
-                            type="number"
+                            type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
                             value={coil.rows ?? coil.autoRows ?? 1}
                             min={1} max={8} step={1}
                             onChange={(e) => updateCoil(coil.id, { rows: Number(e.target.value) })}
@@ -785,7 +785,7 @@ export function CoilsInSeriesPanel({
             <div>
               <Label className="text-xs">T setpoint (°C)</Label>
               <Input
-                type="number" step={0.5}
+                type="text" inputMode="decimal" onFocus={(e) => e.target.select()} step={0.5}
                 value={controlCfg.T_setpoint_C}
                 onChange={(e) => setControlCfg((c) => ({ ...c, T_setpoint_C: Number(e.target.value) }))}
                 className="h-7 text-xs"
@@ -794,7 +794,7 @@ export function CoilsInSeriesPanel({
             <div>
               <Label className="text-xs">UR setpoint (%)</Label>
               <Input
-                type="number" step={1} min={40} max={95}
+                type="text" inputMode="decimal" onFocus={(e) => e.target.select()} step={1} min={40} max={95}
                 value={controlCfg.RH_setpoint_pct}
                 onChange={(e) => setControlCfg((c) => ({ ...c, RH_setpoint_pct: Number(e.target.value) }))}
                 className="h-7 text-xs"
@@ -803,7 +803,7 @@ export function CoilsInSeriesPanel({
             <div>
               <Label className="text-xs">ΔT religar (°C)</Label>
               <Input
-                type="number" step={0.5} min={0.5} max={5}
+                type="text" inputMode="decimal" onFocus={(e) => e.target.select()} step={0.5} min={0.5} max={5}
                 value={controlCfg.dT_diff_C}
                 onChange={(e) => setControlCfg((c) => ({ ...c, dT_diff_C: Number(e.target.value) }))}
                 className="h-7 text-xs"
@@ -812,7 +812,7 @@ export function CoilsInSeriesPanel({
             <div>
               <Label className="text-xs">ΔT desligar reaq. (°C)</Label>
               <Input
-                type="number" step={0.5} min={1} max={10}
+                type="text" inputMode="decimal" onFocus={(e) => e.target.select()} step={0.5} min={1} max={10}
                 value={controlCfg.dT_reheat_off_C}
                 onChange={(e) => setControlCfg((c) => ({ ...c, dT_reheat_off_C: Number(e.target.value) }))}
                 className="h-7 text-xs"
@@ -827,7 +827,7 @@ export function CoilsInSeriesPanel({
               <div>
                 <Label className="text-xs">T ambiente (°C)</Label>
                 <Input
-                  type="number" step={0.5}
+                  type="text" inputMode="decimal" onFocus={(e) => e.target.select()} step={0.5}
                   value={T_ambient_sim}
                   onChange={(e) => setT_ambient_sim(Number(e.target.value))}
                   className="h-7 w-24 text-xs"
@@ -836,7 +836,7 @@ export function CoilsInSeriesPanel({
               <div>
                 <Label className="text-xs">UR ambiente (%)</Label>
                 <Input
-                  type="number" step={1} min={0} max={100}
+                  type="text" inputMode="decimal" onFocus={(e) => e.target.select()} step={1} min={0} max={100}
                   value={RH_ambient_sim}
                   onChange={(e) => setRH_ambient_sim(Number(e.target.value))}
                   className="h-7 w-24 text-xs"
