@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Fan, Loader2, Play, Snowflake, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
