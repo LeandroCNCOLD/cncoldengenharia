@@ -30,14 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { WorkspaceLayout } from "../components/WorkspaceLayout";
 import { WorkspaceHeader } from "../components/WorkspaceHeader";
@@ -54,6 +47,18 @@ import { FanPickerModal } from "../components/FanPickerModal";
 import { useCnCoilsCatalogs as useCnCoilsFullCatalogs } from "../hooks/useCnCoilsCatalogCollection";
 import { useEnrichedFanPickerItems } from "../hooks/useEnrichedFanPickerItems";
 import { PostSaveNextStepDialog } from "../components/PostSaveNextStepDialog";
+import { GeometryPickerModal } from "../components/GeometryPickerModal";
+import { MaterialCostConfigModal } from "../components/MaterialCostConfigModal";
+import { formatBRL } from "../engine/costCalculator";
+import { FAN_CATALOG, findOperatingPoint } from "@/data/fanCatalog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { DrawingTab } from "../components/drawing/DrawingTab";
 import { WorkspaceAIChat } from "../components/WorkspaceAIChat";
@@ -226,10 +231,14 @@ export function CondenserWorkspacePage() {
 
   // ── Ventilador (picker) ──
   const [fanPickerOpen, setFanPickerOpen] = useState(false);
+  const [geomPickerOpen, setGeomPickerOpen] = useState(false);
+  const [calcModeModalOpen, setCalcModeModalOpen] = useState(false);
+  const [costModalOpen, setCostModalOpen] = useState(false);
   const fullCatalogs = useCnCoilsFullCatalogs();
   // Biblioteca enriquecida (EBM-Papst etc.) — fabricante, série, motor, diâmetro
   const { items: fanPickerItems } = useEnrichedFanPickerItems();
-  
+  const selectedFanId = useCnCoilsSimulationStore((s) => s.selectedFanId);
+  const calculatedCost = useCnCoilsSimulationStore((s) => s.calculatedCost);
 
   // ── Compressor ──
   const [compressorPickerOpen, setCompressorPickerOpen] = useState(false);
@@ -352,6 +361,23 @@ export function CondenserWorkspacePage() {
     ],
   );
 
+  // ── Motor CN Coils standalone (no componente pai para handleCalculate) ──
+  const simulationDeps = useMemo(
+    () => ({
+      geometries: catalogs.geometries,
+      tubeMaterials: catalogs.tubeMaterials,
+      correctionCoefficients: catalogs.correctionCoefficients,
+      pressureDropFan: catalogs.pressureDropFan,
+    }),
+    [catalogs.geometries, catalogs.tubeMaterials, catalogs.correctionCoefficients, catalogs.pressureDropFan],
+  );
+  const { run: runCn } = useCnCoilsSimulation(simulationDeps);
+  const { run: runCnV2 } = useCnCoilsSimulationV2({
+    tubeMaterials: catalogs.tubeMaterials,
+    geometries: catalogs.geometries,
+    componentType: "condenser_air",
+  });
+
   // ── CycleEngine ──
   const simState = useCycleSimulation(config, { mode: "manual" });
   const cycleResult: CycleResult | null =
@@ -438,6 +464,74 @@ export function CondenserWorkspacePage() {
   const { isGenerating: isExportingPdf, exportPdf } = usePdfExport();
 
   // ── Handlers ──
+  const focusDetailedSection = (sectionId: string) => {
+    setTimeout(() => {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        el.classList.add("ring-2", "ring-primary/60");
+        setTimeout(() => el.classList.remove("ring-2", "ring-primary/60"), 1500);
+      }
+    }, 60);
+  };
+
+  const handleCalculate = useCallback(() => {
+    const store = useCnCoilsSimulationStore.getState();
+    const latestAirFlow = store.airFlow_m3h || airFlow;
+    if (latestAirFlow !== airFlow) setAirFlow(latestAirFlow);
+    // Garante geometryId para o motor V2
+    if (!store.physicalInputs.geometryId) {
+      useCnCoilsSimulationStore.setState({
+        physicalInputs: { ...store.physicalInputs, geometryId: "condenser-direct" },
+      });
+    }
+    store.setThermoInputs({
+      airFlowM3H: latestAirFlow,
+      selectedFanId: store.selectedFanId,
+    });
+    // 1) Dispara o ciclo termodinâmico
+    simState.trigger();
+    // 2) Roda o motor CN Coils com iteração de ventilador
+    const engineVersion = store.engineVersion;
+    const runEngine = engineVersion === "v2" ? runCnV2 : runCn;
+    const fanItem = fanPickerItems.find((f) => f.id === store.selectedFanId);
+    const fanModel = fanItem
+      ? FAN_CATALOG.find(
+          (f) => `ZA_${f.model}` === fanItem.id || f.model === fanItem.model,
+        )
+      : null;
+    const count = Math.max(1, store.fanCount || 1);
+    if (!fanModel) {
+      runEngine();
+      return;
+    }
+    const MAX_ITER = 6;
+    const TOL_REL = 0.01;
+    for (let i = 0; i < MAX_ITER; i++) {
+      const out = runEngine();
+      if (!out || !out.success) break;
+      const dp = out.result?.airPressureDropPa;
+      const qNow = useCnCoilsSimulationStore.getState().airFlow_m3h;
+      if (!dp || !qNow || qNow <= 0) break;
+      const qPerFan = qNow / count;
+      const R = dp / (qPerFan * qPerFan);
+      const op = findOperatingPoint(fanModel, R);
+      if (!op) break;
+      const qNew = op.q_m3h * count;
+      const rel = Math.abs(qNew - qNow) / qNow;
+      useCnCoilsSimulationStore.getState().setAirFlow(qNew);
+      useCnCoilsSimulationStore.getState().setThermoInputs({
+        airFlowM3H: qNew,
+        selectedFanId: store.selectedFanId,
+      });
+      setAirFlow(qNew);
+      if (rel < TOL_REL) {
+        runEngine();
+        break;
+      }
+    }
+  }, [airFlow, simState, runCn, runCnV2, fanPickerItems]);
+
   const handleReset = () => {
     setCalcMode("verify"); setEngineMode("v1");
     setGeomHeight(600); setGeomWidth(1200); setGeomDepth(64);
@@ -500,219 +594,120 @@ export function CondenserWorkspacePage() {
   const physCheck = validatePhysicalInputs(physicalInputsState);
   const thermoCheck = validateThermoInputs(thermoInputsState);
   const tcVsAirWarn = tc <= airTempIn;
+  const ventIncomplete = !airFlow || airFlow <= 0 || airTempIn === undefined;
+  const velocityWarning = frontalVelocity > 0 && (frontalVelocity < 1.5 || frontalVelocity > 4.5);
+  const fluidIncomplete = !refrigerantId;
+  type NavCardStatus = "ok" | "incomplete" | "warning" | "error";
+  const modeStatus: NavCardStatus = "ok";
+  const geomStatus: NavCardStatus = physCheck.isValid ? "ok" : "incomplete";
+  const ventStatus: NavCardStatus = ventIncomplete
+    ? "incomplete"
+    : velocityWarning
+      ? "warning"
+      : "ok";
+  const fluidStatus: NavCardStatus = fluidIncomplete
+    ? "incomplete"
+    : tcVsAirWarn
+      ? "warning"
+      : "ok";
+  const opsStatus: NavCardStatus = "ok";
+  const ventErrors = ventIncomplete
+    ? thermoCheck.errors.filter((e) => {
+        const s = e.toLowerCase();
+        return s.includes("vazão") || s.includes("temperatura") || s.includes("umidade");
+      })
+    : velocityWarning
+      ? [`Velocidade frontal ${frontalVelocity.toFixed(2)} m/s fora da faixa recomendada (1,5–4,5 m/s)`]
+      : undefined;
+  const fluidErrors = fluidIncomplete
+    ? thermoCheck.errors.filter((e) => {
+        const s = e.toLowerCase();
+        return s.includes("refriger") || s.includes("fluido") || s.includes("evap") || s.includes("cond");
+      })
+    : tcVsAirWarn
+      ? [`Tc (${tc} °C) ≤ Temp. entrada ar (${airTempIn} °C) — verificar condições`]
+      : undefined;
+  const geomErrors = geomStatus !== "ok" ? physCheck.errors : undefined;
+  const sidebarCanCalculate = physCheck.isValid && thermoCheck.isValid;
+  const selectedFanItem = fanPickerItems.find((f) => f.id === selectedFanId);
+  const fanLabel = selectedFanItem
+    ? [selectedFanItem.manufacturer, selectedFanItem.model].filter(Boolean).join(" ")
+    : "Nenhum selecionado";
 
   // ── Sidebar ──
   const sidebar = (
     <WorkspaceInputsSidebar
-      onCalculate={() => simState.trigger()}
+      onCalculate={handleCalculate}
       onReset={handleReset}
       isCalculating={isSimulating}
+      canCalculate={sidebarCanCalculate}
     >
-      <Accordion type="multiple" defaultValue={["mode", "vent", "fluid", "ops"]} className="w-full">
-        {/* 1. MODO */}
-        <AccordionItem value="mode">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">
-            <span className="flex items-center gap-2">
-              Modo de Cálculo
-              <span className="rounded bg-emerald-100 px-1 py-0.5 text-[8px] font-semibold text-emerald-700">OK</span>
-            </span>
-          </AccordionTrigger>
-          <AccordionContent className="space-y-3">
-            <div>
-              <Label className="text-[10px] text-muted-foreground">Objetivo</Label>
-              <RadioGroup
-                value={calcMode}
-                onValueChange={(v) => setCalcMode(v as CalcMode)}
-                className="mt-1 flex gap-3"
-              >
-                <label className="flex items-center gap-1.5 text-xs">
-                  <RadioGroupItem value="verify" /> Verificar
-                </label>
-                <label className="flex items-center gap-1.5 text-xs">
-                  <RadioGroupItem value="design" /> Desenho
-                </label>
-              </RadioGroup>
-            </div>
-            <div>
-              <Label className="text-[10px] text-muted-foreground">Motor</Label>
-              <RadioGroup
-                value={engineMode}
-                onValueChange={(v) => setEngineMode(v as EngineMode)}
-                className="mt-1 flex flex-col gap-1"
-              >
-                <label className="flex items-center gap-1.5 text-xs">
-                  <RadioGroupItem value="v1" /> V1 NTU-ε
-                </label>
-                <label className="flex items-center gap-1.5 text-xs">
-                  <RadioGroupItem value="v2" /> V2 ASHRAE
-                </label>
-              </RadioGroup>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* 2. GEOMETRIA */}
-        <AccordionItem value="geom">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">
-            <span className="flex items-center gap-2">
-              Geometria do Aletado
-              {physCheck.isValid ? (
-                <span className="rounded bg-emerald-100 px-1 py-0.5 text-[8px] font-semibold text-emerald-700">OK</span>
-              ) : (
-                <span className="rounded bg-slate-100 px-1 py-0.5 text-[8px] font-semibold text-slate-500">Incompleto</span>
-              )}
-            </span>
-          </AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            <NumField label="Altura (mm)" value={geomHeight} onChange={setGeomHeight} />
-            <NumField label="Largura (mm)" value={geomWidth} onChange={setGeomWidth} />
-            <NumField label="Profundidade (mm)" value={geomDepth} onChange={setGeomDepth} />
-            <NumField label="Passo de aleta (mm)" value={finPitch} step={0.1} onChange={setFinPitch} />
-            <NumField label="Diâmetro do tubo (mm)" value={tubeDiam} step={0.01} onChange={setTubeDiam} />
-            <NumField label="Nº de circuitos" value={circuits} onChange={setCircuits} />
-            <NumField label="Linhas de tubos" value={rows} onChange={setRows} />
-            <NumField label="Tubos por linha" value={tubesPerRow} onChange={setTubesPerRow} />
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* 3. VENTILAÇÃO */}
-        <AccordionItem value="vent">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">
-            <span className="flex items-center gap-2">
-              Lado Ventilação
-              {airFlow > 0 ? (
-                <span className="rounded bg-emerald-100 px-1 py-0.5 text-[8px] font-semibold text-emerald-700">OK</span>
-              ) : (
-                <span className="rounded bg-slate-100 px-1 py-0.5 text-[8px] font-semibold text-slate-500">Incompleto</span>
-              )}
-            </span>
-          </AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            <NumField label="Vazão de ar (m³/h)" value={airFlow} onChange={setAirFlow} />
-            <NumField label="Temp. entrada DB (°C)" value={airTempIn} step={0.5} onChange={setAirTempIn} />
-            <NumField label="UR entrada (%)" value={airRH} onChange={setAirRH} />
-            <div>
-              <Label className="text-[10px] text-muted-foreground">Velocidade frontal (m/s)</Label>
-              <Input readOnly value={fmt(frontalVelocity, 2)} className="h-8 text-xs bg-muted/40" />
-            </div>
-            <NumField label="Pressão estática (Pa)" value={staticPressure} onChange={setStaticPressure} />
-            <NumField label="Fator de segurança (%)" value={safetyFactor} onChange={setSafetyFactor} />
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* 4. FLUIDO */}
-        <AccordionItem value="fluid">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">
-            <span className="flex items-center gap-2">
-              Lado Fluido / Refrigerante
-              {refrigerantId ? (
-                <span className="rounded bg-emerald-100 px-1 py-0.5 text-[8px] font-semibold text-emerald-700">OK</span>
-              ) : (
-                <span className="rounded bg-slate-100 px-1 py-0.5 text-[8px] font-semibold text-slate-500">Incompleto</span>
-              )}
-              {tcVsAirWarn && (
-                <span className="rounded bg-amber-100 px-1 py-0.5 text-[8px] font-semibold text-amber-700">⚠</span>
-              )}
-            </span>
-          </AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            {tcVsAirWarn && (
-              <div className="rounded border border-amber-200 bg-amber-50 px-2 py-1 text-[9px] text-amber-700">
-                ⚠ Tc ({tc} °C) ≤ Temp. entrada ar ({airTempIn} °C) — verificar condições
-              </div>
-            )}
-            <div>
-              <Label className="text-[10px] text-muted-foreground">Fluido</Label>
-              <Select value={refrigerantId} onValueChange={setRefrigerantId}>
-                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {REFRIGERANT_OPTIONS.map((r) => (
-                    <SelectItem key={r} value={r}>{r}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              size="sm"
-              variant={selectedCompressorRow ? "default" : "outline"}
-              className="w-full h-8 text-xs truncate"
-              onClick={() => setCompressorPickerOpen(true)}
-              title={selectedCompressorRow ? selectedCompressorRow.model : "Selecionar compressor"}
-            >
-              {selectedCompressorRow ? selectedCompressorRow.model : "Selecionar compressor…"}
-            </Button>
-            <div>
-              <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
-                <Label>Te</Label>
-                <input
-                  type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
-                  value={te}
-                  min={-40}
-                  max={15}
-                  step={1}
-                  onChange={(e) => {
-                    const v = parseInt(e.target.value, 10);
-                    if (!isNaN(v)) setTe(Math.max(-40, Math.min(15, v)));
-                  }}
-                  className="w-20 rounded border border-input bg-background px-2 py-0.5 text-right font-mono text-xs text-foreground"
-                />
-              </div>
-              <Slider value={[te]} min={-40} max={15} step={1} onValueChange={(v) => setTe(v[0])} />
-            </div>
-            <div>
-              <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
-                <Label>Tc</Label>
-                <input
-                  type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
-                  value={tc}
-                  min={25}
-                  max={65}
-                  step={1}
-                  onChange={(e) => {
-                    const v = parseInt(e.target.value, 10);
-                    if (!isNaN(v)) setTc(Math.max(25, Math.min(65, v)));
-                  }}
-                  className="w-20 rounded border border-input bg-background px-2 py-0.5 text-right font-mono text-xs text-foreground"
-                />
-              </div>
-              <Slider value={[tc]} min={25} max={65} step={1} onValueChange={(v) => setTc(v[0])} />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <NumField label="SH (K)" value={superheat} onChange={setSuperheat} />
-              <NumField label="SC (K)" value={subcooling} onChange={setSubcooling} />
-            </div>
-            <NumField label="Vazão fluido (kg/h)" value={massFlow} onChange={setMassFlow} />
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* 5. OPERAÇÃO */}
-        <AccordionItem value="ops">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">
-            <span className="flex items-center gap-2">
-              Condições Operacionais
-              <span className="rounded bg-emerald-100 px-1 py-0.5 text-[8px] font-semibold text-emerald-700">OK</span>
-            </span>
-          </AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            <div className="flex gap-1">
-              {(["ari", "constant", "manual"] as CompressorMode[]).map((m) => (
-                <Button
-                  key={m}
-                  type="button"
-                  size="sm"
-                  variant={compressorMode === m ? "default" : "outline"}
-                  className="flex-1 h-7 text-[10px] px-1"
-                  onClick={() => setCompressorMode(m)}
-                >
-                  {m === "ari" ? "ARI 540" : m === "constant" ? "Const." : "Manual"}
-                </Button>
-              ))}
-            </div>
-            <NumField label="Frequência (Hz)" value={frequency} onChange={setFrequency} />
-            <NumField label="Tensão (V)" value={voltage} onChange={setVoltage} />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      {/* 1. MODO */}
+      <NavCard
+        title="Modo de Cálculo"
+        status={modeStatus}
+        lines={[
+          calcMode === "verify" ? "Verificar (geometria → performance)" : "Desenho (capacidade → geometria)",
+          engineMode === "v1" ? "Motor V1 NTU-ε" : "Motor V2 ASHRAE",
+        ]}
+        onEdit={() => setCalcModeModalOpen(true)}
+      />
+      {/* 2. GEOMETRIA */}
+      <NavCard
+        title="Geometria do Aletado"
+        status={geomStatus}
+        lines={[
+          `${geomHeight}×${geomWidth}×${geomDepth} mm`,
+          `${rows} linhas · ${tubesPerRow} tubos/linha · ${circuits} circuitos`,
+          `Ø${tubeDiam} mm · passo ${finPitch} mm`,
+        ]}
+        errors={geomErrors}
+        onEdit={() => setGeomPickerOpen(true)}
+      />
+      {/* 3. VENTILAÇÃO */}
+      <NavCard
+        title="Lado Ventilação"
+        status={ventStatus}
+        lines={[
+          `${airFlow.toLocaleString("pt-BR")} m³/h · ${airTempIn}°C · ${airRH}% UR`,
+          `V frontal: ${fmt(frontalVelocity, 2)} m/s`,
+          fanLabel !== "Nenhum selecionado" ? `Vent.: ${fanLabel}` : "Sem ventilador",
+        ]}
+        errors={ventErrors}
+        onEdit={() => focusDetailedSection("section-lado-ventilacao")}
+      />
+      {/* 4. FLUIDO */}
+      <NavCard
+        title="Lado Fluido / Refrigerante"
+        status={fluidStatus}
+        lines={[
+          refrigerantId || "Nenhum",
+          `Te: ${te}°C · Tc: ${tc}°C`,
+          `SH: ${superheat} K · SC: ${subcooling} K`,
+          selectedCompressorRow ? `Compressor: ${selectedCompressorRow.model}` : "Sem compressor",
+        ]}
+        errors={fluidErrors}
+        onEdit={() => focusDetailedSection("section-lado-fluido")}
+      />
+      {/* 5. OPERAÇÃO */}
+      <NavCard
+        title="Condições Operacionais"
+        status={opsStatus}
+        lines={[
+          `${compressorMode === "ari" ? "ARI 540" : compressorMode === "constant" ? "Efic. constante" : "Manual"}`,
+          `${frequency} Hz · ${voltage} V`,
+        ]}
+        onEdit={() => focusDetailedSection("section-condicoes-operacionais")}
+      />
+      {/* 6. CUSTO */}
+      {calculatedCost > 0 && (
+        <NavCard
+          title="Custo de Materiais"
+          status="ok"
+          lines={[formatBRL(calculatedCost)]}
+          onEdit={() => setCostModalOpen(true)}
+        />
+      )}
     </WorkspaceInputsSidebar>
   );
 
@@ -815,11 +810,138 @@ export function CondenserWorkspacePage() {
         onOpenChange={setNextStepOpen}
         next="compressor"
       />
+      <GeometryPickerModal
+        open={geomPickerOpen}
+        onClose={() => setGeomPickerOpen(false)}
+        componentType="condenser_air"
+      />
+      <MaterialCostConfigModal
+        open={costModalOpen}
+        onClose={() => setCostModalOpen(false)}
+      />
+      {/* Dialog de Modo de Cálculo */}
+      <Dialog open={calcModeModalOpen} onOpenChange={setCalcModeModalOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Modo de Cálculo</DialogTitle>
+            <DialogDescription>Escolha o objetivo e o motor de cálculo.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Objetivo</p>
+              <div className="flex gap-3">
+                {(["verify", "design"] as const).map((m) => (
+                  <label key={m} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input
+                      type="radio"
+                      name="calcMode"
+                      value={m}
+                      checked={calcMode === m}
+                      onChange={() => setCalcMode(m)}
+                      className="accent-primary"
+                    />
+                    {m === "verify" ? "Verificar" : "Desenho"}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Motor</p>
+              <div className="flex flex-col gap-2">
+                {(["v1", "v2"] as const).map((m) => (
+                  <label key={m} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input
+                      type="radio"
+                      name="engineMode"
+                      value={m}
+                      checked={engineMode === m}
+                      onChange={() => setEngineMode(m)}
+                      className="accent-primary"
+                    />
+                    {m === "v1" ? "V1 NTU-ε (padrão)" : "V2 ASHRAE"}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button size="sm" onClick={() => setCalcModeModalOpen(false)}>Confirmar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </WorkspaceLayout>
   );
 }
 
-// ── NumField helper ──────────────────────────────────────────────────────────
+/// ── NavCard helper ──────────────────────────────────────────────
+function NavCard({
+  title,
+  status,
+  lines,
+  onEdit,
+  errors,
+}: {
+  title: string;
+  status: "ok" | "incomplete" | "warning" | "error";
+  lines: string[];
+  onEdit?: () => void;
+  errors?: string[];
+}) {
+  const statusColors = {
+    ok: "bg-emerald-100 text-emerald-800",
+    incomplete: "bg-slate-100 text-slate-500",
+    warning: "bg-amber-100 text-amber-800",
+    error: "bg-red-100 text-red-700",
+  };
+  const statusLabels = {
+    ok: "OK",
+    incomplete: "Incompleto",
+    warning: "Alerta",
+    error: "Erro",
+  };
+  return (
+    <div className="mb-2 rounded border border-border bg-card p-2 text-[10px]">
+      <div className="mb-1 flex items-center justify-between">
+        <span className="font-semibold uppercase tracking-wide text-foreground">
+          {title}
+        </span>
+        <span className={`rounded px-1 py-0.5 text-[9px] font-semibold ${statusColors[status]}`}>
+          {statusLabels[status]}
+        </span>
+      </div>
+      {lines.map((line, i) => (
+        <div key={i} className="text-muted-foreground">{line}</div>
+      ))}
+      {errors && errors.length > 0 && (
+        <div className="mt-1 space-y-0.5">
+          {errors.map((err, i) => (
+            <div
+              key={i}
+              className={`rounded border px-1.5 py-0.5 text-[9px] ${
+                status === "warning"
+                  ? "border-amber-200 bg-amber-50 text-amber-800"
+                  : "border-red-200 bg-red-50 text-red-700"
+              }`}
+            >
+              {err}
+            </div>
+          ))}
+        </div>
+      )}
+      {onEdit && (
+        <button
+          type="button"
+          onClick={onEdit}
+          className="mt-1.5 text-[9px] font-semibold text-[#1E6FD9] hover:underline"
+        >
+          Editar →
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── NumField helper ──────────────────────────────────────────────
 function NumField({
   label,
   value,
