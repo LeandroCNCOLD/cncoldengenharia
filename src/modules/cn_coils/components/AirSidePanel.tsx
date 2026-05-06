@@ -271,12 +271,12 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
   // valores de entrada convertidos para exibição
   const airFlowDisplay = useMemo(
     () =>
-      Number.isFinite(thermo.airFlowM3H) ? toAirFlow(thermo.airFlowM3H ?? 0, uFlow) : 0,
-    [thermo.airFlowM3H, uFlow],
+      Number.isFinite(airFlowCanon) ? toAirFlow(airFlowCanon ?? 0, uFlow) : 0,
+    [airFlowCanon, uFlow],
   );
   const airTempDisplay = useMemo(
-    () => toTemp(thermo.airInletTempC ?? 25, uTempIn),
-    [thermo.airInletTempC, uTempIn],
+    () => toTemp(tempInCanon ?? 25, uTempIn),
+    [tempInCanon, uTempIn],
   );
 
   // ventilador selecionado — prioriza store principal, com fallback ao thermo legado
