@@ -437,6 +437,32 @@ export function EvaporatorUnifiedWorkspacePage() {
   const cycleResult: CycleResult | null =
     simState.status === "success" ? simState.result : null;
 
+  // ── Motor CN Coils (preenche store usado por AirSidePanel/FluidSidePanel) ──
+  const cnCatalogs = useCnCoilsCatalogs();
+  const { run: runCn } = useCnCoilsSimulation({
+    geometries: cnCatalogs.geometries,
+    tubeMaterials: cnCatalogs.tubeMaterials,
+    correctionCoefficients: cnCatalogs.correctionCoefficients,
+    pressureDropFan: cnCatalogs.pressureDropFan,
+  });
+  const { run: runCnV2 } = useCnCoilsSimulationV2({
+    tubeMaterials: cnCatalogs.tubeMaterials,
+    geometries: cnCatalogs.geometries,
+    componentType: "evaporator_dx",
+  });
+
+  const handleCalculate = useCallback(() => {
+    // 1) Dispara o ciclo termodinâmico (Te/Tc/COP, etc.)
+    simState.trigger();
+    // 2) Dispara o motor CN Coils selecionado para preencher o lado ar/fluido
+    const engineVersion = useCnCoilsSimulationStore.getState().engineVersion;
+    if (engineVersion === "v2") {
+      runCnV2();
+    } else {
+      runCn();
+    }
+  }, [simState, runCn, runCnV2]);
+
   // ── IA Chat state ──
   const [aiOpen, setAiOpen] = useState(false);
   const [aiTab, setAiTab] = useState("Detalhado");
