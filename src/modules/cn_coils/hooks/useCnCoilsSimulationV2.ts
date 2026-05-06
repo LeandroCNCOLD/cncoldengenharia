@@ -54,7 +54,14 @@ export function useCnCoilsSimulationV2(params: UseCnCoilsSimulationV2Params) {
         ]);
       }
 
-      const T_sat = thermo.evaporatingTempC ?? thermo.condensingTempC ?? state.fluidOperatingTemp_C ?? -10;
+      // Para condensador, usar condensingTempC (Tc); para evaporador, usar evaporatingTempC (Te).
+      // Usar a temperatura errada afeta rho, mu, cp, k e portanto h_i (Dittus-Boelter) e U global.
+      const isCondenser =
+        params.componentType === "condenser_air" ||
+        params.componentType === "condenser_shell_tube";
+      const T_sat = isCondenser
+        ? (thermo.condensingTempC ?? state.fluidOperatingTemp_C ?? 45)
+        : (thermo.evaporatingTempC ?? state.fluidOperatingTemp_C ?? -10);
       const fluidData = getRefrigerantLiquidProps(state.fluid ?? "REF_R404A", T_sat);
       const fluidProps = {
         rho_kg_m3: fluidData.rho_kg_m3,

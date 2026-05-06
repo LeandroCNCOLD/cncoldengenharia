@@ -225,7 +225,10 @@ export function calculateHeatingCoil(
 
   // ── Resultados térmicos ───────────────────────────────────────────────────────
   const Tf_mean_C = (inputs.Tf_in_C + Tf_out_C) / 2;
-  const Q_max = C_min * (Tf_mean_C - inputs.Tair_in_C);
+  // Q_max = C_min × (T_hot_in - T_cold_in) — definição correta do método NTU-ε.
+  // Usar Tf_mean subestima Q_max quando há grande diferença entre Tf_in e Tf_out.
+  // Referência: Incropera 7ª ed., Eq. 11.21; ASHRAE Fundamentals 2017, Cap. 23.
+  const Q_max = C_min * (inputs.Tf_in_C - inputs.Tair_in_C);
   const Q_heating_W = Math.max(0, epsilon * Q_max);
   const Tair_out_C = inputs.Tair_in_C + Q_heating_W / C_air;
 
