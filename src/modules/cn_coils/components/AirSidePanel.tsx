@@ -324,12 +324,12 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
   // Ponto de operação real calculado a partir do catálogo
   // (curva do ventilador × resistência do sistema R = ΔP / Q²)
   const opCalc = useMemo(() => {
-    if (!selectedFan || !airPressDropPa || !thermo.airFlowM3H) return null;
+    if (!selectedFan || !airPressDropPa || !airFlowCanon) return null;
     const fanModel = FAN_CATALOG.find(
       (f) => `ZA_${f.model}` === selectedFan.id || f.model === selectedFan.model,
     );
     if (!fanModel) return null;
-    const qTotal = thermo.airFlowM3H;
+    const qTotal = airFlowCanon;
     const count = Math.max(1, fanCount || 1);
     const qPerFan = qTotal / count;
     if (qPerFan <= 0) return null;
@@ -337,7 +337,7 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
     const op = findOperatingPoint(fanModel, R);
     if (!op) return { offCurve: true as const };
     return { offCurve: false as const, q_m3h: op.q_m3h, psf_pa: op.psf_pa, count };
-  }, [selectedFan, fanCount, airPressDropPa, thermo.airFlowM3H]);
+  }, [selectedFan, fanCount, airPressDropPa, airFlowCanon]);
 
   const opPoint = useMemo(() => {
     if (!opCalc) {
