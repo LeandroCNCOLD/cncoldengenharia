@@ -14,7 +14,8 @@ import {
   FileText, Wind, Shield, Target, GitCompare, BarChart2,
   Gauge, FlaskConical, Play, Loader2, LayoutDashboard,
 } from "lucide-react";
-import { PageContainer } from "../components/layout/PageContainer";
+import { HubConfigSidebar } from "../components/HubConfigSidebar";
+import { useHubStoreSync } from "../hooks/useHubStoreSync";
 
 import { SimulationTabContent } from "./hub-tabs/SimulationTabContent";
 import { PerformanceCurveTabContent } from "./hub-tabs/PerformanceCurveTabContent";
@@ -167,6 +168,9 @@ export function TestHubPage() {
 
   const activeTabDef = useMemo(() => TABS.find((t) => t.id === activeTab)!, [activeTab]);
 
+  // Sincroniza useTestHubStore → useCatalogSessionStore para que Equilíbrio/Desempenho/Mapa herdem os dados
+  useHubStoreSync();
+
   const runAllAnalyses = useCallback(async () => {
     setIsRunningAll(true);
     try {
@@ -209,49 +213,67 @@ export function TestHubPage() {
   }, []);
 
   return (
-    <PageContainer title="Hub de Testes" subtitle={activeTabDef.description}>
+    <div className="flex h-full min-h-0 flex-col">
+      {/* Título */}
+      <div className="border-b border-slate-200 bg-white px-4 py-2.5">
+        <h1 className="text-base font-bold text-slate-900">Hub de Testes</h1>
+        <p className="text-xs text-slate-500">{activeTabDef.description}</p>
+      </div>
+
+      {/* Barra de status */}
       <SystemStatusBar onRunAll={runAllAnalyses} isRunning={isRunningAll} />
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabId)} className="space-y-4">
-        <div className="space-y-1.5">
-          {Object.entries(tabGroups).map(([group, tabs]) => (
-            <div key={group} className="flex flex-wrap items-center gap-1">
-              <span className={`mr-1 w-28 shrink-0 text-[10px] font-semibold uppercase tracking-wide ${GROUP_COLORS[group]}`}>
-                {GROUP_LABELS[group]}
-              </span>
-              <div className="flex flex-wrap gap-0.5 rounded-lg bg-slate-100 p-0.5">
-                {tabs.map((tab) => {
-                  const Icon = tab.icon;
-                  const isDone =
-                    (tab.id === "ph" && ph.result != null) ||
-                    (tab.id === "montecarlo" && montecarlo.result != null) ||
-                    (tab.id === "autoopt" && optimization.result != null) ||
-                    (tab.id === "ai" && ai.result != null);
-                  const isLoading =
-                    (tab.id === "ph" && ph.loading) ||
-                    (tab.id === "montecarlo" && montecarlo.loading) ||
-                    (tab.id === "autoopt" && optimization.loading) ||
-                    (tab.id === "ai" && ai.loading);
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all ${
-                        activeTab === tab.id
-                          ? "bg-white text-[#1E6FD9] shadow-sm"
-                          : "text-slate-600 hover:bg-white/60 hover:text-slate-800"
-                      }`}
-                    >
-                      {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Icon className="h-3 w-3" />}
-                      {tab.label}
-                      {isDone && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
-                    </button>
-                  );
-                })}
+      {/* Corpo: sidebar + conteúdo */}
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        {/* Sidebar de configuração persistente */}
+        <HubConfigSidebar />
+
+        {/* Área de conteúdo */}
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          {/* Navegação de abas */}
+          <div className="space-y-1 border-b border-slate-100 bg-white px-3 py-2">
+            {Object.entries(tabGroups).map(([group, tabs]) => (
+              <div key={group} className="flex flex-wrap items-center gap-1">
+                <span className={`mr-1 w-28 shrink-0 text-[10px] font-semibold uppercase tracking-wide ${GROUP_COLORS[group]}`}>
+                  {GROUP_LABELS[group]}
+                </span>
+                <div className="flex flex-wrap gap-0.5 rounded-lg bg-slate-100 p-0.5">
+                  {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    const isDone =
+                      (tab.id === "ph" && ph.result != null) ||
+                      (tab.id === "montecarlo" && montecarlo.result != null) ||
+                      (tab.id === "autoopt" && optimization.result != null) ||
+                      (tab.id === "ai" && ai.result != null);
+                    const isLoading =
+                      (tab.id === "ph" && ph.loading) ||
+                      (tab.id === "montecarlo" && montecarlo.loading) ||
+                      (tab.id === "autoopt" && optimization.loading) ||
+                      (tab.id === "ai" && ai.loading);
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all ${
+                          activeTab === tab.id
+                            ? "bg-white text-[#1E6FD9] shadow-sm"
+                            : "text-slate-600 hover:bg-white/60 hover:text-slate-800"
+                        }`}
+                      >
+                        {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Icon className="h-3 w-3" />}
+                        {tab.label}
+                        {isDone && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+
+          {/* Conteúdo da aba ativa */}
+          <div className="flex-1 overflow-auto p-4">
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabId)}>
 
         <TabsContent value="summary" className="mt-0">
           <ExecutiveSummaryTabContent machine={selectedMachine} onNavigate={(tab) => setActiveTab(tab as TabId)} />
@@ -310,7 +332,10 @@ export function TestHubPage() {
         <TabsContent value="report" className="mt-0">
           <TechnicalReportTabContent machine={selectedMachine} />
         </TabsContent>
-      </Tabs>
-    </PageContainer>
+            </Tabs>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
