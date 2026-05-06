@@ -463,14 +463,51 @@ export function EvaporatorUnifiedWorkspacePage() {
 
     // 1) Dispara o ciclo termodinâmico (Te/Tc/COP, etc.)
     simState.trigger();
-    // 2) Dispara o motor CN Coils selecionado para preencher o lado ar/fluido
+
+    // 2) Roda o motor CN Coils. Se houver ventilador selecionado com curva
+    //    no catálogo, itera para o ponto de operação real (interseção da
+    //    curva do ventilador com a curva de resistência do sistema R=ΔP/Q²).
     const engineVersion = store.engineVersion;
-    if (engineVersion === "v2") {
-      runCnV2();
-    } else {
-      runCn();
+    const runEngine = engineVersion === "v2" ? runCnV2 : runCn;
+    const fanItem = fanPickerItems.find((f) => f.id === store.selectedFanId);
+    const fanModel = fanItem
+      ? FAN_CATALOG.find(
+          (f) => `ZA_${f.model}` === fanItem.id || f.model === fanItem.model,
+        )
+      : null;
+    const count = Math.max(1, store.fanCount || 1);
+
+    if (!fanModel) {
+      runEngine();
+      return;
     }
-  }, [airFlow, simState, runCn, runCnV2]);
+
+    const MAX_ITER = 6;
+    const TOL_REL = 0.01;
+    for (let i = 0; i < MAX_ITER; i++) {
+      const out = runEngine();
+      if (!out || !out.success) break;
+      const dp = out.result?.airPressureDropPa;
+      const qNow = useCnCoilsSimulationStore.getState().airFlow_m3h;
+      if (!dp || !qNow || qNow <= 0) break;
+      const qPerFan = qNow / count;
+      const R = dp / (qPerFan * qPerFan);
+      const op = findOperatingPoint(fanModel, R);
+      if (!op) break;
+      const qNew = op.q_m3h * count;
+      const rel = Math.abs(qNew - qNow) / qNow;
+      useCnCoilsSimulationStore.getState().setAirFlow(qNew);
+      useCnCoilsSimulationStore.getState().setThermoInputs({
+        airFlowM3H: qNew,
+        selectedFanId: store.selectedFanId,
+      });
+      setAirFlow(qNew);
+      if (rel < TOL_REL) {
+        runEngine();
+        break;
+      }
+    }
+  }, [airFlow, simState, runCn, runCnV2, fanPickerItems]);
 
   // ── IA Chat state ──
   const [aiOpen, setAiOpen] = useState(false);
