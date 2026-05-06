@@ -1408,21 +1408,26 @@ function DetailedWorkspaceTab({
           Formulário principal / dados do ambiente
         </h3>
         <div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_240px]">
-          {/* Coluna 1 — Lado Ventilação */}
+          {/* Coluna 1 — Lado Ventilação
+              Campos de entrada SEMPRE editáveis (mesmo antes do cálculo).
+              O usuário pode digitar Vazão de Ar / Temp. / UR e os valores
+              ficam gravados no store. Quando seleciona um ventilador no
+              picker, a Vazão de Ar é sobrescrita pela vazão total do
+              ventilador (ver FanPickerModal.handleConfirm). */}
           <div id="section-lado-ventilacao" className="min-w-0 rounded-md border border-border bg-card shadow-sm transition-shadow">
             <AirSidePanel
               result={result}
-              disabled={!catalogs.ready}
+              disabled={false}
               onFanPickerOpen={() => {}}
             />
           </div>
 
-          {/* Coluna 2 — Lado Fluido */}
+          {/* Coluna 2 — Lado Fluido — também sempre editável */}
           <div id="section-lado-fluido" className="min-w-0 rounded-md border border-border bg-card shadow-sm transition-shadow">
             <FluidSidePanel
               componentType="evaporator_dx"
               refrigerants={catalogs.refrigerants}
-              disabled={!catalogs.ready}
+              disabled={false}
               result={result}
             />
           </div>
