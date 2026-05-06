@@ -529,9 +529,7 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               input={
                 <InputCell
                   value={airTempDisplay}
-                  onChange={(v) =>
-                    setThermo({ airInletTempC: fromTemp(v, uTempIn) })
-                  }
+                  onChange={(v) => setTempInCanon(fromTemp(v, uTempIn))}
                   disabled={disabled}
                 />
               }
@@ -547,12 +545,8 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               }
               input={
                 <InputCell
-                  value={thermo.airInletRhPercent ?? 60}
-                  onChange={(v) =>
-                    setThermo({
-                      airInletRhPercent: Math.min(100, Math.max(0, v)),
-                    })
-                  }
+                  value={rhInCanon ?? 60}
+                  onChange={(v) => setRhInCanon(Math.min(100, Math.max(0, v)))}
                   disabled={disabled}
                   min={0}
                   max={100}
@@ -560,7 +554,7 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               }
               result={
                 <ResultCell
-                  value={fmt(thermo.airInletRhPercent ?? 60, 1)}
+                  value={fmt(rhInCanon ?? 60, 1)}
                   highlight
                 />
               }
