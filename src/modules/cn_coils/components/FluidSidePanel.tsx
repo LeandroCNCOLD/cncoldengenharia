@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Lock, Unlock, Zap, Search } from "lucide-react";
 import { useNumericInput } from "../hooks/useNumericInput";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
@@ -264,8 +264,15 @@ export function FluidSidePanel({
   const [opTempManual, setOpTempManual] = useState(false);
   const [pairedTempManual, setPairedTempManual] = useState(false);
   const tempInDB_C = useCnCoilsSimulationStore((s) => s.tempInDB_C);
+  // Ref para ignorar a primeira execução dos useEffects (mount)
+  // — evita sobrescrever valores já definidos pelo workspace pai
+  const isMountedRef = useRef(false);
 
   useEffect(() => {
+    if (!isMountedRef.current) {
+      isMountedRef.current = true;
+      return; // ignora o mount — o workspace pai já inicializou o store
+    }
     if (opTempReadOnly) return; // compressor resolve automaticamente
     const suggested = isCondenser
       ? cfg.type === "condenser_shell_tube"
@@ -281,7 +288,14 @@ export function FluidSidePanel({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tempInDB_C]);
 
+  // Ref separada para o campo emparelhado
+  const isPairedMountedRef = useRef(false);
+
   useEffect(() => {
+    if (!isPairedMountedRef.current) {
+      isPairedMountedRef.current = true;
+      return; // ignora o mount
+    }
     const suggestedPaired = isEvaporator
       ? tempInDB_C + 15
       : isCondenser
