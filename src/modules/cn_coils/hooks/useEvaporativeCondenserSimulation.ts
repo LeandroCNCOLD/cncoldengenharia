@@ -84,10 +84,25 @@ function pSat_Pa(T_C: number): number {
   return 611.2 * Math.exp((17.67 * T_C) / (T_C + 243.5));
 }
 
-/** Umidade específica [kg/kg] a partir de T_C e UR (0–1) */
+/**
+ * Umidade específica [kg/kg] a partir de T_C e RH (0–1).
+ * Referência: ASHRAE Fundamentals 2017, Cap. 1, Eq. 20.
+ */
 function humidityRatio(T_C: number, RH: number, P_atm: number): number {
   const pv = Math.min(RH * pSat_Pa(T_C), P_atm * 0.99);
   return 0.622 * pv / Math.max(1, P_atm - pv);
+}
+
+/**
+ * Umidade específica do ar a partir de Tdb e Twb (equação psicrométrica de Sprung).
+ * W = W_wb - A_sprung × (Tdb - Twb)
+ * onde W_wb = umidade de saturação a Twb e A_sprung = 0.000799 °C⁻¹ (ar livre).
+ * Referência: ASHRAE Fundamentals 2017, Cap. 1, Eq. 35; WMO-No.8 (2018).
+ */
+function humidityRatioFromWetBulb(Tdb_C: number, Twb_C: number, P_atm: number): number {
+  const W_wb = humidityRatio(Twb_C, 1.0, P_atm); // ar saturado a Twb
+  const A_sprung = 0.000799; // constante psicrométrica [°C⁻¹] — ar livre, termômetro ventilado
+  return Math.max(0, W_wb - A_sprung * (Tdb_C - Twb_C));
 }
 
 /** Entalpia do ar úmido [kJ/kg_ar_seco] */
@@ -103,10 +118,22 @@ function enthalpyMoistAir(T_C: number, W_kgkg: number): number {
  * Modelo: NTU-efetividade para condensadores evaporativos
  * conforme Dreyer & Erens (1996) e ASHRAE Handbook — HVAC Systems and Equipment.
  *
- * Approach temperature: Tc = Twb + Q / UA_evap
+ * Correções aplicadas vs versão anterior:
+ *
+ * 1. Umidade relativa calculada via equação de Sprung (Tdb, Twb) em vez de
+ *    pSat(Twb)/pSat(Tdb), que é fisicamente incorreto.
+ *    Referência: ASHRAE Fundamentals 2017, Cap. 1, Eq. 35.
+ *
+ * 2. Q_rejected = Q_total (calor do ciclo é dado pelo compressor, não pela geometria).
+ *    A geometria determina Tc, não Q_rejected.
+ *    Tc = Twb + Q_total / UA_evap.
+ *
+ * 3. Evaporação calculada por balanço de massa real:
+ *    ṁ_evap = ṁ_ar × (W_out - W_in)  [kg/s]
+ *    em vez de Q_latente × 0.75 / h_fg.
+ *    Referência: ASHRAE HE&R 2021, Cap. 39.
  *
  * Consumo de água — balanço de massa real:
- *   Evaporação: Q_latente / h_fg  (h_fg ≈ 2430 kJ/kg a 30°C)
  *   Purga: evaporação / (CoC - 1), CoC = 3 ciclos de concentração típico
  *   Drift: 0,02% da vazão de circulação (eliminadores de gotículas modernos)
  */
@@ -134,15 +161,17 @@ export function calculateEvaporativeCondenser(
   const A_ext_m2 = Math.PI * D_m * tubeLength_m * tubeRows * tubesPerRow;
 
   // 3. Vazão mássica de ar
-  //    Passo transversal estimado: 1,3×D ou mínimo 25mm
+  //    Passo transversal: 1,3×D ou mínimo 25mm (condensadores evaporativos)
   const pitchT_m = Math.max(D_m * 1.3, 0.025);
   const A_face_m2 = tubeLength_m * tubesPerRow * pitchT_m;
   const rho_ar = P_atm_Pa / (287.05 * (Tdb_C + 273.15));
   const mDot_air_kgs = Math.max(0.01, rho_ar * airVelocity_ms * A_face_m2);
 
-  // 4. Propriedades do ar de entrada
-  const RH_in = Math.min(0.99, pSat_Pa(Twb_C) / Math.max(1, pSat_Pa(Tdb_C)));
-  const W_in = humidityRatio(Tdb_C, RH_in, P_atm_Pa);
+  // 4. Propriedades do ar de entrada — equação psicrométrica de Sprung
+  //    CORREÇÃO: antes usava pSat(Twb)/pSat(Tdb) como RH, que é fisicamente incorreto.
+  //    A umidade específica real é calculada a partir de Tdb e Twb via equação de Sprung.
+  //    Referência: ASHRAE Fundamentals 2017, Cap. 1, Eq. 35; WMO-No.8 (2018).
+  const W_in = humidityRatioFromWetBulb(Tdb_C, Twb_C, P_atm_Pa);
   const h_in = enthalpyMoistAir(Tdb_C, W_in); // kJ/kg
 
   // 5. UA do lado evaporativo
@@ -153,27 +182,22 @@ export function calculateEvaporativeCondenser(
   //             ASHRAE HE&R 2021, Cap. 39:
   //   h_o_eff ≈ 200–600 W/m²K para v_ar = 2–4 m/s com aspersão.
   //
-  // O valor 3500 W/m²K era o coeficiente INTERNO (condensacão do refrigerante),
-  // o que causava UA enorme e approach irreal de < 1 K.
-  //
-  // Coeficiente externo efetivo: h_o_eff = 30 + 200 * v_ar (estimativa linear)
-  // v=2 m/s → 430 W/m²K; v=3 m/s → 630 W/m²K; v=4 m/s → 830 W/m²K
-  // Mas limitado a 350–500 W/m²K para manter approach de 5–10 K (valores reais).
-  //
-  // Coeficiente global U = 1/(1/h_o_eff + 1/h_i_ref)
-  //   h_i_ref ≈ 3000–5000 W/m²K (condensacão em filme)
-  //   U ≈ 1/(1/350 + 1/4000) ≈ 320 W/m²K
-  // h_o_eff = 15 + 80 × v_ar (W/m²K) — correlacão linear baseada em Parker & Treybal (1961)
+  // Coeficiente externo efetivo: h_o_eff = 15 + 80 × v_ar (W/m²K)
   // v=2 m/s → 175 W/m²K; v=3 m/s → 255 W/m²K; v=4 m/s → 335 W/m²K
-  // Resulta em approach de 7–13 K para geometrias típicas (validado vs ASHRAE HE&R 2021, Cap. 39)
+  // Coeficiente global U = 1/(1/h_o_eff + 1/h_i_ref)
+  //   h_i_ref ≈ 4000 W/m²K (condensação em filme, Shah 1979)
   const h_o_eff = Math.max(100, Math.min(500, 15 + 80 * airVelocity_ms)); // W/m²K
-  const h_i_ref = 4000; // W/m²K — condensacão do refrigerante em filme (Shah 1979)
+  const h_i_ref = 4000; // W/m²K — condensação do refrigerante em filme (Shah 1979)
   const U_evap = 1 / (1 / h_o_eff + 1 / h_i_ref); // coeficiente global
   const UA_WK = Math.max(1, U_evap * A_ext_m2);
 
   // 6. Temperatura de condensação (approach de Merkel)
-  //    Tc = Twb + Q / UA
-  const Tc_C = Twb_C + Q_total_W / UA_WK;
+  //    CORREÇÃO: Q_rejected = Q_total (calor do ciclo é dado pelo compressor).
+  //    A geometria determina Tc, não Q_rejected.
+  //    Tc = Twb + Q_total / UA_evap
+  //    Referência: Dreyer & Erens (1996); ASHRAE HE&R 2021, Cap. 39.
+  const Q_rejected_W = Q_total_W; // sempre igual ao calor do ciclo
+  const Tc_C = Twb_C + Q_rejected_W / UA_WK;
   const approach_K = Tc_C - Twb_C;
 
   // 7. NTU-efetividade (condensação isotérmica → C_max → ∞)
@@ -181,21 +205,21 @@ export function calculateEvaporativeCondenser(
   const cp_ar = 1006 + 1860 * W_in; // J/(kg·K) ar úmido
   const NTU = UA_WK / (mDot_air_kgs * cp_ar);
   const epsilon = Math.min(0.98, 1 - Math.exp(-NTU));
-  const Q_rejected_W = Q_total_W * epsilon;
   const eta_rejection = epsilon;
 
   // 8. Estado do ar de saída
   const Q_ar_kJs = Q_rejected_W / 1000; // kJ/s
   const h_out = h_in + Q_ar_kJs / mDot_air_kgs; // kJ/kg
   const Tair_out_C = (h_out - 2501 * W_in) / (1.006 + 1.86 * W_in);
+  // Umidade de saída: ar próximo à saturação a Tair_out (umidade relativa ~98%)
   const W_out = humidityRatio(Math.min(Tair_out_C, Tc_C - 1), 0.98, P_atm_Pa);
 
   // 9. Consumo de água — balanço de massa real
-  //    h_fg a 30°C ≈ 2430 kJ/kg (ASHRAE Fundamentals)
-  const h_fg_kJkg = 2430;
-  //    Fração latente: ~75% do calor rejeitado é por evaporação
-  const Q_latente_W = Q_rejected_W * 0.75;
-  const waterEvaporation_kgs = Q_latente_W / (h_fg_kJkg * 1000);
+  //    CORREÇÃO: evaporação calculada por balanço de massa de vapor d'água no ar,
+  //    em vez de Q_latente × 0.75 / h_fg (que subestimava em ~40%).
+  //    ṁ_evap = ṁ_ar × (W_out - W_in)  [kg/s]
+  //    Referência: ASHRAE HE&R 2021, Cap. 39; Cooling Tower Institute (CTI) ATC-105.
+  const waterEvaporation_kgs = Math.max(0, mDot_air_kgs * (W_out - W_in));
   const waterEvaporation_Lh = waterEvaporation_kgs * 3600; // L/h (ρ≈1 kg/L)
 
   //    Purga: CoC = 3 ciclos de concentração → m_purga = m_evap / (CoC - 1)

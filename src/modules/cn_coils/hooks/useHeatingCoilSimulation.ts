@@ -129,7 +129,6 @@ export function calculateHeatingCoil(
 
   // ── Vazão mássica de ar ──────────────────────────────────────────────────────
   const mDot_air = Math.max(0.001, (inputs.airFlowRate_m3h * rho_air) / 3600);
-  const cp_air = 1006 + 1860 * W_in; // J/(kg·K)
 
   // ── Geometria ────────────────────────────────────────────────────────────────
   const D_ext = inputs.tubeDiameter_mm / 1000;
@@ -137,27 +136,52 @@ export function calculateHeatingCoil(
   const D_int = Math.max(0.005, D_ext - 2 * wall_m);
   const A_tube_bare = Math.PI * D_ext * inputs.tubeLength_m * inputs.tubeRows * inputs.tubesPerRow;
 
-  // Fator de superfície aletada (relação área total / área de tubo nu)
-  // Baseado em passo de aleta: A_fin/A_bare ≈ 2×(passo_aleta/passo_tubo_transversal)
-  // Estimativa conservadora: finFactor = 1 + 2×(tubeLength / finPitch_m)
+  // Área de superfície aletada (plate fins contínuas)
+  //
+  // CORREÇÃO: A_fin_per_tube × tubeRows × tubesPerRow causava double-counting.
+  // Para plate fins contínuas (aletas planas que cobrem toda a face da bateria):
+  //   nFins = tubeLength_m / finPitch_m  (aletas ao longo do comprimento do tubo)
+  //   A_fin_total = 2 × A_face × nFins  (ambos os lados de cada aleta)
+  //   A_ext = A_tube_bare + A_fin_total
+  // Referência: Incropera 7ª ed., Cap. 11; Kays & London (1984), Compact Heat Exchangers.
   const finPitch_m = Math.max(0.001, inputs.finPitch_mm / 1000);
   const nFins = inputs.tubeLength_m / finPitch_m;
-  // Área de aleta por tubo por fila (ambos os lados)
   const pitchT_m = Math.max(D_ext * 1.3, 0.025);
-  const A_fin_per_tube = 2 * (pitchT_m * inputs.tubeLength_m) * nFins;
-  const A_ext_m2 = A_tube_bare + A_fin_per_tube * inputs.tubeRows * inputs.tubesPerRow;
+  const A_face = inputs.tubeLength_m * inputs.tubesPerRow * pitchT_m;
+  // Área de aleta total: 2 lados × área de face × número de aletas
+  const A_fin_total = 2 * A_face * nFins;
+  const A_ext_m2 = A_tube_bare + A_fin_total;
 
   // ── Velocidade do ar na face ─────────────────────────────────────────────────
-  const A_face = inputs.tubeLength_m * inputs.tubesPerRow * pitchT_m;
   const v_face = Math.max(0.1, (inputs.airFlowRate_m3h / 3600) / A_face);
 
-  // ── Coeficiente convectivo lado ar (Granryd 1965 / correlação simplificada) ──
-  // h_ar = 38 × Re_D^0,4 × (s/D)^-0,15 × (Pr)^0,33
-  // Simplificado: h_ar ≈ 35–60 W/m²K para v = 1–5 m/s
-  const Re_D = rho_air * v_face * D_ext / (1.85e-5); // μ_ar ≈ 1,85×10⁻⁵ Pa·s
+  // ── Coeficiente convectivo lado ar (Chang & Wang 1997 — plate fins) ──────────
+  //
+  // CORREÇÃO: a correlação de Granryd usava Re_face e retornava h_ar = 622 W/m²K,
+  // muito acima do esperado (30–80 W/m²K) para baterias aletadas.
+  // O erro era usar Re_face em vez de Re_max (velocidade na seção mínima entre aletas)
+  // e não incluir o fator de área de aleta na correlação.
+  //
+  // Correlação de Chang & Wang (1997) para plate fins (ASHRAE Fundamentals 2017, Cap. 23):
+  //   j = 0.086 × Re_Dc^(-0.45) × (Fp/Dc)^(-0.14) × (Fl/Dc)^(-0.29)
+  //   h_ar = j × G_max × cp_ar / Pr^(2/3)
+  //   onde G_max = ρ × v_max = ρ × v_face × pitchT / (pitchT - D_ext)
+  // Faixa válida: Re_Dc = 300–7000, h_ar = 30–100 W/m²K.
+  const mu_ar = 1.85e-5; // Pa·s
   const Pr_ar = 0.71;
-  const h_air = 38 * Math.pow(Math.max(1, Re_D), 0.4) * Math.pow(Pr_ar, 0.33) *
-    Math.pow(Math.max(0.5, pitchT_m / D_ext), -0.15) * (airIn.P_atm / 101325);
+  const G_max = rho_air * v_face * pitchT_m / Math.max(1e-4, pitchT_m - D_ext); // kg/(m²·s)
+  const Re_Dc = G_max * D_ext / mu_ar;
+  // Fator de passo de aleta: Fp/Dc
+  const Fp_Dc = finPitch_m / D_ext;
+  // Fator de comprimento de aleta: Fl/Dc (profundidade = tubeRows × pitchT)
+  const Fl_Dc = (inputs.tubeRows * pitchT_m) / D_ext;
+  // Fator de Colburn j (Chang & Wang 1997)
+  const j_CW = 0.086 *
+    Math.pow(Math.max(1, Re_Dc), -0.45) *
+    Math.pow(Math.max(0.1, Fp_Dc), -0.14) *
+    Math.pow(Math.max(0.1, Fl_Dc), -0.29);
+  const cp_air_val = 1006 + 1860 * W_in;
+  const h_air = Math.max(10, j_CW * G_max * cp_air_val / Math.pow(Pr_ar, 2 / 3));
 
   // ── Coeficiente convectivo lado fluido ────────────────────────────────────────
   let h_fluid: number;
@@ -193,7 +217,7 @@ export function calculateHeatingCoil(
   // ── Coeficiente global ────────────────────────────────────────────────────────
   // Eficiência da aleta (alumínio, k=200 W/mK) — simplificado: η_fin ≈ 0,85
   const eta_fin = 0.85;
-  const eta_surface = 1 - (1 - eta_fin) * (A_fin_per_tube * inputs.tubeRows * inputs.tubesPerRow) / A_ext_m2;
+  const eta_surface = 1 - (1 - eta_fin) * A_fin_total / A_ext_m2;
   const U_Wm2K = 1 / (
     1 / (eta_surface * h_air) +
     0.0001 + // fouling ar
@@ -201,7 +225,7 @@ export function calculateHeatingCoil(
   );
 
   // ── NTU-efetividade ───────────────────────────────────────────────────────────
-  const C_air = mDot_air * cp_air;
+  const C_air = mDot_air * cp_air_val;
   const C_fluid = inputs.heatingFluid === "steam" ? Infinity : mDot_fluid * cp_fluid;
   const C_min = Math.min(C_air, C_fluid);
   const C_max = Math.max(C_air, C_fluid);

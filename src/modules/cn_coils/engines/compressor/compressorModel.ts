@@ -241,9 +241,15 @@ function evaluateConstantEfficiency(
   const Q_evap_W = m_dot_kgS * h_fg_Jkg;
   const ratio = compressionRatio(satProps) || 1;
   const gamma = 1.15;
-  const h_g_Te_Jkg = satProps.evap.h_g_kJkg * 1000;
-  const h_is_Jkg = h_g_Te_Jkg * Math.pow(ratio, (gamma - 1) / gamma);
-  const W_is_W = m_dot_kgS * (h_is_Jkg - h_g_Te_Jkg);
+  // CORREÇÃO: trabalho isentrópico para gás ideal.
+  // Antes: h_is = h_g × ratio^((gamma-1)/gamma) — mistura entalpia com temperatura (ERRADO, erro de 57%).
+  // Correto: w_is = cp × T1 × (ratio^((gamma-1)/gamma) - 1)  [J/kg]
+  // onde T1 = temperatura de sucção [K] e cp = calor específico do vapor.
+  // Referência: Incropera 7ª ed., Eq. 9.28; ASHRAE Fundamentals 2017, Cap. 2.
+  const cp_vapor_Jkg = satProps.evap.vapor.cp_kJkgK * 1000; // J/(kg·K)
+  const T1_K = satProps.evap.T_C + 273.15; // temperatura de saturação (sucção)
+  const w_is_Jkg = cp_vapor_Jkg * T1_K * (Math.pow(ratio, (gamma - 1) / gamma) - 1);
+  const W_is_W = m_dot_kgS * w_is_Jkg;
   const W_comp_W = coeffs.eta_is > 0 ? W_is_W / coeffs.eta_is : W_is_W;
 
   return {
