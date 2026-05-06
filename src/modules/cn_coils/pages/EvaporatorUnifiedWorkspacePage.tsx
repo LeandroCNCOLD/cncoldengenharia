@@ -452,16 +452,25 @@ export function EvaporatorUnifiedWorkspacePage() {
   });
 
   const handleCalculate = useCallback(() => {
+    const store = useCnCoilsSimulationStore.getState();
+    const latestAirFlow = store.airFlow_m3h || airFlow;
+
+    if (latestAirFlow !== airFlow) setAirFlow(latestAirFlow);
+    store.setThermoInputs({
+      airFlowM3H: latestAirFlow,
+      selectedFanId: store.selectedFanId,
+    });
+
     // 1) Dispara o ciclo termodinâmico (Te/Tc/COP, etc.)
     simState.trigger();
     // 2) Dispara o motor CN Coils selecionado para preencher o lado ar/fluido
-    const engineVersion = useCnCoilsSimulationStore.getState().engineVersion;
+    const engineVersion = store.engineVersion;
     if (engineVersion === "v2") {
       runCnV2();
     } else {
       runCn();
     }
-  }, [simState, runCn, runCnV2]);
+  }, [airFlow, simState, runCn, runCnV2]);
 
   // ── IA Chat state ──
   const [aiOpen, setAiOpen] = useState(false);
@@ -1401,7 +1410,11 @@ function DetailedWorkspaceTab({
         <div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_240px]">
           {/* Coluna 1 — Lado Ventilação */}
           <div id="section-lado-ventilacao" className="min-w-0 rounded-md border border-border bg-card shadow-sm transition-shadow">
-            <AirSidePanel result={result} disabled={!catalogs.ready} />
+            <AirSidePanel
+              result={result}
+              disabled={!catalogs.ready}
+              onFanPickerOpen={() => {}}
+            />
           </div>
 
           {/* Coluna 2 — Lado Fluido */}
