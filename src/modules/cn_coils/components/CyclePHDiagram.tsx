@@ -41,7 +41,7 @@ function fmt(n: number | undefined | null, digits = 1, fallback = "—"): string
 
 const POINT_META: Record<number, { name: string; desc: string; color: string }> = {
   0: { name: "1 — Saída Evaporador", desc: "Vapor superaquecido", color: "#3b82f6" },
-  1: { name: "2 — Saída Compressor", desc: "Descarga (alta T/P)", color: "#ef4444" },
+  1: { name: "2 — Saída Compressor", desc: "Vapor descarga (alta P)", color: "#ef4444" },
   2: { name: "3 — Saída Condensador", desc: "Líquido sub-resfriado", color: "#f97316" },
   3: { name: "4 — Saída Válvula", desc: "Mistura líquido-vapor", color: "#8b5cf6" },
 };
@@ -241,7 +241,10 @@ export function CyclePHDiagram({
         <rect x={tx} y={ty + 13} width={tipW} height={5} fill={meta.color} opacity={0.9} />
         <text x={tx + 6} y={ty + 12} fontSize={9.5} fontWeight="bold" fill="white">{meta.name}</text>
         <text x={tx + 6} y={ty + 27} fontSize={8.5} fill="#94a3b8">{meta.desc} · {PHASE_LABEL[pt.phase]}</text>
-        <text x={tx + 6} y={ty + 42} fontSize={10} fill="#e2e8f0">T = <tspan fontWeight="bold" fill="white">{fmt(pt.T_C, 1)} °C</tspan></text>
+        <text x={tx + 6} y={ty + 42} fontSize={10} fill="#e2e8f0">
+          {idx === 1 ? "T_desc" : "T"} = <tspan fontWeight="bold" fill={idx === 1 ? "#fca5a5" : "white"}>{fmt(pt.T_C, 1)} °C</tspan>
+          {idx === 1 && <tspan fontSize={8} fill="#6b7280"> (descarga)</tspan>}
+        </text>
         <text x={tx + 6} y={ty + 56} fontSize={10} fill="#e2e8f0">P = <tspan fontWeight="bold" fill="white">{pt.P_kPa >= 1000 ? `${fmt(pt.P_kPa / 1000, 3)} MPa` : `${fmt(pt.P_kPa, 1)} kPa`}</tspan></text>
         <text x={tx + 6} y={ty + 70} fontSize={10} fill="#e2e8f0">h = <tspan fontWeight="bold" fill="white">{fmt(pt.h_kJkg, 2)} kJ/kg</tspan></text>
         <text x={tx + 6} y={ty + 84} fontSize={10} fill="#e2e8f0">s = <tspan fontWeight="bold" fill="white">{fmt(pt.s_kJkgK, 4)} kJ/kg·K</tspan></text>
@@ -522,11 +525,14 @@ export function CyclePHDiagram({
 
       {/* ── Tabela de estados ── */}
       <div className="overflow-x-auto px-4 pb-3">
+        <p className="text-[10px] text-gray-500 mb-1">
+          <span className="text-gray-400 font-medium">¹</span> Ponto 2: T = temperatura de descarga do compressor (vapor superaquecido). Tc = {fmt(result.Tc_C, 1)} °C é a temperatura de condensação (saturação).
+        </p>
         <table className="w-full text-[11px] border-collapse">
           <thead>
             <tr className="border-b border-gray-800">
               <th className="py-1.5 text-left font-medium text-gray-400">Ponto</th>
-              <th className="py-1.5 text-right font-medium text-gray-400">T (°C)</th>
+              <th className="py-1.5 text-right font-medium text-gray-400">T (°C) <span className="text-[9px] text-gray-600 font-normal">¹</span></th>
               <th className="py-1.5 text-right font-medium text-gray-400">P (kPa)</th>
               <th className="py-1.5 text-right font-medium text-gray-400">h (kJ/kg)</th>
               <th className="py-1.5 text-right font-medium text-gray-400">s (kJ/kg·K)</th>
