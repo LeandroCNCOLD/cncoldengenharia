@@ -845,7 +845,7 @@ export function EvaporatorUnifiedWorkspacePage() {
               onExportPdf={handleExportPdf}
               isExportingPdf={isExportingPdf}
               onOpenAI={openAI}
-              onCalculate={() => simState.trigger()}
+              onCalculate={handleCalculate}
               onReset={handleReset}
               isCalculating={isCalculating}
               activeTab={activeTab}
