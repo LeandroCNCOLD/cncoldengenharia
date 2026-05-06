@@ -728,7 +728,7 @@ export function EvaporatorUnifiedWorkspacePage() {
   // ── Sidebar ──
   const sidebar = (
     <WorkspaceInputsSidebar
-      onCalculate={() => simState.trigger()}
+      onCalculate={handleCalculate}
       onReset={handleReset}
       isCalculating={isCalculating}
       canCalculate={sidebarCanCalculate}
