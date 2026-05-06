@@ -269,6 +269,38 @@ export function CondenserWorkspacePage() {
 
   // ── Sincroniza store ──
   useCnCoilsInputBridge("condenser_air");
+  // Subscribe bidirecional: store → UI (quando AirSidePanel/FluidSidePanel editam o store, atualiza o estado local)
+  useEffect(() => {
+    const unsub = useCnCoilsSimulationStore.subscribe((s) => {
+      if (s.airFlow_m3h !== undefined && s.airFlow_m3h !== airFlow) setAirFlow(s.airFlow_m3h);
+      if (s.tempInDB_C !== undefined && s.tempInDB_C !== airTempIn) setAirTempIn(s.tempInDB_C);
+      if (s.rhIn_pct !== undefined && s.rhIn_pct !== airRH) setAirRH(s.rhIn_pct);
+      if (s.fluid && s.fluid !== refrigerantId) setRefrigerantId(s.fluid);
+      if (s.fluidOperatingTemp_C !== undefined && s.fluidOperatingTemp_C !== tc) setTc(s.fluidOperatingTemp_C);
+      if (s.pairedTempC != null && s.pairedTempC !== te) setTe(s.pairedTempC);
+      if (s.superheat_K !== undefined && s.superheat_K !== superheat) setSuperheat(s.superheat_K);
+      if (s.subcooling_K !== undefined && s.subcooling_K !== subcooling) setSubcooling(s.subcooling_K);
+      if (s.fluidMassFlow_kg_h !== undefined && s.fluidMassFlow_kg_h !== massFlow) setMassFlow(s.fluidMassFlow_kg_h);
+    });
+    return unsub;
+  }, [airFlow, airTempIn, airRH, refrigerantId, te, tc, superheat, subcooling, massFlow]);
+  // Push inicial do estado local para o store (apenas no mount)
+  useEffect(() => {
+    const store = useCnCoilsSimulationStore.getState();
+    store.setAirFlow(airFlow);
+    store.setTempInDB(airTempIn);
+    store.setRhIn(airRH);
+    store.setFluid(refrigerantId);
+    store.setFluidOperatingTemp(tc);
+    store.setPairedTempC(te);
+    store.setSuperheat(superheat);
+    store.setSubcooling(subcooling);
+    store.setFluidMassFlow(massFlow);
+    store.setCalcMode(calcMode);
+    store.setEngineVersion(engineMode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  // Sync reativo: geometria e modo (não vêm do store, só do estado local)
   useEffect(() => {
     const store = useCnCoilsSimulationStore.getState();
     store.setPhysicalInputs({
@@ -282,22 +314,9 @@ export function CondenserWorkspacePage() {
       tubeOuterDiameterMm: tubeDiam,
       tubeInnerDiameterMm: Math.max(1, tubeDiam - 1),
     });
-    store.setAirFlow(airFlow);
-    store.setTempInDB(airTempIn);
-    store.setRhIn(airRH);
-    store.setFluid(refrigerantId);
-    store.setFluidOperatingTemp(tc);
-    store.setPairedTempC(te); // Te para condensador ("paired temp" = temp. evaporação)
-    store.setSuperheat(superheat);
-    store.setSubcooling(subcooling);
-    store.setFluidMassFlow(massFlow);
     store.setCalcMode(calcMode);
     store.setEngineVersion(engineMode);
-  }, [
-    airFlow, airRH, airTempIn, calcMode, circuits, engineMode,
-    finPitch, geomHeight, geomWidth, massFlow, refrigerantId,
-    rows, subcooling, superheat, tc, te, tubeDiam, tubesPerRow,
-  ]);
+  }, [calcMode, circuits, engineMode, finPitch, geomHeight, geomWidth, rows, tubeDiam, tubesPerRow]);
 
   // ── Velocidade frontal ──
   const frontalVelocity = useMemo(() => {
