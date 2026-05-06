@@ -533,9 +533,9 @@ export function EvaporatorUnifiedWorkspacePage() {
     if (inputs.circuits !== undefined) setCircuits(inputs.circuits);
     if (inputs.rows !== undefined) setRows(inputs.rows);
     if (inputs.tubesPerRow !== undefined) setTubesPerRow(inputs.tubesPerRow);
-    if (inputs.airFlow !== undefined) setAirFlow(inputs.airFlow);
-    if (inputs.airTempIn !== undefined) setAirTempIn(inputs.airTempIn);
-    if (inputs.airRH !== undefined) setAirRH(inputs.airRH);
+    if (inputs.airFlow !== undefined) { setAirFlow(inputs.airFlow); useCnCoilsSimulationStore.getState().setAirFlow(inputs.airFlow); }
+    if (inputs.airTempIn !== undefined) { setAirTempIn(inputs.airTempIn); useCnCoilsSimulationStore.getState().setTempInDB(inputs.airTempIn); }
+    if (inputs.airRH !== undefined) { setAirRH(inputs.airRH); useCnCoilsSimulationStore.getState().setRhIn(inputs.airRH); }
     if (inputs.refrigerantId !== undefined) setRefrigerantId(inputs.refrigerantId);
     if (inputs.te !== undefined) setTe(inputs.te);
     if (inputs.tc !== undefined) setTc(inputs.tc);
