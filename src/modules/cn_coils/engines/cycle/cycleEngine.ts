@@ -240,51 +240,80 @@ export async function runCycleSimulation(config: CycleSystemConfig): Promise<Cyc
     getRefrigerantSatProps(config.refrigerantId, Tc),
   ]);
 
+  // ── Ponto 1: Saída do evaporador (vapor superaquecido) ──────────────────
+  // h1 = h_g(Te) + cp_vapor * ΔT_superheat  [kJ/kg]
+  // s1 = s_g(Te) + cp_vapor * ln(T1/Tsat_e)  [kJ/kg·K]  (gás ideal)
+  const T1_K = Te + superheatK + 273.15;
+  const Tsat_e_K = Te + 273.15;
   const h1 = satEvap.h_g_kJkg + satEvap.vapor.cp_kJkgK * superheatK;
+  const s1 = satEvap.s_g_kJkgK + satEvap.vapor.cp_kJkgK * Math.log(T1_K / Tsat_e_K);
   const point1 = buildStatePoint(
     Te + superheatK,
     satEvap.P_kPa,
     h1,
-    satEvap.s_g_kJkgK,
+    s1,
     1.0 + superheatK / 100,
   );
 
+  // ── Ponto 2: Saída do compressor (vapor superaquecido a alta pressão) ────
+  // h2 = h1 + w_comp  onde w_comp = W_comp_W [W] / m_dot [kg/s] → [kJ/kg]
+  // T2 = calculada a partir de h2 usando cp_vapor do condensador
+  // s2 = s1 + (h2 - h2is) / T2  (geração de entropia por irreversibilidade)
+  //   onde h2is = h1 + cp_vapor*(T2is - T1)  (compressão isentrópica)
   const compressionRatio = satEvap.P_kPa > 0 ? satCond.P_kPa / satEvap.P_kPa : 1;
   const gamma = 1.15;
-  const T2is =
-    (Te + superheatK + 273.15) *
-      Math.pow(compressionRatio, (gamma - 1) / gamma) -
-    273.15;
+  const T2is_K = T1_K * Math.pow(compressionRatio, (gamma - 1) / gamma);
   const etaIs = 0.70;
-  const T2 = Te + superheatK + (T2is - Te - superheatK) / etaIs;
-  const h2 = h1 + (WCompW / 1000) / (mDot > 0 ? mDot : 1);
+  // Trabalho real de compressão [kJ/kg]
+  const wComp_kJkg = mDot > 0 ? (WCompW / 1000) / mDot : satEvap.vapor.cp_kJkgK * (T2is_K - T1_K) / etaIs;
+  const h2 = h1 + wComp_kJkg;
+  // Temperatura de descarga estimada a partir de h2 e cp_vapor
+  const T2_K = T1_K + wComp_kJkg / satEvap.vapor.cp_kJkgK;
+  const T2 = T2_K - 273.15;
+  // Entropia no ponto 2: s2 = s1 + geração por irreversibilidade
+  // Δs_irrev = (h2 - h2is) / T2_K  (Gouy-Stodola, aproximação)
+  const h2is = h1 + satEvap.vapor.cp_kJkgK * (T2is_K - T1_K);
+  const s2 = s1 + Math.max(0, (h2 - h2is)) / T2_K;
   const point2 = buildStatePoint(
     T2,
     satCond.P_kPa,
     h2,
-    satCond.s_g_kJkgK,
+    s2,
     1.0 + (T2 - Tc) / 100,
   );
 
+  // ── Ponto 3: Saída do condensador (líquido sub-resfriado) ────────────────
+  // h3 = h_f(Tc) - cp_liq * ΔT_subcooling  [kJ/kg]
+  // s3 = s_f(Tc) - cp_liq * ln(Tc_K / T3_K)  [kJ/kg·K]
   const h3 = satCond.h_f_kJkg - satCond.liquid.cp_kJkgK * subcoolingK;
+  const Tc_K = Tc + 273.15;
+  const T3_K = Tc_K - subcoolingK;
+  const s3 = satCond.s_f_kJkgK - satCond.liquid.cp_kJkgK * Math.log(Tc_K / T3_K);
   const point3 = buildStatePoint(
     Tc - subcoolingK,
     satCond.P_kPa,
     h3,
-    satCond.s_f_kJkgK,
+    s3,
     -subcoolingK / 100,
   );
 
+  // ── Ponto 4: Saída da válvula de expansão (processo isentálpico) ─────────
+  // h4 = h3  (expansão isentálpica — 1ª Lei, sem trabalho nem calor)
+  // T4 = Te  (equilíbrio com a pressão de evaporação)
+  // P4 = P_evap
+  // x4 = (h4 - h_f(Te)) / h_fg(Te)  (título de vapor na mistura)
+  // s4 = s_f(Te) + x4 * (s_g(Te) - s_f(Te))  (mistura bifásica)
   const h4 = h3;
   const quality4 =
     satEvap.h_fg_kJkg > 0
       ? Math.max(0, Math.min(1, (h4 - satEvap.h_f_kJkg) / satEvap.h_fg_kJkg))
       : 0;
+  const s4 = satEvap.s_f_kJkgK + quality4 * (satEvap.s_g_kJkgK - satEvap.s_f_kJkgK);
   const point4 = buildStatePoint(
     Te,
     satEvap.P_kPa,
     h4,
-    satEvap.s_f_kJkgK,
+    s4,
     quality4,
   );
 

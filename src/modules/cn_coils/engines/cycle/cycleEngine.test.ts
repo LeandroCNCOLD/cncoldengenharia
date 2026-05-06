@@ -167,4 +167,71 @@ describe("runCycleSimulation", () => {
       expect(result.warnings.some((w) => w.includes("não convergiu"))).toBe(true);
     }
   });
+
+  // ── Testes termodinâmicos dos pontos do ciclo P-H ──────────────────────────
+
+  it("ponto 1: entalpia h1 = h_g(Te) + cp_v*SH deve ser maior que h_g(Te)", async () => {
+    const result = await runCycleSimulation(baseConfig);
+    const { point1_evapOut, point4_valveOut } = result.statePoints;
+    // h1 > h4 (evaporação absorve calor)
+    expect(point1_evapOut.h_kJkg).toBeGreaterThan(point4_valveOut.h_kJkg);
+    // Ponto 1 deve ser vapor superaquecido
+    expect(point1_evapOut.phase).toBe("superheated");
+  });
+
+  it("ponto 2: h2 > h1 (compressor adiciona trabalho)", async () => {
+    const result = await runCycleSimulation(baseConfig);
+    const { point1_evapOut, point2_compOut } = result.statePoints;
+    expect(point2_compOut.h_kJkg).toBeGreaterThan(point1_evapOut.h_kJkg);
+    // Pressão do ponto 2 deve ser maior que ponto 1
+    expect(point2_compOut.P_kPa).toBeGreaterThan(point1_evapOut.P_kPa);
+  });
+
+  it("ponto 2: entropia s2 >= s1 (2ª Lei — processo irreversível)", async () => {
+    const result = await runCycleSimulation(baseConfig);
+    const { point1_evapOut, point2_compOut } = result.statePoints;
+    // Compressão real: s2 >= s1 (irreversível). Compressão isentrópica: s2 = s1.
+    expect(point2_compOut.s_kJkgK).toBeGreaterThanOrEqual(point1_evapOut.s_kJkgK - 1e-9);
+  });
+
+  it("ponto 3: h3 < h2 (condensador rejeita calor)", async () => {
+    const result = await runCycleSimulation(baseConfig);
+    const { point2_compOut, point3_condOut } = result.statePoints;
+    expect(point3_condOut.h_kJkg).toBeLessThan(point2_compOut.h_kJkg);
+    // Ponto 3 deve ser líquido sub-resfriado
+    expect(point3_condOut.phase).toBe("subcooled");
+  });
+
+  it("ponto 4: h4 = h3 (expansão isentálpica)", async () => {
+    const result = await runCycleSimulation(baseConfig);
+    const { point3_condOut, point4_valveOut } = result.statePoints;
+    expect(Math.abs(point4_valveOut.h_kJkg - point3_condOut.h_kJkg)).toBeLessThan(1e-9);
+  });
+
+  it("ponto 4: entropia s4 calculada corretamente pela mistura bifásica", async () => {
+    const result = await runCycleSimulation(baseConfig);
+    const { point4_valveOut } = result.statePoints;
+    // s4 deve ser finito e positivo
+    expect(point4_valveOut.s_kJkgK).toBeGreaterThan(0);
+    // s4 deve ser maior que s3 (expansão isentálpica aumenta entropia)
+    expect(point4_valveOut.s_kJkgK).toBeGreaterThan(result.statePoints.point3_condOut.s_kJkgK);
+  });
+
+  it("pressões: P1 = P4 (baixa pressão) e P2 = P3 (alta pressão)", async () => {
+    const result = await runCycleSimulation(baseConfig);
+    const { point1_evapOut, point2_compOut, point3_condOut, point4_valveOut } = result.statePoints;
+    expect(Math.abs(point1_evapOut.P_kPa - point4_valveOut.P_kPa)).toBeLessThan(1e-6);
+    expect(Math.abs(point2_compOut.P_kPa - point3_condOut.P_kPa)).toBeLessThan(1e-6);
+    expect(point2_compOut.P_kPa).toBeGreaterThan(point1_evapOut.P_kPa);
+  });
+
+  it("balanço entálpico: (h1-h4) + (h2-h1) ≈ (h2-h3) — 1ª Lei do ciclo", async () => {
+    const result = await runCycleSimulation(baseConfig);
+    const { point1_evapOut, point2_compOut, point3_condOut, point4_valveOut } = result.statePoints;
+    const qEvap = point1_evapOut.h_kJkg - point4_valveOut.h_kJkg;
+    const wComp = point2_compOut.h_kJkg - point1_evapOut.h_kJkg;
+    const qCond = point2_compOut.h_kJkg - point3_condOut.h_kJkg;
+    // Q_cond = Q_evap + W_comp (1ª Lei)
+    expect(Math.abs(qCond - (qEvap + wComp))).toBeLessThan(1e-9);
+  });
 });
