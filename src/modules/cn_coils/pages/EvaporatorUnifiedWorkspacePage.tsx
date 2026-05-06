@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useNumericInput } from "../hooks/useNumericInput";
 import { Snowflake, Bot, Calculator } from "lucide-react";
 import { toast } from "sonner";
@@ -650,6 +650,23 @@ export function EvaporatorUnifiedWorkspacePage() {
     tubesPerRow,
   ]);
 
+  // Push inicial do estado local para o store.
+  // useLayoutEffect garante execução SÍNCRONA antes dos useEffect de subscribe,
+  // evitando que o store (padrão Tc=45) sobrescreva te=-10 do evaporador.
+  useLayoutEffect(() => {
+    const store = useCnCoilsSimulationStore.getState();
+    store.setAirFlow(airFlow);
+    store.setTempInDB(airTempIn);
+    store.setRhIn(airRH);
+    store.setFluid(refrigerantId);
+    store.setFluidOperatingTemp(te);   // te=-10 para evaporador
+    store.setPairedTempC(tc);          // tc=40
+    store.setSuperheat(superheat);
+    store.setSubcooling(subcooling);
+    store.setFluidMassFlow(massFlow);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Sincroniza store canônico → estado local da página (para o config do ciclo).
   // Quando o usuário edita nos painéis (Ar/Fluido), o store muda e refletimos aqui.
   useEffect(() => {
@@ -666,21 +683,6 @@ export function EvaporatorUnifiedWorkspacePage() {
     });
     return unsub;
   }, [airFlow, airTempIn, airRH, refrigerantId, te, tc, superheat, subcooling, massFlow]);
-
-  // Push inicial do estado local para o store (apenas no mount).
-  useEffect(() => {
-    const store = useCnCoilsSimulationStore.getState();
-    store.setAirFlow(airFlow);
-    store.setTempInDB(airTempIn);
-    store.setRhIn(airRH);
-    store.setFluid(refrigerantId);
-    store.setFluidOperatingTemp(te);
-    store.setPairedTempC(tc);
-    store.setSuperheat(superheat);
-    store.setSubcooling(subcooling);
-    store.setFluidMassFlow(massFlow);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleReset = () => {
     setCalcMode("verify");
