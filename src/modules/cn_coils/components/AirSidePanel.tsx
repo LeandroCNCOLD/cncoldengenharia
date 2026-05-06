@@ -240,6 +240,14 @@ interface AirSidePanelProps {
 export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanelProps) {
   const thermo = useCnCoilsSimulationStore((s) => s.thermoInputs);
   const setThermo = useCnCoilsSimulationStore((s) => s.setThermoInputs);
+  // Campos canônicos (escritos pelo bridge no thermoInputs do motor).
+  // O usuário pode SEMPRE editar — gravamos diretamente no store canônico.
+  const airFlowCanon = useCnCoilsSimulationStore((s) => s.airFlow_m3h);
+  const tempInCanon = useCnCoilsSimulationStore((s) => s.tempInDB_C);
+  const rhInCanon = useCnCoilsSimulationStore((s) => s.rhIn_pct);
+  const setAirFlowCanon = useCnCoilsSimulationStore((s) => s.setAirFlow);
+  const setTempInCanon = useCnCoilsSimulationStore((s) => s.setTempInDB);
+  const setRhInCanon = useCnCoilsSimulationStore((s) => s.setRhIn);
   const errorFactorPercent = useCnCoilsSimulationStore((s) => s.errorFactorPercent);
   const setErrorFactorPercent = useCnCoilsSimulationStore(
     (s) => s.setErrorFactorPercent,
