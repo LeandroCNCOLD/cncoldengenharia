@@ -254,6 +254,46 @@ export function FluidSidePanel({
   const fluidVelocityMs = result?.fluidVelocityMs;
   const fluidDpDigits = uPdrop === "Pa" ? 0 : 3;
 
+  // ── Preenchimento automático de Tc/Te baseado na temperatura de entrada do ar (Tdb) ──
+  // Regras de projeto (ASHRAE / prática de refrigeração):
+  //   Condensador a ar:   Tc = Tdb + 15 K  (approach típico 12–18 K)
+  //   Condensador a água: Tc = Tdb + 10 K  (approach típico 8–12 K)
+  //   Evaporador (Te):    Te = Tdb - 15 K  (para fan-coils de ar condicionado)
+  //   Evaporador (Tc):    Tc = Tdb + 15 K  (condensador acoplado ao ciclo)
+  // Flags para saber se o usuário já editou manualmente os campos
+  const [opTempManual, setOpTempManual] = useState(false);
+  const [pairedTempManual, setPairedTempManual] = useState(false);
+  const tempInDB_C = useCnCoilsSimulationStore((s) => s.tempInDB_C);
+
+  useEffect(() => {
+    if (opTempReadOnly) return; // compressor resolve automaticamente
+    const suggested = isCondenser
+      ? cfg.type === "condenser_shell_tube"
+        ? tempInDB_C + 10
+        : tempInDB_C + 15
+      : isEvaporator
+        ? tempInDB_C - 15
+        : null;
+    if (suggested == null) return;
+    if (!opTempManual) {
+      setFluidOperatingTemp(suggested);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tempInDB_C]);
+
+  useEffect(() => {
+    const suggestedPaired = isEvaporator
+      ? tempInDB_C + 15
+      : isCondenser
+        ? tempInDB_C - 15
+        : null;
+    if (suggestedPaired == null) return;
+    if (!pairedTempManual) {
+      setPairedTempC(suggestedPaired);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tempInDB_C]);
+
   return (
     <>
     <div className="rounded border border-slate-300 bg-slate-50 shadow-sm">
@@ -416,9 +456,10 @@ export function FluidSidePanel({
           ) : (
             <NumInput
               value={tempConv.fromCanonical(fluidOperatingTemp_C, uOpTemp)}
-              onChange={(v) =>
-                setFluidOperatingTemp(tempConv.toCanonical(v, uOpTemp))
-              }
+              onChange={(v) => {
+                setOpTempManual(true);
+                setFluidOperatingTemp(tempConv.toCanonical(v, uOpTemp));
+              }}
               disabled={thermalInputsDisabled}
             />
           )}
@@ -439,7 +480,7 @@ export function FluidSidePanel({
             />
           }
         >
-          <div className="min-w-0">
+          <div className="flex min-w-0 items-center gap-1">
             <input
               type="text"
               inputMode="decimal"
@@ -453,6 +494,7 @@ export function FluidSidePanel({
               placeholder={pairedRequired ? "Obrigatório" : "Opcional"}
               onChange={(e) => {
                 const raw = e.target.value;
+                setPairedTempManual(true);
                 if (raw === "") {
                   setPairedTempC(null);
                   return;
@@ -468,6 +510,7 @@ export function FluidSidePanel({
                   : "border-slate-300 bg-white text-slate-900 focus:border-[#1E6FD9] focus:ring-[#1E6FD9]"
               }`}
             />
+
           </div>
         </FieldRow>
 
