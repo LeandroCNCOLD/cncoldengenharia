@@ -397,8 +397,8 @@ export function FluidSidePanel({
         <FieldRow
           label={operatingTempLabel}
           tooltip={isEvaporator
-            ? "Temperatura de saturação do refrigerante no evaporador. Para câmaras frias: -10 a -30°C. Para ar condicionado: 0 a 10°C. Valores negativos são normais."
-            : "Temperatura de saturação do refrigerante no condensador. Típico: 40–55°C para condensadores a ar."}
+            ? "Temperatura de Evaporação (Te) — Temperatura de saturação do refrigerante no evaporador. Para câmaras frias: -10 a -30°C. Para ar condicionado: 0 a 10°C. Valores negativos são normais e esperados."
+            : "Temperatura de Condensação (Tc) — Temperatura de saturação do refrigerante no condensador. Típico: 40–55°C para condensadores a ar, 30–45°C para condensadores a água."}
           badge={opTempReadOnly ? <BadgeCell type="auto" /> : undefined}
           unit={
             <UnitSelect
@@ -428,8 +428,8 @@ export function FluidSidePanel({
         <FieldRow
           label={pairedTempLabel + (pairedRequired ? " *" : "")}
           tooltip={isEvaporator
-            ? "Temperatura de condensação do ciclo. Necessária quando há compressor selecionado para calcular o ponto de equilíbrio. Típico: 40–55°C."
-            : "Temperatura de evaporação do ciclo. Necessária quando há compressor selecionado. Típico: -10 a 5°C."}
+            ? "Temperatura de Condensação (Tc) — Temperatura de saturação do refrigerante no condensador do ciclo. Necessária quando há compressor selecionado para calcular o ponto de equilíbrio termodinâmico. Típico: 40–55°C."
+            : "Temperatura de Evaporação (Te) — Temperatura de saturação do refrigerante no evaporador do ciclo. Necessária quando há compressor selecionado. Típico: -10 a 5°C."}
           unit={
             <UnitSelect
               value={uPaired}
@@ -475,7 +475,7 @@ export function FluidSidePanel({
         {isEvaporator && (
           <FieldRow
             label="Sobreaq. Útil (SH)"
-            tooltip="Diferença entre a temperatura do vapor na saída do evaporador e a temperatura de saturação (Te). Típico: 5–10 K. Garante que não há líquido entrando no compressor."
+            tooltip="Sobreaquecimento Útil (SH — Superheat) — Diferença entre a temperatura do vapor na saída do evaporador e a temperatura de saturação (Te). Típico: 5–10 K. Garante que não há líquido retornando ao compressor, protegendo-o contra golpe de líquido."
             unit={
               <UnitSelect
                 value={uSH}
@@ -496,7 +496,7 @@ export function FluidSidePanel({
         {isCondenser && (
           <FieldRow
             label="Sobreaq. Descarga (DSH)"
-            tooltip="Diferença entre a temperatura de descarga do compressor e a temperatura de saturação (Tc). Típico: 30–60 K. Afeta a entalpia no ponto 2 do ciclo P-H."
+            tooltip="Sobreaquecimento de Descarga (DSH — Discharge Superheat) — Diferença entre a temperatura do gás na saída do compressor e a temperatura de saturação (Tc). Típico: 30–60 K. Afeta a entalpia no ponto 2 do diagrama P-H e a capacidade do condensador."
             unit={
               <UnitSelect
                 value={uDSH}
@@ -524,7 +524,7 @@ export function FluidSidePanel({
         {/* 5) Subresfriamento — sempre disponível (necessário para entalpia da válvula) */}
         <FieldRow
           label="Subresfriamento (SC)"
-          tooltip="Diferença entre a temperatura de saturação (Tc) e a temperatura do líquido na saída do condensador. Típico: 3–8 K. Aumenta a capacidade do evaporador ao reduzir o título na expansão."
+          tooltip="Subresfriamento (SC — Subcooling) — Diferença entre a temperatura de saturação (Tc) e a temperatura do líquido na saída do condensador. Típico: 3–8 K. Aumenta a capacidade do evaporador ao reduzir o título na expansão e evita cavitação na válvula de expansão."
           unit={
             <UnitSelect
               value={uSC}
@@ -571,7 +571,7 @@ export function FluidSidePanel({
         {/* 7) Fator de Segurança — auto-preenchido pelo SecurityFactor da geometria */}
         <FieldRow
           label="Fator de Segurança"
-          tooltip="Margem adicional aplicada sobre a capacidade calculada. 0% = sem margem. 10% = capacidade nominal 10% acima do calculado. Use 10–15% para projetos com incerteza nos dados de entrada."
+          tooltip="Fator de Segurança (Safety Factor) — Margem percentual adicional aplicada sobre a capacidade térmica calculada. 0% = sem margem (resultado teórico puro). 10% = capacidade nominal 10% acima do calculado. Recomendado: 10–15% para projetos com incerteza nos dados de entrada ou condições operacionais variáveis."
           unit={<UnitText text="%" />}>
           <NumInput
             value={errorFactorPercent}
@@ -586,7 +586,7 @@ export function FluidSidePanel({
         {/* 8) Velocidade do Fluido (resultado) */}
         <FieldRow
           label="Vel. do Fluido"
-          tooltip="Velocidade do refrigerante nos tubos. Faixa recomendada: 0.5–2.5 m/s para líquido, 5–15 m/s para vapor. Valores fora desta faixa indicam subdimensionamento de tubos ou circuitos."
+          tooltip="Velocidade do Fluido Refrigerante nos Tubos — Calculada a partir da vazão mássica, densidade e área de seção transversal dos tubos. Faixa recomendada: 0,5–2,5 m/s para líquido, 5–15 m/s para vapor bifásico. Valores fora desta faixa indicam subdimensionamento de tubos ou número insuficiente de circuitos."
           badge={<BadgeCell type="calculated" />}
           unit={
             <UnitSelect value={uVel} onChange={setUVel} options={VELOCITY_UNITS} />
