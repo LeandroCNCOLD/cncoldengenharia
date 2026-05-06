@@ -240,6 +240,14 @@ interface AirSidePanelProps {
 export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanelProps) {
   const thermo = useCnCoilsSimulationStore((s) => s.thermoInputs);
   const setThermo = useCnCoilsSimulationStore((s) => s.setThermoInputs);
+  // Campos canônicos (escritos pelo bridge no thermoInputs do motor).
+  // O usuário pode SEMPRE editar — gravamos diretamente no store canônico.
+  const airFlowCanon = useCnCoilsSimulationStore((s) => s.airFlow_m3h);
+  const tempInCanon = useCnCoilsSimulationStore((s) => s.tempInDB_C);
+  const rhInCanon = useCnCoilsSimulationStore((s) => s.rhIn_pct);
+  const setAirFlowCanon = useCnCoilsSimulationStore((s) => s.setAirFlow);
+  const setTempInCanon = useCnCoilsSimulationStore((s) => s.setTempInDB);
+  const setRhInCanon = useCnCoilsSimulationStore((s) => s.setRhIn);
   const errorFactorPercent = useCnCoilsSimulationStore((s) => s.errorFactorPercent);
   const setErrorFactorPercent = useCnCoilsSimulationStore(
     (s) => s.setErrorFactorPercent,
@@ -263,12 +271,12 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
   // valores de entrada convertidos para exibição
   const airFlowDisplay = useMemo(
     () =>
-      Number.isFinite(thermo.airFlowM3H) ? toAirFlow(thermo.airFlowM3H ?? 0, uFlow) : 0,
-    [thermo.airFlowM3H, uFlow],
+      Number.isFinite(airFlowCanon) ? toAirFlow(airFlowCanon ?? 0, uFlow) : 0,
+    [airFlowCanon, uFlow],
   );
   const airTempDisplay = useMemo(
-    () => toTemp(thermo.airInletTempC ?? 25, uTempIn),
-    [thermo.airInletTempC, uTempIn],
+    () => toTemp(tempInCanon ?? 25, uTempIn),
+    [tempInCanon, uTempIn],
   );
 
   // ventilador selecionado — prioriza store principal, com fallback ao thermo legado
@@ -316,12 +324,12 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
   // Ponto de operação real calculado a partir do catálogo
   // (curva do ventilador × resistência do sistema R = ΔP / Q²)
   const opCalc = useMemo(() => {
-    if (!selectedFan || !airPressDropPa || !thermo.airFlowM3H) return null;
+    if (!selectedFan || !airPressDropPa || !airFlowCanon) return null;
     const fanModel = FAN_CATALOG.find(
       (f) => `ZA_${f.model}` === selectedFan.id || f.model === selectedFan.model,
     );
     if (!fanModel) return null;
-    const qTotal = thermo.airFlowM3H;
+    const qTotal = airFlowCanon;
     const count = Math.max(1, fanCount || 1);
     const qPerFan = qTotal / count;
     if (qPerFan <= 0) return null;
@@ -329,7 +337,7 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
     const op = findOperatingPoint(fanModel, R);
     if (!op) return { offCurve: true as const };
     return { offCurve: false as const, q_m3h: op.q_m3h, psf_pa: op.psf_pa, count };
-  }, [selectedFan, fanCount, airPressDropPa, thermo.airFlowM3H]);
+  }, [selectedFan, fanCount, airPressDropPa, airFlowCanon]);
 
   const opPoint = useMemo(() => {
     if (!opCalc) {
@@ -448,7 +456,7 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               input={
                 <InputCell
                   value={airFlowDisplay}
-                  onChange={(v) => setThermo({ airFlowM3H: fromAirFlow(v, uFlow) })}
+                  onChange={(v) => setAirFlowCanon(fromAirFlow(v, uFlow))}
                   disabled={disabled}
                   min={0}
                 />
@@ -521,9 +529,7 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               input={
                 <InputCell
                   value={airTempDisplay}
-                  onChange={(v) =>
-                    setThermo({ airInletTempC: fromTemp(v, uTempIn) })
-                  }
+                  onChange={(v) => setTempInCanon(fromTemp(v, uTempIn))}
                   disabled={disabled}
                 />
               }
@@ -539,12 +545,8 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               }
               input={
                 <InputCell
-                  value={thermo.airInletRhPercent ?? 60}
-                  onChange={(v) =>
-                    setThermo({
-                      airInletRhPercent: Math.min(100, Math.max(0, v)),
-                    })
-                  }
+                  value={rhInCanon ?? 60}
+                  onChange={(v) => setRhInCanon(Math.min(100, Math.max(0, v)))}
                   disabled={disabled}
                   min={0}
                   max={100}
@@ -552,7 +554,7 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               }
               result={
                 <ResultCell
-                  value={fmt(thermo.airInletRhPercent ?? 60, 1)}
+                  value={fmt(rhInCanon ?? 60, 1)}
                   highlight
                 />
               }
