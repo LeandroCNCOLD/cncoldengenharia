@@ -596,9 +596,8 @@ export function EvaporatorUnifiedWorkspacePage() {
       tubeOuterDiameterMm: tubeDiam,
       tubeInnerDiameterMm: Math.max(1, tubeDiam - 1),
     });
-    store.setAirFlow(airFlow);
-    store.setTempInDB(airTempIn);
-    store.setRhIn(airRH);
+    // NÃO sobrescrever airFlow/tempInDB/rhIn aqui — esses campos são
+    // editáveis pelo usuário no AirSidePanel e gravam direto no store.
     store.setFluid(refrigerantId);
     store.setFluidOperatingTemp(te);
     store.setSuperheat(superheat);
@@ -607,9 +606,6 @@ export function EvaporatorUnifiedWorkspacePage() {
     store.setCalcMode(calcMode);
     store.setEngineVersion(engineMode);
   }, [
-    airFlow,
-    airRH,
-    airTempIn,
     calcMode,
     circuits,
     engineMode,
@@ -625,6 +621,26 @@ export function EvaporatorUnifiedWorkspacePage() {
     tubeDiam,
     tubesPerRow,
   ]);
+
+  // Sincroniza store canônico → estado local da página (para o config do ciclo).
+  // Quando o usuário edita no AirSidePanel, o store muda e refletimos aqui.
+  useEffect(() => {
+    const unsub = useCnCoilsSimulationStore.subscribe((s) => {
+      if (s.airFlow_m3h !== undefined && s.airFlow_m3h !== airFlow) setAirFlow(s.airFlow_m3h);
+      if (s.tempInDB_C !== undefined && s.tempInDB_C !== airTempIn) setAirTempIn(s.tempInDB_C);
+      if (s.rhIn_pct !== undefined && s.rhIn_pct !== airRH) setAirRH(s.rhIn_pct);
+    });
+    return unsub;
+  }, [airFlow, airTempIn, airRH]);
+
+  // Push inicial do estado local para o store (apenas se store estiver no default).
+  useEffect(() => {
+    const store = useCnCoilsSimulationStore.getState();
+    store.setAirFlow(airFlow);
+    store.setTempInDB(airTempIn);
+    store.setRhIn(airRH);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleReset = () => {
     setCalcMode("verify");
