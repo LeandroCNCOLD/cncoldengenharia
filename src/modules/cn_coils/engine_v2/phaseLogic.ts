@@ -40,7 +40,12 @@ export function determineFluidPhase(inputs: PhaseInputs): FluidPhase {
       return "bifasico";
     case "condenser_air":
     case "condenser_shell_tube":
-      if (sc > 0.1) return "liquido";
+      // A condensação ocorre a temperatura constante (C_fluido → ∞ no modelo NTU-ε).
+      // O subresfriamento (SC) é uma condição de saída, não uma fase global do trocador.
+      // Tratar como "liquido" quando SC > 0 causaria Cmin = m_dot × cp_liq ≪ cAir,
+      // resultando em capacidade subestimada em 10-15×.
+      // Referência: ASHRAE Fundamentals 2017, Cap. 23; Incropera 7ª ed., Cap. 11.
+      void sc;
       return "bifasico";
     case "heating_coil":
     case "cooling_coil":
