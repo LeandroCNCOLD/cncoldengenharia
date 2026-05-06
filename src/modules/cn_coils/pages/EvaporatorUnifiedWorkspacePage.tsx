@@ -596,13 +596,8 @@ export function EvaporatorUnifiedWorkspacePage() {
       tubeOuterDiameterMm: tubeDiam,
       tubeInnerDiameterMm: Math.max(1, tubeDiam - 1),
     });
-    // NÃO sobrescrever airFlow/tempInDB/rhIn aqui — esses campos são
-    // editáveis pelo usuário no AirSidePanel e gravam direto no store.
-    store.setFluid(refrigerantId);
-    store.setFluidOperatingTemp(te);
-    store.setSuperheat(superheat);
-    store.setSubcooling(subcooling);
-    store.setFluidMassFlow(massFlow);
+    // NÃO sobrescrever airFlow/tempInDB/rhIn nem campos do lado fluido aqui —
+    // esses campos são editáveis pelo usuário nos painéis e gravam direto no store.
     store.setCalcMode(calcMode);
     store.setEngineVersion(engineMode);
   }, [
@@ -612,33 +607,40 @@ export function EvaporatorUnifiedWorkspacePage() {
     finPitch,
     geomHeight,
     geomWidth,
-    massFlow,
-    refrigerantId,
     rows,
-    subcooling,
-    superheat,
-    te,
     tubeDiam,
     tubesPerRow,
   ]);
 
   // Sincroniza store canônico → estado local da página (para o config do ciclo).
-  // Quando o usuário edita no AirSidePanel, o store muda e refletimos aqui.
+  // Quando o usuário edita nos painéis (Ar/Fluido), o store muda e refletimos aqui.
   useEffect(() => {
     const unsub = useCnCoilsSimulationStore.subscribe((s) => {
       if (s.airFlow_m3h !== undefined && s.airFlow_m3h !== airFlow) setAirFlow(s.airFlow_m3h);
       if (s.tempInDB_C !== undefined && s.tempInDB_C !== airTempIn) setAirTempIn(s.tempInDB_C);
       if (s.rhIn_pct !== undefined && s.rhIn_pct !== airRH) setAirRH(s.rhIn_pct);
+      if (s.fluid && s.fluid !== refrigerantId) setRefrigerantId(s.fluid);
+      if (s.fluidOperatingTemp_C !== undefined && s.fluidOperatingTemp_C !== te) setTe(s.fluidOperatingTemp_C);
+      if (s.pairedTempC != null && s.pairedTempC !== tc) setTc(s.pairedTempC);
+      if (s.superheat_K !== undefined && s.superheat_K !== superheat) setSuperheat(s.superheat_K);
+      if (s.subcooling_K !== undefined && s.subcooling_K !== subcooling) setSubcooling(s.subcooling_K);
+      if (s.fluidMassFlow_kg_h !== undefined && s.fluidMassFlow_kg_h !== massFlow) setMassFlow(s.fluidMassFlow_kg_h);
     });
     return unsub;
-  }, [airFlow, airTempIn, airRH]);
+  }, [airFlow, airTempIn, airRH, refrigerantId, te, tc, superheat, subcooling, massFlow]);
 
-  // Push inicial do estado local para o store (apenas se store estiver no default).
+  // Push inicial do estado local para o store (apenas no mount).
   useEffect(() => {
     const store = useCnCoilsSimulationStore.getState();
     store.setAirFlow(airFlow);
     store.setTempInDB(airTempIn);
     store.setRhIn(airRH);
+    store.setFluid(refrigerantId);
+    store.setFluidOperatingTemp(te);
+    store.setPairedTempC(tc);
+    store.setSuperheat(superheat);
+    store.setSubcooling(subcooling);
+    store.setFluidMassFlow(massFlow);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
