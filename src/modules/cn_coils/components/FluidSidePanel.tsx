@@ -86,6 +86,82 @@ interface FluidSidePanelProps {
  *  - 🔒 (locked): vazão é incógnita (motor resolve via balanço de energia)
  *  - 🔓 (unlocked): vazão fixa pelo usuário; motor resolve T_saída
  */
+// ── PairedTempInput: input com estado local de string para permitir negativos ──
+function PairedTempInput({
+  valueC,
+  unit,
+  tempConv,
+  pairedMissing,
+  pairedRequired,
+  disabled,
+  onCommit,
+}: {
+  valueC: number | null;
+  unit: TempUnit;
+  tempConv: { fromCanonical: (v: number, u: TempUnit) => number; toCanonical: (v: number, u: TempUnit) => number };
+  pairedMissing: boolean;
+  pairedRequired: boolean | undefined;
+  disabled: boolean;
+  onCommit: (c: number | null) => void;
+}) {
+  const [local, setLocal] = useState<string>(() =>
+    valueC != null && Number.isFinite(valueC)
+      ? String(parseFloat(tempConv.fromCanonical(valueC, unit).toFixed(6)))
+      : "",
+  );
+
+  useEffect(() => {
+    const displayed = valueC != null && Number.isFinite(valueC)
+      ? parseFloat(tempConv.fromCanonical(valueC, unit).toFixed(6))
+      : null;
+    const localNum = parseFloat(local);
+    if (displayed == null) {
+      setLocal("");
+    } else if (!Number.isFinite(localNum) || Math.abs(localNum - displayed) > 0.001) {
+      setLocal(String(displayed));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [valueC, unit]);
+
+  const isIntermediate = (s: string) =>
+    s === "" || s === "-" || s === "." || s === "-."
+    || /^-?\d*\.?\d*$/.test(s);
+
+  return (
+    <input
+      type="text"
+      inputMode="decimal"
+      disabled={disabled}
+      onFocus={(e) => e.target.select()}
+      value={local}
+      placeholder={pairedRequired ? "Obrigatório" : "Opcional"}
+      onChange={(e) => {
+        const raw = e.target.value;
+        if (!isIntermediate(raw)) return;
+        setLocal(raw);
+        if (raw === "" || raw === "-") return; // estado intermediário
+        const n = parseFloat(raw);
+        if (Number.isFinite(n)) onCommit(tempConv.toCanonical(n, unit));
+      }}
+      onBlur={() => {
+        const n = parseFloat(local);
+        if (Number.isFinite(n)) {
+          setLocal(String(parseFloat(n.toFixed(6))));
+          onCommit(tempConv.toCanonical(n, unit));
+        } else {
+          setLocal("");
+          onCommit(null);
+        }
+      }}
+      className={`w-full min-w-0 rounded border px-1.5 py-1 text-right text-xs focus:outline-none focus:ring-1 ${
+        pairedMissing
+          ? "border-red-500 bg-red-50 text-red-900 focus:border-red-600 focus:ring-red-500"
+          : "border-slate-300 bg-white text-slate-900 focus:border-[#1E6FD9] focus:ring-[#1E6FD9]"
+      }`}
+    />
+  );
+}
+
 export function FluidSidePanel({
   componentType,
   disabled,
@@ -480,11 +556,12 @@ export function FluidSidePanel({
         </FieldRow>
 
         {/* 3.5) Temperatura emparelhada (Tc para evap, Te para condensador) */}
+        {/* Estado local de string para permitir digitação de valores negativos */}
         <FieldRow
           label={pairedTempLabel + (pairedRequired ? " *" : "")}
           tooltip={isEvaporator
             ? "Temperatura de Condensação (Tc) — Temperatura de saturação do refrigerante no condensador do ciclo. Necessária quando há compressor selecionado para calcular o ponto de equilíbrio termodinâmico. Típico: 40–55°C."
-            : "Temperatura de Evaporação (Te) — Temperatura de saturação do refrigerante no evaporador do ciclo. Necessária quando há compressor selecionado. Típico: -10 a 5°C."}
+            : "Temperatura de Evaporação (Te) — Temperatura de saturação do refrigerante no evaporador do ciclo. Necessária quando há compressor selecionado. Típico: -10 a 5°C. Valores negativos são normais para câmaras frias."}
           unit={
             <UnitSelect
               value={uPaired}
@@ -495,36 +572,18 @@ export function FluidSidePanel({
           }
         >
           <div className="flex min-w-0 items-center gap-1">
-            <input
-              type="text"
-              inputMode="decimal"
-              onFocus={(e) => e.target.select()}
-              value={
-                pairedTempC != null && Number.isFinite(pairedTempC)
-                  ? tempConv.fromCanonical(pairedTempC, uPaired)
-                  : ""
-              }
-              step="any"
-              placeholder={pairedRequired ? "Obrigatório" : "Opcional"}
-              onChange={(e) => {
-                const raw = e.target.value;
+            <PairedTempInput
+              valueC={pairedTempC}
+              unit={uPaired}
+              tempConv={tempConv}
+              pairedMissing={pairedMissing}
+              pairedRequired={pairedRequired}
+              disabled={!!disabled}
+              onCommit={(c) => {
                 setPairedTempManual(true);
-                if (raw === "") {
-                  setPairedTempC(null);
-                  return;
-                }
-                const n = parseFloat(raw);
-                setPairedTempC(
-                  Number.isFinite(n) ? tempConv.toCanonical(n, uPaired) : null,
-                );
+                setPairedTempC(c);
               }}
-              className={`w-full min-w-0 rounded border px-1.5 py-1 text-right text-xs focus:outline-none focus:ring-1 ${
-                pairedMissing
-                  ? "border-red-500 bg-red-50 text-red-900 focus:border-red-600 focus:ring-red-500"
-                  : "border-slate-300 bg-white text-slate-900 focus:border-[#1E6FD9] focus:ring-[#1E6FD9]"
-              }`}
             />
-
           </div>
         </FieldRow>
 
