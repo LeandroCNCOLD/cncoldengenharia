@@ -58,6 +58,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useCnCoilsCatalogs } from "../hooks/useCnCoilsCatalogs";
+import { FAN_CATALOG, findOperatingPoint } from "@/data/fanCatalog";
 import { useCnCoilsSimulationStore } from "../store/useCnCoilsSimulationStore";
 import { useCnCoilsSimulation } from "../hooks/useCnCoilsSimulation";
 import { useCnCoilsSimulationV2 } from "../hooks/useCnCoilsSimulationV2";
