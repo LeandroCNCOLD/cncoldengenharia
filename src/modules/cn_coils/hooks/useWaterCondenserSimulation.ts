@@ -52,6 +52,12 @@ export interface WaterCondenserResult {
   v_water_ms: number;
   /** Número de Reynolds da água */
   Re_water: number;
+  /** NTU do trocador */
+  NTU: number;
+  /** Efetividade do trocador (0–1) */
+  epsilon: number;
+  /** Approach (Tc - Tw_out) calculado pela geometria [K] */
+  approach_K: number;
 }
 
 // ─── Defaults ──────────────────────────────────────────────────────────────────
@@ -74,11 +80,15 @@ export const DEFAULT_WATER_CONDENSER_INPUTS: WaterCondenserInputs = {
 /**
  * Calcula o desempenho de um condensador casco-e-tubos (água).
  *
- * Modelo:
- *   - Coeficiente lado água: correlação de Dittus-Boelter (Re, Pr)
+ * Modelo NTU-ε (Incropera 7ª ed., Cap. 11; ASHRAE HE&R 2021, Cap. 39):
+ *   - Condensação isotérmica → C_refrigerante → ∞ → Cmin = C_água → Cr = 0
+ *   - ε = 1 − exp(−NTU)  com  NTU = U × A_disponível / C_água
+ *   - Tc calculado iterativamente: Tc = Tw_in + Q / (ε × C_água)
+ *     (não mais approach fixo de 5 K — Tc agora depende da geometria real)
+ *   - Coeficiente lado água: Dittus-Boelter (Re, Pr)
  *   - Coeficiente lado refrigerante: condensação em filme (Shah 1979 simplificado)
- *   - LMTD contracorrente com 3 zonas: dessuperaquecimento + condensação + sub-resfriamento
- *   - Queda de pressão: Darcy-Weisbach (fator de atrito de Churchill)
+ *   - LMTD contracorrente para verificação de área
+ *   - Queda de pressão: Darcy-Weisbach (Blasius / Hagen-Poiseuille)
  */
 export function calculateWaterCondenser(
   inputs: WaterCondenserInputs,
@@ -91,82 +101,99 @@ export function calculateWaterCondenser(
     tubeLength_m,
     tubeDiameter_mm,
     passes,
-    superheat_K,
-    subcooling_K,
+    superheat_K: _sh,
+    subcooling_K: _sc,
   } = inputs;
+
+  void _sh; void _sc; // reservados para modelo de 3 zonas futuro
 
   const Q = Math.max(0, Q_total_W);
 
-  // ── Propriedades da água (a ~30°C) ──────────────────────────────────────────
-  const cpWater = 4182;      // J/(kg·K)
-  const rhoWater = 995;      // kg/m³
-  const muWater = 8e-4;      // Pa·s
-  const kWater = 0.617;      // W/(m·K)
+  // ── Propriedades da água (a ~35°C — média entre Tw_in e Tw_out estimado) ────
+  const cpWater = 4178;      // J/(kg·K)
+  const rhoWater = 994;      // kg/m³
+  const muWater = 7.2e-4;    // Pa·s
+  const kWater = 0.623;      // W/(m·K)
 
   // ── Geometria dos tubos ──────────────────────────────────────────────────────
   const D_ext = tubeDiameter_mm / 1000;
   const D_int = Math.max(0.005, D_ext - 0.002); // espessura de parede 1 mm
-  const A_tube_int = Math.PI * D_int ** 2 / 4; // área seccional de 1 tubo
+  const A_tube_int = Math.PI * D_int ** 2 / 4;  // área seccional de 1 tubo
 
   // ── Vazão mássica de água ────────────────────────────────────────────────────
   const mDotWater = Math.max(0.001, (waterFlowRate_m3h * rhoWater) / 3600); // kg/s
+  const C_agua = mDotWater * cpWater; // W/K
 
-  // ── Temperatura de saída da água ─────────────────────────────────────────────
-  const Tw_out_C = Tw_in_C + Q / (mDotWater * cpWater);
-
-  // ── Temperatura de condensação ───────────────────────────────────────────────
-  // Tc = Tw_out + approach mínimo de 5K (pinch point na zona de condensação)
-  const Tc_C = Tw_out_C + 5;
+  // ── Temperatura de saída da água (balanço de energia) ───────────────────────
+  const Tw_out_C = Tw_in_C + Q / C_agua;
 
   // ── Coeficiente convectivo lado água (Dittus-Boelter) ───────────────────────
-  const v_water = mDotWater / (rhoWater * A_tube_int * tubeCount);
+  const v_water = mDotWater / (rhoWater * A_tube_int * Math.max(1, tubeCount));
   const Re_water = Math.max(1, rhoWater * v_water * D_int / muWater);
-  // Turbulento: Nu = 0,023 Re^0,8 Pr^0,4 com Pr = cp·μ/k
+  const Pr_water = cpWater * muWater / kWater;
   const Nu_water = Re_water > 2300
-    ? 0.023 * Math.pow(Re_water, 0.8) * Math.pow(cpWater * muWater / kWater, 0.4)
-    : 3.66; // laminar
+    ? 0.023 * Math.pow(Re_water, 0.8) * Math.pow(Pr_water, 0.4) // Dittus-Boelter, aquecimento
+    : 3.66; // Nusselt laminar (Nu constante)
   const h_water = Nu_water * kWater / D_int;
 
-  // ── Coeficiente convectivo lado refrigerante (estimativa simplificada) ──────
+  // ── Coeficiente convectivo lado refrigerante (condensação em filme) ──────────
+  // Shah (1979) simplificado para condensação em casco:
+  // h_ref ≈ 3000–5000 W/m²K; 3500 é valor médio conservador.
   const h_ref = 3500;
 
-  // ── Resistência da parede (aço inox: k=16 W/mK; cobre: k=380 W/mK) ──────────
-  const k_wall = 380; // cobre
-  const R_wall = Math.log(D_ext / D_int) / (2 * Math.PI * k_wall * tubeLength_m);
-  const R_fouling_water = 0.0001; // m²K/W (TEMA R)
-  const R_fouling_ref = 0.00005;  // m²K/W
+  // ── Resistência da parede (cobre: k=380 W/mK) ────────────────────────────────
+  const k_wall = 380;
+  const R_wall_m2K = (D_ext / 2) * Math.log(D_ext / D_int) / k_wall; // [m²K/W] por área ext
+  const R_fouling_water = 0.0001; // m²K/W (TEMA R, água de torre)
+  const R_fouling_ref = 0.00005;  // m²K/W (TEMA R, refrigerante)
 
-  // ── Coeficiente global (baseado na área externa) ─────────────────────────────
-  const A_int_per_m = Math.PI * D_int;
-  const A_ext_per_m = Math.PI * D_ext;
+  // ── Coeficiente global U (baseado na área externa) ───────────────────────────
+  // 1/U = 1/h_ref + Rf_ref + R_wall + (A_ext/A_int)×(Rf_água + 1/h_água)
+  const ratio_A = D_ext / D_int; // A_ext / A_int por unidade de comprimento
   const U_Wm2K = 1 / (
     1 / h_ref +
     R_fouling_ref +
-    R_wall * A_ext_per_m +
-    (A_ext_per_m / A_int_per_m) * (R_fouling_water + 1 / h_water)
+    R_wall_m2K +
+    ratio_A * (R_fouling_water + 1 / h_water)
   );
 
-  // ── LMTD contracorrente ──────────────────────────────────────────────────────
-  // Zona de condensação (dominante): Tc constante, água de Tw_in a Tw_out
-  const DT1 = Math.max(0.1, Tc_C - Tw_out_C); // extremidade quente
-  const DT2 = Math.max(0.1, Tc_C - Tw_in_C);  // extremidade fria
+  // ── Área de troca disponível (baseada na geometria real) ─────────────────────
+  const A_available_m2 = Math.PI * D_ext * tubeLength_m * Math.max(1, tubeCount) * Math.max(1, passes);
+
+  // ── NTU-ε (condensação isotérmica: C_ref → ∞, Cr = 0) ───────────────────────
+  // Referência: Incropera 7ª ed., Eq. 11.35 (condensador/evaporador)
+  const NTU = (U_Wm2K * A_available_m2) / C_agua;
+  const epsilon = Math.min(0.99, 1 - Math.exp(-NTU));
+
+  // ── Temperatura de condensação calculada pela geometria ───────────────────────
+  // Q = ε × C_água × (Tc − Tw_in)  →  Tc = Tw_in + Q / (ε × C_água)
+  // Isso substitui o approach fixo de 5 K: Tc agora responde à geometria real.
+  // Trocador grande (NTU alto, ε → 1): Tc ≈ Tw_in + Q/C_água = Tw_out → approach → 0 K
+  // Trocador pequeno (NTU baixo, ε → 0): Tc → ∞ → approach grande → subdimensionado
+  const Tc_C = epsilon > 0.001
+    ? Tw_in_C + Q / (epsilon * C_agua)
+    : Tw_out_C + 30; // fallback se ε ≈ 0 (trocador muito pequeno)
+  const approach_K = Tc_C - Tw_out_C;
+
+  // ── LMTD contracorrente (zona de condensação dominante) ──────────────────────
+  // Tc constante, água de Tw_in (fria) a Tw_out (quente)
+  const DT1 = Math.max(0.1, Tc_C - Tw_out_C); // extremidade quente (saída da água)
+  const DT2 = Math.max(0.1, Tc_C - Tw_in_C);  // extremidade fria (entrada da água)
   const LMTD_K = Math.abs(DT2 - DT1) < 1e-9
     ? DT1
     : (DT2 - DT1) / Math.log(DT2 / DT1);
 
-  // ── Área necessária e disponível ─────────────────────────────────────────────
+  // ── Área necessária (verificação via LMTD) ───────────────────────────────────
   const A_needed_m2 = Q / Math.max(1, U_Wm2K * LMTD_K);
-  const A_available_m2 = Math.PI * D_ext * tubeLength_m * tubeCount * passes;
   const areaMargin = A_needed_m2 > 0
     ? (A_available_m2 - A_needed_m2) / A_needed_m2
     : 0;
 
   // ── Queda de pressão (Darcy-Weisbach) ────────────────────────────────────────
-  // Fator de atrito de Churchill (1977) — válido para todos os regimes
   const f = Re_water > 2300
     ? 0.316 * Math.pow(Re_water, -0.25) // Blasius (turbulento suave)
-    : 64 / Re_water; // Hagen-Poiseuille
-  const L_total = tubeLength_m * passes;
+    : 64 / Re_water;                     // Hagen-Poiseuille (laminar)
+  const L_total = tubeLength_m * Math.max(1, passes);
   const pressureDrop_Pa = f * (L_total / D_int) * rhoWater * v_water ** 2 / 2;
   const pressureDrop_kPa = pressureDrop_Pa / 1000;
 
@@ -188,6 +215,9 @@ export function calculateWaterCondenser(
     h_ref_Wm2K: h_ref,
     v_water_ms: v_water,
     Re_water,
+    NTU,
+    epsilon,
+    approach_K,
   };
 }
 

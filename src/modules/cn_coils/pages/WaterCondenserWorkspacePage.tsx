@@ -477,8 +477,24 @@ export function WaterCondenserWorkspacePage() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
                   <ResultCard label="Tc condensação" value={fmtBR(result.Tc_C, 1)} unit="°C" variant="success"
-                    hint="Temperatura de condensação" />
+                    hint="Temperatura de condensação calculada pela geometria real (NTU-ε)" />
                   <ResultCard label="T água saída" value={fmtBR(result.Tw_out_C, 1)} unit="°C" />
+                  <ResultCard
+                    label="Approach"
+                    value={fmtBR((result as WaterCondenserResult & { approach_K?: number }).approach_K ?? (result.Tc_C - result.Tw_out_C), 1)}
+                    unit="K"
+                    variant={(((result as WaterCondenserResult & { approach_K?: number }).approach_K ?? (result.Tc_C - result.Tw_out_C)) < 3) ? "warning" : "default"}
+                    hint="Tc − T água saída: quanto menor, mais eficiente o trocador (ideal: 3–8 K)" />
+                  <ResultCard
+                    label="NTU"
+                    value={fmtBR((result as WaterCondenserResult & { NTU?: number }).NTU ?? 0, 3)}
+                    unit=""
+                    hint="Número de unidades de transferência — depende da geometria real" />
+                  <ResultCard
+                    label="Efetividade"
+                    value={fmtBR(((result as WaterCondenserResult & { epsilon?: number }).epsilon ?? 0) * 100, 1)}
+                    unit="%"
+                    hint="ε = 1 − exp(−NTU): fração do calor máximo transferível" />
                   <ResultCard label="LMTD" value={fmtBR(result.LMTD_K, 1)} unit="K"
                     hint="Diferença de temperatura média logarítmica" />
                   <ResultCard label="U global" value={fmtBR(result.U_Wm2K, 0)} unit="W/m²K"

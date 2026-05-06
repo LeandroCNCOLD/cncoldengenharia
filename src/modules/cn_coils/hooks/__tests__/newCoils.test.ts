@@ -61,7 +61,11 @@ describe("useWaterCondenserSimulation", () => {
     expect(lowFlow.Tc_C).toBeGreaterThan(highFlow.Tc_C);
   });
 
-  it("margem de área negativa quando tubos insuficientes", () => {
+  it("trocador subdimensionado: approach alto (Tc >> Tw_out) quando tubos insuficientes", () => {
+    // Com o modelo NTU-ε, A_needed e A_available são matematicamente iguais
+    // (identidade do método). O indicador de subdimensionamento é o approach:
+    // trocador pequeno → NTU baixo → ε baixo → Tc muito alta → approach grande.
+    // Referência: Incropera 7ª ed., Cap. 11 (NTU-ε para condensadores).
     const result = calculateWaterCondenser({
       Q_total_W: 80_000,
       Tw_in_C: 30,
@@ -75,7 +79,11 @@ describe("useWaterCondenserSimulation", () => {
       subcooling_K: 3,
     });
 
-    expect(result.areaMargin).toBeLessThan(0);
+    // Approach > 50 K indica trocador grosseiramente subdimensionado
+    const approach = result.Tc_C - result.Tw_out_C;
+    expect(approach).toBeGreaterThan(50);
+    // NTU deve ser baixo (< 0.5) para trocador com apenas 2 tubos e Q=80 kW
+    expect(result.NTU).toBeLessThan(0.5);
   });
 });
 
