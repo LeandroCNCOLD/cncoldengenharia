@@ -18,12 +18,11 @@ import { FileText, Copy, Printer, CheckCircle2 } from "lucide-react";
 import { useTestHubStore } from "../../stores/useTestHubStore";
 import type { CatalogEquipmentRow } from "@/modules/coldpro_catalog/data/equipmentCatalog.types";
 import { useState } from "react";
+import { fmtCapacityAll } from "../../components/ui/CapacityDisplay";
 
 interface Props {
   machine: CatalogEquipmentRow | null;
 }
-
-const KCALH_TO_W = 1.163;
 
 export function TechnicalReportTabContent({ machine }: Props) {
   const { compressor, condenser, evaporator, conditions, ph, montecarlo, optimization, ai } = useTestHubStore();
@@ -31,9 +30,29 @@ export function TechnicalReportTabContent({ machine }: Props) {
 
   const reportText = useMemo(() => {
     const now = new Date().toLocaleString("pt-BR");
-    const Q_kW = (compressor.cooling_capacity_w ?? 0) / 1000;
-    const W_kW = (compressor.power_w ?? Q_kW / 2.5) / 1000;
-    const COP = W_kW > 0 ? Q_kW / W_kW : 0;
+
+    // Capacidade: prioriza store, fallback para catálogo, fallback para ciclo P-H
+    const Q_W_store = compressor.cooling_capacity_w ?? 0;
+    const Q_W_catalog = machine?.capacidadeFrigorificaKcalH
+      ? machine.capacidadeFrigorificaKcalH * 1.163  // kcal/h → W
+      : machine?.capacidadeCompressorKcalH
+        ? machine.capacidadeCompressorKcalH * 1.163
+        : 0;
+    const Q_W_ph = ph.result ? ph.result.qEvap_kJkg * 1000 : 0; // kJ/kg não é W diretamente, usar apenas como referência
+    const Q_W = Q_W_store > 0 ? Q_W_store : Q_W_catalog;
+    const Q_kW = Q_W / 1000;
+
+    // Potência: prioriza store, fallback catálogo
+    const W_W_store = compressor.power_w ?? 0;
+    const W_W_catalog = machine?.potenciaEletricaKw ? machine.potenciaEletricaKw * 1000 : 0;
+    const W_W = W_W_store > 0 ? W_W_store : W_W_catalog;
+    const W_kW = W_W / 1000;
+
+    // COP: prioriza ciclo P-H se disponível, senão calcula dos nominais
+    const COP_ph = ph.result?.COP ?? 0;
+    const COP_nominal = W_kW > 0 ? Q_kW / W_kW : (machine?.cop ?? 0);
+    const COP = COP_ph > 0 ? COP_ph : COP_nominal;
+    const hasNominalData = Q_kW > 0;
 
     const lines: string[] = [
       "═══════════════════════════════════════════════════════════════",
@@ -41,7 +60,7 @@ export function TechnicalReportTabContent({ machine }: Props) {
       "═══════════════════════════════════════════════════════════════",
       `  Data: ${now}`,
       "",
-      "─── 1. IDENTIFICAÇÃO DO EQUIPAMENTO ────────────────────────────",
+      "─── 1. IDENTIFICAÇÃO DO EQUIPAMENTO ────────────────────────────────────────",
       `  Modelo: ${machine?.modelo ?? "—"}`,
       `  Aplicação: ${machine?.application ?? "—"}`,
       `  Refrigerante: ${machine?.refrigerante ?? compressor.refrigerant ?? "—"}`,
@@ -49,16 +68,18 @@ export function TechnicalReportTabContent({ machine }: Props) {
       `  Tensão: ${machine?.tensaoComercial ?? `${machine?.tensaoV ?? "—"}V/${machine?.frequenciaHz ?? "—"}Hz`}`,
       `  Compressor: ${machine?.compressorModelo ?? "—"}`,
       "",
-      "─── 2. PARÂMETROS NOMINAIS ─────────────────────────────────────",
-      `  Capacidade frigorífica: ${Q_kW.toFixed(2)} kW (${(Q_kW / KCALH_TO_W * 1000).toFixed(0)} kcal/h)`,
-      `  Potência elétrica: ${W_kW.toFixed(2)} kW`,
-      `  COP: ${COP.toFixed(3)}`,
-      `  EER: ${(COP * 3.412).toFixed(3)}`,
-      `  Te: ${(compressor.evap_temp_c ?? machine?.tempEvaporacaoC ?? "—")}°C`,
-      `  Tc: ${(compressor.cond_temp_c ?? machine?.tempCondensacaoC ?? "—")}°C`,
-      `  T_ambiente: ${(conditions.ambient_temp_c ?? machine?.tempAmbienteC ?? "—")}°C`,
-      `  Vazão ar evaporador: ${(evaporator.airflow_m3_h ?? machine?.vazaoArEvaporadorM3H ?? "—")} m³/h`,
-      `  Vazão ar condensador: ${(machine?.vazaoArCondensadorM3H ?? "—")} m³/h`,
+      "─── 2. PARÂMETROS NOMINAIS ───────────────────────────────────────────",
+      hasNominalData
+        ? `  Capacidade frigorífica: ${fmtCapacityAll(Q_W)}`
+        : "  Capacidade frigorífica: Não configurada (selecione uma máquina ou preencha o compressor)",
+      `  Potência elétrica: ${W_kW > 0 ? `${W_kW.toFixed(2)} kW` : "—"}`,
+      `  COP: ${COP > 0 ? `${COP.toFixed(3)}${COP_ph > 0 ? " (calculado pelo ciclo P-H)" : " (nominal)"}` : "—"}`,
+      `  EER: ${COP > 0 ? (COP * 3.412).toFixed(3) : "—"}`,
+      `  Te: ${compressor.evap_temp_c ?? machine?.tempEvaporacaoC ?? "—"}°C`,
+      `  Tc: ${compressor.cond_temp_c ?? machine?.tempCondensacaoC ?? "—"}°C`,
+      `  T_ambiente: ${conditions.ambient_temp_c ?? machine?.tempAmbienteC ?? "—"}°C`,
+      `  Vazão ar evaporador: ${evaporator.airflow_m3_h ?? machine?.vazaoArEvaporadorM3H ?? "—"} m³/h`,
+      `  Vazão ar condensador: ${machine?.vazaoArCondensadorM3H ?? "—"} m³/h`,
       "",
     ];
 

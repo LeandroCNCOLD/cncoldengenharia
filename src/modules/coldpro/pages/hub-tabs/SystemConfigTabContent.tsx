@@ -28,6 +28,8 @@ import { getEquipmentCatalog } from "@/modules/coldpro_catalog/data/equipmentCat
 import type { CatalogEquipmentRow } from "@/modules/coldpro_catalog/data/equipmentCatalog.types";
 import { catalogToCompressorSpec } from "@/modules/coldpro_catalog/adapters/compressorAdapter";
 import { catalogToCondenserSpec } from "@/modules/coldpro_catalog/adapters/condenserAdapter";
+import { useTestHubStore } from "../../stores/useTestHubStore";
+import { CapacityRow } from "../../components/ui/CapacityDisplay";
 
 interface Props {
   onDone: () => void;
@@ -240,13 +242,19 @@ function CatalogMachinePicker({
 
 // ── Componente principal ──────────────────────────────────────────────────────
 export function SystemConfigTabContent({ onDone }: Props) {
-  const [compressor, setCompressor] = useState<Partial<CompressorSpec>>({ refrigerant: "R404A" });
-  const [condenser, setCondenser] = useState<Partial<CondenserSpec>>({});
-  const [evaporator, setEvaporator] = useState<EvaporatorFormValue>({});
-  const [conditions, setConditions] = useState<Partial<SystemConditions>>({});
   const [selectedMachineId, setSelectedMachineId] = useState<string | undefined>();
   const [catalogSource, setCatalogSource] = useState<string | undefined>();
 
+  // Store global do Hub — fonte de verdade para todas as abas
+  const {
+    compressor, setCompressor,
+    condenser, setCondenser,
+    evaporator, setEvaporator,
+    conditions, setConditions,
+    setMachine,
+  } = useTestHubStore();
+
+  // Store do catálogo (compatibilidade com abas legadas)
   const {
     selectedCompressor,
     selectedCondenser,
@@ -261,23 +269,15 @@ export function SystemConfigTabContent({ onDone }: Props) {
   function handleMachineSelect(row: CatalogEquipmentRow) {
     setSelectedMachineId(row.id);
     setCatalogSource(row.modeloBaseReferencia ?? row.modelo);
-
-    // Preenche o store (para compatibilidade com outras abas)
+    // Atualiza store global do Hub (fonte de verdade para todas as abas)
+    setMachine(row);
+    // Atualiza store do catálogo (compatibilidade com abas legadas)
     storeSetCompressor(row);
     storeSetCondenser(row);
     storeSetEvaporator(row);
-
-    // Preenche os formulários locais
-    try {
-      setCompressor(catalogToCompressorSpec(row));
-    } catch {
-      // Sem capacidade — mantém o formulário atual
-    }
-    try {
-      setCondenser(catalogToCondenserSpec(row));
-    } catch {
-      // Sem calor rejeitado — mantém o formulário atual
-    }
+    // Preenche formulários via store global
+    try { setCompressor(catalogToCompressorSpec(row)); } catch { /* sem capacidade */ }
+    try { setCondenser(catalogToCondenserSpec(row)); } catch { /* sem calor rejeitado */ }
     setEvaporator(catalogToEvaporatorFormValue(row));
     setConditions(catalogToSystemConditions(row));
   }
@@ -322,6 +322,22 @@ export function SystemConfigTabContent({ onDone }: Props) {
             Limpar e preencher manualmente
           </Button>
         </div>
+      )}
+
+      {/* Painel de capacidade em múltiplas unidades */}
+      {compressor.cooling_capacity_w != null && compressor.cooling_capacity_w > 0 && (
+        <Card className="border-blue-100 bg-blue-50/40">
+          <CardContent className="p-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-blue-700">Capacidade Frigorífica</p>
+            <CapacityRow watts={compressor.cooling_capacity_w} primary="kW" />
+            {condenser.heat_rejection_capacity_w != null && condenser.heat_rejection_capacity_w > 0 && (
+              <>
+                <div className="my-2 border-t border-blue-100" />
+                <CapacityRow watts={condenser.heat_rejection_capacity_w} label="Calor rejeitado (condensador)" primary="kW" />
+              </>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {/* Status dos componentes */}

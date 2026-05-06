@@ -9,21 +9,20 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, AlertCircle, XCircle, Clock, Brain, BarChart3, Thermometer, Zap, Wind, Target, Activity, TrendingUp } from "lucide-react";
 import { useTestHubStore } from "../../stores/useTestHubStore";
 import type { CatalogEquipmentRow } from "@/modules/coldpro_catalog/data/equipmentCatalog.types";
+import { CapacityDisplay, fmtCapacity } from "../../components/ui/CapacityDisplay";
 
 interface Props {
   machine: CatalogEquipmentRow | null;
   onNavigate: (tab: string) => void;
 }
 
-const KCALH_TO_W = 1.163;
-
 export function ExecutiveSummaryTabContent({ machine, onNavigate }: Props) {
   const { compressor, condenser, evaporator, ph, montecarlo, optimization, ai, isConfigured } = useTestHubStore();
 
-  const Q_kW = (compressor.cooling_capacity_w ?? 0) / 1000;
-  const W_kW = (compressor.power_w ?? Q_kW / 2.5) / 1000;
+  const Q_W = compressor.cooling_capacity_w ?? 0;
+  const Q_kW = Q_W / 1000;
+  const W_kW = (compressor.power_w ?? Q_kW / 2.5);
   const COP = W_kW > 0 ? Q_kW / W_kW : 0;
-  const Q_kcalh = Q_kW / KCALH_TO_W * 1000;
 
   const analyses = [
     {
@@ -119,7 +118,7 @@ export function ExecutiveSummaryTabContent({ machine, onNavigate }: Props) {
       {/* Métricas principais */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { label: "Capacidade Frigorífica", value: Q_kW > 0 ? `${Q_kW.toFixed(2)} kW` : "—", sub: Q_kcalh > 0 ? `${Q_kcalh.toFixed(0)} kcal/h` : "", icon: Thermometer, color: "text-blue-600" },
+          { label: "Capacidade Frigorífica", value: Q_kW > 0 ? `${Q_kW.toFixed(2)} kW` : "—", sub: Q_kW > 0 ? `${fmtCapacity(Q_W, "kcal/h")} kcal/h · ${fmtCapacity(Q_W, "BTU/h")} BTU/h · ${fmtCapacity(Q_W, "TR")} TR` : "", icon: Thermometer, color: "text-blue-600" },
           { label: "Potência Elétrica", value: W_kW > 0 ? `${W_kW.toFixed(2)} kW` : "—", sub: machine?.correnteA ? `${machine.correnteA.toFixed(1)} A` : "", icon: Zap, color: "text-amber-600" },
           { label: "COP", value: COP > 0 ? COP.toFixed(3) : "—", sub: COP > 0 ? `EER: ${(COP * 3.412).toFixed(2)}` : "", icon: TrendingUp, color: "text-emerald-600" },
           { label: "Análises Concluídas", value: `${completedCount}/${analyses.length}`, sub: `${Math.round((completedCount / analyses.length) * 100)}% completo`, icon: CheckCircle2, color: "text-[#1E6FD9]" },
@@ -136,6 +135,16 @@ export function ExecutiveSummaryTabContent({ machine, onNavigate }: Props) {
           </Card>
         ))}
       </div>
+
+      {/* Capacidade em múltiplas unidades */}
+      {Q_W > 0 && (
+        <Card className="border-blue-100 bg-blue-50/30">
+          <CardContent className="p-4">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-blue-700">Capacidade Frigorífica — Conversão de Unidades</p>
+            <CapacityDisplay watts={Q_W} primary="kW" />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Status das análises */}
       <Card>

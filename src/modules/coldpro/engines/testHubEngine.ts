@@ -634,12 +634,26 @@ export async function computeAIAnalysis(
   const Te = compressor.evap_temp_c ?? evaporator.T_evaporating_c ?? -10;
   const Tc = compressor.cond_temp_c ?? 40;
   const T_amb = conditions.ambient_temp_c ?? 35;
-  const COP_nom = W_comp > 0 ? Q_comp / W_comp : 0;
+  // COP: prioriza ciclo P-H (mais preciso), senão calcula dos dados nominais do compressor
+  const COP_ph = phResult?.COP ?? 0;
+  const COP_nom_raw = W_comp > 0 ? Q_comp / W_comp : 0;
+  const COP_nom = COP_ph > 0 ? COP_ph : COP_nom_raw;
+  // Só avalia eficiência se há dados reais (capacidade configurada)
+  const has_cop_data = Q_comp > 0 && (COP_ph > 0 || W_comp > 0);
 
-  // ── Regra 1: COP vs COP de Carnot ─────────────────────────────────────────
+  // ── Regra 1: COP vs COP de Carnot ─────────────────────────────────────────────────────
   const COP_carnot = (Te + 273.15) / Math.max(1, Tc - Te);
-  const eta_2nd_law = COP_nom > 0 && COP_carnot > 0 ? COP_nom / COP_carnot : 0;
-  if (eta_2nd_law < 0.3) {
+  const eta_2nd_law = has_cop_data && COP_nom > 0 && COP_carnot > 0 ? COP_nom / COP_carnot : -1;
+
+  if (!has_cop_data) {
+    diagnoses.push({
+      category: "Eficiência Termodinâmica",
+      severity: "ok",
+      finding: "Dados insuficientes para avaliar eficiência de 2ª Lei",
+      explanation: "Configure a capacidade e potência do compressor, ou execute o ciclo P-H para obter o COP real do sistema.",
+      reference: "ASHRAE Handbook Fundamentals 2021, Cap. 2",
+    });
+  } else if (eta_2nd_law < 0.3) {
     score -= 20;
     diagnoses.push({
       category: "Eficiência Termodinâmica",
