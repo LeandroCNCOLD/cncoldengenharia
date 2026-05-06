@@ -456,7 +456,7 @@ export function AirSidePanel({ result, disabled, onFanPickerOpen }: AirSidePanel
               input={
                 <InputCell
                   value={airFlowDisplay}
-                  onChange={(v) => setThermo({ airFlowM3H: fromAirFlow(v, uFlow) })}
+                  onChange={(v) => setAirFlowCanon(fromAirFlow(v, uFlow))}
                   disabled={disabled}
                   min={0}
                 />
