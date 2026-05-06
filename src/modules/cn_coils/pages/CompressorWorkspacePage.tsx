@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Calculator, Save, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -7,11 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "@/components/ui/accordion"; // Accordion removido — sidebar migrado para NavCard
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   getCompressorById,
@@ -23,7 +19,7 @@ import { WorkspacePdfReport } from "../components/pdf/WorkspacePdfReport";
 import { ActionBar } from "../components/ActionBar";
 import { ResultCard } from "../components/ResultCard";
 import { WorkspaceHeader } from "../components/WorkspaceHeader";
-import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
+// WorkspaceInputsSidebar removido — sidebar migrado para NavCard
 import { WorkspaceLayout } from "../components/WorkspaceLayout";
 import { ProjectHeaderBar } from "../components/ProjectHeaderBar";
 import {
@@ -199,19 +195,61 @@ export function CompressorWorkspacePage() {
     warnings: [],
   }), [activeTab, inputs, result]);
 
+  // ── NavCard helper ──
+  function NavCard({ title, status, lines, children }: {
+    title: string;
+    status: "ok" | "incomplete" | "warning";
+    lines: string[];
+    children?: React.ReactNode;
+  }) {
+    const [open, setOpen] = React.useState(false);
+    const dot = status === "ok" ? "bg-emerald-500" : status === "warning" ? "bg-amber-400" : "bg-rose-500";
+    const label = status === "ok" ? "OK" : status === "warning" ? "Alerta" : "Incompleto";
+    return (
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <button
+          type="button"
+          className="w-full flex items-center justify-between px-3 py-2 hover:bg-muted/40 transition-colors"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <span className={`h-2 w-2 rounded-full flex-shrink-0 ${dot}`} />
+            <span className="text-xs font-semibold truncate">{title}</span>
+          </div>
+          <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+            <span className="text-[10px] text-muted-foreground">{label}</span>
+            <span className="text-[10px] text-muted-foreground">{open ? "▲" : "▼"}</span>
+          </div>
+        </button>
+        {!open && lines.length > 0 && (
+          <div className="px-3 pb-2 space-y-0.5">
+            {lines.map((l, i) => (
+              <p key={i} className="text-[10px] text-muted-foreground truncate">{l}</p>
+            ))}
+          </div>
+        )}
+        {open && children && (
+          <div className="px-3 pb-3">{children}</div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Sidebar (NavCard) ──
+  const compressorSelected = !!inputs.compressorId;
+
   const sidebar = (
-    <WorkspaceInputsSidebar
-      onCalculate={() => cycle.trigger()}
-      onReset={handleReset}
-      isCalculating={isCalculating}
-      canCalculate={!!inputs.compressorId}
-    >
-      <Accordion type="multiple" defaultValue={["sel", "op", "elec"]} className="w-full">
-        <AccordionItem value="sel">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Seleção do Compressor
-          </AccordionTrigger>
-          <AccordionContent className="space-y-2">
+    <div className="flex h-full flex-col gap-0">
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
+        {/* 1. SELEÇÃO DO COMPRESSOR */}
+        <NavCard
+          title="Seleção do Compressor"
+          status={compressorSelected ? "ok" : "incomplete"}
+          lines={compressorSelected
+            ? [`${inputs.compressorBrand} ${inputs.compressorModel}`, inputs.refrigerant]
+            : ["Nenhum compressor selecionado"]}
+        >
+          <div className="mt-2 space-y-2">
             <Button
               variant="outline"
               size="sm"
@@ -227,14 +265,19 @@ export function CompressorWorkspacePage() {
               value={inputs.refrigerant}
               onChange={(refrigerant) => updateInputs({ refrigerant })}
             />
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        </NavCard>
 
-        <AccordionItem value="op">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Condições de Operação
-          </AccordionTrigger>
-          <AccordionContent className="space-y-2">
+        {/* 2. CONDIÇÕES DE OPERAÇÃO */}
+        <NavCard
+          title="Condições de Operação"
+          status="ok"
+          lines={[
+            `Te: ${inputs.Te_C}°C · Tc: ${inputs.Tc_C}°C`,
+            `SH: ${inputs.Tsuperheating_K} K · SC: ${inputs.Tsubcooling_K} K`,
+          ]}
+        >
+          <div className="mt-2 space-y-2">
             <NumberField
               label="Te — Evaporação (°C)"
               value={inputs.Te_C}
@@ -255,12 +298,16 @@ export function CompressorWorkspacePage() {
               value={inputs.Tsubcooling_K}
               onChange={(Tsubcooling_K) => updateInputs({ Tsubcooling_K })}
             />
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        </NavCard>
 
-        <AccordionItem value="elec">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">Elétrica</AccordionTrigger>
-          <AccordionContent className="space-y-2">
+        {/* 3. ELÉTRICA */}
+        <NavCard
+          title="Elétrica"
+          status="ok"
+          lines={[`${inputs.voltage_V} V · ${inputs.frequency_Hz} Hz`]}
+        >
+          <div className="mt-2 space-y-2">
             <NumberField
               label="Tensão (V)"
               value={inputs.voltage_V}
@@ -271,16 +318,30 @@ export function CompressorWorkspacePage() {
               value={inputs.frequency_Hz}
               onChange={(frequency_Hz) => updateInputs({ frequency_Hz })}
             />
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        </NavCard>
 
         {cycle.status === "error" && (
           <div className="mt-2 rounded border border-red-500/30 bg-red-500/5 p-2 text-xs text-red-500">
             {cycle.message}
           </div>
         )}
-      </Accordion>
-    </WorkspaceInputsSidebar>
+      </div>
+
+      {/* Botões de ação */}
+      <div className="border-t border-border px-3 py-3 space-y-2">
+        <Button
+          className="w-full h-9 text-sm font-semibold bg-blue-700 hover:bg-blue-800 text-white"
+          onClick={() => cycle.trigger()}
+          disabled={isCalculating || !inputs.compressorId}
+        >
+          {isCalculating ? "Calculando…" : "⚡ Calcular"}
+        </Button>
+        <Button variant="outline" className="w-full h-8 text-xs" onClick={handleReset} disabled={isCalculating}>
+          Restaurar Padrões
+        </Button>
+      </div>
+    </div>
   );
 
   const header = (

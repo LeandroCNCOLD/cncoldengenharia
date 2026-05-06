@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Snowflake, Calculator } from "lucide-react";
 import { toast } from "sonner";
 import { useCycleSimulation } from "../hooks/useCycleSimulation";
@@ -18,7 +18,7 @@ import { OptimizationPanel } from "../components/OptimizationPanel";
 import { CompressorPickerModal } from "../components/CompressorPickerModal";
 import { WorkspaceLayout } from "../components/WorkspaceLayout";
 import { WorkspaceHeader } from "../components/WorkspaceHeader";
-import { WorkspaceInputsSidebar } from "../components/WorkspaceInputsSidebar";
+// WorkspaceInputsSidebar removido — sidebar migrado para NavCard
 import { DrawingTab } from "../components/drawing/DrawingTab";
 import { WorkspaceAIPanel } from "../components/WorkspaceAIPanel";
 import type { AIContext } from "../components/WorkspaceAIChat";
@@ -27,12 +27,7 @@ import { ResultCard } from "../components/ResultCard";
 import { ActionBar } from "../components/ActionBar";
 import { usePdfExport } from "../hooks/usePdfExport";
 import { listAvailableRefrigerants } from "../engines/refrigerant/refrigerantProperties";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+// Accordion removido — sidebar migrado para NavCard
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -301,86 +296,124 @@ export function CycleWorkspacePage() {
   const hasResults = !!cycleResult;
   const isCalculating = simState.status === "running";
 
+  // ── NavCard helper ──
+  function NavCard({ title, status, lines, children }: {
+    title: string;
+    status: "ok" | "incomplete" | "warning";
+    lines: string[];
+    children?: React.ReactNode;
+  }) {
+    const [open, setOpen] = React.useState(false);
+    const dot = status === "ok" ? "bg-emerald-500" : status === "warning" ? "bg-amber-400" : "bg-rose-500";
+    const label = status === "ok" ? "OK" : status === "warning" ? "Alerta" : "Incompleto";
+    return (
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <button
+          type="button"
+          className="w-full flex items-center justify-between px-3 py-2 hover:bg-muted/40 transition-colors"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <span className={`h-2 w-2 rounded-full flex-shrink-0 ${dot}`} />
+            <span className="text-xs font-semibold truncate">{title}</span>
+          </div>
+          <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+            <span className="text-[10px] text-muted-foreground">{label}</span>
+            <span className="text-[10px] text-muted-foreground">{open ? "▲" : "▼"}</span>
+          </div>
+        </button>
+        {!open && lines.length > 0 && (
+          <div className="px-3 pb-2 space-y-0.5">
+            {lines.map((l, i) => (
+              <p key={i} className="text-[10px] text-muted-foreground truncate">{l}</p>
+            ))}
+          </div>
+        )}
+        {open && children && (
+          <div className="px-3 pb-3">{children}</div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Sidebar (NavCard) ──
   const sidebar = (
-    <WorkspaceInputsSidebar
-      onCalculate={() => simState.trigger()}
-      onReset={handleReset}
-      isCalculating={isCalculating}
-    >
-      <Accordion type="multiple" defaultValue={["ref", "comp", "exp", "ops"]} className="w-full">
-        <AccordionItem value="ref">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Refrigerante
-          </AccordionTrigger>
-          <AccordionContent className="space-y-2">
+    <div className="flex h-full flex-col gap-0">
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
+        {/* 1. REFRIGERANTE */}
+        <NavCard
+          title="Refrigerante"
+          status="ok"
+          lines={[refrigerantId]}
+        >
+          <div className="mt-2 space-y-2">
             <Select value={refrigerantId} onValueChange={setRefrigerantId}>
               <SelectTrigger className="h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="max-h-80">
+              <SelectContent>
                 {REFRIGERANT_GROUPS.map((g) => (
                   <SelectGroup key={g.label}>
-                    <SelectLabel>{g.label}</SelectLabel>
+                    <SelectLabel className="text-[10px] text-muted-foreground">{g.label}</SelectLabel>
                     {g.ids.map((id) => (
-                      <SelectItem key={id} value={id}>
-                        {id}
-                      </SelectItem>
+                      <SelectItem key={id} value={id} className="text-xs">{id}</SelectItem>
                     ))}
                   </SelectGroup>
                 ))}
               </SelectContent>
             </Select>
-            {(() => {
-              const meta = refrigerantsMeta.find((r) => r.id === refrigerantId);
-              return meta ? (
-                <div className="text-[10px] text-muted-foreground">
-                  {meta.name} · <span className="uppercase">{meta.category.replace("_", " ")}</span>
-                </div>
-              ) : null;
-            })()}
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        </NavCard>
 
-        <AccordionItem value="comp">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">Compressor</AccordionTrigger>
-          <AccordionContent className="space-y-2">
-            <div className="flex gap-1">
-              {(["bitzer", "ari", "constant"] as CompressorMode[]).map((m) => (
-                <Button
-                  key={m}
-                  type="button"
-                  size="sm"
-                  variant={compressorMode === m ? "default" : "outline"}
-                  className="flex-1 h-7 text-[10px] px-1"
-                  onClick={() => setCompressorMode(m)}
-                >
-                  {m === "bitzer" ? "Bitzer" : m === "ari" ? "ARI 540" : "Const."}
-                </Button>
-              ))}
-            </div>
+        {/* 2. COMPRESSOR */}
+        <NavCard
+          title="Compressor"
+          status="ok"
+          lines={[
+            compressorMode === "bitzer" && selectedCompressor
+              ? `${selectedCompressor.manufacturer} ${selectedCompressor.model}`
+              : compressorMode === "bitzer"
+              ? "BITZER 2KES-05 (padrão)"
+              : compressorMode === "ari"
+              ? "ARI 540 (busca)"
+              : "Eficiência constante",
+          ]}
+        >
+          <div className="mt-2 space-y-2">
+            <Select value={compressorMode} onValueChange={(v) => setCompressorMode(v as CompressorMode)}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="bitzer" className="text-xs">Catálogo BITZER</SelectItem>
+                <SelectItem value="ari" className="text-xs">ARI 540</SelectItem>
+                <SelectItem value="constant" className="text-xs">Eficiência Constante</SelectItem>
+              </SelectContent>
+            </Select>
             {compressorMode === "bitzer" && (
               <>
                 <Button
-                  size="sm"
                   variant="outline"
+                  size="sm"
+                  className="w-full justify-start h-8 text-xs"
                   onClick={() => setCompressorPickerOpen(true)}
-                  className="w-full h-8 text-xs"
                 >
-                  Selecionar compressor…
+                  {selectedCompressor
+                    ? `${selectedCompressor.manufacturer} ${selectedCompressor.model}`
+                    : "Selecionar compressor…"}
                 </Button>
-                <div className="rounded border border-border bg-muted/40 p-2 text-[10px]">
-                  <div className="font-mono text-foreground">
-                    {selectedCompressor?.model ?? DEFAULT_CONFIG.compressor.model}
+                {selectedCompressor?.bitzerNative && (
+                  <div className="rounded bg-muted/40 p-2 text-[10px] space-y-0.5">
+                    <div>Deslocamento: {selectedCompressor.bitzerNative.displacement_m3h} m³/h</div>
+                    <div>RPM: {selectedCompressor.bitzerNative.rpm}</div>
                   </div>
-                  <div className="text-muted-foreground">
-                    {selectedCompressor?.manufacturer ?? DEFAULT_CONFIG.compressor.manufacturer} ·{" "}
-                    {fmt(
-                      selectedCompressor?.bitzerNative?.displacement_m3h ??
-                        DEFAULT_CONFIG.compressor.bitzerNative?.displacement_m3h ?? 0,
-                      2,
-                    )} m³/h
+                )}
+                {!selectedCompressor && (
+                  <div className="rounded bg-muted/40 p-2 text-[10px] space-y-0.5">
+                    <div>Padrão: BITZER 2KES-05</div>
+                    <div>Deslocamento: {DEFAULT_CONFIG.compressor.bitzerNative?.displacement_m3h ?? 0} m³/h</div>
                   </div>
-                </div>
+                )}
               </>
             )}
             {compressorMode === "ari" && (
@@ -398,14 +431,22 @@ export function CycleWorkspacePage() {
                 </div>
               </div>
             )}
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        </NavCard>
 
-        <AccordionItem value="exp">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Dispositivo de Expansão
-          </AccordionTrigger>
-          <AccordionContent className="space-y-2">
+        {/* 3. DISPOSITIVO DE EXPANSÃO */}
+        <NavCard
+          title="Dispositivo de Expansão"
+          status="ok"
+          lines={[
+            expansionType === "none" ? "Desabilitado"
+            : expansionType === "txv" ? `TXV · SH alvo: ${shTarget} K`
+            : expansionType === "eev" ? `EEV · SH alvo: ${shTarget} K`
+            : expansionType === "capillary" ? `Capilar · ${capLength} m · Ø ${capDiameter} mm`
+            : `Orifício Fixo · Ø ${orificeDiameter} mm`,
+          ]}
+        >
+          <div className="mt-2 space-y-2">
             <Select value={expansionType} onValueChange={(v) => setExpansionType(v as ExpansionDeviceType)}>
               <SelectTrigger className="h-8 text-xs">
                 <SelectValue />
@@ -418,7 +459,6 @@ export function CycleWorkspacePage() {
                 <SelectItem value="fixed_orifice">Orifício Fixo</SelectItem>
               </SelectContent>
             </Select>
-
             {(expansionType === "txv" || expansionType === "eev") && (
               <div>
                 <Label className="text-[10px] text-muted-foreground">SH alvo (K)</Label>
@@ -448,14 +488,19 @@ export function CycleWorkspacePage() {
                 <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={orificeDiameter} step="0.1" onChange={(e) => setOrificeDiameter(Number(e.target.value))} className="h-8 text-xs" />
               </div>
             )}
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        </NavCard>
 
-        <AccordionItem value="ops">
-          <AccordionTrigger className="text-xs uppercase tracking-wide">
-            Condições de Operação
-          </AccordionTrigger>
-          <AccordionContent className="space-y-3">
+        {/* 4. CONDIÇÕES DE OPERAÇÃO */}
+        <NavCard
+          title="Condições de Operação"
+          status="ok"
+          lines={[
+            `Te: ${te}°C · Tc: ${tc}°C`,
+            `SH: ${superheat} K · SC: ${subcooling} K`,
+          ]}
+        >
+          <div className="mt-2 space-y-3">
             <div>
               <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                 <Label>Te</Label>
@@ -490,12 +535,25 @@ export function CycleWorkspacePage() {
                 />
               </div>
             </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </WorkspaceInputsSidebar>
-  );
+          </div>
+        </NavCard>
+      </div>
 
+      {/* Botões de ação */}
+      <div className="border-t border-border px-3 py-3 space-y-2">
+        <Button
+          className="w-full h-9 text-sm font-semibold bg-blue-700 hover:bg-blue-800 text-white"
+          onClick={() => simState.trigger()}
+          disabled={isCalculating}
+        >
+          {isCalculating ? "Calculando…" : "⚡ Calcular"}
+        </Button>
+        <Button variant="outline" className="w-full h-8 text-xs" onClick={handleReset} disabled={isCalculating}>
+          Restaurar Padrões
+        </Button>
+      </div>
+    </div>
+  );
   const header = (
     <WorkspaceHeader
       title="Evaporador DX — Ciclo de Refrigeração"

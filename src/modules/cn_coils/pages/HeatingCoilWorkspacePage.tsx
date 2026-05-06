@@ -9,7 +9,7 @@
  *  - Exportação PDF/CSV/Excel
  */
 
-import { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { ThermometerSun } from "lucide-react";
 import {
   CartesianGrid,
@@ -23,12 +23,7 @@ import {
   YAxis,
 } from "recharts";
 import { toast } from "sonner";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+// Accordion removido — sidebar migrado para NavCard
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -240,97 +235,151 @@ export function HeatingCoilWorkspacePage() {
     return b;
   }, [inputs.heatingFluid, result]);
 
-  // ── Sidebar ──
+  // ── NavCard helper ──
+  function NavCard({ title, status, lines, children }: {
+    title: string;
+    status: "ok" | "incomplete" | "warning";
+    lines: string[];
+    children?: React.ReactNode;
+  }) {
+    const [open, setOpen] = React.useState(false);
+    const dot = status === "ok" ? "bg-emerald-500" : status === "warning" ? "bg-amber-400" : "bg-rose-500";
+    const label = status === "ok" ? "OK" : status === "warning" ? "Alerta" : "Incompleto";
+    return (
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <button
+          type="button"
+          className="w-full flex items-center justify-between px-3 py-2 hover:bg-muted/40 transition-colors"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <span className={`h-2 w-2 rounded-full flex-shrink-0 ${dot}`} />
+            <span className="text-xs font-semibold truncate">{title}</span>
+          </div>
+          <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+            <span className="text-[10px] text-muted-foreground">{label}</span>
+            <span className="text-[10px] text-muted-foreground">{open ? "▲" : "▼"}</span>
+          </div>
+        </button>
+        {!open && lines.length > 0 && (
+          <div className="px-3 pb-2 space-y-0.5">
+            {lines.map((l, i) => (
+              <p key={i} className="text-[10px] text-muted-foreground truncate">{l}</p>
+            ))}
+          </div>
+        )}
+        {open && children && (
+          <div className="px-3 pb-3">{children}</div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Sidebar (NavCard) ──
+  const modeLabel = draft.mode === "heating" ? "Aquecimento" : "Reaquecimento";
+  const fluidLabel = draft.heatingFluid === "hot_water" ? "Água quente" : "Vapor";
+  const geomIncomplete = !draft.tubeRows || !draft.tubesPerRow || !draft.tubeLength_m;
+  const airIncomplete = !draft.airFlowRate_m3h;
+  const fluidIncomplete = !draft.Tf_in_C || (draft.heatingFluid === "hot_water" && !draft.fluidFlowRate_m3h);
+
   const sidebar = (
     <div className="flex h-full flex-col gap-0">
-      <div className="flex-1 overflow-y-auto px-3 py-3">
-        <Accordion type="multiple" defaultValue={["mode", "air", "fluid", "geom"]} className="space-y-1">
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
+        {/* 1. MODO */}
+        <NavCard
+          title="Modo de Operação"
+          status="ok"
+          lines={[modeLabel, fluidLabel]}
+        >
+          <div className="mt-2 space-y-2">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Modo</Label>
+              <Select value={draft.mode} onValueChange={(v) => update({ mode: v as HeatingCoilInputs["mode"] })}>
+                <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="heating" className="text-xs">Aquecimento</SelectItem>
+                  <SelectItem value="reheat" className="text-xs">Reaquecimento</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Fluido de aquecimento</Label>
+              <Select value={draft.heatingFluid} onValueChange={(v) => update({ heatingFluid: v as HeatingCoilInputs["heatingFluid"] })}>
+                <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hot_water" className="text-xs">Água quente</SelectItem>
+                  <SelectItem value="steam" className="text-xs">Vapor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </NavCard>
 
-          {/* Modo de Operação */}
-          <AccordionItem value="mode" className="rounded-lg border border-border bg-card">
-            <AccordionTrigger className="px-3 py-2 text-xs font-semibold hover:no-underline">
-              ⚙️ Modo de Operação
-            </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3 pt-1 space-y-3">
-              <div className="space-y-1">
-                <Label className="text-[10px] text-muted-foreground">Modo</Label>
-                <Select value={draft.mode} onValueChange={(v) => update({ mode: v as HeatingCoilInputs["mode"] })}>
-                  <SelectTrigger className="h-7 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="heating" className="text-xs">Aquecimento</SelectItem>
-                    <SelectItem value="reheat" className="text-xs">Reaquecimento</SelectItem>
-                  </SelectContent>
-                </Select>
+        {/* 2. LADO AR */}
+        <NavCard
+          title="Lado Ar"
+          status={airIncomplete ? "incomplete" : "ok"}
+          lines={[
+            `T: ${draft.Tair_in_C}°C · UR: ${(draft.RH_in * 100).toFixed(0)}%`,
+            `Vazão: ${draft.airFlowRate_m3h} m³/h`,
+            `Altitude: ${draft.altitude_m} m`,
+          ]}
+        >
+          <div className="mt-2 space-y-2">
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-[10px] text-muted-foreground">T entrada (°C)</Label>
+                <span className="text-[10px] font-medium">{draft.Tair_in_C} °C</span>
               </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] text-muted-foreground">Fluido de aquecimento</Label>
-                <Select value={draft.heatingFluid} onValueChange={(v) => update({ heatingFluid: v as HeatingCoilInputs["heatingFluid"] })}>
-                  <SelectTrigger className="h-7 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="hot_water" className="text-xs">Água quente</SelectItem>
-                    <SelectItem value="steam" className="text-xs">Vapor</SelectItem>
-                  </SelectContent>
-                </Select>
+              <Slider min={-20} max={35} step={0.5} value={[draft.Tair_in_C]}
+                onValueChange={([v]) => update({ Tair_in_C: v })} className="h-4" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-[10px] text-muted-foreground">UR entrada (%)</Label>
+                <span className="text-[10px] font-medium">{(draft.RH_in * 100).toFixed(0)} %</span>
               </div>
-            </AccordionContent>
-          </AccordionItem>
+              <Slider min={10} max={100} step={5} value={[draft.RH_in * 100]}
+                onValueChange={([v]) => update({ RH_in: v / 100 })} className="h-4" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Vazão ar (m³/h)</Label>
+              <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.airFlowRate_m3h}
+                onChange={(e) => update({ airFlowRate_m3h: Number(e.target.value) })}
+                className="h-7 text-xs" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Altitude (m)</Label>
+              <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.altitude_m}
+                onChange={(e) => update({ altitude_m: Number(e.target.value) })}
+                className="h-7 text-xs" />
+            </div>
+          </div>
+        </NavCard>
 
-          {/* Lado Ar */}
-          <AccordionItem value="air" className="rounded-lg border border-border bg-card">
-            <AccordionTrigger className="px-3 py-2 text-xs font-semibold hover:no-underline">
-              🌬️ Lado Ar
-            </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3 pt-1 space-y-3">
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <Label className="text-[10px] text-muted-foreground">T entrada (°C)</Label>
-                  <span className="text-[10px] font-medium">{draft.Tair_in_C} °C</span>
-                </div>
-                <Slider min={-20} max={35} step={0.5} value={[draft.Tair_in_C]}
-                  onValueChange={([v]) => update({ Tair_in_C: v })} className="h-4" />
+        {/* 3. FLUIDO DE AQUECIMENTO */}
+        <NavCard
+          title="Fluido de Aquecimento"
+          status={fluidIncomplete ? "incomplete" : "ok"}
+          lines={[
+            `T entrada: ${draft.Tf_in_C}°C`,
+            ...(draft.heatingFluid === "hot_water" ? [
+              `T saída: ${draft.Tf_out_C}°C`,
+              `Vazão: ${draft.fluidFlowRate_m3h} m³/h`,
+            ] : ["Vapor saturado"]),
+          ]}
+        >
+          <div className="mt-2 space-y-2">
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-[10px] text-muted-foreground">T entrada fluido (°C)</Label>
+                <span className="text-[10px] font-medium">{draft.Tf_in_C} °C</span>
               </div>
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <Label className="text-[10px] text-muted-foreground">UR entrada (%)</Label>
-                  <span className="text-[10px] font-medium">{(draft.RH_in * 100).toFixed(0)} %</span>
-                </div>
-                <Slider min={10} max={100} step={5} value={[draft.RH_in * 100]}
-                  onValueChange={([v]) => update({ RH_in: v / 100 })} className="h-4" />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] text-muted-foreground">Vazão ar (m³/h)</Label>
-                <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.airFlowRate_m3h}
-                  onChange={(e) => update({ airFlowRate_m3h: Number(e.target.value) })}
-                  className="h-7 text-xs" />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] text-muted-foreground">Altitude (m)</Label>
-                <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.altitude_m}
-                  onChange={(e) => update({ altitude_m: Number(e.target.value) })}
-                  className="h-7 text-xs" />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Fluido de Aquecimento */}
-          <AccordionItem value="fluid" className="rounded-lg border border-border bg-card">
-            <AccordionTrigger className="px-3 py-2 text-xs font-semibold hover:no-underline">
-              🔥 Fluido de Aquecimento
-            </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3 pt-1 space-y-3">
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <Label className="text-[10px] text-muted-foreground">T entrada fluido (°C)</Label>
-                  <span className="text-[10px] font-medium">{draft.Tf_in_C} °C</span>
-                </div>
-                <Slider min={40} max={150} step={1} value={[draft.Tf_in_C]}
-                  onValueChange={([v]) => update({ Tf_in_C: v })} className="h-4" />
-              </div>
-              {draft.heatingFluid === "hot_water" && (
+              <Slider min={40} max={150} step={1} value={[draft.Tf_in_C]}
+                onValueChange={([v]) => update({ Tf_in_C: v })} className="h-4" />
+            </div>
+            {draft.heatingFluid === "hot_water" && (
+              <>
                 <div className="space-y-1">
                   <div className="flex justify-between">
                     <Label className="text-[10px] text-muted-foreground">T saída fluido (°C)</Label>
@@ -339,63 +388,66 @@ export function HeatingCoilWorkspacePage() {
                   <Slider min={30} max={130} step={1} value={[draft.Tf_out_C]}
                     onValueChange={([v]) => update({ Tf_out_C: v })} className="h-4" />
                 </div>
-              )}
-              {draft.heatingFluid === "hot_water" && (
                 <div className="space-y-1">
                   <Label className="text-[10px] text-muted-foreground">Vazão fluido (m³/h)</Label>
                   <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.fluidFlowRate_m3h}
                     onChange={(e) => update({ fluidFlowRate_m3h: Number(e.target.value) })}
                     className="h-7 text-xs" />
                 </div>
-              )}
-            </AccordionContent>
-          </AccordionItem>
+              </>
+            )}
+          </div>
+        </NavCard>
 
-          {/* Geometria */}
-          <AccordionItem value="geom" className="rounded-lg border border-border bg-card">
-            <AccordionTrigger className="px-3 py-2 text-xs font-semibold hover:no-underline">
-              📐 Geometria do Aletado
-            </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3 pt-1 space-y-3">
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <Label className="text-[10px] text-muted-foreground">Filas de tubos</Label>
-                  <span className="text-[10px] font-medium">{draft.tubeRows}</span>
-                </div>
-                <Slider min={1} max={8} step={1} value={[draft.tubeRows]}
-                  onValueChange={([v]) => update({ tubeRows: v })} className="h-4" />
+        {/* 4. GEOMETRIA */}
+        <NavCard
+          title="Geometria do Aletado"
+          status={geomIncomplete ? "incomplete" : "ok"}
+          lines={[
+            `${draft.tubeRows} filas × ${draft.tubesPerRow} tubos`,
+            `L: ${draft.tubeLength_m} m · Passo: ${draft.finPitch_mm} mm`,
+            `Ø tubo: ${draft.tubeDiameter_mm} mm`,
+          ]}
+        >
+          <div className="mt-2 space-y-2">
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-[10px] text-muted-foreground">Filas de tubos</Label>
+                <span className="text-[10px] font-medium">{draft.tubeRows}</span>
               </div>
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <Label className="text-[10px] text-muted-foreground">Tubos por fila</Label>
-                  <span className="text-[10px] font-medium">{draft.tubesPerRow}</span>
-                </div>
-                <Slider min={4} max={40} step={1} value={[draft.tubesPerRow]}
-                  onValueChange={([v]) => update({ tubesPerRow: v })} className="h-4" />
+              <Slider min={1} max={8} step={1} value={[draft.tubeRows]}
+                onValueChange={([v]) => update({ tubeRows: v })} className="h-4" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-[10px] text-muted-foreground">Tubos por fila</Label>
+                <span className="text-[10px] font-medium">{draft.tubesPerRow}</span>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <Label className="text-[10px] text-muted-foreground">Comprimento (m)</Label>
-                  <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.tubeLength_m}
-                    onChange={(e) => update({ tubeLength_m: Number(e.target.value) })}
-                    className="h-7 text-xs" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] text-muted-foreground">Passo aletas (mm)</Label>
-                  <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.finPitch_mm}
-                    onChange={(e) => update({ finPitch_mm: Number(e.target.value) })}
-                    className="h-7 text-xs" />
-                </div>
-              </div>
+              <Slider min={4} max={40} step={1} value={[draft.tubesPerRow]}
+                onValueChange={([v]) => update({ tubesPerRow: v })} className="h-4" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
-                <Label className="text-[10px] text-muted-foreground">Ø tubo (mm)</Label>
-                <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.tubeDiameter_mm}
-                  onChange={(e) => update({ tubeDiameter_mm: Number(e.target.value) })}
+                <Label className="text-[10px] text-muted-foreground">Comprimento (m)</Label>
+                <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.tubeLength_m}
+                  onChange={(e) => update({ tubeLength_m: Number(e.target.value) })}
                   className="h-7 text-xs" />
               </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+              <div className="space-y-1">
+                <Label className="text-[10px] text-muted-foreground">Passo aletas (mm)</Label>
+                <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.finPitch_mm}
+                  onChange={(e) => update({ finPitch_mm: Number(e.target.value) })}
+                  className="h-7 text-xs" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Ø tubo (mm)</Label>
+              <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.tubeDiameter_mm}
+                onChange={(e) => update({ tubeDiameter_mm: Number(e.target.value) })}
+                className="h-7 text-xs" />
+            </div>
+          </div>
+        </NavCard>
       </div>
 
       {/* Botões de ação */}
@@ -411,9 +463,8 @@ export function HeatingCoilWorkspacePage() {
           Restaurar Padrões
         </Button>
       </div>
-    </div>
+     </div>
   );
-
   return (
     <WorkspaceLayout
       header={

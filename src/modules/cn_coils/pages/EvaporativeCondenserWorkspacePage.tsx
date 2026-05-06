@@ -9,7 +9,7 @@
  *  - Exportação PDF/CSV/Excel
  */
 
-import { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Droplets, Save } from "lucide-react";
 import {
   CartesianGrid,
@@ -21,12 +21,7 @@ import {
   YAxis,
 } from "recharts";
 import { toast } from "sonner";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+// Accordion removido — sidebar migrado para NavCard
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -234,124 +229,176 @@ export function EvaporativeCondenserWorkspacePage() {
   }, [result]);
 
   // ── Sidebar ──
+  // ── NavCard helper ──
+  function NavCard({ title, status, lines, children }: {
+    title: string;
+    status: "ok" | "incomplete" | "warning";
+    lines: string[];
+    children?: React.ReactNode;
+  }) {
+    const [open, setOpen] = React.useState(false);
+    const dot = status === "ok" ? "bg-emerald-500" : status === "warning" ? "bg-amber-400" : "bg-rose-500";
+    const label = status === "ok" ? "OK" : status === "warning" ? "Alerta" : "Incompleto";
+    return (
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <button
+          type="button"
+          className="w-full flex items-center justify-between px-3 py-2 hover:bg-muted/40 transition-colors"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <span className={`h-2 w-2 rounded-full flex-shrink-0 ${dot}`} />
+            <span className="text-xs font-semibold truncate">{title}</span>
+          </div>
+          <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+            <span className="text-[10px] text-muted-foreground">{label}</span>
+            <span className="text-[10px] text-muted-foreground">{open ? "▲" : "▼"}</span>
+          </div>
+        </button>
+        {!open && lines.length > 0 && (
+          <div className="px-3 pb-2 space-y-0.5">
+            {lines.map((l, i) => (
+              <p key={i} className="text-[10px] text-muted-foreground truncate">{l}</p>
+            ))}
+          </div>
+        )}
+        {open && children && (
+          <div className="px-3 pb-3">{children}</div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Sidebar (NavCard) ──
+  const loadIncomplete = !draft.Q_total_W;
+  const airIncomplete = !draft.Twb_C || !draft.Tdb_C;
+  const geomIncomplete = !draft.tubeRows || !draft.tubeLength_m || !draft.tubeDiameter_mm;
+
   const sidebar = (
     <div className="flex h-full flex-col gap-0">
-      <div className="flex-1 overflow-y-auto px-3 py-3">
-        <Accordion type="multiple" defaultValue={["load", "air", "geom", "water_spray"]} className="space-y-1">
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
+        {/* 1. CARGA TÉRMICA */}
+        <NavCard
+          title="Carga Térmica"
+          status={loadIncomplete ? "incomplete" : "ok"}
+          lines={[`Q: ${(draft.Q_total_W / 1000).toFixed(1)} kW`]}
+        >
+          <div className="mt-2 space-y-2">
+            <div className="space-y-1">
+              <Label className="text-[10px] text-muted-foreground">Q total (kW)</Label>
+              <Input
+                type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
+                value={draft.Q_total_W / 1000}
+                onChange={(e) => update({ Q_total_W: Number(e.target.value) * 1000 })}
+                className="h-7 text-xs"
+              />
+            </div>
+          </div>
+        </NavCard>
 
-          {/* Carga Térmica */}
-          <AccordionItem value="load" className="rounded-lg border border-border bg-card">
-            <AccordionTrigger className="px-3 py-2 text-xs font-semibold hover:no-underline">
-              🔥 Carga Térmica
-            </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3 pt-1 space-y-3">
-              <div className="space-y-1">
-                <Label className="text-[10px] text-muted-foreground">Q total (kW)</Label>
-                <Input
-                  type="text" inputMode="decimal" onFocus={(e) => e.target.select()}
-                  value={draft.Q_total_W / 1000}
-                  onChange={(e) => update({ Q_total_W: Number(e.target.value) * 1000 })}
-                  className="h-7 text-xs"
-                />
+        {/* 2. CONDIÇÕES DO AR */}
+        <NavCard
+          title="Condições do Ar"
+          status={airIncomplete ? "incomplete" : "ok"}
+          lines={[
+            `Twb: ${draft.Twb_C}°C · Tdb: ${draft.Tdb_C}°C`,
+            `Vel. ar: ${draft.airVelocity_ms} m/s · Alt: ${draft.altitude_m} m`,
+          ]}
+        >
+          <div className="mt-2 space-y-2">
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-[10px] text-muted-foreground">Twb (°C)</Label>
+                <span className="text-[10px] font-medium">{draft.Twb_C} °C</span>
               </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Condições do Ar */}
-          <AccordionItem value="air" className="rounded-lg border border-border bg-card">
-            <AccordionTrigger className="px-3 py-2 text-xs font-semibold hover:no-underline">
-              🌬️ Condições do Ar
-            </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3 pt-1 space-y-3">
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <Label className="text-[10px] text-muted-foreground">Twb (°C)</Label>
-                  <span className="text-[10px] font-medium">{draft.Twb_C} °C</span>
-                </div>
-                <Slider min={10} max={35} step={0.5} value={[draft.Twb_C]}
-                  onValueChange={([v]) => update({ Twb_C: v })} className="h-4" />
+              <Slider min={10} max={35} step={0.5} value={[draft.Twb_C]}
+                onValueChange={([v]) => update({ Twb_C: v })} className="h-4" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-[10px] text-muted-foreground">Tdb (°C)</Label>
+                <span className="text-[10px] font-medium">{draft.Tdb_C} °C</span>
               </div>
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <Label className="text-[10px] text-muted-foreground">Tdb (°C)</Label>
-                  <span className="text-[10px] font-medium">{draft.Tdb_C} °C</span>
-                </div>
-                <Slider min={15} max={50} step={0.5} value={[draft.Tdb_C]}
-                  onValueChange={([v]) => update({ Tdb_C: v })} className="h-4" />
+              <Slider min={15} max={50} step={0.5} value={[draft.Tdb_C]}
+                onValueChange={([v]) => update({ Tdb_C: v })} className="h-4" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-[10px] text-muted-foreground">Vel. ar (m/s)</Label>
+                <span className="text-[10px] font-medium">{draft.airVelocity_ms} m/s</span>
               </div>
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <Label className="text-[10px] text-muted-foreground">Vel. ar (m/s)</Label>
-                  <span className="text-[10px] font-medium">{draft.airVelocity_ms} m/s</span>
-                </div>
-                <Slider min={1} max={6} step={0.1} value={[draft.airVelocity_ms]}
-                  onValueChange={([v]) => update({ airVelocity_ms: v })} className="h-4" />
-              </div>
-              <div className="space-y-1">
+              <Slider min={1} max={6} step={0.1} value={[draft.airVelocity_ms]}
+                onValueChange={([v]) => update({ airVelocity_ms: v })} className="h-4" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between">
                 <Label className="text-[10px] text-muted-foreground">Altitude (m)</Label>
-                <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.altitude_m}
-                  onChange={(e) => update({ altitude_m: Number(e.target.value) })}
+                <span className="text-[10px] font-medium">{draft.altitude_m} m</span>
+              </div>
+              <Slider min={0} max={3000} step={100} value={[draft.altitude_m]}
+                onValueChange={([v]) => update({ altitude_m: v })} className="h-4" />
+            </div>
+          </div>
+        </NavCard>
+
+        {/* 3. GEOMETRIA DOS TUBOS */}
+        <NavCard
+          title="Geometria dos Tubos"
+          status={geomIncomplete ? "incomplete" : "ok"}
+          lines={[
+            `${draft.tubeRows} fileiras × ${draft.tubesPerRow} tubos`,
+            `${draft.tubeLength_m} m · Ø ${draft.tubeDiameter_mm} mm`,
+          ]}
+        >
+          <div className="mt-2 space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label className="text-[10px] text-muted-foreground">Fileiras</Label>
+                <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.tubeRows}
+                  onChange={(e) => update({ tubeRows: Number(e.target.value) })}
                   className="h-7 text-xs" />
               </div>
-            </AccordionContent>
-          </AccordionItem>
+              <div className="space-y-1">
+                <Label className="text-[10px] text-muted-foreground">Tubos/fileira</Label>
+                <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.tubesPerRow}
+                  onChange={(e) => update({ tubesPerRow: Number(e.target.value) })}
+                  className="h-7 text-xs" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label className="text-[10px] text-muted-foreground">Comprimento (m)</Label>
+                <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.tubeLength_m}
+                  onChange={(e) => update({ tubeLength_m: Number(e.target.value) })}
+                  className="h-7 text-xs" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[10px] text-muted-foreground">Ø tubo (mm)</Label>
+                <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.tubeDiameter_mm}
+                  onChange={(e) => update({ tubeDiameter_mm: Number(e.target.value) })}
+                  className="h-7 text-xs" />
+              </div>
+            </div>
+          </div>
+        </NavCard>
 
-          {/* Geometria */}
-          <AccordionItem value="geom" className="rounded-lg border border-border bg-card">
-            <AccordionTrigger className="px-3 py-2 text-xs font-semibold hover:no-underline">
-              📐 Geometria dos Tubos
-            </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3 pt-1 space-y-3">
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <Label className="text-[10px] text-muted-foreground">Filas de tubos</Label>
-                  <span className="text-[10px] font-medium">{draft.tubeRows}</span>
-                </div>
-                <Slider min={1} max={10} step={1} value={[draft.tubeRows]}
-                  onValueChange={([v]) => update({ tubeRows: v })} className="h-4" />
+        {/* 4. ÁGUA DE ASPERSÃO */}
+        <NavCard
+          title="Água de Aspersão"
+          status="ok"
+          lines={[`Vazão: ${draft.waterFlowRate_Lmin} L/min`]}
+        >
+          <div className="mt-2 space-y-2">
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-[10px] text-muted-foreground">Vazão (L/min)</Label>
+                <span className="text-[10px] font-medium">{draft.waterFlowRate_Lmin}</span>
               </div>
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <Label className="text-[10px] text-muted-foreground">Tubos por fila</Label>
-                  <span className="text-[10px] font-medium">{draft.tubesPerRow}</span>
-                </div>
-                <Slider min={4} max={60} step={1} value={[draft.tubesPerRow]}
-                  onValueChange={([v]) => update({ tubesPerRow: v })} className="h-4" />
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <Label className="text-[10px] text-muted-foreground">Comprimento (m)</Label>
-                  <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.tubeLength_m}
-                    onChange={(e) => update({ tubeLength_m: Number(e.target.value) })}
-                    className="h-7 text-xs" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] text-muted-foreground">Ø tubo (mm)</Label>
-                  <Input type="text" inputMode="decimal" onFocus={(e) => e.target.select()} value={draft.tubeDiameter_mm}
-                    onChange={(e) => update({ tubeDiameter_mm: Number(e.target.value) })}
-                    className="h-7 text-xs" />
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Água de Aspersão */}
-          <AccordionItem value="water_spray" className="rounded-lg border border-border bg-card">
-            <AccordionTrigger className="px-3 py-2 text-xs font-semibold hover:no-underline">
-              💧 Água de Aspersão
-            </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3 pt-1 space-y-3">
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <Label className="text-[10px] text-muted-foreground">Vazão (L/min)</Label>
-                  <span className="text-[10px] font-medium">{draft.waterFlowRate_Lmin}</span>
-                </div>
-                <Slider min={5} max={60} step={1} value={[draft.waterFlowRate_Lmin]}
-                  onValueChange={([v]) => update({ waterFlowRate_Lmin: v })} className="h-4" />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+              <Slider min={5} max={60} step={1} value={[draft.waterFlowRate_Lmin]}
+                onValueChange={([v]) => update({ waterFlowRate_Lmin: v })} className="h-4" />
+            </div>
+          </div>
+        </NavCard>
       </div>
 
       {/* Botões de ação */}
