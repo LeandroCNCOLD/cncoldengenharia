@@ -88,6 +88,7 @@ export const ptBR = {
     technicalSheet: "Ficha Técnica & Exportação",
     sectionProjects: "Projetos",
     sectionEngineering: "Engenharia",
+    sectionCadastros: "Cadastros & Biblioteca",
     sectionDocumentation: "Documentação",
     sectionAdmin: "Administração",
   },

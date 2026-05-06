@@ -10,7 +10,14 @@ import {
   Settings,
   LogOut,
   BookOpen,
+  Cpu,
+  Wrench,
+  ClipboardList,
+  Package,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
+import { useState } from "react";
 import { CnLogo } from "@/components/cn-logo";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -33,10 +40,17 @@ const NAV_ENGENHARIA: NavItem[] = [
   { to: "/coldpro/hub-de-testes", label: "navigation.testHub", Icon: FlaskConical },
 ];
 
+const NAV_CADASTROS: NavItem[] = [
+  { to: "/coldpro/components", label: "navigation.components", Icon: Cpu },
+  { to: "/coldpro/library", label: "navigation.library", Icon: Library },
+  { to: "/coldpro/record", label: "navigation.productRecord", Icon: ClipboardList },
+  { to: "/coldpro/registry", label: "navigation.productRegistry", Icon: BookOpen },
+  { to: "/coldpro/assembly", label: "navigation.assembly", Icon: Wrench },
+];
+
 const NAV_DOCUMENTACAO: NavItem[] = [
   { to: "/coldpro/ficha-tecnica", label: "navigation.technicalSheet", Icon: FileText },
-  { to: "/coldpro/registry", label: "navigation.productRegistry", Icon: BookOpen },
-  { to: "/coldpro/library", label: "navigation.library", Icon: Library },
+  { to: "/coldpro/export", label: "navigation.export", Icon: Package },
 ];
 
 const NAV_ADMIN: NavItem[] = [
@@ -44,37 +58,62 @@ const NAV_ADMIN: NavItem[] = [
   { to: "/coldpro/settings", label: "navigation.settings", Icon: Settings },
 ];
 
-function NavSection({ title, items }: { title: string; items: NavItem[] }) {
+function NavSection({
+  title,
+  items,
+  collapsible = false,
+  defaultOpen = true,
+}: {
+  title: string;
+  items: NavItem[];
+  collapsible?: boolean;
+  defaultOpen?: boolean;
+}) {
   const { t } = useTranslation();
+  const [open, setOpen] = useState(defaultOpen);
+
   return (
-    <div className="mb-4">
-      <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-        {title}
-      </p>
-      <ul className="space-y-0.5">
-        {items.map((item) => {
-          const Icon = item.Icon;
-          return (
-            <li key={item.to}>
-              <Link
-                to={item.to}
-                activeOptions={{ exact: item.exact ?? false }}
-                activeProps={{
-                  className:
-                    "flex items-center gap-2.5 rounded-md bg-[#1E6FD9] px-3 py-2 text-sm font-medium text-white",
-                }}
-                inactiveProps={{
-                  className:
-                    "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white",
-                }}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span className="truncate">{t(item.label)}</span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+    <div className="mb-3">
+      <button
+        type="button"
+        onClick={() => collapsible && setOpen((v) => !v)}
+        className={`mb-1 flex w-full items-center justify-between px-3 ${collapsible ? "cursor-pointer hover:text-slate-300" : "cursor-default"}`}
+      >
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+          {title}
+        </p>
+        {collapsible && (
+          open
+            ? <ChevronDown className="h-3 w-3 text-slate-500" />
+            : <ChevronRight className="h-3 w-3 text-slate-500" />
+        )}
+      </button>
+      {open && (
+        <ul className="space-y-0.5">
+          {items.map((item) => {
+            const Icon = item.Icon;
+            return (
+              <li key={item.to}>
+                <Link
+                  to={item.to}
+                  activeOptions={{ exact: item.exact ?? false }}
+                  activeProps={{
+                    className:
+                      "flex items-center gap-2.5 rounded-md bg-[#1E6FD9] px-3 py-2 text-sm font-medium text-white",
+                  }}
+                  inactiveProps={{
+                    className:
+                      "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white",
+                  }}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{t(item.label)}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }
@@ -99,9 +138,15 @@ export function Sidebar({ onClose: _onClose }: { onClose?: () => void } = {}) {
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         <NavSection title={t("navigation.sectionProjects")} items={NAV_PROJETOS} />
         <NavSection title={t("navigation.sectionEngineering")} items={NAV_ENGENHARIA} />
-        <NavSection title={t("navigation.sectionDocumentation")} items={NAV_DOCUMENTACAO} />
+        <NavSection
+          title={t("navigation.sectionCadastros")}
+          items={NAV_CADASTROS}
+          collapsible
+          defaultOpen={true}
+        />
+        <NavSection title={t("navigation.sectionDocumentation")} items={NAV_DOCUMENTACAO} collapsible defaultOpen={false} />
         {isAdmin && (
-          <NavSection title={t("navigation.sectionAdmin")} items={NAV_ADMIN} />
+          <NavSection title={t("navigation.sectionAdmin")} items={NAV_ADMIN} collapsible defaultOpen={false} />
         )}
       </nav>
 
