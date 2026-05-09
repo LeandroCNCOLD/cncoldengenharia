@@ -41,6 +41,7 @@ import { Route as AppColdproCnCoilsRouteImport } from './routes/_app/coldpro.cn-
 import { Route as AppColdproCatalogRouteImport } from './routes/_app/coldpro.catalog'
 import { Route as AppColdproAuditRouteImport } from './routes/_app/coldpro.audit'
 import { Route as AppColdproAssemblyRouteImport } from './routes/_app/coldpro.assembly'
+import { Route as AppColdproApplicationEngineeringRouteImport } from './routes/_app/coldpro.application-engineering'
 import { Route as AppColdproUnilabIndexRouteImport } from './routes/_app/coldpro.unilab.index'
 import { Route as AppColdproUnilabWorkspaceRouteImport } from './routes/_app/coldpro.unilab.workspace'
 import { Route as AppColdproTestBenchEquipmentIdRouteImport } from './routes/_app/coldpro.test-bench.$equipmentId'
@@ -215,6 +216,12 @@ const AppColdproAssemblyRoute = AppColdproAssemblyRouteImport.update({
   path: '/assembly',
   getParentRoute: () => AppColdproRoute,
 } as any)
+const AppColdproApplicationEngineeringRoute =
+  AppColdproApplicationEngineeringRouteImport.update({
+    id: '/application-engineering',
+    path: '/application-engineering',
+    getParentRoute: () => AppColdproRoute,
+  } as any)
 const AppColdproUnilabIndexRoute = AppColdproUnilabIndexRouteImport.update({
   id: '/unilab/',
   path: '/unilab/',
@@ -305,6 +312,7 @@ export interface FileRoutesByFullPath {
   '/shared': typeof SharedRoute
   '/coldpro': typeof AppColdproRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
+  '/coldpro/application-engineering': typeof AppColdproApplicationEngineeringRoute
   '/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/coldpro/audit': typeof AppColdproAuditRoute
   '/coldpro/catalog': typeof AppColdproCatalogRoute
@@ -351,6 +359,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/shared': typeof SharedRoute
   '/dashboard': typeof AppDashboardRoute
+  '/coldpro/application-engineering': typeof AppColdproApplicationEngineeringRoute
   '/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/coldpro/audit': typeof AppColdproAuditRoute
   '/coldpro/catalog': typeof AppColdproCatalogRoute
@@ -400,6 +409,7 @@ export interface FileRoutesById {
   '/shared': typeof SharedRoute
   '/_app/coldpro': typeof AppColdproRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/coldpro/application-engineering': typeof AppColdproApplicationEngineeringRoute
   '/_app/coldpro/assembly': typeof AppColdproAssemblyRoute
   '/_app/coldpro/audit': typeof AppColdproAuditRoute
   '/_app/coldpro/catalog': typeof AppColdproCatalogRoute
@@ -449,6 +459,7 @@ export interface FileRouteTypes {
     | '/shared'
     | '/coldpro'
     | '/dashboard'
+    | '/coldpro/application-engineering'
     | '/coldpro/assembly'
     | '/coldpro/audit'
     | '/coldpro/catalog'
@@ -495,6 +506,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/shared'
     | '/dashboard'
+    | '/coldpro/application-engineering'
     | '/coldpro/assembly'
     | '/coldpro/audit'
     | '/coldpro/catalog'
@@ -543,6 +555,7 @@ export interface FileRouteTypes {
     | '/shared'
     | '/_app/coldpro'
     | '/_app/dashboard'
+    | '/_app/coldpro/application-engineering'
     | '/_app/coldpro/assembly'
     | '/_app/coldpro/audit'
     | '/_app/coldpro/catalog'
@@ -818,6 +831,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppColdproAssemblyRouteImport
       parentRoute: typeof AppColdproRoute
     }
+    '/_app/coldpro/application-engineering': {
+      id: '/_app/coldpro/application-engineering'
+      path: '/application-engineering'
+      fullPath: '/coldpro/application-engineering'
+      preLoaderRoute: typeof AppColdproApplicationEngineeringRouteImport
+      parentRoute: typeof AppColdproRoute
+    }
     '/_app/coldpro/unilab/': {
       id: '/_app/coldpro/unilab/'
       path: '/unilab'
@@ -958,6 +978,7 @@ const AppColdproCncoilsRouteWithChildren =
   AppColdproCncoilsRoute._addFileChildren(AppColdproCncoilsRouteChildren)
 
 interface AppColdproRouteChildren {
+  AppColdproApplicationEngineeringRoute: typeof AppColdproApplicationEngineeringRoute
   AppColdproAssemblyRoute: typeof AppColdproAssemblyRoute
   AppColdproAuditRoute: typeof AppColdproAuditRoute
   AppColdproCatalogRoute: typeof AppColdproCatalogRoute
@@ -993,6 +1014,7 @@ interface AppColdproRouteChildren {
 }
 
 const AppColdproRouteChildren: AppColdproRouteChildren = {
+  AppColdproApplicationEngineeringRoute: AppColdproApplicationEngineeringRoute,
   AppColdproAssemblyRoute: AppColdproAssemblyRoute,
   AppColdproAuditRoute: AppColdproAuditRoute,
   AppColdproCatalogRoute: AppColdproCatalogRoute,

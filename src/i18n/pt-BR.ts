@@ -85,6 +85,7 @@ export const ptBR = {
     catalogSelection: "Catálogo & Seleção",
     cnCoilsSimulator: "CN COILS — Simulador",
     testHub: "Hub de Testes",
+    applicationEngineering: "Engenharia de Aplicação",
     technicalSheet: "Ficha Técnica & Exportação",
     sectionProjects: "Projetos",
     sectionEngineering: "Engenharia",

@@ -16,6 +16,7 @@ import {
   Package,
   ChevronDown,
   ChevronRight,
+  Cog,
 } from "lucide-react";
 import { useState } from "react";
 import { CnLogo } from "@/components/cn-logo";
@@ -38,6 +39,7 @@ const NAV_ENGENHARIA: NavItem[] = [
   { to: "/coldpro/catalog", label: "navigation.catalogSelection", Icon: Database },
   { to: "/coldpro/cncoils", label: "navigation.cnCoilsSimulator", Icon: Gauge },
   { to: "/coldpro/hub-de-testes", label: "navigation.testHub", Icon: FlaskConical },
+  { to: "/coldpro/application-engineering", label: "navigation.applicationEngineering", Icon: Cog },
 ];
 
 const NAV_CADASTROS: NavItem[] = [
