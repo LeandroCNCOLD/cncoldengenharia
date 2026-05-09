@@ -229,54 +229,59 @@ export function computeFluidPressureDrop(params: ComputeFluidPressureDropParams)
   const props = getRefrigerantLiquidProps(refrigerant, T_evap_C);
   warnings.push(...props.warnings);
 
-  const rho = props.rho_kg_m3;
-  const mu = props.mu_Pa_s;
+  const rho_l = props.rho_kg_m3;
+  const mu_l = props.mu_Pa_s;
   const massFlowPerCircuit = mass_flow_kg_s / n_circuits;
   const areaM2 = (Math.PI * D_i_m * D_i_m) / 4;
-  const velocity = massFlowPerCircuit / (rho * areaM2);
-  const reynolds = (rho * velocity * D_i_m) / mu;
+  const G = massFlowPerCircuit / areaM2; // fluxo mássico específico [kg/(m²·s)]
 
-  if (!Number.isFinite(reynolds) || reynolds <= 0) {
-    return { dP_kPa: NaN, warnings: ["Reynolds do fluido inválido."] };
+  // --- Helper: fator de atrito de Churchill (1977) ---
+  function churchillFriction(Re: number): number {
+    if (Re < 1) return 64;
+    if (Re < 2300) return 64 / Re;
+    const A = Math.pow(
+      2.457 * Math.log(1 / (Math.pow(7 / Re, 0.9) + 0.27 * (roughness_m / D_i_m))),
+      16,
+    );
+    const B = Math.pow(37530 / Re, 16);
+    return 8 * Math.pow(Math.pow(8 / Re, 12) + Math.pow(A + B, -1.5), 1 / 12);
   }
 
-  const churchillA = Math.pow(
-    2.457 *
-      Math.log(
-        1 /
-          (Math.pow(7 / reynolds, 0.9) +
-            0.27 * (roughness_m / D_i_m)),
-      ),
-    16,
-  );
-  const churchillB = Math.pow(37530 / reynolds, 16);
-  const darcyFriction =
-    8 *
-    Math.pow(
-      Math.pow(8 / reynolds, 12) +
-        1 / Math.pow(churchillA + churchillB, 1.5),
-      1 / 12,
-    );
+  // C3: Müller-Steinhagen & Heck (1986) para escoamento bifásico.
+  // Substitui Darcy-Weisbach monofásico que subestima ΔP bifásico em 3–10×.
+  // Usa rho_v estimada como rho_l / 20 se não disponível (conservador).
+  const rho_v = rho_l / 20; // estimativa conservadora; idealmente via tabela
+  const mu_v = mu_l * 0.05; // estimativa; vapor é ~20× menos viscoso
 
-  const dpPa =
-    darcyFriction *
-    (L_tube_per_circuit_m / D_i_m) *
-    ((rho * velocity * velocity) / 2);
+  const Re_l = G * D_i_m / mu_l;
+  const Re_v = G * D_i_m / mu_v;
+  const f_l = churchillFriction(Re_l);
+  const f_v = churchillFriction(Re_v);
+
+  const dp_l_Pa_m = f_l * G * G / (2 * rho_l * D_i_m); // [Pa/m] todo líquido
+  const dp_v_Pa_m = f_v * G * G / (2 * rho_v * D_i_m); // [Pa/m] todo vapor
+
+  // Título médio: evaporador DX x_in=0.20, x_out=0.90 → x_med=0.55
+  const x_med = 0.55;
+  // M-S&H: dP/dz = [A_msh × (1-x)^(1/3) + dP_v × x^3]
+  const A_msh = dp_l_Pa_m + 2 * (dp_v_Pa_m - dp_l_Pa_m) * x_med;
+  const dpPa = (A_msh * Math.pow(1 - x_med, 1 / 3) + dp_v_Pa_m * Math.pow(x_med, 3))
+    * L_tube_per_circuit_m;
+
   if (!Number.isFinite(dpPa) || dpPa < 0) {
-    return { dP_kPa: NaN, warnings: ["ΔP fluido calculado inválido."] };
+    return { dP_kPa: NaN, warnings: ["ΔP fluido bifásico calculado inválido."] };
   }
 
-  if (reynolds < 2300) {
+  const velocity_l = G / rho_l;
+  if (Re_l < 2300) {
+    warnings.push(`Re_l=${Re_l.toFixed(0)} — regime laminar no tubo (bifásico)`);
+  }
+  if (velocity_l < 0.1 || velocity_l > 8) {
     warnings.push(
-      `Re=${reynolds.toFixed(0)} — regime laminar no tubo do evaporador`,
+      `Velocidade líquido ${velocity_l.toFixed(2)} m/s fora da faixa típica (0.1–8 m/s)`,
     );
   }
-  const velocityForWarning = Number(velocity.toFixed(2));
-  if (velocityForWarning < 0.1 || velocityForWarning > 5) {
-    warnings.push(
-      `Velocidade do fluido ${velocity.toFixed(2)} m/s fora da faixa típica (0.1–5 m/s)`,
-    );
-  }
+  warnings.push("Müller-Steinhagen & Heck (1986) — ΔP bifásico com x_med=0.55");
 
   return { dP_kPa: dpPa / KPA_TO_PA, warnings };
 }

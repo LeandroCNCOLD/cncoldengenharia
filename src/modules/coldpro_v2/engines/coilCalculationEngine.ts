@@ -16,6 +16,7 @@ import { calculateDarcyFrictionFactor } from "./core/friction";
 import { calculateDarcyWeisbachPressureDrop } from "./core/pressureDrop";
 import { calculateOverallU } from "./core/overallHeatTransfer";
 import { calculateFinEfficiencySimplified } from "./core/finEfficiency";
+import { computeFinnedExternalArea } from "./core/finnedExternalArea";
 
 const AIR_DENSITY_KGM3 = 1.2;
 const CP_AIR_KJ_KGK = 1.005;
@@ -124,10 +125,39 @@ export function calculateCoilAdvanced(input: CoilAdvancedInput): CoilAdvancedRes
   // 2. Air mass flow
   const m_air = calculateMassFlowAirKgS(airflow, airProps.density_kg_m3);
 
-  // 3. Exchange area
+  // 3. Exchange area — C_AREA: área externa total (tubo nu + aletas), convenção LMTD.
+  // η_o aplicado em h_ar via calculateOverallU (finEfficiency), NÃO na área.
   const lengthM = lengthMm / 1000;
   const tubeDiamM = tubeDiamMm / 1000;
-  const exchange_area_m2 = rows * tubesPerRow * lengthM * Math.PI * tubeDiamM;
+  const pitchTmm_adv = input.tube_pitch_transverse_m ? input.tube_pitch_transverse_m * 1000 : 0;
+  const pitchLmm_adv = input.tube_pitch_longitudinal_m ? input.tube_pitch_longitudinal_m * 1000 : 0;
+  const finSpacingMm_adv = input.fin_spacing_mm ?? 0;
+  const finThickMm_adv = input.fin_thickness_mm ?? 0.12;
+  const hasFinnedGeometry_adv = pitchTmm_adv > 0 && pitchLmm_adv > 0 && finSpacingMm_adv > 0;
+
+  let exchange_area_m2: number;
+  if (hasFinnedGeometry_adv) {
+    const finnedArea = computeFinnedExternalArea({
+      rows,
+      tubes_per_row: tubesPerRow,
+      length_mm: lengthMm,
+      tube_diameter_mm: tubeDiamMm,
+      tube_pitch_transverse_mm: pitchTmm_adv,
+      tube_pitch_longitudinal_mm: pitchLmm_adv,
+      fin_spacing_mm: finSpacingMm_adv,
+      fin_thickness_mm: finThickMm_adv,
+    });
+    warnings.push(...finnedArea.warnings);
+    exchange_area_m2 = finnedArea.A_total_m2;
+  } else {
+    exchange_area_m2 = rows * tubesPerRow * lengthM * Math.PI * tubeDiamM;
+    if (finSpacingMm_adv <= 0) {
+      warnings.push(
+        "fin_spacing_mm ausente — área calculada como tubo nu apenas. " +
+        "Fornecer tube_pitch_transverse_m, tube_pitch_longitudinal_m e fin_spacing_mm para área com aletas.",
+      );
+    }
+  }
 
   // 4. Face velocity (approximate)
   const faceArea = Math.max(tubesPerRow * lengthM * 0.025, 0.01);
@@ -247,7 +277,11 @@ export function calculateCoilAdvanced(input: CoilAdvancedInput): CoilAdvancedRes
   const tubeInnerDiamM = Math.max(tubeDiamM - 2 * wallThickM, 0.001);
   const fluidCrossSection = Math.max(circuits * Math.PI * (tubeInnerDiamM / 2) ** 2, 0.0001);
   const massFlowKgs = input.mass_flow_kgs ?? 0;
-  const fluidVelocity = massFlowKgs / (fluidCrossSection * 1000);
+  // FIX: velocidade = ṁ / (ρ × A). A divisão por 1000 anterior era um atalho
+  // incorreto que tentava simular densidade da água (≈1000 kg/m³) mas sem base
+  // física — não usava a densidade real do fluido.
+  const fluidDensity = input.fluid_density_kg_m3 ?? 1000; // padrão água; fornecer para refrigerantes
+  const fluidVelocity = massFlowKgs / (fluidCrossSection * fluidDensity);
 
   const fluidTubeLength = (rows * tubesPerRow * lengthM) / Math.max(circuits, 1);
   const f_fluid = calculateDarcyFrictionFactor({

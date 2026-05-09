@@ -364,6 +364,18 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
   // M6 — Multiplicador ΔP fluido
   const fluidDp = applyCorrection(fluidDpRaw, cm.fluidPressureDrop);
 
+  // FIX BUG 5: calcular e expor fluidVelocityMs no resultado.
+  // O Motor V2 calculava v_fluid_check internamente apenas para warnings,
+  // mas não retornava o valor — a UI ficava sem velocidade do fluido.
+  const fluidVelocityMs_v2: number | undefined = (() => {
+    const A_tube = (Math.PI * Di_m ** 2) / 4;
+    if (A_tube <= 0 || physical.circuits <= 0 || inputs.fluidMassFlowKgS <= 0) return undefined;
+    const massFlowPerCircuit = inputs.fluidMassFlowKgS / physical.circuits;
+    const rho_eff = inputs.fluidProps.rho_kg_m3;
+    if (rho_eff <= 0) return undefined;
+    return massFlowPerCircuit / (rho_eff * A_tube);
+  })();
+
   const result: SimulationV2Result = {
     totalCapacityKw: Q_total_W / 1000,
     sensibleCapacityKw: Q_sens_W / 1000,
@@ -376,6 +388,7 @@ export function runSimulationV2(inputs: SimulationV2Inputs): SimulationV2Result 
     faceAreaM2,
     faceVelocityMs,
     airMassFlowKgS,
+    fluidVelocityMs: fluidVelocityMs_v2,
     regime: hasCondensation ? "WET" : "DRY",
     lmtdK: undefined,
     ntu: nt.NTU,

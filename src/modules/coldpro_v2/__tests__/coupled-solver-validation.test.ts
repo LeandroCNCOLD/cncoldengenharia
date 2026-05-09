@@ -49,6 +49,9 @@ describe("Caso 1: Modo seco — T_surface > T_dp", () => {
 
 describe("Caso 2: Modo molhado — W_out < W_in", () => {
   it("deve operar em modo wet com condensação", () => {
+    // Geometria: 4 filas × 24 tubos × 1670 mm, P_t=31.5mm, P_l=27mm, F_p=3.6mm
+    // Área total com aletas ≈ 200 m² → airflow compatível com coil de grande porte
+    // Atualizado: airflow_m3h=8000 para Q_th ≈ Q_psy (correção C_AREA aplicada)
     const result = solveCoupledCoil({
       ...BASE,
       rows: 4,
@@ -56,7 +59,7 @@ describe("Caso 2: Modo molhado — W_out < W_in", () => {
       circuits: 12,
       fin_spacing_mm: 3.6,
       length_mm: 1670,
-      airflow_m3h: 100,
+      airflow_m3h: 8000,
       air_inlet_temp_c: 30,
       air_relative_humidity: 0.6,
       fluid_inlet_temp_c: -10,

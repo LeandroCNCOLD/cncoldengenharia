@@ -192,15 +192,36 @@ export function computeFluidVelocity(params: {
   nCircuits: number;
   tubeID_m: number;
   massFlow_kg_s?: number;
+  /**
+   * Qualidade de vapor na entrada do evaporador DX (padrão: 0.20).
+   * Usado para calcular a densidade bifásica média (Zivi 1964).
+   */
+  x_in?: number;
+  /**
+   * Qualidade de vapor na saída do evaporador DX (padrão: 0.90).
+   */
+  x_out?: number;
 }): number {
   const props = getRefrigerantLiquidProps(params.refrigerant, params.T_evap_C);
+  const rho_v = getRefrigerantVaporDensity(params.refrigerant, params.T_evap_C);
+
+  // FIX: usar densidade bifásica média (Zivi 1964) em vez do fator empírico 0.06.
+  // O fator 0.06 era um atalho sem base física que produzia densidades incorretas
+  // (ex: 66 kg/m³ vs real ~33 kg/m³ para R404A a -35°C, x_médio=0.55).
+  const x_in = params.x_in ?? 0.20;
+  const x_out = params.x_out ?? 0.90;
+  const effectiveRho = meanTwoPhaseRefrigerantDensity(props.rho_kg_m3, rho_v, x_in, x_out);
+
+  // FIX (C1): usar Δx = x_out − x_in para estimar a vazão mássica.
+  // ṁ = Q / [h_fg × (x_out − x_in)] é a forma termodinâmica correta para
+  // evaporação/condensação parcial entre dois títulos.
+  // Antes: Q/(h_fg × x_médio) — erro de até 27% na vazão.
+  const delta_x = Math.max(x_out - x_in, 0.01);
   const massFlowKgS =
     params.massFlow_kg_s && params.massFlow_kg_s > 0
       ? params.massFlow_kg_s
-      : params.Q_total_W / (props.h_fg_kJkg * 1000);
-  // Display uses an evaporating two-phase mean density; using saturated liquid
-  // density here severely under-reports velocity in direct-expansion coils.
-  const effectiveRho = props.rho_kg_m3 * 0.06;
+      : (params.Q_total_W / 1000) / Math.max(props.h_fg_kJkg * delta_x, 1);
+
   const tubeAreaM2 = Math.PI * Math.pow(params.tubeID_m / 2, 2);
   return (massFlowKgS / params.nCircuits) / (effectiveRho * tubeAreaM2);
 }

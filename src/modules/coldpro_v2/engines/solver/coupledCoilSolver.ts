@@ -23,6 +23,7 @@ import {
 } from "../psychrometrics/psychrometricCore";
 import { calculateAirGeometry } from "../airSide/airGeometry";
 import { calculateAirSideHTC } from "../airSide/airHeatTransfer";
+import { computeFinnedExternalArea } from "../core/finnedExternalArea";
 
 const KCALH_PER_KW = 859.845;
 const DEFAULT_FLUID_H = 1000;
@@ -51,7 +52,38 @@ export function solveCoupledCoil(input: CoilAdvancedInput): CoupledCoilResult {
   const lengthM = lengthMm / 1000;
   const tubeDiamM = tubeDiamMm / 1000;
   const tubeThickM = tubeThickMm / 1000;
-  const exchange_area_m2 = rows * tubesPerRow * lengthM * Math.PI * tubeDiamM;
+
+  // C_AREA: Área externa total (tubo nu + aletas) — convenção LMTD.
+  // η_o é aplicado em h_ar via calculateOverallU (finEfficiency), NÃO na área.
+  const pitchTmm_c = input.tube_pitch_transverse_m ? input.tube_pitch_transverse_m * 1000 : 0;
+  const pitchLmm_c = input.tube_pitch_longitudinal_m ? input.tube_pitch_longitudinal_m * 1000 : 0;
+  const finSpacingMm_c = input.fin_spacing_mm ?? 0;
+  const finThickMm_c = input.fin_thickness_mm ?? 0.12;
+  const hasFinnedGeometry_c = pitchTmm_c > 0 && pitchLmm_c > 0 && finSpacingMm_c > 0;
+
+  let exchange_area_m2: number;
+  if (hasFinnedGeometry_c) {
+    const finnedArea = computeFinnedExternalArea({
+      rows,
+      tubes_per_row: tubesPerRow,
+      length_mm: lengthMm,
+      tube_diameter_mm: tubeDiamMm,
+      tube_pitch_transverse_mm: pitchTmm_c,
+      tube_pitch_longitudinal_mm: pitchLmm_c,
+      fin_spacing_mm: finSpacingMm_c,
+      fin_thickness_mm: finThickMm_c,
+    });
+    warnings.push(...finnedArea.warnings);
+    exchange_area_m2 = finnedArea.A_total_m2;
+  } else {
+    exchange_area_m2 = rows * tubesPerRow * lengthM * Math.PI * tubeDiamM;
+    if (finSpacingMm_c <= 0) {
+      warnings.push(
+        "fin_spacing_mm ausente — área calculada como tubo nu apenas. " +
+        "Fornecer tube_pitch_transverse_m, tube_pitch_longitudinal_m e fin_spacing_mm para área com aletas.",
+      );
+    }
+  }
 
   if (exchange_area_m2 <= 0) warnings.push("área de troca zero ou ausente");
   if (airflow <= 0) warnings.push("airflow_m3h ausente ou zero");

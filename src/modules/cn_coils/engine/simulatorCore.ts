@@ -359,9 +359,13 @@ export function runSimulation(params: RunSimulationParams): CnCoilsSimulationRes
     thermo.refrigerantId,
     surfaceTempC,
   );
+  // C1: vazão mássica por Δx = x_out − x_in (não x_médio nem x=1).
+  // Para evaporador DX: x_in=0.20, x_out=0.90 → Δx=0.70.
+  // Para condensador: x_in=0.05, x_out=0.95 → Δx=0.90.
+  const dx_evap = isCooling ? 0.70 : 0.90;
   const estimatedMassFlowKgS = safeDivide(
     qFinalW / 1000,
-    Math.max(refrigerantLiquidProps.h_fg_kJkg, 1),
+    Math.max(refrigerantLiquidProps.h_fg_kJkg * dx_evap, 0.1),
   );
   const fluidVelocityMs = computeFluidVelocity({
     refrigerant: thermo.refrigerantId,

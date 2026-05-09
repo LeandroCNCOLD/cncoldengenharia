@@ -32,6 +32,7 @@ import { calculateAirPressureDrop as calculateAirSidePressureDrop } from "../air
 import { calculateWetCoil } from "../psychrometrics/wetCoil";
 import { calculateReheat } from "../psychrometrics/reheatCoil";
 import type { WetCoilResult, ReheatResult } from "../../domain/types";
+import { computeFinnedExternalArea } from "../core/finnedExternalArea";
 
 const KCALH_PER_KW = 859.845;
 const KCALH_PER_TR = 3024;
@@ -77,7 +78,46 @@ export function solveCoilIterative(input: CoilIterativeInput): CoilIterativeResu
   const tubeThickM = tubeThickMm / 1000;
   const tubeInnerDiamM = input.tube_inner_diameter_m ?? Math.max(tubeDiamM - 2 * tubeThickM, 0.001);
   const tubeOuterDiamM = input.tube_outer_diameter_m ?? tubeDiamM;
-  const exchange_area_m2 = rows * tubesPerRow * lengthM * Math.PI * tubeDiamM;
+
+  // C_AREA: Área externa total (tubo nu + aletas) — convenção LMTD.
+  // η_o é aplicado em h_ar via calculateOverallU (finEfficiency), NÃO na área.
+  // Antes: A = rows × tpr × L × π × D_o  (apenas tubo nu — subestimava 14×)
+  const pitchTmm = input.tube_pitch_transverse_m ? input.tube_pitch_transverse_m * 1000 : 0;
+  const pitchLmm = input.tube_pitch_longitudinal_m ? input.tube_pitch_longitudinal_m * 1000 : 0;
+  const finSpacingMm = input.fin_spacing_mm ?? 0;
+  const finThickMm = input.fin_thickness_mm ?? 0.12;
+  const hasFinnedGeometry = pitchTmm > 0 && pitchLmm > 0 && finSpacingMm > 0;
+
+  let exchange_area_m2: number;
+  if (hasFinnedGeometry) {
+    const finnedArea = computeFinnedExternalArea({
+      rows,
+      tubes_per_row: tubesPerRow,
+      length_mm: lengthMm,
+      tube_diameter_mm: tubeDiamMm,
+      tube_pitch_transverse_mm: pitchTmm,
+      tube_pitch_longitudinal_mm: pitchLmm,
+      fin_spacing_mm: finSpacingMm,
+      fin_thickness_mm: finThickMm,
+    });
+    warnings.push(...finnedArea.warnings);
+    exchange_area_m2 = finnedArea.A_total_m2;
+    if (exchange_area_m2 > 0) {
+      warnings.push(
+        `Área total com aletas: ${exchange_area_m2.toFixed(2)} m² ` +
+        `(${finnedArea.n_fins} aletas, A_fin=${finnedArea.A_fin_m2.toFixed(2)} m²)`,
+      );
+    }
+  } else {
+    // Fallback: apenas tubo nu (retrocompatível quando geometria de aleta ausente)
+    exchange_area_m2 = rows * tubesPerRow * lengthM * Math.PI * tubeDiamM;
+    if (finSpacingMm <= 0) {
+      warnings.push(
+        "fin_spacing_mm ausente — área calculada como tubo nu apenas. " +
+        "Fornecer tube_pitch_transverse_m, tube_pitch_longitudinal_m e fin_spacing_mm para área com aletas.",
+      );
+    }
+  }
 
   if (exchange_area_m2 <= 0) warnings.push("área de troca zero ou ausente");
 

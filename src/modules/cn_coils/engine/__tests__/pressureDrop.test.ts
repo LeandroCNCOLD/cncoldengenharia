@@ -21,7 +21,7 @@ describe("computeAirPressureDrop", () => {
 });
 
 describe("computeFluidPressureDrop", () => {
-  it("computeFluidPressureDrop — R404A, Te=-35°C, 12 circuitos", () => {
+  it("computeFluidPressureDrop — R404A, Te=-35°C, 12 circuitos (bifásico M-S&H)", () => {
     const result = computeFluidPressureDrop({
       refrigerant: "R404A",
       T_evap_C: -35,
@@ -33,6 +33,25 @@ describe("computeFluidPressureDrop", () => {
 
     expect(result.dP_kPa).toBeGreaterThan(0.1);
     expect(result.dP_kPa).toBeLessThan(50);
-    expect(result.warnings).toHaveLength(0);
+    // C3: Müller-Steinhagen & Heck (1986) emite 1 warning informativo sobre o método
+    const hasMethodWarning = result.warnings.some((w) =>
+      w.includes("Müller-Steinhagen"),
+    );
+    expect(hasMethodWarning).toBe(true);
+  });
+
+  it("computeFluidPressureDrop — resultado físico positivo e finito", () => {
+    const result = computeFluidPressureDrop({
+      refrigerant: "R404A",
+      T_evap_C: -22,
+      mass_flow_kg_s: 0.06,
+      n_circuits: 5,
+      L_tube_per_circuit_m: 10,
+      D_i_m: 0.0117,
+    });
+
+    expect(Number.isFinite(result.dP_kPa)).toBe(true);
+    expect(result.dP_kPa).toBeGreaterThan(0);
+    expect(result.dP_kPa).toBeLessThan(100);
   });
 });

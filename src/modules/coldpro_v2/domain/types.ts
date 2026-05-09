@@ -177,6 +177,12 @@ export interface CoilAdvancedInput {
   coupled_air_outlet_guess_c?: number;
   coupled_max_iterations?: number;
   coupled_tolerance_w?: number;
+  /**
+   * Densidade do fluido [kg/m³] para cálculo de velocidade e ΔP no Motor Básico.
+   * Padrão: 1000 kg/m³ (água). Para refrigerantes, fornecer a densidade bifásica
+   * média ou a densidade do líquido saturado na temperatura de operação.
+   */
+  fluid_density_kg_m3?: number;
 }
 
 export interface CoilAdvancedResult {
@@ -344,6 +350,14 @@ export interface WetCoilInput {
   T_surface: number;
   air_mass_flow_kg_s: number;
   P_atm?: number;
+  /**
+   * C5: Coeficiente global de transferência de calor [W/(m²·K)].
+   * Quando fornecido junto com A_exchange_m2, o wet-coil usa iteracão
+   * acoplada (Q_coil = U×A×LMTD) em vez de fixar T_ar_out = T_surf + 2°C.
+   */
+  U_w_m2k?: number;
+  /** C5: Área de troca efetiva [m²]. Necessária para wet-coil acoplado. */
+  A_exchange_m2?: number;
 }
 
 export interface WetCoilResult {
