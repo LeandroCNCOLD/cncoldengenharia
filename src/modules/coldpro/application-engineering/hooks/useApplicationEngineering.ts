@@ -232,7 +232,7 @@ export const useApplicationEngineering = create<ApplicationEngineeringStore>(
           evapInput.t_air_in_c !== undefined &&
           evapInput.airflow_m3h
         ) {
-          evapResult = sizeEvaporator({
+          evapResult = await sizeEvaporator({
             required_capacity_w: evapInput.required_capacity_w,
             te_c: opResult.te_c,
             refrigerant: compInput.refrigerant ?? "R404A",
@@ -259,11 +259,12 @@ export const useApplicationEngineering = create<ApplicationEngineeringStore>(
           : (compInput.required_capacity_w ?? 5000) * 1.4;
 
         if (condInput.airflow_m3h && condInput.t_ambient_c !== undefined) {
-          condResult = sizeCondenser({
+          condResult = await sizeCondenser({
             heat_rejection_w: heatRejectionW,
             tc_c: opResult.tc_c,
             t_ambient_c: condInput.t_ambient_c,
             airflow_m3h: condInput.airflow_m3h,
+            refrigerant: compInput.refrigerant ?? "R404A",
             rows: condInput.rows,
             tubes_per_row: condInput.tubes_per_row,
             fin_spacing_mm: condInput.fin_spacing_mm,

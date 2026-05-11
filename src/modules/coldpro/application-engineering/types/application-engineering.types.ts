@@ -161,6 +161,8 @@ export interface CondenserSizingInput {
   t_ambient_c: number;
   /** Vazão de ar (m³/h) */
   airflow_m3h: number;
+  /** Refrigerante (ex: "R404A", "R134a"). Padrão: "R404A" */
+  refrigerant?: string;
   /** Número de filas. Padrão: 2 */
   rows?: number;
   /** Tubos por fila. Padrão: 20 */
