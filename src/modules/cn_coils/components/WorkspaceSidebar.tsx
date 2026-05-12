@@ -37,11 +37,12 @@ import {
 
 type ModalKey = "geometry" | "tube" | "fin" | "distributor" | null;
 
-const MODAL_BUTTONS: Array<{ id: Exclude<ModalKey, null>; label: string }> = [
+const MODAL_BUTTONS: Array<{ id: Exclude<ModalKey, null>; label: string; evaporatorOnly?: boolean }> = [
   { id: "geometry", label: "Geometria…" },
   { id: "tube", label: "Tubo…" },
   { id: "fin", label: "Aleta…" },
-  { id: "distributor", label: "Distribuidor…" },
+  // Distribuidor só existe em evaporadores DX/bombeado — condensadores não têm distribuidor
+  { id: "distributor", label: "Distribuidor…", evaporatorOnly: true },
 ];
 
 const MATERIAL_SHORT: Record<TubeMaterial | FinMaterial, string> = {
@@ -300,22 +301,24 @@ export function WorkspaceSidebar({
           Configurar
         </div>
         <ul>
-          {MODAL_BUTTONS.map((m) => {
-            const geoLabel = m.id === "geometry" && selectedGeometry
-              ? `Geometria: ${(selectedGeometry as unknown as { codigo?: string }).codigo ?? selectedGeometry.id}`
-              : m.label;
-            return (
-              <li key={m.id}>
-                <button
-                  type="button"
-                  onClick={() => setActiveModal(m.id)}
-                  className="block w-full border-b border-slate-100 px-2 py-1 text-left text-[10px] text-slate-700 last:border-b-0 hover:bg-slate-100"
-                >
-                  {geoLabel}
-                </button>
-              </li>
-            );
-          })}
+          {MODAL_BUTTONS
+            .filter((m) => !m.evaporatorOnly || cfg.type === "evaporator_dx" || cfg.type === "evaporator_pumped")
+            .map((m) => {
+              const geoLabel = m.id === "geometry" && selectedGeometry
+                ? `Geometria: ${(selectedGeometry as unknown as { codigo?: string }).codigo ?? selectedGeometry.id}`
+                : m.label;
+              return (
+                <li key={m.id}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveModal(m.id)}
+                    className="block w-full border-b border-slate-100 px-2 py-1 text-left text-[10px] text-slate-700 last:border-b-0 hover:bg-slate-100"
+                  >
+                    {geoLabel}
+                  </button>
+                </li>
+              );
+            })}
           <li>
             <button
               type="button"
