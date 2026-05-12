@@ -2,10 +2,18 @@
  * CondenserDetailPanel.tsx
  *
  * Painel de dimensionamento do condensador.
- * 5 abas: Geometria | Condições | Resultados | Área | Diagnóstico
+ * Abas: Geometria | Condições | Resultados | Área | Refrigerante | Cobertura | Diagnóstico
  */
 import { useState } from "react";
-import { Grid3x3, Wind, BarChart2, Layers, AlertTriangle } from "lucide-react";
+import {
+  Grid3x3,
+  Wind,
+  BarChart2,
+  Layers,
+  AlertTriangle,
+  Droplets,
+  Target,
+} from "lucide-react";
 import { useApplicationEngineering } from "../hooks/useApplicationEngineering";
 
 const TABS = [
@@ -13,6 +21,8 @@ const TABS = [
   { id: "conditions", label: "Condições", icon: Wind },
   { id: "results", label: "Resultados", icon: BarChart2 },
   { id: "area", label: "Área", icon: Layers },
+  { id: "refrigerant", label: "Refrigerante", icon: Droplets },
+  { id: "coverage", label: "Cobertura", icon: Target },
   { id: "diagnostics", label: "Diagnóstico", icon: AlertTriangle },
 ] as const;
 
@@ -20,16 +30,38 @@ type TabId = (typeof TABS)[number]["id"];
 
 export function CondenserDetailPanel() {
   const [activeTab, setActiveTab] = useState<TabId>("geometry");
-  const { condenserInput, condenserResult, setCondenserInput } =
-    useApplicationEngineering();
+  const {
+    condenserInput,
+    condenserResult,
+    setCondenserInput,
+    compressorOperatingPoints,
+    condenserCoverageRatio,
+  } = useApplicationEngineering();
 
   return (
     <div className="rounded-lg border border-border bg-card text-card-foreground shadow-sm">
       <div className="border-b border-border px-4 py-3">
-        <h2 className="text-sm font-semibold text-foreground">Condensador</h2>
-        <p className="text-xs text-muted-foreground">
-          Dimensionamento e análise do trocador de calor do condensador
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">Condensador</h2>
+            <p className="text-xs text-muted-foreground">
+              Dimensionamento e análise do trocador de calor do condensador
+            </p>
+          </div>
+          {condenserCoverageRatio !== null && (
+            <div
+              className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+                condenserCoverageRatio >= 0.9
+                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                  : condenserCoverageRatio >= 0.7
+                  ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+              }`}
+            >
+              {(condenserCoverageRatio * 100).toFixed(0)}% cobertura
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-wrap border-b border-border">
@@ -61,7 +93,7 @@ export function CondenserDetailPanel() {
               value={condenserInput.rows ?? 2}
               onChange={(v) => setCondenserInput({ rows: v })}
               min={1}
-              max={8}
+              max={12}
             />
             <NumberField
               label="Tubos por fila"
@@ -90,7 +122,7 @@ export function CondenserDetailPanel() {
               label="Passo de aleta (mm)"
               value={condenserInput.fin_spacing_mm ?? 2.0}
               onChange={(v) => setCondenserInput({ fin_spacing_mm: v })}
-              min={1}
+              min={1.5}
               max={8}
               step={0.5}
             />
@@ -136,6 +168,18 @@ export function CondenserDetailPanel() {
           <AreaContent result={condenserResult} />
         )}
 
+        {activeTab === "refrigerant" && (
+          <RefrigerantContent result={condenserResult} />
+        )}
+
+        {activeTab === "coverage" && (
+          <CoverageContent
+            points={compressorOperatingPoints}
+            coverageRatio={condenserCoverageRatio}
+            type="cond"
+          />
+        )}
+
         {activeTab === "diagnostics" && (
           <DiagnosticsContent result={condenserResult} />
         )}
@@ -157,17 +201,30 @@ function ResultsContent({
     );
   }
   return (
-    <div className="grid grid-cols-2 gap-2">
-      <Metric
-        label="Calor rejeitado"
-        value={`${(result.heat_rejection_w / 1000).toFixed(2)} kW`}
-        highlight
-      />
-      <Metric label="T saída do ar" value={`${result.t_air_out_c.toFixed(1)} °C`} />
-      <Metric label="LMTD" value={`${result.lmtd_k.toFixed(2)} K`} />
-      <Metric label="U global" value={`${result.u_overall_w_m2k.toFixed(1)} W/m²·K`} />
-      <Metric label="Vel. face" value={`${result.face_velocity_ms.toFixed(2)} m/s`} />
-      <Metric label="ΔP ar" value={`${result.dp_air_pa.toFixed(1)} Pa`} />
+    <div className="space-y-3">
+      <SectionTitle>Capacidade</SectionTitle>
+      <div className="grid grid-cols-2 gap-2">
+        <Metric label="Calor rejeitado" value={`${(result.heat_rejection_w / 1000).toFixed(3)} kW`} highlight />
+        {result.sensible_capacity_w !== undefined && (
+          <Metric label="Capacidade sensível" value={`${(result.sensible_capacity_w / 1000).toFixed(3)} kW`} />
+        )}
+        {result.safety_factor !== undefined && (
+          <Metric label="Fator de segurança" value={result.safety_factor.toFixed(3)} />
+        )}
+      </div>
+
+      <SectionTitle>Ar</SectionTitle>
+      <div className="grid grid-cols-2 gap-2">
+        <Metric label="T saída do ar" value={`${result.t_air_out_c.toFixed(2)} °C`} />
+        <Metric label="Vel. de face" value={`${result.face_velocity_ms.toFixed(3)} m/s`} />
+        <Metric label="ΔP ar" value={`${result.dp_air_pa.toFixed(1)} Pa`} />
+      </div>
+
+      <SectionTitle>Transferência de Calor</SectionTitle>
+      <div className="grid grid-cols-2 gap-2">
+        <Metric label="LMTD" value={`${result.lmtd_k.toFixed(3)} K`} />
+        <Metric label="U global" value={`${result.u_overall_w_m2k.toFixed(2)} W/m²·K`} />
+      </div>
     </div>
   );
 }
@@ -186,16 +243,134 @@ function AreaContent({
   }
   return (
     <div className="grid grid-cols-2 gap-2">
-      <Metric label="Área total" value={`${result.exchange_area_m2.toFixed(3)} m²`} highlight />
-      <Metric label="Área de aletas" value={`${result.finned_area_m2.toFixed(3)} m²`} />
+      <Metric label="Área total" value={`${result.exchange_area_m2.toFixed(4)} m²`} highlight />
+      <Metric label="Área de aletas" value={`${result.finned_area_m2.toFixed(4)} m²`} />
       <Metric
         label="Área tubo nu"
-        value={`${(result.exchange_area_m2 - result.finned_area_m2).toFixed(3)} m²`}
+        value={`${(result.exchange_area_m2 - result.finned_area_m2).toFixed(4)} m²`}
       />
       <Metric
         label="% aletas"
         value={`${((result.finned_area_m2 / result.exchange_area_m2) * 100).toFixed(1)}%`}
       />
+    </div>
+  );
+}
+
+function RefrigerantContent({
+  result,
+}: {
+  result: ReturnType<typeof useApplicationEngineering>["condenserResult"];
+}) {
+  if (!result) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        Execute o cálculo para ver os dados do refrigerante.
+      </p>
+    );
+  }
+  const hasData =
+    result.refrigerant_outlet_temp_c !== undefined ||
+    result.fluid_pressure_drop_kpa !== undefined;
+
+  if (!hasData) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        Dados do refrigerante não disponíveis para esta configuração.
+      </p>
+    );
+  }
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {result.refrigerant_outlet_temp_c !== undefined && (
+        <Metric label="T saída refrigerante" value={`${result.refrigerant_outlet_temp_c.toFixed(2)} °C`} highlight />
+      )}
+      {result.fluid_pressure_drop_kpa !== undefined && (
+        <Metric label="ΔP refrigerante" value={`${result.fluid_pressure_drop_kpa.toFixed(3)} kPa`} />
+      )}
+    </div>
+  );
+}
+
+function CoverageContent({
+  points,
+  coverageRatio,
+  type,
+}: {
+  points: ReturnType<typeof useApplicationEngineering>["compressorOperatingPoints"];
+  coverageRatio: number | null;
+  type: "evap" | "cond";
+}) {
+  if (!points || points.length === 0) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        Execute o cálculo para ver a cobertura ponto a ponto.
+      </p>
+    );
+  }
+
+  const meetsKey = type === "evap" ? "evap_meets" : "cond_meets";
+  const metCount = points.filter((p) => p[meetsKey]).length;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-3">
+        <div
+          className={`rounded-full px-3 py-1.5 text-sm font-bold ${
+            (coverageRatio ?? 0) >= 0.9
+              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+              : (coverageRatio ?? 0) >= 0.7
+              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+          }`}
+        >
+          {metCount}/{points.length} pontos atendidos ({((coverageRatio ?? 0) * 100).toFixed(0)}%)
+        </div>
+      </div>
+
+      <div className="max-h-64 overflow-auto rounded-md border border-border">
+        <table className="w-full text-[10px]">
+          <thead className="sticky top-0 bg-muted/80">
+            <tr>
+              <th className="px-2 py-1.5 text-left font-semibold text-muted-foreground">Te (°C)</th>
+              <th className="px-2 py-1.5 text-left font-semibold text-muted-foreground">Tc (°C)</th>
+              <th className="px-2 py-1.5 text-right font-semibold text-muted-foreground">Q_rej_req (kW)</th>
+              <th className="px-2 py-1.5 text-right font-semibold text-muted-foreground">Q_cond (kW)</th>
+              <th className="px-2 py-1.5 text-center font-semibold text-muted-foreground">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {points.map((p, i) => {
+              const meets = p[meetsKey];
+              const heatRejReq = (p.comp_capacity_w + p.comp_power_w) / 1000;
+              return (
+                <tr
+                  key={i}
+                  className={`border-t border-border ${
+                    meets ? "" : "bg-red-50/50 dark:bg-red-950/20"
+                  }`}
+                >
+                  <td className="px-2 py-1 text-foreground">{p.te_c.toFixed(1)}</td>
+                  <td className="px-2 py-1 text-foreground">{p.tc_c.toFixed(1)}</td>
+                  <td className="px-2 py-1 text-right text-foreground">
+                    {heatRejReq.toFixed(2)}
+                  </td>
+                  <td className="px-2 py-1 text-right text-foreground">
+                    {(p.cond_heat_rejection_w / 1000).toFixed(2)}
+                  </td>
+                  <td className="px-2 py-1 text-center">
+                    {meets ? (
+                      <span className="text-green-600 dark:text-green-400">✓</span>
+                    ) : (
+                      <span className="text-red-600 dark:text-red-400">✗</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -229,6 +404,14 @@ function DiagnosticsContent({
         </p>
       ))}
     </div>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+      {children}
+    </p>
   );
 }
 

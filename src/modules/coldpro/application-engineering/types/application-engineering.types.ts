@@ -147,6 +147,25 @@ export interface EvaporatorSizingResult {
   face_velocity_ms: number;
   /** Carga de gelo estimada (kg) */
   frost_load_kg?: number;
+  // ── Campos extras do motor V2 (CoilCycleResult) ──
+  /** Capacidade sensível (W) */
+  sensible_capacity_w?: number;
+  /** Capacidade latente (W) */
+  latent_capacity_w?: number;
+  /** Umidade relativa de saída do ar (%) */
+  air_outlet_rh?: number;
+  /** Queda de pressão do refrigerante (kPa) */
+  fluid_pressure_drop_kpa?: number;
+  /** Coeficiente convectivo do ar (W/m²·K) */
+  h_air_w_m2k?: number;
+  /** Coeficiente convectivo do fluido (W/m²·K) */
+  h_fluid_w_m2k?: number;
+  /** Temperatura de saída do refrigerante (°C) */
+  refrigerant_outlet_temp_c?: number;
+  /** Qualidade de entrada do refrigerante (0–1) */
+  inlet_quality?: number;
+  /** Fator de segurança da simulação */
+  safety_factor?: number;
   warnings: string[];
 }
 
@@ -194,7 +213,39 @@ export interface CondenserSizingResult {
   dp_air_pa: number;
   /** Velocidade do ar na face (m/s) */
   face_velocity_ms: number;
+  // ── Campos extras do motor V2 (CoilCycleResult) ──
+  /** Capacidade sensível (W) */
+  sensible_capacity_w?: number;
+  /** Capacidade latente (W) */
+  latent_capacity_w?: number;
+  /** Umidade relativa de saída do ar (%) */
+  air_outlet_rh?: number;
+  /** Queda de pressão do refrigerante (kPa) */
+  fluid_pressure_drop_kpa?: number;
+  /** Coeficiente convectivo do ar (W/m²·K) */
+  h_air_w_m2k?: number;
+  /** Coeficiente convectivo do fluido (W/m²·K) */
+  h_fluid_w_m2k?: number;
+  /** Temperatura de saída do refrigerante (°C) */
+  refrigerant_outlet_temp_c?: number;
+  /** Qualidade de entrada do refrigerante (0–1) */
+  inlet_quality?: number;
+  /** Fator de segurança da simulação */
+  safety_factor?: number;
   warnings: string[];
+}
+
+// ─── Ponto de operação do compressor (grade Te×Tc) ────────────────────────────
+
+export interface CompressorOperatingPoint {
+  te_c: number;
+  tc_c: number;
+  comp_capacity_w: number;
+  comp_power_w: number;
+  evap_capacity_w: number;
+  cond_heat_rejection_w: number;
+  evap_meets: boolean;
+  cond_meets: boolean;
 }
 
 // ─── Seleção de ventilador ────────────────────────────────────────────────────
@@ -293,6 +344,13 @@ export interface ApplicationEngineeringState {
 
   /** Validação do sistema */
   validationResult: SystemValidationResult | null;
+
+  /** Grade de pontos de operação do compressor (Te×Tc) */
+  compressorOperatingPoints: CompressorOperatingPoint[] | null;
+  /** Cobertura do evaporador (0–1): fração de pontos atendidos */
+  evaporatorCoverageRatio: number | null;
+  /** Cobertura do condensador (0–1): fração de pontos atendidos */
+  condenserCoverageRatio: number | null;
 
   /** Estado de cálculo */
   isCalculating: boolean;

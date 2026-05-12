@@ -153,6 +153,14 @@ export async function sizeEvaporator(
       dp_air_pa: dpAirPa,
       face_velocity_ms: faceVelocityMs,
       frost_load_kg: frostLoadKg,
+      // Campos extras do motor V2
+      sensible_capacity_w: result.sensibleCapacityW,
+      latent_capacity_w: result.latentCapacityW,
+      air_outlet_rh: result.airOutletRH,
+      fluid_pressure_drop_kpa: result.fluidPressureDropKPa,
+      refrigerant_outlet_temp_c: result.refrigerantOutletTempC,
+      inlet_quality: result.inletQuality,
+      safety_factor: result.safetyFactor,
       warnings,
     };
   } catch (err) {
@@ -271,6 +279,14 @@ export async function sizeCondenser(
       u_overall_w_m2k: uOverallWm2K,
       dp_air_pa: dpAirPa,
       face_velocity_ms: faceVelocityMs,
+      // Campos extras do motor V2
+      sensible_capacity_w: result.sensibleCapacityW,
+      latent_capacity_w: result.latentCapacityW,
+      air_outlet_rh: result.airOutletRH,
+      fluid_pressure_drop_kpa: result.fluidPressureDropKPa,
+      refrigerant_outlet_temp_c: result.refrigerantOutletTempC,
+      inlet_quality: result.inletQuality,
+      safety_factor: result.safetyFactor,
       warnings,
     };
   } catch (err) {

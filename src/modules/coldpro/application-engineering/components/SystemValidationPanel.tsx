@@ -2,15 +2,17 @@
  * SystemValidationPanel.tsx
  *
  * Painel de validação do sistema completo.
- * Exibe COP, alertas, status e resumo de ventiladores.
+ * Exibe COP, alertas, válvula de expansão recomendada e resumo de ventiladores.
  */
-import { CheckCircle, AlertTriangle, XCircle, Wind } from "lucide-react";
+import { CheckCircle, AlertTriangle, XCircle, Wind, Zap } from "lucide-react";
 import { useApplicationEngineering } from "../hooks/useApplicationEngineering";
+import { useComponentStore } from "@/modules/coldpro/stores/useComponentStore";
 import type { AlertSeverity } from "../types/application-engineering.types";
 
 export function SystemValidationPanel() {
-  const { validationResult, evapFanResult, condFanResult } =
+  const { validationResult, evapFanResult, condFanResult, evaporatorResult } =
     useApplicationEngineering();
+  const componentStore = useComponentStore();
 
   if (!validationResult) {
     return (
@@ -102,6 +104,12 @@ export function SystemValidationPanel() {
           </div>
         )}
 
+        {/* Válvula de Expansão */}
+        <ValveSection
+          requiredCapacityW={evaporatorResult?.capacity_w ?? 0}
+          valves={componentStore.expansionValves}
+        />
+
         {/* Ventiladores */}
         <div className="space-y-2">
           <p className="text-xs font-semibold text-foreground">Ventiladores Recomendados</p>
@@ -136,6 +144,91 @@ export function SystemValidationPanel() {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function ValveSection({
+  requiredCapacityW,
+  valves,
+}: {
+  requiredCapacityW: number;
+  valves: { id: string; name: string; spec: { nominal_capacity_w: number } }[];
+}) {
+  if (valves.length === 0) {
+    return (
+      <div className="space-y-2">
+        <p className="text-xs font-semibold text-foreground">Válvula de Expansão</p>
+        <p className="text-[10px] text-muted-foreground">
+          Nenhuma válvula cadastrada. Cadastre válvulas em Componentes para ver a recomendação.
+        </p>
+      </div>
+    );
+  }
+
+  if (requiredCapacityW <= 0) {
+    return (
+      <div className="space-y-2">
+        <p className="text-xs font-semibold text-foreground">Válvula de Expansão</p>
+        <p className="text-[10px] text-muted-foreground">
+          Execute o cálculo do evaporador para ver a válvula recomendada.
+        </p>
+      </div>
+    );
+  }
+
+  // Selecionar a menor válvula com nominal_capacity_w >= requiredCapacityW
+  const suitable = valves
+    .filter((v) => v.spec.nominal_capacity_w >= requiredCapacityW)
+    .sort((a, b) => a.spec.nominal_capacity_w - b.spec.nominal_capacity_w);
+  const recommended = suitable[0] ?? null;
+
+  return (
+    <div className="space-y-2">
+      <p className="text-xs font-semibold text-foreground">Válvula de Expansão Recomendada</p>
+      {recommended ? (
+        <div className="rounded-md border border-border bg-muted/20 p-2.5">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Zap className="h-3.5 w-3.5 text-muted-foreground" />
+            <p className="text-xs font-semibold text-foreground">{recommended.name}</p>
+            {recommended.spec.nominal_capacity_w > requiredCapacityW * 1.5 && (
+              <span className="ml-auto rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-semibold text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+                Superdimensionada
+              </span>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-1">
+            <p className="text-[10px] text-muted-foreground">
+              Cap. nominal: {(recommended.spec.nominal_capacity_w / 1000).toFixed(2)} kW
+            </p>
+            <p className="text-[10px] text-muted-foreground">
+              Cap. requerida: {(requiredCapacityW / 1000).toFixed(2)} kW
+            </p>
+            <p className="text-[10px] text-muted-foreground">
+              Margem: {(((recommended.spec.nominal_capacity_w - requiredCapacityW) / requiredCapacityW) * 100).toFixed(1)}%
+            </p>
+          </div>
+          {suitable.length > 1 && (
+            <p className="mt-1.5 text-[10px] text-muted-foreground">
+              {suitable.length - 1} outra(s) opção(ões) compatível(is) disponível(is).
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="rounded-md border border-red-200 bg-red-50 p-2.5 dark:border-red-800 dark:bg-red-950">
+          <div className="flex items-start gap-1.5">
+            <XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-600 dark:text-red-400" />
+            <div>
+              <p className="text-xs font-medium text-red-800 dark:text-red-200">
+                Nenhuma válvula compatível encontrada.
+              </p>
+              <p className="mt-0.5 text-[10px] text-red-700 dark:text-red-300">
+                Capacidade requerida: {(requiredCapacityW / 1000).toFixed(2)} kW. Cadastre uma válvula com capacidade nominal ≥ esse valor.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function KPI({
   label,

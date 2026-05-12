@@ -3,6 +3,11 @@
  *
  * Zustand store para o módulo Application Engineering.
  * Orquestra o fluxo completo: ponto de operação → compressor → coils → validação.
+ *
+ * Lógica de cobertura de pontos (v2):
+ *   - Após selecionar o compressor, gera a grade Te×Tc completa
+ *   - Para cada ponto avalia se o evaporador e o condensador atendem
+ *   - Armazena compressorOperatingPoints + evaporatorCoverageRatio + condenserCoverageRatio
  */
 import { create } from "zustand";
 import { resolveOperatingPoint } from "../services/operatingPointService";
@@ -16,6 +21,10 @@ import {
 import {
   evaluateCompressorAtPoint,
 } from "../services/compressorPerformanceService";
+import {
+  evaluateCompressorAtPoint as evalAtPointRaw,
+  generateOperatingGrid,
+} from "@/modules/coldpro_catalog/engines/compressorSelector";
 import type { CompressorRecord } from "@/modules/coldpro_catalog/engines/compressorSelector";
 import type {
   ApplicationEngineeringState,
@@ -26,6 +35,7 @@ import type {
   CompressorSelectionResult,
   EvaporatorSizingResult,
   CondenserSizingResult,
+  CompressorOperatingPoint,
 } from "../types/application-engineering.types";
 
 // ─── Estado inicial ───────────────────────────────────────────────────────────
@@ -79,6 +89,10 @@ const INITIAL_STATE: ApplicationEngineeringState = {
   condFanResult: null,
   validationResult: null,
 
+  compressorOperatingPoints: null,
+  evaporatorCoverageRatio: null,
+  condenserCoverageRatio: null,
+
   isCalculating: false,
   lastError: null,
 };
@@ -128,11 +142,11 @@ export const useApplicationEngineering = create<ApplicationEngineeringStore>(
         // 2. Selecionar compressor
         const compInput = state.compressorInput;
         let compResult: CompressorSelectionResult | null = null;
+        let selectedRecord: CompressorRecord | null = null;
 
         if (compInput.refrigerant && compInput.required_capacity_w) {
           try {
             const index = await loadCompressorIndex();
-            // Filtrar por refrigerante e aplicação
             const filtered = index.filter((r) => {
               const refMatch =
                 !compInput.refrigerant ||
@@ -143,7 +157,6 @@ export const useApplicationEngineering = create<ApplicationEngineeringStore>(
               return refMatch && appMatch;
             });
 
-            // Carregar dados completos dos primeiros 3 fabricantes encontrados
             const manufacturers = [
               ...new Set(filtered.slice(0, 50).map((r) => r.manufacturer)),
             ].slice(0, 3) as Array<"Copeland" | "Bitzer" | "Danfoss" | "Dorin">;
@@ -177,6 +190,9 @@ export const useApplicationEngineering = create<ApplicationEngineeringStore>(
                     max_evap_temp_c: r.max_evap_temp_c ?? undefined,
                     min_cond_temp_c: r.min_cond_temp_c ?? undefined,
                     max_cond_temp_c: r.max_cond_temp_c ?? undefined,
+                    capacity_coefficients: r.capacity_coefficients,
+                    power_coefficients: r.power_coefficients,
+                    current_coefficients: r.current_coefficients,
                   })),
                 );
               } catch {
@@ -192,20 +208,21 @@ export const useApplicationEngineering = create<ApplicationEngineeringStore>(
                 application: compInput.application,
               };
 
-              // Avaliar todos e selecionar o melhor
               const evaluated = records
-                .map((r) => evaluateCompressorAtPoint(r, selInput))
-                .filter((r) => r.capacity_w > 0)
+                .map((r) => ({ result: evaluateCompressorAtPoint(r, selInput), record: r }))
+                .filter((e) => e.result.capacity_w > 0)
                 .sort((a, b) => {
-                  const excessA = Math.abs(a.capacity_w - selInput.required_capacity_w);
-                  const excessB = Math.abs(b.capacity_w - selInput.required_capacity_w);
+                  const excessA = Math.abs(a.result.capacity_w - selInput.required_capacity_w);
+                  const excessB = Math.abs(b.result.capacity_w - selInput.required_capacity_w);
                   return excessA - excessB;
                 });
 
-              compResult = evaluated[0] ?? null;
+              if (evaluated.length > 0) {
+                compResult = evaluated[0].result;
+                selectedRecord = evaluated[0].record;
+              }
             }
           } catch (e) {
-            // Fallback: usar dados nominais
             compResult = {
               model: "Compressor Nominal",
               manufacturer: "—",
@@ -223,7 +240,7 @@ export const useApplicationEngineering = create<ApplicationEngineeringStore>(
 
         set({ compressorResult: compResult });
 
-        // 3. Dimensionar evaporador
+        // 3. Dimensionar evaporador no ponto de design
         const evapInput = state.evaporatorInput;
         let evapResult: EvaporatorSizingResult | null = null;
 
@@ -250,7 +267,7 @@ export const useApplicationEngineering = create<ApplicationEngineeringStore>(
 
         set({ evaporatorResult: evapResult });
 
-        // 4. Dimensionar condensador
+        // 4. Dimensionar condensador no ponto de design
         const condInput = state.condenserInput;
         let condResult: CondenserSizingResult | null = null;
         const heatRejectionW = compResult
@@ -276,7 +293,64 @@ export const useApplicationEngineering = create<ApplicationEngineeringStore>(
 
         set({ condenserResult: condResult });
 
-        // 5. Selecionar ventiladores
+        // 5. Varredura de pontos Te×Tc para cobertura
+        let compressorOperatingPoints: CompressorOperatingPoint[] | null = null;
+        let evaporatorCoverageRatio: number | null = null;
+        let condenserCoverageRatio: number | null = null;
+
+        if (selectedRecord && evapResult && condResult) {
+          try {
+            // Grade: Te de (opResult.te_c - 10) a (opResult.te_c + 5), passo 2.5 K
+            //        Tc de (opResult.tc_c - 5) a (opResult.tc_c + 15), passo 2.5 K
+            const teMin = Math.round((opResult.te_c - 10) * 2) / 2;
+            const teMax = Math.round((opResult.te_c + 5) * 2) / 2;
+            const tcMin = Math.round((opResult.tc_c - 5) * 2) / 2;
+            const tcMax = Math.round((opResult.tc_c + 15) * 2) / 2;
+            const grid = generateOperatingGrid(
+              [teMin, teMax, 2.5],
+              [tcMin, tcMax, 2.5],
+            );
+
+            // Para cada ponto da grade, avaliar compressor e verificar coils
+            const points: CompressorOperatingPoint[] = [];
+            for (const { te, tc } of grid) {
+              const evalComp = evalAtPointRaw(selectedRecord, te, tc);
+              const compCapW = evalComp.cooling_capacity_kw * 1000;
+              const compPowW = evalComp.power_input_kw * 1000;
+              const heatRejW = compCapW + compPowW;
+
+              // Verificar evaporador: capacidade calculada no ponto >= capacidade do compressor × 0.95
+              const evapMeets = evapResult.capacity_w >= compCapW * 0.95;
+
+              // Verificar condensador: calor rejeitado calculado >= heatRejW × 0.95
+              const condMeets = condResult.heat_rejection_w >= heatRejW * 0.95;
+
+              points.push({
+                te_c: te,
+                tc_c: tc,
+                comp_capacity_w: compCapW,
+                comp_power_w: compPowW,
+                evap_capacity_w: evapResult.capacity_w,
+                cond_heat_rejection_w: condResult.heat_rejection_w,
+                evap_meets: evapMeets,
+                cond_meets: condMeets,
+              });
+            }
+
+            compressorOperatingPoints = points;
+            const total = points.length;
+            if (total > 0) {
+              evaporatorCoverageRatio = points.filter((p) => p.evap_meets).length / total;
+              condenserCoverageRatio = points.filter((p) => p.cond_meets).length / total;
+            }
+          } catch {
+            // Varredura falhou — não bloquear o restante do cálculo
+          }
+        }
+
+        set({ compressorOperatingPoints, evaporatorCoverageRatio, condenserCoverageRatio });
+
+        // 6. Selecionar ventiladores
         const evapFan = evapInput.airflow_m3h
           ? selectFan({
               airflow_m3h: evapInput.airflow_m3h,
@@ -295,7 +369,7 @@ export const useApplicationEngineering = create<ApplicationEngineeringStore>(
 
         set({ evapFanResult: evapFan, condFanResult: condFan });
 
-        // 6. Validar sistema
+        // 7. Validar sistema
         let validationResult = null;
         if (compResult && evapResult && condResult) {
           validationResult = validateSystem({
